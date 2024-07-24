@@ -23,6 +23,17 @@ export const getSxClasses = (theme: Theme): any => ({
       fontSize: theme.palette.geoViewFontSize.default,
       paddingTop: 8,
       textTransform: 'uppercase',
+      opacity: 0,
+      animation: 'fadein 500ms ease-in-out forwards',
+      animationDelay: '300ms',
+      '@keyframes fadein': {
+        from: {
+          opacity: 0,
+        },
+        to: {
+          opacity: 1,
+        },
+      },
     },
     '& .MuiCardHeader-action': {
       '& .MuiButtonBase-root': {
@@ -55,5 +66,16 @@ export const getSxClasses = (theme: Theme): any => ({
       paddingBottom: 0,
     },
     height: 'calc(100% - 64px)',
+    opacity: 0,
+    animation: 'fadein 500ms ease-in-out forwards',
+    animationDelay: '400ms',
+    '@keyframes fadein': {
+      from: {
+        opacity: 0,
+      },
+      to: {
+        opacity: 1,
+      },
+    },
   },
 });

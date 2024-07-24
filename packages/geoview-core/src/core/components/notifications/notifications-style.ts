@@ -10,7 +10,7 @@ export const getSxClasses = (theme: Theme): any => ({
     maxHeight: '500px',
     overflowY: 'hidden',
     gap: '8px',
-    marginLeft: '15px',
+    marginLeft: '18px',
     backgroundColor: theme.palette.geoViewColor.bgColor.light[200],
     borderRadius: '5px',
     boxShadow: 2,
