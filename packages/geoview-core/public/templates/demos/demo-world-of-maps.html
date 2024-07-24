@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>OSDP Society & Culture Demo - Canadian Geospatial Platform Viewer</title>
+    <title>World of Maps - Canadian Geospatial Platform Viewer</title>
     <link rel="shortcut icon" href="./favicon.ico" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="msapplication-config" content="./img/browserconfig.xml" />
@@ -22,7 +22,7 @@
           <tr>
             <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
             <td class="header-title">
-              <h1><strong>OSDP Society & Culture Demo</strong></h1>
+              <h1><strong>World of Maps - NTS Search Demo</strong></h1>
             </td>
           </tr>
           <tr>
@@ -33,16 +33,16 @@
       <table>
         <tbody>
           <tr>
-            <td><p>Demonstration of Open Science Data Portal - Society and Culture in GeoView</p></td>
+            <td><p>Demonstration of World of Maps - NTS Search</p></td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <a href="https://osdp-psdo.canada.ca/en/learn-about/society-and-culture">Original RAMP Society and Culture</a><br />
+    <a href="https://www.worldofmaps.com/topo.cfm">Original RAMP NTS Search</a><br />
 
     <div class="map-title-holder">
-      <h4 id="HMap1">Society and Culture</h4>
+      <h4 id="HMap1">Water</h4>
     </div>
     <button class="collapsible active">Map Status Flags</button>
     <pre id="HMap1-state" class="panel map-title-holder"></pre>
@@ -64,43 +64,55 @@
           'listOfGeoviewLayerConfig': [
             {
               'geoviewLayerId': 'LYR1',
-              'geoviewLayerName': { 'en': 'Indigenous Place Names' },
+              'geoviewLayerName': { 'en': 'NTS' },
               'metadataAccessPath': {
-                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/indigenous_place_names_en/MapServer/'
-              },
-              'geoviewLayerType': 'esriFeature',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '0',
-                  'layerName': { 'en': 'Indigenous Place Names' }
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'LYR2',
-              'geoviewLayerName': { 'en': 'Recognizing Women with Canadian Place Names' },
-              'metadataAccessPath': {
-                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/womens_placenames_en/MapServer/'
+                'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/NTS_SNRC/MapServer/'
               },
               'geoviewLayerType': 'esriDynamic',
               'listOfLayerEntryConfig': [
                 {
-                  'layerId': '0',
-                  'layerName': { 'en': 'Recognizing Women with Canadian Place Names' }
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'LYR3',
-              'geoviewLayerName': { 'en': 'Majority (%) mother tongue by census division, 2016' },
-              'metadataAccessPath': {
-                'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/cd_socioeconomic_variables_2016_en/MapServer/'
-              },
-              'geoviewLayerType': 'esriDynamic',
-              'listOfLayerEntryConfig': [
+                  'layerId': '3',
+                  'layerName': { 'en': 'NTS - 50K' },
+                  'source': {
+                    'featureInfo': {
+                      'queryable': true,
+                      'nameField': { 'en': 'IDENTIF', 'fr': 'IDENTIF' },
+                      'outfields': { 'en': 'IDENTIF,NAME,OBJECTID', 'fr': 'IDENTIF,NAME,OBJECTID' },
+                      'fieldTypes': 'string,string',
+                      'aliasFields': { 'en': 'Identification,Name,Id', 'fr': 'Identification,Name,Id' }
+                    }
+                  }
+                },
                 {
-                  'layerId': '7',
-                  'layerName': { 'en': 'Majority (%) mother tongue by census division, 2016' }
+                  'layerId': '2',
+                  'layerName': { 'en': 'NTS - 250K' },
+                  'source': {
+                    'featureInfo': {
+                      'queryable': true,
+                      'nameField': { 'en': 'IDENTIF', 'fr': 'IDENTIF' },
+                      'outfields': { 'en': 'IDENTIF,NAME,OBJECTID', 'fr': 'IDENTIF,NAME,OBJECTID' },
+                      'fieldTypes': 'string,string',
+                      'aliasFields': { 'en': 'Identification,Name,Id', 'fr': 'Identification,Name,Id' }
+                    }
+                  }
+                },
+                {
+                  'layerId': '0',
+                  'layerName': { 'en': 'NTS -1M' },
+                  'source': {
+                    'featureInfo': {
+                      'queryable': false
+                    }
+                  }
+                },
+                {
+                  'layerId': '1',
+                  'layerName': { 'en': 'NTS - 1M' },
+                  'source': {
+                    'featureInfo': {
+                      'queryable': false
+                    }
+                  }
                 }
               ]
             }
@@ -108,15 +120,15 @@
         },
         'components': ['north-arrow', 'overview-map'],
         'overviewMap': {'hideOnZoom': 6},
-        'navBar': ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
+        'navBar': ['zoom', 'fullscreen', 'home', 'location'],
         'appBar': {
           'tabs': {
-            'core': ['geolocator', 'export']
+            'core': ['geolocator' ]
           }
         },
         'footerBar': {
           'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
+            'core': ['legend', 'details', 'data-table']
           }
         },
         'corePackages': [],
