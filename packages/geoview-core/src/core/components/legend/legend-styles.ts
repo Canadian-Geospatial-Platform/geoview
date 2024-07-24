@@ -110,6 +110,7 @@ export const getSxClasses = (theme: Theme): any => ({
     flexWrap: 'wrap',
     '& button': {
       padding: '0.25rem',
+      marginRight: 0,
       '& svg': {
         width: '1.25rem',
         height: '1.25rem',
