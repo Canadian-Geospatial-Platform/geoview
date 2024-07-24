@@ -1,6 +1,5 @@
 import { useRef, useEffect, KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import FocusTrap from 'focus-trap-react';
 
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -16,6 +15,7 @@ import { useUIActiveTrapGeoView, useUIMapInfoExpanded } from '@/core/stores/stor
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { FocusTrapContainer } from '@/core/components/common';
 
 /**
  * Interface for panel properties
@@ -125,19 +125,14 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   // TODO: refactor - remove comment in tsx for production build facebook/create-react-app#9507
   return (
     <Box sx={panelContainerStyles} ref={panelContainerRef}>
-      <FocusTrap
-        active={activeTrapGeoView && open}
-        focusTrapOptions={{
-          escapeDeactivates: false,
-          clickOutsideDeactivates: true,
-        }}
-      >
+      <FocusTrapContainer open={activeTrapGeoView && open}>
         <Card
           sx={{
             ...sxClasses.panelContainer,
             display: open ? 'block' : 'none',
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
+          tabIndex={activeTrapGeoView && open ? 0 : -1}
           ref={panelRef as React.MutableRefObject<null>}
           onKeyDown={(e: KeyboardEvent) => {
             if (e.key === 'Escape') {
@@ -177,7 +172,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
             {typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}
           </CardContent>
         </Card>
-      </FocusTrap>
+      </FocusTrapContainer>
     </Box>
   );
 }
