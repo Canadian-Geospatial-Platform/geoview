@@ -10,6 +10,7 @@ import { Extent } from 'ol/extent';
 import XYZ from 'ol/source/XYZ';
 import TileLayer from 'ol/layer/Tile';
 import { LineString, Polygon } from 'ol/geom';
+import { Coordinate } from 'ol/coordinate';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
@@ -21,8 +22,6 @@ import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeStyleConfig } from '@/geo/map/map-schema-types';
 
 import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
-import { ProjectionLike } from 'ol/proj';
-import { Coordinate } from 'ol/coordinate';
 
 /**
  * Interface used for css style declarations
@@ -509,9 +508,21 @@ export function getLength(geometry: Geometry): number {
   return getLengthOL(geometry);
 }
 
-export function calculateDistance(coordinates: Coordinate[], inProj: string, outProj: string): number {
+/**
+ * Calculate distance along a path define by array of Coordinates
+ * @param  {Coordinate[]} coordinates - Array of corrdinates
+ * @param {string} inProj - Input projection (EPSG:4326, EPSG:3978, ESPG:3857)
+ * @param {string} outProj - Output projection (EPSG:3978, ESPG:3857)
+ * @returns { total: number; sections: number[] } - The total distance in kilometers and distance for each section
+ */
+export function calculateDistance(coordinates: Coordinate[], inProj: string, outProj: string): { total: number; sections: number[] } {
   const arr = Projection.transformPoints(coordinates, inProj, outProj);
 
   const geom = new LineString(arr);
-  return Math.round((getLength(geom) / 1000) * 100) / 100;
+  const sections: number[] = [];
+  geom.forEachSegment((start, end) => {
+    sections.push(Math.round((getLength(new LineString([start, end])) / 1000) * 100) / 100);
+  });
+
+  return { total: Math.round((getLength(geom) / 1000) * 100) / 100, sections };
 }
