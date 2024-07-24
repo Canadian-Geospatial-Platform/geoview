@@ -554,6 +554,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
               this.getStyle(layerConfig.layerPath)!,
               layerConfig.filterEquation,
               layerConfig.legendFilterIsOff,
+              true,
               callbackToFetchDataUrl
             )
               .then((canvas) => {
