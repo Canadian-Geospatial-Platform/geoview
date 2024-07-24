@@ -1,8 +1,10 @@
 # Core Packages
 ## Creating a Core package
+
 Geoview is implemented in a monorepo using rush. In a project using Rush (a monorepo manager), adding a new package requires updating the rush.json file to inform Rush of the existence and location of this new package. Here is an explanation of why you add these specific lines:
 
 ## Modifying rush.json
+
 1. Package Declaration:
 
 ```
@@ -25,6 +27,7 @@ This section must be added to declare a new package in your monorepo. Rush uses 
 - Role: It tells Rush where to find the package in the monorepo structure. This enables Rush to locate the package for operations like dependency installation, building, and updates.
 
 ### Process of Adding a New Package
+
 1. Create the Package Directory:
 
 Create a new directory for your package under packages/, for example packages/geoview-aoi-panel.
@@ -45,6 +48,7 @@ Add the new package in the projects section of rush.json as you did:
 ```
 
 ### rush.json modification summary
+
 In summary, by adding these lines in rush.json, you inform Rush of the existence of your new package and its location, allowing Rush to efficiently manage this package within the context of your monorepo.
 
 ## Modifying webpack.common.js
@@ -139,7 +143,7 @@ When creating a new package in the monorepo it will involve creating necessary f
 
    - index.tsx
 
-     The entry point for the pluggin. This file imports and exports the main components and styles.
+     The entry point for the pluggin. This file imports and exports the main components and styles. It also contains translation information.
 
    - tsconfig.json
 
@@ -147,6 +151,26 @@ When creating a new package in the monorepo it will involve creating necessary f
 
 In conclusion, by following these steps, you can create and configure a new package within your monorepo. This ensures that the package is properly integrated and can be built, tested, and used consistently with the rest of your project.
 
+### Adding translation information to index.tsx
+To add translation information, you can just create an object as follow in index.tsx
+
+``` JS
+  /**
+   * translations object to inject to the viewer translations
+   */
+  translations = toJsonObject({
+    en: {
+      AoiPanel: {
+        title: 'Area of Interest',
+      },
+    },
+    fr: {
+      AoiPanel: {
+        title: "Région d'intérêt",
+      },
+    },
+  });
+  ```
 ### Adding your pluggin ID to the concerned files
 1. map-schema-types.ts
 Let's say we want to add a new package having the aoi-panel ID. To be detected as being valid, you must add your package ID to the schema (config-validation-schema.json). You must find the type definition TypeValidAppBarCoreProps and add your package ID to the enum section.
@@ -189,7 +213,7 @@ Edit packages/geoview-core/public/configs/loading-packages-config.json to includ
 ### Icons definition (Optional)
 If you need a new Icon that does not extist in packages/geoview-core/src/ui/icons/index.ts, you can explore [predefined material UI icons](https://mui.com/material-ui/material-icons/) and chose one from those available. You must add a line in packages/geoview-core/src/ui/icons/index.ts as follow:
 ```
-CropOriginal as AoiIcon,CropOriginal as AoiIcon,
+CropOriginal as AoiIcon,
 ```
 
 ### Run Rush Commands:
@@ -197,3 +221,8 @@ CropOriginal as AoiIcon,CropOriginal as AoiIcon,
 - After updating rush.json, run rush update to update the monorepo's dependencies and integrate the new package.
 - Use rush build to build the package along with the other packages in the monorepo.
 - To test the code will working on it you can always use the **rush serve** command.
+
+## Available core packages
+
+Available package ids `aoi-panel`, `basemap-panel`, `swiper`, `time-slider`, `geochart`
+

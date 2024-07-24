@@ -202,4 +202,3 @@ The viewer is bundled with core packages, you can load them by passing their id 
 ></div>
 ```
 
-Available package ids `aoi-panel`, `basemap-panel`, `swiper`, `time-slider`, `geochart`
