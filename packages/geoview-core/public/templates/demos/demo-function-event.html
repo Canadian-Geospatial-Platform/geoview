@@ -154,7 +154,11 @@
           cgpv.api.maps.Map1.plugins['swiper'].deActivateForLayer('nonmetalmines/5')
         </li>
         <li><button id="Calc-dist">Calculate distance</button>
-          <input type="text" id="Dist-geom" placeholder="Enter coordinates" value="[[-75.6792, 45.3540],[-71.3000, 46.7693]]" style="width: 600px"><br />
+          <input type="text" id="Dist-geom" placeholder="Enter coordinates" value="[[-75.6792, 45.3540],[-73.6659, 45.5762],[-71.3000, 46.7693]]" style="width: 600px">
+          <select name="Projection" id="Dist-proj">
+            <option value="EPSG:3978">LCC</option>
+            <option value="EPSG:3857">Web Mercator</option>
+          </select><br />
           cgpv.api.utilities.geo.calculateDistance(coordinates[], 'EPSG:4326', outProj)
         </li>
       </ul>
@@ -565,15 +569,19 @@
 
       // add an event listener when a button is clicked
       calculateDistanceButton.addEventListener('click', () => {
+        // Get the proj
+        const proj = document.getElementById('Dist-proj');
+
         // get the input for the group name
         const geometryString = document.getElementById('Dist-geom');
-        const geom = geometryString.value.replace('],[', ';').replace('[[', '').replace(']]', '').split(';');
+        const geom = geometryString.value.replaceAll('],[', ';').replaceAll('[[', '').replaceAll(']]', '').split(';');
         const arr = []
         geom.forEach(point => {
           const coords = point.split(',');
           arr.push([parseFloat(coords[0]), parseFloat(coords[1])]);
         })
-        console.log(cgpv.api.utilities.geo.calculateDistance(arr, 'EPSG:4326', 'EPSG:3857'));
+        const dist = cgpv.api.utilities.geo.calculateDistance(arr, 'EPSG:4326', proj.value);
+        console.log(`Total: ${dist.total}, Sections: ${dist.sections}`);
       });
   
       // create snippets
