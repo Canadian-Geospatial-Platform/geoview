@@ -28,10 +28,10 @@ export function CircularProgress(props: TypeCircularProgressProps): JSX.Element 
   const sxClasses = getSxClasses(theme);
 
   return (
-    <Fade in={!isLoaded} timeout={500} mountOnEnter unmountOnExit>
+    <Fade in={!isLoaded} timeout={250} mountOnEnter unmountOnExit>
       <Box sx={{ ...sxClasses.loading, ...sx }} style={{ ...style }}>
         <MaterialCircularProgress sx={sxClasses.progress} {...rest} />
       </Box>
     </Fade>
-  )
+  );
 }
