@@ -13,7 +13,6 @@ import { useMapRotation, useMapStoreActions } from '@/core/stores/store-interfac
 export function MapInfoRotationButton(): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  const tooltipAndAria = 'mapctrl.rotation.resetRotation';
 
   // internal state
   const iconRef = useRef(null);
@@ -26,8 +25,8 @@ export function MapInfoRotationButton(): JSX.Element {
     <IconButton
       sx={sxClasses.rotationButton.rotationButton}
       tooltipPlacement="top"
-      tooltip={tooltipAndAria}
-      aria-label={tooltipAndAria}
+      tooltip="mapctrl.rotation.resetRotation"
+      aria-label="mapctrl.rotation.resetRotation"
       onClick={() => setRotation(0)}
     >
       <ArrowUpIcon ref={iconRef} sx={sxClasses.rotationButton.rotationIcon} style={{ transform: `rotate(${mapRotation}rad)` }} />

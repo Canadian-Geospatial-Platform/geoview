@@ -10,6 +10,8 @@ import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
+import { FocusTrapContainer } from '@/core/components/common';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 export interface GeoListItem {
   key: string;
@@ -28,6 +30,7 @@ export function Geolocator(): JSX.Element {
   const { t } = useTranslation();
 
   const theme = useTheme();
+  const mapId = useGeoViewMapId();
 
   // internal state
   const [data, setData] = useState<GeoListItem[]>();
@@ -126,7 +129,7 @@ export function Geolocator(): JSX.Element {
   const resetSearch = useCallback(() => {
     setSearchValue('');
     setData(undefined);
-    setActiveAppBarTab('AppbarPanelButtonGeolocator', CV_DEFAULT_APPBAR_CORE.GEOLOCATOR, false);
+    setActiveAppBarTab(`${mapId}AppbarPanelButtonGeolocator`, CV_DEFAULT_APPBAR_CORE.GEOLOCATOR, false);
   }, [setActiveAppBarTab]);
 
   /**
@@ -196,54 +199,57 @@ export function Geolocator(): JSX.Element {
   }, []);
 
   return (
-    <Box
-      sx={sxClasses.root}
-      visibility={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
-      id="geolocator-search"
-    >
-      <Box sx={sxClasses.geolocator}>
-        <AppBarUI position="static">
-          <Toolbar variant="dense">
-            <form
-              onSubmit={(e) => {
-                // NOTE: so that when enter is pressed, page is not reloaded.
-                e.preventDefault();
-                if (!isLoading) {
-                  handleGetGeolocations();
-                }
-              }}
-            >
-              <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
-              <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
-                <IconButton
-                  size="small"
-                  edge="end"
-                  color="inherit"
-                  sx={{ mr: 4 }}
-                  disabled={!searchValue.length}
-                  onClick={handleGetGeolocations}
-                >
-                  <SearchIcon fontSize={theme.palette.geoViewFontSize.sm} />
-                </IconButton>
-                <Divider orientation="vertical" variant="middle" flexItem />
-                <IconButton size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={resetSearch}>
-                  <CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />
-                </IconButton>
-              </Box>
-            </form>
-          </Toolbar>
-        </AppBarUI>
+    <FocusTrapContainer open={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen}>
+      <Box
+        sx={sxClasses.root}
+        visibility={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
+        id="geolocator-search"
+        tabIndex={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 0 : -1}
+      >
+        <Box sx={sxClasses.geolocator}>
+          <AppBarUI position="static">
+            <Toolbar variant="dense">
+              <form
+                onSubmit={(e) => {
+                  // NOTE: so that when enter is pressed, page is not reloaded.
+                  e.preventDefault();
+                  if (!isLoading) {
+                    handleGetGeolocations();
+                  }
+                }}
+              >
+                <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
+                <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
+                  <IconButton
+                    size="small"
+                    edge="end"
+                    color="inherit"
+                    sx={{ mr: 4 }}
+                    disabled={!searchValue.length}
+                    onClick={handleGetGeolocations}
+                  >
+                    <SearchIcon fontSize={theme.palette.geoViewFontSize.sm} />
+                  </IconButton>
+                  <Divider orientation="vertical" variant="middle" flexItem />
+                  <IconButton size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={resetSearch}>
+                    <CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />
+                  </IconButton>
+                </Box>
+              </form>
+            </Toolbar>
+          </AppBarUI>
+        </Box>
+        {isLoading && (
+          <Box sx={sxClasses.progressBar}>
+            <ProgressBar />
+          </Box>
+        )}
+        {!!data && searchValue?.length >= MIN_SEARCH_LENGTH && !error && (
+          <Box sx={sxClasses.searchResult}>
+            <GeolocatorResult geoLocationData={data} searchValue={searchValue} error={error} />
+          </Box>
+        )}
       </Box>
-      {isLoading && (
-        <Box sx={sxClasses.progressBar}>
-          <ProgressBar />
-        </Box>
-      )}
-      {!!data && searchValue?.length >= MIN_SEARCH_LENGTH && !error && (
-        <Box sx={sxClasses.searchResult}>
-          <GeolocatorResult geoLocationData={data} searchValue={searchValue} error={error} />
-        </Box>
-      )}
-    </Box>
+    </FocusTrapContainer>
   );
 }

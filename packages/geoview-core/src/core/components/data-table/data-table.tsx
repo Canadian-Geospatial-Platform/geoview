@@ -337,14 +337,13 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   const rows = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
-
     return (data?.features ?? []).map((feature) => {
-      const iconUrl = feature.featureIcon.toDataURL().toString();
       return {
         ICON: (
           <Box
             component="img"
-            src={iconUrl}
+            alt={feature?.nameField ?? ''}
+            src={feature.featureIcon.toDataURL('image/webp', 0.5)}
             className="layer-icon"
           />
         ),

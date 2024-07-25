@@ -33,6 +33,7 @@ export function Button(props: ButtonProps): JSX.Element {
     size,
     makeResponsive,
     fullWidth,
+    'aria-label': ariaLabel,
   } = props;
 
   const { t } = useTranslation<string>();
@@ -55,6 +56,7 @@ export function Button(props: ButtonProps): JSX.Element {
         disableRipple={disableRipple}
         startIcon={startIcon}
         endIcon={endIcon}
+        aria-label={ariaLabel}
       >
         {!(makeResponsive && mobileView) ? children : null}
       </MaterialButton>

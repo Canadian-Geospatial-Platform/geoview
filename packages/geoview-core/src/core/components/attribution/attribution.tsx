@@ -48,6 +48,7 @@ export function Attribution(): JSX.Element {
         className={open ? 'active' : ''}
         tooltipPlacement="top"
         tooltip="mapctrl.attribution.tooltip"
+        aria-label="mapctrl.attribution.tooltip"
         sx={{
           color: theme.palette.geoViewColor.bgColor.light[800],
           marginTop: expanded ? '0.75rem' : '0.25rem',
@@ -57,7 +58,6 @@ export function Attribution(): JSX.Element {
           width: '30px',
           height: '30px',
         }}
-        aria-label="mapctrl.attribution.tooltip"
       >
         <MoreHorizIcon />
       </IconButton>

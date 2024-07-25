@@ -99,7 +99,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
-  const { setActiveAppBarTab } = useUIStoreActions();
+  const { setActiveAppBarTab, setActiveTrapGeoView } = useUIStoreActions();
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
@@ -163,19 +163,22 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
       // Get the button panel
       const buttonPanel = buttonPanelGroups[groupName][buttonId];
-
+      setActiveTrapGeoView(true);
       setActiveAppBarTab(buttonId, groupName, !buttonPanel.panel?.status);
     },
-    [buttonPanelGroups, setActiveAppBarTab]
+    [buttonPanelGroups, setActiveAppBarTab, setActiveTrapGeoView]
   );
 
-  const handleGeneralCloseClicked = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('APP-BAR - handleGeneralCloseClicked');
+  const handleGeneralCloseClicked = useCallback(
+    (buttonId: string, groupName: string) => {
+      // Log
+      logger.logTraceUseCallback('APP-BAR - handleGeneralCloseClicked');
 
-    // Close it
-    setActiveAppBarTab(tabId, tabGroup, false);
-  }, [setActiveAppBarTab, tabGroup, tabId]);
+      setActiveTrapGeoView(false);
+      setActiveAppBarTab(buttonId, groupName, false);
+    },
+    [setActiveAppBarTab, setActiveTrapGeoView]
+  );
 
   const handleAddButtonPanel = useCallback(
     (sender: AppBarApi, event: AppBarCreatedEvent) => {
@@ -433,7 +436,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     button={buttonPanel.button}
                     onPanelOpened={buttonPanel.onPanelOpened}
                     onPanelClosed={hideClickMarker}
-                    onGeneralCloseClicked={handleGeneralCloseClicked}
+                    onGeneralCloseClicked={() => handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '')}
                   />
                 );
               }
