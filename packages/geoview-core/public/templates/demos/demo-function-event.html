@@ -161,6 +161,12 @@
           </select><br />
           cgpv.api.utilities.geo.calculateDistance(coordinates[], 'EPSG:4326', outProj)
         </li>
+        <li><button id="Get-config">Get config with current state (in console)</button><br />
+          cgpv.api.maps.Map1.createMapConfigFromMapState()
+        </li>
+        <li><button id="Reload-map">Reload map with current state</button><br />
+          cgpv.api.maps.Map1.reloadWithCurrentState()
+        </li>
       </ul>
       <h3>Events that will generate notifications:</h3>
       <ul>
@@ -582,6 +588,24 @@
         })
         const dist = cgpv.api.utilities.geo.calculateDistance(arr, 'EPSG:4326', proj.value);
         console.log(`Total: ${dist.total}, Sections: ${dist.sections}`);
+      });
+
+      // Get map config Button================================================================================================
+      // find the button element by ID
+      var getConfigButton = document.getElementById('Get-config');
+
+      // add an event listener when a button is clicked
+      getConfigButton.addEventListener('click', async () => {
+        console.log(cgpv.api.maps.Map1.createMapConfigFromMapState());
+      });
+
+      // Reload-map Button================================================================================================
+      // find the button element by ID
+      var reloadMapButton = document.getElementById('Reload-map');
+
+      // add an event listener when a button is clicked
+      reloadMapButton.addEventListener('click', async () => {
+        console.log(cgpv.api.maps.Map1.reloadWithCurrentState());
       });
   
       // create snippets

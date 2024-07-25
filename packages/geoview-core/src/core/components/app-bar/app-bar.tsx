@@ -194,7 +194,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
           },
         };
       });
+
+      if (isOpen && tabId === event.buttonPanelId) openPanelById(tabId, tabGroup);
     },
+    // Don't want to update every time active tab changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [buttonPanelGroups]
   );
 
