@@ -516,9 +516,9 @@ export class ConfigApi {
     language: TypeDisplayLanguage = 'en'
   ): Promise<EntryConfigBaseClass[]> {
     const geoviewLayerConfig = await ConfigApi.createLayerConfig(serviceAccessString, layerType, listOfLayerId, language);
-    if (geoviewLayerConfig && !geoviewLayerConfig.errorDetected) {
+    if (geoviewLayerConfig && !geoviewLayerConfig.getErrorDetectedFlag()) {
       await geoviewLayerConfig.fetchServiceMetadata();
-      if (!geoviewLayerConfig.errorDetected) return geoviewLayerConfig?.metadataLayerTree;
+      if (!geoviewLayerConfig.getErrorDetectedFlag()) return geoviewLayerConfig.getMetadataLayerTree();
     }
     return [];
   }

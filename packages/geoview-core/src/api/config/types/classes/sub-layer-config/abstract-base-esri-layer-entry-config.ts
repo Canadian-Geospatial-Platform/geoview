@@ -14,15 +14,15 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
    * (renderer, initial settings, fields and aliases).
    */
   override async fetchLayerMetadata(): Promise<void> {
-    const serviceUrl = this.geoviewLayerConfigInstance.metadataAccessPath;
+    const serviceUrl = this.getGeoviewLayerConfig().metadataAccessPath;
     const queryUrl = serviceUrl.endsWith('/') ? `${serviceUrl}${this.layerId}` : `${serviceUrl}/${this.layerId}`;
 
-    if (!this.errorDetected) {
+    if (!this.getErrorDetectedFlag()) {
       try {
         const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
         if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
         else {
-          this.metadata = data;
+          this.setLayerMetadata(data);
           return;
         }
       } catch (error) {
@@ -30,6 +30,6 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
       }
       this.setErrorDetectedFlag();
     }
-    this.metadata = {};
+    this.setLayerMetadata({});
   }
 }

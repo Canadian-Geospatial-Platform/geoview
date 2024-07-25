@@ -435,7 +435,7 @@
     generateLayerPathErrorFlag = (listOfLayerEntryConfig, buffer = '', prefix = '') => {
       listOfLayerEntryConfig.forEach((layer) => {
         buffer = buffer ? `${buffer}\n` : '';
-        buffer = `${buffer}${layer.layerPath}: ${layer.errorDetected ? 'ERROR' : 'Ok'}`;
+        buffer = `${buffer}${layer.layerPath}: ${layer.getErrorDetectedFlag() ? 'ERROR' : 'Ok'}`;
         if (layer.isLayerGroup) buffer = generateLayerPathErrorFlag(layer.listOfLayerEntryConfig, buffer, prefix ? `${prefix}.${layer.layerId}` : layer.layerId);
       });
       return buffer;
@@ -473,11 +473,11 @@
         // Create a recursive function that scans the layer structure for erroneous sublayers. This function is used in the following line.
         const subLayerError = (listOfLayerEntryConfig) => {
           return listOfLayerEntryConfig.reduce((accumulator, subLayer) => {
-            if (subLayer.isLayerGroup) return accumulator || subLayer.errorDetected || subLayerError(subLayer.listOfLayerEntryConfig);
-            return accumulator || subLayer.errorDetected;
+            if (subLayer.isLayerGroup) return accumulator || subLayer.getErrorDetectedFlag() || subLayerError(subLayer.listOfLayerEntryConfig);
+            return accumulator || subLayer.getErrorDetectedFlag();
           }, false);
         }
-        return accumulator || geoviewLayer.errorDetected || subLayerError(geoviewLayer.listOfLayerEntryConfig);
+        return accumulator || geoviewLayer.getErrorDetectedFlag() || subLayerError(geoviewLayer.listOfLayerEntryConfig);
       }, false);
 
       // If no geoview and sub layer error was detected
@@ -490,7 +490,7 @@
         return `${accumulator}== ${geoviewLayer.geoviewLayerId} ===============================================================================================\n${geoviewLayer.serialize()}\n`;
       }, '');
       layerPathErrorFlag = mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
-        return `${accumulator}${generateLayerPathErrorFlag(geoviewLayer.listOfLayerEntryConfig, `geoviewLayerId ${geoviewLayer.geoviewLayerId}: ${geoviewLayer.errorDetected? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`)}\n\n`;
+        return `${accumulator}${generateLayerPathErrorFlag(geoviewLayer.listOfLayerEntryConfig, `geoviewLayerId ${geoviewLayer.geoviewLayerId}: ${geoviewLayer.getErrorDetectedFlag()? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`)}\n\n`;
       }, '');
     }
 
@@ -709,19 +709,22 @@
         // Create a recursive function that scans the layer structure for erroneous sublayers. This function is used in the following line.
         const subLayerError = (listOfLayerEntryConfig) => {
           return listOfLayerEntryConfig.reduce((accumulator, subLayer) => {
-            if (subLayer.isLayerGroup) return accumulator || subLayer.errorDetected || subLayerError(subLayer.listOfLayerEntryConfig);
-            return accumulator || subLayer.errorDetected;
+            if (subLayer.isLayerGroup) return accumulator || subLayer.getErrorDetectedFlag() || subLayerError(subLayer.listOfLayerEntryConfig);
+            return accumulator || subLayer.getErrorDetectedFlag();
           }, false);
         }
 
         // If an error is detected
-        if  (geoviewLayerConfig.errorDetected || subLayerError(geoviewLayerConfig.listOfLayerEntryConfig))
+        if  (geoviewLayerConfig.getErrorDetectedFlag() || subLayerError(geoviewLayerConfig.listOfLayerEntryConfig))
           printMessage(messageTab2, 'Execution completed, but the GeoView configuration contains invalid layers.', 'error');
         else printMessage(messageTab2, 'Execution completed and no error detecteds');
 
         // Set the global variables associated to the Element Display zone.
         geoviewLayerString = geoviewLayerConfig?.serialize();
-        layerPathErrorFlag = generateLayerPathErrorFlag(geoviewLayerConfig.listOfLayerEntryConfig, `geoviewLayerId ${geoviewLayerConfig.geoviewLayerId}: ${geoviewLayerConfig.errorDetected? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`);
+        layerPathErrorFlag = generateLayerPathErrorFlag(
+          geoviewLayerConfig.listOfLayerEntryConfig,
+          `geoviewLayerId ${geoviewLayerConfig.geoviewLayerId}: ${geoviewLayerConfig.getErrorDetectedFlag()? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`
+        );
 
         // Output the new GeoView Layer config representation.
         elementSelectorTab2.dispatchEvent(new Event('change'));
@@ -882,6 +885,9 @@
       else printMessage(messageTab4, 'Cannot generate layer tree, see console for details...', 'error');
 
       elementSelectorTab4.dispatchEvent(new Event('change'));
+      const a = {a:1, b:'b', c:{d:'d'}};
+      const b = {...a};
+      b.c.d='Modif';
     });
 
     // create snippets
