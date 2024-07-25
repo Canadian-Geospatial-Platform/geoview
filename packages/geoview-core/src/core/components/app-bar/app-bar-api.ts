@@ -5,6 +5,7 @@ import { generateId } from '@/core/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import { logger } from '@/core/utils/logger';
+import { ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Class to manage buttons on the app-bar
@@ -174,6 +175,14 @@ export class AppBarApi {
     }
 
     return null;
+  }
+
+  /**
+   * Selects a tab by id and tab group
+   * @return {ActiveAppBarTabType} The active app bar tab info.
+   */
+  getActiveAppBarTab(): ActiveAppBarTabType {
+    return UIEventProcessor.getActiveAppBarTab(this.mapId);
   }
 
   /**
