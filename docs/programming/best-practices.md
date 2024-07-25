@@ -52,8 +52,8 @@ classes. Inheritance also allows to exploit polymorphism. To do this, you just n
 whether it is abstract or not. This variable can then be assigned any object of a derived class without having to negotiate the type.
 Polymorphism allows to expose the common characteristics of the different classes of the inheritance tree. When we want to use child
 specific fields, typescript allows us to downcast to the child type allowing us to refer to the child properties. Before downcasting,
-it is recommended to verify the actual object type by either using the [*instanceof*](https://www.typescriptlang.org/docs/handbook/advanced-types.html)
-keyword or a [*type guard function*](https://www.typescriptlang.org/docs/handbook/advanced-types.html).
+it is recommended to verify the actual object type by either using the [*instanceof*](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#instanceof-narrowing)
+keyword or a [*type guard function*](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates).
 
 ## 5- Use the spreading operator only when necessary ##
 
