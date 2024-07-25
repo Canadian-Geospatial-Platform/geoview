@@ -7,7 +7,6 @@ import { isvalidComparedToInputSchema, normalizeLocalizedString } from '@config/
 import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@config/types/config-constants';
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { GeoviewLayerMandatoryError } from '@config/types/classes/config-exceptions';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 import { generateId } from '@/core/utils/utilities';
@@ -23,10 +22,10 @@ export abstract class AbstractGeoviewLayerConfig {
   #geoviewLayerConfig: TypeJsonObject;
 
   /** Flag used to indicate that errors were detected in the config provided. */
-  #errorDetected = false;
+  #errorDetectedFlag = false;
 
   /** The metadata returned by the service endpoint. */
-  #metadata: TypeJsonObject = {};
+  #serviceMetadata: TypeJsonObject = {};
 
   /** The metadata layer tree definition */
   #metadataLayerTree: EntryConfigBaseClass[] = [];
@@ -59,14 +58,21 @@ export abstract class AbstractGeoviewLayerConfig {
   listOfLayerEntryConfig: EntryConfigBaseClass[] = [];
 
   // GV NOTE START ****************************************************************************************************
-  // The following attribute uses the 'definite assignment assertion' (! after the property name) to indicate that
-  // it will not be null or undefined when used. It is not initialized by the constructor but rather by the metadata
-  // processing methods or ultimately by the applyDefaultValueToUndefinedFields method executed following metadata
-  // processing. I'm writing it here, simply, explicitly, to make it clear that this AbstractGeoviewLayerConfig class
-  // owns (and expects) this attribute.
+  // The following attributes use the 'definite assignment assertion' (! after the property name) to indicate that
+  // it will not be null or undefined when used. It is not initialized by the constructor. I'm writing it here, simply,
+  // explicitly, to make it clear that this AbstractGeoviewLayerConfig class owns (and expects) these attributes.
+
+  // The initialSettings property is initialized by the metadata processing methods or ultimately by the
+  // applyDefaultValueToUndefinedFields method executed following metadata processing.
 
   /** Initial settings to apply to the GeoView layer at creation time. */
   initialSettings!: TypeLayerInitialSettings;
+
+  // The geoviewLayerType property is initialized by the children classes. Each child class knows the value to
+  // assign to this property.
+
+  /** Type of GeoView layer. */
+  geoviewLayerType!: TypeGeoviewLayerType;
 
   // GV NOTE END *****************************************************************************************************
 
@@ -80,7 +86,7 @@ export abstract class AbstractGeoviewLayerConfig {
   constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
     // Keep a copy of the configuration. It will be used later in the execution flow to overwrite values obtained from the metadata.
     this.#geoviewLayerConfig = cloneDeep(geoviewLayerConfig);
-    this.#validateGeoviewConfig();
+    if (!isvalidComparedToInputSchema(this.getGeoviewLayerSchema(), this.#geoviewLayerConfig)) this.setErrorDetectedFlag();
 
     this.#language = language;
 
@@ -128,24 +134,6 @@ export abstract class AbstractGeoviewLayerConfig {
   }
 
   /**
-   * Validate the geoview configuration using the schema associated to its layer type. The validation performed doesn't
-   * cover the content of the listOfLayerEntryConfig. This validation will be done by the sublayer instances.
-   */
-  #validateGeoviewConfig(): void {
-    if (
-      !isvalidComparedToInputSchema(this.geoviewLayerSchema, this.#geoviewLayerConfig) ||
-      !this.#geoviewLayerConfig.geoviewLayerType ||
-      !this.#geoviewLayerConfig.metadataAccessPath
-    )
-      this.setErrorDetectedFlag();
-
-    if (!this.#geoviewLayerConfig.geoviewLayerType)
-      throw new GeoviewLayerMandatoryError('LayerTypeMandatory', [this.geoviewLayerId, this.geoviewLayerType]);
-    if (!this.#geoviewLayerConfig.metadataAccessPath)
-      throw new GeoviewLayerMandatoryError('MetadataAccessPathMandatory', [this.geoviewLayerId, this.geoviewLayerType]);
-  }
-
-  /**
    * Apply default value to undefined fields.
    */
   applyDefaultValueToUndefinedFields(): void {
@@ -171,21 +159,19 @@ export abstract class AbstractGeoviewLayerConfig {
    * private #metadata is that it is invisible to the schema validation and JSON serialization.
    *
    * @param {TypeJsonObject} metadata The GeoView service metadata.
-   * @protected
    */
-  protected set metadata(metadata: TypeJsonObject) {
-    this.#metadata = metadata;
+  setServiceMetadata(metadata: TypeJsonObject): void {
+    this.#serviceMetadata = metadata;
   }
 
   /**
-   * The getter method that returns the metadata private property. The benifit of using a setter/getter with a
-   * private #metadata is that it is invisible to the schema validation and JSON serialization.
+   * The getter method that returns the serviceMetadata private property. The benifit of using a setter/getter with a
+   * private #serviceMetadata is that it is invisible to the schema validation and JSON serialization.
    *
    * @returns {TypeJsonObject} The GeoView service metadata.
-   * @protected
    */
-  protected get metadata(): TypeJsonObject {
-    return this.#metadata;
+  getServiceMetadata(): TypeJsonObject {
+    return this.#serviceMetadata;
   }
 
   /**
@@ -194,7 +180,7 @@ export abstract class AbstractGeoviewLayerConfig {
    *
    * @returns {EntryConfigBaseClass[]} The metadata layer tree.
    */
-  get metadataLayerTree(): EntryConfigBaseClass[] {
+  getMetadataLayerTree(): EntryConfigBaseClass[] {
     return this.#metadataLayerTree;
   }
 
@@ -205,7 +191,7 @@ export abstract class AbstractGeoviewLayerConfig {
    * @param {TypeJsonObject} metadataLayerTree The GeoView service metadata.
    * @protected
    */
-  protected set metadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]) {
+  protected setMetadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]): void {
     this.#metadataLayerTree = metadataLayerTree;
   }
 
@@ -215,7 +201,7 @@ export abstract class AbstractGeoviewLayerConfig {
    * @returns {TypeDisplayLanguage} The GeoView layer schema associated to the config.
    * @protected @abstract
    */
-  protected get language(): TypeDisplayLanguage {
+  protected getLanguage(): TypeDisplayLanguage {
     return this.#language;
   }
 
@@ -225,15 +211,7 @@ export abstract class AbstractGeoviewLayerConfig {
    * @returns {string} The GeoView layer schema associated to the config.
    * @protected @abstract
    */
-  protected abstract get geoviewLayerSchema(): string;
-
-  /**
-   * The getter method that returns the geoview layer type to use for the validation.
-   *
-   * @returns {string} The GeoView layer schema associated to the config.
-   * @protected @abstract
-   */
-  abstract get geoviewLayerType(): TypeGeoviewLayerType;
+  protected abstract getGeoviewLayerSchema(): string;
 
   /**
    * The method used to implement the class factory model that returns the instance of the class based on the sublayer
@@ -259,7 +237,7 @@ export abstract class AbstractGeoviewLayerConfig {
    * Methode used to set the AbstractGeoviewLayerConfig error flag to true.
    */
   setErrorDetectedFlag(): void {
-    this.#errorDetected = true;
+    this.#errorDetectedFlag = true;
   }
 
   /**
@@ -267,8 +245,8 @@ export abstract class AbstractGeoviewLayerConfig {
    *
    * @returns {boolean} The errorDetected property associated to the geoview layer config.
    */
-  get errorDetected(): boolean {
-    return this.#errorDetected;
+  getErrorDetectedFlag(): boolean {
+    return this.#errorDetectedFlag;
   }
 
   /**

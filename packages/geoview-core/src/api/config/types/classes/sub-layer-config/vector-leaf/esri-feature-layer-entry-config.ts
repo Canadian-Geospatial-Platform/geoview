@@ -46,7 +46,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
    * @returns {string} The schemaPath associated to the sublayer.
    * @protected
    */
-  protected override get schemaPath(): string {
+  protected override getSchemaPath(): string {
     return CV_CONST_LEAF_LAYER_SCHEMA_PATH.ESRI_FEATURE;
   }
 
