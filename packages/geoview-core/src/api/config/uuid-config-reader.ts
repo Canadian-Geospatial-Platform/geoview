@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { TypeJsonObject, TypeJsonArray, Cast } from '@config/types/config-types';
+import { TypeJsonObject, TypeJsonArray, toJsonObject } from '@config/types/config-types';
 import { CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -61,7 +61,7 @@ export class UUIDmapConfigReader {
           const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
           if (layerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
@@ -71,7 +71,7 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return Cast<TypeJsonObject>({
+                return toJsonObject({
                   layerId: `${item.index}`,
                 });
               }
@@ -84,7 +84,7 @@ export class UUIDmapConfigReader {
             const serviceUrl = (url as string).split('/').slice(0, -1).join('/');
             const layerId = (url as string).split('/').pop();
 
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(serviceUrl),
@@ -93,13 +93,13 @@ export class UUIDmapConfigReader {
               isTimeAware,
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = [
-              Cast<TypeJsonObject>({
+              toJsonObject({
                 layerId,
               }),
             ];
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.ESRI_FEATURE) {
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
@@ -109,14 +109,14 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return Cast<TypeJsonObject>({
+                return toJsonObject({
                   layerId: `${item.index}`,
                 });
               }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.WMS) {
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
@@ -126,7 +126,7 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return Cast<TypeJsonObject>({
+                return toJsonObject({
                   layerId: `${item.id}`,
                   source: {
                     serverType: serverType === undefined ? 'mapserver' : serverType,
@@ -136,7 +136,7 @@ export class UUIDmapConfigReader {
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.WFS) {
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
@@ -146,7 +146,7 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return Cast<TypeJsonObject>({
+                return toJsonObject({
                   layerId: `${item.id}`,
                   source: {
                     format: 'WFS',
@@ -157,7 +157,7 @@ export class UUIDmapConfigReader {
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.OGC_FEATURE) {
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
@@ -167,7 +167,7 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return Cast<TypeJsonObject>({
+                return toJsonObject({
                   layerId: `${item.id}`,
                   source: {
                     format: 'featureAPI',
@@ -177,7 +177,7 @@ export class UUIDmapConfigReader {
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.GEOJSON) {
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
@@ -187,7 +187,7 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return Cast<TypeJsonObject>({
+                return toJsonObject({
                   layerId: `${item.id}`,
                   source: {
                     format: 'GeoJSON',
@@ -197,7 +197,7 @@ export class UUIDmapConfigReader {
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.XYZ_TILES) {
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
@@ -207,14 +207,14 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return Cast<TypeJsonObject>({
+                return toJsonObject({
                   layerId: `${item.id}`,
                 });
               }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.VECTOR_TILES) {
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
@@ -224,7 +224,7 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return Cast<TypeJsonObject>({
+                return toJsonObject({
                   layerId: `${item.id}`,
                   tileGrid: item.tileGrid,
                   source: {
@@ -235,7 +235,7 @@ export class UUIDmapConfigReader {
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.GEOPACKAGE) {
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
@@ -245,7 +245,7 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return Cast<TypeJsonObject>({
+                return toJsonObject({
                   layerId: `${item.id}`,
                   source: {
                     format: 'GeoPackage',
@@ -255,7 +255,7 @@ export class UUIDmapConfigReader {
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.IMAGE_STATIC) {
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
@@ -264,7 +264,7 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return Cast<TypeJsonObject>({
+                return toJsonObject({
                   layerId: `${item.id}`,
                 });
               }
@@ -274,7 +274,7 @@ export class UUIDmapConfigReader {
             // GV: ESRI Image layers as they are returned by RCS don't have a layerEntries property. It is undefined.
             // GV: Everything needed to create the geoview layer is in the URL. The layerId of the layerEntryConfig is not used,
             // GV: but we need to create a layerEntryConfig in the list for the layer to be displayed.
-            const geoviewLayerConfig = Cast<TypeJsonObject>({
+            const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
@@ -283,7 +283,7 @@ export class UUIDmapConfigReader {
               isTimeAware,
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = [
-              Cast<TypeJsonObject>({
+              toJsonObject({
                 layerId: (url as string).split('/').slice(-2, -1)[0],
               }),
             ];
