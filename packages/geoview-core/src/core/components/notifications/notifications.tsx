@@ -148,6 +148,7 @@ export default function Notifications(): JSX.Element {
           <IconButton
             id="notification"
             tooltip="appbar.notifications"
+            aria-label="appbar.notifications"
             tooltipPlacement="bottom-end"
             onClick={handleOpenPopover}
             className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
@@ -179,6 +180,7 @@ export default function Notifications(): JSX.Element {
                 disabled={notifications.length === 0}
                 size="small"
                 onClick={handleRemoveAllNotificationsClick}
+                aria-label={t('appbar.removeAllNotifications') ?? ''}
               >
                 {t('appbar.removeAllNotifications')}
               </Button>

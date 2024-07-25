@@ -402,9 +402,9 @@
             "description": "The display name of the layer.",
             "type": "string"
           },
-          "geoviewLayerType": {
-            "description": "Type of GeoView layer.",
-            "$ref": "#/definitions/TypeGeoviewLayerType"
+          "metadataAccessPath": {
+            "description": "The GeoView layer service access path (English/French).",
+            "type": "string"
           }
         }
       },
@@ -415,23 +415,9 @@
             "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information.",
             "$ref": "#/definitions/TypeLocalizedString"
           },
-          "geoviewLayerType": {
-            "description": "Type of GeoView layer.",
-            "type": "string",
-            "enum": [
-              "CSV",
-              "esriDynamic",
-              "esriFeature",
-              "esriImage",
-              "GeoJSON",
-              "imageStatic",
-              "ogcFeature",
-              "ogcWfs",
-              "ogcWms",
-              "vectorTiles",
-              "xyzTiles",
-              "geoCore"
-            ]
+          "metadataAccessPath": {
+            "description": "The GeoView layer service access path (English/French).",
+            "$ref": "#/definitions/TypeLocalizedString"
           }
         }
       },

@@ -28,6 +28,7 @@ export default function ExportButton({ className = '', sxDetails }: ExportProps)
       onClick={() => openModal({ activeElementId: 'export', callbackElementId: `${mapId}-export-btn` })}
       sx={sxDetails}
       className={className}
+      aria-label="appbar.export"
     >
       <DownloadIcon />
     </IconButton>

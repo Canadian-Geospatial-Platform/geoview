@@ -63,7 +63,6 @@
     "dayjs": "^1.11.9",
     "domhandler": "^4.3.0",
     "export-to-csv": "^0.2.1",
-    "focus-trap-react": "^8.9.1",
     "html-react-parser": "^1.4.6",
     "i18next": "^22.4.13",
     "i18next-http-backend": "^1.0.21",
