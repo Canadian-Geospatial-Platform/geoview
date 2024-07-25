@@ -130,6 +130,7 @@ export function Geolocator(): JSX.Element {
     setSearchValue('');
     setData(undefined);
     setActiveAppBarTab(`${mapId}AppbarPanelButtonGeolocator`, CV_DEFAULT_APPBAR_CORE.GEOLOCATOR, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setActiveAppBarTab]);
 
   /**
