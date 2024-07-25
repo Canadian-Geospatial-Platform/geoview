@@ -47,7 +47,6 @@ export function Geolocator(): JSX.Element {
 
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
   const abortControllerRef = useRef<AbortController | null>(null);
-  // const searchInputRef = useRef<HTMLDivElement>();
   const MIN_SEARCH_LENGTH = 3;
 
   /**
