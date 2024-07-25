@@ -70,7 +70,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
 
   // create a new config object and apply default
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
-  let mapConfig: MapFeatureConfig = api.configApi.getDefaultMapFeatureConfig(lang);
+  let mapConfig: MapFeatureConfig = api.config.getDefaultMapFeatureConfig(lang);
 
   // check what type of config is provided (data-config, data-config-url or data-shared)
   if (mapElement.hasAttribute('data-config')) {
@@ -79,7 +79,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
 
     // Erase comments in the config file then process
     const configObjStr = removeCommentsFromJSON(configData!);
-    mapConfig = await api.configApi.createMapConfig(configObjStr, lang);
+    mapConfig = await api.config.createMapConfig(configObjStr, lang);
 
     // TODO: refactor - remove this injection once config is done, remove the casting to unknown
     let tempStr = removeCommentsFromJSON(configData!);
@@ -92,7 +92,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     // configurations file url is provided, fetch then process
     const configUrl = mapElement.getAttribute('data-config-url');
     const configObject = await fetchConfigFile(configUrl!);
-    mapConfig = await api.configApi.createMapConfig(configObject, lang);
+    mapConfig = await api.config.createMapConfig(configObject, lang);
 
     // TODO: refactor - remove this injection once config is done, remove the casting to unknown
     mapConfig.map.listOfGeoviewLayerConfig = (configObject as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig
@@ -101,10 +101,10 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
   } else if (mapElement.getAttribute('data-shared')) {
     // configurations from the URL parameters is provided, extract then process (replace HTLM characters , && :)
     const urlParam = new URLSearchParams(window.location.search).toString().replace(/%2C/g, ',').replace(/%3A/g, ':') || '';
-    mapConfig = await api.configApi.getConfigFromUrl(urlParam);
+    mapConfig = await api.config.getConfigFromUrl(urlParam);
   }
 
-  // inject 'data-geocore-keys' inside the config for later processing by the configAPI
+  // inject 'data-geocore-keys' inside the config for later processing by the ConfigApi
   if (mapElement.hasAttribute('data-geocore-keys')) {
     const geocoreKeys = mapElement.getAttribute('data-geocore-keys')?.split(',');
     geocoreKeys?.forEach((key: string) => {

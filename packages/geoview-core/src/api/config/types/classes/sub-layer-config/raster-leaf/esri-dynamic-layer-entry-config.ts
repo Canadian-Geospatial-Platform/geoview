@@ -1,6 +1,7 @@
 import { defaultsDeep } from 'lodash';
 
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
+import { Cast } from '@config/types/config-types';
 import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-esri-layer-entry-config';
 import {
   TypeStyleConfig,
@@ -8,6 +9,7 @@ import {
   TypeSourceEsriDynamicInitialConfig,
   TypeLayerInitialSettings,
 } from '@config/types/map-schema-types';
+import { EsriBaseRenderer, parseStyleUsingEsriRenderer } from '@/api/config/esri-renderer-parser';
 
 /**
  * The ESRI dynamic geoview sublayer class.
@@ -49,5 +51,14 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
    */
   protected override getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method is used to parse the layer metadata and extract the style and source information.
+   * @protected
+   */
+  protected override parseLayerMetadata(): void {
+    const renderer = Cast<EsriBaseRenderer>(this.getLayerMetadata().drawingInfo?.renderer);
+    if (renderer) this.style = parseStyleUsingEsriRenderer(renderer);
   }
 }

@@ -23,6 +23,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
         if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
         else {
           this.setLayerMetadata(data);
+          this.parseLayerMetadata();
           return;
         }
       } catch (error) {
@@ -32,4 +33,11 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
     }
     this.setLayerMetadata({});
   }
+
+  /** ***************************************************************************************************************************
+   * This method is used to parse the layer metadata and extract the style and source information.
+   * @protected
+   * @abstract
+   */
+  protected abstract parseLayerMetadata(): void;
 }
