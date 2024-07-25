@@ -186,7 +186,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         letterSpacing: 2,
       },
       button: {
-        fontSize: geoViewFontSizes.lg,
+        fontSize: geoViewFontSizes.default,
         fontWeight: 500,
       },
       control: {
