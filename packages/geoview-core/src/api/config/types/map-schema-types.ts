@@ -53,6 +53,7 @@ export type TypeFooterBarProps = {
     custom: TypeFooterBarTabsCustomProps[]; // TODO: support custom tab by creating a Typeobject for it
   };
   collapsed: boolean;
+  selectedTab: TypeValidFooterBarTabsCoreProps;
 };
 
 /** Supported app bar values. */
@@ -73,6 +74,8 @@ export type TypeAppBarProps = {
   tabs: {
     core: TypeValidAppBarCoreProps[];
   };
+  collapsed: boolean;
+  selectedTab: TypeValidAppBarCoreProps;
 };
 
 /** Overview map options. Default none. */

@@ -177,8 +177,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
   // Update the active footer tab based on footer tabs created from configuration.
   useEffect(() => {
-    setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
-  }, [memoFooterBarTabs, setActiveFooterBarTab]);
+    if (!selectedTab) setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memoFooterBarTabs]);
 
   /**
    * Whenever the array layer data batch changes if we're on 'details' tab and it's collapsed, make sure we uncollapse it
