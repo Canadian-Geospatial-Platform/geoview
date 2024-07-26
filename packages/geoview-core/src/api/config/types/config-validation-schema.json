@@ -392,10 +392,6 @@
           "type": "boolean",
           "description": "Flag to mention if layer will use its time dimension if provided (default: true). Used to remove a layer from time enabled functions like time slider."
         },
-        "initialSettings": {
-          "description": "Initial settings to apply to the GeoView layer at creation time.",
-          "$ref": "#/definitions/TypeLayerInitialSettings"
-        },
         "listOfLayerEntryConfig": {
           "description": "The layer entries to use from the GeoView layer.",
           "$ref": "#/definitions/TypeListOfLayerEntryConfig"
@@ -1412,7 +1408,7 @@
         },
         {
           "description": "One of the chid type.",
-          "oneOf": [
+          "anyOf": [
             {
               "$ref": "#/definitions/TypeLineStringVectorConfig"
             },
@@ -1461,8 +1457,7 @@
             }
           }
         }
-      ],
-      "required": ["type", "stroke"]
+      ]
     },
     "TypeStrokeSymbolConfig": {
       "description": "Stroke style for vector features.",
@@ -1530,8 +1525,7 @@
             }
           }
         }
-      ],
-      "required": ["type", "stroke"]
+      ]
     },
     "TypeFillStyle": {
       "description": "Valid values to specify fill styles.",
@@ -1576,8 +1570,7 @@
             }
           }
         }
-      ],
-      "required": ["type", "symbol"]
+      ]
     },
     "TypeSymbol": {
       "description": "Valid values to specify symbol shapes.",
@@ -1633,8 +1626,7 @@
             }
           }
         }
-      ],
-      "required": ["type", "mimeType", "src"]
+      ]
     },
     "TypePostSettings": {
       "description": "Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET.",

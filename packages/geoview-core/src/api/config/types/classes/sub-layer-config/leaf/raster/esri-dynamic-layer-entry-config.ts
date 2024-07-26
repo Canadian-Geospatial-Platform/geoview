@@ -1,37 +1,28 @@
-import { defaultsDeep } from 'lodash';
-
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { Cast } from '@config/types/config-types';
-import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-esri-layer-entry-config';
 import {
   TypeStyleConfig,
   TypeLayerEntryType,
   TypeSourceEsriDynamicInitialConfig,
-  TypeLayerInitialSettings,
+  TypeEsriFormatParameter,
+  TypeValidMapProjectionCodes,
 } from '@config/types/map-schema-types';
-import { EsriBaseRenderer, parseStyleUsingEsriRenderer } from '@/api/config/esri-renderer-parser';
+import { AbstractBaseEsriLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
+import { EsriBaseRenderer, createStyleUsingEsriRenderer } from '@/api/config/esri-renderer-parser';
 
+// #region CLASS HEADER
 /**
  * The ESRI dynamic geoview sublayer class.
  */
 export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfig {
+  // #region PUBLIC PROPERTIES
   /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceEsriDynamicInitialConfig;
 
   /** Style to apply to the raster layer. */
   style?: TypeStyleConfig;
 
-  /**
-   * Apply default value to undefined fields. The default values to be used for the initialSettings are
-   * inherited from the object that owns this sublayer instance.
-   *
-   * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited by the parent container.
-   */
-  override applyDefaultValueToUndefinedFields(initialSettings: TypeLayerInitialSettings): void {
-    super.applyDefaultValueToUndefinedFields(initialSettings);
-    this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'png', featureInfo: { queryable: false } });
-  }
-
+  // #region PROTECTED GET/SET
   /**
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
    * used to do its validation.
@@ -53,12 +44,47 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
     return CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE;
   }
 
+  // #region PROTECTED METHODS
   /** ***************************************************************************************************************************
-   * This method is used to parse the layer metadata and extract the style and source information.
+   * This method is used to parse the layer metadata and extract the style, source information and other properties.
    * @protected
    */
   protected override parseLayerMetadata(): void {
+    super.parseLayerMetadata();
+
+    const layerMetadata = this.getLayerMetadata();
+
+    this.source = {
+      maxRecordCount: (layerMetadata?.maxRecordCount || 0) as number,
+      // layerFilter?: is optional,
+      featureInfo: this.createFeatureInfoUsingMetadata(),
+      format: 'png' as TypeEsriFormatParameter,
+      transparent: true,
+      projection: layerMetadata.sourceSpatialReference.wkid as TypeValidMapProjectionCodes,
+    };
+
     const renderer = Cast<EsriBaseRenderer>(this.getLayerMetadata().drawingInfo?.renderer);
-    if (renderer) this.style = parseStyleUsingEsriRenderer(renderer);
+    if (renderer) this.style = createStyleUsingEsriRenderer(renderer);
+
+    this.processTemporalDimension(layerMetadata.timeInfo);
+  }
+
+  // #region PUBLIC METHODS
+  /**
+   * Apply default values. The default values will be overwritten by the values in the metadata when they are analyzed.
+   * The resulting config will then be overwritten by the values provided in the user config.
+   */
+  override applyDefaultValues(): void {
+    super.applyDefaultValues();
+    this.source = {
+      maxRecordCount: 0,
+      format: 'png',
+      projection: 3978,
+      featureInfo: {
+        queryable: false,
+        nameField: '',
+        outfields: [],
+      },
+    };
   }
 }

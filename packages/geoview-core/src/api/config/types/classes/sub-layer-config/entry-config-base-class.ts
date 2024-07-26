@@ -1,5 +1,6 @@
-import defaultsDeep from 'lodash/defaultsDeep';
+import cloneDeep from 'lodash/cloneDeep';
 
+import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@config/types/config-constants';
 import { TypeJsonObject } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import {
@@ -11,11 +12,12 @@ import {
 } from '@config/types/map-schema-types';
 import { isvalidComparedToInputSchema } from '@/api/config/utils';
 
+// #region CLASS HEADER
 /**
  * Base type used to define a GeoView sublayer to display on the map. The sublayer can be a group or an abstract sublayer.
  */
 export abstract class EntryConfigBaseClass {
-  // GV: Only the public properties are serialized.
+  // #region PRIVATE PROPERTIES
   /** The language used when interacting with this instance of MapFeatureConfig. */
   #language;
 
@@ -28,6 +30,12 @@ export abstract class EntryConfigBaseClass {
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetectedFlag = false;
 
+  /**
+   * The metadata returned by the service endpoint.
+   */
+  #layerMetadata: TypeJsonObject = {};
+
+  // #region PUBLIC PROPERTIES
   /** Used to distinguish layer group nodes. */
   isLayerGroup: boolean;
 
@@ -49,9 +57,8 @@ export abstract class EntryConfigBaseClass {
   // GV NOTE START ****************************************************************************************************
   // The following attributes use the 'definite assignment assertion' (! after the property name) to indicate that
   // these properties will not be null or undefined when used. They are not initialized by the constructor but rather
-  // by the metadata processing methods or ultimately by the applyDefaultValueToUndefinedFields method executed
-  // following metadata processing. I'm writing them here, simply, explicitly, to make it clear that this
-  // EntryConfigBaseClass class owns (and expects) these attributes.
+  // by the applyDefaultValues or the metadata processing methods. I'm writing them here, simply, explicitly, to make
+  // it clear that EntryConfigBaseClass owns (and expects) these attributes.
 
   /** The min scale that can be reach by the layer. */
   minScale!: number;
@@ -67,6 +74,7 @@ export abstract class EntryConfigBaseClass {
 
   // GV NOTE END *****************************************************************************************************
 
+  // #region CONSTRUCTOR
   /**
    * The class constructor use the sublayer configuration supplied by the user and runs a validation on it to find any errors that
    * may have been made. It only initalizes the properties needed to query the layer metadata for leaf nodes or to create a the
@@ -90,47 +98,35 @@ export abstract class EntryConfigBaseClass {
     this.#parentNode = parentNode;
 
     this.layerId = layerConfig.layerId as string;
-    this.layerName = layerConfig?.layerName?.[this.#language] as string;
-    this.isLayerGroup = (layerConfig.isLayerGroup as boolean) || false;
+    this.layerName = (layerConfig?.layerName?.[this.#language] as string) || 'undefined';
     this.entryType = this.getEntryType();
+    this.isLayerGroup = (layerConfig.isLayerGroup as boolean) || false;
+
+    // Default values are assigned first, then replaced by metadata values and finally by user configuration
+    // if they have new values for these properties.
+    this.applyDefaultValues();
+  }
+
+  // #region GETTER/SETTER
+  /**
+   * The setter method that sets the metadata private property. The benifit of using a setter/getter with a
+   * private #metadata is that it is invisible to the schema validation and JSON serialization.
+   *
+   * @param {TypeJsonObject} metadata The sub-layer metadata.
+   */
+  setLayerMetadata(metadata: TypeJsonObject): void {
+    this.#layerMetadata = metadata;
   }
 
   /**
-   * Validate the node configuration using the schema associated to its layer type.
-   * @protected
+   * The getter method that returns the metadata private property. The benifit of using a setter/getter with a
+   * private #metadata is that it is invisible to the schema validation and JSON serialization.
+   *
+   * @returns {TypeJsonObject} The sub-layer metadata.
    */
-  protected validateLayerConfig(layerConfig: TypeJsonObject): void {
-    if (!isvalidComparedToInputSchema(this.getSchemaPath(), layerConfig)) this.setErrorDetectedFlag();
+  getLayerMetadata(): TypeJsonObject {
+    return this.#layerMetadata;
   }
-
-  /**
-   * Apply default value to undefined fields. The default values to be used for the initialSettings are
-   * inherited from the object that owns this sublayer instance.
-   *
-   * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited by the parent container.
-   */
-  applyDefaultValueToUndefinedFields(initialSettings: TypeLayerInitialSettings): void {
-    this.initialSettings = defaultsDeep(this.initialSettings, initialSettings);
-    this.minScale = this.minScale || 0;
-    this.maxScale = this.maxScale || 0;
-  }
-
-  /**
-   * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
-   * used to do its validation.
-   *
-   * @returns {string} The schemaPath associated to the sublayer.
-   * @protected @abstract
-   */
-  protected abstract getSchemaPath(): string;
-
-  /**
-   * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
-   *
-   * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
-   * @protected @abstract
-   */
-  protected abstract getEntryType(): TypeLayerEntryType;
 
   /** The geoview layer type that owns this config entry. */
   getGeoviewLayerType(): TypeGeoviewLayerType {
@@ -149,7 +145,7 @@ export abstract class EntryConfigBaseClass {
    *
    * @returns {string} The schemaPath associated to the sublayer.
    */
-  getlayerPath(): string {
+  getLayerPath(): string {
     // recursive fonction used to evaluate the complete layer path. The function is used in the return statement that follow.
     const evaluateLayerPath = (aNode: EntryConfigBaseClass): string => {
       return aNode.#parentNode ? `${evaluateLayerPath(aNode.#parentNode)}/${aNode.layerId}` : aNode.layerId;
@@ -184,24 +180,60 @@ export abstract class EntryConfigBaseClass {
     return this.#parentNode;
   }
 
+  // #region PROTECTED GET/SET
   /**
-   * This method returns the json string of the layer entry configuration. The output representation is not a multi-line indented
-   * string. Private variables and pseudo-properties are not serialized.
+   * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
+   * used to do its validation.
+   *
+   * @returns {string} The schemaPath associated to the sublayer.
+   * @protected @abstract
+   */
+  protected abstract getSchemaPath(): string;
+
+  /**
+   * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
+   *
+   * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
+   * @protected @abstract
+   */
+  protected abstract getEntryType(): TypeLayerEntryType;
+
+  // #region PUBLIC METHODS
+  /**
+   * This method returns the json string of the entry configuration. The output representation is a multi-line indented
+   * string. Indentation can be controled using the ident parameter. Private variables are not serialized.
+   * @param {number} indent The number of space to indent the output string (default=2).
    *
    * @returns {string} The json string corresponding to the map feature configuration.
    */
-  getJsonString(): string {
-    return this.getIndentedJsonString(null);
+  serialize(indent: number = 2): string {
+    return JSON.stringify(this, undefined, indent);
   }
 
   /**
-   * This method returns the json string of the entry configuration.The output representation is a multi-line indented
-   * string. Indentation can be controled using the ident parameter. Private variables and pseudo-properties are not serialized.
-   * @param {number | null} indent The number of space to indent the output string.
-   *
-   * @returns {string} The json string corresponding to the entry configuration.
+   * Validate the node configuration using the schema associated to its layer type.
+   * @protected
    */
-  getIndentedJsonString(indent: number | null = 2): string {
-    return JSON.stringify(this, undefined, indent || undefined);
+  protected validateLayerConfig(layerConfig: TypeJsonObject): void {
+    if (!isvalidComparedToInputSchema(this.getSchemaPath(), layerConfig)) this.setErrorDetectedFlag();
   }
+
+  /**
+   * Apply default values. The default values will be overwritten by the values in the metadata when they are analyzed.
+   * The resulting config will then be overwritten by the values provided in the user config.
+   */
+  applyDefaultValues(): void {
+    this.initialSettings = cloneDeep(CV_DEFAULT_LAYER_INITIAL_SETTINGS);
+    this.minScale = 0;
+    this.maxScale = 0;
+  }
+
+  /**
+   * Fetch the layer  metadata from the metadataAccessPath and store it in a private variable of the sub-layer.
+   * The same method signature is used by layer group nodes and leaf nodes (layers).
+   *
+   * @returns {Promise<void>} A Promise that will resolve when the execution will be completed.
+   * @abstract
+   */
+  abstract fetchLayerMetadata(): Promise<void>;
 }

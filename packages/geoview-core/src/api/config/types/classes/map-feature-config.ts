@@ -3,7 +3,7 @@ import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
-import { Cast, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
+import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vector-config/esri-feature-config';
 import {
   CV_BASEMAP_ID,
@@ -39,16 +39,22 @@ import {
 import { logger } from '@/core//utils/logger';
 import { ConfigApi } from '../../config-api';
 
+// #region CLASS HEADER
 /**
  * The map feature configuration class.
  */
 export class MapFeatureConfig {
+  // #region PRIVATE PROPERTIES
   /** The language used when interacting with this instance of MapFeatureConfig. */
   #language;
 
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetectedFlag = false;
 
+  /** The registeredLayerPaths property keeps track of all the GeoView layers created and attached to this map */
+  #registeredLayerPaths: Record<string, AbstractGeoviewLayerConfig> = {};
+
+  // #region PUBLIC PROPERTIES
   /** map configuration. */
   map: TypeMapConfig;
 
@@ -85,79 +91,67 @@ export class MapFeatureConfig {
    */
   schemaVersionUsed?: '1.0';
 
+  // #region CONSTRUCTOR
   /**
    * The class constructor
    *
-   * A copy of the original configuration is kept to identify which fields were left empty by the user. This information will be
-   * useful after reading the metadata to determine whether a default value should be applied.
+   * All properties at this inheritance level have no values provided in the metadata. They are therefore initialized
+   * from the configuration passed as a parameter or from the default values.
    *
-   * @param {TypeJsonObject} providedMapConfig The map feature configuration to instantiate.
+   * @param {TypeJsonObject} userMapFeatureConfig The map feature configuration to instantiate.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
    * @constructor
    */
-  constructor(providedMapFeatureConfig: TypeJsonObject, language: TypeDisplayLanguage) {
+  constructor(userMapFeatureConfig: TypeJsonObject, language: TypeDisplayLanguage) {
     // Input schema validation.
-    this.#errorDetectedFlag = !isvalidComparedToInputSchema(CV_MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
+    this.#errorDetectedFlag = !isvalidComparedToInputSchema(CV_MAP_CONFIG_SCHEMA_PATH, userMapFeatureConfig);
 
     this.#language = language;
+
     // set map configuration
-    const gvMap = cloneDeep(providedMapFeatureConfig.map) as TypeJsonObject;
-    if (gvMap) (gvMap.listOfGeoviewLayerConfig as TypeJsonArray) = (gvMap.listOfGeoviewLayerConfig || []) as TypeJsonArray;
+    const gvMap = cloneDeep(userMapFeatureConfig.map) as TypeJsonObject;
     this.map = Cast<TypeMapConfig>(
+      // Default map config depends on map projection.
       defaultsDeep(gvMap, MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes))
     );
-    this.map.listOfGeoviewLayerConfig = (gvMap.listOfGeoviewLayerConfig as TypeJsonArray)
+    this.map.listOfGeoviewLayerConfig = this.map.listOfGeoviewLayerConfig
       .map((geoviewLayerConfig) => {
-        return MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language);
+        return MapFeatureConfig.nodeFactory(toJsonObject(geoviewLayerConfig), this.#language);
       })
+      // Validate and filter undefined entries (undefined is returned when a GeoView layer cannot be instanciated).
       .filter((layerConfig) => {
+        if (layerConfig) {
+          if (layerConfig.geoviewLayerId in this.#registeredLayerPaths) {
+            layerConfig.setErrorDetectedFlag();
+            layerConfig.setErrorDetectedFlagForAllLayers(layerConfig.listOfLayerEntryConfig);
+            logger.logError(`ERROR: The GeoView layer ${layerConfig.geoviewLayerId} is duplicated.`);
+          } else this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
+        }
         return layerConfig;
       }) as AbstractGeoviewLayerConfig[];
-    this.serviceUrls = Cast<TypeServiceUrls>(defaultsDeep(providedMapFeatureConfig.serviceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls));
-    this.theme = (providedMapFeatureConfig.theme || CV_DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
-    this.navBar = [...((providedMapFeatureConfig.navBar || CV_DEFAULT_MAP_FEATURE_CONFIG.navBar) as TypeNavBarProps)];
-    this.appBar = Cast<TypeAppBarProps>(defaultsDeep(providedMapFeatureConfig.appBar, CV_DEFAULT_MAP_FEATURE_CONFIG.appBar));
-    this.footerBar = Cast<TypeFooterBarProps>(providedMapFeatureConfig.footerBar);
+
+    this.serviceUrls = Cast<TypeServiceUrls>(defaultsDeep(userMapFeatureConfig.serviceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls));
+    this.theme = (userMapFeatureConfig.theme || CV_DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
+    this.navBar = [...((userMapFeatureConfig.navBar || CV_DEFAULT_MAP_FEATURE_CONFIG.navBar) as TypeNavBarProps)];
+    this.appBar = Cast<TypeAppBarProps>(defaultsDeep(userMapFeatureConfig.appBar, CV_DEFAULT_MAP_FEATURE_CONFIG.appBar));
+    this.footerBar = Cast<TypeFooterBarProps>(userMapFeatureConfig.footerBar);
     this.overviewMap = Cast<TypeOverviewMapProps>(
-      defaultsDeep(providedMapFeatureConfig.overviewMap, CV_DEFAULT_MAP_FEATURE_CONFIG.overviewMap)
+      defaultsDeep(userMapFeatureConfig.overviewMap, CV_DEFAULT_MAP_FEATURE_CONFIG.overviewMap)
     );
-    this.components = [...((providedMapFeatureConfig.components || CV_DEFAULT_MAP_FEATURE_CONFIG.components) as TypeMapComponents)];
-    this.corePackages = [...((providedMapFeatureConfig.corePackages || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages) as TypeMapCorePackages)];
+    this.components = [...((userMapFeatureConfig.components || CV_DEFAULT_MAP_FEATURE_CONFIG.components) as TypeMapComponents)];
+    this.corePackages = [...((userMapFeatureConfig.corePackages || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages) as TypeMapCorePackages)];
     this.externalPackages = [
-      ...((providedMapFeatureConfig.externalPackages || CV_DEFAULT_MAP_FEATURE_CONFIG.externalPackages) as TypeExternalPackages),
+      ...((userMapFeatureConfig.externalPackages || CV_DEFAULT_MAP_FEATURE_CONFIG.externalPackages) as TypeExternalPackages),
     ];
     this.schemaVersionUsed =
-      (providedMapFeatureConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
-    if (this.#errorDetectedFlag) this.#makeMapConfigValid(providedMapFeatureConfig); // Tries to apply a correction to invalid properties
+      (userMapFeatureConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
+    if (this.#errorDetectedFlag) this.#makeMapConfigValid(userMapFeatureConfig); // Tries to apply a correction to invalid properties
     if (!isvalidComparedToInternalSchema(CV_MAP_CONFIG_SCHEMA_PATH, this)) this.setErrorDetectedFlag();
   }
 
-  /**
-   * This method reads the service metadata for geoview layers in the geoview layer list.
-   */
-  async fetchAllServiceMetadata(): Promise<void> {
-    const promiseLayersProcessed: Promise<void>[] = [];
-
-    this.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-      promiseLayersProcessed.push(geoviewLayerConfig.fetchServiceMetadata());
-    });
-
-    const promiseSettledResult = await Promise.allSettled(promiseLayersProcessed);
-    promiseSettledResult.forEach((promise, i) => {
-      if (promise.status === 'rejected') this.map.listOfGeoviewLayerConfig[i].setErrorDetectedFlag();
-    });
-  }
-
-  /**
-   * This method returns the json string of the map feature's configuration. The output representation is a multi-line indented
-   * string. Indentation can be controled using the ident parameter. Private variables and pseudo-properties are not serialized.
-   * @param {number} indent The number of space to indent the output string (default=2).
-   *
-   * @returns {string} The json string corresponding to the map feature configuration.
-   */
-  serialize(indent: number = 2): string {
-    return JSON.stringify(this, undefined, indent);
-  }
+  // #region GETTER/SETTER
+  // GV: The benifit of using a setter/getter with a private #property is that it is invisible to the schema
+  // GV: validation and JSON serialization.
 
   /**
    * The getter method that returns the errorDetected flag.
@@ -176,46 +170,14 @@ export class MapFeatureConfig {
   }
 
   /**
-   * The method used to implement the class factory model that returns the instance of the class based on the GeoView layer type
-   * needed.
+   * Methode used to get a specific GeoView layer configuration.
    *
-   * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
-   * @param {MapFeatureConfig} mapFeatureConfig An optional mapFeatureConfig instance if the layer is part of it.
+   * @param {string} geoviewLayerId The GeoView layer identifier.
    *
-   * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer instance or undefined if there is an error.
-   * @static
+   * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer object or undefined if it doesn't exist.
    */
-  static nodeFactory(layerConfig: TypeJsonObject, language: TypeDisplayLanguage): AbstractGeoviewLayerConfig | undefined {
-    switch (layerConfig.geoviewLayerType) {
-      // case CONST_LAYER_TYPES.CSV:
-      //   return new CsvLayerConfig(layerConfig);
-      case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
-        return new EsriDynamicLayerConfig(layerConfig, language);
-      case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
-        return new EsriFeatureLayerConfig(layerConfig, language);
-      // case CONST_LAYER_TYPES.ESRI_IMAGE:
-      //   return new EsriImageLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.GEOJSON:
-      //   return new GeojsonLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.GEOPACKAGE:
-      //   return new GeopackageLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.XYZ_TILES:
-      //   return new XyzLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.VECTOR_TILES:
-      //   return new VectorTileLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.OGC_FEATURE:
-      //   return new OgcFeatureLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.WFS:
-      //   return new WfsLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.WMS:
-      //   return new WmsLayerConfig(layerConfig);
-      default:
-        // TODO: Restore the commented line and remove the next line when we have converted our code to the new framework.
-        // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
-        if (ConfigApi.devMode) logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
-    }
-    return undefined;
+  getGeoviewLayer(geoviewLayerId: string): AbstractGeoviewLayerConfig | undefined {
+    return this.#registeredLayerPaths?.[geoviewLayerId];
   }
 
   /**
@@ -236,6 +198,7 @@ export class MapFeatureConfig {
     return mapConfig;
   }
 
+  // #region PRIVATE METHODS
   /**
    * This method attempts to recover a valid configuration following the detection of an error. It will attempt to replace the
    * erroneous values with the default values associated with the properties in error. There is a limit to this recovery
@@ -394,5 +357,95 @@ export class MapFeatureConfig {
         )} replaced by ${JSON.stringify(this.map.basemapOptions)} -`
       );
     }
+  }
+
+  // #region PUBLIC METHODS
+  /**
+   * This method reads the service metadata for geoview layers in the geoview layer list.
+   */
+  async fetchAllServiceMetadata(): Promise<void> {
+    const promiseLayersProcessed: Promise<void>[] = [];
+
+    this.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+      promiseLayersProcessed.push(geoviewLayerConfig.fetchServiceMetadata());
+    });
+
+    const promiseSettledResult = await Promise.allSettled(promiseLayersProcessed);
+    promiseSettledResult.forEach((promise, i) => {
+      if (promise.status === 'rejected') this.map.listOfGeoviewLayerConfig[i].setErrorDetectedFlag();
+    });
+  }
+
+  /**
+   * This method returns the json string of the map feature's configuration. The output representation is a multi-line indented
+   * string. Indentation can be controled using the ident parameter. Private variables are not serialized.
+   * @param {number} indent The number of space to indent the output string (default=2).
+   *
+   * @returns {string} The json string corresponding to the map feature configuration.
+   */
+  serialize(indent: number = 2): string {
+    return JSON.stringify(this, undefined, indent);
+  }
+
+  /**
+   * Apply user configuration over the geoview layer configurations created from the raw metadata.
+   */
+  applyUserConfigToGeoviewLayers(listOfGeoviewLayerConfig?: TypeJsonArray): void {
+    this.map.listOfGeoviewLayerConfig.forEach((geoviewConfig) => {
+      // Use config pass as parameter if defined
+      if (listOfGeoviewLayerConfig?.length) {
+        const geoviewConfigToUse = listOfGeoviewLayerConfig.find(
+          (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId === geoviewConfig.geoviewLayerId
+        );
+        // If a GeoView layer config has been found, use it. Otherwise, do nothing
+        if (geoviewConfigToUse) geoviewConfig.applyUserConfig(geoviewConfigToUse);
+      } else {
+        // Use config provided at instanciation time.
+        geoviewConfig.applyUserConfig();
+      }
+    });
+  }
+
+  /**
+   * The method used to implement the class factory model that returns the instance of the class based on the GeoView layer type
+   * needed.
+   *
+   * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
+   * @param {MapFeatureConfig} mapFeatureConfig An optional mapFeatureConfig instance if the layer is part of it.
+   *
+   * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer instance or undefined if there is an error.
+   * @static
+   */
+  static nodeFactory(layerConfig: TypeJsonObject, language: TypeDisplayLanguage): AbstractGeoviewLayerConfig | undefined {
+    switch (layerConfig.geoviewLayerType) {
+      // case CONST_LAYER_TYPES.CSV:
+      //   return new CsvLayerConfig(layerConfig);
+      case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
+        return new EsriDynamicLayerConfig(layerConfig, language);
+      case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
+        return new EsriFeatureLayerConfig(layerConfig, language);
+      // case CONST_LAYER_TYPES.ESRI_IMAGE:
+      //   return new EsriImageLayerConfig(layerConfig);
+      // case CONST_LAYER_TYPES.GEOJSON:
+      //   return new GeojsonLayerConfig(layerConfig);
+      // case CONST_LAYER_TYPES.GEOPACKAGE:
+      //   return new GeopackageLayerConfig(layerConfig);
+      // case CONST_LAYER_TYPES.XYZ_TILES:
+      //   return new XyzLayerConfig(layerConfig);
+      // case CONST_LAYER_TYPES.VECTOR_TILES:
+      //   return new VectorTileLayerConfig(layerConfig);
+      // case CONST_LAYER_TYPES.OGC_FEATURE:
+      //   return new OgcFeatureLayerConfig(layerConfig);
+      // case CONST_LAYER_TYPES.WFS:
+      //   return new WfsLayerConfig(layerConfig);
+      // case CONST_LAYER_TYPES.WMS:
+      //   return new WmsLayerConfig(layerConfig);
+      default:
+        // TODO: Restore the commented line and remove the next line when we have converted our code to the new framework.
+        // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
+        if (ConfigApi.devMode) logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
+    }
+    return undefined;
   }
 }

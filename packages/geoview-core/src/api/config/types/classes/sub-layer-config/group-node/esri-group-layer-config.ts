@@ -1,0 +1,107 @@
+import axios from 'axios';
+
+import { TypeJsonObject } from '@config/types/config-types';
+import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
+import { Extent } from '@config/types/map-schema-types';
+
+import { logger } from '@/core/utils/logger';
+import { Projection } from '@/geo/utils/projection';
+import { validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { TypeJsonArray } from '@/app';
+
+// #region CLASS HEADER
+/**
+ * Base type used to define the common implementation of an ESRI GeoView sublayer to display on the map.
+ */
+export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
+  // #region PRIVATE METHODS
+  /** ***************************************************************************************************************************
+   * This method is used to analyze metadata and extract the relevant information from a group layer based on a definition
+   * provided by the ESRI service.
+   * @private
+   */
+  #parseLayerMetadata(): void {
+    const layerMetadata = this.getLayerMetadata();
+
+    this.minScale = layerMetadata.minScale as number;
+    this.maxScale = layerMetadata.maxScale as number;
+
+    const metadataExtent = [
+      layerMetadata.extent.xmin,
+      layerMetadata.extent.ymin,
+      layerMetadata.extent.xmax,
+      layerMetadata.extent.ymax,
+    ] as Extent;
+    const sourceProj = layerMetadata.extent.spatialReference.wkid;
+    if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
+    else
+      this.initialSettings.extent = validateExtentWhenDefined(
+        Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT)
+      );
+
+    if (layerMetadata.defaultVisibility !== undefined) this.initialSettings.states!.visible = layerMetadata.defaultVisibility as boolean;
+
+    this.initialSettings.states!.queryable = (layerMetadata?.capabilities as string)?.includes('Query') || false;
+
+    if (layerMetadata.copyrightText) this.attributions.push(layerMetadata.copyrightText as string);
+  }
+
+  /** ***************************************************************************************************************************
+   * This method is used to analyze metadata and extract the relevant information from a group layer based on a definition
+   * provided by the user's configuration. In this case, we use the service metadata.
+   * @private
+   */
+  #parseServiceMetadata(): void {
+    const serviceMetadata = this.getGeoviewLayerConfig().getServiceMetadata();
+
+    this.minScale = serviceMetadata.minScale as number;
+    this.maxScale = serviceMetadata.maxScale as number;
+
+    const metadataExtent = [
+      serviceMetadata.initialExtent.xmin,
+      serviceMetadata.initialExtent.ymin,
+      serviceMetadata.initialExtent.xmax,
+      serviceMetadata.initialExtent.ymax,
+    ] as Extent;
+    const sourceProj = serviceMetadata.initialExtent.spatialReference.wkid;
+    if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
+    else
+      this.initialSettings.extent = validateExtentWhenDefined(
+        Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT)
+      );
+
+    this.initialSettings.states!.queryable = (serviceMetadata?.capabilities as string)?.includes('Query') || false;
+
+    if (serviceMetadata.copyrightText) this.attributions.push(serviceMetadata.copyrightText as string);
+  }
+
+  // #region PUBLIC METHODS
+  /** ***************************************************************************************************************************
+   * This method is used to fetch, parse and extract the relevant information from the metadata of the group layer.
+   * The same method signature is used by layer group nodes and leaf nodes (layers).
+   */
+  override async fetchLayerMetadata(): Promise<void> {
+    const serviceMetadata = this.getGeoviewLayerConfig().getServiceMetadata();
+
+    if ((serviceMetadata.layers as TypeJsonArray).find((availableLayer) => (availableLayer.id as string) === this.layerId)) {
+      const serviceUrl = this.getGeoviewLayerConfig().metadataAccessPath;
+      const queryUrl = serviceUrl.endsWith('/') ? `${serviceUrl}${this.layerId}` : `${serviceUrl}/${this.layerId}`;
+
+      if (!this.getErrorDetectedFlag()) {
+        try {
+          const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
+          if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
+          else {
+            this.setLayerMetadata(data);
+            this.#parseLayerMetadata();
+            return;
+          }
+        } catch (error) {
+          logger.logError('Error detected while reading Layer metadata.', error);
+        }
+        this.setErrorDetectedFlag();
+      }
+      this.setLayerMetadata({});
+    } else this.#parseServiceMetadata();
+  }
+}
