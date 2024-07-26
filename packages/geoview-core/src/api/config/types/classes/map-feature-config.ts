@@ -47,7 +47,7 @@ export class MapFeatureConfig {
   #language;
 
   /** Flag used to indicate that errors were detected in the config provided. */
-  #errorDetected = false;
+  #errorDetectedFlag = false;
 
   /** map configuration. */
   map: TypeMapConfig;
@@ -97,7 +97,7 @@ export class MapFeatureConfig {
    */
   constructor(providedMapFeatureConfig: TypeJsonObject, language: TypeDisplayLanguage) {
     // Input schema validation.
-    this.#errorDetected = !isvalidComparedToInputSchema(CV_MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
+    this.#errorDetectedFlag = !isvalidComparedToInputSchema(CV_MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
 
     this.#language = language;
     // set map configuration
@@ -128,7 +128,7 @@ export class MapFeatureConfig {
     ];
     this.schemaVersionUsed =
       (providedMapFeatureConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
-    if (this.#errorDetected) this.#makeMapConfigValid(providedMapFeatureConfig); // Tries to apply a correction to invalid properties
+    if (this.#errorDetectedFlag) this.#makeMapConfigValid(providedMapFeatureConfig); // Tries to apply a correction to invalid properties
     if (!isvalidComparedToInternalSchema(CV_MAP_CONFIG_SCHEMA_PATH, this)) this.setErrorDetectedFlag();
   }
 
@@ -149,15 +149,6 @@ export class MapFeatureConfig {
   }
 
   /**
-   * The getter method that returns the errorDetected flag.
-   *
-   * @returns {boolean} The errorDetected property associated to the map feature config.
-   */
-  get errorDetected(): boolean {
-    return this.#errorDetected;
-  }
-
-  /**
    * This method returns the json string of the map feature's configuration. The output representation is a multi-line indented
    * string. Indentation can be controled using the ident parameter. Private variables and pseudo-properties are not serialized.
    * @param {number} indent The number of space to indent the output string (default=2).
@@ -169,10 +160,19 @@ export class MapFeatureConfig {
   }
 
   /**
+   * The getter method that returns the errorDetected flag.
+   *
+   * @returns {boolean} The errorDetected property associated to the map feature config.
+   */
+  getErrorDetectedFlag(): boolean {
+    return this.#errorDetectedFlag;
+  }
+
+  /**
    * Methode used to set the MapFeatureConfig error flag to true.
    */
   setErrorDetectedFlag(): void {
-    this.#errorDetected = true;
+    this.#errorDetectedFlag = true;
   }
 
   /**

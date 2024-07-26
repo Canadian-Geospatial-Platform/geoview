@@ -20,13 +20,13 @@ export abstract class EntryConfigBaseClass {
   #language;
 
   /** The GeoView configuration that owns the configuration tree that contains this node. */
-  #geoviewLayerConfigInstance: AbstractGeoviewLayerConfig;
+  #geoviewLayerConfig: AbstractGeoviewLayerConfig;
 
   /** Parent node (used to compute the layerPath). */
   #parentNode: EntryConfigBaseClass | undefined = undefined;
 
   /** Flag used to indicate that errors were detected in the config provided. */
-  #errorDetected = false;
+  #errorDetectedFlag = false;
 
   /** Used to distinguish layer group nodes. */
   isLayerGroup: boolean;
@@ -86,7 +86,7 @@ export abstract class EntryConfigBaseClass {
   ) {
     this.validateLayerConfig(layerConfig);
     this.#language = language;
-    this.#geoviewLayerConfigInstance = geoviewLayerConfig;
+    this.#geoviewLayerConfig = geoviewLayerConfig;
     this.#parentNode = parentNode;
 
     this.layerId = layerConfig.layerId as string;
@@ -100,7 +100,7 @@ export abstract class EntryConfigBaseClass {
    * @protected
    */
   protected validateLayerConfig(layerConfig: TypeJsonObject): void {
-    if (!isvalidComparedToInputSchema(this.schemaPath, layerConfig)) this.setErrorDetectedFlag();
+    if (!isvalidComparedToInputSchema(this.getSchemaPath(), layerConfig)) this.setErrorDetectedFlag();
   }
 
   /**
@@ -122,7 +122,7 @@ export abstract class EntryConfigBaseClass {
    * @returns {string} The schemaPath associated to the sublayer.
    * @protected @abstract
    */
-  protected abstract get schemaPath(): string;
+  protected abstract getSchemaPath(): string;
 
   /**
    * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
@@ -133,13 +133,13 @@ export abstract class EntryConfigBaseClass {
   protected abstract getEntryType(): TypeLayerEntryType;
 
   /** The geoview layer type that owns this config entry. */
-  get geoviewLayerType(): TypeGeoviewLayerType {
-    return this.#geoviewLayerConfigInstance.geoviewLayerType;
+  getGeoviewLayerType(): TypeGeoviewLayerType {
+    return this.#geoviewLayerConfig.geoviewLayerType;
   }
 
   /** The geoview layer that owns this sub-layer configuration. */
-  get geoviewLayerConfigInstance(): AbstractGeoviewLayerConfig {
-    return this.#geoviewLayerConfigInstance;
+  getGeoviewLayerConfig(): AbstractGeoviewLayerConfig {
+    return this.#geoviewLayerConfig;
   }
 
   /**
@@ -149,11 +149,13 @@ export abstract class EntryConfigBaseClass {
    *
    * @returns {string} The schemaPath associated to the sublayer.
    */
-  get layerPath(): string {
-    const getLayerPath = (aNode: EntryConfigBaseClass): string => {
-      return aNode.#parentNode ? `${getLayerPath(aNode.#parentNode)}/${aNode.layerId}` : aNode.layerId;
+  getlayerPath(): string {
+    // recursive fonction used to evaluate the complete layer path. The function is used in the return statement that follow.
+    const evaluateLayerPath = (aNode: EntryConfigBaseClass): string => {
+      return aNode.#parentNode ? `${evaluateLayerPath(aNode.#parentNode)}/${aNode.layerId}` : aNode.layerId;
     };
-    return `${this.#geoviewLayerConfigInstance.geoviewLayerId}/${getLayerPath(this)}`;
+
+    return `${this.#geoviewLayerConfig.geoviewLayerId}/${evaluateLayerPath(this)}`;
   }
 
   /**
@@ -161,7 +163,7 @@ export abstract class EntryConfigBaseClass {
    * config is no longer considered viable.
    */
   setErrorDetectedFlag(): void {
-    this.#errorDetected = true;
+    this.#errorDetectedFlag = true;
   }
 
   /**
@@ -169,8 +171,8 @@ export abstract class EntryConfigBaseClass {
    *
    * @returns {boolean} The errorDetected property associated to the entry config.
    */
-  get errorDetected(): boolean {
-    return this.#errorDetected;
+  getErrorDetectedFlag(): boolean {
+    return this.#errorDetectedFlag;
   }
 
   /**
@@ -178,7 +180,7 @@ export abstract class EntryConfigBaseClass {
    *
    * @returns {EntryConfigBaseClass | undefined} The parentNode property associated to the entry config.
    */
-  get parentNode(): EntryConfigBaseClass | undefined {
+  getParentNode(): EntryConfigBaseClass | undefined {
     return this.#parentNode;
   }
 

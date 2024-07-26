@@ -51,47 +51,9 @@ class, whether abstract or not, can be used as a parent at the root of the inher
 classes. Inheritance also allows to exploit polymorphism. To do this, you just need to define a variable with a base class as type,
 whether it is abstract or not. This variable can then be assigned any object of a derived class without having to negotiate the type.
 Polymorphism allows to expose the common characteristics of the different classes of the inheritance tree. When we want to use child
-specific fields, typescript allows us to code type guard functions that allow us to do a type ascension in a safer way than a blind
-cast. The type guard functions have as parameter a polymorphic variable whose type is a parent class and use the known attributes of
-this class to determine unambiguously that the type of the object passed as parameter corresponds to a child class of the inheritance
-tree. They return a boolean as output and perform a type ascension to the type of the child if the value of this boolean is true.
-Type guard functions are used in if clauses and when the boolean returned is true, the type of the parameter passed to the function
-will have ascended to the child type for the duration of the block associated with the `then` section. This concept is a bit abstract
-and difficult to explain, but the following code is a better way to understand what is going on.
-
-```ts
-class BaseClass {
-  type: 'child_a' | 'chil_b';
-  constructor(type: 'child_a' | 'chil_b') {
-    this.type = type;
-  }
-}
-
-class Child_A extends BaseClass {
-  constructor() {
-    super('child_a');
-  }
-}
-
-// type guard function for Child_A
-const childTypeIs_A = (verifyIfChildType: BaseClass): verifyIfChildType is Child_A => {
-  return verifyIfChildType?.type === 'child_a';
-};
-
-// Here, we could do something similar to define a class and a type guard for child_b
-const typeGuardExample = () {
-  const instance: BaseClass = getTheInstanceByAnyMeans(); // Here, instance type is BaseClass
-
-  if (childTypeIs_A(instance)) {
-    // Inside this block, instance type is Child_A since the condition is true
-  }
-  // And here, instance type has returned to BaseClass
-}
-```
-
-If you want to see how classes and type guards are used in the viewer, have a look at the
-[payloads folder](../../../packages/geoview-core/src/api/events/payloads) and search where we use these payloads through the code.
-
+specific fields, typescript allows us to downcast to the child type allowing us to refer to the child properties. Before downcasting,
+it is recommended to verify the actual object type by either using the [*instanceof*](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#instanceof-narrowing)
+keyword or a [*type guard function*](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates).
 
 ## 5- Use the spreading operator only when necessary ##
 
@@ -108,6 +70,8 @@ const spredingCollision = { ...object1, ...object2 };
 // Here, value of attribute collision is preserved for both object
 const noCollision = { object1, object2 };
 ```
+
+In some cases, the spreading operator is used to create a duplicate that will not leak into the original property when modified. If the structure of the original object is deep, the spreading operator is not sufficient to avoid leakage. In such cases, use lodash's cloneDeep function.
 
 ## 6- Do not leave dead code in the source code ##
 

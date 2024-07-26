@@ -21,7 +21,7 @@ import { initMapDivFromFunctionCall } from '@/app';
  */
 export class API {
   // ConfigApi static class
-  configApi = ConfigApi;
+  config = ConfigApi;
 
   // list of available maps
   maps: Record<string, MapViewer> = {};

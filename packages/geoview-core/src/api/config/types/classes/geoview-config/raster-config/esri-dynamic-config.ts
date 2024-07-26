@@ -12,7 +12,7 @@ export type TypeEsriDynamicLayerNode = GroupLayerEntryConfig | EsriDynamicLayerE
 /** The ESRI dynamic geoview layer class. */
 export class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConfig {
   /** Type of GeoView layer. */
-  geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
+  override geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
   /** The layer entries to use from the GeoView layer. */
   declare listOfLayerEntryConfig: TypeEsriDynamicLayerNode[];
@@ -24,7 +24,7 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConfig {
    * @returns {string} The GeoView layer schema associated to the config.
    * @protected
    */
-  protected override get geoviewLayerSchema(): string {
+  protected override getGeoviewLayerSchema(): string {
     /** The GeoView layer schema associated to EsriDynamicLayerConfig */
     return CV_GEOVIEW_SCHEMA_PATH.ESRI_DYNAMIC;
   }
