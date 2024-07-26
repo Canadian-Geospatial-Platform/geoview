@@ -593,7 +593,7 @@ function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeSt
  *
  * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-export function parseStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeStyleConfig | undefined {
+export function createStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeStyleConfig | undefined {
   if (esriRendererIsUniqueValue(renderer)) return processUniqueValueRenderer(renderer);
   if (esriRendererIsSimple(renderer)) return processSimpleRenderer(renderer);
   if (esriRendererIsClassBreaks(renderer)) return processClassBreakRenderer(renderer);
