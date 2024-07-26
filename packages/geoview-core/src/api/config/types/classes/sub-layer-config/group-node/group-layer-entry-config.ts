@@ -1,22 +1,27 @@
-import defaultsDeep from 'lodash/defaultsDeep';
-
 import { CV_CONST_SUB_LAYER_TYPES, CV_LAYER_GROUP_SCHEMA_PATH } from '@config/types/config-constants';
 import { TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { TypeDisplayLanguage, TypeLayerEntryType, TypeLayerInitialSettings } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeLayerEntryType } from '@config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
+import { logger } from '@/core/utils/logger';
 
+// ========================
+// #region CLASS DEFINITION
 /**
  * Type used to define a group of layers. It can be either subgroups or sublayers.
  */
-export class GroupLayerEntryConfig extends EntryConfigBaseClass {
+export abstract class GroupLayerEntryConfig extends EntryConfigBaseClass {
+  // #region PUBLIC PROPERTIES
   /** Layer entry data type. */
   override entryType = CV_CONST_SUB_LAYER_TYPES.GROUP;
 
   /** The list of layer entry configurations to use from the GeoView layer group. */
   listOfLayerEntryConfig: EntryConfigBaseClass[] = [];
+  // #endregion PUBLIC PROPERTIES
 
+  // ===================
+  // #region CONSTRUCTOR
   /**
    * The class constructor.
    * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
@@ -34,26 +39,26 @@ export class GroupLayerEntryConfig extends EntryConfigBaseClass {
     super(layerConfig, language, geoviewLayerConfig, parentNode);
     this.listOfLayerEntryConfig = (layerConfig.listOfLayerEntryConfig as TypeJsonArray)
       .map((subLayerConfig) => {
-        if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, language, geoviewLayerConfig, this);
+        if (layerEntryIsGroupLayer(subLayerConfig))
+          return geoviewLayerConfig.createGroupNode(subLayerConfig, language, geoviewLayerConfig, this);
         return geoviewLayerConfig.createLeafNode(subLayerConfig, language, geoviewLayerConfig, this);
       })
       .filter((subLayerConfig) => {
         return subLayerConfig;
       }) as EntryConfigBaseClass[];
+    this.findDuplicatesAndMarkThemAsErrors();
   }
+  // #endregion CONSTRUCTOR
 
-  /**
-   * Apply default value to undefined fields.
+  // ===============
+  // #region METHODS
+  /*
+   * Methods are listed in the following order: abstract, override, private, protected and public.
    */
-  override applyDefaultValueToUndefinedFields(initialSettings: TypeLayerInitialSettings): void {
-    this.initialSettings = defaultsDeep(this.initialSettings, initialSettings);
-    this.listOfLayerEntryConfig.forEach((subLayer) => {
-      subLayer.applyDefaultValueToUndefinedFields(this.initialSettings);
-    });
-  }
-
+  // ==========================
+  // #region OVERRIDE
   /**
-   * @protected
+   * @protected @override
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
    * used to do its validation.
    *
@@ -64,7 +69,7 @@ export class GroupLayerEntryConfig extends EntryConfigBaseClass {
   }
 
   /**
-   * @protected
+   * @protected @override
    * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
    *
    * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
@@ -72,4 +77,23 @@ export class GroupLayerEntryConfig extends EntryConfigBaseClass {
   protected override getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.GROUP;
   }
+  // #endregion OVERRIDE
+
+  // #region PUBLIC
+  /**
+   * Scan the list of sublayers for duplicates. If duplicates exist, mark them as an error layer.
+   */
+  findDuplicatesAndMarkThemAsErrors(): void {
+    this.listOfLayerEntryConfig.forEach((subLayer, sublayerIndex) => {
+      for (let i = sublayerIndex + 1; i < this.listOfLayerEntryConfig.length; i++) {
+        if (!this.listOfLayerEntryConfig[i].getErrorDetectedFlag() && this.listOfLayerEntryConfig[i].layerId === subLayer.layerId) {
+          this.listOfLayerEntryConfig[i].setErrorDetectedFlag();
+          logger.logError(`ERROR: The layerPath ${subLayer.getLayerPath()} is duplicated.`);
+        }
+      }
+    });
+  }
+  // #endregion PUBLIC
+  // #endregion METHODS
+  // #endregion CLASS DEFINITION
 }
