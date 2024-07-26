@@ -16,8 +16,7 @@ Implementation: Use private and protected access modifiers to restrict access to
 
 ```
    /**
-    * The getter method that returns the serviceMetadata private property. The benifit of using a setter/getter with a
-    * private #serviceMetadata is that it is invisible to the schema validation and JSON serialization.
+    * The getter method that returns the serviceMetadata private property.
     *
     * @returns {TypeJsonObject} The GeoView service metadata.
     */
@@ -37,8 +36,7 @@ Implementation: Use private and protected access modifiers to restrict access to
    // it will not be null or undefined when used. It is not initialized by the constructor. We declare it here
    // to make it clear that this AbstractGeoviewLayerConfig class owns (and expects) these attributes.
 
-   // The initialSettings property is initialized by the metadata processing methods or ultimately by the
-   // applyDefaultValueToUndefinedFields method executed following metadata processing.
+   // The initialSettings property is initialized by the applyDefaultValues and the metadata processing methods.
 
    /** Initial settings to apply to the GeoView layer at creation time. */
    initialSettings!: TypeLayerInitialSettings;
