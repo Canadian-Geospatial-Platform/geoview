@@ -19,7 +19,7 @@ export declare class EsriFeatureLayerConfig extends AbstractGeoviewEsriLayerConf
      * @returns {string} The GeoView layer schema associated to the config.
      * @protected
      */
-    protected get geoviewLayerSchema(): string;
+    protected getGeoviewLayerSchema(): string;
     /**
      * The method used to implement the class factory model that returns the instance of the class based on the sublayer
      * type needed.

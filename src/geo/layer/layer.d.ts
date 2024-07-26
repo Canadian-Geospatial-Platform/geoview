@@ -13,6 +13,7 @@ import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractBaseLayer } from './gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from './gv-layers/abstract-gv-layer';
 import { TypeLegendItem } from '@/core/components/layers/types';
 export type GeoViewLayerAddedResult = {
@@ -75,13 +76,13 @@ export declare class LayerApi {
      * Temporary new function for migration purposes, replacing getGeoviewLayers
      * @returns The list of new Geoview Layers
      */
-    getGeoviewLayersNew(): AbstractGVLayer[];
+    getGeoviewLayersNew(): AbstractBaseLayer[];
     /**
      * New function for migration purposes, replacing getGeoviewLayer
      * @param {string} layerPath - The layer path
      * @returns The new Geoview Layer
      */
-    getGeoviewLayerNew(layerPath: string): AbstractGVLayer | undefined;
+    getGeoviewLayerNew(layerPath: string): AbstractBaseLayer | undefined;
     /**
      * Hybrid function for migration purposes, bridging the gap between getGeoviewLayer and getGeoviewLayerNew
      * @param {string} layerPath - The layer path
@@ -93,13 +94,13 @@ export declare class LayerApi {
      * @param {string} layerPath - The layer path
      * @returns The new Geoview Layer
      */
-    getGeoviewLayersHybrid(): AbstractGeoViewLayer[] | AbstractGVLayer[];
+    getGeoviewLayersHybrid(): AbstractGeoViewLayer[] | AbstractBaseLayer[];
     /**
      * Hybrid function for migration purposes, bridging the gap between getGeoviewLayer and getGeoviewLayerNew
      * @param {string} layerPath - The layer path
      * @returns The new Geoview Layer or the old Geoview Layer
      */
-    getGeoviewLayerHybrid(layerPath: string): AbstractGeoViewLayer | AbstractGVLayer | undefined;
+    getGeoviewLayerHybrid(layerPath: string): AbstractGeoViewLayer | AbstractBaseLayer | undefined;
     /**
      * Verifies if a layer is registered. Returns true if registered.
      * @param {string} layerPath - The layer path to check.

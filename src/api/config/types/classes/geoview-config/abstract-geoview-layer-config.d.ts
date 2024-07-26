@@ -27,6 +27,8 @@ export declare abstract class AbstractGeoviewLayerConfig {
     listOfLayerEntryConfig: EntryConfigBaseClass[];
     /** Initial settings to apply to the GeoView layer at creation time. */
     initialSettings: TypeLayerInitialSettings;
+    /** Type of GeoView layer. */
+    geoviewLayerType: TypeGeoviewLayerType;
     /**
      * The class constructor saves a cloned copy of the Geoview configuration supplied by the user and runs a validation on it to
      * find any errors that may have been made. It only initalizes the properties needed to query the service and layer metadata.
@@ -50,24 +52,22 @@ export declare abstract class AbstractGeoviewLayerConfig {
      * private #metadata is that it is invisible to the schema validation and JSON serialization.
      *
      * @param {TypeJsonObject} metadata The GeoView service metadata.
-     * @protected
      */
-    protected set metadata(metadata: TypeJsonObject);
+    setServiceMetadata(metadata: TypeJsonObject): void;
     /**
-     * The getter method that returns the metadata private property. The benifit of using a setter/getter with a
-     * private #metadata is that it is invisible to the schema validation and JSON serialization.
+     * The getter method that returns the serviceMetadata private property. The benifit of using a setter/getter with a
+     * private #serviceMetadata is that it is invisible to the schema validation and JSON serialization.
      *
      * @returns {TypeJsonObject} The GeoView service metadata.
-     * @protected
      */
-    protected get metadata(): TypeJsonObject;
+    getServiceMetadata(): TypeJsonObject;
     /**
      * The getter method that returns the metadataLayerTree private property. The benifit of using a setter/getter with a
      * private #metadataLayerTree is that it is invisible to the schema validation and JSON serialization.
      *
      * @returns {EntryConfigBaseClass[]} The metadata layer tree.
      */
-    get metadataLayerTree(): EntryConfigBaseClass[];
+    getMetadataLayerTree(): EntryConfigBaseClass[];
     /**
      * The setter method that sets the metadataLayerTree private property. The benifit of using a setter/getter with a
      * private #metadata is that it is invisible to the schema validation and JSON serialization.
@@ -75,28 +75,21 @@ export declare abstract class AbstractGeoviewLayerConfig {
      * @param {TypeJsonObject} metadataLayerTree The GeoView service metadata.
      * @protected
      */
-    protected set metadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]);
+    protected setMetadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]): void;
     /**
      * The getter method that returns the language used to create the geoview layer.
      *
      * @returns {TypeDisplayLanguage} The GeoView layer schema associated to the config.
      * @protected @abstract
      */
-    protected get language(): TypeDisplayLanguage;
+    protected getLanguage(): TypeDisplayLanguage;
     /**
      * The getter method that returns the geoview layer schema to use for the validation.
      *
      * @returns {string} The GeoView layer schema associated to the config.
      * @protected @abstract
      */
-    protected abstract get geoviewLayerSchema(): string;
-    /**
-     * The getter method that returns the geoview layer type to use for the validation.
-     *
-     * @returns {string} The GeoView layer schema associated to the config.
-     * @protected @abstract
-     */
-    abstract get geoviewLayerType(): TypeGeoviewLayerType;
+    protected abstract getGeoviewLayerSchema(): string;
     /**
      * The method used to implement the class factory model that returns the instance of the class based on the sublayer
      * type needed.
@@ -120,7 +113,7 @@ export declare abstract class AbstractGeoviewLayerConfig {
      *
      * @returns {boolean} The errorDetected property associated to the geoview layer config.
      */
-    get errorDetected(): boolean;
+    getErrorDetectedFlag(): boolean;
     /**
      * This method returns the json string of the geoview layer's configuration. The output representation is a multi-line indented
      * string. Indentation can be controled using the ident parameter. Private variables and pseudo-properties are not serialized.

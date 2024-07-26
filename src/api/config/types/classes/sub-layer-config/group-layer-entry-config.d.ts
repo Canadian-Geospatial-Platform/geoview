@@ -30,7 +30,7 @@ export declare class GroupLayerEntryConfig extends EntryConfigBaseClass {
      *
      * @returns {string} The schemaPath associated to the sublayer.
      */
-    protected get schemaPath(): string;
+    protected getSchemaPath(): string;
     /**
      * @protected
      * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.

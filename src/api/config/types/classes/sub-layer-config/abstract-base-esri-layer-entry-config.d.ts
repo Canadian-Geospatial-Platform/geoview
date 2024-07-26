@@ -8,4 +8,10 @@ export declare abstract class AbstractBaseEsriLayerEntryConfig extends AbstractB
      * (renderer, initial settings, fields and aliases).
      */
     fetchLayerMetadata(): Promise<void>;
+    /** ***************************************************************************************************************************
+     * This method is used to parse the layer metadata and extract the style and source information.
+     * @protected
+     * @abstract
+     */
+    protected abstract parseLayerMetadata(): void;
 }

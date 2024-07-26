@@ -6,6 +6,7 @@ import { Extent } from 'ol/extent';
 import XYZ from 'ol/source/XYZ';
 import TileLayer from 'ol/layer/Tile';
 import { Polygon } from 'ol/geom';
+import { Coordinate } from 'ol/coordinate';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -71,12 +72,6 @@ export declare function wktToGeometry(wkt: string, readOptions: ReadOptions): Ge
  * @returns {Geometry | null} the Geometry representation of the geojson
  */
 export declare function geojsonToGeometry(geojson: string, readOptions: ReadOptions): Geometry | null;
-/**
- * Gets the area of a given geometry
- * @param {Geometry} geometry the geometry to calculate the area
- * @returns the area of the given geometry
- */
-export declare function getArea(geometry: Geometry): number;
 /**
  * Default drawing style for GeoView
  * @returns an Open Layers styling for drawing on a map
@@ -183,3 +178,26 @@ export declare function validateExtent(extent: Extent, code?: string): Extent;
  * @returns {Extent | undefined} The validated extent if it was defined.
  */
 export declare function validateExtentWhenDefined(extent: Extent | undefined, code?: string): Extent | undefined;
+/**
+ * Gets the area of a given geometry
+ * @param {Geometry} geometry the geometry to calculate the area
+ * @returns the area of the given geometry
+ */
+export declare function getArea(geometry: Geometry): number;
+/**
+ * Gets the length of a given geometry
+ * @param {Geometry} geometry the geometry to calculate the length
+ * @returns the length of the given geometry
+ */
+export declare function getLength(geometry: Geometry): number;
+/**
+ * Calculate distance along a path define by array of Coordinates
+ * @param  {Coordinate[]} coordinates - Array of corrdinates
+ * @param {string} inProj - Input projection (EPSG:4326, EPSG:3978, ESPG:3857)
+ * @param {string} outProj - Output projection (EPSG:3978, ESPG:3857)
+ * @returns { total: number; sections: number[] } - The total distance in kilometers and distance for each section
+ */
+export declare function calculateDistance(coordinates: Coordinate[], inProj: string, outProj: string): {
+    total: number;
+    sections: number[];
+};

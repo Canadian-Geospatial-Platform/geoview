@@ -22,7 +22,7 @@ export declare class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEn
      * @returns {string} The schemaPath associated to the sublayer.
      * @protected
      */
-    protected get schemaPath(): string;
+    protected getSchemaPath(): string;
     /**
      * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
      *
@@ -30,4 +30,9 @@ export declare class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEn
      * @protected
      */
     protected getEntryType(): TypeLayerEntryType;
+    /** ***************************************************************************************************************************
+     * This method is used to parse the layer metadata and extract the style and source information.
+     * @protected
+     */
+    protected parseLayerMetadata(): void;
 }

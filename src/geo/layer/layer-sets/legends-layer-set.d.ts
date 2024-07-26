@@ -3,7 +3,7 @@ import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import { TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractGeoViewLayer } from '../geoview-layers/abstract-geoview-layers';
-import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
+import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
 import { LayerApi } from '../layer';
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -28,11 +28,11 @@ export declare class LegendsLayerSet extends AbstractLayerSet {
     protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean;
     /**
      * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
-     * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
+     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
      * @param {string} layerPath - The layer path
      * @returns {boolean} True when the layer should be registered to this legends-layer-set
      */
-    protected onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean;
+    protected onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean;
     /**
      * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
      * @param {ConfigBaseClass} layerConfig - The layer config
@@ -40,9 +40,9 @@ export declare class LegendsLayerSet extends AbstractLayerSet {
     protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void;
     /**
      * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
-     * @param {AbstractGeoViewLayer} layer - The layer
+     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
      */
-    protected onRegisterLayer(layer: AbstractGeoViewLayer, layerPath: string): void;
+    protected onRegisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): void;
     /**
      * Overrides the behavior to apply when a layer status changed for a legends-layer-set.
      * @param {ConfigBaseClass} layerConfig - The layer config

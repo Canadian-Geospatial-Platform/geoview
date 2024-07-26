@@ -254,14 +254,6 @@ export declare class MapViewer {
      */
     zoomToLngLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void>;
     /**
-     * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
-     * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
-     *
-     * @param {Extent} bounds - Bounding box to zoom to
-     * @param {string | number | undefined} projectionCode - Optional projection code used by the bounds.
-     */
-    fitBounds(bounds?: Extent, projectionCode?: string | number | undefined): void;
-    /**
      * Initializes selection interactions
      */
     initSelectInteractions(): Select;
@@ -291,11 +283,11 @@ export declare class MapViewer {
      */
     initSnapInteractions(geomGroupKey: string): Snap;
     /**
-     * Check if north is visible. This is not a perfect solution and is more a work around
+     * Gets if north is visible. This is not a perfect solution and is more a work around
      *
      * @returns {boolean} true if visible, false otherwise
      */
-    checkNorth(): boolean;
+    getNorthVisibility(): boolean;
     /**
      * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
      * https://www.movable-type.co.uk/scripts/latlong.html

@@ -1,5 +1,4 @@
 import { TypeJsonObject } from '@config/types/config-types';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { TypeDisplayLanguage, TypeStyleGeometry } from '@config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
@@ -24,15 +23,6 @@ export declare abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeo
      * @protected
      */
     protected createLayerTree(): EntryConfigBaseClass[];
-    /** ***************************************************************************************************************************
-     * This method is used to process the metadata of the sub-layers. It will fill the empty properties of the configuration
-     * (renderer, initial settings, fields and aliases).
-     *
-     * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
-     *
-     * @returns {Promise<TypeJsonObject>} A promise that resolve when the JSON metadata are read..
-     */
-    fetchEsriLayerMetadata(subLayerConfig: AbstractBaseLayerEntryConfig): Promise<TypeJsonObject>;
     /**
      * Converts an esri geometry type string to a TypeStyleGeometry.
      * @param {string} esriGeometryType - The esri geometry type to convert

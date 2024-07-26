@@ -1,27 +1,27 @@
-import BaseLayer, { Options } from 'ol/layer/Base';
+import { Options } from 'ol/layer/Base';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
+import { Layer } from 'ol/layer';
 import Source from 'ol/source/Source';
-import { TypeLocalizedString } from '@config/types/map-schema-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeStyleConfig, TypeLayerStatusSimplified, TypeLayerStatus, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType } from '@/geo/map/map-schema-types';
+import { TypeStyleConfig, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType } from '@/geo/map/map-schema-types';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { AbstractBaseLayer } from './abstract-base-layer';
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
-export declare abstract class AbstractGVLayer {
+export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     #private;
     static DEFAULT_HIT_TOLERANCE: number;
     hitTolerance: number;
-    protected olLayer: BaseLayer;
     /**
      * Constructs a GeoView layer to manage an OpenLayer layer.
      * @param {string} mapId - The map id
@@ -35,32 +35,20 @@ export declare abstract class AbstractGVLayer {
      */
     abstract getBounds(layerPath: string): Extent | undefined;
     /**
-     * Overridable function that gets the extent of an array of features.
-     * @param {string} layerPath - The layer path
-     * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
-     * @returns {Promise<Extent | undefined>} The extent of the features, if available
-     */
-    getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined>;
-    /**
      * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
      * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
      */
     init(): void;
-    /**
-     * Gets the Map Id
-     * @returns The Map id
-     */
-    getMapId(): string;
     /**
      * Gets the MapViewer where the layer resides
      * @returns {MapViewer} The MapViewer
      */
     getMapViewer(): MapViewer;
     /**
-     * Gets the OpenLayers Layer
-     * @returns The OpenLayers Layer
+     * Overrides the get of the OpenLayers Layer
+     * @returns {Layer} The OpenLayers Layer
      */
-    getOLLayer(): BaseLayer;
+    getOLLayer(): Layer;
     /**
      * Gets the OpenLayers Layer Source
      * @returns The OpenLayers Layer Source
@@ -71,41 +59,6 @@ export declare abstract class AbstractGVLayer {
      * @returns {AbstractBaseLayerEntryConfig} The layer configuration
      */
     getLayerConfig(): AbstractBaseLayerEntryConfig;
-    /**
-     * Gets the layer path associated with the layer.
-     * @returns {string} The layer path
-     */
-    getLayerPath(): string;
-    /**
-     * Gets the Geoview layer id.
-     * @returns {string} The geoview layer id
-     */
-    getGeoviewLayerId(): string;
-    /**
-     * Gets the geoview layer name.
-     * @returns {AbstractBaseLayerEntryConfig} The layer name
-     */
-    getGeoviewLayerName(): TypeLocalizedString | undefined;
-    /**
-     * Gets the layer status
-     * @returns The layer status
-     */
-    getLayerStatus(): TypeLayerStatusSimplified;
-    /**
-     * Gets the layer configuration status
-     * @returns The layer status
-     */
-    getLayerConfigStatus(): TypeLayerStatus;
-    /**
-     * Gets the layer name
-     * @returns The layer status
-     */
-    getLayerName(layerPath: string): TypeLocalizedString | undefined;
-    /**
-     * Sets the layer name
-     * @param {TypeLocalizedString | undefined} name - The layer name
-     */
-    setLayerName(layerPath: string, name: TypeLocalizedString | undefined): void;
     /**
      * Gets the layer style
      * @returns The layer style
@@ -205,59 +158,6 @@ export declare abstract class AbstractGVLayer {
      */
     protected getFieldType(fieldName: string): 'string' | 'date' | 'number';
     /**
-     * Returns the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
-     * numbers representing an extent: [minx, miny, maxx, maxy].
-     * The extent is used to clip the data displayed on the map.
-     * @returns {Extent | undefined} The layer extent.
-     */
-    getExtent(): Extent | undefined;
-    /**
-     * Sets the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
-     * numbers representing an extent: [minx, miny, maxx, maxy].
-     * @param {Extent} layerExtent The extent to assign to the layer.
-     */
-    setExtent(layerExtent: Extent): void;
-    /**
-     * Gets the opacity of the layer (between 0 and 1).
-     * @returns {number} The opacity of the layer.
-     */
-    getOpacity(): number;
-    /**
-     * Sets the opacity of the layer (between 0 and 1).
-     * @param {number} layerOpacity The opacity of the layer.
-     */
-    setOpacity(layerOpacity: number): void;
-    /**
-     * Gets the visibility of the layer (true or false).
-     * @returns {boolean} The visibility of the layer.
-     */
-    getVisible(): boolean;
-    /**
-     * Sets the visibility of the layer (true or false).
-     * @param {boolean} layerVisibility The visibility of the layer.
-     */
-    setVisible(layerVisibility: boolean): void;
-    /**
-     * Gets the min zoom of the layer.
-     * @returns {number} The min zoom of the layer.
-     */
-    getMinZoom(): number;
-    /**
-     * Sets the min zoom of the layer.
-     * @param {number} minZoom The min zoom of the layer.
-     */
-    setMinZoom(minZoom: number): void;
-    /**
-     * Gets the max zoom of the layer.
-     * @returns {number} The max zoom of the layer.
-     */
-    getMaxZoom(): number;
-    /**
-     * Sets the max zoom of the layer.
-     * @param {number} maxZoom The max zoom of the layer.
-     */
-    setMaxZoom(maxZoom: number): void;
-    /**
      * Queries the legend.
      * This function raises legend querying and queried events. It calls the overridable getLegend() function.
      * @returns {Promise<TypeLegend | null>} The promise when the legend (or null) will be received
@@ -302,16 +202,6 @@ export declare abstract class AbstractGVLayer {
      */
     protected static initOptionsWithInitialSettings(layerOptions: Options, layerConfig: AbstractBaseLayerEntryConfig): void;
     /**
-     * Registers a layer name changed event handler.
-     * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
-     */
-    onLayerNameChanged(callback: LayerNameChangedDelegate): void;
-    /**
-     * Unregisters a layer name changed event handler.
-     * @param {LayerNameChangedDelegate} callback - The callback to stop being called whenever the event is emitted
-     */
-    offLayerNameChanged(callback: LayerNameChangedDelegate): void;
-    /**
      * Registers a legend querying event handler.
      * @param {LegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
      */
@@ -332,16 +222,6 @@ export declare abstract class AbstractGVLayer {
      */
     offLegendQueried(callback: LegendQueriedDelegate): void;
     /**
-     * Registers a visible changed event handler.
-     * @param {VisibleChangedDelegate} callback The callback to be executed whenever the event is emitted
-     */
-    onVisibleChanged(callback: VisibleChangedDelegate): void;
-    /**
-     * Unregisters a visible changed event handler.
-     * @param {VisibleChangedDelegate} callback The callback to stop being called whenever the event is emitted
-     */
-    offVisibleChanged(callback: VisibleChangedDelegate): void;
-    /**
      * Emits filter applied event.
      * @param {FilterAppliedEvent} event - The event to emit
      * @private
@@ -357,16 +237,6 @@ export declare abstract class AbstractGVLayer {
      * @param {FilterAppliedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerFilterApplied(callback: LayerFilterAppliedDelegate): void;
-    /**
-     * Registers an opacity changed event handler.
-     * @param {LayerOpacityChangedDelegate} callback - The callback to be executed whenever the event is emitted
-     */
-    onLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void;
-    /**
-     * Unregisters an opacity changed event handler.
-     * @param {LayerOpacityChangedDelegate} callback - The callback to stop being called whenever the event is emitted
-     */
-    offLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void;
     /**
      * Registers a layer style changed event handler.
      * @param {LayerStyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
@@ -388,17 +258,6 @@ export declare abstract class AbstractGVLayer {
      */
     offIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void;
 }
-/**
- * Define an event for the delegate.
- */
-export type LayerNameChangedEvent = {
-    layerName?: TypeLocalizedString;
-    layerPath: string;
-};
-/**
- * Define a delegate for the event handler function signature.
- */
-type LayerNameChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerNameChangedEvent, void>;
 /**
  * Define a delegate for the event handler function signature
  */
@@ -429,17 +288,6 @@ export type LegendQueriedEvent = {
  */
 type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
 /**
- * Define an event for the delegate
- */
-export type VisibleChangedEvent = {
-    layerPath: string;
-    visible: boolean;
-};
-/**
- * Define a delegate for the event handler function signature
- */
-type VisibleChangedDelegate = EventDelegateBase<AbstractGVLayer, VisibleChangedEvent, void>;
-/**
  * Define a delegate for the event handler function signature
  */
 type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
@@ -449,17 +297,6 @@ type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilter
 export type LayerFilterAppliedEvent = {
     layerPath: string;
     filter: string;
-};
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerOpacityChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerOpacityChangedEvent, void>;
-/**
- * Define an event for the delegate
- */
-export type LayerOpacityChangedEvent = {
-    layerPath: string;
-    opacity: number;
 };
 /**
  * Define a delegate for the event handler function signature

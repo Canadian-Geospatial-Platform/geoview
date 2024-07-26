@@ -1,11 +1,12 @@
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { QueryType, TypeFeatureInfoEntry, TypeLayerStatus, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { LayerApi } from '@/geo/layer/layer';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
-import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
 /**
  * A class to hold a set of layers associated with a value of any type.
  * Layers are added/removed to the layer-set via the registerOrUnregisterLayer function.
@@ -54,22 +55,22 @@ export declare abstract class AbstractLayerSet {
     protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void;
     /**
      * Registers the layer in the layer-set.
-     * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
+     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
      */
-    registerLayer(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): Promise<void>;
+    registerLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): Promise<void>;
     /**
      * An overridable registration condition function for a layer-set to check if the registration
      * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
-     * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
+     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
      * @returns {boolean} True if the layer should be registered, false otherwise
      */
-    protected onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean;
+    protected onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean;
     /**
      * An overridable registration function for a layer-set that the registration process will use to
      * create a new entry in the layer set for a specific geoview layer and layer path.
-     * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer config
+     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer config
      */
-    protected onRegisterLayer(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): void;
+    protected onRegisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): void;
     /**
      * Unregisters the layer config and layer from the layer-set.
      * @param {string} layerPath - The layer path
@@ -84,9 +85,9 @@ export declare abstract class AbstractLayerSet {
     /**
      * An overridable unregistration function for a layer-set that the registration process will use to
      * unregister a specific geoview layer.
-     * @param {AbstractGeoViewLayer | AbstractGVLayer | undefined} layer - The layer
+     * @param {AbstractGeoViewLayer | AbstractBaseLayer | undefined} layer - The layer
      */
-    protected onUnregisterLayer(layer: AbstractGeoViewLayer | AbstractGVLayer | undefined): void;
+    protected onUnregisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer | undefined): void;
     /**
      * An overridable function for a layer-set to process a layer status changed event.
      * @param {ConfigBaseClass} layerConfig - The layer config
@@ -115,22 +116,22 @@ export declare abstract class AbstractLayerSet {
     protected static queryLayerFeatures(data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry, geoviewLayer: AbstractGeoViewLayer | AbstractGVLayer, queryType: QueryType, location: TypeLocation): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
      * Checks if the layer is of queryable type based on its class definition
-     * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
+     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
      * @returns True if the layer is of queryable type
      */
-    protected static isQueryableType(layer: AbstractGeoViewLayer | AbstractGVLayer): boolean;
+    protected static isQueryableType(layer: AbstractGeoViewLayer | AbstractBaseLayer): boolean;
     /**
      * Checks if the layer config source is queryable.
-     * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
+     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
      * @returns {boolean} True if the source is queryable or undefined
      */
-    protected static isSourceQueryable(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean;
+    protected static isSourceQueryable(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean;
     /**
      * Checks if the layer config state is queryable.
-     * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
+     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
      * @returns {boolean} True if the state is queryable or undefined
      */
-    protected static isStateQueryable(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean;
+    protected static isStateQueryable(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean;
     /**
      * Registers a callback to be executed whenever the layer set is updated.
      * @param {LayerSetUpdatedDelegate} callback - The callback function

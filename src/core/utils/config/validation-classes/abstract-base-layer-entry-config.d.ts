@@ -25,15 +25,25 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     protected constructor(layerConfig: AbstractBaseLayerEntryConfig);
     /**
+     * Gets the service metadata that is associated to the service.
+     * @returns {TypeJsonObject} The service metadata.
+     */
+    getServiceMetadata(): TypeJsonObject | undefined;
+    /**
+     * Sets the service metadata for the layer.
+     * @param {TypeJsonObject} metadata - The service metadata to set
+     */
+    setServiceMetadata(metadata: TypeJsonObject): void;
+    /**
      * Gets the metadata that is associated to the layer.
      * @returns {TypeJsonObject} The layer metadata.
      */
-    getMetadata(): TypeJsonObject | undefined;
+    getLayerMetadata(): TypeJsonObject | undefined;
     /**
      * Sets the layer metadata for the layer.
      * @param {TypeJsonObject} layerMetadata - The layer metadata to set
      */
-    setMetadata(layerMetadata: TypeJsonObject): void;
+    setLayerMetadata(layerMetadata: TypeJsonObject): void;
     /**
      * The TypeStyleGeometries associated with the style as could be read from the layer config metadata.
      * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry
