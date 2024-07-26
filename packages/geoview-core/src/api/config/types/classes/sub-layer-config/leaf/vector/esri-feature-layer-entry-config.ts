@@ -1,0 +1,101 @@
+import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
+import { Cast } from '@config/types/config-types';
+import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
+import {
+  TypeStyleConfig,
+  TypeLayerEntryType,
+  TypeSourceEsriFeatureInitialConfig,
+  TypeVectorSourceFormats,
+  TypeValidMapProjectionCodes,
+} from '@config/types/map-schema-types';
+import { EsriBaseRenderer, createStyleUsingEsriRenderer } from '@/api/config/esri-renderer-parser';
+
+// ========================
+// #region CLASS DEFINITION
+/**
+ * The ESRI feature geoview sublayer class.
+ */
+export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfig {
+  // =========================
+  // #region PUBLIC PROPERTIES
+  /** Source settings to apply to the GeoView feature layer source at creation time. */
+  declare source: TypeSourceEsriFeatureInitialConfig;
+
+  /** Style to apply to the feature layer. */
+  style?: TypeStyleConfig;
+  // #endregion PUBLIC PROPERTIES
+
+  // ===============
+  // #region METHODS
+  /*
+   * Methods are listed in the following order: abstract, override, private, protected and public.
+   */
+  // ==========================
+  // #region OVERRIDE
+  /**
+   * @protected @override
+   * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
+   * used to do its validation.
+   *
+   * @returns {string} The schemaPath associated to the sublayer.
+   */
+  protected override getSchemaPath(): string {
+    return CV_CONST_LEAF_LAYER_SCHEMA_PATH.ESRI_FEATURE;
+  }
+
+  /**
+   * @protected @override
+   * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
+   *
+   * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
+   */
+  protected override getEntryType(): TypeLayerEntryType {
+    return CV_CONST_SUB_LAYER_TYPES.VECTOR;
+  }
+
+  /** ***************************************************************************************************************************
+   * @protected @override
+   * This method is used to parse the layer metadata and extract the style and source information.
+   */
+  protected override parseLayerMetadata(): void {
+    super.parseLayerMetadata();
+
+    const layerMetadata = this.getLayerMetadata();
+
+    this.source = {
+      maxRecordCount: (layerMetadata?.maxRecordCount || 0) as number,
+      // layerFilter?: is optional,
+      featureInfo: this.createFeatureInfoUsingMetadata(),
+      format: 'EsriJSON' as TypeVectorSourceFormats, // The only possible value
+      strategy: 'all', // default value
+      projection: layerMetadata.sourceSpatialReference.wkid as TypeValidMapProjectionCodes,
+    };
+
+    const renderer = Cast<EsriBaseRenderer>(layerMetadata.drawingInfo?.renderer);
+    if (renderer) this.style = createStyleUsingEsriRenderer(renderer);
+
+    this.processTemporalDimension(layerMetadata.timeInfo);
+  }
+
+  /**
+   * @override
+   * Apply default values. The default values will be overwritten by the values in the metadata when they are analyzed.
+   * The resulting config will then be overwritten by the values provided in the user config.
+   */
+  override applyDefaultValues(): void {
+    super.applyDefaultValues();
+    this.source = {
+      maxRecordCount: 0,
+      format: 'EsriJSON',
+      projection: 3978,
+      featureInfo: {
+        queryable: false,
+        nameField: '',
+        outfields: [],
+      },
+    };
+  }
+  // #endregion OVERRIDE
+  // #endregion METHODS
+  // #endregion CLASS DEFINITION
+}

@@ -1,16 +1,22 @@
 import { toJsonObject, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { TypeDisplayLanguage, TypeStyleGeometry } from '@config/types/map-schema-types';
+import { EsriGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/esri-group-layer-config';
 import { layerEntryIsAbstractBaseLayerEntryConfig, layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
 import { ConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 import { getXMLHttpRequest } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
-/** The ESRI dynamic geoview layer class. */
+// ========================
+// #region CLASS DEFINITION
+/**
+ * The ESRI dynamic geoview layer class.
+ */
 export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLayerConfig {
+  // ===================
+  // #region CONSTRUCTOR
   /**
    * The class constructor.
    *
@@ -36,22 +42,18 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
       this.listOfLayerEntryConfig = [this.createLeafNode(toJsonObject({ layerId: lastPathItem }), language, this)!];
     }
   }
+  // #endregion CONSTRUCTOR
 
-  /**
-   * Sets the error flag for all layers in the provided list of layer entries.
-   *
-   * @param {EntryConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries.
-   * @private
+  // ===============
+  // #region METHODS
+  /*
+   * Methods are listed in the following order: abstract, override, private, protected and public.
    */
-  #setErrorDetectedFlagForAllLayers(listOfLayerEntryConfig: EntryConfigBaseClass[]): void {
-    listOfLayerEntryConfig.forEach((layerEntry) => {
-      layerEntry.setErrorDetectedFlag();
-      if (layerEntryIsGroupLayer(layerEntry)) this.#setErrorDetectedFlagForAllLayers(layerEntry.listOfLayerEntryConfig);
-    });
-  }
-
+  // ================
+  // #region OVERRIDE
   /**
    * Get the service metadata from the metadataAccessPath and store it in a protected property of the geoview layer.
+   * @override
    */
   override async fetchServiceMetadata(): Promise<void> {
     const metadataString = await getXMLHttpRequest(`${this.metadataAccessPath}?f=json`);
@@ -67,33 +69,12 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
       if ('error' in jsonMetadata) {
         // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
         this.setErrorDetectedFlag();
-        this.#setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
+        this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
         logger.logError(`Error detected while reading ESRI metadata for geoview layer ${this.geoviewLayerId}.`, jsonMetadata.error);
       } else {
         this.setServiceMetadata(jsonMetadata);
 
-        // Define a recursive function to process the listOfLayerEntryConfig. The goal is to process each valid sublayer, searching the
-        // service's metadata to verify the layer's existence and determine whether it is a layer group, in order to determine the node's
-        // final structure. If it is a layer group, it will be created.
-        const processListOfLayerEntryConfig = (listOfLayerEntryConfig: EntryConfigBaseClass[]): void => {
-          listOfLayerEntryConfig.forEach((subLayer, i) => {
-            if (!subLayer.getErrorDetectedFlag()) {
-              if (layerEntryIsGroupLayer(subLayer)) processListOfLayerEntryConfig(subLayer.listOfLayerEntryConfig);
-              else {
-                try {
-                  // eslint-disable-next-line no-param-reassign
-                  listOfLayerEntryConfig[i] = this.#createLayerEntryNode(parseInt(subLayer.layerId, 10), subLayer.getParentNode());
-                } catch (error) {
-                  listOfLayerEntryConfig[i].setErrorDetectedFlag();
-                  logger.logError((error as ConfigError).message, error);
-                }
-              }
-            }
-          });
-        };
-
-        // Call the function defined above.
-        processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+        this.listOfLayerEntryConfig = this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
         // When a list of layer entries is specified, the layer tree is the same as the resulting listOfLayerEntryConfig of the geoview instance.
         // Otherwise, a layer tree is built using all the layers that compose the metadata.
         this.setMetadataLayerTree(this.listOfLayerEntryConfig.length ? this.listOfLayerEntryConfig : this.createLayerTree());
@@ -101,38 +82,41 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
       }
     } else {
       this.setErrorDetectedFlag();
-      this.#setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
+      this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
       logger.logError(`Error detected while reading ESRI metadata for geoview layer ${this.geoviewLayerId}. An empty object was returned.`);
     }
   }
+  // #endregion OVERRIDE
+  // #region PRIVATE
 
   /**
-   * Create the layer tree using the service metadata.
+   * A recursive method to process the listOfLayerEntryConfig. The goal is to process each valid sublayer, searching the service's
+   * metadata to verify the layer's existence and whether it is a layer group, in order to determine the node's final structure.
+   * If it is a layer group, it will be created.
    *
-   * @returns {TypeJsonObject[]} The layer tree created from the metadata.
-   * @protected
+   * @param {EntryConfigBaseClass[]} listOfLayerEntryConfig the list of sublayers to process.
+   *
+   * @returns {EntryConfigBaseClass[]} the new list of sublayer configurations.
+   * @private
    */
-  protected createLayerTree(): EntryConfigBaseClass[] {
-    const layers = this.getServiceMetadata().layers as TypeJsonArray;
-    if (layers.length > 1) {
-      const groupName = this.getServiceMetadata().mapName as string;
-      return [new GroupLayerEntryConfig(this.#createGroupNode(-1, groupName), this.getLanguage(), this)];
-    }
-
-    if (layers.length === 1)
-      return [
-        this.createLeafNode(
-          toJsonObject({
-            layerId: layers[0].id.toString(),
-            layerName: { en: layers[0].name, fr: layers[0].name },
-            geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layers[0].geometryType as string),
-          }),
-          this.getLanguage(),
-          this
-        )!,
-      ];
-
-    return [];
+  #processListOfLayerEntryConfig(listOfLayerEntryConfig: EntryConfigBaseClass[]): EntryConfigBaseClass[] {
+    return listOfLayerEntryConfig.map((subLayer) => {
+      if (subLayer.getErrorDetectedFlag()) return subLayer;
+      if (layerEntryIsGroupLayer(subLayer)) {
+        // The next line replace the listOfLayerEntryConfig stored in the subLayer parameter
+        // Since subLayer is the function parameter, we must disable the eslint no-param-reassign
+        // eslint-disable-next-line no-param-reassign
+        subLayer.listOfLayerEntryConfig = this.#processListOfLayerEntryConfig(subLayer.listOfLayerEntryConfig);
+        return subLayer;
+      }
+      try {
+        return this.#createLayerEntryNode(parseInt(subLayer.layerId, 10), subLayer.getParentNode());
+      } catch (error) {
+        subLayer.setErrorDetectedFlag();
+        logger.logError((error as ConfigError).message, error);
+        return subLayer;
+      }
+    });
   }
 
   /**
@@ -141,9 +125,13 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
    * @param {number} layerId The layer id to use for the subLayer creation.
    *
    * @returns {EntryConfigBaseClass[]} The subLayer created from the metadata.
+   * @private
    */
   #createLayerEntryNode(layerId: number, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass {
+    // Extract the layer definitions from the metadata.
     const layers = this.getServiceMetadata().layers as TypeJsonObject[];
+
+    // If we cannot find the layerId in the layer definitions, throw an error.
     const layerFound = layerId !== undefined && layers.find((layer) => layer.id === layerId);
     if (!layerFound) {
       throw new GeoviewLayerInvalidParameterError('LayerIdNotFound', [layerId?.toString()]);
@@ -161,7 +149,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
 
     // Create the layer group from the array of layers
     const jsonConfig = this.#createGroupNode(parseInt(layerFound.id as string, 10), layerFound?.name as string);
-    return new GroupLayerEntryConfig(jsonConfig, this.getLanguage(), this, parentNode);
+    return this.createGroupNode(jsonConfig, this.getLanguage(), this, parentNode)!;
   }
 
   /**
@@ -193,7 +181,6 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
 
     return toJsonObject({
       layerId: parentId === -1 ? groupName : `${parentId}`,
-      initialSettings: this.initialSettings,
       layerName: { en: groupName, fr: groupName },
       isLayerGroup: true,
       listOfLayerEntryConfig,
@@ -212,6 +199,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
     const listOfLayerMetadata: Promise<TypeJsonObject | void>[] = [];
     listOfLayerEntryConfig.forEach((subLayerConfig) => {
       if (layerEntryIsGroupLayer(subLayerConfig)) {
+        listOfLayerMetadata.push(subLayerConfig.fetchLayerMetadata());
         listOfLayerMetadata.push(this.#fetchListOfLayerMetadata(subLayerConfig.listOfLayerEntryConfig));
       } else if (layerEntryIsAbstractBaseLayerEntryConfig(subLayerConfig)) {
         listOfLayerMetadata.push(subLayerConfig.fetchLayerMetadata());
@@ -219,12 +207,16 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
     });
 
     await Promise.allSettled(listOfLayerMetadata);
+    logger.logDebug(listOfLayerEntryConfig);
   }
 
+  // #endregion PRIVATE
+  // #region PROTECTED
   /**
    * Converts an esri geometry type string to a TypeStyleGeometry.
    * @param {string} esriGeometryType - The esri geometry type to convert
    * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
+   * @protected @static
    */
   protected static convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
     switch (esriGeometryType) {
@@ -243,4 +235,36 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         throw new Error(`Unsupported geometry type: ${esriGeometryType}`);
     }
   }
+
+  /**
+   * Create the layer tree using the service metadata.
+   *
+   * @returns {TypeJsonObject[]} The layer tree created from the metadata.
+   * @protected
+   */
+  protected createLayerTree(): EntryConfigBaseClass[] {
+    const layers = this.getServiceMetadata().layers as TypeJsonArray;
+    if (layers.length > 1) {
+      const groupName = this.getServiceMetadata().mapName as string;
+      return [new EsriGroupLayerConfig(this.#createGroupNode(-1, groupName), this.getLanguage(), this)];
+    }
+
+    if (layers.length === 1)
+      return [
+        this.createLeafNode(
+          toJsonObject({
+            layerId: layers[0].id.toString(),
+            layerName: { en: layers[0].name, fr: layers[0].name },
+            geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layers[0].geometryType as string),
+          }),
+          this.getLanguage(),
+          this
+        )!,
+      ];
+
+    return [];
+  }
+  // #endregion PROTECTED
+  // #endregion METHODS
+  // #endregion CLASS DEFINITION
 }

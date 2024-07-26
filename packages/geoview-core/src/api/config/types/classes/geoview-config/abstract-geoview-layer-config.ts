@@ -1,25 +1,30 @@
-import defaultsDeep from 'lodash/defaultsDeep';
+import merge from 'lodash/merge';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { Cast, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
-import { TypeGeoviewLayerType, TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeDisplayLanguage } from '@config/types/map-schema-types';
 import { isvalidComparedToInputSchema, normalizeLocalizedString } from '@config/utils';
-import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@config/types/config-constants';
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
+import { EsriGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/esri-group-layer-config';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 import { generateId } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 
+// ========================
+// #region CLASS DEFINITION
 /**
  *  Base class for the definition of a Geoview layer configuration.
  */
 export abstract class AbstractGeoviewLayerConfig {
+  // ==========================
+  // #region PRIVATE PROPERTIES
+
   /** The language used when interacting with this instance of MapFeatureConfig. */
   #language: TypeDisplayLanguage;
 
   /** Cloned copy of the configuration as provided by the user when the constructor was called. */
-  #geoviewLayerConfig: TypeJsonObject;
+  #userGeoviewLayerConfig: TypeJsonObject;
 
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetectedFlag = false;
@@ -29,6 +34,10 @@ export abstract class AbstractGeoviewLayerConfig {
 
   /** The metadata layer tree definition */
   #metadataLayerTree: EntryConfigBaseClass[] = [];
+  // #endregion PRIVATE PROPERTIES
+
+  // =========================
+  // #region PUBLIC PROPERTIES
 
   /** The GeoView layer identifier. */
   geoviewLayerId: string;
@@ -58,15 +67,9 @@ export abstract class AbstractGeoviewLayerConfig {
   listOfLayerEntryConfig: EntryConfigBaseClass[] = [];
 
   // GV NOTE START ****************************************************************************************************
-  // The following attributes use the 'definite assignment assertion' (! after the property name) to indicate that
+  // The following attribute uses the 'definite assignment assertion' (! after the property name) to indicate that
   // it will not be null or undefined when used. It is not initialized by the constructor. I'm writing it here, simply,
-  // explicitly, to make it clear that this AbstractGeoviewLayerConfig class owns (and expects) these attributes.
-
-  // The initialSettings property is initialized by the metadata processing methods or ultimately by the
-  // applyDefaultValueToUndefinedFields method executed following metadata processing.
-
-  /** Initial settings to apply to the GeoView layer at creation time. */
-  initialSettings!: TypeLayerInitialSettings;
+  // explicitly, to make it clear that this AbstractGeoviewLayerConfig class owns (and expects) this attribute.
 
   // The geoviewLayerType property is initialized by the children classes. Each child class knows the value to
   // assign to this property.
@@ -75,146 +78,96 @@ export abstract class AbstractGeoviewLayerConfig {
   geoviewLayerType!: TypeGeoviewLayerType;
 
   // GV NOTE END *****************************************************************************************************
+  // #endregion PUBLIC PROPERTIES
+
+  // ===================
+  // #region CONSTRUCTOR
 
   /**
    * The class constructor saves a cloned copy of the Geoview configuration supplied by the user and runs a validation on it to
    * find any errors that may have been made. It only initalizes the properties needed to query the service and layer metadata.
    *
-   * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
+   * @param {TypeJsonObject} userGeoviewLayerConfig The layer configuration that the user has supplied for instantiation.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
    */
-  constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
+  constructor(userGeoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
     // Keep a copy of the configuration. It will be used later in the execution flow to overwrite values obtained from the metadata.
-    this.#geoviewLayerConfig = cloneDeep(geoviewLayerConfig);
-    if (!isvalidComparedToInputSchema(this.getGeoviewLayerSchema(), this.#geoviewLayerConfig)) this.setErrorDetectedFlag();
+    this.#userGeoviewLayerConfig = cloneDeep(userGeoviewLayerConfig);
+    if (!isvalidComparedToInputSchema(this.getGeoviewLayerSchema(), this.#userGeoviewLayerConfig)) this.setErrorDetectedFlag();
 
     this.#language = language;
 
     // GV: GeoCore layers are processed by the configApi. GeoView layer instances do not recognize them as a valid geoView layer Type.
     // GV: However, whe have the isGeocore flag to keep track of geocore layers that were converted to geoview layers.
-    this.isGeocore = (geoviewLayerConfig.isGeocore as boolean) || false;
-    if (this.isGeocore) this.geoviewLayerName = geoviewLayerConfig.geoviewLayerName[this.#language] as string;
-    this.geoviewLayerId = (geoviewLayerConfig.geoviewLayerId || generateId()) as string;
-    this.metadataAccessPath = normalizeLocalizedString(geoviewLayerConfig.metadataAccessPath)![this.#language]!;
+    this.isGeocore = (userGeoviewLayerConfig.isGeocore as boolean) || false;
+    if (this.isGeocore) this.geoviewLayerName = userGeoviewLayerConfig.geoviewLayerName[this.#language] as string;
+    this.geoviewLayerId = (userGeoviewLayerConfig.geoviewLayerId || generateId()) as string;
+    this.metadataAccessPath = normalizeLocalizedString(userGeoviewLayerConfig.metadataAccessPath)![this.#language]!;
 
     // Validate the structure of the sublayer list and correct it if needed.
-    let jsonListOfLayerEntryConfig: TypeJsonArray;
-    switch ((geoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)?.length) {
+    switch ((this.#userGeoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)?.length) {
       case undefined:
       case 0:
-        jsonListOfLayerEntryConfig = [];
+        (this.#userGeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray) = [];
         break;
       case 1:
-        // The top layer is a single leaf node.
-        jsonListOfLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray;
+        // Do nothing, the top layer is a single leaf node and the structure is correct.
         break;
       default:
         // We create a group because the node at the top of the layer tree cannot be an array.
-        jsonListOfLayerEntryConfig = [
+        (this.#userGeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray) = [
           Cast<TypeJsonObject>({
-            layerId: geoviewLayerConfig.geoviewLayerId,
-            layerName: { ...(geoviewLayerConfig.geoviewLayerName as object) },
+            layerId: this.#userGeoviewLayerConfig.geoviewLayerId,
+            layerName: { ...(this.#userGeoviewLayerConfig.geoviewLayerName as object) },
             isLayerGroup: true,
-            listOfLayerEntryConfig: geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray,
+            listOfLayerEntryConfig: this.#userGeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray,
           }),
         ];
         break;
     }
 
     // Instanciate the sublayer list.
-    this.listOfLayerEntryConfig = jsonListOfLayerEntryConfig
+    this.listOfLayerEntryConfig = (this.#userGeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)
       ?.map((subLayerConfig) => {
-        if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, language, this);
+        if (layerEntryIsGroupLayer(subLayerConfig)) return new EsriGroupLayerConfig(subLayerConfig, language, this);
         return this.createLeafNode(subLayerConfig, language, this);
       })
       // When a sublayer cannot be created, the value returned is undefined. These values will be filtered.
       ?.filter((subLayerConfig) => {
         return subLayerConfig;
       }) as EntryConfigBaseClass[];
+
+    // Default values are assigned first, then replaced by metadata values and finally by user configuration
+    // if they have new values for these properties.
+    this.applyDefaultValues();
   }
+  // #endregion CONSTRUCTOR
 
-  /**
-   * Apply default value to undefined fields.
+  // ===============
+  // #region METHODS
+  /*
+   * Methods are listed in the following order: abstract, override, private, protected and public.
    */
-  applyDefaultValueToUndefinedFields(): void {
-    this.serviceDateFormat = this.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ';
-    this.externalDateFormat = this.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ';
-    this.isTimeAware = this.isTimeAware !== undefined ? this.isTimeAware : true;
-
-    this.initialSettings = defaultsDeep(this.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS);
-    this.listOfLayerEntryConfig.forEach((subLayer) => {
-      subLayer.applyDefaultValueToUndefinedFields(this.initialSettings);
-    });
-  }
-
+  // ================
+  // #region ABSTRACT
   /**
-   * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
-   * The benifit of using a private #metadata is that it is invisible to the schema validation and JSON serialization.
-   * @abstract
-   */
-  abstract fetchServiceMetadata(): Promise<void>;
-
-  /**
-   * The setter method that sets the metadata private property. The benifit of using a setter/getter with a
-   * private #metadata is that it is invisible to the schema validation and JSON serialization.
-   *
-   * @param {TypeJsonObject} metadata The GeoView service metadata.
-   */
-  setServiceMetadata(metadata: TypeJsonObject): void {
-    this.#serviceMetadata = metadata;
-  }
-
-  /**
-   * The getter method that returns the serviceMetadata private property. The benifit of using a setter/getter with a
-   * private #serviceMetadata is that it is invisible to the schema validation and JSON serialization.
-   *
-   * @returns {TypeJsonObject} The GeoView service metadata.
-   */
-  getServiceMetadata(): TypeJsonObject {
-    return this.#serviceMetadata;
-  }
-
-  /**
-   * The getter method that returns the metadataLayerTree private property. The benifit of using a setter/getter with a
-   * private #metadataLayerTree is that it is invisible to the schema validation and JSON serialization.
-   *
-   * @returns {EntryConfigBaseClass[]} The metadata layer tree.
-   */
-  getMetadataLayerTree(): EntryConfigBaseClass[] {
-    return this.#metadataLayerTree;
-  }
-
-  /**
-   * The setter method that sets the metadataLayerTree private property. The benifit of using a setter/getter with a
-   * private #metadata is that it is invisible to the schema validation and JSON serialization.
-   *
-   * @param {TypeJsonObject} metadataLayerTree The GeoView service metadata.
-   * @protected
-   */
-  protected setMetadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]): void {
-    this.#metadataLayerTree = metadataLayerTree;
-  }
-
-  /**
-   * The getter method that returns the language used to create the geoview layer.
-   *
-   * @returns {TypeDisplayLanguage} The GeoView layer schema associated to the config.
    * @protected @abstract
-   */
-  protected getLanguage(): TypeDisplayLanguage {
-    return this.#language;
-  }
-
-  /**
    * The getter method that returns the geoview layer schema to use for the validation.
    *
    * @returns {string} The GeoView layer schema associated to the config.
-   * @protected @abstract
    */
   protected abstract getGeoviewLayerSchema(): string;
 
   /**
-   * The method used to implement the class factory model that returns the instance of the class based on the sublayer
+   * @abstract
+   * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
+   * The benifit of using a private #metadata is that it is invisible to the schema validation and JSON serialization.
+   */
+  abstract fetchServiceMetadata(): Promise<void>;
+
+  /**
+   * @abstract
+   * The method used to implement the class factory model that returns the instance of the class based on the leaf
    * type needed.
    *
    * @param {TypeJsonObject} layerConfig The sublayer configuration.
@@ -224,7 +177,6 @@ export abstract class AbstractGeoviewLayerConfig {
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
    * @returns {EntryConfigBaseClass | undefined} The sublayer instance or undefined if there is an error.
-   * @abstract
    */
   abstract createLeafNode(
     layerConfig: TypeJsonObject,
@@ -234,10 +186,78 @@ export abstract class AbstractGeoviewLayerConfig {
   ): EntryConfigBaseClass | undefined;
 
   /**
-   * Methode used to set the AbstractGeoviewLayerConfig error flag to true.
+   * @abstract
+   * The method used to implement the class factory model that returns the instance of the class based on the group
+   * type needed.
+   *
+   * @param {TypeJsonObject} layerConfig The sublayer configuration.
+   * @param {TypeLayerInitialSettings | TypeJsonObject} initialSettings The initial settings inherited.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
+   * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
+   * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
+   *
+   * @returns {EntryConfigBaseClass | undefined} The sublayer instance or undefined if there is an error.
    */
-  setErrorDetectedFlag(): void {
-    this.#errorDetectedFlag = true;
+  abstract createGroupNode(
+    layerConfig: TypeJsonObject,
+    language: TypeDisplayLanguage,
+    geoviewConfig: AbstractGeoviewLayerConfig,
+    parentNode?: EntryConfigBaseClass
+  ): EntryConfigBaseClass | undefined;
+  // #endregion ABSTRACT
+
+  // =================
+  // #region PROTECTED
+  /**
+   * @protected
+   * The setter method that sets the metadataLayerTree private property.
+   *
+   * @param {TypeJsonObject} metadataLayerTree The GeoView service metadata.
+   */
+  protected setMetadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]): void {
+    this.#metadataLayerTree = metadataLayerTree;
+  }
+
+  /**
+   * @protected
+   * The getter method that returns the language used to create the geoview layer.
+   *
+   * @returns {TypeDisplayLanguage} The GeoView layer schema associated to the config.
+   */
+  protected getLanguage(): TypeDisplayLanguage {
+    return this.#language;
+  }
+  // #endregion PROTECTED
+
+  // ==============
+  // #region PUBLIC
+  // GV: The benifit of using a setter/getter with a private #property is that it is invisible to the schema
+  // GV: validation and JSON serialization.
+  /**
+   * The getter method that returns the serviceMetadata private property.
+   *
+   * @returns {TypeJsonObject} The GeoView service metadata.
+   */
+  getServiceMetadata(): TypeJsonObject {
+    return this.#serviceMetadata;
+  }
+
+  /**
+   * The setter method that sets the metadata private property.
+   *
+   * @param {TypeJsonObject} metadata The GeoView service metadata.
+   */
+  setServiceMetadata(metadata: TypeJsonObject): void {
+    this.#serviceMetadata = metadata;
+  }
+
+  /**
+   * The getter method that returns the metadataLayerTree private property.
+   *
+   * @returns {EntryConfigBaseClass[]} The metadata layer tree.
+   */
+  getMetadataLayerTree(): EntryConfigBaseClass[] {
+    return this.#metadataLayerTree;
   }
 
   /**
@@ -250,8 +270,92 @@ export abstract class AbstractGeoviewLayerConfig {
   }
 
   /**
+   * Methode used to set the AbstractGeoviewLayerConfig error flag to true.
+   */
+  setErrorDetectedFlag(): void {
+    this.#errorDetectedFlag = true;
+  }
+
+  /**
+   * The getter method that returns the sublayer configuration. If the layer path doesn't exists, return undefined.
+   *
+   * @returns {EntryConfigBaseClass | undefined} The sublayer configuration.
+   */
+  getSubLayerConfig(layerPath: string): EntryConfigBaseClass | undefined {
+    const pathElement = layerPath.split('/');
+    if (pathElement[0] !== this.geoviewLayerId) return undefined;
+    let { listOfLayerEntryConfig } = this;
+    let pathNode: EntryConfigBaseClass | undefined;
+    for (let i = 1; i < pathElement.length; i++) {
+      pathNode = listOfLayerEntryConfig.find((layerEntryConfig) => layerEntryConfig.layerId === pathElement[i]);
+      if (!pathNode) break;
+      listOfLayerEntryConfig = layerEntryIsGroupLayer(pathNode) ? pathNode.listOfLayerEntryConfig : [];
+    }
+    return pathNode;
+  }
+
+  /**
+   * Sets the error flag for all layers in the provided list of layer entries.
+   *
+   * @param {EntryConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries.
+   */
+  setErrorDetectedFlagForAllLayers(listOfLayerEntryConfig: EntryConfigBaseClass[]): void {
+    listOfLayerEntryConfig.forEach((layerEntry) => {
+      layerEntry.setErrorDetectedFlag();
+      if (layerEntryIsGroupLayer(layerEntry)) this.setErrorDetectedFlagForAllLayers(layerEntry.listOfLayerEntryConfig);
+    });
+  }
+
+  /**
+   * Apply default values. The default values will be overwritten by the values in the metadata when they are analyzed.
+   * The resulting config will then be overwritten by the values provided in the user config.
+   */
+  applyDefaultValues(): void {
+    this.serviceDateFormat = this.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ';
+    this.externalDateFormat = this.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ';
+    this.isTimeAware = this.isTimeAware !== undefined ? this.isTimeAware : true;
+  }
+
+  /**
+   * Apply user configuration over the geoview layer configurations created from the raw metadata.
+   *
+   * @param {TypeJsonObject} userGeoviewLayerConfig Optional parameter that will replace the configuration provided
+   *                                                    at instanciation time.
+   */
+  applyUserConfig(userGeoviewLayerConfig?: TypeJsonObject): void {
+    if (userGeoviewLayerConfig && !isvalidComparedToInputSchema(this.getGeoviewLayerSchema(), userGeoviewLayerConfig)) {
+      logger.logError(
+        `GeoView configuration ${userGeoviewLayerConfig.geoviewLayerId} passed to applyUserConfig is invalid compared to the schema specification and has been ignored.`
+      );
+      return;
+    }
+
+    // if userGeoviewLayerConfig is undefined, use configuration provided at instanciation time. We're using a cloned copy of the
+    // configuration because we're modifying it and don't want it to leak back to the original object.
+    const geoviewLayerConfig = cloneDeep(userGeoviewLayerConfig || this.#userGeoviewLayerConfig);
+
+    if (geoviewLayerConfig.geoviewLayerName) this.geoviewLayerName = geoviewLayerConfig.geoviewLayerName[this.#language] as string;
+    if (geoviewLayerConfig.serviceDateFormat) this.serviceDateFormat = geoviewLayerConfig.serviceDateFormat as string;
+    if (geoviewLayerConfig.externalDateFormat) this.externalDateFormat = geoviewLayerConfig.externalDateFormat as string;
+
+    const convertUserConfigToInternalConfig = (listOfLayerEntryConfig: TypeJsonArray): TypeJsonArray => {
+      return listOfLayerEntryConfig.map((sublayer): TypeJsonObject => {
+        // We disable the eslint no-param-reassign because we want to keep the modifications made to the object passed as parameter.
+        // eslint-disable-next-line no-param-reassign
+        if (sublayer.layerName) sublayer.layerName = sublayer.layerName[this.#language];
+        if (sublayer.isLayerGroup) convertUserConfigToInternalConfig(sublayer.listOfLayerEntryConfig as TypeJsonArray);
+        return sublayer;
+      });
+    };
+    this.listOfLayerEntryConfig = merge(
+      this.listOfLayerEntryConfig,
+      convertUserConfigToInternalConfig(geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)
+    );
+  }
+
+  /**
    * This method returns the json string of the geoview layer's configuration. The output representation is a multi-line indented
-   * string. Indentation can be controled using the ident parameter. Private variables and pseudo-properties are not serialized.
+   * string. Indentation can be controled using the ident parameter. Private variables are not serialized.
    * @param {number} indent The number of space to indent the output string (default=2).
    *
    * @returns {string} The json string corresponding to the map feature configuration.
@@ -259,4 +363,7 @@ export abstract class AbstractGeoviewLayerConfig {
   serialize(indent: number = 2): string {
     return JSON.stringify(this, undefined, indent);
   }
+  // #endregion PUBLIC
+  // #endregion METHODS
+  // #endregion CLASS DEFINITION
 }
