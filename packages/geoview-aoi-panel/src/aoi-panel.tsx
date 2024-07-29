@@ -1,4 +1,5 @@
 import { Extent } from 'geoview-core/src/api/config/types/map-schema-types';
+import { useMapStoreActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './area-of-interest-style';
 
 interface AoiPanelProps {
@@ -33,6 +34,8 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const { highlightBBox } = useMapStoreActions();
+
   return (
     <Box sx={sxClasses.aoiCard}>
       {aoiList.map((aoiItem: AoiItem, index) => {
@@ -40,7 +43,11 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
           <Card
             tabIndex={0}
             className="aoiCardThumbnail"
-            onClick={() => myMap.zoomToLngLatExtentOrCoordinate(aoiItem.extent, { maxZoom: 14 })}
+            onClick={() =>
+              myMap.zoomToLngLatExtentOrCoordinate(aoiItem.extent, { maxZoom: 14 }).then(() => {
+                highlightBBox(myMap.convertExtentLngLatToMapProj(aoiItem.extent), false);
+              })
+            }
             // eslint-disable-next-line react/no-array-index-key
             key={index}
             title={aoiItem.aoiTitle}
