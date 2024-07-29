@@ -1,6 +1,5 @@
 import { Extent } from 'geoview-core/src/api/config/types/map-schema-types';
 import { useMapStoreActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
-import { delay } from 'geoview-core/src/core/utils/utilities';
 import { getSxClasses } from './area-of-interest-style';
 
 interface AoiPanelProps {
@@ -35,7 +34,7 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const { zoomToExtent, highlightBBox, transformPoints } = useMapStoreActions();
+  const { highlightBBox } = useMapStoreActions();
 
   return (
     <Box sx={sxClasses.aoiCard}>
