@@ -15,7 +15,6 @@ export const getFocusTrapSxClasses = (theme: Theme): any => {
       top: theme.spacing(0),
       left: theme.spacing(0),
       width: '100%',
-      height: '100%',
       zIndex: theme.zIndex.focusDialog,
       overflow: 'hidden',
     },

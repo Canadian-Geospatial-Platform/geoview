@@ -32,6 +32,7 @@ import { logger } from '@/core/utils/logger';
 import { GuidePanel } from '@/core/components/guide/guide-panel';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
+import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 interface Tab {
   icon: ReactNode;
@@ -380,6 +381,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         tabProps={{ disableRipple: true }}
         tabs={memoFooterBarTabs}
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
+        containerType={CONTAINER_TYPE.FOOTER_BAR}
         rightButtons={
           <>
             {!isCollapsed && isMapFullScreen && <ResizeFooterPanel />}

@@ -1,4 +1,3 @@
-export * from './focus-trap-element';
 export * from './responsive-grid';
 export * from './layer-list';
 export * from './layout';

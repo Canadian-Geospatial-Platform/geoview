@@ -122,17 +122,15 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     }
   }, [mapInfoExpanded, mapSize, open, mapId]);
 
-  // TODO: refactor - remove comment in tsx for production build facebook/create-react-app#9507
   return (
     <Box sx={panelContainerStyles} ref={panelContainerRef}>
-      <FocusTrapContainer open={activeTrapGeoView && open}>
+      <FocusTrapContainer open={activeTrapGeoView && open} id="app-bar-focus-trap">
         <Card
           sx={{
             ...sxClasses.panelContainer,
             display: open ? 'block' : 'none',
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
-          tabIndex={activeTrapGeoView && open ? 0 : -1}
           ref={panelRef as React.MutableRefObject<null>}
           onKeyDown={(e: KeyboardEvent) => {
             if (e.key === 'Escape') {

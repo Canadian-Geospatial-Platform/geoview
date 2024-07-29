@@ -11,6 +11,7 @@ import { getSxClasses } from './tabs-style';
 import { TabPanel } from './tab-panel';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIHiddenTabs } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { TypeContainerBox } from '@/core/types/global-types';
 
 /**
  * Type used for properties of each tab
@@ -50,6 +51,7 @@ export interface TypeTabsProps {
   onSelectedTabChanged?: (tab: TypeTabs) => void;
   onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
   onCloseKeyboard?: () => void;
+  containerType?: TypeContainerBox;
 }
 
 /**
@@ -73,6 +75,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     TabContentVisibilty = 'inherit',
     tabsProps = {},
     tabProps = {},
+    containerType,
   } = props;
 
   const { t } = useTranslation<string>();
@@ -200,6 +203,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                     id={`tab-${index}`}
                     onClick={() => handleClick(index)}
                     sx={hiddenTabs.includes(tab.id) ? { display: 'none' } : sxClasses.tab}
+                    tabIndex={0}
                     {...tabProps}
                   />
                 );
@@ -237,7 +241,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       >
         {tabPanels.map((tab, index) => {
           return tab ? (
-            <TabPanel value={value} index={index} key={tab.id} id={`${shellContainer?.id ?? ''}-${tab.id}`}>
+            <TabPanel value={value} index={index} key={tab.id} id={`${shellContainer?.id ?? ''}-${tab.id}`} containerType={containerType}>
               {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
             </TabPanel>
           ) : (
