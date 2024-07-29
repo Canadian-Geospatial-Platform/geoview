@@ -24,15 +24,13 @@ export declare abstract class AbstractBaseLayerEntryConfig extends EntryConfigBa
      * private #metadata is that it is invisible to the schema validation and JSON serialization.
      *
      * @param {TypeJsonObject} metadata The sub-layer metadata.
-     * @protected
      */
-    protected set metadata(metadata: TypeJsonObject);
+    setLayerMetadata(metadata: TypeJsonObject): void;
     /**
      * The getter method that returns the metadata private property. The benifit of using a setter/getter with a
      * private #metadata is that it is invisible to the schema validation and JSON serialization.
      *
      * @returns {TypeJsonObject} The sub-layer metadata.
-     * @protected
      */
-    protected get metadata(): TypeJsonObject;
+    getLayerMetadata(): TypeJsonObject;
 }

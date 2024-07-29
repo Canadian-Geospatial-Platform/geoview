@@ -13,7 +13,7 @@ import * as GeoUtilities from '@/geo/utils/utilities';
  */
 export declare class API {
     #private;
-    configApi: typeof ConfigApi;
+    config: typeof ConfigApi;
     maps: Record<string, MapViewer>;
     plugin: typeof Plugin;
     utilities: {

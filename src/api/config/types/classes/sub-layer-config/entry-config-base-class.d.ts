@@ -58,7 +58,7 @@ export declare abstract class EntryConfigBaseClass {
      * @returns {string} The schemaPath associated to the sublayer.
      * @protected @abstract
      */
-    protected abstract get schemaPath(): string;
+    protected abstract getSchemaPath(): string;
     /**
      * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
      *
@@ -67,9 +67,9 @@ export declare abstract class EntryConfigBaseClass {
      */
     protected abstract getEntryType(): TypeLayerEntryType;
     /** The geoview layer type that owns this config entry. */
-    get geoviewLayerType(): TypeGeoviewLayerType;
+    getGeoviewLayerType(): TypeGeoviewLayerType;
     /** The geoview layer that owns this sub-layer configuration. */
-    get geoviewLayerConfigInstance(): AbstractGeoviewLayerConfig;
+    getGeoviewLayerConfig(): AbstractGeoviewLayerConfig;
     /**
      * The getter method, which returns the layerPath of the sublayer configuration. The layer path is a unique identifier
      * associated with the sublayer configuration. It's made up of the Geoview layer identifier and the node identifiers you need
@@ -77,7 +77,7 @@ export declare abstract class EntryConfigBaseClass {
      *
      * @returns {string} The schemaPath associated to the sublayer.
      */
-    get layerPath(): string;
+    getlayerPath(): string;
     /**
      * Method used to set the EntryConfigBaseClass error flag to true. Once this operation has been performed, the layer entry
      * config is no longer considered viable.
@@ -88,13 +88,13 @@ export declare abstract class EntryConfigBaseClass {
      *
      * @returns {boolean} The errorDetected property associated to the entry config.
      */
-    get errorDetected(): boolean;
+    getErrorDetectedFlag(): boolean;
     /**
      * The getter method that returns the parentNode.
      *
      * @returns {EntryConfigBaseClass | undefined} The parentNode property associated to the entry config.
      */
-    get parentNode(): EntryConfigBaseClass | undefined;
+    getParentNode(): EntryConfigBaseClass | undefined;
     /**
      * This method returns the json string of the layer entry configuration. The output representation is not a multi-line indented
      * string. Private variables and pseudo-properties are not serialized.

@@ -114,5 +114,5 @@ export declare class ConfigApi {
      * @returns {EntryConfigBaseClass[]} The metadata layer tree.
      * @static
      */
-    static createMetadataLayerTree(serviceAccessString: string, layerType: TypeGeoviewLayerType | typeof CV_CONFIG_GEOCORE_TYPE, listOfLayerId?: TypeJsonArray, language?: TypeDisplayLanguage): Promise<EntryConfigBaseClass[]>;
+    static createMetadataLayerTree(serviceAccessString: string, layerType: TypeGeoviewLayerType, listOfLayerId?: TypeJsonArray, language?: TypeDisplayLanguage): Promise<EntryConfigBaseClass[]>;
 }

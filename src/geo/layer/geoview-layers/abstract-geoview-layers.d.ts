@@ -47,19 +47,16 @@ export declare abstract class AbstractGeoViewLayer {
      * configuration does not provide a value, we use an empty array instead of an undefined attribute.
      */
     listOfLayerEntryConfig: TypeLayerEntryConfig[];
-    /**
-     * Initial settings to apply to the GeoView layer at creation time. This attribute is allowed only if listOfLayerEntryConfig.length > 1.
-     */
+    /** Initial settings to apply to the GeoView layer at creation time. This attribute is allowed only if listOfLayerEntryConfig.length > 1. */
     initialSettings?: TypeLayerInitialSettings;
     /** layers of listOfLayerEntryConfig that did not load. */
     layerLoadError: {
         layer: string;
         loggerMessage: string;
     }[];
-    /**
-     * The OpenLayer root layer representing this GeoView Layer.
-     */
+    /** The OpenLayer root layer representing this GeoView Layer. */
     olRootLayer?: BaseLayer;
+    /** The service metadata. */
     metadata: TypeJsonObject | null;
     /** Date format object used to translate server to ISO format and ISO to server format */
     serverDateFragmentsOrder?: TypeDateFragments;
@@ -347,18 +344,6 @@ export declare abstract class AbstractGeoViewLayer {
      * @returns {LayerGroup} A new layer group.
      */
     protected createLayerGroup(layerConfig: TypeLayerEntryConfig, initialSettings: TypeLayerInitialSettings): LayerGroup;
-    /** ***************************************************************************************************************************
-     * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. If projectionCode is
-     * defined, returns the bounds in the specified projection otherwise use the map projection. The bounds are different from the
-     * extent. They are mainly used for display purposes to show the bounding box in which the data resides and to zoom in on the
-     * entire layer data. It is not used by openlayer to limit the display of data on the map.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
-     *
-     * @returns {Extent} The layer bounding box.
-     */
-    getMetadataBounds(layerPath: string, projectionCode?: string | number | undefined): Extent | undefined;
     /** ***************************************************************************************************************************
      * Returns the domain of the specified field or null if the field has no domain.
      *

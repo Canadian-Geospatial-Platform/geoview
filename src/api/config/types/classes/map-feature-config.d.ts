@@ -47,12 +47,6 @@ export declare class MapFeatureConfig {
      */
     fetchAllServiceMetadata(): Promise<void>;
     /**
-     * The getter method that returns the errorDetected flag.
-     *
-     * @returns {boolean} The errorDetected property associated to the map feature config.
-     */
-    get errorDetected(): boolean;
-    /**
      * This method returns the json string of the map feature's configuration. The output representation is a multi-line indented
      * string. Indentation can be controled using the ident parameter. Private variables and pseudo-properties are not serialized.
      * @param {number} indent The number of space to indent the output string (default=2).
@@ -60,6 +54,12 @@ export declare class MapFeatureConfig {
      * @returns {string} The json string corresponding to the map feature configuration.
      */
     serialize(indent?: number): string;
+    /**
+     * The getter method that returns the errorDetected flag.
+     *
+     * @returns {boolean} The errorDetected property associated to the map feature config.
+     */
+    getErrorDetectedFlag(): boolean;
     /**
      * Methode used to set the MapFeatureConfig error flag to true.
      */
