@@ -248,7 +248,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
         open={open}
         sx={sxClasses.dialog}
         className={`${className && className}`}
-        style={{ ...style, position: 'absolute' }}
+        style={{ ...style, position: 'fixed' }}
         aria-labelledby={ariaLabeledBy}
         aria-describedby={ariaDescribedBy}
         fullScreen={fullScreen}

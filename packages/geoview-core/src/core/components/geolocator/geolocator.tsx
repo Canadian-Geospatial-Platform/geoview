@@ -200,7 +200,7 @@ export function Geolocator(): JSX.Element {
   }, []);
 
   return (
-    <FocusTrapContainer open={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen}>
+    <FocusTrapContainer open={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen} id="geolocator-focus-trap">
       <Box
         sx={sxClasses.root}
         visibility={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
