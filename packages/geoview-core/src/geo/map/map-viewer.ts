@@ -1193,12 +1193,19 @@ export class MapViewer {
   }
 
   /**
-   * Reload a map from a config object stored in store. It first removes then recreates the map.
+   * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
+   * @param {TypeMapFeaturesConfig} mapConfig - Optional map config to use for reload.
    */
-  reload(): void {
+  reload(mapConfig?: TypeMapFeaturesConfig): void {
+    const mapContainer = document.getElementById(this.mapId)!;
+
+    // Set map container height to current height to avoid shifting
+    const height = mapContainer.offsetHeight;
+    mapContainer.style.height = `${height}px`;
+
     // remove the map, then get config to use to recreate it
     const mapDiv = this.remove(false);
-    const config = MapEventProcessor.getGeoViewMapConfig(this.mapId);
+    const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(this.mapId);
     // TODO: Remove time out and make this async so remove/recreate work one after the other
     // TO.DOCONT: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
     setTimeout(
@@ -1216,20 +1223,8 @@ export class MapViewer {
    * Reload a map from a config object created using current map state. It first removes then recreates the map.
    */
   reloadWithCurrentState(): void {
-    // remove the map, then get config to use to recreate it
-    const mapDiv = this.remove(false);
-    const config = this.createMapConfigFromMapState();
-    // TODO: Remove time out and make this async so remove/recreate work one after the other
-    // TO.DOCONT: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
-    setTimeout(
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      () =>
-        api.createMapFromConfig(mapDiv.id, JSON.stringify(config)).catch((error) => {
-          // Log
-          logger.logError(`Couldn't reload the map in map-viewer`, error);
-        }),
-      1500
-    );
+    const currentMapConfig = this.createMapConfigFromMapState();
+    this.reload(currentMapConfig);
   }
 
   /**

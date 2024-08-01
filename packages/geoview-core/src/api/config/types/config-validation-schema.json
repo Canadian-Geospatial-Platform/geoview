@@ -45,6 +45,9 @@
         },
         "schemaVersionUsed": {
           "$ref": "#/definitions/TypeValidVersions"
+        },
+        "globalSettings": {
+          "$ref": "#/definitions/TypeGlobalSettings"
         }
       },
       "required": ["map"]
@@ -302,6 +305,17 @@
     "TypeValidVersions": {
       "description": "The schema version that can be used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer.",
       "enum": ["1.0"]
+    },
+    "TypeGlobalSettings": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Universal map settings",
+      "properties": {
+        "canRemoveSublayers": {
+          "type": "boolean",
+          "description": "Whether or not sublayers can be removed from layer groups. Default = true."
+        }
+      }
     },
     "TypeBasemapOptions": {
       "additionalProperties": false,

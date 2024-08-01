@@ -24,6 +24,7 @@ import {
   TypeMapComponents,
   TypeMapCorePackages,
   TypeExternalPackages,
+  TypeGlobalSettings,
 } from '@config/types/map-schema-types';
 
 import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -520,6 +521,8 @@ export type TypeMapFeaturesInstance = {
    * this version of the viewer.
    */
   schemaVersionUsed?: '1.0';
+  /** Global settings. */
+  globalSettings?: TypeGlobalSettings; //! config
 };
 
 /** ******************************************************************************************************************************
