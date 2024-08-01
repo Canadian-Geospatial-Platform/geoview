@@ -140,5 +140,8 @@
     "tabs": {
       "core": ["geolocator", "export"]
     }
+  },
+  "globalSettings": {
+    "canRemoveSublayers": false
   }
 }

@@ -217,13 +217,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const { layerPath } = legendResultSetEntry;
     const layerPathNodes = layerPath.split('/');
 
-    const setLayerControls = (layerConfig: ConfigBaseClass): TypeLayerControls => {
+    const setLayerControls = (layerConfig: ConfigBaseClass, isChild: boolean = false): TypeLayerControls => {
+      const removeDefault = !(isChild && MapEventProcessor.getGeoViewMapConfig(mapId)?.globalSettings?.canRemoveSublayers === false);
+      // console.log(layerConfig.layerPath, isChild, removeDefault, MapEventProcessor.getGeoViewMapConfig(mapId));
       const controls: TypeLayerControls = {
         highlight: layerConfig.initialSettings?.controls?.highlight !== undefined ? layerConfig.initialSettings?.controls?.highlight : true,
         hover: layerConfig.initialSettings?.controls?.hover !== undefined ? layerConfig.initialSettings?.controls?.hover : true,
         opacity: layerConfig.initialSettings?.controls?.opacity !== undefined ? layerConfig.initialSettings?.controls?.opacity : true,
         query: layerConfig.initialSettings?.controls?.query !== undefined ? layerConfig.initialSettings?.controls?.query : true,
-        remove: layerConfig.initialSettings?.controls?.remove !== undefined ? layerConfig.initialSettings?.controls?.remove : true,
+        remove: layerConfig.initialSettings?.controls?.remove !== undefined ? layerConfig.initialSettings?.controls?.remove : removeDefault,
         table: layerConfig.initialSettings?.controls?.table !== undefined ? layerConfig.initialSettings?.controls?.table : true,
         visibility:
           layerConfig.initialSettings?.controls?.visibility !== undefined ? layerConfig.initialSettings?.controls?.visibility : true,
@@ -264,7 +266,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerConfig.layerPath);
         }
 
-        const controls: TypeLayerControls = setLayerControls(layerConfig);
+        const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
         if (entryIndex === -1) {
           const legendLayerEntry: TypeLegendLayer = {
             bounds,
@@ -306,7 +308,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerConfig.layerPath);
         }
 
-        const controls: TypeLayerControls = setLayerControls(layerConfig);
+        const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
         const legendLayerEntry: TypeLegendLayer = {
           bounds,
           controls,

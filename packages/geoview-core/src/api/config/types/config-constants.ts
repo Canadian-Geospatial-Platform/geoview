@@ -191,6 +191,7 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
     geolocator: CV_CONFIG_GEOLOCATOR_URL,
     proxyUrl: CV_CONFIG_PROXY_URL,
   },
+  globalSettings: { canRemoveSublayers: true },
   schemaVersionUsed: '1.0',
 });
 
