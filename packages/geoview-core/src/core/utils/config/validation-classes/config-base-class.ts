@@ -213,6 +213,8 @@ export abstract class ConfigBaseClass {
    */
   onSerialize(): TypeJsonObject {
     return {
+      layerName: this.layerName,
+      layerId: this.layerId,
       layerIdExtension: this.layerIdExtension,
       schemaTag: this.schemaTag,
       entryType: this.entryType,
