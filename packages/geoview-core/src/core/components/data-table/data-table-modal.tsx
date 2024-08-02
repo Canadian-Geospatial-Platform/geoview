@@ -40,7 +40,7 @@ export default function DataTableModal(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
 
   // get store function
-  const { closeModal } = useUIStoreActions();
+  const { disableFocusTrap } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const selectedLayer = useLayerSelectedLayerPath();
 
@@ -148,7 +148,7 @@ export default function DataTableModal(): JSX.Element {
   }, [layersData, selectedLayer]);
 
   return (
-    <Dialog open={activeModalId === 'layerDataTable'} onClose={closeModal} maxWidth="xl">
+    <Dialog open={activeModalId === 'layerDataTable'} onClose={disableFocusTrap} maxWidth="xl">
       <DialogTitle>{`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}</DialogTitle>
       <DialogContent sx={{ overflow: 'hidden' }}>
         {isLoading && (
@@ -187,7 +187,7 @@ export default function DataTableModal(): JSX.Element {
         )}
       </DialogContent>
       <DialogActions>
-        <Button fullWidth variant="contained" className="buttonOutlineFilled" onClick={closeModal} type="text" autoFocus>
+        <Button fullWidth variant="contained" className="buttonOutlineFilled" onClick={disableFocusTrap} type="text" autoFocus>
           {t('general.close')}
         </Button>
       </DialogActions>

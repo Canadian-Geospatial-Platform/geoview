@@ -35,8 +35,8 @@ export interface IUIState {
 
   actions: {
     hideTab: (tab: string) => void;
-    closeModal: () => void;
-    openModal: (uiFocus: FocusItemProps) => void;
+    enableFocusTrap: (uiFocus: FocusItemProps) => void;
+    disableFocusTrap: () => void;
     showTab: (tab: string) => void;
     setActiveFooterBarTab: (id: string) => void;
     setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
@@ -48,8 +48,8 @@ export interface IUIState {
   };
 
   setterActions: {
-    closeModal: () => void;
-    openModal: (uiFocus: FocusItemProps) => void;
+    enableFocusTrap: (uiFocus: FocusItemProps) => void;
+    disableFocusTrap: () => void;
     setActiveFooterBarTab: (id: string) => void;
     setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
@@ -112,13 +112,13 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to event processor
         UIEventProcessor.hideTab(get().mapId, tab);
       },
-      closeModal: () => {
+      enableFocusTrap: (uiFocus: FocusItemProps) => {
         // Redirect to setter
-        get().uiState.setterActions.closeModal();
+        get().uiState.setterActions.enableFocusTrap(uiFocus);
       },
-      openModal: (uiFocus: FocusItemProps) => {
+      disableFocusTrap: () => {
         // Redirect to setter
-        get().uiState.setterActions.openModal(uiFocus);
+        get().uiState.setterActions.disableFocusTrap();
       },
       showTab: (tab: string): void => {
         // Redirect to event processor
@@ -155,20 +155,20 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     },
 
     setterActions: {
-      closeModal: () => {
+      enableFocusTrap: (uiFocus: FocusItemProps) => {
+        set({
+          uiState: {
+            ...get().uiState,
+            focusItem: { activeElementId: uiFocus.activeElementId, callbackElementId: uiFocus.callbackElementId },
+          },
+        });
+      },
+      disableFocusTrap: () => {
         document.getElementById(get().uiState.focusItem.callbackElementId as string)?.focus();
         set({
           uiState: {
             ...get().uiState,
             focusItem: { activeElementId: false, callbackElementId: false },
-          },
-        });
-      },
-      openModal: (uiFocus: FocusItemProps) => {
-        set({
-          uiState: {
-            ...get().uiState,
-            focusItem: { activeElementId: uiFocus.activeElementId, callbackElementId: uiFocus.callbackElementId },
           },
         });
       },

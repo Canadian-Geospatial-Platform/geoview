@@ -74,7 +74,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const geoviewElement = useAppGeoviewHTMLElement();
   const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
 
-  const { setFooterPanelResizeValue, setActiveFooterBarTab, openModal, closeModal, setFooterBarIsCollapsed } = useUIStoreActions();
+  const { setFooterPanelResizeValue, setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } =
+    useUIStoreActions();
 
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
@@ -373,8 +374,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         isCollapsed={isCollapsed}
         onToggleCollapse={handleToggleCollapse}
         onSelectedTabChanged={handleSelectedTabChanged}
-        onOpenKeyboard={openModal}
-        onCloseKeyboard={closeModal}
+        onOpenKeyboard={enableFocusTrap}
+        onCloseKeyboard={disableFocusTrap}
         selectedTab={memoFooterBarTabs.findIndex((t) => t.id === selectedTab)}
         tabProps={{ disableRipple: true }}
         tabs={memoFooterBarTabs}

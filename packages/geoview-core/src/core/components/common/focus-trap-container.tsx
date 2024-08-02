@@ -26,12 +26,12 @@ export function FocusTrapContainer({ children, open = false, id, containerType }
   const { t } = useTranslation<string>();
 
   // get values from the store
-  const { closeModal } = useUIStoreActions();
+  const { disableFocusTrap } = useUIStoreActions();
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const focusItem = useUIActiveFocusItem();
 
   const handleClose = (): void => {
-    closeModal();
+    disableFocusTrap();
     document.getElementById(focusItem.callbackElementId as string)?.focus();
   };
 
@@ -41,8 +41,8 @@ export function FocusTrapContainer({ children, open = false, id, containerType }
     // Log
     logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - activeTrapGeoView', activeTrapGeoView);
 
-    if (!activeTrapGeoView) closeModal();
-  }, [activeTrapGeoView, closeModal]);
+    if (!activeTrapGeoView) disableFocusTrap();
+  }, [activeTrapGeoView, disableFocusTrap]);
 
   // if focus trap gets focus, send focus to the exit button
   useEffect(() => {
@@ -56,7 +56,7 @@ export function FocusTrapContainer({ children, open = false, id, containerType }
   // #endregion
 
   return (
-    <FocusTrap open={id === focusItem.activeElementId || open}>
+    <FocusTrap open={id === focusItem.activeElementId || open} disableAutoFocus>
       <Box tabIndex={id === focusItem.activeElementId || open ? 0 : -1} sx={{ height: '100%' }}>
         {containerType === CONTAINER_TYPE.FOOTER_BAR && (
           <Button

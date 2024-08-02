@@ -114,12 +114,10 @@ const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onLis
   /**
    * Handle layer click when mouse enter is pressed.
    */
-  const handleLayerKeyDown = useCallback(
-    (e: React.KeyboardEvent, selectedLayer: LayerListEntry, layerId: string): void => {
-      if (e.key === 'Enter' && !isDisabled) onListItemClick(selectedLayer, layerId);
-    },
-    [onListItemClick, isDisabled]
-  );
+  const handleLayerKeyDown = (e: React.KeyboardEvent, selectedLayer: LayerListEntry, layerId: string): void => {
+    // e.preventDefault();
+    if (e.key === 'Enter' && !isDisabled) onListItemClick(selectedLayer, layerId);
+  };
 
   const AnimatedPaper = animated(Paper);
 

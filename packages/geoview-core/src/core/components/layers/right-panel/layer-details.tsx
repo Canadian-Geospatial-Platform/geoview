@@ -57,7 +57,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const highlightedLayer = useLayerHighlightedLayer();
   const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, refreshLayer, zoomToLayerExtent, getLayerBounds } =
     useLayerStoreActions();
-  const { openModal } = useUIStoreActions();
+  const { enableFocusTrap } = useUIStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const datatableSettings = useDataTableLayerSettings();
   const layersData = useDataTableAllFeaturesDataArray();
@@ -102,7 +102,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in single-layer.handleLayerClick', error);
       });
     }
-    openModal({ activeElementId: 'layerDataTable', callbackElementId: `table-details` });
+    enableFocusTrap({ activeElementId: 'layerDataTable', callbackElementId: `table-details` });
   };
 
   if (layerDetails.bounds === undefined || layerDetails.bounds![0] === Infinity) {
