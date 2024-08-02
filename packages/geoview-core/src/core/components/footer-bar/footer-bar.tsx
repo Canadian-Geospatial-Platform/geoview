@@ -178,7 +178,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
   // Update the active footer tab based on footer tabs created from configuration.
   useEffect(() => {
-    setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
+    if (!selectedTab) setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
+    // No need to update when selected tab changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memoFooterBarTabs, setActiveFooterBarTab]);
 
   /**

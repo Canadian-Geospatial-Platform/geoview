@@ -1,4 +1,5 @@
 import { useStore } from 'zustand';
+import { capitalize } from 'lodash';
 import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@config/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
@@ -89,8 +90,17 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         uiState: {
           ...get().uiState,
           appBarComponents: geoviewConfig.appBar?.tabs.core || [],
+          activeAppBarTab: {
+            tabId: geoviewConfig.appBar?.selectedTab
+              ? `${get().mapId}AppbarPanelButton${capitalize(geoviewConfig.appBar.selectedTab)}`
+              : '',
+            tabGroup: geoviewConfig.appBar?.selectedTab || '',
+            isOpen: geoviewConfig.appBar?.collapsed !== undefined ? !geoviewConfig.appBar.collapsed : true,
+          },
+          activeFooterBarTabId: geoviewConfig.footerBar?.selectedTab || '',
           corePackagesComponents: geoviewConfig.corePackages || [],
           navBarComponents: geoviewConfig.navBar || [],
+          footerBarIsCollapsed: geoviewConfig.footerBar?.collapsed !== undefined ? geoviewConfig.footerBar.collapsed : false,
         },
       });
     },

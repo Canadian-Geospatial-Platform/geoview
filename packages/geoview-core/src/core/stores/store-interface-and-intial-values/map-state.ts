@@ -29,6 +29,7 @@ export interface IMapState {
   centerCoordinates: Coordinate;
   clickCoordinates?: TypeMapMouseInfo;
   clickMarker: TypeClickMarker | undefined;
+  currentBasemapOptions: TypeBasemapOptions;
   currentProjection: TypeValidMapProjectionCodes;
   fixNorth: boolean;
   highlightedFeatures: TypeFeatureInfoEntry[];
@@ -77,6 +78,7 @@ export interface IMapState {
     zoomToMyLocation: (position: GeolocationPosition) => Promise<void>;
     transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
     setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => Promise<TypeFeatureInfoResultSet>;
+    setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions) => void;
     setFixNorth: (ifFix: boolean) => void;
     setOverlayClickMarkerRef: (htmlRef: HTMLElement) => void;
     setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
@@ -101,6 +103,7 @@ export interface IMapState {
     ) => void;
     setPointerPosition: (pointerPosition: TypeMapMouseInfo) => void;
     setClickCoordinates: (clickCoordinates: TypeMapMouseInfo) => void;
+    setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions) => void;
     setFixNorth: (ifFix: boolean) => void;
     setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]) => void;
     setVisibleLayers: (newOrder: string[]) => void;
@@ -127,6 +130,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
     centerCoordinates: [0, 0] as Coordinate,
     clickMarker: undefined,
+    currentBasemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
     currentProjection: 3857 as TypeValidMapProjectionCodes,
     fixNorth: false,
     highlightedFeatures: [],
@@ -158,6 +162,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
             ? (geoviewConfig.map.viewSettings.initialView.zoomAndCenter[1] as Coordinate)
             : CV_MAP_CENTER[geoviewConfig.map.viewSettings.projection],
           currentProjection: geoviewConfig.map.viewSettings.projection,
+          currentBasemapOptions: geoviewConfig.map.basemapOptions,
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.maxExtent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
@@ -286,6 +291,15 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       resetBasemap: (): Promise<void> => {
         // Redirect to processor
         return MapEventProcessor.resetBasemap(get().mapId);
+      },
+
+      /**
+       * Sets the current basemap options.
+       * @param {TypeBasemapOptions} basemapOptions - The basemap options.
+       */
+      setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions): void => {
+        // Redirect to setter
+        get().mapState.setterActions.setCurrentBasemapOptions(basemapOptions);
       },
 
       /**
@@ -478,6 +492,19 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           mapState: {
             ...get().mapState,
             attribution,
+          },
+        });
+      },
+
+      /**
+       * Sets the current basemap options.
+       * @param {TypeBasemapOptions} basemapOptions - The new basemap options.
+       */
+      setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            currentBasemapOptions: basemapOptions,
           },
         });
       },

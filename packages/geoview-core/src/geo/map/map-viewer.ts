@@ -259,6 +259,7 @@ export class MapViewer {
         extent: extentProjected || undefined,
         minZoom: mapViewSettings.minZoom || 0,
         maxZoom: mapViewSettings.maxZoom || 17,
+        rotation: mapViewSettings.rotation || 0,
       }),
       controls: [],
       keyboardEventTarget: document.getElementById(`map-${this.mapId}`) as HTMLElement,
@@ -980,6 +981,7 @@ export class MapViewer {
         );
     viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
     viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
+    viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
     if (mapView.maxExtent)
       viewOptions.extent = Projection.transformExtent(mapView.maxExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${mapView.projection}`);
 
@@ -1191,12 +1193,32 @@ export class MapViewer {
   }
 
   /**
-   * Reload a map from a config object stored in store. It first remove then recreate the map.
+   * Reload a map from a config object stored in store. It first removes then recreates the map.
    */
   reload(): void {
     // remove the map, then get config to use to recreate it
     const mapDiv = this.remove(false);
-    const config = MapEventProcessor.getStoreConfig(this.mapId);
+    const config = MapEventProcessor.getGeoViewMapConfig(this.mapId);
+    // TODO: Remove time out and make this async so remove/recreate work one after the other
+    // TO.DOCONT: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
+    setTimeout(
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      () =>
+        api.createMapFromConfig(mapDiv.id, JSON.stringify(config)).catch((error) => {
+          // Log
+          logger.logError(`Couldn't reload the map in map-viewer`, error);
+        }),
+      1500
+    );
+  }
+
+  /**
+   * Reload a map from a config object created using current map state. It first removes then recreates the map.
+   */
+  reloadWithCurrentState(): void {
+    // remove the map, then get config to use to recreate it
+    const mapDiv = this.remove(false);
+    const config = this.createMapConfigFromMapState();
     // TODO: Remove time out and make this async so remove/recreate work one after the other
     // TO.DOCONT: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
     setTimeout(
@@ -1525,6 +1547,14 @@ export class MapViewer {
 
     // Same projection
     return extent;
+  }
+
+  /**
+   * Creates a map config based on current map state.
+   * @returns {TypeMapFeaturesConfig | undefined} Map config with current map state.
+   */
+  createMapConfigFromMapState(): TypeMapFeaturesConfig | undefined {
+    return MapEventProcessor.createMapConfigFromMapState(this.mapId);
   }
 
   // #region EVENTS

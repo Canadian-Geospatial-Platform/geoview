@@ -7,11 +7,26 @@ import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 
 import { CV_MAP_EXTENTS } from '@config/types/config-constants';
-import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes, TypeViewSettings } from '@config/types/map-schema-types';
+import {
+  TypeBasemapOptions,
+  TypeInteraction,
+  TypeLayerInitialSettings,
+  TypeValidAppBarCoreProps,
+  TypeValidFooterBarTabsCoreProps,
+  TypeValidMapProjectionCodes,
+  TypeViewSettings,
+} from '@config/types/map-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import { TypeFeatureInfoEntry, TypeGeometry, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import {
+  MapConfigLayerEntry,
+  TypeFeatureInfoEntry,
+  TypeGeometry,
+  TypeGeoviewLayerConfig,
+  TypeLayerEntryConfig,
+  TypeMapConfig,
+} from '@/geo/map/map-schema-types';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
@@ -29,6 +44,10 @@ import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/st
 import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 import { LegendEventProcessor } from './legend-event-processor';
+import { TypeLegendLayer } from '@/core/components/layers/types';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { UIEventProcessor } from './ui-event-processor';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -166,11 +185,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.setInteraction(mapId, store.getState().mapState.interaction);
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  static getStoreConfig(mapId: string) {
-    return this.getState(mapId).mapConfig;
-  }
-
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
@@ -261,7 +275,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the Map config for a given map id
-   * @param {string} mapId the map id to retreive the config for
+   * @param {string} mapId the map id to retrieve the config for
    * @returns {TypeMapFeaturesConfig | undefined} the map config or undefined if there is no config for this map id
    */
   static getGeoViewMapConfig(mapId: string): TypeMapFeaturesConfig | undefined {
@@ -271,6 +285,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static getBasemapOptions(mapId: string): TypeBasemapOptions {
     return this.getMapStateProtected(mapId).basemapOptions;
+  }
+
+  static getCurrentBasemapOptions(mapId: string): TypeBasemapOptions {
+    return this.getMapStateProtected(mapId).currentBasemapOptions;
   }
 
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
@@ -415,7 +433,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // If maxExtent was provided, apply
       // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
       // GV We may have to keep extent as array for configuration file but, technically, user does not change projection often.
-      const mapMaxExtent = this.getStoreConfig(mapId)?.map.viewSettings.maxExtent ? CV_MAP_EXTENTS[newProjection] : undefined;
+      const mapMaxExtent = this.getGeoViewMapConfig(mapId)?.map.viewSettings.maxExtent ? CV_MAP_EXTENTS[newProjection] : undefined;
 
       // create new view settings
       const newView: TypeViewSettings = {
@@ -462,6 +480,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static getMapOrderedLayerInfo(mapId: string): TypeOrderedLayerInfo[] {
     return this.getMapStateProtected(mapId).orderedLayerInfo;
+  }
+
+  /**
+   * Gets the ordered layer info for one layer.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The path of the layer to get.
+   * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
+   */
+  static getMapOrderedLayerInfoForLayer(mapId: string, layerPath: string): TypeOrderedLayerInfo | undefined {
+    return this.getMapStateProtected(mapId).orderedLayerInfo.find((orderedLayerInfo) => orderedLayerInfo.layerPath === layerPath);
   }
 
   static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number {
@@ -533,6 +561,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (bounds && bounds[0] !== Infinity) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
 
     return layerPath;
+  }
+
+  static setCurrentBasemapOptions(mapId: string, basemapOptions: TypeBasemapOptions): void {
+    this.getMapStateProtected(mapId).setterActions.setCurrentBasemapOptions(basemapOptions);
   }
 
   static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
@@ -653,7 +685,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
     const basemap = await this.getMapViewer(mapId).basemap.createCoreBasemap(basemapOptions, projection, language);
 
-    if (basemap) this.getMapViewer(mapId).basemap.setBasemap(basemap);
+    if (basemap) {
+      this.getMapViewer(mapId).basemap.setBasemap(basemap);
+      this.setCurrentBasemapOptions(mapId, basemapOptions);
+    }
   }
 
   static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {
@@ -840,6 +875,225 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setClickMarkerOnPosition = (mapId: string, position: number[]): void => {
     this.getMapViewer(mapId).map.getOverlayById(`${mapId}-clickmarker`)!.setPosition(position);
   };
+
+  /**
+   * Creates layer initial settings according to provided configs.
+   * @param {ConfigBaseClass} layerEntryConfig - Layer entry config for the layer.
+   * @param {TypeOrderedLayerInfo} orderedLayerInfo - Ordered layer info for the layer.
+   * @param {TypeLegendLayer} legendLayerInfo - Legend layer info for the layer.
+   * @returns {TypeLayerInitialSettings} Initial settings object.
+   */
+  static getInitialSettings(
+    layerEntryConfig: ConfigBaseClass,
+    orderedLayerInfo: TypeOrderedLayerInfo,
+    legendLayerInfo: TypeLegendLayer
+  ): TypeLayerInitialSettings {
+    return {
+      states: {
+        visible: orderedLayerInfo.visible,
+        opacity: legendLayerInfo.opacity,
+        legendCollapsed: orderedLayerInfo.legendCollapsed,
+        queryable: orderedLayerInfo.queryable,
+        hoverable: orderedLayerInfo.hoverable,
+      },
+      controls: legendLayerInfo.controls,
+      bounds: layerEntryConfig.initialSettings.bounds,
+      className: layerEntryConfig.initialSettings.className,
+      extent: layerEntryConfig.initialSettings.extent,
+      minZoom: layerEntryConfig.initialSettings.minZoom,
+      maxZoom: layerEntryConfig.initialSettings.maxZoom,
+    };
+  }
+
+  /**
+   * Creates a layer entry config based on current layer state.
+   * @param {string} mapId - Id of map.
+   * @param {string} layerPath - Path of the layer to create config for.
+   * @returns {TypeLayerEntryConfig} Entry config object.
+   */
+  static createLayerEntryConfig(mapId: string, layerPath: string): TypeLayerEntryConfig {
+    // Get needed info
+    const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
+    const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfoForLayer(mapId, layerPath);
+    const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
+
+    // Get original layerEntryConfig from map config
+    const pathArray = layerPath.split('/');
+    if (pathArray[0] === pathArray[1]) pathArray.splice(0, 1);
+    const geoviewLayerConfig = MapEventProcessor.getGeoViewMapConfig(mapId)?.map.listOfGeoviewLayerConfig?.find(
+      (layerConfig) => layerConfig.geoviewLayerId === pathArray[0]
+    );
+
+    let configLayerEntryConfig;
+    if (geoviewLayerConfig) {
+      configLayerEntryConfig = (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.find(
+        (nextEntryConfig: TypeLayerEntryConfig) => nextEntryConfig.layerId === pathArray[1]
+      );
+      for (let i = 2; i < pathArray.length; i++) {
+        if (configLayerEntryConfig?.listOfLayerEntryConfig)
+          configLayerEntryConfig = configLayerEntryConfig.listOfLayerEntryConfig.find(
+            (nextEntryConfig: TypeLayerEntryConfig) => nextEntryConfig.layerId === pathArray[i]
+          );
+        else configLayerEntryConfig = undefined;
+      }
+    }
+
+    // Create list of sublayer entry configs if it is a group layer
+    const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
+    if (layerEntryConfig!.entryType === 'group') {
+      const sublayerPaths = MapEventProcessor.getMapLayerOrder(mapId).filter(
+        (entryLayerPath) => entryLayerPath.startsWith(layerPath) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
+      );
+      sublayerPaths.forEach((sublayerPath) => listOfLayerEntryConfig.push(MapEventProcessor.createLayerEntryConfig(mapId, sublayerPath)));
+    }
+
+    // Get initial settings
+    const initialSettings = this.getInitialSettings(layerEntryConfig!, orderedLayerInfo!, legendLayerInfo!);
+
+    // Construct layer entry config
+    const newLayerEntryConfig = {
+      layerId: layerEntryConfig!.layerId,
+      layerName: layerEntryConfig!.layerName,
+      layerFilter: (configLayerEntryConfig as VectorLayerEntryConfig)?.layerFilter
+        ? (configLayerEntryConfig as VectorLayerEntryConfig).layerFilter
+        : undefined,
+      initialSettings,
+      style: legendLayerInfo!.styleConfig ? legendLayerInfo!.styleConfig : undefined,
+      source: (layerEntryConfig! as VectorLayerEntryConfig).source ? (layerEntryConfig! as VectorLayerEntryConfig).source : undefined,
+      entryType: listOfLayerEntryConfig.length ? 'group' : undefined,
+      listOfLayerEntryConfig: listOfLayerEntryConfig.length ? listOfLayerEntryConfig : [],
+    };
+
+    // Only use feature info specified in original config, not drawn from services
+    if (newLayerEntryConfig.source?.featureInfo) delete newLayerEntryConfig.source?.featureInfo;
+    if (configLayerEntryConfig?.source?.featureInfo) newLayerEntryConfig.source!.featureInfo = configLayerEntryConfig.source.featureInfo;
+
+    return newLayerEntryConfig as unknown as TypeLayerEntryConfig;
+  }
+
+  /**
+   * Creates a geoview layer config based on current layer state.
+   * @param {string} mapId - Id of map.
+   * @param {string} layerPath - Path of the layer to create config for.
+   * @returns {MapConfigLayerEntry} Geoview layer config object.
+   */
+  static createGeoviewLayerConfig(mapId: string, layerPath: string): MapConfigLayerEntry {
+    // Get needed info
+    const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)!;
+    const { geoviewLayerConfig } = layerEntryConfig;
+    const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfoForLayer(mapId, layerPath);
+    const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
+
+    // Check for sublayers
+    const sublayerPaths = MapEventProcessor.getMapLayerOrder(mapId).filter(
+      // We only want the immediate child layers, group sublayers will handle their own sublayers
+      (entryLayerPath) => entryLayerPath.startsWith(layerPath) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
+    );
+
+    // Build list of sublayer entry configs
+    const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
+    if (sublayerPaths.length)
+      sublayerPaths.forEach((sublayerPath) => listOfLayerEntryConfig.push(MapEventProcessor.createLayerEntryConfig(mapId, sublayerPath)));
+    else listOfLayerEntryConfig.push(this.createLayerEntryConfig(mapId, layerPath));
+
+    // Get initial settings
+    const initialSettings = this.getInitialSettings(layerEntryConfig!, orderedLayerInfo!, legendLayerInfo!);
+
+    // Construct geoview layer config
+    const newGeoviewLayerConfig: MapConfigLayerEntry = {
+      externalDateFormat: geoviewLayerConfig.externalDateFormat,
+      geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+      geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
+      geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+      initialSettings,
+      isTimeAware: geoviewLayerConfig.isTimeAware,
+      listOfLayerEntryConfig,
+      metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
+      serviceDateFormat: geoviewLayerConfig.serviceDateFormat,
+    };
+
+    return newGeoviewLayerConfig;
+  }
+
+  /**
+   * Creates a map config based on current map state.
+   * @param {string} mapId - Id of map.
+   */
+  static createMapConfigFromMapState(mapId: string): TypeMapFeaturesConfig | undefined {
+    const config = MapEventProcessor.getGeoViewMapConfig(mapId);
+
+    if (config) {
+      // Get paths of top level layers
+      const layerOrder = MapEventProcessor.getMapLayerOrder(mapId).filter(
+        (layerPath) => MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)?.parentLayerConfig === undefined
+      );
+
+      // Build list of geoview layer configs
+      const listOfGeoviewLayerConfig = layerOrder.map((layerPath) => this.createGeoviewLayerConfig(mapId, layerPath));
+
+      // Get info for view
+      const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
+      const currentView = this.getMapViewer(mapId).map.getView();
+      const currentCenter = currentView.getCenter();
+      const currentProjection = currentView.getProjection().getCode();
+      const centerLatLng = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LNGLAT)[0] as [
+        number,
+        number
+      ];
+
+      // Set view settings
+      const viewSettings: TypeViewSettings = {
+        initialView: { zoomAndCenter: [currentView.getZoom() as number, centerLatLng] },
+        enableRotation: config.map.viewSettings.enableRotation !== undefined ? config.map.viewSettings.enableRotation : undefined,
+        rotation: this.getMapStateProtected(mapId).rotation,
+        minZoom: currentView.getMinZoom(),
+        maxZoom: currentView.getMaxZoom(),
+        maxExtent: this.getGeoViewMapConfig(mapId)?.map.viewSettings.maxExtent ? CV_MAP_EXTENTS[projection] : undefined,
+        projection,
+      };
+
+      // Set map config settings
+      const map: TypeMapConfig = {
+        basemapOptions: this.getCurrentBasemapOptions(mapId),
+        interaction: this.getMapInteraction(mapId),
+        listOfGeoviewLayerConfig,
+        highlightColor: config.map.highlightColor,
+        viewSettings,
+      };
+
+      // Construct map config
+      const newMapConfig: TypeMapFeaturesConfig = {
+        mapId,
+        map,
+        theme: AppEventProcessor.getDisplayTheme(mapId),
+        navBar: config.navBar,
+        footerBar: config.footerBar,
+        appBar: config.appBar,
+        overviewMap: config.overviewMap,
+        components: config.components,
+        corePackages: config.corePackages,
+        externalPackages: config.externalPackages,
+        serviceUrls: config.serviceUrls,
+        schemaVersionUsed: config.schemaVersionUsed,
+      };
+
+      // Set open app bar tab
+      if (newMapConfig.appBar) {
+        newMapConfig.appBar.selectedTab = UIEventProcessor.getActiveAppBarTab(mapId).tabGroup as TypeValidAppBarCoreProps;
+        newMapConfig.appBar.collapsed = !UIEventProcessor.getActiveAppBarTab(mapId).isOpen;
+      }
+
+      // Set open footer bar tab
+      if (newMapConfig.footerBar) {
+        newMapConfig.footerBar.selectedTab = UIEventProcessor.getActiveFooterBarTab(mapId) as TypeValidFooterBarTabsCoreProps;
+        newMapConfig.footerBar.collapsed = UIEventProcessor.getFooterBarIsCollapsed(mapId);
+      }
+
+      return newMapConfig;
+    }
+
+    return undefined;
+  }
 
   // #endregion
 }
