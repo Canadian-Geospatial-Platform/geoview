@@ -1,6 +1,7 @@
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 import { EventDelegateBase } from '@/api/events/event-helper';
+import { ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 /**
  * Class to manage buttons on the app-bar
  *
@@ -53,6 +54,11 @@ export declare class AppBarApi {
      * @returns {TypeButtonPanel | null} The button panel
      */
     getAppBarButtonPanelById(buttonPanelId: string): TypeButtonPanel | null;
+    /**
+     * Selects a tab by id and tab group
+     * @return {ActiveAppBarTabType} The active app bar tab info.
+     */
+    getActiveAppBarTab(): ActiveAppBarTabType;
     /**
      * Gets all created buttons panels regardless of group
      *

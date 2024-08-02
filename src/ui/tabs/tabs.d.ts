@@ -1,5 +1,6 @@
 /// <reference types="react" />
 import { TabsProps, TabProps, BoxProps } from '@mui/material';
+import { TypeContainerBox } from '@/core/types/global-types';
 /**
  * Type used for properties of each tab
  */
@@ -35,6 +36,7 @@ export interface TypeTabsProps {
     onSelectedTabChanged?: (tab: TypeTabs) => void;
     onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
     onCloseKeyboard?: () => void;
+    containerType?: TypeContainerBox;
 }
 /**
  * Create a tabs ui

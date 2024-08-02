@@ -1,5 +1,6 @@
 import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { TypeJsonObject } from '@/core/types/global-types';
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
  */
@@ -19,4 +20,9 @@ export declare class GroupLayerEntryConfig extends ConfigBaseClass {
      * @param {GroupLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: GroupLayerEntryConfig);
+    /**
+     * Overrides the serialization of the mother class
+     * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
+     */
+    onSerialize(): TypeJsonObject;
 }

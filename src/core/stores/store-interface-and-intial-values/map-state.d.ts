@@ -16,6 +16,7 @@ export interface IMapState {
     centerCoordinates: Coordinate;
     clickCoordinates?: TypeMapMouseInfo;
     clickMarker: TypeClickMarker | undefined;
+    currentBasemapOptions: TypeBasemapOptions;
     currentProjection: TypeValidMapProjectionCodes;
     fixNorth: boolean;
     highlightedFeatures: TypeFeatureInfoEntry[];
@@ -62,6 +63,7 @@ export interface IMapState {
         zoomToMyLocation: (position: GeolocationPosition) => Promise<void>;
         transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
         setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => Promise<TypeFeatureInfoResultSet>;
+        setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions) => void;
         setFixNorth: (ifFix: boolean) => void;
         setOverlayClickMarkerRef: (htmlRef: HTMLElement) => void;
         setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
@@ -79,6 +81,7 @@ export interface IMapState {
         setMapMoveEnd: (centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: string, isNorthVisible: boolean, scale: TypeScaleInfo) => void;
         setPointerPosition: (pointerPosition: TypeMapMouseInfo) => void;
         setClickCoordinates: (clickCoordinates: TypeMapMouseInfo) => void;
+        setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions) => void;
         setFixNorth: (ifFix: boolean) => void;
         setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]) => void;
         setVisibleLayers: (newOrder: string[]) => void;
