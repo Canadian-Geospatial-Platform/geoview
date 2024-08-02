@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { TypeContainerBox } from '@/core/types/global-types';
 type TypeChildren = ReactNode;
 /**
  * Interface used for the tab panel properties
@@ -8,6 +9,7 @@ export interface TypeTabPanelProps {
     value: number;
     id: string;
     children?: TypeChildren;
+    containerType?: TypeContainerBox;
 }
 /**
  * Create a tab panel that will be used to display the content of a tab

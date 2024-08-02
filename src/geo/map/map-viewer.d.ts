@@ -236,9 +236,13 @@ export declare class MapViewer {
      */
     remove(deleteContainer: boolean): HTMLElement;
     /**
-     * Reload a map from a config object stored in store. It first remove then recreate the map.
+     * Reload a map from a config object stored in store. It first removes then recreates the map.
      */
     reload(): void;
+    /**
+     * Reload a map from a config object created using current map state. It first removes then recreates the map.
+     */
+    reloadWithCurrentState(): void;
     /**
      * Zoom to the specified extent.
      *
@@ -347,6 +351,11 @@ export declare class MapViewer {
      * @returns {Extent} The extent in the map projection
      */
     convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent;
+    /**
+     * Creates a map config based on current map state.
+     * @returns {TypeMapFeaturesConfig | undefined} Map config with current map state.
+     */
+    createMapConfigFromMapState(): TypeMapFeaturesConfig | undefined;
     /**
      * Registers a map init event callback.
      * @param {MapInitDelegate} callback - The callback to be executed whenever the event is emitted

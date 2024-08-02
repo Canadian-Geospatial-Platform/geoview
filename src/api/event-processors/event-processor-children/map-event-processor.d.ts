@@ -2,10 +2,10 @@ import { Root } from 'react-dom/client';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
-import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
+import { TypeBasemapOptions, TypeInteraction, TypeLayerInitialSettings, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import { TypeFeatureInfoEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { MapConfigLayerEntry, TypeFeatureInfoEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -14,6 +14,8 @@ import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
+import { TypeLegendLayer } from '@/core/components/layers/types';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 export declare class MapEventProcessor extends AbstractEventProcessor {
     /**
      * Override the initialization process to register store subscriptions handlers and return them so they can be destroyed later.
@@ -24,7 +26,6 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @param {string} mapId - The map id being initialized
      */
     static initMapControls(mapId: string): void;
-    static getStoreConfig(mapId: string): TypeMapFeaturesConfig | undefined;
     /**
      * Shortcut to get the Map state for a given map id
      * @param {string} mapId - map Id
@@ -60,11 +61,12 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static getScaleInfoFromDomElement(mapId: string): Promise<TypeScaleInfo>;
     /**
      * Shortcut to get the Map config for a given map id
-     * @param {string} mapId the map id to retreive the config for
+     * @param {string} mapId the map id to retrieve the config for
      * @returns {TypeMapFeaturesConfig | undefined} the map config or undefined if there is no config for this map id
      */
     static getGeoViewMapConfig(mapId: string): TypeMapFeaturesConfig | undefined;
     static getBasemapOptions(mapId: string): TypeBasemapOptions;
+    static getCurrentBasemapOptions(mapId: string): TypeBasemapOptions;
     static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void;
     static clickMarkerIconHide(mapId: string): void;
     static highlightBBox(mapId: string, extent: Extent, isLayerHighlight?: boolean): void;
@@ -94,6 +96,13 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @returns {TypeOrderedLayerInfo[]} The ordered layer info
      */
     static getMapOrderedLayerInfo(mapId: string): TypeOrderedLayerInfo[];
+    /**
+     * Gets the ordered layer info for one layer.
+     * @param {string} mapId - The map id.
+     * @param {string} layerPath - The path of the layer to get.
+     * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
+     */
+    static getMapOrderedLayerInfoForLayer(mapId: string, layerPath: string): TypeOrderedLayerInfo | undefined;
     static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number;
     static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
     static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
@@ -107,6 +116,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @returns {string} The layer path of the highlighted layer.
      */
     static changeOrRemoveLayerHighlight(mapId: string, layerPath: string, hilightedLayerPath: string): string;
+    static setCurrentBasemapOptions(mapId: string, basemapOptions: TypeBasemapOptions): void;
     static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void;
     static setMapHoverFeatureInfo(mapId: string, hoverFeatureInfo: TypeHoverFeatureInfo): void;
     static setMapOrderedLayerInfo(mapId: string, orderedLayerInfo: TypeOrderedLayerInfo[]): void;
@@ -183,4 +193,31 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setLayerZIndices: (mapId: string) => void;
     static getPixelFromCoordinate: (mapId: string, coord: Coordinate) => [number, number];
     static setClickMarkerOnPosition: (mapId: string, position: number[]) => void;
+    /**
+     * Creates layer initial settings according to provided configs.
+     * @param {ConfigBaseClass} layerEntryConfig - Layer entry config for the layer.
+     * @param {TypeOrderedLayerInfo} orderedLayerInfo - Ordered layer info for the layer.
+     * @param {TypeLegendLayer} legendLayerInfo - Legend layer info for the layer.
+     * @returns {TypeLayerInitialSettings} Initial settings object.
+     */
+    static getInitialSettings(layerEntryConfig: ConfigBaseClass, orderedLayerInfo: TypeOrderedLayerInfo, legendLayerInfo: TypeLegendLayer): TypeLayerInitialSettings;
+    /**
+     * Creates a layer entry config based on current layer state.
+     * @param {string} mapId - Id of map.
+     * @param {string} layerPath - Path of the layer to create config for.
+     * @returns {TypeLayerEntryConfig} Entry config object.
+     */
+    static createLayerEntryConfig(mapId: string, layerPath: string): TypeLayerEntryConfig;
+    /**
+     * Creates a geoview layer config based on current layer state.
+     * @param {string} mapId - Id of map.
+     * @param {string} layerPath - Path of the layer to create config for.
+     * @returns {MapConfigLayerEntry} Geoview layer config object.
+     */
+    static createGeoviewLayerConfig(mapId: string, layerPath: string): MapConfigLayerEntry;
+    /**
+     * Creates a map config based on current map state.
+     * @param {string} mapId - Id of map.
+     */
+    static createMapConfigFromMapState(mapId: string): TypeMapFeaturesConfig | undefined;
 }
