@@ -1,4 +1,4 @@
-import React, { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref, useEffect } from 'react';
+import React, { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
@@ -10,6 +10,7 @@ import FullScreenDialog from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 
@@ -28,6 +29,7 @@ interface ResponsiveGridLayoutProps {
 
 interface ResponsiveGridLayoutExposedMethods {
   setIsRightPanelVisible: (isVisible: boolean) => void;
+  setRightPanelFocus: () => void;
 }
 
 const ResponsiveGridLayout = forwardRef(
@@ -51,6 +53,7 @@ const ResponsiveGridLayout = forwardRef(
     const { t } = useTranslation<string>();
     const guide = useAppGuide();
     const isMapFullScreen = useAppFullscreenActive();
+    const activeFocusItem = useUIActiveFocusItem();
 
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
     const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -59,11 +62,15 @@ const ResponsiveGridLayout = forwardRef(
 
     // Custom hook for calculating the height of footer panel
     const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
+    const rightMainRef = useRef<HTMLDivElement>();
 
     // Expose imperative methods to parent component
     useImperativeHandle(ref, function handleRef() {
       return {
         setIsRightPanelVisible: (isVisible: boolean) => setIsRightPanelVisible(isVisible),
+        setRightPanelFocus: () => {
+          rightMainRef.current?.focus();
+        },
       };
     });
 
@@ -87,6 +94,22 @@ const ResponsiveGridLayout = forwardRef(
         setIsEnlarged(false);
       }
     }, [hideEnlargeBtn, isEnlarged]);
+
+    // return back the focus to layeritem for which right panel was opened.
+    useEffect(() => {
+      const handleEscapeKey = (event: KeyboardEvent): void => {
+        if (event.key === 'Escape' && activeFocusItem.activeElementId) {
+          document.getElementById(activeFocusItem.activeElementId as string)?.focus();
+        }
+      };
+
+      const rightPanel = rightMainRef.current;
+      rightPanel?.addEventListener('keydown', handleEscapeKey);
+
+      return () => {
+        rightPanel?.removeEventListener('keydown', handleEscapeKey);
+      };
+    }, [activeFocusItem.activeElementId]);
 
     /**
      * Handles click on the Enlarge button.
@@ -256,7 +279,9 @@ const ResponsiveGridLayout = forwardRef(
           </FullScreenDialog>
 
           <Box
+            ref={rightMainRef}
             sx={sxClasses.rightGridContent}
+            tabIndex={0}
             className={isGuideOpen ? 'responsive-layout-right-main-content guide-container' : 'responsive-layout-right-main-content'}
           >
             {content}

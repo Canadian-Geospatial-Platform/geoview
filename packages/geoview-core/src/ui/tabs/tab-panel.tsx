@@ -15,6 +15,7 @@ export interface TypeTabPanelProps {
   id: string;
   children?: TypeChildren;
   containerType?: TypeContainerBox;
+  tabId: string;
 }
 
 /**
@@ -24,10 +25,10 @@ export interface TypeTabPanelProps {
  * @returns {JSX.Element} returns the tab panel
  */
 export function TabPanel(props: TypeTabPanelProps): JSX.Element {
-  const { children, value, index, id, containerType, ...other } = props;
+  const { children, value, index, id, containerType, tabId, ...other } = props;
 
   return (
-    <Box role="tabpanel" hidden={value !== index} id={id} aria-labelledby={`simple-tab-${index}`} {...other}>
+    <Box role="tabpanel" hidden={value !== index} id={id} aria-labelledby={`${tabId} layers`} {...other}>
       <FocusTrapContainer id={`panel-${index}`} containerType={containerType}>
         {children}
       </FocusTrapContainer>

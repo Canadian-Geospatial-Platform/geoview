@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { delay } from 'lodash';
@@ -39,10 +39,10 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   const { t } = useTranslation();
   const theme = useTheme();
 
-  const layerData = useDataTableAllFeaturesDataArray();
-
+  const dataTableRef = useRef<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(false);
 
+  const layerData = useDataTableAllFeaturesDataArray();
   const tableHeight = useDataTableTableHeight();
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
@@ -225,11 +225,13 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
     if (!isLayerDisabled() && isSelectedLayerHasFeatures()) {
       return (
         <>
-          {orderedLayerData.map((data: MappedLayerDataType) => (
-            <Box key={data.layerPath}>
-              {data.layerPath === selectedLayerPath ? <DataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} /> : null}
-            </Box>
-          ))}
+          {orderedLayerData
+            .filter((data) => data.layerPath === selectedLayerPath)
+            .map((data: MappedLayerDataType) => (
+              <Box key={data.layerPath} ref={dataTableRef}>
+                <DataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} />
+              </Box>
+            ))}
         </>
       );
     }

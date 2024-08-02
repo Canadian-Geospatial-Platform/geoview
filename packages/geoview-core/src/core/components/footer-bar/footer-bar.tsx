@@ -213,10 +213,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         lastChild.style.maxHeight = isCollapsed ? '0px' : '';
       }
     }
-    // unset footer tab id when footer bar panel is collapsed.
-    if (isCollapsed) {
-      setActiveFooterBarTab('');
-    }
   }, [isCollapsed, setActiveFooterBarTab]);
 
   /**
@@ -240,7 +236,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-BAR - selectedTab');
+    logger.logTraceUseEffect('FOOTER-BAR - selectedTab', selectedTab);
 
     // If clicked on a tab with a plugin
     MapEventProcessor.getMapViewerPlugins(mapId)
