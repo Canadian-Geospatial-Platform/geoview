@@ -31,6 +31,7 @@ export interface IUIState {
   footerPanelResizeValue: number;
   footerPanelResizeValues: number[];
   footerBarIsCollapsed: boolean;
+  selectedFooterLayerListItem: string;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
@@ -44,7 +45,7 @@ export interface IUIState {
     setFooterPanelResizeValue: (value: number) => void;
     setMapInfoExpanded: (expanded: boolean) => void;
     setFooterBarIsCollapsed: (collapsed: boolean) => void;
-    setFocusItem: (item: FocusItemProps) => void;
+    setSelectedFooterLayerListItem: (layerListItem: string) => void;
   };
 
   setterActions: {
@@ -57,7 +58,7 @@ export interface IUIState {
     setHiddenTabs: (hiddenTabs: string[]) => void;
     setMapInfoExpanded: (expanded: boolean) => void;
     setFooterBarIsCollapsed: (collapsed: boolean) => void;
-    setFocusItem: (item: FocusItemProps) => void;
+    setSelectedFooterLayerListItem: (layerListItem: string) => void;
   };
 }
 
@@ -83,6 +84,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     footerPanelResizeValue: 35,
     footerPanelResizeValues: [35, 50, 100],
     footerBarIsCollapsed: false,
+    selectedFooterLayerListItem: '',
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -148,9 +150,9 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to setter
         get().uiState.setterActions.setActiveAppBarTab(tabId, tabGroup, isOpen);
       },
-      setFocusItem: (item: FocusItemProps) => {
+      setSelectedFooterLayerListItem: (layerListItem: string) => {
         // Redirect to setter
-        get().uiState.setterActions.setFocusItem(item);
+        get().uiState.setterActions.setSelectedFooterLayerListItem(layerListItem);
       },
     },
 
@@ -232,11 +234,11 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
-      setFocusItem: (item: FocusItemProps) => {
+      setSelectedFooterLayerListItem: (layerListItem: string) => {
         set({
           uiState: {
             ...get().uiState,
-            focusItem: item,
+            selectedFooterLayerListItem: layerListItem,
           },
         });
       },
@@ -270,5 +272,7 @@ export const useUIHiddenTabs = (): string[] => useStore(useGeoViewStore(), (stat
 export const useUIMapInfoExpanded = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.mapInfoExpanded);
 export const useUINavbarComponents = (): TypeNavBarProps => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 export const useUIFooterBarIsCollapsed = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.footerBarIsCollapsed);
+export const useUISelectedFooterLayerListItem = (): string =>
+  useStore(useGeoViewStore(), (state) => state.uiState.selectedFooterLayerListItem);
 
 export const useUIStoreActions = (): UIActions => useStore(useGeoViewStore(), (state) => state.uiState.actions);

@@ -23,7 +23,7 @@ export interface LayerListEntry {
 interface LayerListProps {
   layerList: LayerListEntry[];
   selectedLayerPath: string | undefined;
-  onListItemClick: (layer: LayerListEntry, layerUIId: string) => void;
+  onListItemClick: (layer: LayerListEntry) => void;
   mapId: string;
 }
 
@@ -31,7 +31,7 @@ interface LayerListItemProps {
   id: string;
   isSelected: boolean;
   layer: LayerListEntry;
-  onListItemClick: (layer: LayerListEntry, layerUIId: string) => void;
+  onListItemClick: (layer: LayerListEntry) => void;
   layerIndex: number;
 }
 
@@ -114,10 +114,17 @@ const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onLis
   /**
    * Handle layer click when mouse enter is pressed.
    */
-  const handleLayerKeyDown = (e: React.KeyboardEvent, selectedLayer: LayerListEntry, layerId: string): void => {
-    // e.preventDefault();
-    if (e.key === 'Enter' && !isDisabled) onListItemClick(selectedLayer, layerId);
-  };
+  const handleLayerKeyDown = useCallback(
+    (e: React.KeyboardEvent, selectedLayer: LayerListEntry): void => {
+      if (e.key === 'Enter' && !isDisabled) {
+        onListItemClick(selectedLayer);
+        // NOTE: did this, bcz when enter is clicked, tab component `handleClick` function is fired,
+        // to avoid this we have do prevent default so that it doesn't probagate to the parent elements.
+        e.preventDefault();
+      }
+    },
+    [isDisabled, onListItemClick]
+  );
 
   const AnimatedPaper = animated(Paper);
 
@@ -125,13 +132,18 @@ const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onLis
     <AnimatedPaper sx={{ marginBottom: '1rem' }} style={listItemSpring} className={getContainerClass()}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
-          <ListItem disablePadding onKeyDown={(e) => handleLayerKeyDown(e, layer, id)} tabIndex={0} id={id}>
+          <ListItem
+            disablePadding
+            onKeyDown={(e) => handleLayerKeyDown(e, layer)}
+            onClick={() => onListItemClick(layer)}
+            tabIndex={0}
+            id={id}
+          >
             <ListItemButton
               tabIndex={-1}
               selected={isSelected}
               // disable when layer features has null value.
               disabled={isDisabled || isLoading}
-              onClick={() => onListItemClick(layer, id)}
               aria-label={layer.layerName}
             >
               {renderLayerIcon()}

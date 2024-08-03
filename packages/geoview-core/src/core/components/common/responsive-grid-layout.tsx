@@ -10,7 +10,7 @@ import FullScreenDialog from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUISelectedFooterLayerListItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 
@@ -53,7 +53,7 @@ const ResponsiveGridLayout = forwardRef(
     const { t } = useTranslation<string>();
     const guide = useAppGuide();
     const isMapFullScreen = useAppFullscreenActive();
-    const activeFocusItem = useUIActiveFocusItem();
+    const selectedFooterLayerListItem = useUISelectedFooterLayerListItem();
 
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
     const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -69,7 +69,10 @@ const ResponsiveGridLayout = forwardRef(
       return {
         setIsRightPanelVisible: (isVisible: boolean) => setIsRightPanelVisible(isVisible),
         setRightPanelFocus: () => {
-          rightMainRef.current?.focus();
+          if (rightMainRef.current) {
+            rightMainRef.current.tabIndex = 0;
+            rightMainRef.current?.focus();
+          }
         },
       };
     });
@@ -98,8 +101,9 @@ const ResponsiveGridLayout = forwardRef(
     // return back the focus to layeritem for which right panel was opened.
     useEffect(() => {
       const handleEscapeKey = (event: KeyboardEvent): void => {
-        if (event.key === 'Escape' && activeFocusItem.activeElementId) {
-          document.getElementById(activeFocusItem.activeElementId as string)?.focus();
+        if (event.key === 'Escape' && selectedFooterLayerListItem.length && rightMainRef.current) {
+          document.getElementById(selectedFooterLayerListItem)?.focus();
+          rightMainRef.current.tabIndex = -1;
         }
       };
 
@@ -109,7 +113,7 @@ const ResponsiveGridLayout = forwardRef(
       return () => {
         rightPanel?.removeEventListener('keydown', handleEscapeKey);
       };
-    }, [activeFocusItem.activeElementId]);
+    }, [selectedFooterLayerListItem]);
 
     /**
      * Handles click on the Enlarge button.
@@ -281,7 +285,7 @@ const ResponsiveGridLayout = forwardRef(
           <Box
             ref={rightMainRef}
             sx={sxClasses.rightGridContent}
-            tabIndex={0}
+            tabIndex={-1}
             className={isGuideOpen ? 'responsive-layout-right-main-content guide-container' : 'responsive-layout-right-main-content'}
           >
             {content}

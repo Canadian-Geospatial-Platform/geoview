@@ -35,22 +35,22 @@ export function Layout({
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
   const theme = useTheme();
   const mapId = useGeoViewMapId();
-  const { setFocusItem } = useUIStoreActions();
+  const { setSelectedFooterLayerListItem } = useUIStoreActions();
   /**
    * Handles clicks to layers in left panel. Sets selected layer.
    *
    * @param {LayerListEntry} layer The data of the selected layer
    */
   const handleLayerChange = useCallback(
-    (layer: LayerListEntry, layerUIId: string): void => {
+    (layer: LayerListEntry): void => {
       onLayerListClicked?.(layer);
       // Show the panel (hiding the layers list in the process if we're on mobile)
       responsiveLayoutRef.current?.setIsRightPanelVisible(true);
       responsiveLayoutRef.current?.setRightPanelFocus();
       // set the focus item when layer item clicked.
-      setFocusItem({ activeElementId: layerUIId, callbackElementId: false });
+      setSelectedFooterLayerListItem(`${mapId}-${layer.layerPath}`);
     },
-    [onLayerListClicked, setFocusItem]
+    [onLayerListClicked, setSelectedFooterLayerListItem, mapId]
   );
 
   /**
