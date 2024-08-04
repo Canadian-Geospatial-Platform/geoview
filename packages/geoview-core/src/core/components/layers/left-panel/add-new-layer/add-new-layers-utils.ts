@@ -1,20 +1,20 @@
-import { GroupLayerEntryConfig, TypeGeoviewLayerType, TypeLocalizedString } from "@/api/config/types/map-schema-types";
-import { createLocalizedString, generateId } from "@/core/utils/utilities";
-import { TypeGeoviewLayerConfig } from "@/geo/map/map-schema-types";
+import { GroupLayerEntryConfig, TypeGeoviewLayerType, TypeLocalizedString } from '@/api/config/types/map-schema-types';
+import { createLocalizedString, generateId } from '@/core/utils/utilities';
+import { TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 
 type ListOfLayerEntry = {
   layerId: string;
   layerName?: TypeLocalizedString;
   entryType?: string;
   listOfLayerEntryConfig?: ListOfLayerEntry[];
-}
+};
 type GeoViewLayerToAdd = {
   geoviewLayerId: string;
   geoviewLayerName: TypeLocalizedString;
   geoviewLayerType: TypeGeoviewLayerType;
   metadataAccessPath: TypeLocalizedString;
   listOfLayerEntryConfig: ListOfLayerEntry[];
-}
+};
 
 type BuildGeoViewLayerInput = {
   layerIdsToAdd: string[];
@@ -22,23 +22,21 @@ type BuildGeoViewLayerInput = {
   layerType: string;
   layerURL: string;
   layersList: GroupLayerEntryConfig[];
-}
+};
 
 const getLayerNameById = (layersList: GroupLayerEntryConfig[], layerId: string): string | null | undefined => {
-
   function searchBranchForLayer(branchGroup: GroupLayerEntryConfig): string | null | undefined {
     if (branchGroup.layerId === layerId) return branchGroup.layerName;
 
     const layer = branchGroup.listOfLayerEntryConfig?.find((layer) => layer.layerId === layerId);
     if (layer) return layer.layerName;
-
-    else if (branchGroup.listOfLayerEntryConfig) {
+    if (branchGroup.listOfLayerEntryConfig) {
       for (let i = 0; i < branchGroup.listOfLayerEntryConfig.length; i++) {
         const layer = branchGroup.listOfLayerEntryConfig[i] as GroupLayerEntryConfig;
         if (layer.listOfLayerEntryConfig) {
           const name = searchBranchForLayer(layer as GroupLayerEntryConfig);
           if (name) return name;
-          else continue;
+          continue;
         }
       }
     } else return null;
@@ -56,22 +54,22 @@ const getLayerNameById = (layersList: GroupLayerEntryConfig[], layerId: string):
 export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput): TypeGeoviewLayerConfig {
   const { layerIdsToAdd, layerName, layerType, layerURL, layersList } = inputProps;
 
-  let geoviewLayerConfig: GeoViewLayerToAdd = {
+  const geoviewLayerConfig: GeoViewLayerToAdd = {
     geoviewLayerId: generateId(),
     geoviewLayerName: createLocalizedString(layerName),
     geoviewLayerType: layerType as TypeGeoviewLayerType,
     metadataAccessPath: createLocalizedString(layerURL),
-    listOfLayerEntryConfig: []
+    listOfLayerEntryConfig: [],
   };
 
   function appendChildLayerNode(treeRoot: ListOfLayerEntry, layerId: string, parentLayerId: string) {
     if (treeRoot.layerId === parentLayerId) {
-      treeRoot.entryType = "group";
+      treeRoot.entryType = 'group';
       treeRoot.layerName = createLocalizedString(getLayerNameById(layersList, treeRoot.layerId) ?? 'unknown');
       if (!treeRoot.listOfLayerEntryConfig) {
         treeRoot.listOfLayerEntryConfig = [];
       }
-      treeRoot.listOfLayerEntryConfig.push({ layerId: layerId });
+      treeRoot.listOfLayerEntryConfig.push({ layerId });
       return;
     }
 
@@ -88,7 +86,7 @@ export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput):
   function addRootLayerNode(layerId: string) {
     const exists = geoviewLayerConfig.listOfLayerEntryConfig.find((entry) => entry.layerId === layerId);
     if (exists) return;
-    geoviewLayerConfig.listOfLayerEntryConfig.push({ layerId: layerId });
+    geoviewLayerConfig.listOfLayerEntryConfig.push({ layerId });
   }
 
   layerIdsToAdd.forEach((layerId) => {
@@ -105,4 +103,4 @@ export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput):
   });
 
   return geoviewLayerConfig as unknown as TypeGeoviewLayerConfig;
-}
+};

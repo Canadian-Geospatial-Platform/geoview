@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useEffect, useRef, useState, KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SelectChangeEvent, useTheme } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   Button,
@@ -14,7 +14,6 @@ import {
   TextField,
 } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { createLocalizedString, generateId } from '@/core/utils/utilities';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
@@ -25,8 +24,8 @@ import {
   AbstractGeoViewLayer,
   TypeGeoviewLayerType,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { CONST_LAYER_ENTRY_TYPES, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
-import { GroupLayerEntryConfig, TypeLocalizedString } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES } from '@/geo/map/map-schema-types';
+import { GroupLayerEntryConfig } from '@/api/config/types/map-schema-types';
 import { AddLayerTree } from './add-layer-tree';
 import { buildGeoLayerToAdd } from './add-new-layers-utils';
 
@@ -63,7 +62,7 @@ export function AddNewLayer(): JSX.Element {
   const { setDisplayState } = useLayerStoreActions();
 
   const isMultiple = (): boolean =>
-    (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
+    hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
 
   /**
    * List of layer types and labels
@@ -274,9 +273,6 @@ export function AddNewLayer(): JSX.Element {
     else api.maps[mapId].notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
   };
 
-
-
-
   /**
    * Handle the behavior of the 'Finish' button in the Stepper UI
    */
@@ -288,8 +284,8 @@ export function AddNewLayer(): JSX.Element {
       layerName,
       layerType,
       layerURL,
-      layersList: layerList
-    })
+      layersList: layerList,
+    });
 
     // Add the layer using the proper function
     const addedLayer = api.maps[mapId].layer.addGeoviewLayer(newGeoViewLayer);
@@ -369,7 +365,6 @@ export function AddNewLayer(): JSX.Element {
 
     setStepButtonDisable(false);
   };
-
 
   /**
    * Set the layer name from form input
@@ -511,7 +506,6 @@ export function AddNewLayer(): JSX.Element {
     );
   }
 
-
   return (
     <Paper sx={{ padding: '20px', gap: '8' }}>
       <Stepper
@@ -645,13 +639,7 @@ export function AddNewLayer(): JSX.Element {
                     />
                   )}
                   {layerList.length > 0 && (
-                    <>
-                      <AddLayerTree
-                        layersData={layerList}
-                        startingSelectedItems={layerIdsToAdd}
-                        onSelectedItemsChange={setLayerIdsToAdd}
-                      />
-                    </>
+                    <AddLayerTree layersData={layerList} startingSelectedItems={layerIdsToAdd} onSelectedItemsChange={setLayerIdsToAdd} />
                   )}
                   <br />
                   <NavButtons isLast={!isMultiple()} handleNext={isMultiple() ? handleStep3 : handleStepLast} />
@@ -661,25 +649,25 @@ export function AddNewLayer(): JSX.Element {
           },
           isMultiple()
             ? {
-              stepLabel: {
-                children: t('layers.stepFour'),
-              },
-              stepContent: {
-                children: (
-                  <>
-                    <TextField
-                      sx={{ width: '100%' }}
-                      label={t('layers.name')}
-                      variant="standard"
-                      value={layerName}
-                      onChange={handleNameLayer}
-                    />
-                    <br />
-                    <NavButtons isLast handleNext={handleStepLast} />
-                  </>
-                ),
-              },
-            }
+                stepLabel: {
+                  children: t('layers.stepFour'),
+                },
+                stepContent: {
+                  children: (
+                    <>
+                      <TextField
+                        sx={{ width: '100%' }}
+                        label={t('layers.name')}
+                        variant="standard"
+                        value={layerName}
+                        onChange={handleNameLayer}
+                      />
+                      <br />
+                      <NavButtons isLast handleNext={handleStepLast} />
+                    </>
+                  ),
+                },
+              }
             : null,
         ]}
       />
