@@ -102,8 +102,8 @@ const ResponsiveGridLayout = forwardRef(
     useEffect(() => {
       const handleEscapeKey = (event: KeyboardEvent): void => {
         if (event.key === 'Escape' && selectedFooterLayerListItem.length && rightMainRef.current) {
-          document.getElementById(selectedFooterLayerListItem)?.focus();
           rightMainRef.current.tabIndex = -1;
+          document.getElementById(selectedFooterLayerListItem)?.focus();
         }
       };
 

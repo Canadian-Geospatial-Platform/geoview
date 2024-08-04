@@ -90,6 +90,7 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
     });
     const csvExporter = new ExportToCsv(getCsvOptions());
     csvExporter.generateCsv(csvRows);
+    setAnchorEl(null);
   }, [getCsvOptions, rows]);
 
   return (

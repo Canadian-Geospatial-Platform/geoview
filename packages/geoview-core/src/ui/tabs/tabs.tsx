@@ -145,7 +145,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       // and tab is selected again to open the panel.
       if (value === index || value === -1) onToggleCollapse?.();
 
-      // // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
+      // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
       if (activeTrap) onOpenKeyboard?.({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
       else onCloseKeyboard?.();
     },
