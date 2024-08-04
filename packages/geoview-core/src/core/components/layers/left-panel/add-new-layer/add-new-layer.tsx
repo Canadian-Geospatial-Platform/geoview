@@ -1,17 +1,11 @@
 import React, { ChangeEvent, useEffect, useRef, useState, KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SelectChangeEvent, useTheme } from '@mui/material';
-import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
-import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import {
-  Autocomplete,
   Box,
   Button,
   ButtonGroup,
   ButtonPropsLayerPanel,
-  CheckBoxIcon,
-  CheckBoxOutlineBlankIcon,
-  Checkbox,
   CircularProgressBase,
   FileUploadIcon,
   Paper,
@@ -20,7 +14,7 @@ import {
   TextField,
 } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { createLocalizedString } from '@/core/utils/utilities';
+import { createLocalizedString, generateId } from '@/core/utils/utilities';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
@@ -31,16 +25,16 @@ import {
   AbstractGeoViewLayer,
   TypeGeoviewLayerType,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
-import { EntryConfigBaseClass, GroupLayerEntryConfig } from '@/api/config/types/map-schema-types';
-import { render } from 'react-dom';
+import { CONST_LAYER_ENTRY_TYPES, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { GroupLayerEntryConfig, TypeLocalizedString } from '@/api/config/types/map-schema-types';
+import { AddLayerTree } from './add-layer-tree';
+import { buildGeoLayerToAdd } from './add-new-layers-utils';
 
 export function AddNewLayer(): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/add-new-layer/add-new-layer');
 
   const { t } = useTranslation<string>();
-  const theme = useTheme();
 
   const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES } = CONST_LAYER_TYPES;
   const { GEOCORE } = CONST_LAYER_ENTRY_TYPES;
@@ -52,7 +46,7 @@ export function AddNewLayer(): JSX.Element {
   const [layerList, setLayerList] = useState<GroupLayerEntryConfig[]>([]);
 
   const [layerName, setLayerName] = useState('');
-  const [layerEntries, setLayerEntries] = useState<TypeLayerEntryConfig[] | TypeGeoviewLayerConfig[]>([]);
+  const [layerIdsToAdd, setLayerIdsToAdd] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [drag, setDrag] = useState<boolean>(false);
   const [hasMetadata, setHasMetadata] = useState<boolean>(false);
@@ -69,7 +63,7 @@ export function AddNewLayer(): JSX.Element {
   const { setDisplayState } = useLayerStoreActions();
 
   const isMultiple = (): boolean =>
-    hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
+    (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
 
   /**
    * List of layer types and labels
@@ -195,7 +189,6 @@ export function AddNewLayer(): JSX.Element {
         const layersTree = await api.configApi.createMetadataLayerTree(layerURL, curlayerType, [], 'en');
         setLayerList(layersTree as GroupLayerEntryConfig[]);
         setHasMetadata(true);
-        console.log('layersTree 1111 ********* ', layersTree);
         return true;
       } catch (err) {
         emitErrorServer(curlayerType);
@@ -259,7 +252,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const handleStep3 = (): void => {
     let valid = true;
-    if (layerEntries.length === 0) {
+    if (layerIdsToAdd.length === 0) {
       valid = false;
       emitErrorEmpty(t('layers.layer'));
     }
@@ -281,30 +274,25 @@ export function AddNewLayer(): JSX.Element {
     else api.maps[mapId].notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
   };
 
+
+
+
   /**
    * Handle the behavior of the 'Finish' button in the Stepper UI
    */
   const handleStepLast = (): void => {
     setIsLoading(true);
-    // if (true) {
-    // Get config
-    const { geoviewLayerConfig } = layerEntries[0] as TypeLayerEntryConfig;
 
-    // Have to massage this so the `setListOfLayerEntryConfig` inside the layer constructor works
-    // TODO: Refactor - Try to find a way to simplify/clarify what's going on in the layer constructor's call to `setListOfLayerEntryConfig`.
-    // TO.DOCONT: The recursion is necessary, but can the root be a derived type of the branches/leaves or something?
-    // TO.DOCONT: Maybe just me, but seems a bit hard to understand what needs to be set in the `geoviewLayerConfig.listOfLayerEntryConfig`.
-    // TO.DOCONT: Anyways, this works as-it-was before the refactor for now.
-    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries as TypeLayerEntryConfig[];
-
-    // TODO: Bug - Fix this layer naming not working, wasn't working before the refactor either, leaving it as-is
-    geoviewLayerConfig.geoviewLayerName = createLocalizedString(layerName);
-    if (layerType === XYZ_TILES) (layerEntries[0] as TypeLayerEntryConfig).layerName = createLocalizedString(layerName);
-    if (geoviewLayerConfig.listOfLayerEntryConfig.length === 1)
-      geoviewLayerConfig.listOfLayerEntryConfig[0].layerName = geoviewLayerConfig.geoviewLayerName;
+    const newGeoViewLayer = buildGeoLayerToAdd({
+      layerIdsToAdd,
+      layerName,
+      layerType,
+      layerURL,
+      layersList: layerList
+    })
 
     // Add the layer using the proper function
-    const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+    const addedLayer = api.maps[mapId].layer.addGeoviewLayer(newGeoViewLayer);
     if (addedLayer) {
       // Wait on the promise
       addedLayer.promiseLayer
@@ -347,7 +335,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerType('');
     setLayerList([]);
     setLayerName(fileName);
-    setLayerEntries([]);
+    setLayerIdsToAdd([]);
   };
 
   /**
@@ -361,7 +349,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerType('');
     setLayerList([]);
     setLayerName('');
-    setLayerEntries([]);
+    setLayerIdsToAdd([]);
 
     // TODO: create a utilities function to test valid URL before we enable the continue button
     // TODO.CONT: This function should try to ping the server for an answer...
@@ -377,36 +365,11 @@ export function AddNewLayer(): JSX.Element {
   const handleSelectType = (event: SelectChangeEvent<unknown>): void => {
     setLayerType(event.target.value as TypeGeoviewLayerTypeWithGeoCore);
     setLayerList([]);
-    setLayerEntries([]);
+    setLayerIdsToAdd([]);
 
     setStepButtonDisable(false);
   };
 
-  /**
-   * Set the currently selected layer from a list
-   *
-   * @param {Event} event - Select event
-   * @param {TypeLayerEntryConfig[] | TypeLayerEntryConfig} newValue - The new layer entry config value
-   *
-   * @param newValue value/label pairs of select options
-   */
-  const handleSelectLayer = (event: Event, newValue: TypeLayerEntryConfig[] | TypeLayerEntryConfig): void => {
-    setStepButtonDisable(true);
-
-    if (isMultiple()) {
-      if (!((newValue as TypeLayerEntryConfig[]).length === 0)) {
-        setLayerEntries(newValue as TypeLayerEntryConfig[]);
-        setLayerName((newValue as TypeLayerEntryConfig[]).map((layerConfig) => layerConfig.layerName!.en).join(', '));
-
-        setStepButtonDisable(false);
-      }
-    } else {
-      setLayerEntries([newValue as TypeLayerEntryConfig]);
-      setLayerName((newValue as TypeLayerEntryConfig).layerName!.en!);
-
-      setStepButtonDisable(false);
-    }
-  };
 
   /**
    * Set the layer name from form input
@@ -420,8 +383,8 @@ export function AddNewLayer(): JSX.Element {
 
   // To set the button enable when validation set the layerName
   useEffect(() => {
-    if (activeStep === 2 && layerEntries.length > 0) setStepButtonDisable(false);
-  }, [layerName, activeStep, layerEntries]);
+    if (activeStep === 2 && layerIdsToAdd.length > 0) setStepButtonDisable(false);
+  }, [layerName, activeStep, layerIdsToAdd]);
 
   useEffect(() => {
     if (activeStep === 0) {
@@ -548,18 +511,6 @@ export function AddNewLayer(): JSX.Element {
     );
   }
 
-  const uncheckedIcon = <CheckBoxOutlineBlankIcon fontSize={theme.palette.geoViewFontSize.sm} />;
-  const checkedIcon = <CheckBoxIcon fontSize={theme.palette.geoViewFontSize.sm} />;
-
-  function renderListItem(layer: GroupLayerEntryConfig, selected?: boolean): JSX.Element {
-    return (
-      <TreeItem itemId={layer.layerId} label={layer.layerName}>
-        {layer?.listOfLayerEntryConfig?.length > 0 && (
-            layer.listOfLayerEntryConfig.map((subLayer: EntryConfigBaseClass) => renderListItem(subLayer as GroupLayerEntryConfig))
-        )}
-      </TreeItem>
-    );
-  }
 
   return (
     <Paper sx={{ padding: '20px', gap: '8' }}>
@@ -694,9 +645,13 @@ export function AddNewLayer(): JSX.Element {
                     />
                   )}
                   {layerList.length > 0 && (
-                    <SimpleTreeView sx={{fontSize: '0.8rem', '& .MuiTreeItem-label': { fontSize: '0.8rem !important'}}} multiSelect checkboxSelection>
-                      {layerList[0].listOfLayerEntryConfig.map((layer) => renderListItem(layer as GroupLayerEntryConfig))}
-                    </SimpleTreeView>
+                    <>
+                      <AddLayerTree
+                        layersData={layerList}
+                        startingSelectedItems={layerIdsToAdd}
+                        onSelectedItemsChange={setLayerIdsToAdd}
+                      />
+                    </>
                   )}
                   <br />
                   <NavButtons isLast={!isMultiple()} handleNext={isMultiple() ? handleStep3 : handleStepLast} />
@@ -706,26 +661,25 @@ export function AddNewLayer(): JSX.Element {
           },
           isMultiple()
             ? {
-                stepLabel: {
-                  children: t('layers.stepFour'),
-                },
-                stepContent: {
-                  children: (
-                    <>
-                      <TextField
-                        sx={{ width: '100%' }}
-                        label={t('layers.name')}
-                        variant="standard"
-                        value={layerName}
-                        onChange={handleNameLayer}
-                        ref={isMultipleTextFieldRef}
-                      />
-                      <br />
-                      <NavButtons isLast handleNext={handleStepLast} />
-                    </>
-                  ),
-                },
-              }
+              stepLabel: {
+                children: t('layers.stepFour'),
+              },
+              stepContent: {
+                children: (
+                  <>
+                    <TextField
+                      sx={{ width: '100%' }}
+                      label={t('layers.name')}
+                      variant="standard"
+                      value={layerName}
+                      onChange={handleNameLayer}
+                    />
+                    <br />
+                    <NavButtons isLast handleNext={handleStepLast} />
+                  </>
+                ),
+              },
+            }
             : null,
         ]}
       />
