@@ -1,10 +1,10 @@
 /**
  * This component improves Mui's TreeView component to be able to process Layers data.
  */
-import { logger } from '@/core/utils/logger';
 import React, { useEffect, useState } from 'react';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
+import { logger } from '@/core/utils/logger';
 import { EntryConfigBaseClass, GroupLayerEntryConfig } from '@/api/config/types/map-schema-types';
 
 export interface AddLayerTreeProps {
@@ -18,19 +18,22 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element {
   logger.logTraceRender('components/layers/left-panel/add-layer-tree/add-layer-tree');
 
   const { layersData, startingSelectedItems } = props;
-  const [defaultExpandedItems, setDefaultExpandedItems] = useState<string[]>([]); //e.g. ["layer1", "layer2"]
+  const [defaultExpandedItems, setDefaultExpandedItems] = useState<string[]>([]); // e.g. ["layer1", "layer2"]
   const [defaultSelectedItems, setDefaultSelectedItems] = useState<string[]>([]);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]); //e.g. ["group1/layer1", "group2/layer2"]
+  const [selectedItems, setSelectedItems] = useState<string[]>([]); // e.g. ["group1/layer1", "group2/layer2"]
 
-  //this use effect acts like onComponentDidMount
+  // this use effect acts like onComponentDidMount
   useEffect(() => {
     setSelectedItems(startingSelectedItems);
     setDefaultSelectedItems(startingSelectedItems);
 
-    const result = startingSelectedItems.map((item: string) => {
-      return item.split("/");
-    }).flat().concat(selectedItems);
+    const result = startingSelectedItems
+      .map((item: string) => {
+        return item.split('/');
+      })
+      .flat()
+      .concat(selectedItems);
     setDefaultExpandedItems(result);
     setIsInitialized(true);
   }, []);
@@ -39,18 +42,17 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element {
     props.onSelectedItemsChange(selectedItems);
   }, [selectedItems]);
 
-
   function renderTreeItem(layer: GroupLayerEntryConfig, parentId: string | null, parentIsSelected: boolean = false): JSX.Element {
-    const curLayerId = `${parentId ? parentId + "/" : ""}${layer.layerId}`;
+    const curLayerId = `${parentId ? `${parentId}/` : ''}${layer.layerId}`;
     return (
       <TreeItem key={curLayerId} itemId={curLayerId} label={layer.layerName}>
-        {layer?.listOfLayerEntryConfig?.length > 0 && (
-          layer.listOfLayerEntryConfig.map((subLayer: EntryConfigBaseClass) => renderTreeItem(subLayer as GroupLayerEntryConfig, curLayerId))
-        )}
+        {layer?.listOfLayerEntryConfig?.length > 0 &&
+          layer.listOfLayerEntryConfig.map((subLayer: EntryConfigBaseClass) =>
+            renderTreeItem(subLayer as GroupLayerEntryConfig, curLayerId)
+          )}
       </TreeItem>
     );
   }
-
 
   // Event handler for tree selection change
   function handleSelectedItemsChange(event: React.SyntheticEvent, items: string[] | string): void {
@@ -58,7 +60,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element {
     setSelectedItems(sortedItems);
   }
 
-  if(!isInitialized) {
+  if (!isInitialized) {
     return <></>;
   }
 
@@ -69,8 +71,9 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element {
       checkboxSelection
       defaultExpandedItems={defaultExpandedItems}
       defaultSelectedItems={defaultSelectedItems}
-      onSelectedItemsChange={handleSelectedItemsChange}>
+      onSelectedItemsChange={handleSelectedItemsChange}
+    >
       {layersData[0].listOfLayerEntryConfig.map((layer) => renderTreeItem(layer as GroupLayerEntryConfig, null))}
     </SimpleTreeView>
-  )
-};
+  );
+}
