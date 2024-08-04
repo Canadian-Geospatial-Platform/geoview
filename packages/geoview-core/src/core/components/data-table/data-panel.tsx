@@ -17,6 +17,7 @@ import {
   useUIActiveFooterBarTabId,
   useUIAppbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
@@ -42,6 +43,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   const dataTableRef = useRef<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(false);
 
+  const mapId = useGeoViewMapId();
   const layerData = useDataTableAllFeaturesDataArray();
   const tableHeight = useDataTableTableHeight();
   const selectedLayerPath = useDataTableSelectedLayerPath();
@@ -257,6 +259,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
     return orderedLayerData.map((layer) => ({
       ...layer,
+      layerUniqueId: `${mapId}-${TABS.DATA_TABLE}-${layer.layerPath}`,
       layerFeatures: getFeaturesOfLayer(layer.layerPath),
       tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
       mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (

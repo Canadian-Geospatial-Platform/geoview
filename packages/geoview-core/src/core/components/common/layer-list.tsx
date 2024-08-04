@@ -18,13 +18,13 @@ export interface LayerListEntry {
   tooltip?: JSX.Element | string;
   numOffeatures?: number;
   features?: TypeFeatureInfoEntry[] | undefined | null;
+  layerUniqueId?: string;
 }
 
 interface LayerListProps {
   layerList: LayerListEntry[];
   selectedLayerPath: string | undefined;
   onListItemClick: (layer: LayerListEntry) => void;
-  mapId: string;
 }
 
 interface LayerListItemProps {
@@ -163,10 +163,9 @@ const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onLis
  * @param {number} selectedLayerIndex  Current index of list item selected.
  * @param {string} selectedLayerPath  Selected path of the layer.
  * @param {Function} onListItemClick  Callback function excecuted when list item is clicked.
- * @param {string} mapId The id of the map.
  * @returns {JSX.Element}
  */
-export function LayerList({ layerList, selectedLayerPath, onListItemClick, mapId }: LayerListProps): JSX.Element {
+export function LayerList({ layerList, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
@@ -176,7 +175,7 @@ export function LayerList({ layerList, selectedLayerPath, onListItemClick, mapId
       {!!layerList.length &&
         layerList.map((layer, ind) => (
           <LayerListItem
-            id={`${mapId}-${layer.layerPath}`}
+            id={`${layer?.layerUniqueId ?? ''}`}
             key={layer.layerPath}
             // Reason:- (layer?.numOffeatures ?? 1) > 0
             // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.

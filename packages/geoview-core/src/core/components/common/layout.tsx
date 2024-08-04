@@ -6,7 +6,6 @@ import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from './resp
 import { Tooltip, Typography } from '@/ui';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface LayoutProps {
@@ -34,7 +33,7 @@ export function Layout({
 }: LayoutProps): JSX.Element {
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
   const theme = useTheme();
-  const mapId = useGeoViewMapId();
+
   const { setSelectedFooterLayerListItem } = useUIStoreActions();
   /**
    * Handles clicks to layers in left panel. Sets selected layer.
@@ -48,9 +47,9 @@ export function Layout({
       responsiveLayoutRef.current?.setIsRightPanelVisible(true);
       responsiveLayoutRef.current?.setRightPanelFocus();
       // set the focus item when layer item clicked.
-      setSelectedFooterLayerListItem(`${mapId}-${layer.layerPath}`);
+      setSelectedFooterLayerListItem(`${layer.layerUniqueId}`);
     },
-    [onLayerListClicked, setSelectedFooterLayerListItem, mapId]
+    [onLayerListClicked, setSelectedFooterLayerListItem]
   );
 
   /**
@@ -62,8 +61,8 @@ export function Layout({
     // Log
     logger.logTraceUseCallback('LAYOUT - renderLayerList');
 
-    return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} mapId={mapId} />;
-  }, [selectedLayerPath, layerList, handleLayerChange, mapId]);
+    return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
+  }, [selectedLayerPath, layerList, handleLayerChange]);
 
   /**
    * Get the layer title

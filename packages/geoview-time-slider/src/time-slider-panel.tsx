@@ -11,6 +11,7 @@ import { useLayerLegendLayers } from 'geoview-core/src/core/stores/store-interfa
 import { LegendEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/legend-event-processor';
 import { Box } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
+import { TABS } from 'geoview-core/src/core/utils/constant';
 
 import { ReactNode } from 'react';
 import { TimeSlider } from './time-slider';
@@ -106,9 +107,10 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           ),
           layerStatus: 'loaded',
           queryStatus: 'processed',
+          layerUniqueId: `${mapId}-${TABS.TIME_SLIDER}-${layer.layerPath}`,
         } as LayerListEntry;
       });
-  }, [legendLayers, timeSliderLayers, visibleLayers]);
+  }, [legendLayers, timeSliderLayers, visibleLayers, mapId]);
 
   useEffect(() => {
     // Log
