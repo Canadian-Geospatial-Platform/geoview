@@ -132,11 +132,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     // Can be any object so disable eslint
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serialized = super.onSerialize() as any;
-
     // Copy values
-    serialized.layerIdExtension = this.layerIdExtension;
-    serialized.layerName = this.layerName;
     serialized.initialSettings = this.initialSettings;
+    serialized.source = this.source;
 
     // Return it
     return serialized;

@@ -12,7 +12,7 @@ export type TypeEsriFeatureLayerNode = GroupLayerEntryConfig | EsriFeatureLayerE
 /** The ESRI feature geoview layer class. */
 export class EsriFeatureLayerConfig extends AbstractGeoviewEsriLayerConfig {
   /** Type of GeoView layer. */
-  geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_FEATURE;
+  override geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_FEATURE;
 
   /** The layer entries to use from the GeoView layer. */
   declare listOfLayerEntryConfig: TypeEsriFeatureLayerNode[];
@@ -24,7 +24,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewEsriLayerConfig {
    * @returns {string} The GeoView layer schema associated to the config.
    * @protected
    */
-  protected override get geoviewLayerSchema(): string {
+  protected override getGeoviewLayerSchema(): string {
     /** The GeoView layer schema associated to EsriFeatureLayerConfig */
     return CV_GEOVIEW_SCHEMA_PATH.ESRI_FEATURE;
   }

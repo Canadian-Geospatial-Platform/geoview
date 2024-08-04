@@ -59,7 +59,7 @@ export class GroupLayerEntryConfig extends EntryConfigBaseClass {
    *
    * @returns {string} The schemaPath associated to the sublayer.
    */
-  protected override get schemaPath(): string {
+  protected override getSchemaPath(): string {
     return CV_LAYER_GROUP_SCHEMA_PATH;
   }
 

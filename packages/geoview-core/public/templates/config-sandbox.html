@@ -435,7 +435,7 @@
     generateLayerPathErrorFlag = (listOfLayerEntryConfig, buffer = '', prefix = '') => {
       listOfLayerEntryConfig.forEach((layer) => {
         buffer = buffer ? `${buffer}\n` : '';
-        buffer = `${buffer}${layer.layerPath}: ${layer.errorDetected ? 'ERROR' : 'Ok'}`;
+        buffer = `${buffer}${layer.layerPath}: ${layer.getErrorDetectedFlag() ? 'ERROR' : 'Ok'}`;
         if (layer.isLayerGroup) buffer = generateLayerPathErrorFlag(layer.listOfLayerEntryConfig, buffer, prefix ? `${prefix}.${layer.layerId}` : layer.layerId);
       });
       return buffer;
@@ -473,11 +473,11 @@
         // Create a recursive function that scans the layer structure for erroneous sublayers. This function is used in the following line.
         const subLayerError = (listOfLayerEntryConfig) => {
           return listOfLayerEntryConfig.reduce((accumulator, subLayer) => {
-            if (subLayer.isLayerGroup) return accumulator || subLayer.errorDetected || subLayerError(subLayer.listOfLayerEntryConfig);
-            return accumulator || subLayer.errorDetected;
+            if (subLayer.isLayerGroup) return accumulator || subLayer.getErrorDetectedFlag() || subLayerError(subLayer.listOfLayerEntryConfig);
+            return accumulator || subLayer.getErrorDetectedFlag();
           }, false);
         }
-        return accumulator || geoviewLayer.errorDetected || subLayerError(geoviewLayer.listOfLayerEntryConfig);
+        return accumulator || geoviewLayer.getErrorDetectedFlag() || subLayerError(geoviewLayer.listOfLayerEntryConfig);
       }, false);
 
       // If no geoview and sub layer error was detected
@@ -490,7 +490,7 @@
         return `${accumulator}== ${geoviewLayer.geoviewLayerId} ===============================================================================================\n${geoviewLayer.serialize()}\n`;
       }, '');
       layerPathErrorFlag = mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
-        return `${accumulator}${generateLayerPathErrorFlag(geoviewLayer.listOfLayerEntryConfig, `geoviewLayerId ${geoviewLayer.geoviewLayerId}: ${geoviewLayer.errorDetected? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`)}\n\n`;
+        return `${accumulator}${generateLayerPathErrorFlag(geoviewLayer.listOfLayerEntryConfig, `geoviewLayerId ${geoviewLayer.geoviewLayerId}: ${geoviewLayer.getErrorDetectedFlag()? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`)}\n\n`;
       }, '');
     }
 
@@ -563,7 +563,7 @@
       document.getElementById('executionTimeTab1').innerHTML = '';
       const startTimeTab1 = new Date();
       // Call the ConfigApi to get the mapFeatureConfig
-      const mapConfig = await cgpv.api.configApi.createMapConfig(inputTextAreaTab1.value.replaceAll('"', "'").replaceAll("\\'", "\'"), languageTab1);
+      const mapConfig = await cgpv.api.config.createMapConfig(inputTextAreaTab1.value.replaceAll('"', "'").replaceAll("\\'", "\'"), languageTab1);
       if (urlExecutionChoiceTab1.value === 'getConfig') {
         displayExecutionTime(startTimeTab1, 'executionTimeTab1')
         displayMapConfig(mapConfig, 'Tab1');
@@ -655,7 +655,7 @@
     // Type drop-down with the resulting value.
     serviceUrlAreaTab2.addEventListener('keyup', (e) => {
       if (sampleUrlTab2.checked) return;
-      GeoviewLayerTypeDropDownTab2.value = cgpv.api.configApi.guessLayerType(serviceUrlAreaTab2.value);
+      GeoviewLayerTypeDropDownTab2.value = cgpv.api.config.guessLayerType(serviceUrlAreaTab2.value);
       if (!GeoviewLayerTypeDropDownTab2.value) GeoviewLayerTypeDropDownTab2.value = 'unknown';
     });
 
@@ -688,7 +688,7 @@
       // get the start time
       const startTimeTab2 = new Date();
       // Call the ConfigApi to get the GeoView Layer Config
-      const geoviewLayerConfig = await cgpv.api.configApi.createLayerConfig(
+      const geoviewLayerConfig = await cgpv.api.config.createLayerConfig(
         serviceUrlAreaTab2.value.trim(),
         layerTypeTab2,
         layerListTab2,
@@ -709,19 +709,22 @@
         // Create a recursive function that scans the layer structure for erroneous sublayers. This function is used in the following line.
         const subLayerError = (listOfLayerEntryConfig) => {
           return listOfLayerEntryConfig.reduce((accumulator, subLayer) => {
-            if (subLayer.isLayerGroup) return accumulator || subLayer.errorDetected || subLayerError(subLayer.listOfLayerEntryConfig);
-            return accumulator || subLayer.errorDetected;
+            if (subLayer.isLayerGroup) return accumulator || subLayer.getErrorDetectedFlag() || subLayerError(subLayer.listOfLayerEntryConfig);
+            return accumulator || subLayer.getErrorDetectedFlag();
           }, false);
         }
 
         // If an error is detected
-        if  (geoviewLayerConfig.errorDetected || subLayerError(geoviewLayerConfig.listOfLayerEntryConfig))
+        if  (geoviewLayerConfig.getErrorDetectedFlag() || subLayerError(geoviewLayerConfig.listOfLayerEntryConfig))
           printMessage(messageTab2, 'Execution completed, but the GeoView configuration contains invalid layers.', 'error');
         else printMessage(messageTab2, 'Execution completed and no error detecteds');
 
         // Set the global variables associated to the Element Display zone.
         geoviewLayerString = geoviewLayerConfig?.serialize();
-        layerPathErrorFlag = generateLayerPathErrorFlag(geoviewLayerConfig.listOfLayerEntryConfig, `geoviewLayerId ${geoviewLayerConfig.geoviewLayerId}: ${geoviewLayerConfig.errorDetected? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`);
+        layerPathErrorFlag = generateLayerPathErrorFlag(
+          geoviewLayerConfig.listOfLayerEntryConfig,
+          `geoviewLayerId ${geoviewLayerConfig.geoviewLayerId}: ${geoviewLayerConfig.getErrorDetectedFlag()? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`
+        );
 
         // Output the new GeoView Layer config representation.
         elementSelectorTab2.dispatchEvent(new Event('change'));
@@ -767,7 +770,7 @@
       // get the start time
       const startTimeTab3 = new Date();
       // Call the ConfigApi to get the Map Feature Config using the getConfigFromUrl method.
-      const mapConfig = await cgpv.api.configApi.getConfigFromUrl(inputTextAreaTab3.value.trim())
+      const mapConfig = await cgpv.api.config.getConfigFromUrl(inputTextAreaTab3.value.trim())
       if (urlExecutionChoiceTab3.value === 'getConfig') {
         displayExecutionTime(startTimeTab3, 'executionTimeTab3');
         displayMapConfig(mapConfig, 'Tab3');
@@ -834,7 +837,7 @@
     // Type drop-down with the resulting value.
     serviceUrlAreaTab4.addEventListener('keyup', (e) => {
       if (sampleUrlTab4.checked) return;
-      GeoviewLayerTypeDropDownTab4.value = cgpv.api.configApi.guessLayerType(serviceUrlAreaTab4.value);
+      GeoviewLayerTypeDropDownTab4.value = cgpv.api.config.guessLayerType(serviceUrlAreaTab4.value);
       if (!GeoviewLayerTypeDropDownTab4.value) GeoviewLayerTypeDropDownTab4.value = 'unknown';
     });
 
@@ -868,7 +871,7 @@
       }) : [];
 
       // Call the ConfigApi to get the Layer Tree
-      const metadataLayerTree = await cgpv.api.configApi.createMetadataLayerTree(
+      const metadataLayerTree = await cgpv.api.config.createMetadataLayerTree(
         serviceUrlAreaTab4.value.trim(),
         layerTypeTab4,
         layerListTab4,

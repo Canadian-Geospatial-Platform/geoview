@@ -105,7 +105,7 @@ export const layerEntryIsOgcWms = (verifyIfLayer: EntryConfigBaseClass): verifyI
  * @returns {boolean} true if the type assertion is valid.
  */
 export const layerEntryIsEsriDynamic = (verifyIfLayer: EntryConfigBaseClass): verifyIfLayer is EsriDynamicLayerEntryConfig => {
-  return verifyIfLayer?.geoviewLayerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
+  return verifyIfLayer?.getGeoviewLayerType() === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
 /**

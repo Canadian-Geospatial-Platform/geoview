@@ -10,6 +10,8 @@ export const getSxClasses = (theme: Theme): any => ({
     },
     '& .MuiPaper-root': {
       width: 450,
+      height: 'auto',
+      borderRadius: '6px',
     },
   },
   backdrop: {

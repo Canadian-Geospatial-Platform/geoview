@@ -130,6 +130,7 @@ export function Geolocator(): JSX.Element {
     setSearchValue('');
     setData(undefined);
     setActiveAppBarTab(`${mapId}AppbarPanelButtonGeolocator`, CV_DEFAULT_APPBAR_CORE.GEOLOCATOR, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setActiveAppBarTab]);
 
   /**
@@ -199,7 +200,7 @@ export function Geolocator(): JSX.Element {
   }, []);
 
   return (
-    <FocusTrapContainer open={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen}>
+    <FocusTrapContainer open={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen} id="geolocator-focus-trap">
       <Box
         sx={sxClasses.root}
         visibility={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}

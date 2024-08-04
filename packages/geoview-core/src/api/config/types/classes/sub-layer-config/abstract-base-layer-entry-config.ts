@@ -7,7 +7,7 @@ import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-confi
  */
 export abstract class AbstractBaseLayerEntryConfig extends EntryConfigBaseClass {
   /** The metadata returned by the service endpoint. */
-  #metadata: TypeJsonObject = {};
+  #layerMetadata: TypeJsonObject = {};
 
   /** The geometry type of the leaf node. */
   geometryType?: TypeStyleGeometry;
@@ -31,10 +31,9 @@ export abstract class AbstractBaseLayerEntryConfig extends EntryConfigBaseClass 
    * private #metadata is that it is invisible to the schema validation and JSON serialization.
    *
    * @param {TypeJsonObject} metadata The sub-layer metadata.
-   * @protected
    */
-  protected set metadata(metadata: TypeJsonObject) {
-    this.#metadata = metadata;
+  setLayerMetadata(metadata: TypeJsonObject): void {
+    this.#layerMetadata = metadata;
   }
 
   /**
@@ -42,9 +41,8 @@ export abstract class AbstractBaseLayerEntryConfig extends EntryConfigBaseClass 
    * private #metadata is that it is invisible to the schema validation and JSON serialization.
    *
    * @returns {TypeJsonObject} The sub-layer metadata.
-   * @protected
    */
-  protected get metadata(): TypeJsonObject {
-    return this.#metadata;
+  getLayerMetadata(): TypeJsonObject {
+    return this.#layerMetadata;
   }
 }

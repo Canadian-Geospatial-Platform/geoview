@@ -32,6 +32,7 @@ import { logger } from '@/core/utils/logger';
 import { GuidePanel } from '@/core/components/guide/guide-panel';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
+import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 interface Tab {
   icon: ReactNode;
@@ -177,7 +178,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
   // Update the active footer tab based on footer tabs created from configuration.
   useEffect(() => {
-    setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
+    if (!selectedTab) setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
+    // No need to update when selected tab changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memoFooterBarTabs, setActiveFooterBarTab]);
 
   /**
@@ -380,6 +383,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         tabProps={{ disableRipple: true }}
         tabs={memoFooterBarTabs}
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
+        containerType={CONTAINER_TYPE.FOOTER_BAR}
         rightButtons={
           <>
             {!isCollapsed && isMapFullScreen && <ResizeFooterPanel />}
