@@ -137,6 +137,7 @@ const ResponsiveGridLayout = forwardRef(
     const handleOpenGuide = useCallback((): void => {
       if (guideContentIds) {
         setIsGuideOpen(true);
+        rightMainRef.current?.focus();
       }
     }, [setIsGuideOpen, guideContentIds]);
 
