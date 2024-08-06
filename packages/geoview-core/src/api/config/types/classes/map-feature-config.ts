@@ -26,6 +26,7 @@ import {
   TypeDisplayTheme,
   TypeExternalPackages,
   TypeFooterBarProps,
+  TypeGlobalSettings,
   TypeMapComponents,
   TypeMapConfig,
   TypeMapCorePackages,
@@ -75,6 +76,9 @@ export class MapFeatureConfig {
 
   /** List of external packages. */
   externalPackages?: TypeExternalPackages;
+
+  /** Global map settings */
+  globalSettings: TypeGlobalSettings;
 
   /** Service URLs. */
   serviceUrls: TypeServiceUrls;
@@ -126,6 +130,7 @@ export class MapFeatureConfig {
     this.externalPackages = [
       ...((providedMapFeatureConfig.externalPackages || CV_DEFAULT_MAP_FEATURE_CONFIG.externalPackages) as TypeExternalPackages),
     ];
+    this.globalSettings = providedMapFeatureConfig.globalSettings || CV_DEFAULT_MAP_FEATURE_CONFIG.globalSettings;
     this.schemaVersionUsed =
       (providedMapFeatureConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
     if (this.#errorDetectedFlag) this.#makeMapConfigValid(providedMapFeatureConfig); // Tries to apply a correction to invalid properties

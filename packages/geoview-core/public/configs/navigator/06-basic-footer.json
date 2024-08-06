@@ -111,7 +111,10 @@
               },
               {
                 "layerId": "points_1.json",
-                "layerName": { "en": "Points 1" }
+                "layerName": { "en": "Points 1" },
+                "initialSettings": {
+                  "controls": { "remove": true }
+                }
               },
               {
                 "layerId": "points_2.json",
@@ -140,5 +143,8 @@
     "tabs": {
       "core": ["geolocator", "export"]
     }
+  },
+  "globalSettings": {
+    "canRemoveSublayers": false
   }
 }
