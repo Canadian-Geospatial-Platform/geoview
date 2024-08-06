@@ -181,7 +181,7 @@ export function AddNewLayer(): JSX.Element {
 
     const populateLayerList = async (curlayerType: TypeGeoviewLayerType) => {
       try {
-        const layersTree = await api.configApi.createMetadataLayerTree(layerURL, curlayerType, [], 'en');
+        const layersTree = await api.config.createMetadataLayerTree(layerURL, curlayerType, [], 'en');
         setLayerList(layersTree as GroupLayerEntryConfig[]);
         setHasMetadata(true);
         return true;
