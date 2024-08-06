@@ -32,7 +32,6 @@ export function FocusTrapContainer({ children, open = false, id, containerType }
 
   const handleClose = (): void => {
     disableFocusTrap();
-    document.getElementById(focusItem.callbackElementId as string)?.focus();
   };
 
   // #region REACT HOOKS
