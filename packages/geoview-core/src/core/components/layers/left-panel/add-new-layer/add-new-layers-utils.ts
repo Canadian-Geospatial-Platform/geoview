@@ -24,25 +24,25 @@ type BuildGeoViewLayerInput = {
   layersList: GroupLayerEntryConfig[];
 };
 
-const getLayerNameById = (layersList: GroupLayerEntryConfig[], layerId: string): string | null | undefined => {
-  function searchBranchForLayer(branchGroup: GroupLayerEntryConfig): string | null | undefined {
-    if (branchGroup.layerId === layerId) return branchGroup.layerName;
+export const getLayerById = (layersList: GroupLayerEntryConfig[], layerId: string): GroupLayerEntryConfig | null | undefined => {
+  function searchBranchForLayer(branchGroup: GroupLayerEntryConfig): GroupLayerEntryConfig | null | undefined {
+    if (branchGroup.layerId === layerId) return branchGroup;
 
     const layer = branchGroup.listOfLayerEntryConfig?.find((childLayer) => childLayer.layerId === layerId);
-    if (layer) return layer.layerName;
+    if (layer) return layer as GroupLayerEntryConfig;
     if (branchGroup.listOfLayerEntryConfig) {
-      let foundName = null;
+      let foundLayer: GroupLayerEntryConfig | null = null;
       for (let i = 0; i < branchGroup.listOfLayerEntryConfig.length; i++) {
         const layer2 = branchGroup.listOfLayerEntryConfig[i] as GroupLayerEntryConfig;
         if (layer2.listOfLayerEntryConfig) {
           const name = searchBranchForLayer(layer2 as GroupLayerEntryConfig);
           if (name) {
-            foundName = name;
+            foundLayer = name;
             break;
           }
         }
       }
-      return foundName;
+      return foundLayer;
     }
     return null;
   }
@@ -54,6 +54,10 @@ const getLayerNameById = (layersList: GroupLayerEntryConfig[], layerId: string):
   }
 
   return null;
+};
+
+export const getLayerNameById = (layersList: GroupLayerEntryConfig[], layerId: string): string | null | undefined => {
+  return getLayerById(layersList, layerId)?.layerName;
 };
 
 export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput): TypeGeoviewLayerConfig {
