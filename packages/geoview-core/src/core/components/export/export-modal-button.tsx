@@ -18,14 +18,14 @@ interface ExportProps {
 export default function ExportButton({ className = '', sxDetails }: ExportProps): JSX.Element {
   // get store function
   const mapId = useGeoViewMapId();
-  const { openModal } = useUIStoreActions();
+  const { enableFocusTrap } = useUIStoreActions();
 
   return (
     <IconButton
       id={`${mapId}-export-btn`}
       tooltip="appbar.export"
       tooltipPlacement="bottom-end"
-      onClick={() => openModal({ activeElementId: 'export', callbackElementId: `${mapId}-export-btn` })}
+      onClick={() => enableFocusTrap({ activeElementId: 'export', callbackElementId: `${mapId}-export-btn` })}
       sx={sxDetails}
       className={className}
       aria-label="appbar.export"

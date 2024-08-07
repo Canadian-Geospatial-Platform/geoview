@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { delay } from 'lodash';
@@ -17,6 +17,7 @@ import {
   useUIActiveFooterBarTabId,
   useUIAppbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
@@ -39,10 +40,11 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   const { t } = useTranslation();
   const theme = useTheme();
 
-  const layerData = useDataTableAllFeaturesDataArray();
-
+  const dataTableRef = useRef<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(false);
 
+  const mapId = useGeoViewMapId();
+  const layerData = useDataTableAllFeaturesDataArray();
   const tableHeight = useDataTableTableHeight();
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
@@ -225,11 +227,13 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
     if (!isLayerDisabled() && isSelectedLayerHasFeatures()) {
       return (
         <>
-          {orderedLayerData.map((data: MappedLayerDataType) => (
-            <Box key={data.layerPath}>
-              {data.layerPath === selectedLayerPath ? <DataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} /> : null}
-            </Box>
-          ))}
+          {orderedLayerData
+            .filter((data) => data.layerPath === selectedLayerPath)
+            .map((data: MappedLayerDataType) => (
+              <Box key={data.layerPath} ref={dataTableRef}>
+                <DataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} />
+              </Box>
+            ))}
         </>
       );
     }
@@ -255,6 +259,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
     return orderedLayerData.map((layer) => ({
       ...layer,
+      layerUniqueId: `${mapId}-${TABS.DATA_TABLE}-${layer.layerPath}`,
       layerFeatures: getFeaturesOfLayer(layer.layerPath),
       tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
       mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (

@@ -7,6 +7,8 @@ import { TypeGuideObject, useAppGuide } from '@/core/stores/store-interface-and-
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './guide-style';
 import { LayerListEntry, Layout } from '@/core/components/common';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { TABS } from '@/core/utils/constant';
 
 interface GuideListItem extends LayerListEntry {
   content: string | ReactNode;
@@ -23,6 +25,7 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const guide = useAppGuide();
+  const mapId = useGeoViewMapId();
 
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>('');
   const [guideItemIndex, setGuideItemIndex] = useState<number>(0);
@@ -59,9 +62,10 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
         layerStatus: 'loaded',
         queryStatus: 'processed',
         content: <Markdown options={{ wrapper: 'article' }}>{content}</Markdown>,
+        layerUniqueId: `${mapId}-${TABS.GUIDE}-${item ?? ''}`,
       };
     });
-  }, [guide]);
+  }, [guide, mapId]);
 
   /**
    * Memo version of layer list with markdown content

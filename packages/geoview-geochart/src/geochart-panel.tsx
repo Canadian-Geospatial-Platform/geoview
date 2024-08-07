@@ -14,6 +14,7 @@ import {
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { logger } from 'geoview-core/src/core/utils/logger';
+import { TABS } from 'geoview-core/src/core/utils/constant';
 
 import { GeoChart } from './geochart';
 import { GeoViewGeoChartConfig } from './geochart-types';
@@ -145,9 +146,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             numOffeatures: layer!.features?.length ?? 0,
             layerFeatures: getNumFeaturesLabel(layer!),
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
+            layerUniqueId: `${mapId}-${TABS.GEO_CHART}-${layer.layerPath}`,
           } as LayerListEntry)
       );
-  }, [visibleLayers, storeArrayOfLayerData, configObj, getNumFeaturesLabel]);
+  }, [visibleLayers, storeArrayOfLayerData, configObj, getNumFeaturesLabel, mapId]);
 
   /**
    * Memoizes the selected layer for the LayerList component.

@@ -24,7 +24,7 @@ export default function FeatureDetailModal(): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // get store function
-  const { closeModal } = useUIStoreActions();
+  const { disableFocusTrap } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const feature = useDataTableSelectedFeature()!;
 
@@ -49,7 +49,7 @@ export default function FeatureDetailModal(): JSX.Element {
   return (
     <Dialog
       open={activeModalId === 'featureDetailDataTable' && !!feature}
-      onClose={closeModal}
+      onClose={disableFocusTrap}
       maxWidth="lg"
       disablePortal
       sx={sxClasses.featureDetailModal}
@@ -67,7 +67,7 @@ export default function FeatureDetailModal(): JSX.Element {
         </List>
       </DialogContent>
       <DialogActions>
-        <Button fullWidth variant="contained" className="buttonOutlineFilled" onClick={closeModal} type="text" size="small" autoFocus>
+        <Button fullWidth variant="contained" className="buttonOutlineFilled" onClick={disableFocusTrap} type="text" size="small" autoFocus>
           {t('general.close')}
         </Button>
       </DialogActions>

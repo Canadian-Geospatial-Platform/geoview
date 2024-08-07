@@ -2,7 +2,7 @@ import { ReactNode, memo, useCallback } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { animated, useSpring } from '@react-spring/web';
-import { Box, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
+import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography } from '@/ui';
 import { TypeFeatureInfoEntry, TypeQueryStatus, TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
@@ -18,6 +18,7 @@ export interface LayerListEntry {
   tooltip?: JSX.Element | string;
   numOffeatures?: number;
   features?: TypeFeatureInfoEntry[] | undefined | null;
+  layerUniqueId?: string;
 }
 
 interface LayerListProps {
@@ -27,13 +28,14 @@ interface LayerListProps {
 }
 
 interface LayerListItemProps {
+  id: string;
   isSelected: boolean;
   layer: LayerListEntry;
   onListItemClick: (layer: LayerListEntry) => void;
   layerIndex: number;
 }
 
-const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListItemClick, layerIndex }: LayerListItemProps) {
+const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onListItemClick, layerIndex }: LayerListItemProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
@@ -54,11 +56,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
   const renderLayerIcon = (): JSX.Element | null => {
     // If there is content, this is a guide section with no icon
     if (layer.layerPath && !layer.content) {
-      return (
-        <ListItemIcon aria-hidden="true">
-          <LayerIcon layer={layer} />
-        </ListItemIcon>
-      );
+      return <LayerIcon layer={layer} />;
     }
     return null;
   };
@@ -118,9 +116,14 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
    */
   const handleLayerKeyDown = useCallback(
     (e: React.KeyboardEvent, selectedLayer: LayerListEntry): void => {
-      if (e.key === 'Enter') onListItemClick(selectedLayer);
+      if (e.key === 'Enter' && !isDisabled) {
+        onListItemClick(selectedLayer);
+        // NOTE: did this, bcz when enter is clicked, tab component `handleClick` function is fired,
+        // to avoid this we have do prevent default so that it doesn't probagate to the parent elements.
+        e.preventDefault();
+      }
     },
-    [onListItemClick]
+    [isDisabled, onListItemClick]
   );
 
   const AnimatedPaper = animated(Paper);
@@ -129,13 +132,18 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     <AnimatedPaper sx={{ marginBottom: '1rem' }} style={listItemSpring} className={getContainerClass()}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
-          <ListItem disablePadding onKeyDown={(e) => handleLayerKeyDown(e, layer)} tabIndex={0}>
+          <ListItem
+            disablePadding
+            onKeyDown={(e) => handleLayerKeyDown(e, layer)}
+            onClick={() => onListItemClick(layer)}
+            tabIndex={0}
+            id={id}
+          >
             <ListItemButton
               tabIndex={-1}
               selected={isSelected}
               // disable when layer features has null value.
               disabled={isDisabled || isLoading}
-              onClick={() => onListItemClick(layer)}
               aria-label={layer.layerName}
             >
               {renderLayerIcon()}
@@ -167,6 +175,7 @@ export function LayerList({ layerList, selectedLayerPath, onListItemClick }: Lay
       {!!layerList.length &&
         layerList.map((layer, ind) => (
           <LayerListItem
+            id={`${layer?.layerUniqueId ?? ''}`}
             key={layer.layerPath}
             // Reason:- (layer?.numOffeatures ?? 1) > 0
             // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
@@ -179,6 +188,7 @@ export function LayerList({ layerList, selectedLayerPath, onListItemClick }: Lay
         ))}
       {!layerList.length && (
         <LayerListItem
+          id="dummyPath"
           key="dummyPath"
           isSelected={false}
           layerIndex={0}

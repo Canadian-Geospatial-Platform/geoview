@@ -24,19 +24,20 @@ export interface IUIState {
   activeAppBarTab: ActiveAppBarTabType;
   appBarComponents: TypeValidAppBarCoreProps[];
   corePackagesComponents: TypeMapCorePackages;
-  focusITem: FocusItemProps;
+  focusItem: FocusItemProps;
   hiddenTabs: string[];
   mapInfoExpanded: boolean;
   navBarComponents: TypeNavBarProps;
   footerPanelResizeValue: number;
   footerPanelResizeValues: number[];
   footerBarIsCollapsed: boolean;
+  selectedFooterLayerListItem: string;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
     hideTab: (tab: string) => void;
-    closeModal: () => void;
-    openModal: (uiFocus: FocusItemProps) => void;
+    enableFocusTrap: (uiFocus: FocusItemProps) => void;
+    disableFocusTrap: () => void;
     showTab: (tab: string) => void;
     setActiveFooterBarTab: (id: string) => void;
     setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
@@ -44,11 +45,12 @@ export interface IUIState {
     setFooterPanelResizeValue: (value: number) => void;
     setMapInfoExpanded: (expanded: boolean) => void;
     setFooterBarIsCollapsed: (collapsed: boolean) => void;
+    setSelectedFooterLayerListItem: (layerListItem: string) => void;
   };
 
   setterActions: {
-    closeModal: () => void;
-    openModal: (uiFocus: FocusItemProps) => void;
+    enableFocusTrap: (uiFocus: FocusItemProps) => void;
+    disableFocusTrap: () => void;
     setActiveFooterBarTab: (id: string) => void;
     setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
@@ -56,6 +58,7 @@ export interface IUIState {
     setHiddenTabs: (hiddenTabs: string[]) => void;
     setMapInfoExpanded: (expanded: boolean) => void;
     setFooterBarIsCollapsed: (collapsed: boolean) => void;
+    setSelectedFooterLayerListItem: (layerListItem: string) => void;
   };
 }
 
@@ -74,13 +77,14 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     activeAppBarTab: { tabId: '', tabGroup: '', isOpen: false },
     activeTrapGeoView: false,
     corePackagesComponents: [],
-    focusITem: { activeElementId: false, callbackElementId: false },
+    focusItem: { activeElementId: false, callbackElementId: false },
     hiddenTabs: ['time-slider', 'geochart'],
     mapInfoExpanded: false,
     navBarComponents: [],
     footerPanelResizeValue: 35,
     footerPanelResizeValues: [35, 50, 100],
     footerBarIsCollapsed: false,
+    selectedFooterLayerListItem: '',
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -110,13 +114,13 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to event processor
         UIEventProcessor.hideTab(get().mapId, tab);
       },
-      closeModal: () => {
+      enableFocusTrap: (uiFocus: FocusItemProps) => {
         // Redirect to setter
-        get().uiState.setterActions.closeModal();
+        get().uiState.setterActions.enableFocusTrap(uiFocus);
       },
-      openModal: (uiFocus: FocusItemProps) => {
+      disableFocusTrap: () => {
         // Redirect to setter
-        get().uiState.setterActions.openModal(uiFocus);
+        get().uiState.setterActions.disableFocusTrap();
       },
       showTab: (tab: string): void => {
         // Redirect to event processor
@@ -146,23 +150,27 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to setter
         get().uiState.setterActions.setActiveAppBarTab(tabId, tabGroup, isOpen);
       },
+      setSelectedFooterLayerListItem: (layerListItem: string) => {
+        // Redirect to setter
+        get().uiState.setterActions.setSelectedFooterLayerListItem(layerListItem);
+      },
     },
 
     setterActions: {
-      closeModal: () => {
-        document.getElementById(get().uiState.focusITem.callbackElementId as string)?.focus();
+      enableFocusTrap: (uiFocus: FocusItemProps) => {
         set({
           uiState: {
             ...get().uiState,
-            focusITem: { activeElementId: false, callbackElementId: false },
+            focusItem: { activeElementId: uiFocus.activeElementId, callbackElementId: uiFocus.callbackElementId },
           },
         });
       },
-      openModal: (uiFocus: FocusItemProps) => {
+      disableFocusTrap: () => {
+        document.getElementById(get().uiState.focusItem.callbackElementId as string)?.focus();
         set({
           uiState: {
             ...get().uiState,
-            focusITem: { activeElementId: uiFocus.activeElementId, callbackElementId: uiFocus.callbackElementId },
+            focusItem: { activeElementId: false, callbackElementId: false },
           },
         });
       },
@@ -226,6 +234,14 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+      setSelectedFooterLayerListItem: (layerListItem: string) => {
+        set({
+          uiState: {
+            ...get().uiState,
+            selectedFooterLayerListItem: layerListItem,
+          },
+        });
+      },
     },
 
     // #endregion ACTIONS
@@ -242,7 +258,7 @@ type FocusItemProps = {
 // **********************************************************
 // UI state selectors
 // **********************************************************
-export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusITem);
+export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
 export const useUIActiveFooterBarTabId = (): string => useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
 export const useActiveAppBarTab = (): ActiveAppBarTabType => useStore(useGeoViewStore(), (state) => state.uiState.activeAppBarTab);
 export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
@@ -256,5 +272,7 @@ export const useUIHiddenTabs = (): string[] => useStore(useGeoViewStore(), (stat
 export const useUIMapInfoExpanded = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.mapInfoExpanded);
 export const useUINavbarComponents = (): TypeNavBarProps => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 export const useUIFooterBarIsCollapsed = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.footerBarIsCollapsed);
+export const useUISelectedFooterLayerListItem = (): string =>
+  useStore(useGeoViewStore(), (state) => state.uiState.selectedFooterLayerListItem);
 
 export const useUIStoreActions = (): UIActions => useStore(useGeoViewStore(), (state) => state.uiState.actions);

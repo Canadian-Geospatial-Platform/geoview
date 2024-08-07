@@ -96,7 +96,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   const { globalFilter, setGlobalFilter } = useGlobalFilter({ layerPath });
   // #endregion
 
-  const { openModal } = useUIStoreActions();
+  const { enableFocusTrap } = useUIStoreActions();
 
   /**
    * Create table header cell
@@ -364,7 +364,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
               color="primary"
               onClick={() => {
                 setSelectedFeature(feature);
-                openModal({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
+                enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
               }}
             >
               <InfoOutlinedIcon />

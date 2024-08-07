@@ -8,6 +8,7 @@ import {
   useDetailsLayerDataArrayBatch,
   useDetailsSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map-schema-types';
@@ -15,7 +16,7 @@ import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info-new';
-import { LAYER_STATUS } from '@/core/utils/constant';
+import { LAYER_STATUS, TABS } from '@/core/utils/constant';
 import DetailsSkeleton from './details-skeleton';
 
 interface DetailsPanelType {
@@ -37,6 +38,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   const sxClasses = getSxClasses(theme);
 
   // Get states and actions from store
+  const mapId = useGeoViewMapId();
   const selectedLayerPath = useDetailsSelectedLayerPath();
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
@@ -132,10 +134,11 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
             numOffeatures: layer!.features?.length ?? 0,
             layerFeatures: getNumFeaturesLabel(layer!),
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
+            layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath ?? ''}`,
           } as LayerListEntry)
       );
     return layerListEntries;
-  }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel]);
+  }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel, mapId]);
 
   /**
    * Memoizes the selected layer for the LayerList component.
