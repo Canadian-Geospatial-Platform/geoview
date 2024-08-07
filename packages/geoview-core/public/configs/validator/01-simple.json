@@ -32,17 +32,14 @@
             },
             "initialSettings": {
               "controls": {
-                "query": true
+                "query": false
               },
               "states": {
-                "queryable": true
+                "queryable": false
               }
             },
             "attributions": [],
             "temporalDimension": {
-              "field": "Date",
-              "default": "2021-09-01T00:00:00Z",
-              "unitSymbol": "",
               "range": {
                 "range": [
                   "2020-01-01T00:00:00Z",
@@ -56,74 +53,11 @@
                   "2021-05-01T00:00:00Z",
                   "2021-07-01T00:00:00Z",
                   "2021-09-01T00:00:00Z"
-                ],
-                "type": "discrete"
-              },
-              "singleHandle": false
-            },
-            "source": {
-              "layerFilter": "",
-              "maxRecordCount": 0,
-              "featureInfo": {
-                "queryable": true,
-                "nameField": "Location_Emplacement",
-                "outfields": [
-                  {
-                    "name": "Location_Emplacement",
-                    "alias": "Location_Emplacement",
-                    "type": "string",
-                    "domain": []
-                  },
-                  {
-                    "name": "Province",
-                    "alias": "Province",
-                    "type": "string",
-                    "domain": []
-                  },
-                  {
-                    "name": "Station",
-                    "alias": "Station",
-                    "type": "string",
-                    "domain": []
-                  },
-                  {
-                    "name": "OBJECTID",
-                    "alias": "OBJECTID",
-                    "type": "number",
-                    "domain": []
-                  },
-                  {
-                    "name": "X",
-                    "alias": "X",
-                    "type": "number",
-                    "domain": []
-                  },
-                  {
-                    "name": "Y",
-                    "alias": "Y",
-                    "type": "number",
-                    "domain": []
-                  },
-                  {
-                    "name": "Status_EN",
-                    "alias": "Status_EN",
-                    "type": "string",
-                    "domain": []
-                  },
-                  {
-                    "name": "Status_FR",
-                    "alias": "Status_FR",
-                    "type": "string",
-                    "domain": []
-                  },
-                  {
-                    "name": "Date",
-                    "alias": "Date",
-                    "type": "date",
-                    "domain": []
-                  }
                 ]
               }
+            },
+            "source": {
+              "layerFilter": "Province = \\'Alberta\\' or Province = \\'Manitoba\\'"
             },
             "style": {
               "type": "simple",
@@ -131,19 +65,12 @@
               "info": [
                 {
                   "label": "",
-                  "visible": true,
+                  "visible": false,
                   "settings": {
-                    "type": "simpleSymbol",
-                    "symbol": "circle",
+                    "symbol": "square",
                     "stroke": {
-                      "color": "rgba(0,0,0,1)",
-                      "lineStyle": "solid",
-                      "width": 1
-                    },
-                    "size": 2.668,
-                    "rotation": 0,
-                    "offset": [0,0],
-                    "color": "rgba(0,156,130,1)"
+                      "color": "rgba(128,128,128,1)"
+                    }
                   }
                 }
               ]

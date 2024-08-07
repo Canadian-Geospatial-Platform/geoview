@@ -24,7 +24,57 @@
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0"
+            "layerId": "0",
+            "geometryType": "point",
+            "layerName": {
+              "en": "stations-Temporal",
+              "fr": "stations-Temporal"
+            },
+            "initialSettings": {
+              "controls": {
+                "query": false
+              },
+              "states": {
+                "queryable": false
+              }
+            },
+            "attributions": [],
+            "temporalDimension": {
+              "range": {
+                "range": [
+                  "2020-01-01T00:00:00Z",
+                  "2020-03-01T00:00:00Z",
+                  "2020-05-01T00:00:00Z",
+                  "2020-07-01T00:00:00Z",
+                  "2020-09-01T00:00:00Z",
+                  "2020-11-01T00:00:00Z",
+                  "2021-01-01T00:00:00Z",
+                  "2021-03-01T00:00:00Z",
+                  "2021-05-01T00:00:00Z",
+                  "2021-07-01T00:00:00Z",
+                  "2021-09-01T00:00:00Z"
+                ]
+              }
+            },
+            "source": {
+              "layerFilter": "Province = \\'Alberta\\' or Province = \\'Manitoba\\'"
+            },
+            "style": {
+              "type": "simple",
+              "hasDefault": false,
+              "info": [
+                {
+                  "label": "",
+                  "visible": false,
+                  "settings": {
+                    "symbol": "square",
+                    "stroke": {
+                      "color": "rgba(128,128,128,1)"
+                    }
+                  }
+                }
+              ]
+            }
           }
         ]
       },
@@ -41,13 +91,17 @@
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0"
+            "layerId": "0",
+            "layerName": {
+              "en": "Group 0",
+              "fr": "Groupe 0"
+            }
           },
           {
-            "layerId": "8"
+            "layerId": "4"
           },
           {
-            "layerId": "50"
+            "layerId": "51"
           }
         ]
       }

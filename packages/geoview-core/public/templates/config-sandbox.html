@@ -153,9 +153,11 @@
           <option value="fr">Français</option>
         </select>
         <select id="urlExecutionChoiceTab1">
-          <option value="getConfig">Get Map Config</option>
-          <option value="getConfigAndFetchAll">Get Map Config and Fetch All</option>
-          <option value="getConfigAndLoopFetch">Get Map Config and Fetch One by One</option>
+          <option value="getConfig">Create Map Config</option>
+          <option value="GetConfig-FetchAll">Create Map Config and Fetch All Metadata</option>
+          <option value="GetConfig-FetchAll-ApplyUserConfig">Create Map Config, Fetch All Metadata and Apply User Config</option>
+          <option value="GetConfig-LoopFetch">Create Map Config and Fetch Metadata One by One</option>
+          <option value="GetConfig-LoopFetch-ApplyUserConfig">Create Map Config, Fetch Metadata One by One and Apply User Config</option>
         </select>
         <button id="executeOptionTab1" style="margin-top:10px;">Execute</button>
         <span id="executionTimeTab1"></span>
@@ -192,6 +194,7 @@
                   <select id="elementSelectorTab1">
                     <option value="mapConfig">Map Config</option>
                     <option value="geoviewLayer">GeoView Layer</option>
+                    <option value="metadata">Raw Metadata</option>
                     <option value="errorFlags">Error Flags</option>
                   </select>
                 </div>
@@ -271,8 +274,10 @@
       <div>
         <select id="urlExecutionChoiceTab3">
           <option value="getConfig">Get Config From URL</option>
-          <option value="getConfigAndFetchAll">Get Config From URL and Fetch All</option>
-          <option value="getConfigAndLoopFetch">Get Config From URL and Fetch One by One</option>
+          <option value="GetConfig-FetchAll">Get Config From URL and Fetch All Metadata</option>
+          <option value="GetConfig-FetchAll-ApplyUserConfig">Get Config From URL, Fetch All Metadata and Apply User Config</option>
+          <option value="GetConfig-LoopFetch">Get Config From URL and Fetch Metadata One by One</option>
+          <option value="GetConfig-LoopFetch-ApplyUserConfig">Get Config From URL, Fetch Metadata One by One and Apply User Config</option>
         </select>
         <button id="executeOptionTab3" style="margin-top:10px;">Execute</button>
         <span id="executionTimeTab3"></span>
@@ -292,6 +297,7 @@
           <select id="elementSelectorTab3">
             <option value="mapConfig">Map Config</option>
             <option value="geoviewLayer">GeoView Layer</option>
+            <option value="metadata">Raw Metadata</option>
             <option value="errorFlags">Error Flags</option>
           </select>
         </div>
@@ -394,7 +400,8 @@
 
     // Element selector. ========================================================================================================
     //global variables used by all tabs to keep the information to display for each type of item managed by the selector.
-    let mapConfigString = '', geoviewLayerString = '', metadataLayerTreeString = '', layerPathErrorFlag = '';
+    let mapConfigString = '', geoviewLayerString = '', metadataLayerTreeString = '',
+        layerPathErrorFlag = '', geoviewLayerMetadataString = '';
 
     // This function creates the listener callback used when the selector drop-down at the bottom of the output zone changes.
     createElementSelector = (elementSelectorId, outputId, outputLineId) => {
@@ -404,6 +411,7 @@
         if (e.target.value === 'mapConfig') configOutput.value = mapConfigString;
         else if (e.target.value === 'geoviewLayer') configOutput.value = geoviewLayerString;
         else if (e.target.value === 'layerTree') configOutput.value = metadataLayerTreeString;
+        else if (e.target.value === 'metadata') configOutput.value = geoviewLayerMetadataString;
         else configOutput.value = layerPathErrorFlag;
         generateLineNumbers(outputId, outputLineId);
       });
@@ -435,7 +443,7 @@
     generateLayerPathErrorFlag = (listOfLayerEntryConfig, buffer = '', prefix = '') => {
       listOfLayerEntryConfig.forEach((layer) => {
         buffer = buffer ? `${buffer}\n` : '';
-        buffer = `${buffer}${layer.layerPath}: ${layer.getErrorDetectedFlag() ? 'ERROR' : 'Ok'}`;
+        buffer = `${buffer}${layer.getLayerPath()}: ${layer.getErrorDetectedFlag() ? 'ERROR' : 'Ok'}`;
         if (layer.isLayerGroup) buffer = generateLayerPathErrorFlag(layer.listOfLayerEntryConfig, buffer, prefix ? `${prefix}.${layer.layerId}` : layer.layerId);
       });
       return buffer;
@@ -480,6 +488,20 @@
         return accumulator || geoviewLayer.getErrorDetectedFlag() || subLayerError(geoviewLayer.listOfLayerEntryConfig);
       }, false);
 
+      // Scan the layer structure to generate the raw metadata string.
+      geoviewLayerMetadataString = mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
+        // Create a recursive function that scans the layer structure for sublayers metadata. This function is used in the following line.
+        const subLayerMetadata = (listOfLayerEntryConfig) => {
+          return listOfLayerEntryConfig.reduce((accumulator, subLayer) => {
+            if (subLayer.isLayerGroup) return `${accumulator}\nLayer Group ${subLayer.layerId}\n${subLayerMetadata(subLayer.listOfLayerEntryConfig)}`;
+            return `${accumulator}\nLayer Leaf ${subLayer.layerId}\n${JSON.stringify(subLayer.getLayerMetadata(), undefined, 2)}`;
+          }, '');
+        }
+        const sublayerInfo = subLayerMetadata(geoviewLayer.listOfLayerEntryConfig);
+        const geoviewInfo = `Geoview Layer ${geoviewLayer.geoviewLayerId}\n${JSON.stringify(geoviewLayer.getServiceMetadata(), undefined, 2)}\n`;
+        return `${accumulator}\n${geoviewInfo}\n${sublayerInfo}`;
+      }, '');
+
       // If no geoview and sub layer error was detected
       if (noErrorDetected) printMessage(document.getElementById(`message${tabId}`), 'Map Config instance created and all layers are valid.');
       else printMessage(document.getElementById(`message${tabId}`), 'Map Config instance created, but it contains invalid layers.', 'error');
@@ -501,9 +523,11 @@
 
     // Definition of the descriptions for the execution mode.
     const executionChoicesTab1 = {
-      getConfig: "The <b>Get Map Config</b> option calls the <b>ConfigApi.getMapConfig</b> method and displays the resulting map configuration.</br>",
-      getConfigAndFetchAll: "The <b>Get Map Config and Fetch All</b> option calls the <b>ConfigApi.getMapConfig</b> method, <b>Fetch All GeoView Layer Metadata</b> and displays the resulting map configuration.</br>",
-      getConfigAndLoopFetch: "The <b>Get Map Config and Fetch One by One</b> options calls the <b>ConfigApi.getMapConfig</b> method, <b>Fetch All GeoView Layers One by One</b> and displays the resulting map configuration.</br>",
+      getConfig: "The <b>Create Map Config</b> option calls the <b>ConfigApi.createMapConfig</b> method and displays the resulting map configuration.</br>",
+      'GetConfig-FetchAll': "The <b>Create Map Config and Fetch All Metadata</b> option calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch All GeoView Layer Metadata</b> and displays the resulting map configuration.</br>",
+      'GetConfig-LoopFetch': "The <b>Create Map Config and Fetch Metadata One by One</b> options calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch GeoView Layer metadata One by One</b> and displays the resulting map configuration.</br>",
+      'GetConfig-FetchAll-ApplyUserConfig': "The <b>Create Map Config, Fetch All Metadata and Apply User Config</b> option calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch All GeoView Layer Metadata</b>, <b>Apply User Config</b> and displays the resulting map configuration.</br>",
+      'GetConfig-LoopFetch-ApplyUserConfig': "The <b>Create Map Config, Fetch Metadata One by One and Apply User Config</b> options calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch GeoView Layer metadata One by One</b>, <b>Apply User Config</b> and displays the resulting map configuration.</br>",
     }
 
     //Create a listener for the execution options
@@ -570,20 +594,22 @@
         elementSelectorTab1.dispatchEvent(new Event('change'));
       }
 
-      if (urlExecutionChoiceTab1.value === 'getConfigAndFetchAll') {
+      if (urlExecutionChoiceTab1.value.includes('FetchAll')) {
         // fetch service metadata for all map layers.
         try {
           await mapConfig.fetchAllServiceMetadata();
+          if (urlExecutionChoiceTab1.value.includes('ApplyUserConfig')) mapConfig.applyUserConfigToGeoviewLayers();
           displayExecutionTime(startTimeTab1, 'executionTimeTab1');
           displayMapConfig(mapConfig, 'Tab1');
           elementSelectorTab1.dispatchEvent(new Event('change'));
         } catch (error) {
           throw new Error('Error while reading metadata. We should never get this message. Errors should be traped and resolve earlier.', error);
         };
-      } else if (urlExecutionChoiceTab1.value === 'getConfigAndLoopFetch') {
+      } else if (urlExecutionChoiceTab1.value.includes('LoopFetch')) {
         mapConfig.map.listOfGeoviewLayerConfig.forEach(async (geoviewLayerConfig, i) => {
           try {
             await geoviewLayerConfig.fetchServiceMetadata();
+            if (urlExecutionChoiceTab1.value.includes('ApplyUserConfig')) geoviewLayerConfig.applyUserConfig();
             displayExecutionTime(startTimeTab1, 'executionTimeTab1')
             displayMapConfig(mapConfig, 'Tab1');
             elementSelectorTab1.dispatchEvent(new Event('change'));
@@ -737,9 +763,11 @@
 
     // Definition of the descriptions for the execution mode.
     const executionChoicesTab3 = {
-      getConfig: "The <b>Get Config From Url</b> option calls the <b>ConfigApi.getConfigFromUrl</b> method and displays the resulting map configuration.</br>",
-      getConfigAndFetchAll: "The <b>Get Config From Url and Fetch All</b> option calls the <b>ConfigApi.getConfigFromUrl</b> method, <b>Fetch All GeoView Layer Metadata</b> and displays the resulting map configuration.</br>",
-      getConfigAndLoopFetch: "The <b>Get Config From Url and Fetch One by One</b> options calls the <b>ConfigApi.getConfigFromUrl</b> method, <b>Fetch All GeoView Layers One by One</b> and displays the resulting map configuration.</br>",
+      getConfig: "The <b>Get Config From Url</b> option calls the <b>ConfigApi.createMapConfig</b> method and displays the resulting map configuration.</br>",
+      'GetConfig-FetchAll': "The <b>Get Config From Url and Fetch All Metadata</b> option calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch All GeoView Layer Metadata</b> and displays the resulting map configuration.</br>",
+      'GetConfig-LoopFetch': "The <b>Get Config From Url and Fetch Metadata One by One</b> options calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch GeoView Layer metadata One by One</b> and displays the resulting map configuration.</br>",
+      'GetConfig-FetchAll-ApplyUserConfig': "The <b>Get Config From Url, Fetch All Metadata and Apply User Config</b> option calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch All GeoView Layer Metadata</b>, <b>Apply User Config</b> and displays the resulting map configuration.</br>",
+      'GetConfig-LoopFetch-ApplyUserConfig': "The <b>Get Config From Url, Fetch Metadata One by One and Apply User Config</b> options calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch GeoView Layer metadata One by One</b>, <b>Apply User Config</b> and displays the resulting map configuration.</br>",
     }
 
     //Create a listener for the execution options
@@ -776,19 +804,21 @@
         displayMapConfig(mapConfig, 'Tab3');
       }
 
-      if (urlExecutionChoiceTab3.value === 'getConfigAndFetchAll') {
+      if (urlExecutionChoiceTab3.value.includes('FetchAll')) {
         // fetch service metadata for all map layers.
         try {
           await mapConfig.fetchAllServiceMetadata();
+          if (urlExecutionChoiceTab3.value.includes('ApplyUserConfig')) mapConfig.applyUserConfigToGeoviewLayers();
           displayExecutionTime(startTimeTab3, 'executionTimeTab3');
           displayMapConfig(mapConfig, 'Tab3');
         } catch (error) {
           throw new Error('Error while reading metadata. We should never get this message. Errors should be traped and resolve earlier.', error);
         };
-      } else if (urlExecutionChoiceTab3.value === 'getConfigAndLoopFetch') {
+      } else if (urlExecutionChoiceTab3.value.includes('LoopFetch')) {
         mapConfig.map.listOfGeoviewLayerConfig.forEach(async (geoviewLayerConfig, i) => {
           try {
             await geoviewLayerConfig.fetchServiceMetadata();
+            if (urlExecutionChoiceTa31.value.includes('ApplyUserConfig')) geoviewLayerConfig.applyUserConfig();
             displayMapConfig(mapConfig, 'Tab3');
             displayExecutionTime(startTimeTab3, 'executionTimeTab3');
           } catch (error) {
