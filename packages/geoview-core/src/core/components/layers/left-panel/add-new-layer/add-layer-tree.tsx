@@ -4,9 +4,9 @@
 import React, { useEffect, useState } from 'react';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
+import _ from 'lodash';
 import { logger } from '@/core/utils/logger';
 import { EntryConfigBaseClass, GroupLayerEntryConfig } from '@/api/config/types/map-schema-types';
-import _ from 'lodash';
 import { getLayerById } from './add-new-layers-utils';
 
 export interface AddLayerTreeProps {
@@ -74,7 +74,6 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
       });
     }
 
-
     const layerTokens = treeLayerId.split('/');
     const origLayerId = layerTokens.pop() as string;
     let parentLayerId = null;
@@ -84,7 +83,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     populateLayerChildren(origLayerId, parentLayerId);
 
     return _.uniq(result).sort();
-  }
+  };
 
   const handleItemSelectionToggle = function (event: React.SyntheticEvent, itemId: string, isSelected: boolean): void {
     const layerChildren = getLayerChildren(itemId);
@@ -95,14 +94,14 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     } else {
       setSelectedItems(selectedItems.filter((item) => !toAddOrRemove.includes(item)));
     }
-  }
+  };
 
   if (!isInitialized) {
     return null;
   }
 
   const renderTreeItems = function () {
-    //return layersData[0].listOfLayerEntryConfig.map((layer) => renderTreeItem(layer as GroupLayerEntryConfig, null));
+    // return layersData[0].listOfLayerEntryConfig.map((layer) => renderTreeItem(layer as GroupLayerEntryConfig, null));
     return layersData.map((layer) => renderTreeItem(layer as GroupLayerEntryConfig, null));
   };
 
@@ -114,7 +113,9 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
       defaultExpandedItems={defaultExpandedItems}
       defaultSelectedItems={defaultSelectedItems}
       selectedItems={selectedItems}
-      onItemSelectionToggle={(event: React.SyntheticEvent, itemId: string, isSelected: boolean) => handleItemSelectionToggle(event, itemId, isSelected)}
+      onItemSelectionToggle={(event: React.SyntheticEvent, itemId: string, isSelected: boolean) =>
+        handleItemSelectionToggle(event, itemId, isSelected)
+      }
     >
       {renderTreeItems()}
     </SimpleTreeView>
