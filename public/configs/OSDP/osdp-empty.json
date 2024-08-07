@@ -1,0 +1,28 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": []
+  },
+  "components": ["overview-map"],
+  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+        "appBar": {
+          "tabs": {
+            "core": ["geolocator", "export"]
+          }
+        },
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

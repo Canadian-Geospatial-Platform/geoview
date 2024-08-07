@@ -1,0 +1,63 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>High Detail Layer - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>High Detail Layer</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="./outliers.html">Outlier Layers</a><br/></td></tr><tr><td><p>This page is used to showcase a highly detailed layer that causes slow down</p></td></tr><tr><td><a href="#HMap1">1. Highly detailed layers - slow</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HMap1">1. Highly detailed layers - slow</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre id="HMap1-state" class="panel map-title-holder"></pre><hr/><div id="Map1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978,
+            'initialView': {
+              'zoomAndCenter': [12, [-71.26, 46.8]]
+            }
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'quebec-2006',
+              'geoviewLayerName': {
+                'en': 'Québec 2006'
+              },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/GeoAI_UseCase_en/MapServer'
+              },
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '8',
+                  'layerName': {
+                    'en': 'Québec 2006'
+                  },
+                  'initialSettings': {
+                    'states': {
+                      'visible': true
+                      }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'theme': 'geo.ca',
+        'components': ['north-arrow'],
+        'corePackages': [],
+        'appBar': {
+          'tabs': {
+            'core': ['legend', 'export']
+          }
+        },
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        }
+      }"></div><hr/><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {
+          listenToLegendLayerSetChanges('HMap1-state', 'Map1');
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

@@ -1,0 +1,395 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "minZoom": 5,
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "LYR1",
+        "geoviewLayerName": {
+          "en": "ClassBreaks",
+          "fr": "ClassBreaks"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "11",
+            "geometryType": "point",
+            "layerName": {
+              "en": "2021 Combined sewer overflow : total volume discharged - Watewater"
+            },
+            "initialSettings": {
+              "controls": {
+                "query": true
+              },
+              "states": {
+                "queryable": true
+              }
+            },
+            "attributions": ["Environment and Climate Change Canada and ministère de l’Environnement et de la Lutte contre les changements climatiques du Québec"],
+            "source": {
+              "layerFilter": "",
+              "maxRecordCount": 0,
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "Owner",
+                "outfields": [
+                  {
+                    "name": "OBJECTID",
+                    "alias": "OBJECTID",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Facility_id",
+                    "alias": "Facility Identification",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Owner",
+                    "alias": "Owner Name",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "System",
+                    "alias": "System Name",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "City",
+                    "alias": "City",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Province_EN",
+                    "alias": "Province",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Latitude",
+                    "alias": "Latitude",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Longitude",
+                    "alias": "Longitude",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Approval_State",
+                    "alias": "Approval State",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Jan_CSO_Discharge",
+                    "alias": "January - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Jan_CSO_Volume",
+                    "alias": "January - Volume of effluent deposited via a CSO point in the month (m3),",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Feb_CSO_Discharge",
+                    "alias": "February - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Feb_CSO_Volume",
+                    "alias": "February - Volume of effluent deposited via a CSO point in the month (m3),",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Mar_CSO_Discharge",
+                    "alias": "March - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Mar_CSO_Volume",
+                    "alias": "March - Volume of effluent deposited via a CSO point in the month (m3)",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Apr_CSO_Discharge",
+                    "alias": "April - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Apr_CSO_Volume",
+                    "alias": "April - Volume of effluent deposited via a CSO point in the month (m3)",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "May_CSO_Discharge",
+                    "alias": "May - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "May_CSO_Volume",
+                    "alias": "May - Volume of effluent deposited via a CSO point in the month (m3)",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Jun_CSO_Discharge",
+                    "alias": "June - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Jun_CSO_Volume",
+                    "alias": "June - Volume of effluent deposited via a CSO point in the month (m3)",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Jul_CSO_Discharge",
+                    "alias": "July - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Jul_CSO_Volume",
+                    "alias": "July - Volume of effluent deposited via a CSO point in the month (m3)",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Aug_CSO_Discharge",
+                    "alias": "August - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Aug_CSO_Volume",
+                    "alias": "August - Volume of effluent deposited via a CSO point in the month (m3)",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Sept_CSO_Discharge",
+                    "alias": "September - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Sept_CSO_Volume",
+                    "alias": "September - Volume of effluent deposited via a CSO point in the month (m3)",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Oct_CSO_Discharge",
+                    "alias": "October - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Oct_CSO_Volume",
+                    "alias": "October - Volume of effluent deposited via a CSO point in the month (m3)",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Nov_CSO_Discharge",
+                    "alias": "November - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Nov_CSO_Volume",
+                    "alias": "November - Volume of effluent deposited via a CSO point in the month (m3)",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Dec_CSO_Discharge",
+                    "alias": "December - Was effluent discharged from a CSO points during month?",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Dec_CSO_Volume",
+                    "alias": "December - Volume of effluent deposited via a CSO point in the month (m3)",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Total_CSO_Volume",
+                    "alias": "Total volume of effluent deposited via a CSO points",
+                    "type": "number",
+                    "domain": []
+                  }
+                ]
+              }
+            },
+            "style": {
+              "type": "classBreaks",
+              "fields": ["Total_CSO_Volume"],
+              "hasDefault": false,
+              "info": [
+                {
+                  "label": "0 m3",
+                  "values": [0,0],
+                  "settings": {
+                    "color": "rgba(0,156,130,1)",
+                    "offset": [0,0],
+                    "rotation": 0,
+                    "size": 4.002,
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 0.5
+                    },
+                    "symbol": "circle",
+                    "type": "simpleSymbol"
+                  },
+                  "visible": true
+                },
+                {
+                  "label": ">0 - 1,000 m3",
+                  "values": [0,1000],
+                  "settings": {
+                    "color": "rgba(232,190,255,1)",
+                    "offset": [0,0],
+                    "rotation": 0,
+                    "size": 5.336,
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 0.5
+                    },
+                    "symbol": "circle",
+                    "type": "simpleSymbol"
+                  },
+                  "visible": true
+                },
+                {
+                  "label": ">1,000 - 500,000 m3",
+                  "values": [1000,500000],
+                  "settings": {
+                    "color": "rgba(223,115,255,1)",
+                    "offset": [0,0],
+                    "rotation": 0,
+                    "size": 10.005,
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 0.5
+                    },
+                    "symbol": "circle",
+                    "type": "simpleSymbol"
+                  },
+                  "visible": true
+                },
+                {
+                  "label": ">500,000 - 5,000,000 m3",
+                  "values": [500000,5000000],
+                  "settings": {
+                    "color": "rgba(197,0,255,1)",
+                    "offset": [0,0],
+                    "rotation": 0,
+                    "size": 14.007,
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 0.5
+                    },
+                    "symbol": "circle",
+                    "type": "simpleSymbol"
+                  },
+                  "visible": true
+                },
+                {
+                  "label": ">5,000,000 - 10,000,000 m3",
+                  "values": [5000000,10000000],
+                  "settings": {
+                    "color": "rgba(132,0,168,1)",
+                    "offset": [0,0],
+                    "rotation": 0,
+                    "size": 18.009,
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 0.5
+                    },
+                    "symbol": "circle",
+                    "type": "simpleSymbol"
+                  },
+                  "visible": true
+                },
+                {
+                  "label": ">10,000,000 m3",
+                  "values": [10000000,999000000],
+                  "settings": {
+                    "color": "rgba(76,0,115,1)",
+                    "offset": [0,0],
+                    "rotation": 0,
+                    "size": 23.345,
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 0.5
+                    },
+                    "symbol": "circle",
+                    "type": "simpleSymbol"
+                  },
+                  "visible": true
+                },
+                {
+                  "label": "No Data",
+                  "values": [999000000,999999999],
+                  "settings": {
+                    "mimeType": "image/png",
+                    "offset": [0,0],
+                    "opacity": 1,
+                    "rotation": 0,
+                    "src": "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAT0lEQVQYlWNhgIBQBvxgNQsDA0Noh4vLKiVBQawqzj57xtB59GgYCwMDA4OSoCBDqJYWXiNZCFg59BSeffYMp4J779/DFa7uPHo0jICBqwFMlhJ/CxAqXwAAAABJRU5ErkJggg==",
+                    "type": "iconSymbol"
+                  },
+                   "visible": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

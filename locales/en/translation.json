@@ -1,0 +1,145 @@
+{
+  "general": {
+    "close": "Close",
+    "open": "Open",
+    "layers": "Layers",
+    "add": "Add",
+    "remove": "Remove",
+    "name": "Name"
+  },
+  "mapnav": {
+    "arianavbar": "vertical button group for map navigation",
+    "fullscreen": "Full Screen",
+    "home": "Reset to initial view",
+    "export": "Export map as PNG",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "coordinates": "Toggle Coordinates format",
+    "scale": "Toggle between scale and resolution",
+    "location": "Zoom to my location"
+  },
+  "mapctrl": {
+    "rotation": {
+      "resetRotation": "Reset Rotation",
+      "fixedNorth": "Fix North"
+    },
+    "mouseposition": {
+      "east": "E",
+      "west": "W",
+      "north": "N",
+      "south": "S"
+    },
+    "overviewmap": {
+      "toggle": "Toggle minimap"
+    },
+    "attribution": {
+      "defaultnrcan": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources"
+    },
+    "crosshair": "Use <strong>Arrows</strong>, <strong>+</strong> and <strong>-</strong> keys to navigate the map, <strong>Enter</strong> to select and <strong>Shift+Arrow</strong> <strong>Up</strong> or <strong>Down</strong> to modify the pan value."
+  },
+  "appbar": {
+    "export": "Export",
+    "geolocator": "Geolocator",
+    "notifications": "Notifications",
+    "no_notifications_available": "No notifications available",
+    "fullscreen": "Full Screen",
+    "help": "Help",
+    "layers": "Layers",
+    "share": "Share",
+    "version": "About GeoView",
+    "repoLink": "Repo link"
+  },
+  "legend": {
+    "unknown": "Unknown Layer Title",
+    "remove_layer": "Remove Layer",
+    "opacity": "Opacity",
+    "expand_legend": "Expand Legend",
+    "toggle_cluster": "Toggle Clustering",
+    "toggle_opacity": "Toggle Opacity",
+    "zoom_to": "Zoom to Layer",
+    "overview_title": "Legend Overview",
+    "bold_selection": "Selection: ",
+    "add_layer": "Add Layer",
+    "selected_legend": "Selected Legend",
+    "sort_layers": "Sort Layers",
+    "selected_Layers": "An overview of currrently selected layers",
+    "re-arrange": "re-arrange",
+    "categories_title": "Categories",
+    "items_available": "items available",
+    "layer_has_error": "Layer has an error...",
+    "layer_is_loading": "Layer is loading..."
+  },
+  "details": {
+    "zoom_to": "Zoom to feature",
+    "select": "Highlight feature on map",
+    "external_link": "External Link",
+    "detailsView": "Details View",
+    "selectVisbleLayer": "Select any visible layer on the map to get started",
+    "feature": "feature",
+    "clickOnMap": "Click on map",
+    "nextFeatureBtn": "Next feature",
+    "previousFeatureBtn": "Previous feature",
+    "clearAllfeatures": "Clear all feature highlights",
+    "highlightFeaturesOnMap": "Highlight features on map",
+    "keepFeatureSelected": "Keep feature highlighted"
+  },
+  "lightbox": {
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "download": "Download"
+  },
+  "keyboardnav": {
+    "start": "Skip after map element",
+    "end": "Skip before map element",
+    "focusdialog": {
+      "title": "Keyboard Navigation",
+      "main": "If enable, we will keep focus locked on the viewer.\nTo exit, press <strong>CTRL + Q</strong>",
+      "button": {
+        "enable": "Enable",
+        "skip": "Skip"
+      }
+    }
+  },
+  "validation": {
+    "layer": {
+      "loadfailed": "Layer [__param__] failed to load on map __param__.",
+      "notfound": "The sublayer __param__ of the GeoView layer __param__ does not exist on the server",
+      "createtwice": "Can not execute twice the createGeoViewRasterLayers method for the map __param__",
+      "usedtwice": "Duplicate use of geoview layer identifier [__param__] on map __param__"
+    },
+    "schema": {
+      "notFound": "A schema error was found, check the console to see what is wrong.",
+      "wrongPath": "Cannot find schema ([__param__])"
+    }
+  },
+  "exportModal": {
+    "title": "Export Map as PNG",
+    "cancelBtn": "Cancel",
+    "exportBtn": "Export"
+  },
+  "geolocator": {
+    "search": "Search",
+    "errorMessage": "No matches found for"
+  },
+  "hovertooltip": {
+    "alticon": "Selected feature icon"
+  },
+  "dataTable": {
+    "icon": "ICON",
+    "zoom": "ZOOM",
+    "exportBtn": "Export",
+    "jsonExportBtn": "Download GeoJSON",
+    "downloadAsCSV": "Download as CSV",
+    "filterMap": "Filter Map",
+    "stopFilterMap": "Stop Filter Map",
+    "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
+    "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",
+    "enlargeBtn": "Enlarge",
+    "reduceBtn": "Reduce",
+    "features": "feature(s)",
+    "featureFiltered": "features filtered",
+    "images": "Images",
+    "close": "Close"
+  }
+}

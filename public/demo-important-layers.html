@@ -1,0 +1,181 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Important Layers Test Panel - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><style>li.source-link {
+        cursor: pointer;
+        color: #6082b6;
+      }
+
+      .sourceLinkCopied {
+        position: fixed;
+        top: 6px;
+        right: 6px;
+        background-color: darkblue;
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        min-width: 150px;
+        text-align: center;
+        border-radius: 5px;
+        z-index: 1;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+      }
+
+      .selector {
+        display: flex;
+        flex-direction: column;
+        width: 400px;
+      }
+
+    table.display-fields, th.display-fields, td.display-fields {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }</style><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Important Layers Test Panel</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/><a href="#HUC1">Drop-down Zone</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page allows you to load different geospatial layers depending on the service selected in the drop-down lists below the map.</td></tr></tbody></table></div><div class="map-title-holder"><h4>1. Selected Maps</h4></div><select name="projections" id="projections"><option value="3857">Web Mercator (3857)</option><option value="3978">LCC (3978)</option></select> <button type="button" onclick="reloadMap()">Set Projection</button><div id="mapWM" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': []
+        },
+        'theme': 'geo.ca',
+        'components': [],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table', 'geochart', 'time-slider']
+          }
+        },
+        'corePackages': [],
+        'externalPackages': [],
+        'appBar': {
+          'tabs': {
+            'core': []
+          }
+        }
+      }"></div><h4 id="HUC1">Drop-down Selectors</h4><div style="font-size: smaller"><div class="container"><div class="selector"><div>Group Selector</div><select id="selectGroup"><option value="dataTeam">Data Team</option><option value="OSDP">OSDP</option></select></div><div class="selector"><div>Sub Group Selector</div><select id="selectSubGroup"></select></div><div class="selector"><div>Service Selector</div><select id="selectService"></select></div><div class="selector"><div>&nbsp;</div><button type="button" style="width: 100px" onclick="addLayer()">Add layer</button></div></div><br/><div><table class="display-fields" style="width: 1400px"><tr><td class="display-fields" style="width: 10%">Type</td><td class="display-fields" id="type-field"></td></tr><tr><td class="display-fields" style="width: 10%">Access Path</td><td class="display-fields" id="access-path-field"></td></tr><tr><td class="display-fields" style="width: 10%">Layer Id</td><td class="display-fields" id="layer-id-field"></td></tr></table></div><br/></div><hr/><button type="button" class="collapsible">Configuration Snippet</button><pre id="mapWMCS" class="panel"></pre><hr/><script src="codedoc.js"></script><script>async function addGeocore(uuid) {
+        const geoviewConfig = await cgpv.api.configApi.convertGeocoreToGeoview('en', {
+          geoviewLayerType: 'geoCore',
+          geoviewLayerId: uuid
+        });
+        document.getElementById('type-field').innerText = geoviewConfig ? `geoCore converted to ${geoviewConfig.geoviewLayerType}` : 'geocore conversion error';
+        document.getElementById('access-path-field').innerText = geoviewConfig ? geoviewConfig.metadataAccessPath.en : '';
+
+        cgpv.api.maps['mapWM'].layer.addGeoviewLayerByGeoCoreUUID(uuid);
+      }
+
+      async function addGeoviewLayer(geoviewLayerType, metadataAccessPath, layerId) {
+        // adding a geojson layer requires a type of geojson and url
+        const addResult = cgpv.api.maps['mapWM'].layer.addGeoviewLayer(
+          {
+            geoviewLayerType: `${geoviewLayerType}`,
+            metadataAccessPath: {
+              'en': `${metadataAccessPath}`
+            },
+            listOfLayerEntryConfig: [
+              {
+                layerId: `${layerId}`
+              },
+            ],
+          },
+          ['en', 'fr']
+        );
+      }
+
+      async function addLayer() {
+        const geoviewLayerType =  document.getElementById('type-field').innerText;
+        const metadataAccessPath = document.getElementById('access-path-field').innerText;
+        const layerId = document.getElementById('layer-id-field').innerText;
+
+        if (cgpv.api.configApi.isValidUUID(layerId)) addGeocore(layerId);
+        else addGeoviewLayer(geoviewLayerType, metadataAccessPath, layerId);
+      }
+
+      function reloadMap() {
+        cgpv.api.maps['mapWM'].setProjection(Number(document.getElementById('projections').value));
+      }
+
+      async function addGeocoreNametoSelectOption(uuid, optionElement) {
+        const geoviewConfig = await cgpv.api.configApi.convertGeocoreToGeoview('en', {
+          geoviewLayerType: 'geoCore',
+          geoviewLayerId: uuid
+        });
+        optionElement.innerText = geoviewConfig ? geoviewConfig.geoviewLayerName.en : `WRONG - ${uuid}`;
+      }
+
+      function initServiceDropDown(groupHasChanged) {
+        const groupDropDown = document.getElementById('selectGroup');
+        const subGroupDropDown = document.getElementById('selectSubGroup');
+        if (groupHasChanged) {
+          subGroupDropDown.innerHTML = '';
+          Object.keys(importantLayersData[groupDropDown.value]).forEach((element) => {
+            const optionElement = document.createElement('option');
+            optionElement.value = element;
+            optionElement.innerText = element;
+            subGroupDropDown.appendChild(optionElement);
+          });
+        }
+
+        const serviceDropDown = document.getElementById('selectService');
+        serviceDropDown.innerHTML = '';
+        importantLayersData[groupDropDown.value][subGroupDropDown.value].forEach((element, i) => {
+          const optionElement = document.createElement('option');
+          optionElement.value = `${i}`;
+          optionElement.innerText = (element.type === 'geoCore' && element.optionDisplayValue === '') ? addGeocoreNametoSelectOption(element.layerId, optionElement) : element.optionDisplayValue;
+          serviceDropDown.appendChild(optionElement);
+        });
+        initTableFields();
+      }
+
+      function initTableFields() {
+        const groupDropDown = document.getElementById('selectGroup');
+        const subGroupDropDown = document.getElementById('selectSubGroup');
+        const serviceDropDown = document.getElementById('selectService');
+        const serviceInfo = importantLayersData[groupDropDown.value][subGroupDropDown.value][serviceDropDown.value];
+        document.getElementById('type-field').innerText = serviceInfo.type;
+        document.getElementById('access-path-field').innerText = serviceInfo.accessPath;
+        document.getElementById('layer-id-field').innerText = serviceInfo.layerId;
+      }
+
+      let importantLayersData;
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {
+        // fetch JSON config file to show in the text are section
+        function fetchJSONData() {
+          fetch('./configs/important-layers.json')
+            .then((res) => {
+              if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+              }
+              return res.json();
+            })
+            .then((data) => {
+              importantLayersData = data;
+              initServiceDropDown(true);
+            })
+            .catch((error) => console.error('Unable to fetch data:', error));
+        }
+        fetchJSONData();
+        document.getElementById('selectGroup').addEventListener('change', (e) => {
+          initServiceDropDown(true);
+        });
+        document.getElementById('selectSubGroup').addEventListener('change', (e) => {
+          initServiceDropDown(false);
+        });
+        document.getElementById('selectService').addEventListener('change', (e) => {
+          initTableFields();
+        });
+
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

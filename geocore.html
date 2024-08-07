@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Geocore Layers</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="./type-of-layers.html">Type Of Layers</a><br/></td></tr><tr><td><p>This page is used to showcase how the viewer may show Geocore layer types</p></td></tr><tr><td><a href="#HLYR1">1. Many Geocore Layers</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLYR1">1. Many GeoCore Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre style="overflow-y: scroll" id="HLYR1-state" class="panel map-title-holder"></pre><div id="LYR1" class="llwp-map" triggerreadycallback="true" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'listOfLayerEntryConfig': [
+                  /*===========================================================================
+                  Temporarilly deactivate this entry because the service has a legend problem
+                  {
+                    'layerId': '0fe65119-e96e-4a57-8bfe-9d9245fba06b',
+                    'geocoreLayerName': { 'en': 'HRDEM Mosaic Hillshade' },
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': 'dsm-hillshade',
+                        'layerName': { 'en': 'Map' },
+                        'source': {
+                          'style': 'hillshade'
+                        }
+                      }
+                    ]
+                  },
+                  /*===========================================================================*/
+                  {
+                    'layerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9',
+                    'geocoreLayerName': { 'en': 'Commemorative Map' },
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': '0'
+                      }
+                    ]
+                  },
+                  {
+                    'layerId': '0fca08b5-e9d0-414b-a3c4-092ff9c5e326',
+                    'geocoreLayerName': { 'en': 'Marine Water Quality' },
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': '6'
+                      }
+                    ]
+
+                  },
+                  {
+                    'layerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703',
+                    'geocoreLayerName': { 'en': 'NAPL Temporal Series' },
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': 'regina',
+                        'layerName': { 'en': 'Map of Regina' }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          'components': ['overview-map'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div><button type="button" class="collapsible">Visibility and filters</button><pre id="layer1-buttons-pre" class="panel"></pre><button class="collapsible">Get Legend</button><pre id="LegendsId1-table-pre" class="panel"></pre><button type="button" class="collapsible">Get Feature Info</button><pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre><hr/><p>This map has a wms layer added from configuration.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function (mapId) {
+        console.log(`api is ready for ${mapId}`);
+
+        if (mapId === 'allMaps') {          createTableOfFilter('LYR1');
+        }
+      });
+
+      // LYR1 ===================================================================================================================
+      const featureInfoLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets, eventType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSets, eventType);
+        },
+        'LYR1/FeatureInfoLayerSet'
+      );
+
+      const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('LegendsId1', resultSets);
+        },
+        'LYR1/LegendsLayerSet'
+      );
+      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
+      //create snippets
+      createCodeSnippet();
+      createConfigSnippet();</script></body></html>

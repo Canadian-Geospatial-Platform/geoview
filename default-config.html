@@ -1,0 +1,142 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script>// add url params
+      if (document.location.search.length === 0)
+        // reload page with new params
+        document.location.search =
+          '?' +
+          'p=3857&' +
+          'z=4&' +
+          'c=-100,40&' +
+          'l=en&' +
+          't=dark&' +
+          'b={basemapId:transport,shaded:false,labeled:true}&' +
+          'i=dynamic&' +
+          'cc=overview-map&' +
+          'keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9';</script><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Default Configuration</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="#HLCONF1">1. Load from no config object</a><br/><a href="#HLCONF2">2. Load with wrong JSON object</a><br/><a href="#HLCONF3">3. Load with bad config values</a><br/><a href="#HLCONF4">4. Load layers with bad config values</a><br/><a href="#HLCONF5">5. Load config from URL params</a><br/><a href="#HLCONF6">6. Load config from file</a><br/><a href="#HLCONF7">7. Load config from function call</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase how we validate map configuration object before creating the map.</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLCONF1">1. Load from no config object</h4><a class="ref-link" href="#top">Top</a></div><div id="CONF1" class="llwp-map"></div><p>This map will will load with default configuration because none is provided.</p><hr/><div class="map-title-holder"><h4 id="HLCONF2">2. Load with wrong JSON object</h4><a class="ref-link" href="#top">Top</a></div><div id="CONF2" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, x],
+              'projection': 1111
+            }
+          }"></div><p>This map will load with bad configuration (<strong>'center': [-100, x]</strong>) replaced with default.</p><hr/><div class="map-title-holder"><h4 id="HLCONF3">3. Load with bad config values</h4><a class="ref-link" href="#top">Top</a></div><div id="CONF3" class="llwp-map" data-lang="test_sp-CA" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 40,
+              'center': ['Last', -1000],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'notdefined',
+              'shaded': true,
+              'labeledWhat': true
+            },
+            'listOfGeoviewLayerConfig': []
+          },
+          'components': ['overview-map', 'nav-bar'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div><p>This map will load with bad configuration replaced with default.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="CONF3CS" class="panel"></pre><hr/><div class="map-title-holder"><h4 id="HLCONF4">4. Load layers with bad config values</h4><a class="ref-link" href="#top">Top</a></div><div id="CONF4" class="llwp-map" data-lang="test_sp-CA" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 40,
+            'center': ['Last', -1000],
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'notdefined',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'wmsLYR1',
+              'geoviewLayerName': {
+                'en': 'earthquakes',
+                'fr': 'earthquakes'
+              },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
+              },
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'corePackages': [],
+        'theme': 'dark',
+        'suportedLanguages': ['en']
+      }"></div><p>This map will not load layers with bad configuration and inform the user.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="CONF4CS" class="panel"></pre><hr/><div class="map-title-holder"><h4 id="HLCONF5">5. Load config from URL params</h4><a class="ref-link" href="#top">Top</a></div><div id="CONF5" class="llwp-map" data-lang="en" data-shared="true"></div><p>This map loads it's configurations from the URL parameters by providing <strong>data-shared</strong>. If <strong>data-config</strong> is provided then it will override all loaded config from parameters.</p><hr/><div class="map-title-holder"><h4 id="HLCONF6">6. Load config from file</h4><a class="ref-link" href="#top">Top</a></div><div id="CONF6" class="llwp-map" data-lang="en" data-config-url="./configs/my-config.json"></div><p>This map loads it's configurations from a file by providing <strong>data-config-url</strong>, the map is static!</p><hr/><div class="map-title-holder"><h4 id="HLCONF7">7. Load config from function call</h4><a class="ref-link" href="#top">Top</a></div><div id="CONF7" class="llwp-map" data-lang="fr"></div><p>This map loads it's configurations from a function call</p><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function (mapId) {
+        console.log('api is ready');
+
+        if (cgpv.api.maps['CONF7']) {
+          setTimeout(() => {
+            cgpv.api.maps['CONF7'].loadMapFromJsonStringConfig (`{
+              'map': {
+                'interaction': 'dynamic',
+                'viewSettings': {
+                  'zoom': 7,
+                  'center': [-110, 70],
+                  'projection': 3978
+                },
+                'basemapOptions': {
+                  'basemapId': 'transport',
+                  'shaded': false,
+                  'labeled': true
+                },
+                'listOfGeoviewLayerConfig': [{
+                  'geoviewLayerId': 'wmsLYR1',
+                  'geoviewLayerName': {
+                    'en': 'earthquakes',
+                    'fr': 'earthquakes'
+                  },
+                  'metadataAccessPath': {
+                    'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                    'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
+                  },
+                  'geoviewLayerType': 'esriDynamic',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': '0'
+                    }
+                  ]
+                }, {
+                  'geoviewLayerId': 'wmsLYR1',
+                  'geoviewLayerName': {
+                    'en': 'earthquakes',
+                    'fr': 'earthquakes'
+                  },
+                  'metadataAccessPath': {
+                    'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                    'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
+                  },
+                  'geoviewLayerType': 'esriDynamic',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': '0'
+                    }
+                  ]
+                }]
+              },
+              'components': ['overview-map', 'nav-bar'],
+              'corePackages': [],
+              'theme': 'dark',
+              'suportedLanguages': ['en']
+            }`);
+          }, 2000);
+        }
+
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

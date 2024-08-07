@@ -1,0 +1,63 @@
+{
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "execution",
+      "layerName": { "en": "Downstream Analysis" },
+      "source": {
+        "dataAccessPath": {
+          "en": "https://132.156.9.48:30102/api/processes/downstream-analysis/execution",
+          "fr": "https://132.156.9.48:30102/api/processes/downstream-analysis/execution"
+        },
+        "postSettings": {
+          "header": {
+            "accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          "data": {
+            "inputs": {
+              "inSRID": 4326,
+              "lat": 45.1823,
+              "long": -72.0556,
+              "outSRID": 4326
+            }
+          }
+        },
+        "featureInfo": {
+          "queryable": "true",
+          "nameField": {
+            "en": "name_en",
+            "fr": "name_fr"
+          },
+          "outfields": {
+            "en": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id",
+            "fr": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id"
+          },
+          "fieldTypes": "string,number,number,number,number,number,number,number,number,number,number,string,string,number,number,string,string,string,number,number,number,number,number,number,number,number,number,number,number,number,string,number,number,number,number,string,number,number,number",
+          "aliasFields": {
+            "en": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id",
+            "fr": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id"
+          }
+        }
+      },
+      "initialSettings": {
+        "visible": "yes",
+        "extent": [-177.29275972275843, 34.301384132573055, -9.977229778239453, 84.400481529465]
+      },
+      "style": {
+        "LineString": {
+          "styleType": "simple",
+          "label": "Downstream Analysis",
+          "settings": {
+            "type": "lineString",
+            "stroke": {
+              "color": "rgba(230,123,38,1)",
+              "lineStyle": "shortDash-dot-dot",
+              "width": 2
+            }
+          }
+        }
+      }
+    }
+  ]
+}

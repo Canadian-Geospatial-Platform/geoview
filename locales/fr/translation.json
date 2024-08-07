@@ -1,0 +1,143 @@
+{
+  "general": {
+    "close": "Fermer",
+    "open": "Ouvrir",
+    "layers": "Couches",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "name": "Nom"
+  },
+  "mapnav": {
+    "arianavbar": "groupe de buttons vertical pour navigation sur la carte",
+    "export": "Exporter la carte en PNG",
+    "fullscreen": "Plein Écran",
+    "home": "Retour à la vue initiale",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "coordinates": "Basculer le format des coordonnées",
+    "scale": "Basculer entre l'échelle et la résolution",
+    "location": "Zoom sur ma position"
+  },
+  "mapctrl": {
+    "rotation": {
+      "resetRotation": "Réinitialiser la rotation",
+      "fixedNorth": "Nord fixe"
+    },
+    "mouseposition": {
+      "east": "E",
+      "west": "O",
+      "north": "N",
+      "south": "S"
+    },
+    "overviewmap": {
+      "toggle": "Basculer la mini-carte"
+    },
+    "attribution": {
+      "defaultnrcan": "© Sa Majesté le Roi du Chef du Canada, représentée par le ministre des Ressources naturelle"
+    },
+    "crosshair": "Utilisez les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte, <strong>Entrée</strong> pour sélectionner et <strong>Shift+fléchées</strong> <strong>Haut</strong> et <strong>Bas</strong> pour modfier le déplacement."
+  },
+  "appbar": {
+    "export": "Exporter",
+    "geolocator": "Géolocalisation",
+    "notifications": "Avis",
+    "no_notifications_available": "Aucune notification disponible",
+    "fullscreen": "Plein écran",
+    "help": "Aide",
+    "layers": "Couches",
+    "share": "Partager",
+    "version": "À propos de GéoView",
+    "repoLink": "Lien repo"
+  },
+  "legend": {
+    "unknown": "Titre de légende inconnu",
+    "remove_layer": "Supprimer le calque",
+    "opacity": "Opacité",
+    "expand_legend": "Développer la légende",
+    "toggle_cluster": "Basculer le groupement",
+    "toggle_opacity": "Basculer le Opacité",
+    "zoom_to": "Zoom sur la Couche",
+    "overview_title": "Aperçu de la légende",
+    "add_layer": "Ajouter un calque",
+    "selected_legend": "Légende sélectionnée",
+    "sort_layers": "Trier les calques",
+    "selected_Layers": "Un aperçu des calques actuellement sélectionnés",
+    "re-arrange": "Réarranger",
+    "categories_title": "Catégories",
+    "layer_has_error": "La couche a une erreur...",
+    "layer_is_loading": "La couche se charge..."
+  },
+  "details": {
+    "zoom_to": "Zoom à l'élément",
+    "select": "Sélectionner l'élément sur la carte",
+    "external_link": "Lien externe",
+    "detailsView": "Vue détaillée",
+    "selectVisbleLayer": "Sélectionnez n'importe quelle couche visible sur la carte pour commencer",
+    "feature": "item",
+    "clickOnMap": "Cliquer sur la carte",
+    "nextFeatureBtn": "Item suivant",
+    "previousFeatureBtn": "Item précédent",
+    "clearAllfeatures": "Déselctionner tout les items",
+    "highlightFeaturesOnMap": "Déselctionner tout les items",
+    "keepFeatureSelected": "Garder l'élément sélectionné"
+  },
+  "lightbox": {
+    "next": "Prochaine",
+    "previous": "Précédente",
+    "close": "Fermer",
+    "download": "Télécharger"
+  },
+  "keyboardnav": {
+    "start": "Aller après l'élément carte",
+    "end": "Aller avant l'élément carte",
+    "focusdialog": {
+      "title": "Navigation clavier",
+      "main": "Si activé, le focus sera verrouillé sur le visualiseur. \nPour sortir, appuyez sur <strong>CTRL + Q</strong>.",
+      "button": {
+        "enable": "Activer",
+        "skip": "Sauter"
+      }
+    }
+  },
+  "validation": {
+    "layer": {
+      "loadfailed": "Le chargement de la couche [__param__] a échoué sur la carte __param__.",
+      "notfound": "La sous couche __param__ de la couche GeoView __param__ n'existe pas sur le sereur",
+      "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la carte __param__",
+      "usedtwice": "Utilisation en double de l'identifiant de couche geoview [__param__] sur la carte __param__"
+    },
+    "schema": {
+      "notFound": "Une erreur de schéma a été trouvée, vérifiez la console pour voir ce qui ne va pas.",
+      "wrongPath": "Impossible de trouver le schéma ([__param__])"
+    }
+  },
+  "exportModal": {
+    "title": "Exporter la carte en PNG",
+    "cancelBtn": "Annuler",
+    "exportBtn": "Exporter"
+  },
+  "geolocator": {
+    "search": "Texte à rechercher",
+    "errorMessage": "Aucun résultat correspondant à"
+  },
+  "hovertooltip": {
+    "alticon": "Symbol de l'élément sélectionné"
+  },
+  "dataTable": {
+    "icon": "ICÔNE",
+    "zoom": "ZOOM",
+    "exportBtn": "Exporter",
+    "jsonExportBtn": "Télécharger GeoJSON",
+    "downloadAsCSV": "Télécharger la CSV",
+    "filterMap": "Filtrer la carte",
+    "stopFilterMap": "Filtrer la carte d'arrêt",
+    "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
+    "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)",
+    "enlargeBtn": "Agrandir",
+    "reduceBtn": "Réduire",
+    "features": "Item(s)",
+    "featureFiltered": "Item filtrée(s)",
+    "images": "Images",
+    "close": "Fermer"
+  }
+}

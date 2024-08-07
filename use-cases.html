@@ -1,0 +1,201 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Use Cases</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="#HUC1">Use Case 1</a><br/><a href="#HUC2">Use Case 2</a><br/><a href="#HUC3">Use Case 3</a><br/><a href="#HUC4">Use Case 4</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase how the viewer may be use in different situation. There is, at the moment, 4 use cases to address.</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HUC1">1. Display Metadata</h4><a class="ref-link" href="#top">Top</a></div><div id="UC1" data-lang="en" class="llwp-map" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            }
+          },
+          'components': ['overview-map'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div><p>This map is in LLC projection with an English interface.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="UC1CS" class="panel"></pre><hr/><div class="map-title-holder"><h4 id="HUC2">2. Display Thumbnail</h4><a class="ref-link" href="#top">Top</a></div><div id="UC2" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'static',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'wmsLYR1',
+                'geoviewLayerName': {
+                  'en': 'Première Nation / First Nation',
+                  'fr': 'Première Nation / First Nation'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer',
+                  'fr': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer'
+                },
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [{ 'layerId': '0' }]
+              },
+              {
+                'geoviewLayerId': 'esriDynamicLYR2',
+                'geoviewLayerName': {
+                  'en': 'Energy',
+                  'fr': 'Energy'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
+                  'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                },
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [{ 'layerId': '0' }, { 'layerId': '6' }]
+              },
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+                'metadataAccessPath': { 'en': './geojson/metadata.json' },
+                'geoviewLayerType': 'GeoJSON',
+                'listOfLayerEntryConfig': [
+                  { 'layerId': 'polygons.json' },
+                  { 'layerId': 'lines.json' },
+                  {
+                    'entryType': 'group',
+                    'layerId': 'point-feature-group',
+                    'layerName': { 'en': 'point-feature-group' },
+                    'listOfLayerEntryConfig': [
+                      { 'layerId': 'icon_points.json' },
+                      { 'layerId': 'points.json' }
+                    ]
+                  }
+                ]
+              },
+              {
+                'geoviewLayerId': 'wmsLYR7',
+                'geoviewLayerName': {
+                  'en': 'Geomet',
+                  'fr': 'Geomet'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://geo.weather.gc.ca/geomet',
+                  'fr': 'https://geo.weather.gc.ca/geomet'
+                },
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [{ 'layerId': 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg' }]
+              }
+            ]
+          },
+          'theme': 'dark',
+          'components': [],
+          'corePackages': [],
+          'suportedLanguages': ['en']
+        }"></div><p>Use to display a map like a thumbnail (static map, no components).</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="UC2CS" class="panel"></pre><hr/><div class="map-title-holder"><h4 id="HUC3">3. Geo Search - Coming Soon</h4><a class="ref-link" href="#top">Top</a></div><div id="UC3" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'simple',
+              'shaded': true,
+              'labeled': false
+            }
+          },
+          'components': ['overview-map'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div><p>...</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="UC3CS" class="panel"></pre><hr/><div class="map-title-holder"><h4 id="HUC4">4. Simple viewer - Coming Soon</h4><a class="ref-link" href="#top">Top</a></div><div id="UC4" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'simple',
+              'shaded': true,
+              'labeled': false
+            }
+          },
+          'components': ['overview-map'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div><p>...</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="UC4CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>function addPolyline(map) {
+        // call an api function to draw a polyline
+        const polyline = cgpv.api.maps[map].layer.geometry.addPolyline(
+          [
+            [-100, 45],
+            [-105, 50],
+          ],
+          {
+            style: {
+              strokeColor: '#000',
+              strokeWidth: 5,
+              strokeOpacity: 0.8,
+            },
+          }
+        );
+      }
+
+      function addPolygon(map) {
+        // call an api function to draw a polygon
+        const polygon = cgpv.api.maps[map].layer.geometry.addPolygon(
+          [
+            [
+              [-109.05, 41.0],
+              [-102.06, 40.99],
+              [-102.03, 36.99],
+              [-109.04, 36.99],
+              [-109.05, 41.0],
+            ],
+          ],
+          {
+            style: {
+              strokeColor: '#000',
+              strokeWidth: 5,
+              strokeOpacity: 0.8,
+              fillColor: 'red',
+              fillOpacity: 1,
+            },
+          }
+        );
+      }
+
+      function addCircle(map) {
+        // call an api function to draw a polygon
+        const circle = cgpv.api.maps[map].layer.geometry.addCircle([-109, 50], {
+          style: {
+            strokeColor: 'red',
+            strokeWidth: 1,
+            fillColor: '#f03',
+            fillOpacity: 0.5,
+            radius: 5,
+          },
+        });
+      }
+
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function (mapId) {
+        if (mapId === 'allMaps') {
+          console.log('api is ready');
+
+          //create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+
+          //add geometries to map
+          addPolyline('UC1');
+          addPolygon('UC1');
+          addCircle('UC1');
+        }
+      });</script></body></html>

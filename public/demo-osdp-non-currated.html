@@ -1,0 +1,142 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>OSDP Non Currated Demo - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>OSDP Non Currated Maps Demo</strong></h1></td></tr><tr><td><a href="./demos.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td><p>Demonstration of Open Science Data Portal -Non Currated Maps Configuration</p></td></tr><tr><td><a href="#HLYR1">1. Empty Map</a><br/><a href="#HLYR2">2. Search</a><br/><a href="#HLYR3">3. Simple</a><br/><a href="#HLYR4">4. GeoJSON Rendering</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLYR1">1. Empty Map</h4><a class="ref-link" href="#top">Top</a></div><div id="Map1" class="geoview-map" data-lang="en" data-config-url="./configs/OSDP/osdp-empty.json"></div><hr/><div class="map-title-holder"><h4 id="HLYR2">2. Search</h4><a class="ref-link" href="#top">Top</a></div><div id="Map2" class="geoview-map" data-lang="en" data-config-url="./configs/OSDP/osdp-search.json"></div><hr/><div class="map-title-holder"><h4 id="HLYR3">3. Simple - Static Thumbnail</h4><a class="ref-link" href="#top">Top</a></div><div id="Map3" class="geoview-map" data-lang="en" data-config-url="./configs/OSDP/osdp-simple.json"></div><hr/><div class="map-title-holder"><h4 id="HLYR4">4. GeoJSON Rendering</h4><a class="ref-link" href="#top">Top</a></div><div id="Map4" class="geoview-map" data-lang="en" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'projection': 3857
+        },
+        'basemapOptions': {
+          'basemapId': 'transport',
+          'shaded': false,
+          'labeled': true
+        },
+        'listOfGeoviewLayerConfig': [
+          {
+            'geoviewLayerId': 'geojsonlyr1',
+            'geoviewLayerName': { 
+              'en': 'Multi Polygon Layer',
+              'fr': 'Couche multi-polygones' 
+            },
+            'metadataAccessPath': { 'en': './configs/OSDP/datasets/OSDP-metadata.json' },
+            'geoviewLayerType': 'GeoJSON',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'BC-MPI-1-2521_fr.json'
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'geojsonlyr2',
+            'geoviewLayerName': { 
+              'en': 'Multi Polygon Layer',
+              'fr': 'Couche multi-polygones' 
+            },
+            'geoviewLayerType': 'GeoJSON',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'NRCAN-GEOSCAN-1-129009_en',
+                'layerName': { 
+                  'en': 'NRCAN-GEOSCAN-1-129009_en',
+                  'fr': 'NRCAN-GEOSCAN-1-129009_en'
+                },
+                'source': {
+                  'dataAccessPath': {
+                    'en': './configs/OSDP/datasets/NRCAN-GEOSCAN-1-129009_en.json',
+                    'fr': './configs/OSDP/datasets/NRCAN-GEOSCAN-1-129009_en.json'
+                  }
+                }
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'geojsonlyr3',
+            'geoviewLayerName': { 
+              'en': 'Multi Polygon Layer',
+              'fr': 'Couche multi-polygones' 
+            },
+            'geoviewLayerType': 'GeoJSON',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'DFO-CURATED-1-03336A72-E5AD-4EEE-803D-E70B7FDE9FCB_en',
+                'layerName': { 
+                  'en': 'DFO-CURATED-1-03336A72-E5AD-4EEE-803D-E70B7FDE9FCB_en',
+                  'fr': 'DFO-CURATED-1-03336A72-E5AD-4EEE-803D-E70B7FDE9FCB_en'
+                },
+                'source': {
+                  'dataAccessPath': {
+                    'en': './configs/OSDP/datasets/DFO-CURATED-1-03336A72-E5AD-4EEE-803D-E70B7FDE9FCB_en.json',
+                    'fr': './configs/OSDP/datasets/DFO-CURATED-1-03336A72-E5AD-4EEE-803D-E70B7FDE9FCB_en.json'
+                  }
+                }
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'geojsonlyr4',
+            'geoviewLayerName': { 
+              'en': 'Multi Polygon Layer',
+              'fr': 'Couche multi-polygones' 
+            },
+            'geoviewLayerType': 'GeoJSON',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'ECCC-CURATED-1-349208FB-DAA5-4A20-B08A-012F1ED32B3A_en',
+                'layerName': { 
+                  'en': 'ECCC-CURATED-1-349208FB-DAA5-4A20-B08A-012F1ED32B3A_en',
+                  'fr': 'ECCC-CURATED-1-349208FB-DAA5-4A20-B08A-012F1ED32B3A_en'
+                },
+                'source': {
+                  'dataAccessPath': {
+                    'en': './configs/OSDP/datasets/ECCC-CURATED-1-349208FB-DAA5-4A20-B08A-012F1ED32B3A_en.json',
+                    'fr': './configs/OSDP/datasets/ECCC-CURATED-1-349208FB-DAA5-4A20-B08A-012F1ED32B3A_en.json'
+                  }
+                }
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'geojsonlyr5',
+            'geoviewLayerName': { 
+              'en': 'Multi Polygon Layer',
+              'fr': 'Couche multi-polygones' 
+            },
+            'geoviewLayerType': 'GeoJSON',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'full-geojson',
+                'layerName': { 
+                  'en': 'full-geojson - Not CORS',
+                  'fr': 'full-geojson - Not CORS'
+                },
+                'source': {
+                  'dataAccessPath': {
+                    'en': 'https://en-fr-test.r2.osdp.aws.nrcan-rncan.cloud/GeoJson/NRCAN-GEOSCAN-1-129009_en',
+                    'fr': 'https://en-fr-test.r2.osdp.aws.nrcan-rncan.cloud/GeoJson/NRCAN-GEOSCAN-1-129009_en'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      'navBar': ['zoom', 'fullscreen', 'home', 'location'],
+      'appBar': {
+        'tabs': {
+          'core': ['geolocator', 'export']
+        }
+      },
+      'footerBar': {
+        'tabs': {
+          'core': ['legend', 'layers', 'details', 'data-table']
+        }
+      },
+      'components': ['overview-map'],
+      'corePackages': [],
+      'theme': 'geo.ca'
+    }"></div><hr/><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {});
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

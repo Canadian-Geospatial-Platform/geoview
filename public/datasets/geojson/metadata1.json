@@ -1,0 +1,122 @@
+{
+  "schemaVersionUsed": "1,0",
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "projects.json",
+      "layerName": { "en": "Projects" },
+      "source": {
+        "featureInfo": {
+          "queryable": true,
+          "nameField": { "en": "Project", "fr": "Project" },
+          "outfields": { "en": "program,project_id,geom_type,geom_area,SRID", "fr": "program,project_id,geom_type,geom_area,SRID" },
+          "fieldTypes": "string",
+          "aliasFields": {
+            "en": "Program,Project ID,Geometry type,Geometry area,SRID",
+            "fr": "Programme,ID du projet,Geometry type,Geometry area,SRID"
+          }
+        }
+      },
+      "style": {
+        "Point": {
+          "styleType": "uniqueValue",
+          "fields": ["Program"],
+          "defaultLabel": "Other point projects",
+          "defaultSettings": {
+            "type": "simpleSymbol",
+            "color": "rgba(0,0,255,0.10)",
+            "symbol": "X"
+          },
+          "uniqueValueStyleInfo": [
+            {
+              "label": "EGP",
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(0,255,0,0.10)",
+                "symbol": "circle"
+              },
+              "values": ["EGP"]
+            },
+            {
+              "label": "TGI",
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(0,128,128,0.10)",
+                "symbol": "star"
+              },
+              "values": ["TGI"]
+            }
+          ]
+        },
+        "Polygon": {
+          "styleId": "uniqueValueId",
+          "defaultLabel": "Other projects",
+          "styleType": "uniqueValue",
+          "defaultSettings": {
+            "type": "filledPolygon",
+            "color": "rgba(0,0,255,0.10)",
+            "paternSize": 10,
+            "paternWidth": 2,
+            "fillStyle": "diagonalCross",
+            "stroke": {
+              "color": "rgba(0,0,255,1)",
+              "lineStyle": "dot"
+            }
+          },
+          "defaultVisible": true,
+          "fields": ["Program"],
+          "uniqueValueStyleInfo": [
+            {
+              "label": "EGP",
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(255,0,0,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "diagonalCross",
+                "stroke": {
+                  "color": "rgba(255,0,0,1)",
+                  "lineStyle": "dot"
+                }
+              },
+              "values": ["EGP"],
+              "visible": true
+            },
+            {
+              "label": "TGI",
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(0,128,128,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "diagonalCross",
+                "stroke": {
+                  "color": "rgba(0,128,128,1)",
+                  "lineStyle": "dot"
+                }
+              },
+              "values": ["TGI"],
+              "visible": true
+            },
+            {
+              "label": "GGN",
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(255,0,255,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "diagonalCross",
+                "stroke": {
+                  "color": "rgba(255,0,255,1)",
+                  "lineStyle": "dot"
+                }
+              },
+              "values": ["GGN"],
+              "visible": true
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
