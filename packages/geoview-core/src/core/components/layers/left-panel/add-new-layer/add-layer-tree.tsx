@@ -6,6 +6,8 @@ import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import { logger } from '@/core/utils/logger';
 import { EntryConfigBaseClass, GroupLayerEntryConfig } from '@/api/config/types/map-schema-types';
+import _ from 'lodash';
+import { getLayerById } from './add-new-layers-utils';
 
 export interface AddLayerTreeProps {
   layersData: GroupLayerEntryConfig[];
@@ -46,7 +48,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   const renderTreeItem = function (layer: GroupLayerEntryConfig, parentId: string | null): JSX.Element {
     const curLayerId = `${parentId ? `${parentId}/` : ''}${layer.layerId}`;
     return (
-      <TreeItem key={curLayerId} itemId={curLayerId} label={layer.layerName}>
+      <TreeItem key={curLayerId} itemId={curLayerId} label={layer.layerName} aria-label={layer.layerName}>
         {layer?.listOfLayerEntryConfig?.length > 0 &&
           layer.listOfLayerEntryConfig.map((subLayer: EntryConfigBaseClass) =>
             renderTreeItem(subLayer as GroupLayerEntryConfig, curLayerId)
@@ -55,18 +57,53 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     );
   };
 
-  // Event handler for tree selection change
-  const handleSelectedItemsChange = function (event: React.SyntheticEvent, items: string[] | string): void {
-    const sortedItems = (items as string[]).sort();
-    setSelectedItems(sortedItems);
-  };
+  const getLayerChildren = function (treeLayerId: string): string[] {
+    const result: string[] = [];
+
+    function populateLayerChildren(origLayerId: string, parentViewId: string | null): void {
+      const viewLayerId = `${parentViewId ? `${parentViewId}/` : ''}${origLayerId}`;
+      result.push(viewLayerId);
+      const layerDetails = getLayerById(layersData, origLayerId);
+
+      const childLayerIds = layerDetails?.listOfLayerEntryConfig?.map((child: EntryConfigBaseClass) => {
+        return child.layerId;
+      });
+
+      childLayerIds?.forEach((childLayerId) => {
+        populateLayerChildren(childLayerId, viewLayerId);
+      });
+    }
+
+
+    const layerTokens = treeLayerId.split('/');
+    const origLayerId = layerTokens.pop() as string;
+    let parentLayerId = null;
+    if (layerTokens.length > 0) {
+      parentLayerId = layerTokens.join('/');
+    }
+    populateLayerChildren(origLayerId, parentLayerId);
+
+    return _.uniq(result).sort();
+  }
+
+  const handleItemSelectionToggle = function (event: React.SyntheticEvent, itemId: string, isSelected: boolean): void {
+    const layerChildren = getLayerChildren(itemId);
+    const toAddOrRemove = [itemId, ...layerChildren];
+
+    if (isSelected) {
+      setSelectedItems(_.uniq([...selectedItems, ...toAddOrRemove]).sort());
+    } else {
+      setSelectedItems(selectedItems.filter((item) => !toAddOrRemove.includes(item)));
+    }
+  }
 
   if (!isInitialized) {
     return null;
   }
 
   const renderTreeItems = function () {
-    return layersData[0].listOfLayerEntryConfig.map((layer) => renderTreeItem(layer as GroupLayerEntryConfig, null));
+    //return layersData[0].listOfLayerEntryConfig.map((layer) => renderTreeItem(layer as GroupLayerEntryConfig, null));
+    return layersData.map((layer) => renderTreeItem(layer as GroupLayerEntryConfig, null));
   };
 
   return (
@@ -76,7 +113,8 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
       checkboxSelection
       defaultExpandedItems={defaultExpandedItems}
       defaultSelectedItems={defaultSelectedItems}
-      onSelectedItemsChange={(event: React.SyntheticEvent, itemIds: Array<string> | string) => handleSelectedItemsChange(event, itemIds)}
+      selectedItems={selectedItems}
+      onItemSelectionToggle={(event: React.SyntheticEvent, itemId: string, isSelected: boolean) => handleItemSelectionToggle(event, itemId, isSelected)}
     >
       {renderTreeItems()}
     </SimpleTreeView>
