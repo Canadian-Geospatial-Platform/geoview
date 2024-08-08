@@ -38,6 +38,9 @@ import { whenThisThen } from '@/core/utils/utilities';
 
 import { AppEventProcessor } from './app-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { DataTableEventProcessor } from './data-table-event-processor';
+import { TimeSliderEventProcessor } from './time-slider-event-processor';
+import { UIEventProcessor } from './ui-event-processor';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -47,7 +50,15 @@ import { LegendEventProcessor } from './legend-event-processor';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { UIEventProcessor } from './ui-event-processor';
+
+import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
+import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -289,6 +300,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static getCurrentBasemapOptions(mapId: string): TypeBasemapOptions {
     return this.getMapStateProtected(mapId).currentBasemapOptions;
+  }
+
+  /**
+   * Gets initial filter(s) for a layer.
+   * @param {string} mapId - The map id of the state to act on
+   * @param {string} layerPath - The path of the layer
+   * @returns {string | undefined} The initial filter(s) for the layer
+   */
+  static getInitialFilter(mapId: string, layerPath: string): string | undefined {
+    return this.getMapStateProtected(mapId).initialFilters[layerPath];
   }
 
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
@@ -561,6 +582,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (bounds && bounds[0] !== Infinity) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
 
     return layerPath;
+  }
+
+  static addInitialFilter(mapId: string, layerPath: string, filter: string): void {
+    const curFilters = this.getMapStateProtected(mapId).initialFilters;
+    this.getMapStateProtected(mapId).setterActions.setInitialFilters({ ...curFilters, [layerPath]: filter });
   }
 
   static setCurrentBasemapOptions(mapId: string, basemapOptions: TypeBasemapOptions): void {
@@ -1093,6 +1119,38 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     return undefined;
+  }
+
+  /**
+   * Apply all available filters to layer.
+   *
+   * @param {string} mapId The map id.
+   * @param {string} layerPath The extent to zoom to.
+   */
+  static applyLayerFilters(mapId: string, layerPath: string): void {
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath);
+    if (geoviewLayer) {
+      if (
+        geoviewLayer instanceof WMS ||
+        geoviewLayer instanceof GVWMS ||
+        geoviewLayer instanceof EsriImage ||
+        geoviewLayer instanceof GVEsriImage
+      ) {
+        const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+        if (filter) geoviewLayer.applyViewFilter(layerPath, filter);
+      } else {
+        const initialFilter = this.getInitialFilter(mapId, layerPath);
+        const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
+        const sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+        const filters = [initialFilter, tableFilter, sliderFilter].filter((eachFilter) => eachFilter);
+
+        if (filters.length)
+          (geoviewLayer as AbstractGeoViewVector | AbstractGVVector | EsriDynamic | GVEsriDynamic).applyViewFilter(
+            layerPath,
+            filters.join(' and ')
+          );
+      }
+    }
   }
 
   // #endregion

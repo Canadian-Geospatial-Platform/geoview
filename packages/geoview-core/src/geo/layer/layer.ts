@@ -17,7 +17,6 @@ import { createLocalizedString, generateId, whenThisThen } from '@/core/utils/ut
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer, LayerCreationEvent, LayerRequestingEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
@@ -87,6 +86,7 @@ import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processo
 import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 export type GeoViewLayerAddedResult = {
   layer: AbstractGeoViewLayer;
@@ -651,6 +651,23 @@ export class LayerApi {
 
         // Register it
         this.registerLayerConfigInit(layerConfig);
+
+        // Add filters to map initial filters, if they exist
+        if (
+          (
+            layerConfig as
+              | VectorLayerEntryConfig
+              | EsriDynamicLayerEntryConfig
+              | EsriImageLayerEntryConfig
+              | ImageStaticLayerEntryConfig
+              | OgcWmsLayerEntryConfig
+          ).layerFilter
+        )
+          MapEventProcessor.addInitialFilter(
+            this.getMapId(),
+            layerConfig.layerPath,
+            (layerConfig as VectorLayerEntryConfig).layerFilter as string
+          );
       });
 
       // Register when layer entry config has become processed (catching on-the-fly layer entry configs as they are further processed)
@@ -1410,8 +1427,8 @@ export class LayerApi {
     // Update the legend layers if necessary
     if (updateLegendLayers) LegendEventProcessor.setItemVisibility(this.getMapId(), item, visibility);
 
-    // Apply filter to layer (lazy casting here to access the function)
-    (this.getGeoviewLayerHybrid(layerPath) as AbstractGeoViewVector).applyViewFilter?.(layerPath, '');
+    // Apply filter to layer
+    MapEventProcessor.applyLayerFilters(this.getMapId(), layerPath);
 
     // Emit event
     this.#emitLayerItemVisibilityToggled({ layerPath, itemName: item.name, visibility });

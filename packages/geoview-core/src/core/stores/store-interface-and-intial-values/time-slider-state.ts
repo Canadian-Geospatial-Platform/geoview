@@ -12,8 +12,10 @@ type TimeSliderActions = ITimeSliderState['actions'];
 export interface ITimeSliderState {
   timeSliderLayers: TimeSliderLayerSet;
   selectedLayerPath: string;
+  sliderFilters: Record<string, string>;
 
   actions: {
+    addOrUpdateSliderFilter(layerPath: string, filter: string): void;
     setTitle: (layerPath: string, title: string) => void;
     setDescription: (layerPath: string, description: string) => void;
     setDelay: (layerPath: string, delay: number) => void;
@@ -35,6 +37,7 @@ export interface ITimeSliderState {
     setLocked: (layerPath: string, locked: boolean) => void;
     setReversed: (layerPath: string, locked: boolean) => void;
     setSelectedLayerPath: (layerPath: string) => void;
+    setSliderFilters: (newSliderFilters: Record<string, string>) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
   };
@@ -52,10 +55,15 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
   const init = {
     timeSliderLayers: {},
     selectedLayerPath: '',
+    sliderFilters: {},
 
     // #region ACTIONS
 
     actions: {
+      addOrUpdateSliderFilter(layerPath: string, filter: string): void {
+        // Redirect to event processor
+        TimeSliderEventProcessor.addOrUpdateSliderFilter(get().mapId, layerPath, filter);
+      },
       setTitle(layerPath: string, title: string): void {
         // Redirect to setter
         get().timeSliderState.setterActions.setTitle(layerPath, title);
@@ -71,7 +79,7 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       setFiltering(layerPath: string, filtering: boolean): void {
         // Redirect to TimeSliderEventProcessor
         const { defaultValue, field, minAndMax, values } = get().timeSliderState.timeSliderLayers[layerPath];
-        TimeSliderEventProcessor.applyFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+        TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
       },
       setLocked(layerPath: string, locked: boolean): void {
         // Redirect to setter
@@ -92,7 +100,7 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       setValues(layerPath: string, values: number[]): void {
         // Redirect to TimeSliderEventProcessor
         const { defaultValue, field, minAndMax, filtering } = get().timeSliderState.timeSliderLayers[layerPath];
-        TimeSliderEventProcessor.applyFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+        TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
       },
     },
 
@@ -183,6 +191,14 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
           },
         });
       },
+      setSliderFilters(newSliderFilters: Record<string, string>): void {
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            sliderFilters: newSliderFilters,
+          },
+        });
+      },
       setDefaultValue(layerPath: string, defaultValue: string): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
         sliderLayers[layerPath].defaultValue = defaultValue;
@@ -237,5 +253,7 @@ export interface TypeTimeSliderValues {
 // **********************************************************
 export const useTimeSliderLayers = (): TimeSliderLayerSet => useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers);
 export const useTimeSliderSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.timeSliderState.selectedLayerPath);
+export const useTimeSliderFilters = (): Record<string, string> =>
+  useStore(useGeoViewStore(), (state) => state.timeSliderState.sliderFilters);
 
 export const useTimeSliderStoreActions = (): TimeSliderActions => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);
