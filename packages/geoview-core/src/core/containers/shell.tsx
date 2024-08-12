@@ -201,7 +201,7 @@ export function Shell(props: ShellProps): JSX.Element {
   useEffect(() => {
     if (mapLoaded) {
       const mapContainer = document.getElementById(mapId);
-      if (mapContainer?.style?.height) mapContainer.style.height = 'fit-content';
+      if (mapContainer?.style?.height.endsWith('px')) mapContainer.style.height = 'fit-content';
     }
   }, [mapId, mapLoaded]);
 

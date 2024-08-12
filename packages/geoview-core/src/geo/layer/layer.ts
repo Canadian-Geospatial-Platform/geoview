@@ -653,21 +653,7 @@ export class LayerApi {
         this.registerLayerConfigInit(layerConfig);
 
         // Add filters to map initial filters, if they exist
-        if (
-          (
-            layerConfig as
-              | VectorLayerEntryConfig
-              | EsriDynamicLayerEntryConfig
-              | EsriImageLayerEntryConfig
-              | ImageStaticLayerEntryConfig
-              | OgcWmsLayerEntryConfig
-          ).layerFilter
-        )
-          MapEventProcessor.addInitialFilter(
-            this.getMapId(),
-            layerConfig.layerPath,
-            (layerConfig as VectorLayerEntryConfig).layerFilter as string
-          );
+        this.#addInitialFilters(layerConfig);
       });
 
       // Register when layer entry config has become processed (catching on-the-fly layer entry configs as they are further processed)
@@ -1586,6 +1572,28 @@ export class LayerApi {
         this.#gatherAllBoundsRec(subLayerConfig, bounds);
       });
     }
+  }
+
+  /**
+   * Adds initial filters to layers, if provided.
+   * @param {ConfigBaseClass} layerConfig - The layer config being processed
+   */
+  #addInitialFilters(layerConfig: ConfigBaseClass): void {
+    if (
+      (
+        layerConfig as
+          | VectorLayerEntryConfig
+          | EsriDynamicLayerEntryConfig
+          | EsriImageLayerEntryConfig
+          | ImageStaticLayerEntryConfig
+          | OgcWmsLayerEntryConfig
+      ).layerFilter
+    )
+      MapEventProcessor.addInitialFilter(
+        this.getMapId(),
+        layerConfig.layerPath,
+        (layerConfig as VectorLayerEntryConfig).layerFilter as string
+      );
   }
 
   /**
