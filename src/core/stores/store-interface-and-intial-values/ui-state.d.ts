@@ -13,18 +13,19 @@ export interface IUIState {
     activeAppBarTab: ActiveAppBarTabType;
     appBarComponents: TypeValidAppBarCoreProps[];
     corePackagesComponents: TypeMapCorePackages;
-    focusITem: FocusItemProps;
+    focusItem: FocusItemProps;
     hiddenTabs: string[];
     mapInfoExpanded: boolean;
     navBarComponents: TypeNavBarProps;
     footerPanelResizeValue: number;
     footerPanelResizeValues: number[];
     footerBarIsCollapsed: boolean;
+    selectedFooterLayerListItem: string;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         hideTab: (tab: string) => void;
-        closeModal: () => void;
-        openModal: (uiFocus: FocusItemProps) => void;
+        enableFocusTrap: (uiFocus: FocusItemProps) => void;
+        disableFocusTrap: () => void;
         showTab: (tab: string) => void;
         setActiveFooterBarTab: (id: string) => void;
         setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
@@ -32,10 +33,11 @@ export interface IUIState {
         setFooterPanelResizeValue: (value: number) => void;
         setMapInfoExpanded: (expanded: boolean) => void;
         setFooterBarIsCollapsed: (collapsed: boolean) => void;
+        setSelectedFooterLayerListItem: (layerListItem: string) => void;
     };
     setterActions: {
-        closeModal: () => void;
-        openModal: (uiFocus: FocusItemProps) => void;
+        enableFocusTrap: (uiFocus: FocusItemProps) => void;
+        disableFocusTrap: () => void;
         setActiveFooterBarTab: (id: string) => void;
         setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;
@@ -43,6 +45,7 @@ export interface IUIState {
         setHiddenTabs: (hiddenTabs: string[]) => void;
         setMapInfoExpanded: (expanded: boolean) => void;
         setFooterBarIsCollapsed: (collapsed: boolean) => void;
+        setSelectedFooterLayerListItem: (layerListItem: string) => void;
     };
 }
 /**
@@ -68,5 +71,6 @@ export declare const useUIHiddenTabs: () => string[];
 export declare const useUIMapInfoExpanded: () => boolean;
 export declare const useUINavbarComponents: () => TypeNavBarProps;
 export declare const useUIFooterBarIsCollapsed: () => boolean;
+export declare const useUISelectedFooterLayerListItem: () => string;
 export declare const useUIStoreActions: () => UIActions;
 export {};

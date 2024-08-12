@@ -236,9 +236,10 @@ export declare class MapViewer {
      */
     remove(deleteContainer: boolean): HTMLElement;
     /**
-     * Reload a map from a config object stored in store. It first removes then recreates the map.
+     * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
+     * @param {TypeMapFeaturesConfig} mapConfig - Optional map config to use for reload.
      */
-    reload(): void;
+    reload(mapConfig?: TypeMapFeaturesConfig): void;
     /**
      * Reload a map from a config object created using current map state. It first removes then recreates the map.
      */

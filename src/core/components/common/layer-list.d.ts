@@ -11,6 +11,7 @@ export interface LayerListEntry {
     tooltip?: JSX.Element | string;
     numOffeatures?: number;
     features?: TypeFeatureInfoEntry[] | undefined | null;
+    layerUniqueId?: string;
 }
 interface LayerListProps {
     layerList: LayerListEntry[];

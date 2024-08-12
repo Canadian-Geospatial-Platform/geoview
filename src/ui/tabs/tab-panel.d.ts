@@ -10,6 +10,7 @@ export interface TypeTabPanelProps {
     id: string;
     children?: TypeChildren;
     containerType?: TypeContainerBox;
+    tabId: string;
 }
 /**
  * Create a tab panel that will be used to display the content of a tab

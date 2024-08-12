@@ -97,6 +97,13 @@ export type TypeServiceUrls = {
 };
 /** Valid schema version number. */
 export type TypeValidVersions = '1.0';
+/** Service endpoint urls. */
+export type TypeGlobalSettings = {
+    /**
+     * Whether or not sublayers can be removed from layer groups. Default = true.
+     */
+    canRemoveSublayers?: boolean;
+};
 /** Definition of the map configuration settings. */
 export type TypeMapConfig = {
     /** Basemap options settings for this map configuration. */

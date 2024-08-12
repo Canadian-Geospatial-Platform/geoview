@@ -3,6 +3,9 @@ export declare const getSxClasses: (theme: Theme) => {
     readonly guideContainer: {
         readonly '& .responsive-layout-right-main-content': {
             readonly backgroundColor: string;
+            readonly '&:focus-visible': {
+                readonly border: "2px solid inherit";
+            };
         };
     };
     readonly rightPanelContainer: {
