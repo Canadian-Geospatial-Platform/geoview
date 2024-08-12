@@ -102,18 +102,16 @@ export class API {
    */
   // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  createMapFromConfig(divId: string, mapConfig: string): Promise<void> {
+  async createMapFromConfig(divId: string, mapConfig: string): Promise<void> {
     // Get the map div
     const mapDiv = document.getElementById(divId);
 
     // If found the map div
     if (mapDiv) {
       // Init by function call
-      return initMapDivFromFunctionCall(mapDiv, mapConfig);
+      await initMapDivFromFunctionCall(mapDiv, mapConfig);
     }
-
     // Log error
-    logger.logError(`Div with id ${divId} does not exist`);
-    return Promise.reject(new Error(`Div with id ${divId} does not exist`));
+    else logger.logError(`Div with id ${divId} does not exist`);
   }
 }
