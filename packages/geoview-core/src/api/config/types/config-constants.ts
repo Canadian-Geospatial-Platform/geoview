@@ -223,6 +223,7 @@ export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
 export const CV_DEFAULT_APPBAR_TABS_ORDER = [
   'geolocator',
   'aoi-panel',
+  'custom-legend-panel',
   'legend',
   'layers',
   'details',

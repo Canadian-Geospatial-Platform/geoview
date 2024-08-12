@@ -62,6 +62,7 @@ export type TypeValidAppBarCoreProps =
   | 'export'
   | 'basemap-panel'
   | 'aoi-panel'
+  | 'custom-legend-panel'
   | 'geochart'
   | 'guide'
   | 'legend'

@@ -36,6 +36,10 @@
       "projectFolder": "packages/geoview-geochart"
     },
     {
+      "packageName": "geoview-legend-panel",
+      "projectFolder": "packages/geoview-legend-panel"
+    },
+    {
       "packageName": "geoview-swiper",
       "projectFolder": "packages/geoview-swiper"
     },

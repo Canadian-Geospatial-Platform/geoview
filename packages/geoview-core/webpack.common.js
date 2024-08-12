@@ -84,6 +84,11 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    'geoview-legend-panel': {
+      import: '../geoview-legend-panel/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
     'geoview-swiper': {
       import: '../geoview-swiper/src/index.tsx',
       dependOn: 'cgpv-main',

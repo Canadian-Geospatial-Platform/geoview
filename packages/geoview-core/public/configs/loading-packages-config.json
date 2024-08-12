@@ -18,6 +18,7 @@
       "core": ["geolocator",
                 "export",
                 "aoi-panel",
+                "custom-legend-panel",
                 "guide",
                 "basemap-panel",
                 "details",
