@@ -1152,41 +1152,35 @@ export class MapViewer {
    * @param {boolean} deleteContainer - True if we want to delete div from the page
    * @returns {HTMLElement} The HTML element
    */
-  remove(deleteContainer: boolean): HTMLElement {
+  async remove(deleteContainer: boolean): Promise<HTMLElement> {
     // Get the map container to unmount
     // Remove geoview-class if we need to reuse the div
     const mapContainer = document.getElementById(this.mapId)!;
     mapContainer.classList.remove('geoview-map');
 
-    // If this is done after plugin removal, it triggers a rerender, and the plugins can cause an error, depending on state
+    // GV If this is done after plugin removal, it triggers a rerender, and the plugins can cause an error, depending on state
     // Remove the dom element (remove rendered map and overview map)
     if (this.overviewRoot) this.overviewRoot.unmount();
     unmountMap(this.mapId);
 
     // Unload all loaded plugins on the map
-    Plugin.removePlugins(this.mapId)
-      .then(() => {
-        // Remove all layers
-        try {
-          this.layer.removeAllGeoviewLayers();
-        } catch (err) {
-          // Failed to remove layers, eat the exception and continue to remove the map
-        }
+    await Plugin.removePlugins(this.mapId);
 
-        // Delete store and event processor
-        removeGeoviewStore(this.mapId);
+    // Remove all layers
+    try {
+      this.layer.removeAllGeoviewLayers();
+    } catch (err) {
+      // Failed to remove layers, eat the exception and continue to remove the map
+    }
 
-        // If deleteContainer, delete the HTML div
-        if (deleteContainer) mapContainer.remove();
+    // Delete store and event processor
+    removeGeoviewStore(this.mapId);
 
-        // Delete the map instance from the maps array, will delete attached plugins
-        // TODO: need a time out here because if not, map is deleted before everything is done on the map
-        // TO.DOCONT: This whole sequence need to be async
-        setTimeout(() => delete api.maps[this.mapId], 1000);
-      })
-      .catch((error) => {
-        logger.logError(`Couldn't remove map in map-viewer`, error);
-      });
+    // If deleteContainer, delete the HTML div
+    if (deleteContainer) mapContainer.remove();
+
+    // Delete the map instance from the maps array, will delete attached plugins
+    delete api.maps[this.mapId];
 
     // Return the map container to be remove
     return mapContainer;
@@ -1196,27 +1190,24 @@ export class MapViewer {
    * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
    * @param {TypeMapFeaturesConfig} mapConfig - Optional map config to use for reload.
    */
-  reload(mapConfig?: TypeMapFeaturesConfig): void {
+  async reload(mapConfig?: TypeMapFeaturesConfig): Promise<void> {
+    // If no config is provided, get the original from the store
+    const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(this.mapId);
+
     const mapContainer = document.getElementById(this.mapId)!;
 
     // Set map container height to current height to avoid shifting
     const height = mapContainer.offsetHeight;
     mapContainer.style.height = `${height}px`;
 
-    // remove the map, then get config to use to recreate it
-    const mapDiv = this.remove(false);
-    const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(this.mapId);
-    // TODO: Remove time out and make this async so remove/recreate work one after the other
-    // TO.DOCONT: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
-    setTimeout(
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      () =>
-        api.createMapFromConfig(mapDiv.id, JSON.stringify(config)).catch((error) => {
-          // Log
-          logger.logError(`Couldn't reload the map in map-viewer`, error);
-        }),
-      1500
-    );
+    // Remove the map
+    const mapDiv = await this.remove(false);
+
+    // TODO: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
+    api.createMapFromConfig(mapDiv.id, JSON.stringify(config)).catch((error) => {
+      // Log
+      logger.logError(`Couldn't reload the map in map-viewer`, error);
+    });
   }
 
   /**
@@ -1224,7 +1215,10 @@ export class MapViewer {
    */
   reloadWithCurrentState(): void {
     const currentMapConfig = this.createMapConfigFromMapState();
-    this.reload(currentMapConfig);
+    this.reload(currentMapConfig).catch((error) => {
+      // Log
+      logger.logError(`Couldn't reload the map in map-viewer`, error);
+    });
   }
 
   /**
