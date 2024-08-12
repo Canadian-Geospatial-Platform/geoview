@@ -40,7 +40,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serialized = super.onSerialize() as any;
     // Copy values
-    serialized.listOfLayerEntryConfig = this.listOfLayerEntryConfig;
+    serialized.listOfLayerEntryConfig = this.listOfLayerEntryConfig.map((layerEntryConfig) => layerEntryConfig.serialize());
 
     // Return it
     return serialized;

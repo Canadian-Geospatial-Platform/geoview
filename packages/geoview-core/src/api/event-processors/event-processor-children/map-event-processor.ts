@@ -1125,7 +1125,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Apply all available filters to layer.
    *
    * @param {string} mapId The map id.
-   * @param {string} layerPath The extent to zoom to.
+   * @param {string} layerPath The path of the layer to apply filters to.
    */
   static applyLayerFilters(mapId: string, layerPath: string): void {
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath);
@@ -1139,18 +1139,32 @@ export class MapEventProcessor extends AbstractEventProcessor {
         const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
         if (filter) geoviewLayer.applyViewFilter(layerPath, filter);
       } else {
-        const initialFilter = this.getInitialFilter(mapId, layerPath);
-        const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
-        const sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
-        const filters = [initialFilter, tableFilter, sliderFilter].filter((eachFilter) => eachFilter);
+        const filters = this.getActiveVectorFilters(mapId, layerPath);
 
-        if (filters.length)
+        if (filters && filters.length)
           (geoviewLayer as AbstractGeoViewVector | AbstractGVVector | EsriDynamic | GVEsriDynamic).applyViewFilter(
             layerPath,
             filters.join(' and ')
           );
       }
     }
+  }
+
+  /**
+   * Get all active filters for layer.
+   *
+   * @param {string} mapId The map id.
+   * @param {string} layerPath The path for the layer to get filters from.
+   */
+  static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath);
+    if (geoviewLayer) {
+      const initialFilter = this.getInitialFilter(mapId, layerPath);
+      const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
+      const sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+      return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
+    }
+    return undefined;
   }
 
   // #endregion
