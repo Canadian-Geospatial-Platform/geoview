@@ -1,5 +1,4 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   ITimeSliderState,
   TimeSliderLayerSet,
@@ -7,14 +6,12 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
-import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -49,6 +46,16 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    */
   static getTimeSliderLayers(mapId: string): TimeSliderLayerSet | undefined {
     return this.getTimesliderState(mapId)?.timeSliderLayers;
+  }
+
+  /**
+   * Gets filter(s) for a layer.
+   * @param {string} mapId - The map id of the state to act on
+   * @param {string} layerPath - The path of the layer
+   * @returns {string | undefined} The time slider filter(s) for the layer
+   */
+  static getTimeSliderFilter(mapId: string, layerPath: string): string | undefined {
+    return this.getTimesliderState(mapId)?.sliderFilters[layerPath];
   }
 
   /**
@@ -87,7 +94,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     this.getTimesliderState(mapId)?.setterActions.addTimeSliderLayer(timeSliderLayer);
 
     const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
-    this.applyFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+    this.updateFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
 
     // Make sure tab is visible
     UIEventProcessor.showTab(mapId, 'time-slider');
@@ -185,6 +192,17 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     this.getTimesliderState(mapId)?.setterActions.setSelectedLayerPath(layerPath);
   }
 
+  /**
+   * Sets the filter for the layer path
+   * @param {string} mapId - The map id of the state to act on
+   * @param {string} layerPath - The layer path to use
+   * @param {string} filter - The filter
+   */
+  static addOrUpdateSliderFilter(mapId: string, layerPath: string, filter: string): void {
+    const curSliderFilters = this.getTimesliderState(mapId)?.sliderFilters;
+    this.getTimesliderState(mapId)?.setterActions.setSliderFilters({ ...curSliderFilters, [layerPath]: filter });
+  }
+
   // #endregion
 
   // **********************************************************
@@ -206,7 +224,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {number[]} values - Filter values to apply
    * @returns {void}
    */
-  static applyFilters(
+  static updateFilters(
     mapId: string,
     layerPath: string,
     defaultValue: string,
@@ -218,39 +236,36 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     // Get the layer using the map event processor
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath)!;
 
+    let filter: string;
     if (geoviewLayer instanceof WMS || geoviewLayer instanceof GVWMS) {
       if (filtering) {
         const newValue = `${new Date(values[0]).toISOString().slice(0, new Date(values[0]).toISOString().length - 5)}Z`;
-        const filter = `${field}=date '${newValue}'`;
-        geoviewLayer.applyViewFilter(layerPath, filter);
+        filter = `${field}=date '${newValue}'`;
       } else {
-        const filter = `${field}=date '${defaultValue}'`;
-        geoviewLayer.applyViewFilter(layerPath, filter);
+        filter = `${field}=date '${defaultValue}'`;
       }
     } else if (geoviewLayer instanceof EsriImage || geoviewLayer instanceof GVEsriImage) {
       if (filtering) {
-        const filter = `time=${minAndMax[0]},${values[0]}`;
-        (geoviewLayer as EsriImage).applyViewFilter(layerPath, filter);
+        filter = `time=${minAndMax[0]},${values[0]}`;
       } else {
-        const filter = `time=${minAndMax[0]},${defaultValue}`;
-        (geoviewLayer as EsriImage).applyViewFilter(layerPath, filter);
+        filter = `time=${minAndMax[0]},${defaultValue}`;
       }
     } else if (filtering) {
-      let filter = `${field} >= date '${new Date(values[0]).toISOString()}'`;
+      filter = `${field} >= date '${new Date(values[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += ` and ${field} <= date '${new Date(values[1]).toISOString()}'`;
       }
-      (geoviewLayer as AbstractGeoViewVector | AbstractGVVector | EsriDynamic).applyViewFilter(layerPath, filter);
     } else {
-      let filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
+      filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += `and ${field} <= date '${new Date(minAndMax[1]).toISOString()}'`;
       }
-      (geoviewLayer as AbstractGeoViewVector | AbstractGVVector | EsriDynamic).applyViewFilter(layerPath, filter);
     }
 
     this.getTimesliderState(mapId)?.setterActions.setFiltering(layerPath, filtering);
     this.getTimesliderState(mapId)?.setterActions.setValues(layerPath, values);
+    this.addOrUpdateSliderFilter(mapId, layerPath, filter);
+    MapEventProcessor.applyLayerFilters(mapId, layerPath);
   }
   // #endregion
 }
