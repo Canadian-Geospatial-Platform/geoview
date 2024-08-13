@@ -1194,12 +1194,6 @@ export class MapViewer {
     // If no config is provided, get the original from the store
     const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(this.mapId);
 
-    const mapContainer = document.getElementById(this.mapId)!;
-
-    // Set map container height to current height to avoid shifting
-    const height = mapContainer.offsetHeight;
-    mapContainer.style.height = `${height}px`;
-
     // Remove the map
     const mapDiv = await this.remove(false);
 
