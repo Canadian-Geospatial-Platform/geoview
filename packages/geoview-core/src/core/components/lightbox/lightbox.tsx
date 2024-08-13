@@ -67,7 +67,12 @@ export function LightboxImg(props: LightboxProps): JSX.Element {
       carousel={{ finite: true }}
       controller={{ closeOnPullDown, closeOnBackdropClick }}
       animation={{ fade, swipe }}
-      labels={{ Next: t('lightbox.next'), Previous: t('lightbox.previous'), Close: t('lightbox.close'), Download: t('lightbox.download') }}
+      labels={{
+        Next: t('lightbox.next')!,
+        Previous: t('lightbox.previous')!,
+        Close: t('lightbox.close')!,
+        Download: t('lightbox.download')!,
+      }}
       on={{
         entered: () => {
           // TODO: Focus on close button on open #1113

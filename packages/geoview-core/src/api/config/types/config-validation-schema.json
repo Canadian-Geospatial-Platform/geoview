@@ -109,7 +109,7 @@
     "TypeValidFooterBarTabsCoreProps": {
       "description": "Valid values for the footerBar tabs core array.",
       "additionalProperties": false,
-      "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
+      "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart", "custom-legend-panel"]
     },
     "TypeFooterBarTabsCustomProps": {
       "description": "Footer bar tabs custom definition.",
@@ -204,7 +204,7 @@
         },
         "selectedTab": {
           "type": "string",
-          "enum": ["geolocator", "basemap-panel", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel"],
+          "enum": ["geolocator", "basemap-panel", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel", "custom-legend-panel"],
           "description": "App bar tab to be selected at map load"
         }
       },

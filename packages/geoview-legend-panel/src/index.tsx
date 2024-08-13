@@ -35,12 +35,12 @@ class LegendPanelPlugin extends AppBarPlugin {
   translations = toJsonObject({
     en: {
       LegendPanel: {
-        title: 'Legend',
+        title: 'Custom Legend',
       },
     },
     fr: {
       LegendPanel: {
-        title: 'Légende',
+        title: 'Légende Personalisée',
       },
     },
   });
@@ -48,7 +48,7 @@ class LegendPanelPlugin extends AppBarPlugin {
   override onCreateButtonProps(): TypeIconButtonProps {
     // Button props
     return {
-      id: `legend-panel`,
+      id: `custom-legend-panel`,
       tooltip: 'LegendPanel.title',
       tooltipPlacement: 'right',
       children: <CustomLegendIcon />,
@@ -80,4 +80,4 @@ export default LegendPanelPlugin;
 
 // Keep a reference to the Legend Panel Plugin as part of the geoviewPlugins property stored in the window object
 window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins['legend-panel'] = Cast<LegendPanelPlugin>(LegendPanelPlugin);
+window.geoviewPlugins['custom-legend-panel'] = Cast<LegendPanelPlugin>(LegendPanelPlugin);
