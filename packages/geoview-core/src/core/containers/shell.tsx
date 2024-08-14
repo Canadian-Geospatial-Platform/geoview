@@ -327,7 +327,7 @@ export function Shell(props: ShellProps): JSX.Element {
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
           </Box>
-          {geoviewConfig!.footerBar !== undefined && <FooterBar api={mapViewer.footerBarApi} />}
+          {geoviewConfig!.footerBar !== undefined && mapLoaded && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
             <Modal
               key={modalId}
