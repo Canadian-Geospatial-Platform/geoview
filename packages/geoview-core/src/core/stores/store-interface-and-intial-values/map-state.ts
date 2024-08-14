@@ -34,6 +34,7 @@ export interface IMapState {
   fixNorth: boolean;
   highlightedFeatures: TypeFeatureInfoEntry[];
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
+  initialFilters: Record<string, string>;
   interaction: TypeInteraction;
   mapExtent: Extent | undefined;
   mapLoaded: boolean;
@@ -88,6 +89,7 @@ export interface IMapState {
     setMapChangeSize: (size: [number, number], scale: TypeScaleInfo) => void;
     setMapLoaded: (mapLoaded: boolean) => void;
     setAttribution: (attribution: string[]) => void;
+    setInitialFilters: (filters: Record<string, string>) => void;
     setInteraction: (interaction: TypeInteraction) => void;
     setZoom: (zoom: number) => void;
     setRotation: (rotation: number) => void;
@@ -135,6 +137,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     fixNorth: false,
     highlightedFeatures: [],
     hoverFeatureInfo: undefined,
+    initialFilters: {},
     interaction: 'static',
     mapExtent: undefined,
     mapLoaded: false,
@@ -505,6 +508,19 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           mapState: {
             ...get().mapState,
             currentBasemapOptions: basemapOptions,
+          },
+        });
+      },
+
+      /**
+       * Sets the initial filters of the map layers.
+       * @param {Record<string, string>} filters - The filters.
+       */
+      setInitialFilters: (filters: Record<string, string>): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            initialFilters: filters,
           },
         });
       },
