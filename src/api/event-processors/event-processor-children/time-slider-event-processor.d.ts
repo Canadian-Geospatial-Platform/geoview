@@ -18,6 +18,13 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      */
     static getTimeSliderLayers(mapId: string): TimeSliderLayerSet | undefined;
     /**
+     * Gets filter(s) for a layer.
+     * @param {string} mapId - The map id of the state to act on
+     * @param {string} layerPath - The path of the layer
+     * @returns {string | undefined} The time slider filter(s) for the layer
+     */
+    static getTimeSliderFilter(mapId: string, layerPath: string): string | undefined;
+    /**
      * Checks if the layer has time slider values. If there are, adds the time slider layer and applies filters.
      * @param {string} mapId - The map id of the state to act on
      * @param {TypeLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
@@ -44,6 +51,13 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      */
     static setSelectedLayerPath(mapId: string, layerPath: string): void;
     /**
+     * Sets the filter for the layer path
+     * @param {string} mapId - The map id of the state to act on
+     * @param {string} layerPath - The layer path to use
+     * @param {string} filter - The filter
+     */
+    static addOrUpdateSliderFilter(mapId: string, layerPath: string, filter: string): void;
+    /**
      * Filter the layer provided in the layerPath variable according to current states (filtering and values)
      *
      * @param {string} mapId - The id of the map
@@ -55,5 +69,5 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      * @param {number[]} values - Filter values to apply
      * @returns {void}
      */
-    static applyFilters(mapId: string, layerPath: string, defaultValue: string, field: string, filtering: boolean, minAndMax: number[], values: number[]): void;
+    static updateFilters(mapId: string, layerPath: string, defaultValue: string, field: string, filtering: boolean, minAndMax: number[], values: number[]): void;
 }

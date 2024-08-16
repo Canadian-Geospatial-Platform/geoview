@@ -9,19 +9,33 @@ export declare class DataTableEventProcessor extends AbstractEventProcessor {
      */
     protected static getDataTableState(mapId: string): IDataTableState;
     /**
+     * Gets filter(s) for a layer.
+     * @param {string} mapId - The map id of the state to act on
+     * @param {string} layerPath - The path of the layer
+     * @returns {string | undefined} The data table filter(s) for the layer
+     */
+    static getTableFilter(mapId: string, layerPath: string): string | undefined;
+    /**
      * Filter the map based on filters set on date table.
      * @param {string} mapId - Id of the map.
      * @param {string} layerPath - Path of the layer
      * @param {string} filterStrings - Filters set on the data table
-     * @param {boolean} isMapRecordExist - Filtered Map switch is on off.
+     * @param {boolean} mapFilteredRecord - Filtered Map switch is on/off.
      */
-    static applyFilters(mapId: string, layerPath: string, filterStrings: string, isMapRecordExist: boolean): void;
+    static updateFilters(mapId: string, layerPath: string, filterStrings: string, mapFilteredRecord: boolean): void;
     /**
      * Initialize columns filter information for a layer.
      * @param {string} mapId - Id of the map.
      * @param {string} layerPath - Path of the layer
      */
     static setInitialSettings(mapId: string, layerPath: string): void;
+    /**
+     * Sets the filter for the layer path
+     * @param {string} mapId - The map id of the state to act on
+     * @param {string} layerPath - The layer path to use
+     * @param {string} filter - The filter
+     */
+    static addOrUpdateTableFilter(mapId: string, layerPath: string, filter: string): void;
     /**
      * Shortcut to get the DataTable state for a given map id
      * @param {string} mapId - Id of the map.

@@ -67,6 +67,13 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static getGeoViewMapConfig(mapId: string): TypeMapFeaturesConfig | undefined;
     static getBasemapOptions(mapId: string): TypeBasemapOptions;
     static getCurrentBasemapOptions(mapId: string): TypeBasemapOptions;
+    /**
+     * Gets initial filter(s) for a layer.
+     * @param {string} mapId - The map id of the state to act on
+     * @param {string} layerPath - The path of the layer
+     * @returns {string | undefined} The initial filter(s) for the layer
+     */
+    static getInitialFilter(mapId: string, layerPath: string): string | undefined;
     static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void;
     static clickMarkerIconHide(mapId: string): void;
     static highlightBBox(mapId: string, extent: Extent, isLayerHighlight?: boolean): void;
@@ -116,6 +123,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @returns {string} The layer path of the highlighted layer.
      */
     static changeOrRemoveLayerHighlight(mapId: string, layerPath: string, hilightedLayerPath: string): string;
+    static addInitialFilter(mapId: string, layerPath: string, filter: string): void;
     static setCurrentBasemapOptions(mapId: string, basemapOptions: TypeBasemapOptions): void;
     static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void;
     static setMapHoverFeatureInfo(mapId: string, hoverFeatureInfo: TypeHoverFeatureInfo): void;
@@ -220,4 +228,18 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @param {string} mapId - Id of map.
      */
     static createMapConfigFromMapState(mapId: string): TypeMapFeaturesConfig | undefined;
+    /**
+     * Apply all available filters to layer.
+     *
+     * @param {string} mapId The map id.
+     * @param {string} layerPath The path of the layer to apply filters to.
+     */
+    static applyLayerFilters(mapId: string, layerPath: string): void;
+    /**
+     * Get all active filters for layer.
+     *
+     * @param {string} mapId The map id.
+     * @param {string} layerPath The path for the layer to get filters from.
+     */
+    static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined;
 }

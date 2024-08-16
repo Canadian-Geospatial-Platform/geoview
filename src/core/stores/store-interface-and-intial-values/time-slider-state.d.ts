@@ -3,7 +3,9 @@ type TimeSliderActions = ITimeSliderState['actions'];
 export interface ITimeSliderState {
     timeSliderLayers: TimeSliderLayerSet;
     selectedLayerPath: string;
+    sliderFilters: Record<string, string>;
     actions: {
+        addOrUpdateSliderFilter(layerPath: string, filter: string): void;
         setTitle: (layerPath: string, title: string) => void;
         setDescription: (layerPath: string, description: string) => void;
         setDelay: (layerPath: string, delay: number) => void;
@@ -24,6 +26,7 @@ export interface ITimeSliderState {
         setLocked: (layerPath: string, locked: boolean) => void;
         setReversed: (layerPath: string, locked: boolean) => void;
         setSelectedLayerPath: (layerPath: string) => void;
+        setSliderFilters: (newSliderFilters: Record<string, string>) => void;
         setDefaultValue: (layerPath: string, defaultValue: string) => void;
         setValues: (layerPath: string, values: number[]) => void;
     };
@@ -56,5 +59,6 @@ export interface TypeTimeSliderValues {
 }
 export declare const useTimeSliderLayers: () => TimeSliderLayerSet;
 export declare const useTimeSliderSelectedLayerPath: () => string;
+export declare const useTimeSliderFilters: () => Record<string, string>;
 export declare const useTimeSliderStoreActions: () => TimeSliderActions;
 export {};

@@ -5,34 +5,37 @@ export interface IDataTableState {
     allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[];
     activeLayerData: TypeLayerData[];
     layersDataTableSetting: Record<string, IDataTableSettings>;
-    selectedLayerPath: string;
-    tableHeight: string;
     selectedFeature: TypeFeatureInfoEntry | null;
+    selectedLayerPath: string;
+    tableFilters: Record<string, string>;
+    tableHeight: string;
     actions: {
+        addOrUpdateTableFilter(layerPath: string, filter: string): void;
         applyMapFilters: (filterStrings: string) => void;
         setActiveLayersData: (layers: TypeLayerData[]) => void;
         setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
+        setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
         setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
         setRowsFilteredEntry: (rows: number, layerPath: string) => void;
-        setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
-        setTableHeight: (tableHeight: string) => void;
-        setSelectedLayerPath: (layerPath: string) => void;
-        triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeAllFeatureInfoResultSet | void>;
-        setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
         setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
+        setSelectedLayerPath: (layerPath: string) => void;
+        setTableHeight: (tableHeight: string) => void;
+        setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
+        triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeAllFeatureInfoResultSet | void>;
     };
     setterActions: {
         setActiveLayersData: (layers: TypeLayerData[]) => void;
         setAllFeaturesDataArray: (allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) => void;
         setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
         setInitiallayerDataTableSetting: (layerPath: string) => void;
+        setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
         setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
         setRowsFilteredEntry: (rows: number, layerPath: string) => void;
-        setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
-        setTableHeight: (tableHeight: string) => void;
-        setSelectedLayerPath: (layerPath: string) => void;
-        setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
         setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
+        setSelectedLayerPath: (layerPath: string) => void;
+        setTableFilters(newTableFilters: Record<string, string>): void;
+        setTableHeight: (tableHeight: string) => void;
+        setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
     };
 }
 /**
@@ -57,6 +60,7 @@ interface IDataTableSettings {
 export type TypeAllFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
 export type TypeAllFeatureInfoResultSet = TypeResultSet<TypeAllFeatureInfoResultSetEntry>;
 export declare const useDataTableAllFeaturesDataArray: () => TypeAllFeatureInfoResultSetEntry[];
+export declare const useDataTableFilters: () => Record<string, string>;
 export declare const useDataTableSelectedLayerPath: () => string;
 export declare const useDataTableLayerSettings: () => Record<string, IDataTableSettings>;
 export declare const useDataTableTableHeight: () => string;
