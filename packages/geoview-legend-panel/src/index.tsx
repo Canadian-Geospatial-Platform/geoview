@@ -1,16 +1,17 @@
-import { TypeJsonObject, toJsonObject, AnySchemaObject, Cast } from 'geoview-core/';
-import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
+import { Cast, AnySchemaObject, TypeJsonObject, toJsonObject } from 'geoview-core/src/core/types/global-types';
+import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
+import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { CustomLegendIcon } from 'geoview-core/src/ui/icons';
-import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
-import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
-import { LegendPanel } from './custom-legend-panel';
+
+import { GeochartEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/geochart-event-processor';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-legend-panel.json';
+import { LegendPanel } from './custom-legend-panel';
 
 /**
- * Create a class for the plugin instance
+ * The Chart Plugin which will be automatically instanciated during GeoView's initialization.
  */
-class LegendPanelPlugin extends AppBarPlugin {
+class CustomLegendFooterPlugin extends FooterPlugin {
   /**
    * Return the package schema
    *
@@ -29,6 +30,9 @@ class LegendPanelPlugin extends AppBarPlugin {
     return toJsonObject(defaultConfig);
   }
 
+  // The callback used to redraw the GeoCharts in the GeoChartPanel
+  callbackRedraw?: () => void;
+
   /**
    * translations object to inject to the viewer translations
    */
@@ -45,39 +49,46 @@ class LegendPanelPlugin extends AppBarPlugin {
     },
   });
 
-  override onCreateButtonProps(): TypeIconButtonProps {
-    // Button props
-    return {
-      id: `custom-legend-panel`,
-      tooltip: 'LegendPanel.title',
-      tooltipPlacement: 'right',
-      children: <CustomLegendIcon />,
-      visible: true,
-    };
-  }
+  /**
+   * Overrides the addition of the GeoChart Footer Plugin to make sure to set the chart configs into the store.
+   */
+  override onAdd(): void {
+    // Initialize the store with geochart provided configuration
+    GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
 
-  override onCreateContentProps(): TypePanelProps {
-    // Panel props
-    return {
-      title: 'LegendPanel.title',
-      icon: <CustomLegendIcon />,
-      width: 350,
-      status: this.configObj?.isOpen as boolean,
-    };
+    // Call parent
+    super.onAdd();
   }
-
-  override onCreateContent = (): JSX.Element => {
-    return <LegendPanel mapId={this.pluginProps.mapId} config={this.configObj || {}} />;
-  };
 
   /**
-   * Function called when the plugin is removed, used for clean up
+   * Overrides the creation of the content properties of this GeoChart Footer Plugin.
+   * @returns {TypeTabs} The TypeTabs for the GeoChart Footer Plugin
    */
-  override onRemoved(): void {}
+  override onCreateContentProps(): TypeTabs {
+    // Create element
+    const content = <LegendPanel mapId={this.pluginProps.mapId} config={{ isOpen: true, legendList: [] }} />;
+
+    return {
+      id: 'custom-legend-panel',
+      value: this.value!,
+      label: 'custom-legend-panel.title',
+      icon: <CustomLegendIcon />,
+      content,
+    };
+  }
+
+  /**
+   * Handles when a redraw callback has been provided by LegendPanel
+   */
+  handleProvideCallbackRedraw(callbackRedraw: () => void): void {
+    // Keep it
+    this.callbackRedraw = callbackRedraw;
+  }
 }
 
-export default LegendPanelPlugin;
+// Exports the CustomLegendFooterPlugin
+export default CustomLegendFooterPlugin;
 
-// Keep a reference to the Legend Panel Plugin as part of the geoviewPlugins property stored in the window object
+// Keep a reference to the CustomLegendPlugin as part of the geoviewPlugins property stored in the window object
 window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins['custom-legend-panel'] = Cast<LegendPanelPlugin>(LegendPanelPlugin);
+window.geoviewPlugins.geochart = Cast<CustomLegendFooterPlugin>(CustomLegendFooterPlugin);

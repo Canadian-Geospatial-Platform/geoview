@@ -17,7 +17,7 @@ type LegendListItems = TypeLegendItem[];
 type TypeLegendProps = {
   isOpen: boolean;
   legendList: LegendListItems;
-  version: string;
+  version?: string;
 };
 
 export function LegendPanel(props: LegendPanelProps): JSX.Element {
