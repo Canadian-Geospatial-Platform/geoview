@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   useLayerDisplayState,
   useLayerLegendLayers,
@@ -12,11 +12,11 @@ import { logger } from '@/core/utils/logger';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 
 interface LeftPanelProps {
-  setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
+  showLayerDetailsPanel: (layer: TypeLegendLayer) => void;
   isLayoutEnlarged: boolean;
 }
 
-export function LeftPanel({ setIsLayersListPanelVisible, isLayoutEnlarged }: LeftPanelProps): JSX.Element {
+export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanelProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/left-panel');
 
@@ -51,11 +51,12 @@ export function LeftPanel({ setIsLayersListPanelVisible, isLayoutEnlarged }: Lef
   if (displayState === 'add') {
     return <AddNewLayer />;
   }
+
   return (
     <LayersList
       layersList={orderedLegendLayers}
       depth={0}
-      setIsLayersListPanelVisible={setIsLayersListPanelVisible}
+      showLayerDetailsPanel={showLayerDetailsPanel}
       isLayoutEnlarged={isLayoutEnlarged}
     />
   );

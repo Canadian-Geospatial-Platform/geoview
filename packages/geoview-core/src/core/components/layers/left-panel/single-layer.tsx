@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react';
+import { useEffect, KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { animated, useSpring } from '@react-spring/web';
@@ -23,6 +23,8 @@ import {
   useLayerStoreActions,
   useLayerDisplayState,
   useLayerSelectedLayerPath,
+  useSelectedLayerSortingArrowId,
+  useLayerLegendLayers,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
@@ -32,11 +34,13 @@ import { logger } from '@/core/utils/logger';
 import { useDataTableLayerSettings, useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { ArrowDownwardIcon, ArrowUpIcon, TableViewIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useUISelectedFooterLayerListItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
   depth: number;
-  setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
+  showLayerDetailsPanel: (layer: TypeLegendLayer) => void;
   index: number;
   isFirst: boolean;
   isLast: boolean;
@@ -46,7 +50,7 @@ interface SingleLayerProps {
 export function SingleLayer({
   depth,
   layer,
-  setIsLayersListPanelVisible,
+  showLayerDetailsPanel,
   index,
   isFirst,
   isLast,
@@ -58,7 +62,7 @@ export function SingleLayer({
   const { t } = useTranslation<string>();
 
   // Get store states
-  const { setSelectedLayerPath } = useLayerStoreActions();
+  const { setSelectedLayerPath, setSelectedLayerSortingArrowId } = useLayerStoreActions();
   const {
     getVisibilityFromOrderedLayerInfo,
     setOrToggleLayerVisibility,
@@ -66,9 +70,14 @@ export function SingleLayer({
     setLegendCollapsed,
     reorderLayer,
   } = useMapStoreActions();
+
+  const mapId = useGeoViewMapId();
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
   const datatableSettings = useDataTableLayerSettings();
+  const selectedLayerSortingArrowId = useSelectedLayerSortingArrowId();
+  const selectedFooterLayerListItem = useUISelectedFooterLayerListItem();
+  const legendLayers = useLayerLegendLayers();
 
   useDataTableStoreActions();
 
@@ -154,12 +163,12 @@ export function SingleLayer({
     }
 
     setSelectedLayerPath(layer.layerPath);
-    if (setIsLayersListPanelVisible) {
-      setIsLayersListPanelVisible(true);
+    if (showLayerDetailsPanel) {
+      showLayerDetailsPanel(layer);
     }
   };
 
-  const handleLayerKeyDown = (e: React.KeyboardEvent): void => {
+  const handleLayerKeyDown = (e: KeyboardEvent): void => {
     if (e.key === 'Enter') handleLayerClick();
   };
 
@@ -186,10 +195,36 @@ export function SingleLayer({
               flexItem
             />
           )}
-          <IconButton disabled={isFirst} edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, -1)}>
+          <IconButton
+            id={`${mapId}-${layer.layerPath}-up-order`}
+            disabled={isFirst}
+            edge="end"
+            size="small"
+            onClick={() => reorderLayer(layer.layerPath, -1)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                setSelectedLayerSortingArrowId(`${mapId}-${layer.layerPath}-up-order`);
+                reorderLayer(layer.layerPath, -1);
+                e.preventDefault();
+              }
+            }}
+          >
             <ArrowUpIcon />
           </IconButton>
-          <IconButton disabled={isLast} edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, 1)}>
+          <IconButton
+            id={`${mapId}-${layer.layerPath}-down-order`}
+            disabled={isLast}
+            edge="end"
+            size="small"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                setSelectedLayerSortingArrowId(`${mapId}-${layer.layerPath}-down-order`);
+                reorderLayer(layer.layerPath, 1);
+                e.preventDefault();
+              }
+            }}
+            onClick={() => reorderLayer(layer.layerPath, 1)}
+          >
             <ArrowDownwardIcon />
           </IconButton>
         </>
@@ -260,7 +295,7 @@ export function SingleLayer({
           depth={1 + depth}
           layersList={layer.children}
           isLayoutEnlarged={isLayoutEnlarged}
-          setIsLayersListPanelVisible={setIsLayersListPanelVisible}
+          showLayerDetailsPanel={showLayerDetailsPanel}
         />
       </Collapse>
     );
@@ -291,12 +326,40 @@ export function SingleLayer({
     to: { opacity: 1 },
   });
 
+  useEffect(() => {
+    // Manually set the focus after sorting is done.
+    if (selectedLayerSortingArrowId.length) {
+      const elem = document.getElementById(selectedLayerSortingArrowId) as HTMLButtonElement;
+      if (elem?.disabled) {
+        if (selectedLayerSortingArrowId.split('-').includes('up')) {
+          (elem?.nextSibling as HTMLButtonElement)?.focus();
+        } else {
+          (elem?.previousSibling as HTMLButtonElement)?.focus();
+        }
+      } else {
+        elem?.focus();
+      }
+    }
+  }, [selectedLayerSortingArrowId]);
+
+  useEffect(() => {
+    // set the focus to first layer, after layer has been deleted.
+    if (displayState === 'remove' && selectedFooterLayerListItem.length) {
+      const firstLayer = document.getElementById('layers-left-panel');
+      if (firstLayer?.getElementsByTagName('li')) {
+        const listItems = firstLayer?.getElementsByTagName('li');
+        listItems[0]?.focus();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [legendLayers, displayState]);
+
   const AnimatedPaper = animated(Paper);
 
   return (
     <AnimatedPaper className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
       <Tooltip title={layer.layerName} placement="top" enterDelay={1000} arrow>
-        <ListItem key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
+        <ListItem id={layer.layerId} key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
           <ListItemButton
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
             tabIndex={-1}
