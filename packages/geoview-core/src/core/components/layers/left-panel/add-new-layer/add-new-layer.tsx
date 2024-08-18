@@ -1095,7 +1095,6 @@ export function AddNewLayer(): JSX.Element {
       }
     }
   };
-  console.log('active step', activeStep);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>): void => {
     if (e.key === 'Enter') {
