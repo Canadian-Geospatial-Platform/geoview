@@ -1,4 +1,4 @@
-import { useEffect, KeyboardEvent } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { animated, useSpring } from '@react-spring/web';
@@ -166,10 +166,6 @@ export function SingleLayer({
     if (showLayerDetailsPanel) {
       showLayerDetailsPanel(layer);
     }
-  };
-
-  const handleLayerKeyDown = (e: KeyboardEvent): void => {
-    if (e.key === 'Enter') handleLayerClick();
   };
 
   const handleToggleVisibility = (): void => {
@@ -359,7 +355,13 @@ export function SingleLayer({
   return (
     <AnimatedPaper className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
       <Tooltip title={layer.layerName} placement="top" enterDelay={1000} arrow>
-        <ListItem id={layer.layerId} key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
+        <ListItem
+          id={layer.layerId}
+          key={layer.layerName}
+          divider
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && e.currentTarget === e.target && handleLayerClick()}
+        >
           <ListItemButton
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
             tabIndex={-1}
