@@ -12,6 +12,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import * as GeoUtilities from '@/geo/utils/utilities';
 
 import { initMapDivFromFunctionCall } from '@/app';
+import EventHelper, { EventDelegateBase } from './events/event-helper';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -31,6 +32,9 @@ export class API {
 
   // utilities object
   utilities;
+
+  // Keep all callback delegates references
+  #onMapAddedToDivHandlers: MapAddedToDivDelegate[] = [];
 
   /**
    * Initiate the event and projection objects
@@ -110,9 +114,51 @@ export class API {
     if (mapDiv) {
       // Init by function call
       await initMapDivFromFunctionCall(mapDiv, mapConfig);
+      this.#emitMapAddedToDiv({ mapId: divId });
       return Promise.resolve();
     }
 
     return Promise.reject(new Error(`Div with id ${divId} does not exist`));
   }
+
+  /**
+   * Emits an event to all handlers.
+   * @param {MapAddedToDivEvent} event - The event to emit
+   * @private
+   */
+  #emitMapAddedToDiv(event: MapAddedToDivEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onMapAddedToDivHandlers, event);
+  }
+
+  /**
+   * Registers a layer added event handler.
+   * @param {MapAddedToDivdDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onMapAddedToDiv(callback: MapAddedToDivDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onMapAddedToDivHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer added event handler.
+   * @param {MapAddedToDivdDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapAddedToDiv(callback: MapAddedToDivDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onMapAddedToDivHandlers, callback);
+  }
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapAddedToDivDelegate = EventDelegateBase<API, MapAddedToDivEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type MapAddedToDivEvent = {
+  // The added layer
+  mapId: string;
+};
