@@ -605,12 +605,18 @@ export class MapViewer {
 
     // Zoom to extent provided in config, it present
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent)
-      await this.zoomToExtent(
-        Projection.transformExtent(
-          this.mapFeaturesConfig.map.viewSettings.initialView?.extent,
-          Projection.PROJECTION_NAMES.LNGLAT,
-          `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
-        )
+      setTimeout(
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        () =>
+          this.zoomToExtent(
+            Projection.transformExtent(
+              this.mapFeaturesConfig.map.viewSettings.initialView?.extent as Extent,
+              Projection.PROJECTION_NAMES.LNGLAT,
+              `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
+            ),
+            { padding: [0, 0, 0, 0] }
+          ).catch((error) => logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)),
+        200
       );
 
     // Zoom to extents of layers selected in config, if provided.
