@@ -234,12 +234,12 @@ export declare class MapViewer {
      * @param {boolean} deleteContainer - True if we want to delete div from the page
      * @returns {HTMLElement} The HTML element
      */
-    remove(deleteContainer: boolean): HTMLElement;
+    remove(deleteContainer: boolean): Promise<HTMLElement>;
     /**
      * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
      * @param {TypeMapFeaturesConfig} mapConfig - Optional map config to use for reload.
      */
-    reload(mapConfig?: TypeMapFeaturesConfig): void;
+    reload(mapConfig?: TypeMapFeaturesConfig): Promise<void>;
     /**
      * Reload a map from a config object created using current map state. It first removes then recreates the map.
      */

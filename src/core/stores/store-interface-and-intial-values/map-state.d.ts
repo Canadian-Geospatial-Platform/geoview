@@ -21,6 +21,7 @@ export interface IMapState {
     fixNorth: boolean;
     highlightedFeatures: TypeFeatureInfoEntry[];
     hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
+    initialFilters: Record<string, string>;
     interaction: TypeInteraction;
     mapExtent: Extent | undefined;
     mapLoaded: boolean;
@@ -72,6 +73,7 @@ export interface IMapState {
         setMapChangeSize: (size: [number, number], scale: TypeScaleInfo) => void;
         setMapLoaded: (mapLoaded: boolean) => void;
         setAttribution: (attribution: string[]) => void;
+        setInitialFilters: (filters: Record<string, string>) => void;
         setInteraction: (interaction: TypeInteraction) => void;
         setZoom: (zoom: number) => void;
         setRotation: (rotation: number) => void;
