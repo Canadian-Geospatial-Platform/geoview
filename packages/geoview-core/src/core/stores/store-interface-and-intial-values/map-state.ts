@@ -827,6 +827,7 @@ export const useMapClickCoordinates = (): TypeMapMouseInfo | undefined =>
   useStore(useGeoViewStore(), (state) => state.mapState.clickCoordinates);
 export const useMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
 export const useMapFixNorth = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
+export const useMapInitialFilters = (): Record<string, string> => useStore(useGeoViewStore(), (state) => state.mapState.initialFilters);
 export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
 export const useMapHoverFeatureInfo = (): TypeHoverFeatureInfo => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
 export const useMapLoaded = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
