@@ -70,8 +70,8 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @param {string} filter - The filter
    */
   static addOrUpdateTableFilter(mapId: string, layerPath: string, filter: string): void {
-    const curSliderFilters = this.getDataTableState(mapId)?.tableFilters;
-    this.getDataTableState(mapId)?.setterActions.setTableFilters({ ...curSliderFilters, [layerPath]: filter });
+    const curTableFilters = this.getDataTableState(mapId)?.tableFilters;
+    this.getDataTableState(mapId)?.setterActions.setTableFilters({ ...curTableFilters, [layerPath]: filter });
   }
 
   /**
@@ -88,8 +88,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * Propagates feature info layer sets to the store.
    * The propagation actually happens only if it wasn't already there. Otherwise, no update is propagated.
    * @param {string} mapId - The map identifier of the modified result set.
-   * @param {string} layerPath - The layer path that has changed.
-   * @param {TypeFeatureInfoResultSet} resultSet - The result set associated to the map.
+   * @param {TypeAllFeatureInfoResultSetEntry} resultSetEntry - The result set associated to the map.
    */
   static propagateFeatureInfoToStore(mapId: string, resultSetEntry: TypeAllFeatureInfoResultSetEntry): void {
     /**
