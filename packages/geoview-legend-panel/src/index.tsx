@@ -3,7 +3,6 @@ import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { CustomLegendIcon } from 'geoview-core/src/ui/icons';
 
-import { GeochartEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/geochart-event-processor';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-legend-panel.json';
 import { LegendPanel } from './custom-legend-panel';
@@ -38,12 +37,12 @@ class CustomLegendFooterPlugin extends FooterPlugin {
    */
   translations = toJsonObject({
     en: {
-      LegendPanel: {
+      customLegendPanel: {
         title: 'Custom Legend',
       },
     },
     fr: {
-      LegendPanel: {
+      customLegendPanel: {
         title: 'Légende Personalisée',
       },
     },
@@ -54,7 +53,7 @@ class CustomLegendFooterPlugin extends FooterPlugin {
    */
   override onAdd(): void {
     // Initialize the store with geochart provided configuration
-    GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
+    // GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
 
     // Call parent
     super.onAdd();
@@ -71,7 +70,7 @@ class CustomLegendFooterPlugin extends FooterPlugin {
     return {
       id: 'custom-legend-panel',
       value: this.value!,
-      label: 'custom-legend-panel.title',
+      label: 'customLegendPanel.title',
       icon: <CustomLegendIcon />,
       content,
     };
@@ -91,4 +90,4 @@ export default CustomLegendFooterPlugin;
 
 // Keep a reference to the CustomLegendPlugin as part of the geoviewPlugins property stored in the window object
 window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins.geochart = Cast<CustomLegendFooterPlugin>(CustomLegendFooterPlugin);
+window.geoviewPlugins['custom-legend-panel'] = Cast<CustomLegendFooterPlugin>(CustomLegendFooterPlugin);
