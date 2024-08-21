@@ -74,7 +74,7 @@ export default function SettingsPanel() {
 
 
   return (
-    <Box sx={{ bgcolor: '#f4f4f4', p: 2, display: "flex", flexDirection: "column", gap: 2, borderRadius: 2 }}>
+    <Box sx={{  p: 2, display: "flex", flexDirection: "column", gap: 2, borderRadius: 2 }}>
 
 <Box sx={{ width: '100%' }}>
       <Tabs

@@ -24,6 +24,7 @@ code {
   padding: 20px 10px;
   height: 600px;
   overflow-y: auto;
+  width: 100%;
 }
 
 .config-editor .line-numbers {
@@ -49,7 +50,6 @@ code {
   border: 0;
   background: #282a3a;
   color: #fff;
-  min-width: 500px;
   outline: none;
   resize: none;
 }

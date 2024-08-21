@@ -19,8 +19,7 @@ export function useCgpvHook() {
     if(isInitialized) return;
     setIsInitialized(true);
     const configJson = typeof config === 'string' ? JSON.parse(config) : config;
-    setMapId(mapId);
-    handleConfigJsonChange(configJson);
+    handleCreateMap(mapId, configJson);
     cgpv.init((mapId: string) => {
       // write some code ...
       
@@ -58,7 +57,6 @@ export function useCgpvHook() {
     return newMapId;
   }
 
-
   const handleReloadMap = () => {
     cgpv.api.maps[mapId].reload();
   }
@@ -78,6 +76,12 @@ export function useCgpvHook() {
     cgpv.api.maps[mapId].setProjection(e.target.value);
   }
 
+  const handleCreateMap = (theMapId: string, data: any) => {
+    cgpv.api.createMapFromConfig(theMapId, JSON.stringify(data));
+    setConfigJson({ ...data });
+    setMapId(theMapId);
+  }
+
   //when config settings changes recreate map
   const handleConfigJsonChange = (data: any) => {
     // pre-select theme and projection from config file
@@ -87,8 +91,7 @@ export function useCgpvHook() {
     const newMapId = handleRemoveMap();
     setTimeout(() => {
       // create map
-      cgpv.api.createMapFromConfig(newMapId, JSON.stringify(data));
-      setConfigJson({ ...data });
+      handleCreateMap(newMapId, data);
 
     }, 1500);
   }
