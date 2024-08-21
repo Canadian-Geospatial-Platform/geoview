@@ -109,7 +109,7 @@
     "TypeValidFooterBarTabsCoreProps": {
       "description": "Valid values for the footerBar tabs core array.",
       "additionalProperties": false,
-      "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart", "custom-legend-panel"]
+      "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart", "footer-custom-legend-panel"]
     },
     "TypeFooterBarTabsCustomProps": {
       "description": "Footer bar tabs custom definition.",

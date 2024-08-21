@@ -140,5 +140,10 @@
       "core": ["legend", "layers", "details", "geochart", "custom-legend-panel"]
     }
   },
-  "corePackages": []
+  "corePackages": [],
+  "appBar": {
+    "tabs": {
+      "core": ["aoi-panel", "geochart"]
+    }
+  }
 }

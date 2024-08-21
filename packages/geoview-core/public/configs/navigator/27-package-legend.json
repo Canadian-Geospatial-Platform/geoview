@@ -15,7 +15,7 @@
   "corePackages": [],
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table", "custom-legend-panel"]
+      "core": ["legend", "layers", "details", "data-table", "footer-custom-legend-panel"]
     }
   },
   "appBar": {

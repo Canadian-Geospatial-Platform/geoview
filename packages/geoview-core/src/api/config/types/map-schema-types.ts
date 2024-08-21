@@ -45,7 +45,7 @@ export type TypeValidFooterBarTabsCoreProps =
   | 'time-slider'
   | 'geochart'
   | 'guide'
-  | 'custom-legend-panel';
+  | 'footer-custom-legend-panel';
 
 /** Footer bar tabs custom definition. */
 export type TypeFooterBarTabsCustomProps = {

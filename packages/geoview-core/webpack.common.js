@@ -85,7 +85,12 @@ const config = {
       filename: 'corePackages/[name].js',
     },
     'geoview-custom-legend-panel': {
-      import: '../geoview-legend-panel/src/index.tsx',
+      import: '../geoview-legend-panel/src/index-appbar.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
+    'geoview-footer-custom-legend-panel': {
+      import: '../geoview-legend-panel/src/index-footer.tsx',
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },

@@ -37,12 +37,12 @@ class CustomLegendFooterPlugin extends FooterPlugin {
    */
   translations = toJsonObject({
     en: {
-      customLegendPanel: {
+      footerCustomLegendPanel: {
         title: 'Custom Legend',
       },
     },
     fr: {
-      customLegendPanel: {
+      footerCustomLegendPanel: {
         title: 'Légende Personalisée',
       },
     },
@@ -68,9 +68,9 @@ class CustomLegendFooterPlugin extends FooterPlugin {
     const content = <LegendPanel mapId={this.pluginProps.mapId} config={{ isOpen: true, legendList: [] }} />;
 
     return {
-      id: 'custom-legend-panel',
+      id: 'footer-custom-legend-panel',
       value: this.value!,
-      label: 'customLegendPanel.title',
+      label: 'footerCustomLegendPanel.title',
       icon: <CustomLegendIcon />,
       content,
     };
@@ -90,4 +90,4 @@ export default CustomLegendFooterPlugin;
 
 // Keep a reference to the CustomLegendPlugin as part of the geoviewPlugins property stored in the window object
 window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins['custom-legend-panel'] = Cast<CustomLegendFooterPlugin>(CustomLegendFooterPlugin);
+window.geoviewPlugins['footer-custom-legend-panel'] = Cast<CustomLegendFooterPlugin>(CustomLegendFooterPlugin);
