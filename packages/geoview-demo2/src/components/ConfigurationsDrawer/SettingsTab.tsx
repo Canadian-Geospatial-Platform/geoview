@@ -1,7 +1,7 @@
 import { LoadingButton } from "@mui/lab";
-import { Autocomplete, Box, Button, ButtonGroup, FormControl, InputAdornment, InputLabel, MenuItem, Select, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, ButtonGroup, FormControl, InputAdornment, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { Save as SaveIcon } from "@mui/icons-material";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext } from "react";
 import { CGPVContext } from "../../providers/cgpvContextProvider/CGPVContextProvider";
 
 type ConfigType = {
@@ -9,7 +9,7 @@ type ConfigType = {
   label: string;
 }
 
-export default function SettingsPanel() {
+export default function SettingsTab() {
 
   const cgpvContext = useContext(CGPVContext);
 
@@ -66,29 +66,8 @@ export default function SettingsPanel() {
     { filePath: "navigator/25-geojson-multi.json", label: "Layer - GeoJSON MutiPolygon -" },
   ];
 
-  const [value, setValue] = useState('one');
-
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    setValue(newValue);
-  };
-
-
   return (
-    <Box sx={{  p: 2, display: "flex", flexDirection: "column", gap: 2, borderRadius: 2 }}>
-
-<Box sx={{ width: '100%' }}>
-      <Tabs
-        value={value}
-        onChange={handleChange}
-        textColor="secondary"
-        indicatorColor="secondary"
-        aria-label="secondary tabs example"
-      >
-        <Tab value="one" label="Item One" />
-        <Tab value="two" label="Item Two" />
-        <Tab value="three" label="Item Three" />
-      </Tabs>
-    </Box>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
 
       <ButtonGroup variant="outlined" aria-label="Loading button group" size="small" sx={{ marginBottom: '20px' }}>
         <Button onClick={handleReloadMap}>Reload Map</Button>

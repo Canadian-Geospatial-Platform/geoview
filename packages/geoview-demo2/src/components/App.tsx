@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { AppBar, Box, Button, CssBaseline, Drawer, Grid, IconButton, Toolbar, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import SettingsPanel from './SettingsPanel/SettingsPanel';
+import ConfigurationDrawer from './ConfigurationsDrawer/ConfigurationsDrawer';
 import { ConfigTextEditor } from './ConfigTextEditor';
 import { CGPVContext } from '../providers/cgpvContextProvider/CGPVContextProvider';
 import { DEFAULT_CONFIG } from '../constants';
@@ -100,7 +100,7 @@ function App() {
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
         >
-          <SettingsPanel />
+          <ConfigurationDrawer />
         </Drawer>
         <Drawer
           variant="permanent"
@@ -111,7 +111,7 @@ function App() {
           }}
           open
         >
-          <SettingsPanel />
+          <ConfigurationDrawer />
         </Drawer>
       </Box>
       <Box
