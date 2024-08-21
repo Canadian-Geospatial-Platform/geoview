@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, KeyboardEvent } from 'react';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface DeleteUndoButtonProps {
   layer: TypeLegendLayer;
@@ -13,13 +14,14 @@ interface DeleteUndoButtonProps {
 interface UndoButtonProps {
   progressValue: number;
   onUndo: () => void;
+  handleKeyDown: (e: KeyboardEvent) => void;
 }
 
 function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/delete-undo-button/UndoButtonWithProgress');
 
-  const { progressValue, onUndo } = props;
+  const { progressValue, onUndo, handleKeyDown } = props;
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }} onClick={onUndo}>
       <CircularProgressBase variant="determinate" size={40} value={progressValue} />
@@ -35,7 +37,7 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
           justifyContent: 'center',
         }}
       >
-        <IconButton edge="end" size="small">
+        <IconButton edge="end" size="small" onKeyDown={(e) => handleKeyDown(e)}>
           <UndoIcon />
         </IconButton>
       </Box>
@@ -55,6 +57,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // get store actions
   const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
   const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
+  const { setSelectedFooterLayerListItem } = useUIStoreActions();
 
   const handleDeleteClick = (): void => {
     if (getVisibilityFromOrderedLayerInfo(layer.layerPath)) setOrToggleLayerVisibility(layer.layerPath);
@@ -66,6 +69,22 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     setOrToggleLayerVisibility(layer.layerPath);
     setInUndoState(false);
     setLayerDeleteInProgress(false);
+  };
+
+  const handleDeleteKeyDown = (e: KeyboardEvent): void => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleDeleteClick();
+      setSelectedFooterLayerListItem(layer.layerId);
+    }
+  };
+
+  const handleUndoDeleteKeyDown = (e: KeyboardEvent): void => {
+    if (e.key === 'Enter') {
+      handleUndoClick();
+      setSelectedFooterLayerListItem('');
+      e.preventDefault();
+    }
   };
 
   useEffect(() => {
@@ -96,7 +115,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   }
   if (!inUndoState && layer.controls?.remove !== false && !getLayerDeleteInProgress()) {
     return (
-      <IconButton onClick={handleDeleteClick} edge="end" size="small">
+      <IconButton onClick={handleDeleteClick} edge="end" size="small" onKeyDown={(e) => handleDeleteKeyDown(e)}>
         <DeleteOutlineIcon color="error" />
       </IconButton>
     );
@@ -108,5 +127,5 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
       </IconButton>
     );
   }
-  return <UndoButtonWithProgress progressValue={progress} onUndo={handleUndoClick} />;
+  return <UndoButtonWithProgress progressValue={progress} onUndo={handleUndoClick} handleKeyDown={handleUndoDeleteKeyDown} />;
 }

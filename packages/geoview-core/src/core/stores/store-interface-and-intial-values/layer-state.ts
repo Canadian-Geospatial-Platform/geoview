@@ -25,6 +25,7 @@ export interface ILayerState {
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
   layerDeleteInProgress: boolean;
+  selectedLayerSortingArrowId: string;
 
   actions: {
     deleteLayer: (layerPath: string) => void;
@@ -41,6 +42,7 @@ export interface ILayerState {
     setSelectedLayerPath: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
+    setSelectedLayerSortingArrowId: (layerId: string) => void;
   };
 
   setterActions: {
@@ -49,6 +51,7 @@ export interface ILayerState {
     setLayerDeleteInProgress: (newVal: boolean) => void;
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
     setSelectedLayerPath: (layerPath: string) => void;
+    setSelectedLayerSortingArrowId: (arrowId: string) => void;
   };
 }
 
@@ -65,7 +68,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     selectedLayerPath: null,
     displayState: 'view',
     layerDeleteInProgress: false,
-
+    selectedLayerSortingArrowId: '',
     // #region ACTIONS
     actions: {
       /**
@@ -201,6 +204,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // Failed
         return Promise.resolve();
       },
+      setSelectedLayerSortingArrowId: (arrowId: string) => {
+        // Redirect to setter
+        get().layerState.setterActions.setSelectedLayerSortingArrowId(arrowId);
+      },
     },
 
     setterActions: {
@@ -272,6 +279,14 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           },
         });
       },
+      setSelectedLayerSortingArrowId: (arrowId: string) => {
+        set({
+          layerState: {
+            ...get().layerState,
+            selectedLayerSortingArrowId: arrowId,
+          },
+        });
+      },
     },
     // #endregion ACTIONS
   } as ILayerState;
@@ -304,6 +319,8 @@ export const useLayerSelectedLayer = (): TypeLegendLayer => useStore(useGeoViewS
 export const useLayerSelectedLayerPath = (): string | null | undefined =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
 export const useLayerDisplayState = (): TypeLayersViewDisplayState => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
+export const useSelectedLayerSortingArrowId = (): string =>
+  useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerSortingArrowId);
 
 export const useLayerStoreActions = (): LayerActions => useStore(useGeoViewStore(), (state) => state.layerState.actions);
 
