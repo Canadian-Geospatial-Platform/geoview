@@ -6,6 +6,7 @@ import { ConfigTextEditor } from './ConfigTextEditor';
 import { CGPVContext } from '../providers/cgpvContextProvider/CGPVContextProvider';
 import { DEFAULT_CONFIG } from '../constants';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
+import { MapRenderer } from './MapRenderer';
 
 
 function App() {
@@ -50,19 +51,7 @@ function App() {
     }
   };
 
-  const renderMap = () => {
-    return (
-      <div id="sandboxMapContainer">
-        <div id="sandboxMap3"></div>
-      </div>
-    );
-  }
-
-  
-
   const renderBodyContent = () => {
-
-
     return (
       <Box sx={{ width: '100%', typography: 'body1' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -72,7 +61,7 @@ function App() {
           </Tabs>
         </Box>
         <Box sx={{display: (selectedTab === 'map' ? 'unset' : 'none')}}>
-          {renderMap()}
+          <MapRenderer />
         </Box>
         <Box sx={{display: (selectedTab === 'config-editor' ? 'unset' : 'none')}}>
           <ConfigTextEditor />
@@ -81,8 +70,6 @@ function App() {
     )
   }
 
-  //{renderMap()}
-  // <ConfigTextEditor />
 
   return (
     <Box sx={{ display: 'flex' }}>

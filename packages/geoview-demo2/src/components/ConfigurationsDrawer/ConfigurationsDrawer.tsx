@@ -6,6 +6,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 import AddAlertIcon from '@mui/icons-material/AddAlert';
 import GridViewIcon from '@mui/icons-material/GridView';
 import SettingsTab from "./SettingsTab";
+import { ConfigBuilderTab } from "./ConfigBuilderTab";
 
 
 export default function ConfigurationDrawer() {
@@ -25,16 +26,14 @@ export default function ConfigurationDrawer() {
           <TabList onChange={handleTabChange} aria-label="handling tabs change" variant="scrollable" scrollButtons="auto">
             <Tab icon={<SettingsIcon />} aria-label="settings" value="settings" />
             <Tab icon={<ListAltIcon />} aria-label="Features" value="features" />
-            <Tab icon={<AddAlertIcon />} aria-label="Notifications" value="notifications" />
-            <Tab icon={<GridViewIcon />} aria-label="Panels" value="panels" />
           </TabList>
         </Box>
         <TabPanel value="settings">
           <SettingsTab />
         </TabPanel>
-        <TabPanel value="features">Item One</TabPanel>
-        <TabPanel value="notifications">Item Two</TabPanel>
-        <TabPanel value="panels">Item Three</TabPanel>
+        <TabPanel value="features">
+          <ConfigBuilderTab />
+        </TabPanel>
       </TabContext>
     </Box>
 

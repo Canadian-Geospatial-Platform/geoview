@@ -7,6 +7,7 @@ import { CGPVContext } from "../../providers/cgpvContextProvider/CGPVContextProv
 type ConfigType = {
   filePath: string;
   label: string;
+  group?: string;
 }
 
 export default function SettingsTab() {
@@ -37,8 +38,8 @@ export default function SettingsTab() {
 
 
   const configsList: ConfigType[] = [
-    { filePath: "navigator/01-basemap-LCC-TLS.json", label: "Basemap LCC Transport-Labeled-Shaded" },
-    { filePath: "navigator/02-basemap-LCC-SL.json", label: "Basemap LCC Simple-Labeled (overview map hide on zoom 7 and lower) " },
+    { filePath: "navigator/01-basemap-LCC-TLS.json", label: "Basemap LCC Transport-Labeled-Shaded", group: "Basemaps" },
+    { filePath: "navigator/02-basemap-LCC-SL.json", label: "Basemap LCC Simple-Labeled (overview map hide on zoom 7 and lower)" },
     { filePath: "navigator/03-projection-WM.json", label: "Basemap WM" },
     { filePath: "navigator/04-restrict-zoom.json", label: "Restricted zoom [4, 8]" },
     { filePath: "navigator/05-zoom-layer.json", label: "Zoom on layer extent" },
@@ -68,6 +69,8 @@ export default function SettingsTab() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+
+      <Typography variant="h6" sx={{margin: 0}}>Interactive Map</Typography>
 
       <ButtonGroup variant="outlined" aria-label="Loading button group" size="small" sx={{ marginBottom: '20px' }}>
         <Button onClick={handleReloadMap}>Reload Map</Button>
@@ -158,6 +161,17 @@ export default function SettingsTab() {
           <MenuItem value={3857}>Web Mercator</MenuItem>
         </Select>
       </FormControl>
+
+
+      <ButtonGroup variant="outlined" aria-label="outlined button group" size="small">
+        <Button>Add notification</Button>
+        <Button>Remove notification</Button>
+      </ButtonGroup>
+
+      <ButtonGroup variant="outlined" aria-label="outlined button group" size="small">
+        <Button>Add Panel</Button>
+        <Button>Remove Panel</Button>
+      </ButtonGroup>
 
     </Box>
   );

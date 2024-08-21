@@ -94,6 +94,11 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    'geoview-demo': {
+      import: '../geoview-demo/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
