@@ -1,0 +1,402 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "minZoom": 5,
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "LYR1",
+        "geoviewLayerName": {
+          "en": "Earthquakes",
+          "fr": "Tremblements de terre"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
+          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_fr/MapServer/"
+        },
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "geometryType": "point",
+            "layerName": {
+              "en": "Earthquakes 1980-1990",
+              "fr": "Tremblements de terre 1980-1990"
+            },
+            "initialSettings": {
+              "controls": {
+                "query": true
+              },
+              "states": {
+                "queryable": true
+              }
+            },
+            "attributions": ["Ressources naturelles Canada, Secteur des terres et des minéraux, Commission Géologique du Canada, Service canadien d\\'information sur les risques"],
+            "source": {
+              "layerFilter": "",
+              "maxRecordCount": 0,
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "date",
+                "outfields": [
+                  {
+                    "name": "magnitude_codelist",
+                    "alias": "magnitude_codelist",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "magnitude",
+                    "alias": "Magnitude",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "magnitude_type",
+                    "alias": "Magnitude Type",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "date",
+                    "alias": "Date",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "place",
+                    "alias": "Place",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "depth",
+                    "alias": "Depth",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "latitude",
+                    "alias": "Latitude",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "longitude",
+                    "alias": "Longitude",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "OBJECTID",
+                    "alias": "OBJECTID",
+                    "type": "number",
+                    "domain": []
+                  }
+                ]
+              }
+            },
+            "style": {
+              "type": "uniqueValue",
+              "fields": ["magnitude_codelist"],
+              "hasDefault": false,
+              "info": [
+                {
+                  "label": "Magnitude less than 2",
+                  "visible": true,
+                  "values": ["<2"],
+                  "settings": {
+                    "type": "simpleSymbol",
+                    "symbol": "circle",
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 1
+                    },
+                    "size": 3.335,
+                    "rotation": 0,
+                    "offset": [0,0],
+                    "color": "rgba(30,0,120,1)"
+                  }
+                },
+                {
+                  "label": "2 to <3",
+                  "visible": true,
+                  "values": ["2"],
+                  "settings": {
+                    "type": "simpleSymbol",
+                    "symbol": "circle",
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 1
+                    },
+                    "size": 4.669,
+                    "rotation": 0,
+                    "offset": [0,0],
+                    "color": "rgba(120,0,190,1)"
+                  }
+                },
+                {
+                  "label": "3 to <4",
+                  "visible": true,
+                  "values": ["3"],
+                  "settings": {
+                    "type": "simpleSymbol",
+                    "symbol": "circle",
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 1
+                    },
+                    "size": 6.003,
+                    "rotation": 0,
+                    "offset": [0,0],
+                    "color": "rgba(190,0,120,1)"
+                  }
+                },
+                {
+                  "label": "4 to <5",
+                  "visible": true,
+                  "values": ["4"],
+                  "settings": {
+                    "type": "simpleSymbol",
+                    "symbol": "circle",
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 1
+                    },
+                    "size": 7.337,
+                    "rotation": 0,
+                    "offset": [0,0],
+                    "color": "rgba(255,0,0,1)"
+                  }
+                },
+                {
+                  "label": "5 to <6",
+                  "visible": true,
+                  "values": ["5"],
+                  "settings": {
+                    "mimeType": "image/png",
+                    "offset": [0,0],
+                    "opacity": 1,
+                    "rotation": 0,
+                    "src": "iVBORw0KGgoAAAANSUhEUgAAACIAAAAfCAYAAACCox+xAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA2VJREFUWIXNl39o1GUcx1+3W3uM0209tmBudguuLV0/RqVX80fUDKtp5s5JfyxYQaChkMQSKopZgjRBCO0HFAlSf0y04mwykAnGzKMfiDFo7vrjqHEj9ZOODvx4eeuP79du2u685Zdd73+e5/l8P5/P84Ln+XwevqX8T1TqQY4Sd8wUFcQYsxSYUNVvigoCRIAJoKggPlVtc0G2uOPMg1hrwyJS684Xi0isKCCpVGrdNfPigARUI00GzsPlYdUI0DXjINbaB0Sk7sUFkE7DxiHusNbeLyI/zihIKpWKAISrIAN+hv6xzSyIVW2fZ6ChHDIZCEJmzCnl170AsWQ7ZU4ZY+qTqqHuENxU4kRsaYCXh7XBGNOsqqcL2DsDSC6Qh4C9QFW+DKoKwMPzsrZlNZQwDKo6WADEGaAT6MsF0gfcZ2CfQgvAeguPVv87kw+oL8+uF1TAB41T7zqQhP2SXQIdQHKyz1R3JKnwOLDVwDu9gv/ZO+HpWvDnObSbS2HDwqttf2Ug+psDYeCywpvADqZ4IHNd1glgR8Dao3XI/rYY87vGYOu9MHdWbpjJOnsR3j0FPQkIweivxrSj+m0u/7xVIyIxgbub4OOeBO3HxmD3Enhwbn6I78/BhkH4QSEIX8ThBVTP54sppHzHTzpX5flz8OGiAcoONUNrzdTOX4/CquMQhDSwOQEfFbBH4X1E4FNRaoFtFf7cfpXutwS8TYEQ0wJx9RTAPTZruPLu+9xx0reVODCeg9QA4deCUFHmGP68BHt+duYv3QVzyqC8DN4KQXecZqCaa8rUC5A2wLfidmcxMg5d38FXbn8YPAM7Fzm9paUauuP4gLXA+16DRAAaKyE6Cu3HIQCZkGHbYsvso0leaejHdzAMy2+7KsZTkCpg6UoL752C7QlYZvh9KGDXxEVOxJMQNubLpoAeaotR2RWEiIUDwiPArcBZr0CeAfz9Av0CTxqih5UOVMavOMRUB1HqOi0HehLO8wD4gTXAJ16BOMdiSM8OsPGw5Ex8Ya+w4jnLpp9S7DqplLqxnoBUAo+ttvwSFZ5AiV8vYJ+wG+hfbznSK7QAFcCFGwVpNcbsioq+gdMtC9VIrxAyxmxX1Vbg8xsF6VPVz6YBMFlpVX0VuOV6joWA/PEfIaaVw4tfTk/0N13QHet8ojHFAAAAAElFTkSuQmCC",
+                    "type": "iconSymbol"
+                  }
+                },
+                {
+                  "label": "> or equal to 6",
+                  "visible": true,
+                  "values": [">=6"],
+                  "settings": {
+                    "mimeType": "image/png",
+                    "offset": [0,0],
+                    "opacity": 1,
+                    "rotation": 0,
+                    "src": "iVBORw0KGgoAAAANSUhEUgAAACcAAAAkCAYAAAAKNyObAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAABD5JREFUWIXNmH1MVXUYxz/AlR8vl7KjLQ9UYKC1rhOQTYyZBcEgyRgvTjC3NplBL+KWtaKJvdl6maswX0bmS3PDWOVGRNPRbEot19LR5p22qHZb7thWJ1+4xcPLpT/OvSAGlwscBt9/zjnP+T3f3+fe5/xeznEwg+WYboBgshuuFPjULjM74WYD7wHNQJ8dhnbCPQzoSqn7ReRLOwxtg3PpVLgNEJFSYEbBxZkmuf7zYuBJwDdZU7vgHjJk0OsWpdRyETk5WVNb4AIlTVTgERCRMmBGwMV2meQDNFRBwQ4ASoBNwMBkjO2Ae9AjRFZmQY4L7k2Edg8JmqZlmqZ5alrhAiUtTgdHBDy6AtoPgdfrLQOmFS5KhEKA9CQrsCzZOopICfDMZMyvh7sRCAPwvKGWRDgkJljy52fU0upGUZVZoN9kxRbMgzQdOgzmNz+l1WQkmb8E8+jpVX/fUStu/2U/cHU0uPuA/cCcxOdljN8FYLUpTh+KzHLAY9nwRCMU7TTrQ/UAfldKrRORE6PBfQakAoeA7BDogKGSBpSVEmrmsH7Xi8hf1wZHeuYuALlALfAS4MhP4creDcTdOscq+VhafDv4Phj53k8X6Vu7i+7TBk6sv+1ZrA3D/zTagPABrymljotI47FOkhY8h6+5hp68Raiw8FAQh6vfB0e+p2vN+zgBp1LqfGxsbLlpmj+MlhN0tIrIt0Aa0CCwpmAHamsh/2zOJyYu6FAZLvMq1B2ha087Tn/ogIhsFBFvsLxQppLLQDnQBtS/0krsV2fp2VtJ5ML4sZPP/Arle+jtNHECV4Bq4HAI/Y5rntsHfA181O4h7a6tcKoWliaPnnC0A1buBGAW8B1QAQSdWiYKB/AjcI+mME0h+oao4I1n+4uoKy4YwnKgdzydjXuFUEotMUWiM3VImRe87aIEUIAhJADxgGdK4bBeYlifY62lAXm74eR5yL4boiKtmDMa6lbBlhbA2qm8M6VwKZqUu42hNRTg5z+g6gByvBO1NoP+11cTcdtc6162C2gBTbHalCmE0zQtw22Y8XdqsFAHnw9aO+gr2k0EVgV9jaeJOHqWgaZqwnJcQ6U1hWWADhhTAuf1eksAHs+FfwXqWune3kZgWOwDXgbeNYWSvHrYtoqBjXmEvVAIL7YShvV+sXtK4FI0qXAb4BuAnDfp6zCIAi4BG4BP/M1KgSrg7S0txJw4hy8vlXAYLK39cLquu9yGMR/g6Y8Hc9uBdcBv1zVvwHqHONzWSWpbpxX0CiuAucCftsIZhlF6zWU/8CqwzX8+ks4BmUqpt0SkBkAgHCjCegTsg8M/hQAepdQjIvJNCDkiIpuAY8BB4GagzG64ZGAx0ARUicjlEPMC+sKf/yHwANZ3lUt2weUDlVi75InqIlAAbPb7NY2VECrcfqB74lyDGgC2A2OsypZChbMDbNx+M/rL5n+qSli//HCkMAAAAABJRU5ErkJggg==",
+                    "type": "iconSymbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "layerId": "1",
+            "geometryType": "point",
+            "layerName": {
+              "en": "Earthquakes 1990-2000",
+              "fr": " Tremblements de terre 1990-2000"
+            },
+            "attributions": ["Ressources naturelles Canada, Secteur des terres et des minéraux, Commission Géologique du Canada, Service canadien d\\'information sur les risques"],
+            "source": {
+              "layerFilter": "",
+              "maxRecordCount": 0,
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "date",
+                "outfields": [
+                  {
+                    "name": "magnitude_codelist",
+                    "alias": "magnitude_codelist",
+                    "type": "date",
+                    "domain": []
+                  },
+                  {
+                    "name": "magnitude",
+                    "alias": "Magnitude",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "magnitude_type",
+                    "alias": "Magnitude Type",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "date",
+                    "alias": "Date",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "place",
+                    "alias": "Place",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "depth",
+                    "alias": "Depth",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "latitude",
+                    "alias": "Latitude",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "longitude",
+                    "alias": "Longitude",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "OBJECTID",
+                    "alias": "OBJECTID",
+                    "type": "number",
+                    "domain": []
+                  }
+                ]
+              }
+            },
+            "style": {
+              "type": "uniqueValue",
+              "fields": ["magnitude_codelist"],
+              "hasDefault": false,
+              "info": [
+                {
+                  "label": "Magnitude less than 2",
+                  "visible": true,
+                  "values": ["<2"],
+                  "settings": {
+                    "type": "simpleSymbol",
+                    "symbol": "circle",
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 1
+                    },
+                    "size": 3.335,
+                    "rotation": 0,
+                    "offset": [0,0],
+                    "color": "rgba(30,0,120,1)"
+                  }
+                },
+                {
+                  "label": "2 to <3",
+                  "visible": true,
+                  "values": ["2"],
+                  "settings": {
+                    "type": "simpleSymbol",
+                    "symbol": "circle",
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 1
+                    },
+                    "size": 4.669,
+                    "rotation": 0,
+                    "offset": [0,0],
+                    "color": "rgba(120,0,190,1)"
+                  }
+                },
+                {
+                  "label": "3 to <4",
+                  "visible": true,
+                  "values": ["3"],
+                  "settings": {
+                    "type": "simpleSymbol",
+                    "symbol": "circle",
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 1
+                    },
+                    "size": 6.003,
+                    "rotation": 0,
+                    "offset": [0,0],
+                    "color": "rgba(190,0,120,1)"
+                  }
+                },
+                {
+                  "label": "4 to <5",
+                  "visible": true,
+                  "values": ["4"],
+                  "settings": {
+                    "type": "simpleSymbol",
+                    "symbol": "circle",
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 1
+                    },
+                    "size": 7.337,
+                    "rotation": 0,
+                    "offset": [0,0],
+                    "color": "rgba(255,0,0,1)"
+                  }
+                },
+                {
+                  "label": "5 to <6",
+                  "visible": true,
+                  "values": ["5"],
+                  "settings": {
+                    "mimeType": "image/png",
+                    "offset": [0,0],
+                    "opacity": 1,
+                    "rotation": 0,
+                    "src": "iVBORw0KGgoAAAANSUhEUgAAACIAAAAfCAYAAACCox+xAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA2VJREFUWIXNl39o1GUcx1+3W3uM0209tmBudguuLV0/RqVX80fUDKtp5s5JfyxYQaChkMQSKopZgjRBCO0HFAlSf0y04mwykAnGzKMfiDFo7vrjqHEj9ZOODvx4eeuP79du2u685Zdd73+e5/l8P5/P84Ln+XwevqX8T1TqQY4Sd8wUFcQYsxSYUNVvigoCRIAJoKggPlVtc0G2uOPMg1hrwyJS684Xi0isKCCpVGrdNfPigARUI00GzsPlYdUI0DXjINbaB0Sk7sUFkE7DxiHusNbeLyI/zihIKpWKAISrIAN+hv6xzSyIVW2fZ6ChHDIZCEJmzCnl170AsWQ7ZU4ZY+qTqqHuENxU4kRsaYCXh7XBGNOsqqcL2DsDSC6Qh4C9QFW+DKoKwMPzsrZlNZQwDKo6WADEGaAT6MsF0gfcZ2CfQgvAeguPVv87kw+oL8+uF1TAB41T7zqQhP2SXQIdQHKyz1R3JKnwOLDVwDu9gv/ZO+HpWvDnObSbS2HDwqttf2Ug+psDYeCywpvADqZ4IHNd1glgR8Dao3XI/rYY87vGYOu9MHdWbpjJOnsR3j0FPQkIweivxrSj+m0u/7xVIyIxgbub4OOeBO3HxmD3Enhwbn6I78/BhkH4QSEIX8ThBVTP54sppHzHTzpX5flz8OGiAcoONUNrzdTOX4/CquMQhDSwOQEfFbBH4X1E4FNRaoFtFf7cfpXutwS8TYEQ0wJx9RTAPTZruPLu+9xx0reVODCeg9QA4deCUFHmGP68BHt+duYv3QVzyqC8DN4KQXecZqCaa8rUC5A2wLfidmcxMg5d38FXbn8YPAM7Fzm9paUauuP4gLXA+16DRAAaKyE6Cu3HIQCZkGHbYsvso0leaejHdzAMy2+7KsZTkCpg6UoL752C7QlYZvh9KGDXxEVOxJMQNubLpoAeaotR2RWEiIUDwiPArcBZr0CeAfz9Av0CTxqih5UOVMavOMRUB1HqOi0HehLO8wD4gTXAJ16BOMdiSM8OsPGw5Ex8Ya+w4jnLpp9S7DqplLqxnoBUAo+ttvwSFZ5AiV8vYJ+wG+hfbznSK7QAFcCFGwVpNcbsioq+gdMtC9VIrxAyxmxX1Vbg8xsF6VPVz6YBMFlpVX0VuOV6joWA/PEfIaaVw4tfTk/0N13QHet8ojHFAAAAAElFTkSuQmCC",
+                    "type": "iconSymbol"
+                  }
+                },
+                {
+                  "label": "> or equal to 6",
+                  "visible": true,
+                  "values": [">=6"],
+                  "settings": {
+                    "mimeType": "image/png",
+                    "offset": [0,0],
+                    "opacity": 1,
+                    "rotation": 0,
+                    "src": "iVBORw0KGgoAAAANSUhEUgAAACcAAAAkCAYAAAAKNyObAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAABD5JREFUWIXNmH1MVXUYxz/AlR8vl7KjLQ9UYKC1rhOQTYyZBcEgyRgvTjC3NplBL+KWtaKJvdl6maswX0bmS3PDWOVGRNPRbEot19LR5p22qHZb7thWJ1+4xcPLpT/OvSAGlwscBt9/zjnP+T3f3+fe5/xeznEwg+WYboBgshuuFPjULjM74WYD7wHNQJ8dhnbCPQzoSqn7ReRLOwxtg3PpVLgNEJFSYEbBxZkmuf7zYuBJwDdZU7vgHjJk0OsWpdRyETk5WVNb4AIlTVTgERCRMmBGwMV2meQDNFRBwQ4ASoBNwMBkjO2Ae9AjRFZmQY4L7k2Edg8JmqZlmqZ5alrhAiUtTgdHBDy6AtoPgdfrLQOmFS5KhEKA9CQrsCzZOopICfDMZMyvh7sRCAPwvKGWRDgkJljy52fU0upGUZVZoN9kxRbMgzQdOgzmNz+l1WQkmb8E8+jpVX/fUStu/2U/cHU0uPuA/cCcxOdljN8FYLUpTh+KzHLAY9nwRCMU7TTrQ/UAfldKrRORE6PBfQakAoeA7BDogKGSBpSVEmrmsH7Xi8hf1wZHeuYuALlALfAS4MhP4creDcTdOscq+VhafDv4Phj53k8X6Vu7i+7TBk6sv+1ZrA3D/zTagPABrymljotI47FOkhY8h6+5hp68Raiw8FAQh6vfB0e+p2vN+zgBp1LqfGxsbLlpmj+MlhN0tIrIt0Aa0CCwpmAHamsh/2zOJyYu6FAZLvMq1B2ha087Tn/ogIhsFBFvsLxQppLLQDnQBtS/0krsV2fp2VtJ5ML4sZPP/Arle+jtNHECV4Bq4HAI/Y5rntsHfA181O4h7a6tcKoWliaPnnC0A1buBGAW8B1QAQSdWiYKB/AjcI+mME0h+oao4I1n+4uoKy4YwnKgdzydjXuFUEotMUWiM3VImRe87aIEUIAhJADxgGdK4bBeYlifY62lAXm74eR5yL4boiKtmDMa6lbBlhbA2qm8M6VwKZqUu42hNRTg5z+g6gByvBO1NoP+11cTcdtc6162C2gBTbHalCmE0zQtw22Y8XdqsFAHnw9aO+gr2k0EVgV9jaeJOHqWgaZqwnJcQ6U1hWWADhhTAuf1eksAHs+FfwXqWune3kZgWOwDXgbeNYWSvHrYtoqBjXmEvVAIL7YShvV+sXtK4FI0qXAb4BuAnDfp6zCIAi4BG4BP/M1KgSrg7S0txJw4hy8vlXAYLK39cLquu9yGMR/g6Y8Hc9uBdcBv1zVvwHqHONzWSWpbpxX0CiuAucCftsIZhlF6zWU/8CqwzX8+ks4BmUqpt0SkBkAgHCjCegTsg8M/hQAepdQjIvJNCDkiIpuAY8BB4GagzG64ZGAx0ARUicjlEPMC+sKf/yHwANZ3lUt2weUDlVi75InqIlAAbPb7NY2VECrcfqB74lyDGgC2A2OsypZChbMDbNx+M/rL5n+qSli//HCkMAAAAABJRU5ErkJggg==",
+                    "type": "iconSymbol"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

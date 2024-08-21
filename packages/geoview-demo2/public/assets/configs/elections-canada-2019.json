@@ -1,0 +1,53 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [4, [-90, 60]]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "polling-division-boudnaries-2019",
+        "geoviewLayerName": {
+          "en": "Polling Division Boundaries of 2019",
+          "fr": "Limites de section de vote de 2019"
+        },
+        "geoviewLayerType": "esriFeature",
+        "initialSettings": {
+          "states": {
+            "visible": true
+          }
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/ELECTIONS/elections_canada_2019_en/mapserver",
+          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/ELECTIONS/elections_canada_2019_fr/mapserver"
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["north-arrow", "overview-map"],
+  "navBar": ["zoom", "fullscreen", "location", "home"],
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "basemap-panel", "export"]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "theme": "geo.ca"
+}

@@ -1,0 +1,55 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+
+
+.config-editor {
+  display: inline-flex;
+  gap: 10px;
+  font-family: monospace;
+  line-height: 21px;
+  background: #282a3a;
+  border-radius: 2px;
+  padding: 20px 10px;
+  height: 600px;
+  overflow-y: auto;
+}
+
+.config-editor .line-numbers {
+  width: 20px;
+  text-align: right;
+  height: 9999px;
+}
+
+.config-editor .line-numbers span {
+  counter-increment: linenumber;
+}
+
+.config-editor .line-numbers span::before {
+  content: counter(linenumber);
+  display: block;
+  color: #506882;
+}
+.config-editor textarea {
+  height: 9999px;
+  line-height: 21px;
+  overflow-y: hidden;
+  padding: 0;
+  border: 0;
+  background: #282a3a;
+  color: #fff;
+  min-width: 500px;
+  outline: none;
+  resize: none;
+}
