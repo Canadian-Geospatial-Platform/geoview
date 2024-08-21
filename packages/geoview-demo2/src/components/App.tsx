@@ -1,10 +1,11 @@
 import React, { useContext, useEffect } from 'react';
-import { AppBar, Box, Button, CssBaseline, Drawer, Grid, IconButton, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Button, CssBaseline, Drawer, Grid, IconButton, Tab, Tabs, Toolbar, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ConfigurationDrawer from './ConfigurationsDrawer/ConfigurationsDrawer';
 import { ConfigTextEditor } from './ConfigTextEditor';
 import { CGPVContext } from '../providers/cgpvContextProvider/CGPVContextProvider';
 import { DEFAULT_CONFIG } from '../constants';
+import { TabContext, TabList, TabPanel } from '@mui/lab';
 
 
 function App() {
@@ -28,6 +29,11 @@ function App() {
 
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
+  const [selectedTab, setSelectedTab] = React.useState('map');
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+    setSelectedTab(newValue);
+  };
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -50,6 +56,29 @@ function App() {
         <div id="sandboxMap3"></div>
       </div>
     );
+  }
+
+  
+
+  const renderBodyContent = () => {
+
+
+    return (
+      <Box sx={{ width: '100%', typography: 'body1' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={selectedTab} onChange={handleTabChange} aria-label="handling tabs change">
+            <Tab label="Map" value="map" />
+            <Tab label="Config Editor" value="config-editor" />
+          </Tabs>
+        </Box>
+        <Box sx={{display: (selectedTab === 'map' ? 'unset' : 'none')}}>
+          {renderMap()}
+        </Box>
+        <Box sx={{display: (selectedTab === 'config-editor' ? 'unset' : 'none')}}>
+          <ConfigTextEditor />
+        </Box>
+    </Box>
+    )
   }
 
   //{renderMap()}
@@ -119,8 +148,7 @@ function App() {
         sx={{ flexGrow: 1, pt: 1, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
       >
         <Toolbar />
-        {renderMap()}
-        <ConfigTextEditor />
+        {renderBodyContent()}
 
       </Box>
     </Box>
