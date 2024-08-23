@@ -1,7 +1,8 @@
-import { Dispatch, SetStateAction } from 'react';
+/// <reference types="react" />
+import { TypeLegendLayer } from '@/core/components/layers/types';
 interface LeftPanelProps {
-    setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
+    showLayerDetailsPanel: (layer: TypeLegendLayer) => void;
     isLayoutEnlarged: boolean;
 }
-export declare function LeftPanel({ setIsLayersListPanelVisible, isLayoutEnlarged }: LeftPanelProps): JSX.Element;
+export declare function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanelProps): JSX.Element;
 export {};
