@@ -132,8 +132,8 @@ export class API {
   }
 
   /**
-   * Registers a layer added event handler.
-   * @param {MapAddedToDivdDelegate} callback - The callback to be executed whenever the event is emitted
+   * Registers a map added to div event handler.
+   * @param {MapAddedToDivDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onMapAddedToDiv(callback: MapAddedToDivDelegate): void {
     // Register the event handler
@@ -141,7 +141,7 @@ export class API {
   }
 
   /**
-   * Unregisters a layer added event handler.
+   * Unregisters a map added to div event handler.
    * @param {MapAddedToDivdDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offMapAddedToDiv(callback: MapAddedToDivDelegate): void {
