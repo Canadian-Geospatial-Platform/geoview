@@ -1,4 +1,4 @@
-/* eslint-disable react/require-default-props */
+import { Ref, forwardRef } from 'react';
 import {
   FormControl,
   InputLabel,
@@ -39,7 +39,7 @@ export interface TypeMenuItemProps {
  * @param {TypeSelectProps} props custom select properties
  * @returns {JSX.Element} the auto complete ui component
  */
-export function Select(props: TypeSelectProps): JSX.Element {
+function MUISelect(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element {
   const { fullWidth, inputLabel, menuItems, formControlProps = {}, container, ...selectProps } = props;
 
   const theme = useTheme();
@@ -52,7 +52,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
           {selectProps.label}
         </InputLabel>
       )}
-      <MaterialSelect sx={sxClasses.formControl} {...selectProps} MenuProps={{ container }}>
+      <MaterialSelect sx={sxClasses.formControl} {...selectProps} MenuProps={{ container }} ref={ref}>
         {menuItems.map((menuItem: TypeMenuItemProps, index) => {
           if (menuItem) {
             if (menuItem.type === 'header') {
@@ -70,3 +70,6 @@ export function Select(props: TypeSelectProps): JSX.Element {
     </FormControl>
   );
 }
+
+// Export the Select using forwardRef so that passing ref is permitted and functional in the react standards
+export const Select = forwardRef(MUISelect);

@@ -1,3 +1,4 @@
+import { forwardRef, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -15,7 +16,7 @@ export type ButtonProps = {
  * @param {ButtonProps} props the properties of the Button UI element
  * @returns {JSX.Element} the new UI element
  */
-export function Button(props: ButtonProps): JSX.Element {
+function MaterialBtn(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element {
   const {
     id,
     sx,
@@ -33,6 +34,7 @@ export function Button(props: ButtonProps): JSX.Element {
     size,
     makeResponsive,
     fullWidth,
+    onKeyDown,
     'aria-label': ariaLabel,
   } = props;
 
@@ -57,6 +59,8 @@ export function Button(props: ButtonProps): JSX.Element {
         startIcon={startIcon}
         endIcon={endIcon}
         aria-label={ariaLabel}
+        {...(onKeyDown && { onKeyDown })}
+        ref={ref}
       >
         {!(makeResponsive && mobileView) ? children : null}
       </MaterialButton>
@@ -72,3 +76,6 @@ export function Button(props: ButtonProps): JSX.Element {
     </Tooltip>
   );
 }
+
+// Export the Button  using forwardRef so that passing ref is permitted and functional in the react standards
+export const Button = forwardRef(MaterialBtn);

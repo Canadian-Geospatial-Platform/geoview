@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState, KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SelectChangeEvent, useTheme } from '@mui/material';
 import {
@@ -84,6 +84,10 @@ export function AddNewLayer(): JSX.Element {
   const [stepButtonDisable, setStepButtonDisable] = useState<boolean>(true);
 
   const dragPopover = useRef(null);
+  const uploadBtnRef = useRef<HTMLButtonElement>(null);
+  const serviceTypeRef = useRef<HTMLDivElement>(null);
+  const isMultipleRef = useRef<HTMLDivElement>(null);
+  const isMultipleTextFieldRef = useRef<HTMLDivElement>(null);
 
   // get values from store
   const mapId = useGeoViewMapId();
@@ -1015,6 +1019,29 @@ export function AddNewLayer(): JSX.Element {
     if (activeStep === 2 && layerEntries.length > 0) setStepButtonDisable(false);
   }, [layerName, activeStep, layerEntries]);
 
+  useEffect(() => {
+    if (activeStep === 0) {
+      uploadBtnRef.current?.focus();
+    }
+    if (activeStep === 1) {
+      (serviceTypeRef.current?.getElementsByTagName('input')[0].previousSibling as HTMLDivElement).focus();
+    }
+    if (activeStep === 2) {
+      if (isMultipleRef.current) {
+        // handle is Multiple fields focus
+        const id = isMultipleRef.current?.dataset?.id;
+        const elem = isMultipleRef.current?.querySelector('#service-layer-label') as HTMLInputElement;
+        if (id === 'autocomplete' && elem) {
+          elem.focus();
+        } else {
+          isMultipleTextFieldRef.current?.getElementsByTagName('input')[0]?.focus();
+        }
+      }
+    }
+    if (activeStep === 3) {
+      isMultipleTextFieldRef.current?.getElementsByTagName('input')[0]?.focus();
+    }
+  }, [activeStep]);
   /**
    * Handle file dragged into dropzone
    *
@@ -1069,6 +1096,13 @@ export function AddNewLayer(): JSX.Element {
     }
   };
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>): void => {
+    if (e.key === 'Enter') {
+      handleBack();
+      e.preventDefault();
+    }
+  };
+
   /**
    * Creates a set of Continue / Back buttons
    *
@@ -1095,7 +1129,14 @@ export function AddNewLayer(): JSX.Element {
           {isLast ? t('layers.finish') : t('layers.continue')}
         </Button>
         {!isFirst && (
-          <Button variant="contained" className="buttonOutlineFilled" size="small" type="text" onClick={handleBack}>
+          <Button
+            variant="contained"
+            className="buttonOutlineFilled"
+            size="small"
+            type="text"
+            onClick={handleBack}
+            onKeyDown={(e) => handleKeyDown(e)}
+          >
             {t('layers.back')}
           </Button>
         )}
@@ -1168,6 +1209,7 @@ export function AddNewLayer(): JSX.Element {
                     type="text"
                     onClick={() => document.getElementById('fileUpload')?.click()}
                     className="buttonOutlineFilled"
+                    ref={uploadBtnRef}
                   >
                     <FileUploadIcon />
                     <Box component="span">{t('layers.upload')}</Box>
@@ -1207,6 +1249,7 @@ export function AddNewLayer(): JSX.Element {
                     inputLabel={{
                       id: 'service-type-label',
                     }}
+                    ref={serviceTypeRef}
                     menuItems={layerOptions.map(([value, label]) => ({
                       key: value,
                       item: {
@@ -1228,7 +1271,13 @@ export function AddNewLayer(): JSX.Element {
               children: (
                 <>
                   {layerList.length === 0 && (
-                    <TextField label={t('layers.name')} variant="standard" value={layerName} onChange={handleNameLayer} />
+                    <TextField
+                      label={t('layers.name')}
+                      variant="standard"
+                      value={layerName}
+                      onChange={handleNameLayer}
+                      ref={isMultipleTextFieldRef}
+                    />
                   )}
                   {layerList.length > 1 && (layerList[0] as TypeLayerEntryConfig).layerName && (
                     <Autocomplete
@@ -1238,15 +1287,18 @@ export function AddNewLayer(): JSX.Element {
                       disableCloseOnSelect
                       id="service-layer-label"
                       options={layerList as TypeLayerEntryConfig[]}
-                      getOptionLabel={(option) => `${option.layerName!.en} (${option.layerId})`}
+                      getOptionLabel={(option) =>
+                        `${(option as TypeLayerEntryConfig).layerName!.en} (${(option as TypeLayerEntryConfig).layerId})`
+                      }
                       renderOption={(props, option, { selected }) => (
-                        <li {...props}>
+                        <li {...props} key={(option as TypeLayerEntryConfig).layerName!.en}>
                           <Checkbox icon={uncheckedIcon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
-                          {option.layerName!.en}
+                          {(option as TypeLayerEntryConfig).layerName!.en}
                         </li>
                       )}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onChange={handleSelectLayer as any}
+                      ref={isMultipleRef}
                       renderInput={(params) => <TextField {...params} label={t('layers.layerSelect')} />}
                     />
                   )}
@@ -1257,16 +1309,19 @@ export function AddNewLayer(): JSX.Element {
                       disableClearable={!isMultiple()}
                       id="service-layer-label"
                       options={layerList as TypeGeoviewLayerConfig[]}
-                      getOptionLabel={(option) => `${option.geoviewLayerName!.en} (${option.geoviewLayerId})`}
+                      getOptionLabel={(option) =>
+                        `${(option as TypeGeoviewLayerConfig).geoviewLayerName!.en} (${(option as TypeGeoviewLayerConfig).geoviewLayerId})`
+                      }
                       disableCloseOnSelect
                       renderOption={(props, option, { selected }) => (
-                        <li {...props}>
+                        <li {...props} key={(option as TypeGeoviewLayerConfig).geoviewLayerName!.en}>
                           <Checkbox icon={uncheckedIcon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
-                          {option.geoviewLayerName!.en}
+                          {(option as TypeGeoviewLayerConfig).geoviewLayerName!.en}
                         </li>
                       )}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onChange={handleSelectLayer as any}
+                      ref={isMultipleRef}
                       renderInput={(params) => <TextField {...params} label={t('layers.layerSelect')} />}
                     />
                   )}
@@ -1290,6 +1345,7 @@ export function AddNewLayer(): JSX.Element {
                         variant="standard"
                         value={layerName}
                         onChange={handleNameLayer}
+                        ref={isMultipleTextFieldRef}
                       />
                       <br />
                       <NavButtons isLast handleNext={handleStepLast} />
