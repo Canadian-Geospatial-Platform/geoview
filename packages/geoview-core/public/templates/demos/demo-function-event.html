@@ -123,11 +123,11 @@
           cgpv.api.maps.Map1.appBarApi.selectAppBarTab('AppbarPanelButtonGeolocator', 'geolocator')
         </li>
         <li><button id="Disable-hover">Disable hover query for Top 100</button><button id="Enable-hover">Enable hover query for Top 100</button><br />
-          cgpv.api.maps.Map1.layer.hoverFeatureInfoLayerSet.disableHoverListener('esriFeatureLYR5/0')
+          cgpv.api.maps.Map1.layer.hoverFeatureInfoLayerSet.disableHoverListener('esriFeatureLYR5/0')<br />
           cgpv.api.maps.Map1.layer.hoverFeatureInfoLayerSet.enableHoverListener('esriFeatureLYR5/0')
         </li>
         <li><button id="Disable-feature-info">Disable feature query for Top 100</button><button id="Enable-feature-info">Enable feature query for Top 100</button><br />
-          cgpv.api.maps.Map1.layer.featureInfoLayerSet.disableClickListener('esriFeatureLYR5/0')
+          cgpv.api.maps.Map1.layer.featureInfoLayerSet.disableClickListener('esriFeatureLYR5/0')<br />
           cgpv.api.maps.Map1.layer.featureInfoLayerSet.enableClickListener('esriFeatureLYR5/0')
         </li>
         <li><button id="Show-collapsed-state">Show collapsed legend state for Water Quantity</button><br />
@@ -140,17 +140,18 @@
           cgpv.api.maps.Map1.getMapLayerOrderInfo()
         </li>
         <li><button id="Language-en">Change language to English</button><button id="Language-fr">Change language to French</button><br />
-          cgpv.api.maps.Map1.getMapLayerOrderInfo()
+          cgpv.api.maps.Map1.setLanguage('en')<br />
+          cgpv.api.maps.Map1.setLanguage('fr')
         </li>
         <li><button id="Change-basemap">Change basemap</button><br />
-          const basemap = await cgpv.api.maps.Map1.basemap.createCoreBasemap(basemapOptions = {basemapId: 'simple'})
+          const basemap = await cgpv.api.maps.Map1.basemap.createCoreBasemap(basemapOptions = {basemapId: 'simple'})<br />
           cgpv.api.maps.Map1.basemap.setBasemap(basemap)
         </li>
         <li><button id="Set-layer">Set selected layer in layers panel to Nonmetal mines</button><br />
           cgpv.api.maps.Map1.stateApi.setSelectedLayersTabLayer('nonmetalmines/5')
         </li>
         <li><button id="Swiper-add">Add Nonmetal mines to swiper</button><button id="Swiper-remove">Remove Nonmetal mines from swiper</button><br />
-          cgpv.api.maps.Map1.plugins['swiper'].activateForLayer('nonmetalmines/5')
+          cgpv.api.maps.Map1.plugins['swiper'].activateForLayer('nonmetalmines/5')<br />
           cgpv.api.maps.Map1.plugins['swiper'].deActivateForLayer('nonmetalmines/5')
         </li>
         <li><button id="Calc-dist">Calculate distance</button>
@@ -166,6 +167,16 @@
         </li>
         <li><button id="Reload-map">Reload map with current state</button><br />
           cgpv.api.maps.Map1.reloadWithCurrentState()
+        </li>
+        <li><button id="Add-marker">Add markers to map</button><button id="Remove-marker">Remove markers from map</button><br />
+          cgpv.api.maps.Map1.layer.featureHighlight.pointMarkers.addPointMarkers('group1', markers)<br />
+          cgpv.api.maps.Map1.layer.featureHighlight.pointMarkers.removePointMarkersOrGroup('group1');
+        </li>
+        <li><button id="Zoom-to-markers">Zoom to markers 1 and 3</button><br />
+          cgpv.api.maps.Map1.layer.featureHighlight.pointMarkers.zoomToPointMarkers('group1', ['1', '3']);
+        </li>
+        <li><button id="Zoom-to-marker-group">Zoom to marker group</button><br />
+          cgpv.api.maps.Map1.layer.featureHighlight.pointMarkers.zoomToPointMarkerGroup('group1');
         </li>
       </ul>
       <h3>Events that will generate notifications:</h3>
@@ -184,6 +195,7 @@
         <li>onBasemapChanged</li>
         <li>onLayersReordered</li>
         <li>onLayerOpacityChanged for Water Quantity</li>
+        <li>onMapAddedToDiv</li>
       </ul>
     </div>
     <br>
@@ -283,8 +295,11 @@
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${payload.layerPath} opacity changed to ${payload.opacity}`);
         });
 
-      });
-
+        // listen to map added to div event
+        cgpv.api.onMapAddedToDiv((sender, payload) => {
+          cgpv.api.maps[payload.mapId].notifications.addNotificationSuccess(`Map ${payload.mapId} added`);
+        });
+      })
       // Add WMS Button======================================================================================================
       // find the button element by ID
       var addLayerButton = document.getElementById('Add-layer');
@@ -518,7 +533,7 @@
 
       // add an event listener when a button is clicked
       changeLanguageEnglishButton.addEventListener('click', async () => {
-        console.log(cgpv.api.maps.Map1.setLanguage('en'));
+        cgpv.api.maps.Map1.setLanguage('en');
       });
 
       // Enable language fr Button================================================================================================
@@ -527,7 +542,7 @@
 
       // add an event listener when a button is clicked
       changeLanguageFrenchButton.addEventListener('click', async () => {
-        console.log(cgpv.api.maps.Map1.setLanguage('fr'));
+        cgpv.api.maps.Map1.setLanguage('fr');
       });
 
       // Change basemap Button================================================================================================
@@ -606,6 +621,61 @@
       // add an event listener when a button is clicked
       reloadMapButton.addEventListener('click', () => {
         cgpv.api.maps.Map1.reloadWithCurrentState();
+      });
+
+      // Add-marker Button================================================================================================
+      // find the button element by ID
+      var addMarkerButton = document.getElementById('Add-marker');
+
+      const markers = [
+        {
+          "id": "1",
+          "coordinate": [-100, 60],
+          "color": "blue",
+          "opacity": 0.5
+        },
+        {
+          "id": "2",
+          "coordinate": [-80, 65],
+          "color": "rgb(0, 226, 0)"
+        },
+        {
+          "id": "3",
+          "coordinate": [-115, 66],
+          "color": "#C52022"
+        }
+      ]
+
+      // add an event listener when a button is clicked
+      addMarkerButton.addEventListener('click', () => {
+        cgpv.api.maps.Map1.layer.featureHighlight.pointMarkers.addPointMarkers('group1', markers);
+      });
+
+      // Remove-marker Button================================================================================================
+      // find the button element by ID
+      var removeMarkerButton = document.getElementById('Remove-marker');
+
+      // add an event listener when a button is clicked
+      removeMarkerButton.addEventListener('click', () => {
+        cgpv.api.maps.Map1.layer.featureHighlight.pointMarkers.removePointMarkersOrGroup('group1');
+      });
+
+      // Zoom-to-markers Button================================================================================================
+      // find the button element by ID
+      var zoomToMarkersButton = document.getElementById('Zoom-to-markers');
+
+      // add an event listener when a button is clicked
+      zoomToMarkersButton.addEventListener('click', () => {
+        cgpv.api.maps.Map1.layer.featureHighlight.pointMarkers.zoomToPointMarkers('group1', ['1', '3']);
+      });
+
+      // Zoom-to-marker-group Button================================================================================================
+      // find the button element by ID
+      var zoomToMarkerGroupButton = document.getElementById('Zoom-to-marker-group');
+
+      // add an event listener when a button is clicked
+      zoomToMarkerGroupButton.addEventListener('click', () => {
+        cgpv.api.maps.Map1.layer.featureHighlight.pointMarkers.zoomToPointMarkerGroup('group1');
       });
   
       // create snippets

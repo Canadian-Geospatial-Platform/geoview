@@ -291,11 +291,6 @@
         cgpv.api.maps['sandboxMap'].remove(true);
       });
 
-      // listen to map language changed event
-      cgpv.api.onMapAddedToDiv((sender, payload) => {
-        cgpv.api.maps[payload.mapId].notifications.addNotificationSuccess(`Map ${payload.mapId} added`);
-      });
-
       // create snippets
       window.addEventListener('load', () => {
         createCodeSnippet();
