@@ -565,7 +565,7 @@
         },
         "dataProjection": {
           "type": "string",
-          "description": "The projection code of the source. Used only for GeoJSON format. Default value is EPSG:4326. "
+          "description": "The projection code of the source. Used only for GeoJSON format. Default value is EPSG:4326."
         },
         "featureInfo": {
           "$ref": "#/definitions/TypeFeatureInfoLayerConfig"
@@ -1346,6 +1346,9 @@
         "highlightColor": {
           "$ref": "#/definitions/TypeHighlightColors"
         },
+        "pointMarkers": {
+          "$ref": "#/definitions/TypePointMarkers"
+        },
         "extraOptions": {
           "type": "object",
           "description": "Additional options used for OpenLayers map options"
@@ -1387,6 +1390,52 @@
       "enum": ["black", "white", "red", "green"],
       "default": "black",
       "description": "Color to use for feature highlights."
+    },
+    "TypePointMarkers": {
+      "type": "object",
+      "patternProperties": {
+        "[^]*": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TypePointMarker"
+          }
+        }
+      }
+    },
+    "TypePointMarker": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID for point marker. Must be unique in group."
+        },
+        "coordinate": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          },
+          "description": "The coordinates of the marker."
+        },
+        "color": {
+          "type": "string",
+          "default": "green",
+          "description": "Marker color."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1
+        },
+        "projection": {
+          "type": "number",
+          "description": "The projection code of the coordinates. Default value is 4326."
+        }
+      },
+      "required": ["id", "coordinate"]
     },
     "TypeListOfGeoviewLayerConfig": {
       "description": "List of GeoView Layers in the order which they should be added to the map.",

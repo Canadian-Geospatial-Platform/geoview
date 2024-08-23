@@ -159,6 +159,7 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
     interaction: 'dynamic',
     listOfGeoviewLayerConfig: [],
     highlightColor: 'black',
+    pointMarkers: {},
     viewSettings: {
       initialView: {
         zoomAndCenter: [3.5, CV_MAP_CENTER[3978]],
