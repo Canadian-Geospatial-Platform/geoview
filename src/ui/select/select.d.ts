@@ -1,15 +1,5 @@
 /// <reference types="react" />
-import { InputLabelProps, ListSubheaderProps, MenuItemProps, SelectProps, FormControlProps } from '@mui/material';
-/**
- * Custom MUI Select properties
- */
-type TypeSelectProps = SelectProps & {
-    fullWidth?: boolean;
-    menuItems: TypeMenuItemProps[];
-    inputLabel: InputLabelProps;
-    formControlProps?: FormControlProps;
-    container?: HTMLElement | null;
-};
+import { InputLabelProps, ListSubheaderProps, MenuItemProps, FormControlProps } from '@mui/material';
 /**
  * Menu Item properties
  */
@@ -17,11 +7,22 @@ export interface TypeMenuItemProps {
     type?: 'item' | 'header';
     item: MenuItemProps | ListSubheaderProps | null;
 }
-/**
- * Create a Material UI Select component
- *
- * @param {TypeSelectProps} props custom select properties
- * @returns {JSX.Element} the auto complete ui component
- */
-export declare function Select(props: TypeSelectProps): JSX.Element;
-export {};
+export declare const Select: import("react").ForwardRefExoticComponent<(Omit<import("@mui/material").FilledSelectProps & import("@mui/material").BaseSelectProps<unknown> & {
+    fullWidth?: boolean | undefined;
+    menuItems: TypeMenuItemProps[];
+    inputLabel: InputLabelProps;
+    formControlProps?: FormControlProps<"div", {}> | undefined;
+    container?: HTMLElement | null | undefined;
+}, "ref"> | Omit<import("@mui/material").StandardSelectProps & import("@mui/material").BaseSelectProps<unknown> & {
+    fullWidth?: boolean | undefined;
+    menuItems: TypeMenuItemProps[];
+    inputLabel: InputLabelProps;
+    formControlProps?: FormControlProps<"div", {}> | undefined;
+    container?: HTMLElement | null | undefined;
+}, "ref"> | Omit<import("@mui/material").OutlinedSelectProps & import("@mui/material").BaseSelectProps<unknown> & {
+    fullWidth?: boolean | undefined;
+    menuItems: TypeMenuItemProps[];
+    inputLabel: InputLabelProps;
+    formControlProps?: FormControlProps<"div", {}> | undefined;
+    container?: HTMLElement | null | undefined;
+}, "ref">) & import("react").RefAttributes<HTMLDivElement>>;

@@ -11,6 +11,7 @@ export interface ILayerState {
     legendLayers: TypeLegendLayer[];
     displayState: TypeLayersViewDisplayState;
     layerDeleteInProgress: boolean;
+    selectedLayerSortingArrowId: string;
     actions: {
         deleteLayer: (layerPath: string) => void;
         getExtentFromFeatures: (layerPath: string, featureIds: string[]) => Promise<Extent | undefined>;
@@ -26,6 +27,7 @@ export interface ILayerState {
         setSelectedLayerPath: (layerPath: string) => void;
         toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
         zoomToLayerExtent: (layerPath: string) => Promise<void>;
+        setSelectedLayerSortingArrowId: (layerId: string) => void;
     };
     setterActions: {
         setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -33,6 +35,7 @@ export interface ILayerState {
         setLayerDeleteInProgress: (newVal: boolean) => void;
         setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
         setSelectedLayerPath: (layerPath: string) => void;
+        setSelectedLayerSortingArrowId: (arrowId: string) => void;
     };
 }
 /**
@@ -59,6 +62,7 @@ export declare const useLayerLegendLayers: () => TypeLegendLayer[];
 export declare const useLayerSelectedLayer: () => TypeLegendLayer;
 export declare const useLayerSelectedLayerPath: () => string | null | undefined;
 export declare const useLayerDisplayState: () => TypeLayersViewDisplayState;
+export declare const useSelectedLayerSortingArrowId: () => string;
 export declare const useLayerStoreActions: () => LayerActions;
 export declare const useSelectedLayer: () => TypeLegendLayer | undefined;
 export declare const useIconLayerSet: (layerPath: string) => string[];

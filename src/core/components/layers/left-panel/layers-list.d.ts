@@ -1,10 +1,10 @@
-import { Dispatch, SetStateAction } from 'react';
+/// <reference types="react" />
 import { TypeLegendLayer } from '@/core/components/layers/types';
 interface LayerListProps {
     depth: number;
     layersList: TypeLegendLayer[];
-    setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
+    showLayerDetailsPanel: (layer: TypeLegendLayer) => void;
     isLayoutEnlarged: boolean;
 }
-export declare function LayersList({ layersList, setIsLayersListPanelVisible, isLayoutEnlarged, depth }: LayerListProps): JSX.Element;
+export declare function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged, depth }: LayerListProps): JSX.Element;
 export {};
