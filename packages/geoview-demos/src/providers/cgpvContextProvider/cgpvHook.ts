@@ -40,6 +40,7 @@ export function useCgpvHook(): ICgpvHook {
   const [displayLanguage, setDisplayLanguage] = useState<string>(DEFAULT_DISPLAY_LANGUAGE);
   const [displayTheme, setDisplayTheme] = useState<string>(DEFAULT_DISPLAY_THEME);
   const [displayProjection, setDisplayProjection] = useState<number | string>(DEFAULT_DISPLAY_PROJECTION);
+  const [applyWidthHeight, setApplyWidthHeight] = useState<boolean>(false);
   const [mapWidth, setMapWidth] = useState<number>(DEFAULT_MAP_WIDTH);
   const [mapHeight, setMapHeight] = useState<number>(DEFAULT_MAP_HEIGHT);
   const [configFilePath, setConfigFilePath] = useState<string>('');
@@ -80,6 +81,7 @@ export function useCgpvHook(): ICgpvHook {
     const mapContainerDiv = document.getElementById('sandboxMapContainer');
     const newDiv = document.createElement('div');
     newDiv.id = newMapId;
+    newDiv.className = 'geoview-map';
     mapContainerDiv?.appendChild(newDiv);
     setMapId(newMapId);
 
@@ -107,7 +109,9 @@ export function useCgpvHook(): ICgpvHook {
 
   const handleCreateMap = (theMapId: string, data: any) => {
     const mapDiv = document.getElementById(theMapId);
-    mapDiv?.setAttribute('style', `width: ${mapWidth}px; height: ${mapHeight}px;`);
+    if(applyWidthHeight) {
+      mapDiv?.setAttribute('style', `width: ${mapWidth}px; height: ${mapHeight}px;`);
+    }
 
     cgpv.api.createMapFromConfig(theMapId, JSON.stringify(data));
     setConfigJson({ ...data });
@@ -120,7 +124,9 @@ export function useCgpvHook(): ICgpvHook {
     setTimeout(() => {
       //waiting for states that were prior to this function to update
       const mapDiv = document.getElementById(newMapId);
-      mapDiv?.setAttribute('style', `width: ${mapWidth}px; height: ${mapHeight}px;`);
+      if(applyWidthHeight) {
+        mapDiv?.setAttribute('style', `width: ${mapWidth}px; height: ${mapHeight}px;`);
+      }
 
       cgpv.api.createMapFromConfig(newMapId, JSON.stringify(configJson));
     }, 500);
@@ -132,7 +138,9 @@ export function useCgpvHook(): ICgpvHook {
     setTimeout(() => {
       //waiting for states that were prior to this function to update
       const mapDiv = document.getElementById(mapId);
-      mapDiv?.setAttribute('style', `width: ${mapWidth}px; height: ${mapHeight}px;`);
+      if(applyWidthHeight) {
+        mapDiv?.setAttribute('style', `width: ${mapWidth}px; height: ${mapHeight}px;`);
+      }
 
       cgpv.api.createMapFromConfig(mapId, JSON.stringify(configJson));
     }, 500);

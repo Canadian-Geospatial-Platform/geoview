@@ -21,6 +21,12 @@
     },
     {
       "commandKind": "global",
+      "name": "host-demos",
+      "summary": "Deploys the geoview project to github pages.",
+      "shellCommand": "npm run --prefix packages/geoview-demos deploy"
+    },
+    {
+      "commandKind": "global",
       "name": "build:core",
       "summary": "Build the packages and move them to the dist directory",
       "shellCommand": "npm run --prefix packages/geoview-core build"

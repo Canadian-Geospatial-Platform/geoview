@@ -12,7 +12,7 @@ code {
     monospace;
 }
 
-
+/* Styling the configeditor */
 
 .config-editor {
   display: inline-flex;
@@ -52,4 +52,35 @@ code {
   color: #fff;
   outline: none;
   resize: none;
+}
+
+/* Styling the scrollbar */
+body ::-webkit-scrollbar {
+  width: '8px';
+  height: '8px';
+}
+::-webkit-scrollbar-track {
+  border-radius: '5px';
+}
+::-webkit-scrollbar-thumb {
+  border-radius: '5px'
+}
+
+
+/* Styling the map */
+.geoview-map {
+  border: gray 1px solid;
+  width: calc(100%);
+  margin-bottom: 30px;
+  height: 800px;
+}
+
+
+/* Styling the lists */
+.unstyled-list ul {
+  list-style-type: none;
+}
+.unstyled-list li {
+  padding: 0;
+  margin: 0;
 }

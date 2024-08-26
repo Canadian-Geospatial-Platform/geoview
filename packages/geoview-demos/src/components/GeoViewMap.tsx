@@ -4,11 +4,16 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ConfigurationDrawer from './ConfigurationsDrawer/ConfigurationsDrawer';
 import { ConfigTextEditor } from './ConfigTextEditor';
 import { CGPVContext } from '../providers/cgpvContextProvider/CGPVContextProvider';
-import { DEFAULT_CONFIG } from '../constants';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { MapRenderer } from './MapRenderer';
 
-function App() {
+interface GeoViewMapProps {
+  showConfigsList?: boolean;
+  showConfigEditor?: boolean;
+  config: string | object;
+}
+
+function GeoViewMap(props: GeoViewMapProps) {
   const cgpvContext = useContext(CGPVContext);
 
   if (!cgpvContext) {
@@ -16,13 +21,14 @@ function App() {
   }
 
   const { initializeMap, isInitialized } = cgpvContext;
+  const { showConfigsList, showConfigEditor, config } = props;
 
   const drawerWidth = 440;
 
   //when component is mounted, initialize the map
   useEffect(() => {
     if (!isInitialized) {
-      initializeMap('sandboxMap3', DEFAULT_CONFIG);
+      initializeMap('sandboxMap3', config);
     }
   }, []);
 
@@ -55,15 +61,17 @@ function App() {
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={selectedTab} onChange={handleTabChange} aria-label="handling tabs change">
             <Tab label="Map" value="map" />
-            <Tab label="Config Editor" value="config-editor" />
+            {showConfigEditor && <Tab label="Config Editor" value="config-editor" />}
           </Tabs>
         </Box>
         <Box sx={{ display: selectedTab === 'map' ? 'unset' : 'none' }}>
           <MapRenderer />
         </Box>
-        <Box sx={{ display: selectedTab === 'config-editor' ? 'unset' : 'none' }}>
+
+        {showConfigEditor && <Box sx={{ marginTop: '20px', display: selectedTab === 'config-editor' ? 'unset' : 'none' }}>
           <ConfigTextEditor />
         </Box>
+        }
       </Box>
     );
   };
@@ -131,4 +139,4 @@ function App() {
   );
 }
 
-export default App;
+export default GeoViewMap;

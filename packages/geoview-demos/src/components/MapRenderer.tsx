@@ -13,7 +13,7 @@ export function MapRenderer() {
   const { configJson, mapHeight, mapWidth } = cgpvContext;
   return (
     <Box id="sandboxMapContainer">
-      <Box id="sandboxMap3"></Box>
+      <Box id="sandboxMap3" className="geoview-map"></Box>
     </Box>
   );
 }
