@@ -4,24 +4,34 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ConfigurationDrawer from './ConfigurationsDrawer/ConfigurationsDrawer';
 import { ConfigTextEditor } from './ConfigTextEditor';
 import { CGPVContext } from '../providers/cgpvContextProvider/CGPVContextProvider';
-import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { MapRenderer } from './MapRenderer';
+import { DEFAULT_CONFIG } from '../constants';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
+import { CodeSnippet } from './CodeSnippet';
 
 interface GeoViewMapProps {
   showConfigsList?: boolean;
   showConfigEditor?: boolean;
   config: string | object;
+  codeSnippet?: string;
 }
 
 function GeoViewMap(props: GeoViewMapProps) {
   const cgpvContext = useContext(CGPVContext);
+  const navigate = useNavigate();
 
   if (!cgpvContext) {
     throw new Error('CGPVContent must be used within a CGPVProvider');
   }
 
   const { initializeMap, isInitialized } = cgpvContext;
-  const { showConfigsList, showConfigEditor, config } = props;
+  const {
+    showConfigsList,
+    showConfigEditor = true,
+    config = DEFAULT_CONFIG,
+    codeSnippet
+  } = props;
 
   const drawerWidth = 440;
 
@@ -55,6 +65,10 @@ function GeoViewMap(props: GeoViewMapProps) {
     }
   };
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   const renderBodyContent = () => {
     return (
       <Box sx={{ width: '100%', typography: 'body1' }}>
@@ -62,6 +76,7 @@ function GeoViewMap(props: GeoViewMapProps) {
           <Tabs value={selectedTab} onChange={handleTabChange} aria-label="handling tabs change">
             <Tab label="Map" value="map" />
             {showConfigEditor && <Tab label="Config Editor" value="config-editor" />}
+            {codeSnippet && <Tab label="Code Snippet" value="code-snippet" />}
           </Tabs>
         </Box>
         <Box sx={{ display: selectedTab === 'map' ? 'unset' : 'none' }}>
@@ -70,6 +85,10 @@ function GeoViewMap(props: GeoViewMapProps) {
 
         {showConfigEditor && <Box sx={{ marginTop: '20px', display: selectedTab === 'config-editor' ? 'unset' : 'none' }}>
           <ConfigTextEditor />
+        </Box>
+        }
+        {codeSnippet && <Box sx={{ marginTop: '20px', display: selectedTab === 'code-snippet' ? 'unset' : 'none' }}>
+          <CodeSnippet code={codeSnippet} />
         </Box>
         }
       </Box>
@@ -87,6 +106,15 @@ function GeoViewMap(props: GeoViewMapProps) {
         }}
       >
         <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleBackToHome}
+            sx={{ mr: 2 }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -117,7 +145,7 @@ function GeoViewMap(props: GeoViewMapProps) {
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
         >
-          <ConfigurationDrawer />
+          <ConfigurationDrawer showConfigsList={showConfigsList} />
         </Drawer>
         <Drawer
           variant="permanent"

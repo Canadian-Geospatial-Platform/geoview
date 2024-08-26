@@ -22,7 +22,11 @@ import { CGPVContext } from '../../../providers/cgpvContextProvider/CGPVContextP
 import { ConfigFileResource } from '../../../types';
 import { CONFIG_FILES_LIST } from '../../../constants';
 
-export default function GeneralAccordion() {
+interface GeneralAccordionProps {
+  showConfigsList?: boolean;
+}
+
+export default function GeneralAccordion(props: GeneralAccordionProps) {
   const cgpvContext = useContext(CGPVContext);
 
   if (!cgpvContext) {
@@ -48,7 +52,8 @@ export default function GeneralAccordion() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Autocomplete
+
+      {props.showConfigsList && <Autocomplete
         disablePortal
         size="small"
         id="combo-box-demo"
@@ -58,6 +63,7 @@ export default function GeneralAccordion() {
         onChange={(e, value) => handleConfigFileChange(value?.filePath ?? null)}
         renderInput={(params: any) => <TextField {...params} label="Configuration" />}
       />
+      }
 
       <Typography variant="h6">Map Size</Typography>
 

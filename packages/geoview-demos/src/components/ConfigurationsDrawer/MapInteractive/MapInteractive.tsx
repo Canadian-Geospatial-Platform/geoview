@@ -7,7 +7,11 @@ import { CGPVContext } from '../../../providers/cgpvContextProvider/CGPVContextP
 import GeneralAccordion from './GeneralAccordion';
 import { NotificationsAccordion } from './EventsAccordion';
 
-export default function MapInteractive() {
+interface MapInteractiveProps {
+  showConfigsList?: boolean;
+}
+
+export default function MapInteractive(props: MapInteractiveProps) {
   const cgpvContext = useContext(CGPVContext);
 
   if (!cgpvContext) {
@@ -22,12 +26,9 @@ export default function MapInteractive() {
         Interactive Map
       </Typography>
 
-      <ButtonGroup variant="outlined" aria-label="Loading button group" size="small" sx={{ marginBottom: '20px' }}>
+      <ButtonGroup variant="outlined" aria-label="Loading button group" size="small">
         <Button onClick={handleReloadMap}>Reload Map</Button>
         <LoadingButton onClick={handleRemoveMap}>Remove Map</LoadingButton>
-        <LoadingButton loading loadingPosition="start" startIcon={<SaveIcon />}>
-          Apply
-        </LoadingButton>
       </ButtonGroup>
 
       <Accordion defaultExpanded>
@@ -35,7 +36,7 @@ export default function MapInteractive() {
           <Typography>General</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <GeneralAccordion />
+          <GeneralAccordion showConfigsList={props.showConfigsList} />
         </AccordionDetails>
       </Accordion>
       <Accordion>
@@ -55,16 +56,6 @@ export default function MapInteractive() {
           <NotificationsAccordion />
         </AccordionDetails>
       </Accordion>
-
-      <ButtonGroup variant="outlined" aria-label="outlined button group" size="small">
-        <Button>Add notification</Button>
-        <Button>Remove notification</Button>
-      </ButtonGroup>
-
-      <ButtonGroup variant="outlined" aria-label="outlined button group" size="small">
-        <Button>Add Panel</Button>
-        <Button>Remove Panel</Button>
-      </ButtonGroup>
     </Box>
   );
 }

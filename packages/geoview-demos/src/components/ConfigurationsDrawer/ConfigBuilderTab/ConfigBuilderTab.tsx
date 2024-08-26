@@ -14,7 +14,10 @@ import {
 } from '@mui/material';
 import { useContext, useState } from 'react';
 import { CGPVContext } from '../../../providers/cgpvContextProvider/CGPVContextProvider';
-import _, { get } from 'lodash';
+import _ from 'lodash';
+import PillsAutoComplete, { PillsAutoCompleteOption } from './PillsAutoComplete';
+
+
 
 export function ConfigBuilderTab() {
   const cgpvContext = useContext(CGPVContext);
@@ -40,8 +43,33 @@ export function ConfigBuilderTab() {
   const [theme, setTheme] = useState<string>('geo.ca');
   const [language, setLanguage] = useState<string>('en');
 
-  const getProperty = (property: string) => {
-    return _.get(configJson, property);
+  const footerTabslist: PillsAutoCompleteOption[] = [
+    { title: 'Legend', value: 'legend' },
+    { title: 'Layers', value: 'layers' },
+    { title: 'Details', value: 'details' },
+    { title: 'Data Table', value: 'data-table' }
+  ];
+
+  const appBarOptions: PillsAutoCompleteOption[] = [
+    { title: 'Legend', value: 'legend' },
+    { title: 'Layers', value: 'layers' },
+    { title: 'Details', value: 'details' },
+    { title: 'Data Table', value: 'data-table' },
+    { title: 'Geolocator', value: 'geolocator' },
+    { title: 'Export', value: 'export' }
+  ];
+
+  //'zoom', 'fullscreen', 'home', 'location', 'basemap-select'
+  const navBarList: PillsAutoCompleteOption[] = [
+    { title: 'Zoom', value: 'zoom' },
+    { title: 'Fullscreen', value: 'fullscreen' },
+    { title: 'Home', value: 'home' },
+    { title: 'Location', value: 'location' },
+    { title: 'Basemap Select', value: 'basemap-select' },
+  ];
+
+  const getProperty = (property: string, defaultValue = undefined) => {
+    return _.get(configJson, property) ?? defaultValue;
   };
 
   const updateProperty = (property: string, value: any) => {
@@ -68,8 +96,11 @@ export function ConfigBuilderTab() {
             <FormControlLabel value="dynamic" control={<Radio />} label="Dynamic" />
           </RadioGroup>
         </FormGroup>
+
+
         <FormGroup aria-label="position">
           <FormLabel component="legend">Zoom Levels</FormLabel>
+          
           <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2 }}>
             <FormControl>
               <FormLabel component="legend">Min Zoom</FormLabel>
@@ -119,14 +150,7 @@ export function ConfigBuilderTab() {
         </FormGroup>
         <FormGroup aria-label="position">
           <FormLabel component="legend">Navigation Bar</FormLabel>
-          <FormControl>
-            <FormGroup aria-label="position" row>
-              <FormControlLabel control={<Radio />} label="Zoom" />
-              <FormControlLabel control={<Radio />} label="Fullscreen" />
-              <FormControlLabel control={<Radio />} label="Home" />
-              <FormControlLabel control={<Radio />} label="Basemap Select" />
-            </FormGroup>
-          </FormControl>
+          <PillsAutoComplete options={navBarList} label="Options" placeholder="" />
         </FormGroup>
 
         <FormGroup aria-label="position">
@@ -134,11 +158,7 @@ export function ConfigBuilderTab() {
             Footer Bar
             <Switch checked={useFooterBar} onChange={(event) => setUseFooterBar(event.target.checked)} />
           </FormLabel>
-          <RadioGroup aria-labelledby="demo-radio-buttons-group-label" defaultValue="female" name="radio-buttons-group">
-            <FormControlLabel value="female" control={<Radio />} label="Female" />
-            <FormControlLabel value="male" control={<Radio />} label="Male" />
-            <FormControlLabel value="other" control={<Radio />} label="Other" />
-          </RadioGroup>
+          <PillsAutoComplete options={footerTabslist} label="Footer Options" placeholder="" />
         </FormGroup>
 
         <FormGroup aria-label="position">
@@ -146,14 +166,7 @@ export function ConfigBuilderTab() {
             App Bar
             <Switch checked={useAppBar} onChange={(event) => setUseAppBar(event.target.checked)} />
           </FormLabel>
-          <FormControl>
-            <FormGroup aria-label="position" row>
-              <FormControlLabel control={<Radio />} label="Legend" />
-              <FormControlLabel control={<Radio />} label="Layers" />
-              <FormControlLabel control={<Radio />} label="Details" />
-              <FormControlLabel control={<Radio />} label="Data Table" />
-            </FormGroup>
-          </FormControl>
+          <PillsAutoComplete options={appBarOptions} label="App-bar Options" placeholder="" />
         </FormGroup>
       </FormControl>
     </Box>

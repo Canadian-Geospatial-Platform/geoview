@@ -1,8 +1,13 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { CGPVContext } from '../providers/cgpvContextProvider/CGPVContextProvider';
 import { Box, Button } from '@mui/material';
+import { CopyToClipboardButton } from './CopyToClipboard';
 
-export function ConfigTextEditor() {
+interface ConfigTextEditorProps {
+
+}
+
+export function ConfigTextEditor(props: ConfigTextEditorProps) {
   const cgpvContext = useContext(CGPVContext);
 
   if (!cgpvContext) {
@@ -56,8 +61,11 @@ export function ConfigTextEditor() {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <Box className="config-editor">
+    <Box sx={{ display: 'flex', flexDirection: 'column', position:'relative' }}>
+      <Box className="config-editor" sx={{position: 'relative'}}>
+        <Box sx={{position: 'absolute', top: 5, right: 10}}>
+          <CopyToClipboardButton textToCopy={editorText || ''} />
+        </Box>
         <div className="line-numbers">
           {generateArray(numberOfLines).map((lineNumber) => (
             <span key={lineNumber}></span>
