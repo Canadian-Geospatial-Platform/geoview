@@ -20,7 +20,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useContext } from 'react';
 import { CGPVContext } from '../../../providers/cgpvContextProvider/CGPVContextProvider';
 import { ConfigFileResource } from '../../../types';
-import { CONFIG_FILES_LIST } from '../../../constants';
+import { CONFIG_FILES_LIST, languageOptions, mapProjectionOptions, themeOptions } from '../../../constants';
+import SingleSelectComplete from '../../SingleSelectAutoComplete';
 
 interface GeneralAccordionProps {
   showConfigsList?: boolean;
@@ -91,47 +92,27 @@ export default function GeneralAccordion(props: GeneralAccordionProps) {
       </Box>
 
       <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-        <InputLabel id="demo-select-small-label">Display Language</InputLabel>
-        <Select
-          labelId="demo-select-small-label"
-          id="demo-select-small"
+        <SingleSelectComplete
+          options={languageOptions}
           value={displayLanguage}
-          label="Display Language"
-          onChange={(e) => handleDisplayLanguage(e)}
-        >
-          <MenuItem value={'en'}>English</MenuItem>
-          <MenuItem value={'fr'}>French</MenuItem>
-        </Select>
+          onChange={(value) => handleDisplayLanguage(value)}
+          label="Display Language" placeholder="" />
       </FormControl>
 
       <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-        <InputLabel id="demo-select-small-label">Display Theme</InputLabel>
-        <Select
-          labelId="demo-select-small-label"
-          id="demo-select-small"
+        <SingleSelectComplete
+          options={themeOptions}
           value={displayTheme}
-          label="Display Theme"
-          onChange={(e) => handleDisplayTheme(e)}
-        >
-          <MenuItem value={'geo.ca'}>geo.ca</MenuItem>
-          <MenuItem value={'light'}>Light</MenuItem>
-          <MenuItem value={'dark'}>Dark</MenuItem>
-          <MenuItem value={'unsupported'}>Unsupported</MenuItem>
-        </Select>
+          onChange={(value) => handleDisplayTheme(value)}
+          label="Display Theme" placeholder="" />
       </FormControl>
 
       <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-        <InputLabel id="demo-select-small-label">Display Projection</InputLabel>
-        <Select
-          labelId="demo-select-small-label"
-          id="demo-select-small"
+        <SingleSelectComplete
+          options={mapProjectionOptions}
           value={displayProjection}
-          label="Display Projection"
-          onChange={(e) => handleDisplayProjection(e)}
-        >
-          <MenuItem value={3978}>LCC</MenuItem>
-          <MenuItem value={3857}>Web Mercator</MenuItem>
-        </Select>
+          onChange={(value) => handleDisplayProjection(value)}
+          label="Display Projection" placeholder="" />
       </FormControl>
     </Box>
   );

@@ -15,7 +15,9 @@ import {
 import { useContext, useState } from 'react';
 import { CGPVContext } from '../../../providers/cgpvContextProvider/CGPVContextProvider';
 import _ from 'lodash';
-import PillsAutoComplete, { PillsAutoCompleteOption } from './PillsAutoComplete';
+import PillsAutoComplete from '../../PillsAutoComplete';
+import { componentsOptions, footerTabslist, navBarOptions, appBarOptions, mapInteractionOptions, mapProjectionOptions, zoomOptions, themeOptions } from '../../../constants';
+import SingleSelectComplete from '../../SingleSelectAutoComplete';
 
 
 
@@ -43,30 +45,7 @@ export function ConfigBuilderTab() {
   const [theme, setTheme] = useState<string>('geo.ca');
   const [language, setLanguage] = useState<string>('en');
 
-  const footerTabslist: PillsAutoCompleteOption[] = [
-    { title: 'Legend', value: 'legend' },
-    { title: 'Layers', value: 'layers' },
-    { title: 'Details', value: 'details' },
-    { title: 'Data Table', value: 'data-table' }
-  ];
 
-  const appBarOptions: PillsAutoCompleteOption[] = [
-    { title: 'Legend', value: 'legend' },
-    { title: 'Layers', value: 'layers' },
-    { title: 'Details', value: 'details' },
-    { title: 'Data Table', value: 'data-table' },
-    { title: 'Geolocator', value: 'geolocator' },
-    { title: 'Export', value: 'export' }
-  ];
-
-  //'zoom', 'fullscreen', 'home', 'location', 'basemap-select'
-  const navBarList: PillsAutoCompleteOption[] = [
-    { title: 'Zoom', value: 'zoom' },
-    { title: 'Fullscreen', value: 'fullscreen' },
-    { title: 'Home', value: 'home' },
-    { title: 'Location', value: 'location' },
-    { title: 'Basemap Select', value: 'basemap-select' },
-  ];
 
   const getProperty = (property: string, defaultValue = undefined) => {
     return _.get(configJson, property) ?? defaultValue;
@@ -76,97 +55,123 @@ export function ConfigBuilderTab() {
     updateConfigProperty(property, value);
   };
 
+  const updateArrayProperty = (property: string, value: any) => {
+    updateConfigProperty(property, value);
+  }
+
+  const toggleOffProperty = (property: string) => {
+    updateConfigProperty(property, undefined);
+  }
+
+  const isPropertyEnabled = (property: string) => {
+    return getProperty(property) !== undefined;
+  }
+
+  const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>, property: string) => {
+    if (!event.target.checked) {
+      toggleOffProperty(property);
+    }
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Typography variant="h6" sx={{ marginBottom: '8px' }}>
         Configurations Builder
       </Typography>
 
-      <FormControl component="fieldset" sx={{ gap: 2 }}>
+      <FormControl component="fieldset" sx={{ gap: 3 }}>
+
+      <FormGroup aria-label="position">
+          <SingleSelectComplete 
+            options={themeOptions}
+            value={getProperty('theme')}
+            onChange={(value) => updateProperty('theme', value)}
+            label="Display Theme" placeholder="" />
+        </FormGroup>
+
+
         <FormGroup aria-label="position">
-          <FormLabel component="legend">Map Interaction</FormLabel>
-          <RadioGroup
-            row
-            aria-label="mapInteraction"
-            name="mapInteraction"
+          <SingleSelectComplete 
+            options={mapInteractionOptions}
             value={getProperty('map.interaction')}
-            onChange={(event) => updateProperty('map.interaction', event.target.value)}
-          >
-            <FormControlLabel value="static" control={<Radio />} label="Static" />
-            <FormControlLabel value="dynamic" control={<Radio />} label="Dynamic" />
-          </RadioGroup>
+            onChange={(value) => updateProperty('map.interaction', value)}
+            label="Map Interaction" placeholder="" />
         </FormGroup>
 
 
         <FormGroup aria-label="position">
           <FormLabel component="legend">Zoom Levels</FormLabel>
-          
+
           <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2 }}>
             <FormControl>
-              <FormLabel component="legend">Min Zoom</FormLabel>
-              <TextField type="number" size="small" value={minZoom} onChange={(event) => setMinZoom(Number(event.target.value))} />
+              <SingleSelectComplete 
+            options={zoomOptions}
+            value={getProperty('map.viewSettings.minZoom')}
+            onChange={(value) => updateProperty('map.viewSettings.minZoom', value)}
+            label="Min Zoom" placeholder="" />
             </FormControl>
             <FormControl>
-              <FormLabel component="legend">Max Zoom</FormLabel>
-              <TextField type="number" size="small" value={maxZoom} onChange={(event) => setMaxZoom(Number(event.target.value))} />
+              <SingleSelectComplete 
+            options={zoomOptions}
+            value={getProperty('map.viewSettings.maxZoom')}
+            onChange={(value) => updateProperty('map.viewSettings.maxZoom', value)}
+            label="Max Zoom" placeholder="" />
             </FormControl>
           </Box>
-        </FormGroup>
-        <FormGroup aria-label="position">
-          <FormLabel component="legend">Projection</FormLabel>
-          <Select
-            labelId="demo-select-small-label"
-            size="small"
-            id="demo-select-small"
-            value={projection}
-            label="Display Projection"
-            onChange={(event) => setProjection(event.target.value)}
-          >
-            <MenuItem value={3978}>LCC</MenuItem>
-            <MenuItem value={3857}>Web Mercator</MenuItem>
-          </Select>
-        </FormGroup>
-        <FormGroup aria-label="position">
-          <FormLabel component="legend">Rotation</FormLabel>
-          <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-            <FormControl>
-              <FormLabel component="legend">Enable Rotation</FormLabel>
-              <RadioGroup
-                row
-                aria-label="enableRotation"
-                name="enableRotation"
-                value={enableRotation}
-                onChange={(event) => setEnableRotation(event.target.value === 'true')}
-              >
-                <FormControlLabel value={true} control={<Radio />} label="Yes" />
-                <FormControlLabel value={false} control={<Radio />} label="No" />
-              </RadioGroup>
-            </FormControl>
-            <FormControl>
-              <FormLabel component="legend">Rotation</FormLabel>
-              <TextField type="number" size="small" value={rotation} onChange={(event) => setRotation(Number(event.target.value))} />
-            </FormControl>
-          </Box>
-        </FormGroup>
-        <FormGroup aria-label="position">
-          <FormLabel component="legend">Navigation Bar</FormLabel>
-          <PillsAutoComplete options={navBarList} label="Options" placeholder="" />
         </FormGroup>
 
-        <FormGroup aria-label="position">
+        <FormGroup aria-label="map projection">
+          <SingleSelectComplete 
+            options={mapProjectionOptions}
+            value={getProperty('map.viewSettings.projection')}
+            onChange={(value) => updateProperty('map.viewSettings.projection', value)}
+            label="Map Projection" placeholder="" />
+        </FormGroup>
+
+        <FormGroup aria-label="Components">
+          <FormLabel component="legend">Components</FormLabel>
+          <PillsAutoComplete
+            value={getProperty('components')}
+            onChange={(value) => updateArrayProperty('components', value)}
+            options={componentsOptions}
+            label="Components Options"
+            placeholder=""
+          />
+        </FormGroup>
+
+        <FormGroup aria-label="Navigation Bar Options">
+          <FormLabel component="legend">Navigation Bar</FormLabel>
+          <PillsAutoComplete
+            value={getProperty('navBar')}
+            onChange={(value) => updateArrayProperty('navBar', value)}
+            options={navBarOptions}
+            label="Options" placeholder="" />
+        </FormGroup>
+
+        <FormGroup aria-label="Footer bar">
           <FormLabel component="legend">
             Footer Bar
-            <Switch checked={useFooterBar} onChange={(event) => setUseFooterBar(event.target.checked)} />
+            <Switch size="small" checked={isPropertyEnabled('footerBar.tabs.core')}
+              onChange={(event) => handleSwitchChange(event, 'footerBar')}
+            />
           </FormLabel>
-          <PillsAutoComplete options={footerTabslist} label="Footer Options" placeholder="" />
+          <PillsAutoComplete
+            value={getProperty('footerBar.tabs.core')}
+            onChange={(value) => updateArrayProperty('footerBar.tabs.core', value)}
+            options={footerTabslist} label="Footer Options" placeholder="" />
         </FormGroup>
 
-        <FormGroup aria-label="position">
+        <FormGroup aria-label="Appbar">
           <FormLabel component="legend">
             App Bar
-            <Switch checked={useAppBar} onChange={(event) => setUseAppBar(event.target.checked)} />
+            <Switch size="small" checked={isPropertyEnabled('appBar.tabs.core')}
+              onChange={(event) => handleSwitchChange(event, 'appBar')}
+            />
           </FormLabel>
-          <PillsAutoComplete options={appBarOptions} label="App-bar Options" placeholder="" />
+          <PillsAutoComplete
+            value={getProperty('appBar.tabs.core')}
+            onChange={(value) => updateArrayProperty('appBar.tabs.core', value)}
+            options={appBarOptions} label="App-bar Options" placeholder="" />
         </FormGroup>
       </FormControl>
     </Box>

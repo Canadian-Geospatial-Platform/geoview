@@ -1,4 +1,5 @@
-import { ConfigFileResource } from './types';
+import _ from 'lodash';
+import { ConfigFileResource, ListOptionType } from './types';
 
 export const DEFAULT_DISPLAY_LANGUAGE = 'en';
 export const DEFAULT_DISPLAY_THEME = 'geo.ca';
@@ -76,3 +77,62 @@ export const CONFIG_FILES_LIST: ConfigFileResource[] = [
   { filePath: 'navigator/24-vector-tile.json', label: 'Layer - Vector Tile -' },
   { filePath: 'navigator/25-geojson-multi.json', label: 'Layer - GeoJSON MutiPolygon -' },
 ];
+
+export const basemapOptions: ListOptionType[] = [
+  { title: 'Transport', value: 'transport' },
+  { title: 'Simple', value: 'simple' },
+  { title: 'World Map', value: 'world-map' }
+];
+
+export const mapProjectionOptions: ListOptionType[] = [
+  { title: 'LCC', value: 3978 },
+  { title: 'Web Mercator', value: 3857 }
+];
+
+export const mapInteractionOptions: ListOptionType[] = [
+  { title: 'Static', value: 'static' },
+  { title: 'Dynamic', value: 'dynamic' }
+];
+
+
+export const componentsOptions: ListOptionType[] = [
+  { title: 'North Arrow', value: 'north-arrow' },
+  { title: 'Overview Map', value: 'overview-map' }
+];
+
+export const footerTabslist: ListOptionType[] = [
+  { title: 'Legend', value: 'legend' },
+  { title: 'Layers', value: 'layers' },
+  { title: 'Details', value: 'details' },
+  { title: 'Data Table', value: 'data-table' }
+];
+
+export const appBarOptions: ListOptionType[] = [
+  { title: 'Legend', value: 'legend' },
+  { title: 'Layers', value: 'layers' },
+  { title: 'Details', value: 'details' },
+  { title: 'Data Table', value: 'data-table' },
+  { title: 'Geolocator', value: 'geolocator' },
+  { title: 'Export', value: 'export' }
+];
+
+export const navBarOptions: ListOptionType[] = [
+  { title: 'Zoom', value: 'zoom' },
+  { title: 'Fullscreen', value: 'fullscreen' },
+  { title: 'Home', value: 'home' },
+  { title: 'Location', value: 'location' },
+  { title: 'Basemap Select', value: 'basemap-select' }
+];
+
+export const themeOptions: ListOptionType[] = [
+  { title: 'geo.ca', value: 'geo.ca' },
+  { title: 'Light', value: 'light' },
+  { title: 'Dark', value: 'dark' }
+];
+
+export const languageOptions: ListOptionType[] = [
+  { title: 'English', value: 'en' },
+  { title: 'French', value: 'fr' }
+];
+
+export const zoomOptions: ListOptionType[] = _.range(0, 51).map((value) => ({ title: value.toString(), value }));

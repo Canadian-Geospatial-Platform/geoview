@@ -3,3 +3,9 @@ export type ConfigFileResource = {
   label: string;
   group?: string;
 };
+
+
+export type ListOptionType = {
+  title: string;
+  value: string | number;
+};

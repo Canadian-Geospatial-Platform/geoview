@@ -81,7 +81,7 @@ export function useCgpvHook(): ICgpvHook {
     const mapContainerDiv = document.getElementById('sandboxMapContainer');
     const newDiv = document.createElement('div');
     newDiv.id = newMapId;
-    newDiv.className = 'geoview-map';
+    newDiv.className = 'geoview-map2';
     mapContainerDiv?.appendChild(newDiv);
     setMapId(newMapId);
 
@@ -92,28 +92,31 @@ export function useCgpvHook(): ICgpvHook {
     cgpv.api.maps[mapId].reload();
   };
 
-  const handleDisplayLanguage = (e: any) => {
-    setDisplayLanguage(e.target.value);
-    cgpv.api.maps[mapId].setLanguage(e.target.value);
+  const handleDisplayLanguage = (newValue: string) => {
+    setDisplayLanguage(newValue);
+    cgpv.api.maps[mapId].setLanguage(newValue);
   };
 
-  const handleDisplayTheme = (e: any) => {
-    setDisplayTheme(e.target.value);
-    cgpv.api.maps[mapId].setTheme(e.target.value);
+  const handleDisplayTheme = (newValue: string) => {
+    setDisplayTheme(newValue);
+    cgpv.api.maps[mapId].setTheme(newValue);
   };
 
-  const handleDisplayProjection = (e: any) => {
-    setDisplayProjection(e.target.value);
-    cgpv.api.maps[mapId].setProjection(e.target.value);
+  const handleDisplayProjection = (newValue: string | number) => {
+    setDisplayProjection(newValue);
+    cgpv.api.maps[mapId].setProjection(newValue);
   };
 
   const handleCreateMap = (theMapId: string, data: any) => {
     const mapDiv = document.getElementById(theMapId);
-    if(applyWidthHeight) {
+    if (applyWidthHeight) {
       mapDiv?.setAttribute('style', `width: ${mapWidth}px; height: ${mapHeight}px;`);
     }
 
     cgpv.api.createMapFromConfig(theMapId, JSON.stringify(data));
+    /*cgpv.init((mapId: string) => {
+      // write some code ...
+    });*/
     setConfigJson({ ...data });
     setMapId(theMapId);
   };
@@ -124,7 +127,7 @@ export function useCgpvHook(): ICgpvHook {
     setTimeout(() => {
       //waiting for states that were prior to this function to update
       const mapDiv = document.getElementById(newMapId);
-      if(applyWidthHeight) {
+      if (applyWidthHeight) {
         mapDiv?.setAttribute('style', `width: ${mapWidth}px; height: ${mapHeight}px;`);
       }
 
@@ -138,7 +141,7 @@ export function useCgpvHook(): ICgpvHook {
     setTimeout(() => {
       //waiting for states that were prior to this function to update
       const mapDiv = document.getElementById(mapId);
-      if(applyWidthHeight) {
+      if (applyWidthHeight) {
         mapDiv?.setAttribute('style', `width: ${mapWidth}px; height: ${mapHeight}px;`);
       }
 
@@ -187,7 +190,11 @@ export function useCgpvHook(): ICgpvHook {
 
   const updateConfigProperty = (property: string, value: any) => {
     let newConfig = { ...configJson };
-    _.set(newConfig, property, value);
+    if (value === undefined) {
+      _.unset(newConfig, property);
+    } else {
+      _.set(newConfig, property, value);
+    }
     handleConfigJsonChange(newConfig);
   };
 
