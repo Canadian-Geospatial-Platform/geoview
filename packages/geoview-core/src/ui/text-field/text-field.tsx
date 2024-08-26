@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { forwardRef, Ref } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -12,17 +12,19 @@ import { TypeTextFieldProps } from '@/ui/panel/panel-types';
  * @param {TypeTextFieldProps} props custom textfield properties
  * @returns {JSX.Element} the text field ui component
  */
-export function TextField(props: TypeTextFieldProps): JSX.Element {
+function MUITextField(props: TypeTextFieldProps, ref: Ref<HTMLDivElement>): JSX.Element {
   const { tooltip, tooltipPlacement, ...rest } = props;
 
   const { t } = useTranslation<string>();
 
   // internal state
-  const textRef = useRef<HTMLElement>(null);
+  // const textRef = useRef<HTMLElement>(null);
 
   return (
-    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade} ref={textRef}>
-      <MaterialTextField {...props} {...rest} />
+    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
+      <MaterialTextField {...rest} ref={ref} />
     </Tooltip>
   );
 }
+
+export const TextField = forwardRef(MUITextField);

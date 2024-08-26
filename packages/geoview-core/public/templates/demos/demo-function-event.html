@@ -595,7 +595,7 @@
       var getConfigButton = document.getElementById('Get-config');
 
       // add an event listener when a button is clicked
-      getConfigButton.addEventListener('click', async () => {
+      getConfigButton.addEventListener('click', () => {
         console.log(cgpv.api.maps.Map1.createMapConfigFromMapState());
       });
 
@@ -604,8 +604,8 @@
       var reloadMapButton = document.getElementById('Reload-map');
 
       // add an event listener when a button is clicked
-      reloadMapButton.addEventListener('click', async () => {
-        console.log(cgpv.api.maps.Map1.reloadWithCurrentState());
+      reloadMapButton.addEventListener('click', () => {
+        cgpv.api.maps.Map1.reloadWithCurrentState();
       });
   
       // create snippets
