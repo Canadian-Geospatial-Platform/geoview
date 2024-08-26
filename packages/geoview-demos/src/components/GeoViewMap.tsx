@@ -14,7 +14,12 @@ interface GeoViewMapProps {
   showConfigsList?: boolean;
   showConfigEditor?: boolean;
   config: string | object;
+  configIsFilePath?: boolean;
   codeSnippet?: string;
+  children?: React.ReactNode;
+  top?: React.ReactNode;
+  bottom?: React.ReactNode;
+  
 }
 
 function GeoViewMap(props: GeoViewMapProps) {
@@ -30,7 +35,9 @@ function GeoViewMap(props: GeoViewMapProps) {
     showConfigsList,
     showConfigEditor = true,
     config = DEFAULT_CONFIG,
-    codeSnippet
+    configIsFilePath,
+    codeSnippet,
+    children
   } = props;
 
   const drawerWidth = 440;
@@ -38,7 +45,7 @@ function GeoViewMap(props: GeoViewMapProps) {
   //when component is mounted, initialize the map
   useEffect(() => {
     if (!isInitialized) {
-      initializeMap('sandboxMap3', config);
+      initializeMap('sandboxMap3', config, configIsFilePath);
     }
   }, []);
 
@@ -156,12 +163,15 @@ function GeoViewMap(props: GeoViewMapProps) {
           }}
           open
         >
-          <ConfigurationDrawer />
+          <ConfigurationDrawer showConfigsList={showConfigsList}  />
         </Drawer>
       </Box>
       <Box component="main" sx={{ flexGrow: 1, pt: 1, width: { sm: `calc(100% - ${drawerWidth}px)` } }}>
         <Toolbar />
+        {props.top}
+        {children}
         {renderBodyContent()}
+        {props.bottom}
       </Box>
     </Box>
   );

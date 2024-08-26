@@ -24,7 +24,8 @@ function ListOfDemosPage() {
             <Link to="/general">Config Sandbox</Link>
 
             <h3>General</h3>
-            <Link to="/general">General</Link>
+            <Link to="/general">Default</Link>
+            <Link to="/package-swiper">Package Swiper</Link>
 
             <h3>Basic Loading</h3>
             <Link to="/general">Default Configuration</Link>

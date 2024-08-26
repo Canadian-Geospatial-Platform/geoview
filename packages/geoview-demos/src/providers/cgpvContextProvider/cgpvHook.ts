@@ -18,18 +18,20 @@ export interface ICgpvHook {
   configFilePath: string;
   configJson: object;
   mapWidth: number;
+  applyWidthHeight: boolean;
   setMapWidth: React.Dispatch<React.SetStateAction<number>>;
   mapHeight: number;
   setMapHeight: React.Dispatch<React.SetStateAction<number>>;
 
-  initializeMap: (mapId: string, config: string | object) => void;
+  initializeMap: (mapId: string, config: string | object, configIsFilePath?: boolean) => void;
   handleDisplayLanguage: (e: any) => void;
   handleDisplayTheme: (e: any) => void;
   handleDisplayProjection: (e: any) => void;
   handleReloadMap: () => void;
   handleRemoveMap: () => string;
-  handleConfigFileChange: (filePath: string | null) => void;
+  handleConfigFileChange:  (filePath: string | null) => void;
   handleConfigJsonChange: (data: any) => void;
+  handleApplyWidthHeight: (val: boolean) => void;
   validateConfigJson: (json: string) => string | null;
   createMapFromConfigText: (configText: string) => void;
   updateConfigProperty: (property: string, value: any) => void;
@@ -46,30 +48,42 @@ export function useCgpvHook(): ICgpvHook {
   const [configFilePath, setConfigFilePath] = useState<string>('');
   const [configJson, setConfigJson] = useState<object>({});
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const initializeMap = (mapId: string, config: string | object) => {
+  const readConfigFile = async (filePath: string) => {
+    const res = await fetch(`./assets/configs/${filePath}`);
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status: ${res.status}`);
+    }
+    return res.json();
+  }
+
+  const initializeMap = (mapId: string, config: string | object, configIsFilePath = false) => {
     if (isInitialized) return;
-    setIsInitialized(true);
-    const configJson = typeof config === 'string' ? JSON.parse(config) : config;
-    handleCreateMap(mapId, configJson);
-    cgpv.init((mapId: string) => {
-      // write some code ...
-    });
+    setIsLoading(true);
+    if(configIsFilePath) {
+      readConfigFile(config as string).then((data) => {
+        console.log('i fetch a file ', data);
+        initializeMap(mapId, data);
+      });
+    } else {
+      setIsInitialized(true);
+      const configJson = typeof config === 'string' ? JSON.parse(config) : config;
+      handleCreateMap(mapId, configJson);
+      cgpv.init((mapId: string) => {
+        // write some code ...
+        setIsLoading(false);
+      });
+    }
   };
 
-  const handleConfigFileChange = (filePath: string | null) => {
+
+  const handleConfigFileChange = async (filePath: string | null) => {
     if (!filePath) return;
-    setConfigFilePath(filePath);
-    fetch(`./assets/configs/${filePath}`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! Status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        handleConfigJsonChange(data);
-      });
+    readConfigFile(filePath).then((data) => {
+      handleConfigJsonChange(data);
+      setConfigFilePath(filePath);
+    });
   };
 
   //removes map and creates a new map
@@ -149,6 +163,11 @@ export function useCgpvHook(): ICgpvHook {
     }, 500);
   };
 
+  const handleApplyWidthHeight = (val: boolean) => {
+    setApplyWidthHeight(val);
+    reCreateMap();
+  }
+
   const onHeightChange = (newHeight: number) => {
     setMapHeight(newHeight);
     reCreateMap();
@@ -210,6 +229,7 @@ export function useCgpvHook(): ICgpvHook {
     mapHeight,
     setMapHeight,
     isInitialized,
+    applyWidthHeight,
 
     initializeMap,
     handleDisplayLanguage,
@@ -220,6 +240,7 @@ export function useCgpvHook(): ICgpvHook {
     handleConfigFileChange,
     handleConfigJsonChange,
     validateConfigJson,
+    handleApplyWidthHeight,
     createMapFromConfigText,
     updateConfigProperty,
   };

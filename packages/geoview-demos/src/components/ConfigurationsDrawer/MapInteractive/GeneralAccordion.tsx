@@ -8,10 +8,13 @@ import {
   Button,
   ButtonGroup,
   FormControl,
+  FormGroup,
+  FormLabel,
   InputAdornment,
   InputLabel,
   MenuItem,
   Select,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material';
@@ -49,26 +52,28 @@ export default function GeneralAccordion(props: GeneralAccordionProps) {
     handleReloadMap,
     handleRemoveMap,
     handleConfigFileChange,
+    handleApplyWidthHeight,
+    applyWidthHeight,
   } = cgpvContext;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-
-      {props.showConfigsList && <Autocomplete
-        disablePortal
-        size="small"
-        id="combo-box-demo"
+      {props.showConfigsList && 
+        <SingleSelectComplete
         options={CONFIG_FILES_LIST}
-        isOptionEqualToValue={(option: ConfigFileResource, value: ConfigFileResource) => option.filePath === value.filePath}
-        getOptionLabel={(option: ConfigFileResource) => option.label}
-        onChange={(e, value) => handleConfigFileChange(value?.filePath ?? null)}
-        renderInput={(params: any) => <TextField {...params} label="Configuration" />}
-      />
+        value={displayLanguage}
+        onChange={(value) => handleConfigFileChange(value)}
+        label="Configurations" placeholder="" />
       }
 
-      <Typography variant="h6">Map Size</Typography>
-
-      <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+      <FormGroup aria-label="Map Seize">
+          <FormLabel component="legend">
+            Map Size
+            <Switch size="small" checked={applyWidthHeight}
+              onChange={(e) => handleApplyWidthHeight(e.target.checked)}
+            />
+          </FormLabel>
+          <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
         <TextField
           size="small"
           label="Width"
@@ -90,6 +95,10 @@ export default function GeneralAccordion(props: GeneralAccordionProps) {
           }}
         />
       </Box>
+
+      </FormGroup>
+
+      
 
       <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
         <SingleSelectComplete
