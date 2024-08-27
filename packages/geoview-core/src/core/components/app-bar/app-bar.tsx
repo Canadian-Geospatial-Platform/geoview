@@ -405,7 +405,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
           {appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic' && (
             <List sx={sxClasses.appBarList}>
               <ListItem>
-                <ExportButton className={` buttonFilled ${activeModalId ? 'active' : ''}`} />
+                <ExportButton className={` buttonFilled ${activeModalId === CV_DEFAULT_APPBAR_CORE.EXPORT ? 'active' : ''}`} />
               </ListItem>
             </List>
           )}

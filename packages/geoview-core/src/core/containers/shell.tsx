@@ -195,6 +195,17 @@ export function Shell(props: ShellProps): JSX.Element {
   }, [footerPanelResizeValue, footerPanelResizeValues]);
 
   /**
+   * Set the map container height to fit content when map is first loaded.
+   * This replaces the hard coded height added by map reload.
+   */
+  useEffect(() => {
+    if (mapLoaded) {
+      const mapContainer = document.getElementById(mapId);
+      if (mapContainer?.style?.height) mapContainer.style.height = 'fit-content';
+    }
+  }, [mapId, mapLoaded]);
+
+  /**
    * Set the map height based on mapDiv
    */
   useEffect(() => {

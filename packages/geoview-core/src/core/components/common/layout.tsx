@@ -6,6 +6,7 @@ import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from './resp
 import { Tooltip, Typography } from '@/ui';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -33,6 +34,7 @@ export function Layout({
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
   const theme = useTheme();
 
+  const { setSelectedFooterLayerListItem } = useUIStoreActions();
   /**
    * Handles clicks to layers in left panel. Sets selected layer.
    *
@@ -43,8 +45,11 @@ export function Layout({
       onLayerListClicked?.(layer);
       // Show the panel (hiding the layers list in the process if we're on mobile)
       responsiveLayoutRef.current?.setIsRightPanelVisible(true);
+      responsiveLayoutRef.current?.setRightPanelFocus();
+      // set the focus item when layer item clicked.
+      setSelectedFooterLayerListItem(`${layer.layerUniqueId}`);
     },
-    [onLayerListClicked]
+    [onLayerListClicked, setSelectedFooterLayerListItem]
   );
 
   /**

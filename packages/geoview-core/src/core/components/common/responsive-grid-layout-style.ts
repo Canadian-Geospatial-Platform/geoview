@@ -23,6 +23,9 @@ export const getSxClasses = (theme: Theme): any => ({
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
     borderRadius: '5px',
     backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
+    '&:focus-visible': {
+      border: '2px solid inherit',
+    },
 
     '&.guide-container': {
       backgroundColor: theme.palette.geoViewColor.white,

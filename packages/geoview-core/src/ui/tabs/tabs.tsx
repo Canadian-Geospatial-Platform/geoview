@@ -1,4 +1,4 @@
-import { SyntheticEvent, ReactNode, useState, useEffect, useMemo } from 'react';
+import { SyntheticEvent, ReactNode, useState, useEffect, useMemo, MouseEvent, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps, Box, SelectChangeEvent } from '@mui/material';
@@ -83,7 +83,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   // internal state
-  const [value, setValue] = useState(0);
+  // boolean value in state reflects when tabs will be collapsed state, then value needs to false.
+  const [value, setValue] = useState<number | boolean>(0);
   const [tabPanels, setTabPanels] = useState([tabs[0]]);
 
   // get store values and actions
@@ -98,48 +99,58 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * Update Tab panel when value change from tabs and dropdown.
    * @param {number} tabValue index of the tab or dropdown.
    */
-  const updateTabPanel = (tabValue: number): void => {
-    // Update panel refs when tab value is changed.
-    // handle no tab when mobile dropdown is displayed.
-    if (typeof tabValue === 'string') {
-      setValue(tabValue);
-      onToggleCollapse?.();
-    } else {
-      // We are adding the new tabs into the state of tabPanels at specific position
-      // based on user selection of tabs, so that tabs id and values are in sync with index of tabPanels state.
-      //  initialy tab panel will look like [tab1], after user click on details tab ie. 3 tab
-      // this can looks like when debugging:- [tab1, undefined, tab3],
-      // undefined values are handled when rendering the tabs.
-      const newPanels = [...tabPanels];
-      newPanels[tabValue] = tabs[tabValue];
-      setTabPanels(newPanels);
-      setValue(tabValue);
-      // Callback
-      onSelectedTabChanged?.(tabs[tabValue]);
-    }
-  };
+  const updateTabPanel = useCallback(
+    (tabValue: number): void => {
+      // Update panel refs when tab value is changed.
+      // handle no tab when mobile dropdown is displayed.
+      if (typeof tabValue === 'string') {
+        setValue(tabValue);
+        onToggleCollapse?.();
+      } else {
+        // We are adding the new tabs into the state of tabPanels at specific position
+        // based on user selection of tabs, so that tabs id and values are in sync with index of tabPanels state.
+        //  initialy tab panel will look like [tab1], after user click on details tab ie. 3 tab
+        // this can looks like when debugging:- [tab1, undefined, tab3],
+        // undefined values are handled when rendering the tabs.
+        const newPanels = [...tabPanels];
+        newPanels[tabValue] = tabs[tabValue];
+        setTabPanels(newPanels);
+        setValue(tabValue);
+        // Callback
+        onSelectedTabChanged?.(tabs[tabValue]);
+      }
+    },
+    [onSelectedTabChanged, onToggleCollapse, tabPanels, tabs]
+  );
 
   /**
    * Handle a tab change
    * @param {number} newValue value of the new tab
    */
-  const handleChange = (event: SyntheticEvent<Element, Event>, newValue: number): void => {
-    updateTabPanel(newValue);
-  };
+  const handleChange = useCallback(
+    (event: SyntheticEvent<Element, Event>, newValue: number): void => {
+      updateTabPanel(newValue);
+    },
+    [updateTabPanel]
+  );
 
   /**
    * Handle a tab click
    * If the panel is collapsed when tab is clicked, expand the panel
    */
-  const handleClick = (index: number): void => {
-    // toggle on -1, so that when no tab is selected on fullscreen
-    // and tab is selected again to open the panel.
-    if (value === index || value === -1) onToggleCollapse?.();
+  const handleClick = useCallback(
+    (e: MouseEvent<HTMLDivElement>): void => {
+      const index = Number((e.target as HTMLDivElement).id.split('-')[1]);
+      // toggle on -1, so that when no tab is selected on fullscreen
+      // and tab is selected again to open the panel.
+      if (value === index || value === -1) onToggleCollapse?.();
 
-    // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
-    if (activeTrap) onOpenKeyboard?.({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
-    else onCloseKeyboard?.();
-  };
+      // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
+      if (activeTrap) onOpenKeyboard?.({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
+      else onCloseKeyboard?.();
+    },
+    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value]
+  );
 
   useEffect(() => {
     // Log
@@ -201,8 +212,9 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                     icon={tab.icon}
                     iconPosition="start"
                     id={`tab-${index}`}
-                    onClick={() => handleClick(index)}
+                    onClick={handleClick}
                     sx={hiddenTabs.includes(tab.id) ? { display: 'none' } : sxClasses.tab}
+                    aria-controls={`${shellContainer?.id ?? ''}-${tab.id}`}
                     tabIndex={0}
                     {...tabProps}
                   />
@@ -241,7 +253,14 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       >
         {tabPanels.map((tab, index) => {
           return tab ? (
-            <TabPanel value={value} index={index} key={tab.id} id={`${shellContainer?.id ?? ''}-${tab.id}`} containerType={containerType}>
+            <TabPanel
+              value={value as number}
+              index={index}
+              key={tab.id}
+              id={`${shellContainer?.id ?? ''}-${tab.id}`}
+              tabId={tab.id}
+              containerType={containerType}
+            >
               {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
             </TabPanel>
           ) : (

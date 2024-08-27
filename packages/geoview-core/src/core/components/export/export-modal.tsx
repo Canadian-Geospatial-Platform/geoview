@@ -49,7 +49,7 @@ export default function ExportModal(): JSX.Element {
   const { rotationAngle } = useManageArrow();
 
   // get store function
-  const { closeModal, setActiveAppBarTab } = useUIStoreActions();
+  const { disableFocusTrap, setActiveAppBarTab } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const { isOpen } = useActiveAppBarTab();
 
@@ -66,7 +66,7 @@ export default function ExportModal(): JSX.Element {
           setIsMapExporting(false);
           exportPNG(dataUrl, mapId);
           setActiveAppBarTab('AppbarPanelButtonLegend', 'legend', false);
-          closeModal();
+          disableFocusTrap();
         })
         .catch((error: Error) => {
           logger.logError('Error while exporting the image', error);
@@ -76,7 +76,7 @@ export default function ExportModal(): JSX.Element {
 
   const handleCloseModal = (): void => {
     setActiveAppBarTab('AppbarPanelButtonLegend', 'legend', false);
-    closeModal();
+    disableFocusTrap();
   };
   /**
    * Calculate the width of the canvas based on dialog box container width.
@@ -158,7 +158,7 @@ export default function ExportModal(): JSX.Element {
   }, [activeModalId, isOpen]);
 
   return (
-    <Dialog open={activeModalId === 'export'} onClose={closeModal} fullWidth maxWidth="xl" disablePortal>
+    <Dialog open={activeModalId === 'export'} onClose={disableFocusTrap} fullWidth maxWidth="xl" disablePortal>
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
       <DialogContent dividers ref={dialogRef}>
         <Box ref={exportContainerRef} textAlign="center">
