@@ -1,14 +1,14 @@
 {
   "isOpen": true,
-  "aoiList": [
+  "legendList": [
     {
       "imageUrl": "https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcSbleN5tjC2Dilx77SCBJD9f3CxlnDEEGx5qY786BpVlu4JLzUd1ixjIOfO1WX5mJjUQLmSSg4JFuNWgqGZJZDV7LBH8y3QBz3KrjuHdg",
-      "aoiTitle": "CN Tower",
+      "legendTitle": "CN Tower",
       "extent": [-79.3881, 43.6416, -79.3861, 43.6436]
     },
     {
       "imageUrl": "https://lh3.googleusercontent.com/p/AF1QipNZdXCEvHL-lStz9abo6WJfV_ROFTkmCtyfi7JD=s680-w680-h510",
-      "aoiTitle": "Parliament Hill",
+      "legendTitle": "Parliament Hill",
       "extent": [-75.7019, 45.4226, -75.6999, 45.4246]
     }
   ],

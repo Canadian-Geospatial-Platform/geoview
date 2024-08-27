@@ -137,8 +137,13 @@
   "theme": "geo.ca",
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "geochart"]
+      "core": ["legend", "layers", "details", "geochart", "custom-legend-panel"]
     }
   },
-  "corePackages": []
+  "corePackages": [],
+  "appBar": {
+    "tabs": {
+      "core": ["aoi-panel", "geochart"]
+    }
+  }
 }

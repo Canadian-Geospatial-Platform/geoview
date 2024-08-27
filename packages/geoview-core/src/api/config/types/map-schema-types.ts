@@ -40,7 +40,15 @@ export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' |
 export type TypeNavBarProps = TypeValidNavBarProps[];
 
 /** Supported footer bar tabs */
-export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
+export type TypeValidFooterBarTabsCoreProps =
+  | 'legend'
+  | 'layers'
+  | 'details'
+  | 'data-table'
+  | 'time-slider'
+  | 'geochart'
+  | 'guide'
+  | 'footer-custom-legend-panel';
 
 /** Footer bar tabs custom definition. */
 export type TypeFooterBarTabsCustomProps = {
@@ -65,6 +73,7 @@ export type TypeValidAppBarCoreProps =
   | 'export'
   | 'basemap-panel'
   | 'aoi-panel'
+  | 'custom-legend-panel'
   | 'geochart'
   | 'guide'
   | 'legend'

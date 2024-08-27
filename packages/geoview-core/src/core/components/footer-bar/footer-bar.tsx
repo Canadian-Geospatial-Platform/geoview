@@ -347,6 +347,27 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
           logger.logPromiseFailed('api.plugin.loadScript(geochart) in useEffect in FooterBar', error);
         });
     }
+    if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('footer-custom-legend-panel')) {
+      // create a new tab by loading the footer custom legend panel plugin
+      Plugin.loadScript('footer-custom-legend-panel')
+        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+          Plugin.addPlugin(
+            'footer-custom-legend-panel',
+            mapId,
+            constructor,
+            toJsonObject({
+              mapId,
+            })
+          ).catch((error) => {
+            // Log
+            logger.logPromiseFailed('api.plugin.addPlugin(footer-custom-legend-panel) in useEffect in FooterBar', error);
+          });
+        })
+        .catch((error) => {
+          // Log
+          logger.logPromiseFailed('api.plugin.loadScript(footer-custom-legend-panel) in useEffect in FooterBar', error);
+        });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [footerBarTabsConfig, mapId]);
 
