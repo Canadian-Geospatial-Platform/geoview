@@ -1,4 +1,3 @@
-import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import {
   IDataTableState,
@@ -7,7 +6,6 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from './map-event-processor';
-import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { TypeResultSetEntry } from '@/geo/map/map-schema-types';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -34,26 +32,26 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets filter(s) for a layer.
+   * @param {string} mapId - The map id of the state to act on
+   * @param {string} layerPath - The path of the layer
+   * @returns {string | undefined} The data table filter(s) for the layer
+   */
+  static getTableFilter(mapId: string, layerPath: string): string | undefined {
+    return this.getDataTableState(mapId)?.tableFilters[layerPath];
+  }
+
+  /**
    * Filter the map based on filters set on date table.
    * @param {string} mapId - Id of the map.
    * @param {string} layerPath - Path of the layer
    * @param {string} filterStrings - Filters set on the data table
-   * @param {boolean} isMapRecordExist - Filtered Map switch is on off.
+   * @param {boolean} mapFilteredRecord - Filtered Map switch is on/off.
    */
-  static applyFilters(mapId: string, layerPath: string, filterStrings: string, isMapRecordExist: boolean): void {
-    // TODO: Refactor - Take a look at the TimeSliderEventProcessor.applyFilters and do same here, passing geoviewLayer in params to save a MapEventProcessor (api.maps[] in disguise)?
-    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath) as
-      | AbstractGeoViewVector
-      | AbstractGVVector
-      | undefined;
-    const filterLayerConfig = layer?.getLayerConfig(layerPath);
-
-    // TODO: Check - Is the condition `filterLayerConfig !== undefined` really necessary here if it's not to be used after? It requires getLayerConfig() which is also unnecessary?
-    if (isMapRecordExist && filterLayerConfig !== undefined && filterStrings.length) {
-      layer?.applyViewFilter(layerPath, filterStrings);
-    } else {
-      layer?.applyViewFilter(layerPath, '');
-    }
+  static updateFilters(mapId: string, layerPath: string, filterStrings: string, mapFilteredRecord: boolean): void {
+    const filter = mapFilteredRecord ? filterStrings : '';
+    this.addOrUpdateTableFilter(mapId, layerPath, filter);
+    MapEventProcessor.applyLayerFilters(mapId, layerPath);
   }
 
   /**
@@ -63,6 +61,17 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    */
   static setInitialSettings(mapId: string, layerPath: string): void {
     this.getDataTableState(mapId).setterActions.setInitiallayerDataTableSetting(layerPath);
+  }
+
+  /**
+   * Sets the filter for the layer path
+   * @param {string} mapId - The map id of the state to act on
+   * @param {string} layerPath - The layer path to use
+   * @param {string} filter - The filter
+   */
+  static addOrUpdateTableFilter(mapId: string, layerPath: string, filter: string): void {
+    const curSliderFilters = this.getDataTableState(mapId)?.tableFilters;
+    this.getDataTableState(mapId)?.setterActions.setTableFilters({ ...curSliderFilters, [layerPath]: filter });
   }
 
   /**

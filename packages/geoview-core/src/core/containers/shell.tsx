@@ -195,17 +195,6 @@ export function Shell(props: ShellProps): JSX.Element {
   }, [footerPanelResizeValue, footerPanelResizeValues]);
 
   /**
-   * Set the map container height to fit content when map is first loaded.
-   * This replaces the hard coded height added by map reload.
-   */
-  useEffect(() => {
-    if (mapLoaded) {
-      const mapContainer = document.getElementById(mapId);
-      if (mapContainer?.style?.height) mapContainer.style.height = 'fit-content';
-    }
-  }, [mapId, mapLoaded]);
-
-  /**
    * Set the map height based on mapDiv
    */
   useEffect(() => {
@@ -320,14 +309,14 @@ export function Shell(props: ShellProps): JSX.Element {
           <CircularProgress isLoaded={mapLoaded} />
           <CircularProgress isLoaded={!circularProgressActive} />
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
-            <AppBar api={mapViewer.appBarApi} />
+            { mapLoaded && <AppBar api={mapViewer.appBarApi} /> }
             <Box sx={sxClasses.mapContainer} ref={mapContainerRef}>
               <Map viewer={mapViewer} />
               <MapInfo />
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
           </Box>
-          {geoviewConfig!.footerBar !== undefined && <FooterBar api={mapViewer.footerBarApi} />}
+          {geoviewConfig!.footerBar !== undefined && mapLoaded && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
             <Modal
               key={modalId}

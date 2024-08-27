@@ -9,6 +9,8 @@ import { logger } from '@/core/utils/logger';
 import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from '@/core/components/common/responsive-grid-layout';
 import { Typography } from '@/ui/typography/typography';
 import { TypeContainerBox } from '@/core/types/global-types';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { TypeLegendLayer } from './types';
 
 interface TypeLayersPanel {
   containerType?: TypeContainerBox;
@@ -21,31 +23,24 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
 
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayerDisplayState();
-  const { setSelectedLayerPath } = useLayerStoreActions();
   const [isLayoutEnlarged, setIsLayoutEnlarged] = useState<boolean>(false);
+
+  const { setSelectedLayerPath } = useLayerStoreActions();
+  const { setSelectedFooterLayerListItem } = useUIStoreActions();
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
-  /*
-  // Using helpers
-  const helpers = useLegendHelpers();
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('LAYERS-PANEL - mount');
-
-    helpers.populateLegendStoreWithFakeData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  */
-
-  const showLayerDetailsPanel = (): void => {
+  const showLayerDetailsPanel = (layer: TypeLegendLayer): void => {
     responsiveLayoutRef.current?.setIsRightPanelVisible(true);
+    responsiveLayoutRef.current?.setRightPanelFocus();
+    // set the focus item when layer item clicked.
+    setSelectedFooterLayerListItem(`${layer.layerId}`);
   };
 
   const leftPanel = (): JSX.Element => {
     return (
-      <Box>
-        <LeftPanel setIsLayersListPanelVisible={showLayerDetailsPanel} isLayoutEnlarged={isLayoutEnlarged} />
+      <Box id="layers-left-panel">
+        <LeftPanel showLayerDetailsPanel={showLayerDetailsPanel} isLayoutEnlarged={isLayoutEnlarged} />
       </Box>
     );
   };

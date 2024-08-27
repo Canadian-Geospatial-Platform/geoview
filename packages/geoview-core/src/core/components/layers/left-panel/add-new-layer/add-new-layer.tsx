@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState, KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -52,6 +52,10 @@ export function AddNewLayer(): JSX.Element {
   const [stepButtonDisable, setStepButtonDisable] = useState<boolean>(true);
 
   const dragPopover = useRef(null);
+  const uploadBtnRef = useRef<HTMLButtonElement>(null);
+  const serviceTypeRef = useRef<HTMLDivElement>(null);
+  const isMultipleRef = useRef<HTMLDivElement>(null);
+  const isMultipleTextFieldRef = useRef<HTMLDivElement>(null);
 
   // get values from store
   const mapId = useGeoViewMapId();
@@ -377,6 +381,29 @@ export function AddNewLayer(): JSX.Element {
     if (activeStep === 2 && layerIdsToAdd.length > 0) setStepButtonDisable(false);
   }, [layerName, activeStep, layerIdsToAdd]);
 
+  useEffect(() => {
+    if (activeStep === 0) {
+      uploadBtnRef.current?.focus();
+    }
+    if (activeStep === 1) {
+      (serviceTypeRef.current?.getElementsByTagName('input')[0].previousSibling as HTMLDivElement).focus();
+    }
+    if (activeStep === 2) {
+      if (isMultipleRef.current) {
+        // handle is Multiple fields focus
+        const id = isMultipleRef.current?.dataset?.id;
+        const elem = isMultipleRef.current?.querySelector('#service-layer-label') as HTMLInputElement;
+        if (id === 'autocomplete' && elem) {
+          elem.focus();
+        } else {
+          isMultipleTextFieldRef.current?.getElementsByTagName('input')[0]?.focus();
+        }
+      }
+    }
+    if (activeStep === 3) {
+      isMultipleTextFieldRef.current?.getElementsByTagName('input')[0]?.focus();
+    }
+  }, [activeStep]);
   /**
    * Handle file dragged into dropzone
    *
@@ -431,6 +458,13 @@ export function AddNewLayer(): JSX.Element {
     }
   };
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>): void => {
+    if (e.key === 'Enter') {
+      handleBack();
+      e.preventDefault();
+    }
+  };
+
   /**
    * Creates a set of Continue / Back buttons
    *
@@ -457,7 +491,14 @@ export function AddNewLayer(): JSX.Element {
           {isLast ? t('layers.finish') : t('layers.continue')}
         </Button>
         {!isFirst && (
-          <Button variant="contained" className="buttonOutlineFilled" size="small" type="text" onClick={handleBack}>
+          <Button
+            variant="contained"
+            className="buttonOutlineFilled"
+            size="small"
+            type="text"
+            onClick={handleBack}
+            onKeyDown={(e) => handleKeyDown(e)}
+          >
             {t('layers.back')}
           </Button>
         )}
@@ -527,6 +568,7 @@ export function AddNewLayer(): JSX.Element {
                     type="text"
                     onClick={() => document.getElementById('fileUpload')?.click()}
                     className="buttonOutlineFilled"
+                    ref={uploadBtnRef}
                   >
                     <FileUploadIcon />
                     <Box component="span">{t('layers.upload')}</Box>
@@ -566,6 +608,7 @@ export function AddNewLayer(): JSX.Element {
                     inputLabel={{
                       id: 'service-type-label',
                     }}
+                    ref={serviceTypeRef}
                     menuItems={layerOptions.map(([value, label]) => ({
                       key: value,
                       item: {
@@ -587,7 +630,13 @@ export function AddNewLayer(): JSX.Element {
               children: (
                 <>
                   {layerList.length === 0 && (
-                    <TextField label={t('layers.name')} variant="standard" value={layerName} onChange={handleNameLayer} />
+                    <TextField
+                      label={t('layers.name')}
+                      variant="standard"
+                      value={layerName}
+                      onChange={handleNameLayer}
+                      ref={isMultipleTextFieldRef}
+                    />
                   )}
                   {layerList.length > 0 && (
                     <AddLayerTree layersData={layerList} startingSelectedItems={layerIdsToAdd} onSelectedItemsChange={setLayerIdsToAdd} />
@@ -612,6 +661,7 @@ export function AddNewLayer(): JSX.Element {
                         variant="standard"
                         value={layerName}
                         onChange={handleNameLayer}
+                        ref={isMultipleTextFieldRef}
                       />
                       <br />
                       <NavButtons isLast handleNext={handleStepLast} />
