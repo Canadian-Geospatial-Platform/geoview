@@ -75,9 +75,6 @@ export function ConfigBuilderTab() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="h6" sx={{ marginBottom: '8px' }}>
-        Configurations Builder
-      </Typography>
 
       <FormControl component="fieldset" sx={{ gap: 3 }}>
 

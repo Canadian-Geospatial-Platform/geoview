@@ -29,6 +29,7 @@ function PackageSwiperPage() {
 
   const renderTop = () => {
     const addSwiper = () => {
+      //cgpv.api.maps[mapId].plugins['swiper'].activateForLayer(document.getElementById('mapWM3Input').value);
     }
 
     const removeSwiper = () => {

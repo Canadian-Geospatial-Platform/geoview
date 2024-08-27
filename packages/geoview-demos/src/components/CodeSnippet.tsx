@@ -25,7 +25,7 @@ export const CodeSnippet = (props: CodeSnippetProps) => {
 
 
   return (
-    <Box sx={{position: 'relative'}}>
+    <Box sx={{position: 'relative', minHeight: '80px', minWidth: '500px'}}>
       <Box sx={{position: 'absolute', top: 5, right: 5}}>
         <CopyToClipboardButton textToCopy={props.code || ''} />
       </Box>

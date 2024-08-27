@@ -1,5 +1,5 @@
 import Autocomplete from '@mui/material/Autocomplete';
-import { TextField } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { ListOptionType } from '../types';
 
 
@@ -25,6 +25,7 @@ export default function SingleSelectComplete(props: PillsAutoCompleteProps) {
   };
   
   return (
+    <Box sx={{ display: 'flex', flexDirection: 'row'}}>
     <Autocomplete
       size="small"
       options={options}
@@ -38,5 +39,6 @@ export default function SingleSelectComplete(props: PillsAutoCompleteProps) {
         <TextField {...params} label={label} placeholder={placeholder} />
       )}
     />
+    </Box>
   );
 }

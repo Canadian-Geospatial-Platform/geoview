@@ -11,7 +11,7 @@ interface ConfigurationDrawerProps {
 }
 
 export default function ConfigurationDrawer(props: ConfigurationDrawerProps) {
-  const [selectedTab, setSelectedTab] = useState('settings');
+  const [selectedTab, setSelectedTab] = useState('interactive-map');
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setSelectedTab(newValue);
@@ -22,14 +22,14 @@ export default function ConfigurationDrawer(props: ConfigurationDrawerProps) {
       <TabContext value={selectedTab}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <TabList onChange={handleTabChange} aria-label="handling tabs change" variant="scrollable" scrollButtons="auto">
-            <Tab icon={<SettingsIcon />} aria-label="settings" value="settings" />
-            <Tab icon={<ListAltIcon />} aria-label="Features" value="features" />
+            <Tab icon={<SettingsIcon />} label="Interactive Map" value="interactive-map" />
+            <Tab icon={<ListAltIcon />} label="Config Builder" value="config-builder" />
           </TabList>
         </Box>
-        <TabPanel value="settings" sx={{ padding: 0 }}>
+        <TabPanel value="interactive-map" sx={{ padding: 0 }}>
           <MapInteractive showConfigsList={props.showConfigsList} />
         </TabPanel>
-        <TabPanel value="features">
+        <TabPanel value="config-builder">
           <ConfigBuilderTab />
         </TabPanel>
       </TabContext>

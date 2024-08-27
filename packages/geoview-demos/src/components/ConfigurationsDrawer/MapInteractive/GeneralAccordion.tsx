@@ -25,6 +25,7 @@ import { CGPVContext } from '../../../providers/cgpvContextProvider/CGPVContextP
 import { ConfigFileResource } from '../../../types';
 import { CONFIG_FILES_LIST, languageOptions, mapProjectionOptions, themeOptions } from '../../../constants';
 import SingleSelectComplete from '../../SingleSelectAutoComplete';
+import { CodeSnipperPopup } from '../../CodeSnippet';
 
 interface GeneralAccordionProps {
   showConfigsList?: boolean;
@@ -123,6 +124,14 @@ export default function GeneralAccordion(props: GeneralAccordionProps) {
           onChange={(value) => handleDisplayProjection(value)}
           label="Display Projection" placeholder="" />
       </FormControl>
+
+      <CodeSnipperPopup  code={`<FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+        <SingleSelectComplete
+          options={mapProjectionOptions}
+          value={displayProjection}
+          onChange={(value) => handleDisplayProjection(value)}
+          label="Display Projection" placeholder="" />
+      </FormControl>`}/>
     </Box>
   );
 }

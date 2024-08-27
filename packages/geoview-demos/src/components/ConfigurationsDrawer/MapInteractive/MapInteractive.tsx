@@ -22,11 +22,8 @@ export default function MapInteractive(props: MapInteractiveProps) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography variant="h6" sx={{ margin: 0 }}>
-        Interactive Map
-      </Typography>
 
-      <ButtonGroup variant="outlined" aria-label="Loading button group" size="small">
+      <ButtonGroup variant="outlined" aria-label="Loading button group" size="small" sx={{mt: 2}}>
         <Button onClick={handleReloadMap}>Reload Map</Button>
         <LoadingButton onClick={handleRemoveMap}>Remove Map</LoadingButton>
       </ButtonGroup>
