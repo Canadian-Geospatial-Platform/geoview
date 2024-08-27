@@ -1,26 +1,27 @@
-import { Dispatch, SetStateAction } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
-import { useMapStoreActions } from '@/core/stores/';
+import { useGeoViewMapId, useMapStoreActions } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import { TypeLegendLayer } from '@/core/components/layers/types';
+import { TABS } from '@/core/utils/constant';
 
 interface LayerListProps {
   depth: number;
   layersList: TypeLegendLayer[];
-  setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
+  showLayerDetailsPanel: (layer: TypeLegendLayer) => void;
   isLayoutEnlarged: boolean;
 }
 
-export function LayersList({ layersList, setIsLayersListPanelVisible, isLayoutEnlarged, depth }: LayerListProps): JSX.Element {
+export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged, depth }: LayerListProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/layers-list');
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const mapId = useGeoViewMapId();
   const { getIndexFromOrderedLayerInfo } = useMapStoreActions();
 
   const sortedLayers = layersList.sort((a, b) =>
@@ -49,12 +50,13 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, isLayoutEn
   const legendItems = sortedLayers.map((details, index) => {
     const isFirst = index === 0;
     const isLast = index === sortedLayers.length - 1;
+
     return (
       <SingleLayer
         key={textToSlug(`layerKey-${index}-${details.layerPath}`)}
         depth={depth}
-        layer={details}
-        setIsLayersListPanelVisible={setIsLayersListPanelVisible}
+        layer={{ ...details, layerId: `${mapId}-${TABS.LAYERS}-${details.layerPath}` }}
+        showLayerDetailsPanel={showLayerDetailsPanel}
         index={index}
         isFirst={isFirst}
         isLast={isLast}
