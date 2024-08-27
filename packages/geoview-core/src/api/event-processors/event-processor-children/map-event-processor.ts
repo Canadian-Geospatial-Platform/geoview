@@ -15,6 +15,7 @@ import {
   TypeValidFooterBarTabsCoreProps,
   TypeValidMapProjectionCodes,
   TypeViewSettings,
+  TypePointMarker,
 } from '@config/types/map-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
@@ -312,6 +313,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapStateProtected(mapId).initialFilters[layerPath];
   }
 
+  static getPointMarkers(mapId: string): Record<string, TypePointMarker[]> {
+    return this.getMapStateProtected(mapId).pointMarkers;
+  }
+
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
     // Project coords
     const projectedCoords = Projection.transformPoints(
@@ -558,6 +563,64 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Save in store
       this.getMapStateProtected(mapId).setterActions.setHighlightedFeatures(highlightedFeatures);
     }
+  }
+
+  /**
+   * Add a point marker
+   * @param {string} mapId - The ID of the map.
+   * @param {string} group - The group to add the markers to.
+   * @param {TypePointMarker} pointMarkers - The point markers to add.
+   */
+  static addPointMarkers(mapId: string, group: string, pointMarkers: TypePointMarker[]): void {
+    const curMarkers = this.getMapStateProtected(mapId).pointMarkers;
+
+    // Check for existing group, and existing markers that match input IDs or coordinates
+    let groupMarkers = curMarkers[group];
+    if (groupMarkers) {
+      pointMarkers.forEach((pointMarker) => {
+        // Replace any existing ids or markers at the same coordinates with new marker
+        groupMarkers = groupMarkers.filter((marker) => marker.coordinate.join() !== pointMarker.coordinate.join());
+        groupMarkers = groupMarkers.filter((marker) => marker.id !== pointMarker.id);
+        groupMarkers.push(pointMarker);
+      });
+    } else {
+      groupMarkers = pointMarkers;
+    }
+
+    // Set the group markers, and update on the map
+    curMarkers[group] = groupMarkers;
+    this.getMapStateProtected(mapId).setterActions.setPointMarkers(curMarkers);
+    MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.pointMarkers.updatePointMarkers(curMarkers);
+  }
+
+  /**
+   * Remove a point marker
+   * @param {string} mapId - The ID of the map.
+   * @param {string} group - The group to remove the markers from.
+   * @param {string | Coordinate} idsOrCoordinates - The IDs or coordinates of the markers to remove.
+   */
+  static removePointMarkersOrGroup(mapId: string, group: string, idsOrCoordinates?: string[] | Coordinate[]): void {
+    const curMarkers = this.getMapStateProtected(mapId).pointMarkers;
+
+    // If no IDs or coordinates are provided, remove group
+    if (!idsOrCoordinates) {
+      delete curMarkers[group];
+    } else {
+      // Set property to check
+      const property = typeof idsOrCoordinates[0] === 'string' ? 'id' : 'coordinate';
+
+      // Filter out markers that match given ones
+      let groupMarkers = curMarkers[group];
+      idsOrCoordinates.forEach((idOrCoordinate) => {
+        groupMarkers = groupMarkers.filter((marker) => marker[property] !== idOrCoordinate);
+      });
+
+      curMarkers[group] = groupMarkers;
+    }
+
+    // Set the pointMarkers and update on map
+    this.getMapStateProtected(mapId).setterActions.setPointMarkers(curMarkers);
+    MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.pointMarkers.updatePointMarkers(curMarkers);
   }
 
   /**
@@ -1084,6 +1147,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         interaction: this.getMapInteraction(mapId),
         listOfGeoviewLayerConfig,
         highlightColor: config.map.highlightColor,
+        overlayObjects: { pointMarkers: this.getPointMarkers(mapId) },
         viewSettings,
       };
 
