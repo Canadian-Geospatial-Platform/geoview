@@ -254,6 +254,6 @@ export interface TypeTimeSliderValues {
 export const useTimeSliderLayers = (): TimeSliderLayerSet => useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers);
 export const useTimeSliderSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.timeSliderState.selectedLayerPath);
 export const useTimeSliderFilters = (): Record<string, string> =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState.sliderFilters);
+  useStore(useGeoViewStore(), (state) => state.timeSliderState?.sliderFilters);
 
 export const useTimeSliderStoreActions = (): TimeSliderActions => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);

@@ -14,6 +14,7 @@ import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
+import { TypePointMarker } from '@/api/config/types/map-schema-types';
 import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from './feature-info-state';
 import { CV_MAP_CENTER } from '@/api/config/types/config-constants';
 
@@ -46,6 +47,7 @@ export interface IMapState {
   overviewMap: boolean;
   overviewMapHideZoom: number;
   pointerPosition?: TypeMapMouseInfo;
+  pointMarkers: Record<string, TypePointMarker[]>;
   rotation: number;
   scale: TypeScaleInfo;
   size: [number, number];
@@ -65,6 +67,8 @@ export interface IMapState {
     highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
     addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
     removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
+    addPointMarkers: (group: string, pointMarkers: TypePointMarker[]) => void;
+    removePointMarkersOrGroup: (group: string, idsOrCoordinates?: string[] | Coordinate[]) => void;
     reorderLayer: (layerPath: string, move: number) => void;
     resetBasemap: () => Promise<void>;
     setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
@@ -104,6 +108,7 @@ export interface IMapState {
       scale: TypeScaleInfo
     ) => void;
     setPointerPosition: (pointerPosition: TypeMapMouseInfo) => void;
+    setPointMarkers: (pointMarkers: Record<string, TypePointMarker[]>) => void;
     setClickCoordinates: (clickCoordinates: TypeMapMouseInfo) => void;
     setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions) => void;
     setFixNorth: (ifFix: boolean) => void;
@@ -147,6 +152,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     overviewMap: false,
     overviewMapHideZoom: 0,
     pointerPosition: undefined,
+    pointMarkers: {},
     rotation: 0,
     scale: { lineWidth: '', labelGraphic: '', labelNumeric: '' } as TypeScaleInfo,
     size: [0, 0] as [number, number],
@@ -171,6 +177,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
           overviewMap: geoviewConfig.components!.indexOf('overview-map') > -1 || false,
           overviewMapHideZoom: geoviewConfig.overviewMap !== undefined ? geoviewConfig.overviewMap.hideOnZoom : 0,
+          pointMarkers: geoviewConfig.map.overlayObjects?.pointMarkers || {},
           rotation: geoviewConfig.map.viewSettings.rotation || 0,
           zoom: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter
             ? geoviewConfig.map.viewSettings.initialView.zoomAndCenter[0]
@@ -275,6 +282,26 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all'): void => {
         // Redirect to processor
         MapEventProcessor.removeHighlightedFeature(get().mapId, feature);
+      },
+
+      /**
+       * Add point markers.
+       * @param {string} group - The group to add the point to
+       * @param {TypePointMarker[]} pointMarkers - The points to add
+       */
+      addPointMarkers: (group: string, pointMarkers: TypePointMarker[]): void => {
+        // Redirect to processor
+        return MapEventProcessor.addPointMarkers(get().mapId, group, pointMarkers);
+      },
+
+      /**
+       * Remove a point marker.
+       * @param {string} group - The group to remove the point from
+       * @param {string[] | Coordinate[]} idsOrCoordinates - The point to remove
+       */
+      removePointMarkersOrGroup: (group: string, idsOrCoordinates?: string[] | Coordinate[]): void => {
+        // Redirect to processor
+        return MapEventProcessor.removePointMarkersOrGroup(get().mapId, group, idsOrCoordinates);
       },
 
       /**
@@ -604,6 +631,19 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
+       * Sets the point markers.
+       * @param {Record<string, TypePointMarker[]>} pointMarkers - The new point markers.
+       */
+      setPointMarkers: (pointMarkers: Record<string, TypePointMarker[]>): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            pointMarkers,
+          },
+        });
+      },
+
+      /**
        * Sets map move end properties.
        * @param {Coordinate} centerCoordinates - The center coordinates of the map.
        * @param {TypeMapMouseInfo} pointerPosition - The pointer position information.
@@ -827,6 +867,7 @@ export const useMapClickCoordinates = (): TypeMapMouseInfo | undefined =>
   useStore(useGeoViewStore(), (state) => state.mapState.clickCoordinates);
 export const useMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
 export const useMapFixNorth = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
+export const useMapInitialFilters = (): Record<string, string> => useStore(useGeoViewStore(), (state) => state.mapState.initialFilters);
 export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
 export const useMapHoverFeatureInfo = (): TypeHoverFeatureInfo => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
 export const useMapLoaded = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
@@ -837,6 +878,8 @@ export const useMapOverviewMap = (): boolean => useStore(useGeoViewStore(), (sta
 export const useMapOverviewMapHideZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.overviewMapHideZoom);
 export const useMapPointerPosition = (): TypeMapMouseInfo | undefined =>
   useStore(useGeoViewStore(), (state) => state.mapState.pointerPosition);
+export const useMapPointMarkers = (): Record<string, TypePointMarker[]> =>
+  useStore(useGeoViewStore(), (state) => state.mapState.pointMarkers);
 export const useMapProjection = (): TypeValidMapProjectionCodes => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);
 export const useMapRotation = (): number => useStore(useGeoViewStore(), (state) => state.mapState.rotation);
 export const useMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(), (state) => state.mapState.scale);

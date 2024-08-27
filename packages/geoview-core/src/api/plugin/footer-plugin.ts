@@ -53,7 +53,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
     // No need to log, parent class does it well already via removed() function.
 
     // Remove the footer tab
-    if (this.value) this.mapViewer().footerBarApi.removeTab(this.footerProps!.id);
+    if (this.value && this.mapViewer()?.footerBarApi) this.mapViewer().footerBarApi.removeTab(this.footerProps!.id);
   }
 
   /**

@@ -1,4 +1,5 @@
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { Coordinate } from 'ol/coordinate';
 
 import { TimeDimension } from '@/core/utils/date-mgt';
 
@@ -154,6 +155,8 @@ export type TypeMapConfig = {
   viewSettings: TypeViewSettings;
   /** Highlight color. */
   highlightColor?: TypeHighlightColors;
+  /** Point markers to add to map. */
+  overlayObjects?: TypeOverlayObjects;
   /** Additional options used for OpenLayers map options. */
   extraOptions?: Record<string, unknown>;
 };
@@ -229,6 +232,30 @@ export type TypeValidMapProjectionCodes = 3978 | 3857;
 
 /** Type used to define valid highlight colors. */
 export type TypeHighlightColors = 'black' | 'white' | 'red' | 'green';
+
+/** Type used to define overlay objects. */
+// TODO: Add more overlay objects - polygons, bounding box?
+export type TypeOverlayObjects = {
+  /** Non interactive markers */
+  pointMarkers?: TypePointMarkers;
+};
+
+/** Type used to define point markers object. */
+type TypePointMarkers = Record<string, TypePointMarker[]>;
+
+/** Type used to define point marker. */
+export type TypePointMarker = {
+  /** ID for marker, must be unique within group */
+  id: string;
+  /** Marker coordinates, unique in group, projection code must be added if not in lon/lat */
+  coordinate: Coordinate;
+  /** Marker color */
+  color?: string;
+  /** Marker opacity */
+  opacity?: number;
+  /** Projection code if coordinates are not in lon/lat */
+  projectionCode?: number;
+};
 
 // #region GEOVIEW LAYERS
 
