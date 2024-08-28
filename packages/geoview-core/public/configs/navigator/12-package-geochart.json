@@ -28,6 +28,23 @@
         ]
       },
       {
+        "geoviewLayerId": "tritium_agol",
+        "geoviewLayerName": {
+          "en": "Tritium Radioactivity agol",
+          "fr": "Radioactivité tritium agol"
+        },
+        "metadataAccessPath": {
+          "en": "https://services1.arcgis.com/HsjBaDykC1mjhXz9/ArcGIS/rest/services/CRMN___Tritium_in_Atmospheric_Water_Vapour_WFL1/FeatureServer",
+          "fr": "https://services1.arcgis.com/HsjBaDykC1mjhXz9/ArcGIS/rest/services/CRMN___Tritium_in_Atmospheric_Water_Vapour_WFL1/FeatureServer"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "shellfish_sites",
         "geoviewLayerName": {
           "en": "Shellfish Sites",

@@ -58,6 +58,57 @@
     {
       "layers": [
         {
+          "layerId": "tritium_agol/1",
+          "propertyValue": "OBJECTID",
+          "propertyDisplay": "Station"
+        }
+      ],
+      "chart": "line",
+      "query": {
+        "type": "esriRegular",
+        "url": "https://services1.arcgis.com/HsjBaDykC1mjhXz9/ArcGIS/rest/services/CRMN___Tritium_in_Atmospheric_Water_Vapour_WFL1/FeatureServer/3",
+        "queryOptions": {
+          "whereClauses": [
+            {
+              "field": "Station",
+              "prefix": "'",
+              "valueFrom": "Station",
+              "suffix": "'"
+            }
+          ],
+          "orderByField": "Date"
+        }
+      },
+      "geochart": {
+        "xAxis": {
+          "type": "time",
+          "property": "Date",
+          "label": "Collected date"
+        },
+        "yAxis": {
+          "type": "linear",
+          "property": "Activity_Activite_Bqm3",
+          "label": "Activity (mBqm3)",
+          "tooltipSuffix": "mBqm3"
+        },
+        "borderWidth": 1
+      },
+      "ui": {
+        "xSlider": {
+          "display": true
+        },
+        "ySlider": {
+          "display": true
+        },
+        "stepsSwitcher": true,
+        "resetStates": true,
+        "description": "This is an ArcGIS Online layer chart",
+        "download": true
+      }
+    },
+    {
+      "layers": [
+        {
           "layerId": "shellfish_sites/1",
           "propertyValue": "OBJECTID",
           "propertyDisplay": "Site"
