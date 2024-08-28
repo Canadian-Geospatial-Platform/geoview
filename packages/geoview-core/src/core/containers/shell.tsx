@@ -309,14 +309,14 @@ export function Shell(props: ShellProps): JSX.Element {
           <CircularProgress isLoaded={mapLoaded} />
           <CircularProgress isLoaded={!circularProgressActive} />
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
-            <AppBar api={mapViewer.appBarApi} />
+            { mapLoaded && <AppBar api={mapViewer.appBarApi} /> }
             <Box sx={sxClasses.mapContainer} ref={mapContainerRef}>
               <Map viewer={mapViewer} />
               <MapInfo />
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
           </Box>
-          {geoviewConfig!.footerBar !== undefined && <FooterBar api={mapViewer.footerBarApi} />}
+          {geoviewConfig!.footerBar !== undefined && mapLoaded && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
             <Modal
               key={modalId}

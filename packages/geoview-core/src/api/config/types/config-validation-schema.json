@@ -73,6 +73,9 @@
         "highlightColor": {
           "$ref": "#/definitions/TypeHighlightColors"
         },
+        "overlayObjects": {
+          "$ref": "#/definitions/TypeOverlayObjects"
+        },
         "extraOptions": {
           "description": "Additional options used for OpenLayers map options",
           "type": "object"
@@ -406,10 +409,6 @@
           "type": "boolean",
           "description": "Flag to mention if layer will use its time dimension if provided (default: true). Used to remove a layer from time enabled functions like time slider."
         },
-        "initialSettings": {
-          "description": "Initial settings to apply to the GeoView layer at creation time.",
-          "$ref": "#/definitions/TypeLayerInitialSettings"
-        },
         "listOfLayerEntryConfig": {
           "description": "The layer entries to use from the GeoView layer.",
           "$ref": "#/definitions/TypeListOfLayerEntryConfig"
@@ -509,6 +508,60 @@
       "additionalProperties": false,
       "enum": ["black", "white", "red", "green"],
       "default": "black"
+    },
+    "TypeOverlayObjects": {
+      "type": "object",
+      "properties": {
+        "pointMarkers": {
+          "$ref": "#/definitions/TypePointMarkers"
+        }
+      }
+    },
+    "TypePointMarkers": {
+      "type": "object",
+      "patternProperties": {
+        "[^]*": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TypePointMarker"
+          }
+        }
+      }
+    },
+    "TypePointMarker": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID for point marker. Must be unique in group."
+        },
+        "coordinate": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          },
+          "description": "The coordinates of the marker."
+        },
+        "color": {
+          "type": "string",
+          "default": "green",
+          "description": "Marker color."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1
+        },
+        "projection": {
+          "type": "number",
+          "description": "The projection code of the coordinates. Default value is 4326."
+        }
+      },
+      "required": ["id", "coordinate"]
     },
     "TypeDisplayLanguage": {
       "description": "Display languages supported.",
@@ -1426,7 +1479,7 @@
         },
         {
           "description": "One of the chid type.",
-          "oneOf": [
+          "anyOf": [
             {
               "$ref": "#/definitions/TypeLineStringVectorConfig"
             },
@@ -1475,8 +1528,7 @@
             }
           }
         }
-      ],
-      "required": ["type", "stroke"]
+      ]
     },
     "TypeStrokeSymbolConfig": {
       "description": "Stroke style for vector features.",
@@ -1544,8 +1596,7 @@
             }
           }
         }
-      ],
-      "required": ["type", "stroke"]
+      ]
     },
     "TypeFillStyle": {
       "description": "Valid values to specify fill styles.",
@@ -1590,8 +1641,7 @@
             }
           }
         }
-      ],
-      "required": ["type", "symbol"]
+      ]
     },
     "TypeSymbol": {
       "description": "Valid values to specify symbol shapes.",
@@ -1647,8 +1697,7 @@
             }
           }
         }
-      ],
-      "required": ["type", "mimeType", "src"]
+      ]
     },
     "TypePostSettings": {
       "description": "Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET.",

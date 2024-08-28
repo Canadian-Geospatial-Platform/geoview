@@ -10,6 +10,7 @@ import {
   TypeViewSettings,
   TypeInteraction,
   TypeHighlightColors,
+  TypeOverlayObjects,
   TypeValidMapProjectionCodes,
   TypeDisplayTheme,
   TypeLocalizedString,
@@ -539,6 +540,8 @@ export type TypeMapConfig = {
   viewSettings: TypeViewSettings; //! config
   /** Highlight color. */
   highlightColor?: TypeHighlightColors; //! config
+  /** Highlight color. */
+  overlayObjects?: TypeOverlayObjects; //! config
   /** Additional options used for OpenLayers map options. */
   extraOptions?: Record<string, unknown>;
 };

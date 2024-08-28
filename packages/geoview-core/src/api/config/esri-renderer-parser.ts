@@ -276,7 +276,7 @@ function convertLineStyle(lineStyle: EsriLineStyle): TypeLineStyle {
     case undefined:
       return 'solid';
     default: {
-      logger.logInfo(`Handling of ESRI renderer line style '${lineStyle}' is not coded, 'solid' will be used instead.`);
+      logger.logWarning(`Handling of ESRI renderer line style '${lineStyle}' is not coded, 'solid' will be used instead.`);
       return 'solid';
     }
   }
@@ -308,7 +308,7 @@ function convertFillStyle(fillStyle: EsriFillStyle): TypeFillStyle {
     case 'esriSFSVertical':
       return 'vertical';
     default: {
-      logger.logInfo(`Handling of ESRI renderer fill style '${fillStyle}' is not coded, 'solid' will be used instead.`);
+      logger.logWarning(`Handling of ESRI renderer fill style '${fillStyle}' is not coded, 'solid' will be used instead.`);
       return 'solid';
     }
   }
@@ -336,7 +336,7 @@ function convertSymbolStyle(symbolStyle: EsriSymbolStyle): TypeSymbol {
     case 'esriSMSX':
       return 'X';
     default: {
-      logger.logInfo(`Handling of ESRI renderer symbol style '${symbolStyle}' is not coded, 'circle' will be used instead.`);
+      logger.logWarning(`Handling of ESRI renderer symbol style '${symbolStyle}' is not coded, 'circle' will be used instead.`);
       return 'circle';
     }
   }
@@ -423,7 +423,7 @@ function convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined
       };
       return iconSymbolVectorConfig;
     }
-    logger.logInfo(`Handling of ESRI renderer symbol '${symbol}' is not coded, default GeoView settings will be used instead.`);
+    logger.logWarning(`Handling of ESRI renderer symbol '${symbol}' is not coded, default GeoView settings will be used instead.`);
   }
   return undefined;
 }
@@ -593,10 +593,10 @@ function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeSt
  *
  * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-export function parseStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeStyleConfig | undefined {
+export function createStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeStyleConfig | undefined {
   if (esriRendererIsUniqueValue(renderer)) return processUniqueValueRenderer(renderer);
   if (esriRendererIsSimple(renderer)) return processSimpleRenderer(renderer);
   if (esriRendererIsClassBreaks(renderer)) return processClassBreakRenderer(renderer);
-  logger.logInfo(`Handling of ESRI renderer '${renderer.type}' is not coded, default GeoView settings will be used instead.`);
+  logger.logWarning(`Handling of ESRI renderer '${renderer.type}' is not coded, default GeoView settings will be used instead.`);
   return undefined;
 }
