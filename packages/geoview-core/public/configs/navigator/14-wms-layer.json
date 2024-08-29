@@ -26,10 +26,15 @@
                 "source": {
                   "featureInfo": {
                     "queryable": true,
-                    "nameField": { "en": "plain_text", "fr": "plain_texte" },
-                    "fieldTypes": "string",
-                    "outfields": { "en": "plain_text", "fr": "plain_texte" },
-                    "aliasFields": { "en": "Forcast", "fr": "Prévision" }
+                    "nameField": "plain_text",
+                    "outfields": [
+                      {
+                        "name": "plain_text",
+                        "alias": "Forcast",
+                        "type": "string",
+                        "domain": []
+                      }
+                    ]
                   }
                 }
               },
@@ -58,10 +63,15 @@
               "style": "msi-binary",
               "featureInfo": {
                 "queryable": true,
-                "nameField": { "en": "band-0-pixel-value", "fr": "band-0-pixel-value" },
-                "fieldTypes": "number",
-                "outfields": { "en": "band-0-pixel-value", "fr": "band-0-pixel-value" },
-                "aliasFields": { "en": "Pixel value", "fr": "Valeur du pixel" }
+                "nameField": "band-0-pixel-value",
+                "outfields": [
+                  {
+                    "name": "band-0-pixel-value",
+                    "alias": "Pixel value",
+                    "type": "number",
+                    "domain": []
+                  }
+                ]
               }
             }
           }

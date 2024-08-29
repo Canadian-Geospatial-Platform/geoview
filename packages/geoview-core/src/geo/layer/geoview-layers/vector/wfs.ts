@@ -27,6 +27,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { TypeOutfields } from '@/api/config/types/map-schema-types';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -310,41 +311,33 @@ export class WFS extends AbstractGeoViewVector {
   #processFeatureInfoConfig(fields: TypeJsonArray, layerConfig: VectorLayerEntryConfig): void {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
-    // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
-    // when en and fr are undefined, we set both en and fr to the same value.
-    if (!layerConfig.source.featureInfo.outfields?.en || !layerConfig.source.featureInfo.aliasFields?.en) {
-      const processOutField = !layerConfig.source.featureInfo.outfields?.en;
-      const processAliasFields = !layerConfig.source.featureInfo.aliasFields?.en;
-      if (processOutField) {
-        layerConfig.source.featureInfo.outfields = { en: '' };
-        layerConfig.source.featureInfo.fieldTypes = '';
-      }
-      if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
+
+    // Process undefined outfields or aliasFields
+    if (!layerConfig.source.featureInfo.outfields?.length) {
+      if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
+
       fields.forEach((fieldEntry) => {
         const fieldEntryType = (fieldEntry.type as string).split(':').slice(-1)[0];
         if (fieldEntryType === 'Geometry') return;
-        if (processOutField) {
-          layerConfig.source!.featureInfo!.outfields!.en = `${layerConfig.source!.featureInfo!.outfields!.en}${fieldEntry.name},`;
-          layerConfig.source!.featureInfo!.fieldTypes = `${layerConfig.source!.featureInfo!.fieldTypes}${this.getFieldType(
-            fieldEntry.name as string,
-            layerConfig
-          )},`;
-        }
-        layerConfig.source!.featureInfo!.aliasFields!.en = `${layerConfig.source!.featureInfo!.aliasFields!.en}${fieldEntry.name},`;
+
+        const newOutfield: TypeOutfields = {
+          name: fieldEntry.name as string,
+          alias: fieldEntry.name as string,
+          type: this.getFieldType(fieldEntry.name as string, layerConfig),
+          domain: null,
+        };
+
+        layerConfig.source!.featureInfo!.outfields!.push(newOutfield);
       });
-      layerConfig.source.featureInfo!.outfields!.en = layerConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
-      layerConfig.source.featureInfo!.fieldTypes = layerConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
-      layerConfig.source.featureInfo!.aliasFields!.en = layerConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
-      layerConfig.source!.featureInfo!.outfields!.fr = layerConfig.source!.featureInfo!.outfields?.en;
-      layerConfig.source!.featureInfo!.aliasFields!.fr = layerConfig.source!.featureInfo!.aliasFields?.en;
     }
-    if (!layerConfig.source.featureInfo.nameField) {
-      // INFO: WFS as geometry for first field, use second one
-      const en =
-        layerConfig.source.featureInfo!.outfields!.en?.split(',')[1] || layerConfig.source.featureInfo!.outfields!.fr?.split(',')[1];
-      const fr = en;
-      if (en) layerConfig.source.featureInfo.nameField = { en, fr };
-    }
+
+    layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      if (!outfield.alias) outfield.alias = outfield.name;
+    });
+
+    // INFO: WFS as geometry for first field, set name field to second value
+    if (!layerConfig.source.featureInfo.nameField)
+      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[1].name;
   }
 
   /** ***************************************************************************************************************************

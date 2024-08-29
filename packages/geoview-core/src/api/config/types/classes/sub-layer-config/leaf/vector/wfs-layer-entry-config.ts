@@ -257,7 +257,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
           name: fieldEntry.name,
           alias: fieldEntry.name,
           type: WfsLayerEntryConfig.#convertFieldType(fieldType),
-          domain: null,
+          domain: [],
         })
       );
     });

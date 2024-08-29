@@ -17,7 +17,7 @@
         },
         "geoviewLayerType": "vectorTiles",
         "metadataAccessPath": {
-          "en": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/"
+          "en": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer/"
         },
         "listOfLayerEntryConfig": [
           {
@@ -25,7 +25,7 @@
             "initialSettings": { "minZoom": 3, "maxZoom": 18 },
             "source": {
               "dataAccessPath": {
-                "en": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/tile/{z}/{y}/{x}.pbf"
+                "en": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer/tile/{z}/{y}/{x}.pbf"
               }
             }
           }

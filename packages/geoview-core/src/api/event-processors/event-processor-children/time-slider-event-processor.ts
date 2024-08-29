@@ -4,12 +4,10 @@ import {
   TimeSliderLayerSet,
   TypeTimeSliderValues,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
-import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
@@ -147,17 +145,12 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
-    let localizedAliasFields;
-    let localizedOutFields;
     const { featureInfo } = layerConfig.source!;
     if (featureInfo) {
-      const { aliasFields, outfields } = featureInfo as TypeFeatureInfoLayerConfig;
-      localizedOutFields = getLocalizedValue(outfields, AppEventProcessor.getDisplayLanguage(mapId))?.split(',');
-      localizedAliasFields = getLocalizedValue(aliasFields, AppEventProcessor.getDisplayLanguage(mapId))?.split(',');
+      const { outfields } = featureInfo as TypeFeatureInfoLayerConfig;
+      const timeOutfield = outfields ? outfields.find((outfield) => outfield.name === field) : undefined;
+      if (timeOutfield) fieldAlias = timeOutfield.alias;
     }
-    const fieldIndex = localizedOutFields ? localizedOutFields.indexOf(field) : -1;
-    if (fieldIndex !== -1 && localizedAliasFields && localizedOutFields && localizedAliasFields?.length === localizedOutFields?.length)
-      fieldAlias = localizedAliasFields![fieldIndex];
 
     // eslint-disable-next-line no-nested-ternary
     const values = singleHandle
