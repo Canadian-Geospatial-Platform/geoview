@@ -1,6 +1,5 @@
-import React, { useContext } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Typography } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useContext } from 'react';
+import { Box } from '@mui/material';
 import { CGPVContext } from '../../../providers/cgpvContextProvider/CGPVContextProvider';
 import SplitButton from '../../SplitButton';
 
@@ -11,7 +10,7 @@ export function NotificationsAccordion() {
     throw new Error('CGPVContent must be used within a CGPVProvider');
   }
 
-  const { configJson, mapId } = cgpvContext;
+  const { mapId } = cgpvContext;
 
   const notificationTypes = ['info', 'warning', 'error', 'success'];
 

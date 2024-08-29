@@ -1,28 +1,14 @@
-import { LoadingButton } from '@mui/lab';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Autocomplete,
   Box,
-  Button,
-  ButtonGroup,
   FormControl,
   FormGroup,
   FormLabel,
   InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
   Switch,
   TextField,
-  Typography,
 } from '@mui/material';
-import { Save as SaveIcon } from '@mui/icons-material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useContext } from 'react';
 import { CGPVContext } from '../../../providers/cgpvContextProvider/CGPVContextProvider';
-import { ConfigFileResource } from '../../../types';
 import { CONFIG_FILES_LIST, languageOptions, mapProjectionOptions, themeOptions } from '../../../constants';
 import SingleSelectComplete from '../../SingleSelectAutoComplete';
 import { CodeSnipperPopup } from '../../CodeSnippet';

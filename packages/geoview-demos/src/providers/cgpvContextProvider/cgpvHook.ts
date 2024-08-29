@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   DEFAULT_DISPLAY_LANGUAGE,
@@ -168,6 +168,7 @@ export function useCgpvHook(): ICgpvHook {
     reCreateMap();
   }
 
+  /*
   const onHeightChange = (newHeight: number) => {
     setMapHeight(newHeight);
     reCreateMap();
@@ -176,7 +177,7 @@ export function useCgpvHook(): ICgpvHook {
   const onWidthChange = (newWidth: number) => {
     setMapWidth(newWidth);
     reCreateMap();
-  };
+  };*/
 
   //when config settings changes recreate map
   const handleConfigJsonChange = (data: any) => {

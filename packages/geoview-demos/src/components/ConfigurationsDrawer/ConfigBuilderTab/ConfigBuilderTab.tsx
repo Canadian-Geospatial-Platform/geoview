@@ -1,18 +1,11 @@
 import {
   Box,
   FormControl,
-  FormControlLabel,
   FormGroup,
   FormLabel,
-  MenuItem,
-  Radio,
-  RadioGroup,
-  Select,
   Switch,
-  TextField,
-  Typography,
 } from '@mui/material';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { CGPVContext } from '../../../providers/cgpvContextProvider/CGPVContextProvider';
 import _ from 'lodash';
 import PillsAutoComplete from '../../PillsAutoComplete';
@@ -29,23 +22,6 @@ export function ConfigBuilderTab() {
   }
 
   const { configJson, updateConfigProperty } = cgpvContext;
-
-  const [mapInteraction, setMapInteraction] = useState<string>('dynamic');
-  const [minZoom, setMinZoom] = useState<number>(0);
-  const [maxZoom, setMaxZoom] = useState<number>(0);
-  const [projection, setProjection] = useState<string>('3978');
-  const [enableRotation, setEnableRotation] = useState<boolean>(true);
-  const [rotation, setRotation] = useState<number>(0);
-  const [navBar, setNavBar] = useState<string[]>([]); // options "zoom", "fullscreen", "home", "basemap-select"
-  const [useFooterBar, setUseFooterBar] = useState<boolean>(true);
-  const [footerBarTabs, setFooterBarTabs] = useState<string[]>([]); // options "legend", "layers", "details", "data-table"
-  const [useAppBar, setUseAppBar] = useState<boolean>(true);
-  const [appBarTabs, setAppBarTabs] = useState<string[]>([]); // options "legend", "layers", "details", "data-table"
-  const [useOverviewMap, setUseOverviewMap] = useState<boolean>(true);
-  const [theme, setTheme] = useState<string>('geo.ca');
-  const [language, setLanguage] = useState<string>('en');
-
-
 
   const getProperty = (property: string, defaultValue = undefined) => {
     return _.get(configJson, property) ?? defaultValue;

@@ -1,6 +1,5 @@
 import { LoadingButton } from '@mui/lab';
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, ButtonGroup, Typography } from '@mui/material';
-import { Save as SaveIcon } from '@mui/icons-material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useContext } from 'react';
 import { CGPVContext } from '../../../providers/cgpvContextProvider/CGPVContextProvider';

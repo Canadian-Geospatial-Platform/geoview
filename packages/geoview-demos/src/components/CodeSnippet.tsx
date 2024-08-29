@@ -3,7 +3,7 @@ import hljs from 'highlight.js';
 import 'highlight.js/styles/default.css';
 import javascript from "highlight.js/lib/languages/javascript";
 import { useEffect, useRef, useState } from "react";
-import { Box, Button, IconButton, Popover, Popper } from '@mui/material';
+import { Box, Button, Popover } from '@mui/material';
 import JavascriptIcon from '@mui/icons-material/Javascript';
 import { CopyToClipboardButton } from './CopyToClipboard';
 
