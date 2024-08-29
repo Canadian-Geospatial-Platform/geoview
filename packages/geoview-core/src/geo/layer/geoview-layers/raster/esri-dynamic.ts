@@ -679,12 +679,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @private
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  #formatFieldValue(fieldName: string, rawValue: string | number | Date, sourceFeatureInfo: TypeFeatureInfoLayerConfig): string {
-    const fieldIndex = getLocalizedValue(sourceFeatureInfo.outfields, AppEventProcessor.getDisplayLanguage(this.mapId))
-      ?.split(',')
-      .indexOf(fieldName);
-    const fieldType = sourceFeatureInfo.fieldTypes?.split(',')[fieldIndex!];
-    switch (fieldType) {
+  static #formatFieldValue(fieldName: string, rawValue: string | number | Date, sourceFeatureInfo: TypeFeatureInfoLayerConfig): string {
+    const { outfields } = sourceFeatureInfo;
+    let selectedOutfield;
+    if (outfields?.length) selectedOutfield = outfields.find((outfield) => outfield.name === fieldName);
+    switch (selectedOutfield?.type) {
       case 'date':
         return `date '${rawValue}'`;
       case 'string':
@@ -716,7 +715,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   ): string {
     let queryString = styleSettings.defaultVisible !== false && !level ? 'not (' : '(';
     for (let i = 0; i < queryTree.length; i++) {
-      const value = this.#formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, sourceFeatureInfo);
+      const value = EsriDynamic.#formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, sourceFeatureInfo);
       // The nextField array is not empty, then it is is not the last field
       if (queryTree[i].nextField.length) {
         // If i > 0 (true) then we add a OR clause
@@ -803,7 +802,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
             if (i === 0) {
               if (styleSettings.classBreakStyleInfo[0].visible !== false && styleSettings.defaultVisible === false)
                 filterArray.push(
-                  `${styleSettings.field} >= ${this.#formatFieldValue(
+                  `${styleSettings.field} >= ${EsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[0].minValue!,
                     layerConfig.source.featureInfo!
@@ -811,7 +810,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
                 );
               else if (styleSettings.classBreakStyleInfo[0].visible === false && styleSettings.defaultVisible !== false) {
                 filterArray.push(
-                  `${styleSettings.field} < ${this.#formatFieldValue(
+                  `${styleSettings.field} < ${EsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[0].minValue!,
                     layerConfig.source.featureInfo!
@@ -821,7 +820,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
               }
             } else if (styleSettings.classBreakStyleInfo[i].visible !== false && styleSettings.defaultVisible === false) {
               filterArray.push(
-                `${styleSettings.field} > ${this.#formatFieldValue(
+                `${styleSettings.field} > ${EsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].minValue!,
                   layerConfig.source.featureInfo!
@@ -829,7 +828,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
               );
               if (i + 1 === styleSettings.classBreakStyleInfo.length)
                 filterArray.push(
-                  `${styleSettings.field} <= ${this.#formatFieldValue(
+                  `${styleSettings.field} <= ${EsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[i].maxValue!,
                     layerConfig.source.featureInfo!
@@ -837,7 +836,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
                 );
             } else if (styleSettings.classBreakStyleInfo[i].visible === false && styleSettings.defaultVisible !== false) {
               filterArray.push(
-                `${styleSettings.field} <= ${this.#formatFieldValue(
+                `${styleSettings.field} <= ${EsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].minValue!,
                   layerConfig.source.featureInfo!
@@ -848,7 +847,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           } else if (styleSettings.defaultVisible === false) {
             if (styleSettings.classBreakStyleInfo[i].visible === false) {
               filterArray.push(
-                `${styleSettings.field} <= ${this.#formatFieldValue(
+                `${styleSettings.field} <= ${EsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i - 1].maxValue!,
                   layerConfig.source.featureInfo!
@@ -856,7 +855,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
               );
             } else if (i + 1 === styleSettings.classBreakStyleInfo.length) {
               filterArray.push(
-                `${styleSettings.field} <= ${this.#formatFieldValue(
+                `${styleSettings.field} <= ${EsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].maxValue!,
                   layerConfig.source.featureInfo!
@@ -865,7 +864,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
             }
           } else if (styleSettings.classBreakStyleInfo[i].visible !== false) {
             filterArray.push(
-              `${styleSettings.field} > ${this.#formatFieldValue(
+              `${styleSettings.field} > ${EsriDynamic.#formatFieldValue(
                 styleSettings.field,
                 styleSettings.classBreakStyleInfo[i - 1].maxValue!,
                 layerConfig.source.featureInfo!
@@ -878,7 +877,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         }
         if (visibleWhenGreatherThisIndex !== -1)
           filterArray.push(
-            `${styleSettings.field} > ${this.#formatFieldValue(
+            `${styleSettings.field} > ${EsriDynamic.#formatFieldValue(
               styleSettings.field,
               styleSettings.classBreakStyleInfo[visibleWhenGreatherThisIndex].maxValue!,
               layerConfig.source.featureInfo!

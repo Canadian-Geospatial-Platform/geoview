@@ -33,6 +33,7 @@ import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/utils/renderer
 import { EsriImage } from './raster/esri-image';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeOutfields } from '@/api/config/types/map-schema-types';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -290,46 +291,31 @@ export function commonProcessFeatureInfoConfig(
 
   // dynamic group layer doesn't have fields definition
   if (layerMetadata.type !== 'Group Layer') {
-    // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
-    // when en and fr are undefined, we set both en and fr to the same value.
-    if (!layerConfig.source.featureInfo.outfields?.en || !layerConfig.source.featureInfo.aliasFields?.en) {
-      const processOutField = !layerConfig.source.featureInfo.outfields?.en;
-      const processAliasFields = !layerConfig.source.featureInfo.aliasFields?.en;
-      if (processOutField) {
-        layerConfig.source.featureInfo.outfields = { en: '' };
-        layerConfig.source.featureInfo.fieldTypes = '';
-      }
-      if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
+    // Process undefined outfields or aliasFields
+    if (!layerConfig.source.featureInfo.outfields?.length) {
+      if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
+
       (layerMetadata.fields as TypeJsonArray).forEach((fieldEntry) => {
         if (layerMetadata.geometryField && fieldEntry?.name === layerMetadata.geometryField.name) return;
-        if (processOutField) {
-          layerConfig.source.featureInfo!.outfields!.en = `${layerConfig.source.featureInfo!.outfields!.en}${fieldEntry.name},`;
-          const fieldType = commonGetFieldType(layer, fieldEntry.name as string, layerConfig);
-          layerConfig.source.featureInfo!.fieldTypes = `${layerConfig.source.featureInfo!.fieldTypes}${fieldType},`;
-        }
-        if (processAliasFields)
-          layerConfig.source.featureInfo!.aliasFields!.en = `${layerConfig.source.featureInfo!.aliasFields!.en}${
-            fieldEntry.alias ? fieldEntry.alias : fieldEntry.name
-          },`;
-      });
-      layerConfig.source.featureInfo!.outfields!.en = layerConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
-      layerConfig.source.featureInfo!.fieldTypes = layerConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
-      layerConfig.source.featureInfo!.aliasFields!.en = layerConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
-      layerConfig.source.featureInfo!.outfields!.fr = layerConfig.source.featureInfo!.outfields?.en;
-      layerConfig.source.featureInfo!.aliasFields!.fr = layerConfig.source.featureInfo!.aliasFields?.en;
-    }
-    if (!layerConfig.source.featureInfo.nameField)
-      if (layerMetadata.displayField) {
-        const nameField = layerMetadata.displayField as string;
-        layerConfig.source.featureInfo.nameField = {
-          en: nameField,
-          fr: nameField,
+        const newOutfield: TypeOutfields = {
+          name: fieldEntry.name as string,
+          alias: (fieldEntry.alias as string) || (fieldEntry.name as string),
+          type: commonGetFieldType(layer, fieldEntry.name as string, layerConfig),
+          domain: commonGetFieldDomain(layer, fieldEntry.name as string, layerConfig),
         };
-      } else {
-        const en =
-          layerConfig.source.featureInfo!.outfields!.en?.split(',')[0] || layerConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
-        const fr = en;
-        if (en) layerConfig.source.featureInfo.nameField = { en, fr };
+
+        layerConfig.source.featureInfo!.outfields!.push(newOutfield);
+      });
+    }
+
+    layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      if (!outfield.alias) outfield.alias = outfield.name;
+    });
+
+    if (!layerConfig.source.featureInfo.nameField)
+      if (layerMetadata.displayField) layerConfig.source.featureInfo.nameField = layerMetadata.displayField as string;
+      else {
+        layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0].name;
       }
   }
 }

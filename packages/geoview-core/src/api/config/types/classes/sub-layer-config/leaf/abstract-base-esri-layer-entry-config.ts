@@ -136,6 +136,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
           name: fieldEntry.name,
           alias: fieldEntry.alias,
           type: AbstractBaseEsriLayerEntryConfig.#convertEsriFieldType(fieldEntry.type as string),
+          // TODO refactor - investigate replacing null with empty array for domain
           domain: Cast<null | codedValueType | rangeDomainType>(fieldEntry.domain),
         })
       );
