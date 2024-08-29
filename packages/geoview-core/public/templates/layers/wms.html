@@ -117,10 +117,15 @@
                         'style': 'msi-binary',
                         'featureInfo': {
                           'queryable': true,
-                          'nameField': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
-                          'fieldTypes': 'number',
-                          'outfields': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
-                          'aliasFields':  { 'en': 'Pixel value', 'fr': 'Valeur du pixel' }
+                          'nameField': 'band-0-pixel-value',
+                          'outfields': [
+                            {
+                              'name': 'band-0-pixel-value',
+                              'alias': 'Pixel value',
+                              'type': 'number',
+                              'domain': []
+                            }
+                          ]
                         }
                       }
                     }

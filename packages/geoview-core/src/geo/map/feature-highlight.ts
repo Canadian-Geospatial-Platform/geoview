@@ -14,6 +14,7 @@ import { logger } from '@/core/utils/logger';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeFeatureInfoEntry } from './map-schema-types';
 import { PointMarkers } from '@/core/components/point-markers/point-markers';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /** *****************************************************************************************************************************
  * A class to handle highlighting of features
@@ -33,7 +34,7 @@ export class FeatureHighlight {
   pointMarkers: PointMarkers;
 
   /** The fill for the highlight */
-  #highlightColor = 'black';
+  #highlightColor: TypeHighlightColors = 'black';
 
   /** The fill for the highlight */
   #highlightFill = new Fill({ color: [0, 0, 0, 0.3] });
@@ -57,13 +58,13 @@ export class FeatureHighlight {
   constructor(mapViewer: MapViewer) {
     this.overlayLayer = new VectorLayer({ source: this.highlighSource, map: mapViewer.map });
     this.pointMarkers = new PointMarkers(mapViewer, this);
-    // if (this.#highlightColor !== undefined)
-    //   this.changeHighlightColor(MapEventProcessor.getMapHighlightColor(this.#mapId) as TypeHighlightColors);
+    if (MapEventProcessor.getFeatureHighlightColor(mapViewer.mapId) !== 'black')
+      this.changeHighlightColor(MapEventProcessor.getFeatureHighlightColor(mapViewer.mapId));
   }
 
   /**
    * Changes the highlight color
-   * @param {TypeHighlightColor} color - New color
+   * @param {TypeHighlightColors} color - New color
    */
   changeHighlightColor(color: TypeHighlightColors): void {
     this.#highlightColor = color;

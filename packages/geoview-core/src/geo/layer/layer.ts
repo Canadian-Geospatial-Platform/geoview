@@ -1516,14 +1516,25 @@ export class LayerApi {
    *
    * @param {string} layerPath - The path of the layer.
    * @param {string} fieldNames - The new field names to use, separated by commas.
-   * @param {'aliasFields' | 'outfields'} fields - The fields to change.
+   * @param {'alias' | 'name'} fields - The fields to change.
    */
-  redefineFeatureFields(layerPath: string, fieldNames: string, fields: 'aliasFields' | 'outfields'): void {
+  redefineFeatureFields(layerPath: string, fieldNames: string, fields: 'alias' | 'name'): void {
     const layerConfig = this.#layerEntryConfigs[layerPath] as AbstractBaseLayerEntryConfig;
+
     if (!layerConfig) logger.logError(`Unable to find layer ${layerPath}`);
-    else if (layerConfig.source?.featureInfo && layerConfig.source.featureInfo.queryable !== false)
-      layerConfig.source.featureInfo[fields] = createLocalizedString(fieldNames);
-    else logger.logError(`${layerPath} is not queryable`);
+    else if (
+      layerConfig.source?.featureInfo &&
+      layerConfig.source.featureInfo.queryable !== false &&
+      layerConfig.source.featureInfo.outfields
+    ) {
+      const fieldValues = fieldNames.split(',');
+      if (layerConfig.source.featureInfo.outfields.length === fieldValues.length)
+        layerConfig.source.featureInfo.outfields?.forEach((outfield, index) => {
+          // eslint-disable-next-line no-param-reassign
+          outfield[fields] = fieldValues[index];
+        });
+      else logger.logError(`Number of provided names for layer ${layerPath} does not match number of fields`);
+    } else logger.logError(`${layerPath} is not queryable`);
   }
 
   /**

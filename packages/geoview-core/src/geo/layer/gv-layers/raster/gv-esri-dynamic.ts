@@ -645,10 +645,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @private
    */
   #formatFieldValue(fieldName: string, rawValue: string | number | Date, sourceFeatureInfo: TypeFeatureInfoLayerConfig): string {
-    const fieldIndex = getLocalizedValue(sourceFeatureInfo.outfields, AppEventProcessor.getDisplayLanguage(this.getMapId()))
-      ?.split(',')
-      .indexOf(fieldName);
-    const fieldType = sourceFeatureInfo.fieldTypes?.split(',')[fieldIndex!];
+    const fieldEntry = sourceFeatureInfo.outfields?.find((outfield) => outfield.name === fieldName);
+    const fieldType = fieldEntry?.type;
     switch (fieldType) {
       case 'date':
         return `date '${rawValue}'`;

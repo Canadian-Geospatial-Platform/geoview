@@ -76,10 +76,27 @@
                   'source': {
                     'featureInfo': {
                       'queryable': true,
-                      'nameField': { 'en': 'IDENTIF', 'fr': 'IDENTIF' },
-                      'outfields': { 'en': 'IDENTIF,NAME,OBJECTID', 'fr': 'IDENTIF,NAME,OBJECTID' },
-                      'fieldTypes': 'string,string',
-                      'aliasFields': { 'en': 'Identification,Name,Id', 'fr': 'Identification,Name,Id' }
+                      'nameField': 'IDENTIF',
+                      'outfields': [
+                        {
+                          'name': 'IDENTIF',
+                          'alias': 'Identification',
+                          'type': 'string',
+                          'domain': []
+                        },
+                        {
+                          'name': 'NAME',
+                          'alias': 'Name',
+                          'type': 'string',
+                          'domain': []
+                        },
+                        {
+                          'name': 'OBJECTID',
+                          'alias': 'Id',
+                          'type': 'number',
+                          'domain': []
+                        }
+                      ]
                     }
                   }
                 },
@@ -89,10 +106,27 @@
                   'source': {
                     'featureInfo': {
                       'queryable': true,
-                      'nameField': { 'en': 'IDENTIF', 'fr': 'IDENTIF' },
-                      'outfields': { 'en': 'IDENTIF,NAME,OBJECTID', 'fr': 'IDENTIF,NAME,OBJECTID' },
-                      'fieldTypes': 'string,string',
-                      'aliasFields': { 'en': 'Identification,Name,Id', 'fr': 'Identification,Name,Id' }
+                      'nameField': 'IDENTIF',
+                      'outfields': [
+                        {
+                          'name': 'IDENTIF',
+                          'alias': 'Identification',
+                          'type': 'string',
+                          'domain': []
+                        },
+                        {
+                          'name': 'NAME',
+                          'alias': 'Name',
+                          'type': 'string',
+                          'domain': []
+                        },
+                        {
+                          'name': 'OBJECTID',
+                          'alias': 'Id',
+                          'type': 'number',
+                          'domain': []
+                        }
+                      ]
                     }
                   }
                 },

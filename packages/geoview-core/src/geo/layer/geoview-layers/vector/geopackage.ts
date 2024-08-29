@@ -33,6 +33,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
+import { TypeOutfields } from '@/api/config/types/map-schema-types';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
@@ -660,41 +661,38 @@ export class GeoPackage extends AbstractGeoViewVector {
   static #processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
-    // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
-    // when en and fr are undefined, we set both en and fr to the same value.
-    if (!layerConfig.source.featureInfo.outfields?.en || !layerConfig.source.featureInfo.aliasFields?.en) {
-      const processOutField = !layerConfig.source.featureInfo.outfields?.en;
-      const processAliasFields = !layerConfig.source.featureInfo.aliasFields?.en;
-      if (processOutField) {
-        layerConfig.source.featureInfo.outfields = { en: '' };
-        layerConfig.source.featureInfo.fieldTypes = '';
-      }
-      if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
 
-      Object.keys(fields).forEach((fieldEntry) => {
-        if (!fields[fieldEntry]) return;
-        if (fields[fieldEntry].type === 'Geometry') return;
-        if (processOutField) {
-          layerConfig.source!.featureInfo!.outfields!.en = `${layerConfig.source!.featureInfo!.outfields!.en}${fieldEntry},`;
-          let fieldType = 'string';
-          if (fields[fieldEntry].type === 'date') fieldType = 'date';
-          else if (['bigint', 'number'].includes(typeof fields[fieldEntry])) fieldType = 'number';
-          layerConfig.source!.featureInfo!.fieldTypes = `${layerConfig.source!.featureInfo!.fieldTypes}${fieldType},`;
-        }
-        layerConfig.source!.featureInfo!.aliasFields!.en = `${layerConfig.source!.featureInfo!.aliasFields!.en}${fieldEntry},`;
+    // Process undefined outfields or aliasFields
+    if (!layerConfig.source.featureInfo.outfields?.length) {
+      if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
+
+      Object.keys(fields).forEach((fieldEntryKey) => {
+        if (!fields[fieldEntryKey]) return;
+
+        const fieldEntry = fields[fieldEntryKey];
+        if (fieldEntry.type === 'Geometry') return;
+
+        let fieldType = 'string';
+        if (fieldEntry.type === 'date') fieldType = 'date';
+        else if (['bigint', 'number'].includes(typeof fieldEntry)) fieldType = 'number';
+
+        const newOutfield: TypeOutfields = {
+          name: fieldEntryKey,
+          alias: fieldEntryKey,
+          type: fieldType as 'string' | 'number' | 'date',
+          domain: null,
+        };
+        layerConfig.source!.featureInfo!.outfields!.push(newOutfield);
       });
-      layerConfig.source.featureInfo!.outfields!.en = layerConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
-      layerConfig.source.featureInfo!.fieldTypes = layerConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
-      layerConfig.source.featureInfo!.aliasFields!.en = layerConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
-      layerConfig.source!.featureInfo!.outfields!.fr = layerConfig.source!.featureInfo!.outfields?.en;
-      layerConfig.source!.featureInfo!.aliasFields!.fr = layerConfig.source!.featureInfo!.aliasFields?.en;
     }
-    if (!layerConfig.source.featureInfo.nameField) {
-      const en =
-        layerConfig.source.featureInfo!.outfields!.en?.split(',')[0] || layerConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
-      const fr = en;
-      if (en) layerConfig.source.featureInfo.nameField = { en, fr };
-    }
+
+    layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      if (!outfield.alias) outfield.alias = outfield.name;
+    });
+
+    // Set name field to first value
+    if (!layerConfig.source.featureInfo.nameField)
+      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
   }
 
   /** ***************************************************************************************************************************

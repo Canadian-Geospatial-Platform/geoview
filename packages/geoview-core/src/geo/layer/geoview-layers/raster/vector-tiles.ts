@@ -118,6 +118,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
   // GV Layers Refactoring - Obsolete (in layers)
+  // TODO refactor - this looks like it will not work, investigate further
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo;
     const fieldIndex = getLocalizedValue(
@@ -279,10 +280,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     if (this.metadata) {
-      const { tileInfo } = this.metadata;
-      const extent = this.metadata.fullExtent;
+      const { tileInfo, fullExtent } = this.metadata;
       const newTileGrid: TypeTileGrid = {
-        extent: [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number],
+        extent: [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number],
         origin: [tileInfo.origin.x as number, tileInfo.origin.y as number],
         resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
         tileSize: [tileInfo.rows as number, tileInfo.cols as number],

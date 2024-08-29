@@ -4,7 +4,7 @@ import { Extent } from 'ol/extent'; // only for Typing
 import { FitOptions } from 'ol/View'; // only for typing
 
 import { useStore } from 'zustand';
-import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
+import { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
@@ -32,6 +32,7 @@ export interface IMapState {
   clickMarker: TypeClickMarker | undefined;
   currentBasemapOptions: TypeBasemapOptions;
   currentProjection: TypeValidMapProjectionCodes;
+  featureHighlightColor: TypeHighlightColors;
   fixNorth: boolean;
   highlightedFeatures: TypeFeatureInfoEntry[];
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
@@ -140,6 +141,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     clickMarker: undefined,
     currentBasemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
     currentProjection: 3857 as TypeValidMapProjectionCodes,
+    featureHighlightColor: 'black',
     fixNorth: false,
     highlightedFeatures: [],
     hoverFeatureInfo: undefined,
@@ -173,6 +175,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
             : CV_MAP_CENTER[geoviewConfig.map.viewSettings.projection],
           currentProjection: geoviewConfig.map.viewSettings.projection,
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
+          featureHighlightColor: geoviewConfig.map.highlightColor || 'black',
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.maxExtent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
@@ -869,6 +872,8 @@ export const useMapClickMarker = (): TypeClickMarker | undefined => useStore(use
 export const useMapClickCoordinates = (): TypeMapMouseInfo | undefined =>
   useStore(useGeoViewStore(), (state) => state.mapState.clickCoordinates);
 export const useMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
+export const useMapFeatureHighlightColor = (): TypeHighlightColors =>
+  useStore(useGeoViewStore(), (state) => state.mapState.featureHighlightColor);
 export const useMapFixNorth = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInitialFilters = (): Record<string, string> => useStore(useGeoViewStore(), (state) => state.mapState.initialFilters);
 export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore(), (state) => state.mapState.interaction);

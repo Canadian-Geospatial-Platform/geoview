@@ -25,19 +25,22 @@
         },
         "featureInfo": {
           "queryable": "true",
-          "nameField": {
-            "en": "label_en",
-            "fr": "label_fr"
-          },
-          "outfields": {
-            "en": "label_en,percentile_en,period_en,scenario_en,time_begin,time_end,time_step,uom,value_type_en,variable_en,values",
-            "fr": "label_fr,percentile_fr,period_fr,scenario_fr,time_begin,time_end,time_step,uom,value_type_fr,variable_fr,values"
-          },
-          "fieldTypes": "string,string,string,string,date,date,string,string,string,string,number",
-          "aliasFields": {
-            "en": "label_en,percentile_en,period_en,scenario_en,time_begin,time_end,time_step,uom,value_type_en,variable_en,values",
-            "fr": "label_fr,percentile_fr,period_fr,scenario_fr,time_begin,time_end,time_step,uom,value_type_fr,variable_fr,values"
-          }
+          "nameField": "label_en",
+          "outfields": [
+            [
+              { "name": "label_en", "alias": "label_en", "type": "string", "domain": null },
+              { "name": "percentile_en", "alias": "percentile_en", "type": "string", "domain": null },
+              { "name": "period_en", "alias": "period_en", "type": "string", "domain": null },
+              { "name": "scenario_en", "alias": "scenario_en", "type": "string", "domain": null },
+              { "name": "time_begin", "alias": "time_begin", "type": "date", "domain": null },
+              { "name": "time_end", "alias": "time_end Date", "type": "date", "domain": null },
+              { "name": "time_step", "alias": "time_step", "type": "string", "domain": null },
+              { "name": "uom", "alias": "uom", "type": "string", "domain": null },
+              { "name": "value_type_en", "alias": "value_type_en", "type": "string", "domain": null },
+              { "name": "variable_en", "alias": "variable_en", "type": "string", "domain": null },
+              { "name": "values", "alias": "values", "type": "number", "domain": null }
+            ]
+          ]
         }
       },
       "style": {

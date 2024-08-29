@@ -29,15 +29,14 @@
                   "en": "band-0-pixel-value",
                   "fr": "band-0-pixel-value"
                 },
-                "outfields": {
-                  "en": "band-0-pixel-value",
-                  "fr": "band-0-pixel-value"
-                },
-                "fieldTypes": "number",
-                "aliasFields": {
-                  "en": "Pixel value",
-                  "fr": "Valeur du pixel"
-                }
+                "outfields": [
+                  {
+                    "name": "band-0-pixel-value",
+                    "alias": "Pixel value",
+                    "type": "number",
+                    "domain": []
+                  }
+                ]
               }
             }
           }

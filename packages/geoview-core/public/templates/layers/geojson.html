@@ -188,10 +188,33 @@
                 },
                 featureInfo: {
                   queryable: true,
-                  nameField: { en: 'comment_en', fr: 'comment_fr' },
-                  outfields: { en: 'comment_en,death_en_1,end_date,evacuation_en_1', fr: 'comment_fr,death_fr_1,end_date,evacuation_fr_1' },
-                  fieldTypes: 'string,string,date,string',
-                  aliasFields: { en: 'comment_en,death_en_1,end_date,evacuation_en_1', fr: 'comment_fr,death_fr_1,end_date,evacuation_fr_1' },
+                  nameField: 'comment_en',
+                  outfields: [
+                    {
+                      name: 'comment_en',
+                      alias: 'comment_en',
+                      type: 'string',
+                      domain: []
+                    },
+                    {
+                      name: 'death_en_1',
+                      alias: 'death_en_1',
+                      type: 'string',
+                      domain: []
+                    },
+                    {
+                      name: 'end_date',
+                      alias: 'end_date',
+                      type: 'date',
+                      domain: []
+                    },
+                    {
+                      name: 'evacuation_en_1',
+                      alias: 'evacuation_en_1',
+                      type: 'string',
+                      domain: []
+                    }
+                  ]
                 },
               },
             },

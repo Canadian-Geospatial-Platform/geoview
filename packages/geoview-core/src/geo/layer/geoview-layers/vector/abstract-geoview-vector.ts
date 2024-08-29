@@ -17,7 +17,7 @@ import { ProjectionLike } from 'ol/proj';
 import { Point } from 'ol/geom';
 import { getUid } from 'ol/util';
 
-import { TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeLocalizedString, TypeOutfields } from '@config/types/map-schema-types';
 
 import { api } from '@/app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -225,27 +225,21 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
             // If feature info is queryable
             if (layerConfig.source?.featureInfo?.queryable) {
-              const featureInfo = (layerConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
-              const fieldTypes = featureInfo.fieldTypes?.split(',') || [];
-              const fieldNames =
-                getLocalizedValue(featureInfo.outfields, AppEventProcessor.getDisplayLanguage(this.mapId))?.split(',') || [];
-              const dateFields = fieldTypes?.reduce<string[]>((accumulator, entryFieldType, i) => {
-                if (entryFieldType === 'date') accumulator.push(fieldNames[i]);
-                return accumulator;
-              }, []);
+              const { outfields } = (layerConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
+              const dateFields = outfields?.filter((outfield) => outfield.type === 'date');
               if (dateFields?.length) {
                 features.forEach((feature) => {
-                  dateFields.forEach((fieldName) => {
-                    let fieldValue = feature.get(fieldName);
+                  dateFields.forEach((dateField) => {
+                    let fieldValue = feature.get(dateField.name);
                     if (typeof fieldValue === 'number') {
                       let dateString = DateMgt.convertMilisecondsToDate(fieldValue);
                       dateString = DateMgt.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
-                      (feature as Feature).set(fieldName, DateMgt.convertToMilliseconds(dateString), true);
+                      (feature as Feature).set(dateField.name, DateMgt.convertToMilliseconds(dateString), true);
                     } else {
                       if (!this.serverDateFragmentsOrder)
                         this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(fieldValue));
                       fieldValue = DateMgt.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
-                      (feature as Feature).set(fieldName, DateMgt.convertToMilliseconds(fieldValue), true);
+                      (feature as Feature).set(dateField.name, DateMgt.convertToMilliseconds(fieldValue), true);
                     }
                   });
                 });
@@ -708,9 +702,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * This method sets the outfields and aliasFields of the source feature info.
    *
-   * @param {string[]} headers An array of field names.
-   * @param {string[]} firstRow The first row of data.
-   * @param {number[]} lonLatIndices The index of lon and lat in the array.
+   * @param {string[]} headers - An array of field names.
+   * @param {string[]} firstRow - The first row of data.
+   * @param {string[]} excludedHeaders - The headers to exclude from feature info.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    * @private
    */
@@ -722,40 +716,34 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): void {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
-    // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
-    // when en and fr are undefined, we set both en and fr to the same value.
-    if (!layerConfig.source.featureInfo.outfields?.en || !layerConfig.source.featureInfo.aliasFields?.en) {
-      const processOutField = !layerConfig.source.featureInfo.outfields?.en;
-      const processAliasFields = !layerConfig.source.featureInfo.aliasFields?.en;
-      if (processOutField) {
-        layerConfig.source.featureInfo.outfields = { en: '' };
-        layerConfig.source.featureInfo.fieldTypes = '';
-      }
-      if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
+
+    // Process undefined outfields or aliasFields
+    if (!layerConfig.source.featureInfo.outfields?.length) {
+      if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
+
       headers.forEach((header, index) => {
         // If not excluded
         if (!excludedHeaders.includes(header)) {
           let type = 'string';
           if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
-          if (processOutField) {
-            layerConfig.source!.featureInfo!.outfields!.en = `${layerConfig.source!.featureInfo!.outfields!.en}${header},`;
-            layerConfig.source!.featureInfo!.fieldTypes = `${layerConfig.source!.featureInfo!.fieldTypes}${type},`;
-          }
-          layerConfig.source!.featureInfo!.aliasFields!.en = `${layerConfig.source!.featureInfo!.outfields!.en}${header},`;
+
+          const newOutfield: TypeOutfields = {
+            name: header,
+            alias: header,
+            type: type as 'string' | 'number',
+            domain: null,
+          };
+          layerConfig.source!.featureInfo!.outfields!.push(newOutfield);
         }
       });
-      // Remove commas from end of strings
-      layerConfig.source.featureInfo!.outfields!.en = layerConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
-      layerConfig.source.featureInfo!.fieldTypes = layerConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
-      layerConfig.source.featureInfo!.aliasFields!.en = layerConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
-      layerConfig.source!.featureInfo!.outfields!.fr = layerConfig.source!.featureInfo!.outfields?.en;
-      layerConfig.source!.featureInfo!.aliasFields!.fr = layerConfig.source!.featureInfo!.aliasFields?.en;
     }
-    if (!layerConfig.source.featureInfo.nameField) {
-      const en =
-        layerConfig.source.featureInfo!.outfields!.en?.split(',')[0] || layerConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
-      const fr = en;
-      if (en) layerConfig.source.featureInfo.nameField = { en, fr };
-    }
+
+    layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      if (!outfield.alias) outfield.alias = outfield.name;
+    });
+
+    // Set name field to first value
+    if (!layerConfig.source.featureInfo.nameField)
+      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
   }
 }
