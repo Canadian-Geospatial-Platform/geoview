@@ -983,10 +983,27 @@ export abstract class LayerMockup {
       source: {
         featureInfo: {
           queryable: true,
-          nameField: { en: 'Province', fr: 'Province' },
-          outfields: { en: 'Province,creationDate,myImages', fr: 'Province,creationDate,myImages' },
-          fieldTypes: 'string,date',
-          aliasFields: { en: 'Province,Creation Date,My Images', fr: 'Province,Date de création,Mes images' },
+          nameField: 'Province',
+          outfields: [
+            {
+              name: 'Province',
+              alias: 'Province',
+              type: 'string',
+              domain: [],
+            },
+            {
+              name: 'creationDate',
+              alias: 'Creation Date',
+              type: 'date',
+              domain: [],
+            },
+            {
+              name: 'myImages',
+              alias: 'My Images',
+              type: 'url',
+              domain: [],
+            },
+          ],
         },
       },
       style: {
@@ -1053,10 +1070,27 @@ export abstract class LayerMockup {
       source: {
         featureInfo: {
           queryable: false,
-          nameField: { en: 'Road_Number', fr: 'Road_Number' },
-          outfields: { en: 'Road_Number,Province,creationDate', fr: 'Road_Number,Province,creationDate' },
-          fieldTypes: 'number,string,date',
-          aliasFields: { en: 'Road Number,Province,Creation Date', fr: 'Numéro de route,Province,Date de création' },
+          nameField: 'Road_Number',
+          outfields: [
+            {
+              name: 'Road_Number',
+              alias: 'Road Number',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Province',
+              alias: 'Province',
+              type: 'string',
+              domain: [],
+            },
+            {
+              name: 'creationDate',
+              alias: 'Creation Date',
+              type: 'date',
+              domain: [],
+            },
+          ],
         },
       },
       style: {
@@ -1081,10 +1115,27 @@ export abstract class LayerMockup {
       source: {
         featureInfo: {
           queryable: true,
-          nameField: { en: 'data', fr: 'data' },
-          outfields: { en: 'data,label,creationDate', fr: 'data,label,creationDate' },
-          fieldTypes: 'string,string,date',
-          aliasFields: { en: 'data,label,Creation Date', fr: 'données,étiquette,Date de création' },
+          nameField: 'data',
+          outfields: [
+            {
+              name: 'data',
+              alias: 'data',
+              type: 'string',
+              domain: [],
+            },
+            {
+              name: 'label',
+              alias: 'label',
+              type: 'string',
+              domain: [],
+            },
+            {
+              name: 'creationDate',
+              alias: 'Creation Date',
+              type: 'date',
+              domain: [],
+            },
+          ],
         },
       },
       style: {
@@ -1109,10 +1160,45 @@ export abstract class LayerMockup {
       source: {
         featureInfo: {
           queryable: false,
-          nameField: { en: 'Red', fr: 'Red' },
-          outfields: { en: 'Red,Green,Blue,Yellow,Orange,creationDate', fr: 'Red,Green,Blue,Yellow,Orange,creationDate' },
-          fieldTypes: 'number,number,number,number,number,date',
-          aliasFields: { en: 'Red,Green,Blue,Yellow,Orange,Creation Date', fr: 'Rouge,Vert,Bleu,Jaune,Orange,Date de création' },
+          nameField: 'Red',
+          outfields: [
+            {
+              name: 'Red',
+              alias: 'Red',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Green',
+              alias: 'Green',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Blue',
+              alias: 'Blue',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Yellow',
+              alias: 'Yellow',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Orange',
+              alias: 'Orange',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'creationDate',
+              alias: 'Creation Date',
+              type: 'number',
+              domain: [],
+            },
+          ],
         },
       },
       style: {
@@ -1135,10 +1221,45 @@ export abstract class LayerMockup {
       source: {
         featureInfo: {
           queryable: true,
-          nameField: { en: 'Red', fr: 'Red' },
-          outfields: { en: 'Red,Green,Blue,Yellow,Orange,creationDate', fr: 'Red,Green,Blue,Yellow,Orange,creationDate' },
-          fieldTypes: 'number,number,number,number,number,date',
-          aliasFields: { en: 'Red,Green,Blue,Yellow,Orange,Creation Date', fr: 'Rouge,Vert,Bleu,Jaune,Orange,Date de création' },
+          nameField: 'Red',
+          outfields: [
+            {
+              name: 'Red',
+              alias: 'Red',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Green',
+              alias: 'Green',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Blue',
+              alias: 'Blue',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Yellow',
+              alias: 'Yellow',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Orange',
+              alias: 'Orange',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'creationDate',
+              alias: 'Creation Date',
+              type: 'number',
+              domain: [],
+            },
+          ],
         },
       },
       style: {
@@ -1161,10 +1282,45 @@ export abstract class LayerMockup {
       source: {
         featureInfo: {
           queryable: true,
-          nameField: { en: 'Red', fr: 'Red' },
-          outfields: { en: 'Red,Green,Blue,Yellow,Orange,creationDate', fr: 'Red,Green,Blue,Yellow,Orange,creationDate' },
-          fieldTypes: 'number,number,number,number,number,date',
-          aliasFields: { en: 'Red,Green,Blue,Yellow,Orange,Creation Date', fr: 'Rouge,Vert,Bleu,Jaune,Orange,Date de création' },
+          nameField: 'Red',
+          outfields: [
+            {
+              name: 'Red',
+              alias: 'Red',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Green',
+              alias: 'Green',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Blue',
+              alias: 'Blue',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Yellow',
+              alias: 'Yellow',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Orange',
+              alias: 'Orange',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'creationDate',
+              alias: 'Creation Date',
+              type: 'number',
+              domain: [],
+            },
+          ],
         },
       },
       style: {
@@ -1187,10 +1343,45 @@ export abstract class LayerMockup {
       source: {
         featureInfo: {
           queryable: false,
-          nameField: { en: 'Red', fr: 'Red' },
-          outfields: { en: 'Red,Green,Blue,Yellow,Orange,creationDate', fr: 'Red,Green,Blue,Yellow,Orange,creationDate' },
-          fieldTypes: 'number,number,number,number,number,date',
-          aliasFields: { en: 'Red,Green,Blue,Yellow,Orange,Creation Date', fr: 'Rouge,Vert,Bleu,Jaune,Orange,Date de création' },
+          nameField: 'Red',
+          outfields: [
+            {
+              name: 'Red',
+              alias: 'Red',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Green',
+              alias: 'Green',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Blue',
+              alias: 'Blue',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Yellow',
+              alias: 'Yellow',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'Orange',
+              alias: 'Orange',
+              type: 'number',
+              domain: [],
+            },
+            {
+              name: 'creationDate',
+              alias: 'Creation Date',
+              type: 'number',
+              domain: [],
+            },
+          ],
         },
       },
       style: {

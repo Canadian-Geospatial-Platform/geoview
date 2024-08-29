@@ -7,7 +7,6 @@ import { Pixel } from 'ol/pixel';
 import { ImageWMS } from 'ol/source';
 import { Extent } from 'ol/extent';
 
-import { TypeLocalizedString } from '@config/types/map-schema-types';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
@@ -408,16 +407,7 @@ export class GVWMS extends AbstractGVRaster {
     layerConfig: OgcWmsLayerEntryConfig,
     clickCoordinate: Coordinate
   ): TypeFeatureInfoEntry[] {
-    const featureInfo = layerConfig?.source?.featureInfo;
-    const outfields = getLocalizedValue(
-      featureInfo?.outfields as TypeLocalizedString,
-      AppEventProcessor.getDisplayLanguage(this.getMapId())
-    )?.split(',');
-    const fieldTypes = featureInfo?.fieldTypes?.split(',');
-    const aliasFields = getLocalizedValue(
-      featureInfo?.aliasFields as TypeLocalizedString,
-      AppEventProcessor.getDisplayLanguage(this.getMapId())
-    )?.split(',');
+    const outfields = layerConfig?.source?.featureInfo?.outfields;
     const queryResult: TypeFeatureInfoEntry[] = [];
 
     let featureKeyCounter = 0;
@@ -465,20 +455,24 @@ export class GVWMS extends AbstractGVRaster {
     else {
       fieldKeyCounter = 0;
       const fieldsToDelete = Object.keys(featureInfoEntry.fieldInfo).filter((fieldName) => {
-        if (outfields?.includes(fieldName)) {
-          const fieldIndex = outfields.indexOf(fieldName);
+        if (outfields.find((outfield) => outfield.name === fieldName)) {
+          const fieldIndex = outfields.findIndex((outfield) => outfield.name === fieldName);
           featureInfoEntry.fieldInfo[fieldName]!.fieldKey = fieldKeyCounter++;
-          featureInfoEntry.fieldInfo[fieldName]!.alias = aliasFields![fieldIndex];
-          featureInfoEntry.fieldInfo[fieldName]!.dataType = fieldTypes![fieldIndex] as 'string' | 'date' | 'number';
+          featureInfoEntry.fieldInfo[fieldName]!.alias = outfields![fieldIndex].alias;
+          featureInfoEntry.fieldInfo[fieldName]!.dataType = outfields![fieldIndex].type;
           return false; // keep this entry
         }
+
         return true; // delete this entry
       });
+
       fieldsToDelete.forEach((entryToDelete) => {
         delete featureInfoEntry.fieldInfo[entryToDelete];
       });
+
       queryResult.push(featureInfoEntry);
     }
+
     return queryResult;
   }
 

@@ -11,7 +11,7 @@ import Feature from 'ol/Feature';
 import Source from 'ol/source/Source';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
 
-import { TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeLocalizedString, TypeOutfieldsType } from '@config/types/map-schema-types';
 
 import { generateId, getXMLHttpRequest, createLocalizedString, getLocalizedValue, whenThisThen } from '@/core/utils/utilities';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
@@ -1238,13 +1238,13 @@ export abstract class AbstractGeoViewLayer {
    * Get and format the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
    * since the base date. Vector feature dates must be in ISO format.
    *
-   * @param {Feature} features The features that hold the field values.
-   * @param {string} fieldName The field name.
-   * @param {'number' | 'string' | 'date'} fieldType The field type.
+   * @param {Feature} feature - The features that hold the field values.
+   * @param {string} fieldName - The field name.
+   * @param {'number' | 'string' | 'date'} fieldType - The field type.
    *
    * @returns {string | number | Date} The formatted value of the field.
    */
-  protected getFieldValue(feature: Feature, fieldName: string, fieldType: 'number' | 'string' | 'date'): string | number | Date {
+  protected getFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType): string | number | Date {
     const fieldValue = feature.get(fieldName);
     let returnValue: string | number | Date;
     if (fieldType === 'date') {
@@ -1304,15 +1304,6 @@ export abstract class AbstractGeoViewLayer {
       };
 
       const featureInfo = layerConfig?.source?.featureInfo;
-      const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
-      const outfields = getLocalizedValue(
-        featureInfo?.outfields as TypeLocalizedString,
-        AppEventProcessor.getDisplayLanguage(this.mapId)
-      )?.split(',');
-      const aliasFields = getLocalizedValue(
-        featureInfo?.aliasFields as TypeLocalizedString,
-        AppEventProcessor.getDisplayLanguage(this.mapId)
-      )?.split(',');
 
       // Loop on the features to build the array holding the promises for their canvas
       const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement }>[] = [];
@@ -1341,11 +1332,6 @@ export abstract class AbstractGeoViewLayer {
         );
       });
 
-      // Hold a dictionary built on the fly for the field domains
-      const dictFieldDomains: { [fieldName: string]: codedValueType | rangeDomainType | null } = {};
-      // Hold a dictionary build on the fly for the field types
-      const dictFieldTypes: { [fieldName: string]: 'string' | 'number' | 'date' } = {};
-
       // Loop on the promised feature infos
       let featureKeyCounter = 0;
       let fieldKeyCounter = 0;
@@ -1363,47 +1349,29 @@ export abstract class AbstractGeoViewLayer {
           geometry: feature,
           featureIcon: canvas,
           fieldInfo: {},
-          nameField:
-            getLocalizedValue(
-              layerConfig?.source?.featureInfo?.nameField as TypeLocalizedString,
-              AppEventProcessor.getDisplayLanguage(this.mapId)
-            ) || null,
+          nameField: layerConfig?.source?.featureInfo?.nameField || null,
         };
 
         const featureFields = feature.getKeys();
         featureFields.forEach((fieldName) => {
           if (fieldName !== 'geometry') {
+            const currentOutfield = featureInfo?.outfields?.length
+              ? featureInfo.outfields.find((outfield) => outfield.name === fieldName)
+              : undefined;
+
             // Calculate the field domain if not already calculated
-            if (!(fieldName in dictFieldDomains)) {
-              // Calculate it
-              dictFieldDomains[fieldName] = this.getFieldDomain(fieldName, layerConfig);
-            }
-            const fieldDomain = dictFieldDomains[fieldName];
+            const fieldDomain = currentOutfield?.domain || this.getFieldDomain(fieldName, layerConfig);
 
             // Calculate the field type if not already calculated
-            if (!(fieldName in dictFieldTypes)) {
-              dictFieldTypes[fieldName] = this.getFieldType(fieldName, layerConfig);
-            }
-            const fieldType = dictFieldTypes[fieldName];
+            const fieldType = currentOutfield?.type || this.getFieldType(fieldName, layerConfig);
 
-            if (outfields?.includes(fieldName)) {
-              const fieldIndex = outfields.indexOf(fieldName);
-              featureInfoEntry.fieldInfo[fieldName] = {
-                fieldKey: fieldKeyCounter++,
-                value: this.getFieldValue(feature, fieldName, fieldTypes![fieldIndex]),
-                dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
-                alias: aliasFields![fieldIndex],
-                domain: fieldDomain,
-              };
-            } else if (!outfields) {
-              featureInfoEntry.fieldInfo[fieldName] = {
-                fieldKey: fieldKeyCounter++,
-                value: this.getFieldValue(feature, fieldName, fieldType),
-                dataType: fieldType,
-                alias: fieldName,
-                domain: fieldDomain,
-              };
-            }
+            featureInfoEntry.fieldInfo[fieldName] = {
+              fieldKey: fieldKeyCounter++,
+              value: this.getFieldValue(feature, fieldName, fieldType),
+              dataType: fieldType,
+              alias: currentOutfield?.alias || fieldName,
+              domain: fieldDomain,
+            };
           }
         });
         queryResult.push(featureInfoEntry);

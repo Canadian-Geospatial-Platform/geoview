@@ -32,23 +32,44 @@
           "description": "Allow querying. Default = false."
         },
         "nameField": {
-          "$ref": "#/definitions/TypeLocalizedString",
+          "type": "string",
           "description": "The display field (English/French) of the layer. If it is not present the viewer will make an attempt to find the first valid field."
         },
         "outfields": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "A comma separated list of attribute names (English/French) that should be requested on query (all by default)."
-        },
-        "fieldTypes": {
-          "type": "string",
-          "description": "A comma separated list of types. Type at index i is associated to the variable at index i."
-        },
-        "aliasFields": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "A comma separated list of attribute names (English/French) that should be use for alias. If empty, no alias will be set if not found."
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TypeOutfields"
+          }
         }
       },
       "required": ["queryable"]
+    },
+    "TypeOutfields": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The field name.",
+          "type": "string"
+        },
+        "alias": {
+          "description": "The field alias that replaces the name when comes time to display it.",
+          "type": "string"
+        },
+        "type": {
+          "description": "The field type.",
+          "$ref": "#/definitions/TypeOutfieldsType"
+        },
+        "domain": {
+          "description": "An array of values that constitute the domain.",
+          "type": "array"
+        }
+      },
+      "required": ["name", "alias", "type", "domain"]
+    },
+    "TypeOutfieldsType": {
+      "description": "The types supported by the outfields object.",
+      "additionalProperties": false,
+      "enum": ["string", "number", "date", "url"]
     },
     "TypeFeatureInfoNotQueryable": {
       "additionalProperties": false,

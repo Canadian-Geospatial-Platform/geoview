@@ -12,7 +12,6 @@ import {
   TypeFeatureInfoResultSet,
   TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { createLocalizedString } from '@/core/utils/utilities';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -256,36 +255,30 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // TODO Make sure this works with solution to #2259
     // Set up feature info for layers that did not include it in the metadata
     const layerEntryConfig = this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig;
+
     if (!layerEntryConfig.source) layerEntryConfig.source = {};
-    if (!layerEntryConfig.source?.featureInfo) {
-      layerEntryConfig.source!.featureInfo = { queryable: true };
+
+    if (!layerEntryConfig.source.featureInfo) {
+      layerEntryConfig.source.featureInfo = { queryable: true };
     }
+
     const sourceFeatureInfo = layerEntryConfig.source!.featureInfo as TypeFeatureInfoLayerConfig;
-
     if (!sourceFeatureInfo.outfields) {
-      // If no outfields, use keys from field info
-      const fieldInfoKeys = Object.keys(record.fieldInfo);
-      sourceFeatureInfo.outfields = createLocalizedString(fieldInfoKeys.join(','));
+      sourceFeatureInfo.outfields = [];
 
-      // Check field info for aliases
-      const aliases: string[] = [];
-      fieldInfoKeys.forEach((key) => {
-        if (record.fieldInfo[key]?.alias) aliases.push(record.fieldInfo[key]!.alias);
+      Object.keys(record.fieldInfo).forEach((fieldName) => {
+        const newOutfield = {
+          name: fieldName,
+          alias: record.fieldInfo[fieldName]?.alias || fieldName,
+          type: record.fieldInfo[fieldName]?.dataType || 'string',
+          domain: null,
+        };
+
+        sourceFeatureInfo.outfields!.push(newOutfield);
       });
-
-      const aliasString = aliases.join(',');
-      if (!sourceFeatureInfo.aliasFields?.en?.split(',').length && aliasString.length === fieldInfoKeys.length)
-        sourceFeatureInfo.aliasFields = createLocalizedString(aliasString);
-      // If no aliases or they did not match, use outfields
-      else if (!sourceFeatureInfo.aliasFields?.en?.split(',').length) sourceFeatureInfo.aliasFields = sourceFeatureInfo.outfields;
-
-      // Get data types if provided
-      const dataTypes: ('string' | 'number' | 'date' | undefined)[] = fieldInfoKeys.map((key: string) => {
-        if (record.fieldInfo[key]?.dataType) return record.fieldInfo[key]!.dataType;
-        return undefined;
-      });
-      sourceFeatureInfo.fieldTypes = dataTypes.join(',');
     }
+
+    if (!sourceFeatureInfo.nameField) sourceFeatureInfo.nameField = sourceFeatureInfo.outfields[0].name;
   }
 
   /**

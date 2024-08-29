@@ -16,6 +16,7 @@ import {
   TypeValidMapProjectionCodes,
   TypeViewSettings,
   TypePointMarker,
+  TypeHighlightColors,
 } from '@config/types/map-schema-types';
 import { cloneDeep } from 'lodash';
 import { api } from '@/app';
@@ -316,6 +317,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static getPointMarkers(mapId: string): Record<string, TypePointMarker[]> {
     return this.getMapStateProtected(mapId).pointMarkers;
+  }
+
+  /**
+   * Gets feature highlight color.
+   * @param {string} mapId - The ID of the map
+   * @returns {TypeHighlightColors} The highlight color
+   */
+  static getFeatureHighlightColor(mapId: string): TypeHighlightColors {
+    return this.getMapStateProtected(mapId).featureHighlightColor;
   }
 
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {

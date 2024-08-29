@@ -8,10 +8,15 @@
       "source": {
         "featureInfo": {
           "queryable": true,
-          "nameField": { "en": "Titre", "fr": "Titre" },
-          "outfields": { "en": "Titre", "fr": "Titre" },
-          "fieldTypes": "string",
-          "aliasFields": { "en": "Title", "fr": "Titre" }
+          "nameField": "Titre",
+          "outfields": [
+            {
+              "name": "Titre",
+              "alias": "Titre",
+              "type": "string",
+              "domain": []
+            }
+          ]
         }
       },
       "style": {

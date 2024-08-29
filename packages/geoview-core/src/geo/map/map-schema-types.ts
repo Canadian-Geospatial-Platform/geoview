@@ -26,6 +26,8 @@ import {
   TypeMapCorePackages,
   TypeExternalPackages,
   TypeGlobalSettings,
+  TypeOutfields,
+  TypeOutfieldsType,
 } from '@config/types/map-schema-types';
 
 import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -68,22 +70,16 @@ export type TypeVectorSourceFormats =
   | typeof CONST_LAYER_TYPES.GEOPACKAGE
   | typeof CONST_LAYER_TYPES.CSV;
 
-// TODO: refactor - SWITCH to new format and fix old config and all viewer code to use new structure
 export type TypeFeatureInfoLayerConfig = {
   /** Allow querying. Default = false. */
   queryable: boolean;
-
   /**
    * The display field (English/French) of the layer. If it is not present the viewer will make an attempt to find the first valid
    * field.
    */
-  nameField?: TypeLocalizedString;
+  nameField?: string;
   /** A comma separated list of attribute names (English/French) that should be requested on query (all by default). */
-  outfields?: TypeLocalizedString;
-  /** A comma separated list of types. Type at index i is associated to the variable at index i. */
-  fieldTypes?: string;
-  /** A comma separated list of attribute names (English/French) that should be use for alias. If empty, no alias will be set */
-  aliasFields?: TypeLocalizedString;
+  outfields?: TypeOutfields[];
 };
 
 export type TypeBaseSourceVectorInitialConfig = {
@@ -262,7 +258,7 @@ export type rangeDomainType = {
 export type TypeFieldEntry = {
   fieldKey: number;
   value: unknown;
-  dataType: 'string' | 'date' | 'number';
+  dataType: TypeOutfieldsType;
   alias: string;
   domain: null | codedValueType | rangeDomainType;
 };
