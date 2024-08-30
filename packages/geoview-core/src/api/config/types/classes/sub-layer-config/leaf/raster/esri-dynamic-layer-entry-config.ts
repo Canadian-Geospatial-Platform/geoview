@@ -15,20 +15,21 @@ import { EsriBaseRenderer, createStyleUsingEsriRenderer } from '@/api/config/esr
 /**
  * The ESRI dynamic geoview sublayer class.
  */
+
 export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfig {
   // =========================
-  // #region PUBLIC PROPERTIES
+  // #region PROPERTIES
   /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceEsriDynamicInitialConfig;
 
   /** Style to apply to the raster layer. */
   style?: TypeStyleConfig;
-  // #endregion PUBLIC PROPERTIES
+  // #endregion PROPERTIES
 
   // ===============
   // #region METHODS
   /*
-   * Methods are listed in the following order: abstract, override, private, protected and public.
+   * Methods are listed in the following order: abstract, override, private, protected, public and static.
    */
   // ==========================
   // #region OVERRIDE
