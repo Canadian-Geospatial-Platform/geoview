@@ -378,7 +378,7 @@ export interface TypeSourceTileInitialConfig extends TypeBaseSourceInitialConfig
 }
 
 /** Initial settings for WMS image sources. */
-export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialConfig {
+export interface TypeSourceWmsInitialConfig extends TypeBaseSourceInitialConfig {
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
   /** The type of the remote WMS server. The default value is mapserver. */

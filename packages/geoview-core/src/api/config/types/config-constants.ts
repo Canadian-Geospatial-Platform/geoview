@@ -82,7 +82,7 @@ export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   VECTOR_TILES: '',
   OGC_FEATURE: '',
   WFS: '',
-  WMS: '',
+  WMS: 'https://cgpv/schema#/definitions/WmsLayerConfig',
 };
 export const CV_MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/MapFeatureConfig';
 export const CV_LAYER_GROUP_SCHEMA_PATH = 'https://cgpv/schema#/definitions/GroupLayerEntryConfig';

@@ -223,6 +223,7 @@
           <option value="esriDynamic">EsriDynamic</option>
           <option value="esriFeature">EsriFeature</option>
           <option value="geoCore">GeoCore</option>
+          <option value="ogcWms">WMS</option>
         </select>
       </div>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL:&nbsp;
@@ -320,6 +321,7 @@
           <option value="unknown">unknown</option>
           <option value="esriDynamic">EsriDynamic</option>
           <option value="esriFeature">EsriFeature</option>
+          <option value="ogcWms">WMS</option>
         </select>
       </div>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL:&nbsp;
@@ -652,6 +654,7 @@
       geoCore: '12acd145-626a-49eb-b850-0a59c9bc7506',
       esriDynamic: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
       esriFeature: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
+      ogcWms: 'https://geo.weather.gc.ca/geomet',
     };
 
     // Get the GeoView Layer Type drop-down object used to select the type of layer.
@@ -838,6 +841,7 @@
       unknown: 'unknown',
       esriDynamic: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
       esriFeature: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
+      ogcWms: 'https://geo.weather.gc.ca/geomet',
     };
 
     // Get the GeoView Layer Type drop-down object used to select the type of layer.
@@ -908,7 +912,11 @@
         languageTab4
       );
       // Output instanciation result
-      metadataLayerTreeString = `${JSON.stringify(metadataLayerTree, undefined, 2)}\n`;
+      metadataLayerTreeString = `${JSON.stringify(metadataLayerTree, (key, value) => {
+        if (['', 'layerId', 'layerName', 'isLayerGroup', 'listOfLayerEntryConfig'].includes(key)) return value;
+        if (/^\d+$/.test(key)) return value;
+        return undefined;
+      }, 2)}\n`;
       layerPathErrorFlag = generateLayerPathErrorFlag(metadataLayerTree);
 
       if (metadataLayerTree) printMessage(messageTab4, 'Layer tree is valid');

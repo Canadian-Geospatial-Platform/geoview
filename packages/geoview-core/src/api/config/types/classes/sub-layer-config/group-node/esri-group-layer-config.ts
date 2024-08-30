@@ -45,27 +45,28 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
       this.setLayerMetadata(serviceMetadata);
       // parse the raw service metadata and build the geoview configuration.
       this.#parseServiceMetadata();
-      return;
-    }
+    } else {
+      // The layer exists and we can fetch its metadata and parse it.
+      const serviceUrl = serviceMetadata.metadataAccessPath as string;
+      const queryUrl = serviceUrl.endsWith('/') ? `${serviceUrl}${this.layerId}` : `${serviceUrl}/${this.layerId}`;
 
-    // The layer exists and we can fetch its metadata and parse it.
-    const serviceUrl = serviceMetadata.metadataAccessPath as string;
-    const queryUrl = serviceUrl.endsWith('/') ? `${serviceUrl}${this.layerId}` : `${serviceUrl}/${this.layerId}`;
-
-    try {
-      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
-      if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
-      else {
-        // The metadata used are the layer metadata.
-        this.setLayerMetadata(data);
-        // Parse the raw layer metadata and build the geoview configuration.
-        this.#parseLayerMetadata();
-        return;
+      try {
+        const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
+        if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
+        else {
+          // The metadata used are the layer metadata.
+          this.setLayerMetadata(data);
+          // Parse the raw layer metadata and build the geoview configuration.
+          this.#parseLayerMetadata();
+          return;
+        }
+      } catch (error) {
+        logger.logError('Error detected while reading Layer metadata.', error);
+        this.setErrorDetectedFlag();
       }
-    } catch (error) {
-      logger.logError('Error detected while reading Layer metadata.', error);
+
+      await this.fetchListOfLayerMetadata();
     }
-    this.setErrorDetectedFlag();
   }
   // #endregion OVERRIDE
 

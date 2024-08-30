@@ -227,6 +227,24 @@ export abstract class AbstractGeoviewLayerConfig {
   protected getLanguage(): TypeDisplayLanguage {
     return this.#language;
   }
+
+  /**
+   * Fetch the metadata of all layer entry configurations defined in the layer tree.
+   *
+   * @returns {Promise<void>} A promise that will resolve when the process has completed.
+   * @protected @async
+   */
+  protected async fetchListOfLayerMetadata(): Promise<void> {
+    // The root of the GeoView layer tree is an array that contains only one node.
+    const rootLayer = this.listOfLayerEntryConfig[0];
+    if (rootLayer.getErrorDetectedFlag()) return;
+    try {
+      if (rootLayer) await rootLayer.fetchLayerMetadata();
+    } catch (error) {
+      logger.logError(`An error occured while reading the metadata for the layerPath ${rootLayer.getLayerPath()}.`, error);
+      rootLayer.setErrorDetectedFlag();
+    }
+  }
   // #endregion PROTECTED
 
   // ==============

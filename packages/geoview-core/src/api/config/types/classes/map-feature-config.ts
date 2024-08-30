@@ -2,9 +2,10 @@ import cloneDeep from 'lodash/cloneDeep';
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
+import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
 import { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vector-config/esri-feature-config';
+import { WmsLayerConfig } from '@config/types/classes/geoview-config/raster-config/wms-config';
 import {
   CV_BASEMAP_ID,
   CV_BASEMAP_LABEL,
@@ -458,8 +459,8 @@ export class MapFeatureConfig {
       //   return new OgcFeatureLayerConfig(layerConfig);
       // case CONST_LAYER_TYPES.WFS:
       //   return new WfsLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.WMS:
-      //   return new WmsLayerConfig(layerConfig);
+      case CV_CONST_LAYER_TYPES.WMS:
+        return new WmsLayerConfig(layerConfig, language);
       default:
         // TODO: Restore the commented line and remove the next line when we have converted our code to the new framework.
         // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
