@@ -464,7 +464,7 @@ function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeStyl
       uniqueValueStyleInfo.push({
         label: symbolInfo.label,
         visible: true,
-        values: symbolInfo.value.replace("'", "''").split(renderer.fieldDelimiter), // GV: We need to escape the ' character with double '' for ESRI
+        values: symbolInfo.value.replaceAll("'", "''").split(renderer.fieldDelimiter), // GV: We need to escape the ' character with double '' for ESRI
         settings,
       });
     }
