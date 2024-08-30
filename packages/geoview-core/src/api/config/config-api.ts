@@ -468,7 +468,7 @@ export class ConfigApi {
   ): Promise<AbstractGeoviewLayerConfig | undefined> {
     let geoviewLayerConfig: TypeJsonObject | undefined;
 
-    // If the lyerType is a GeoCore, we translate it to its GeoView configuration.
+    // If the layerType is a GeoCore, we translate it to its GeoView configuration.
     if (layerType === CV_CONFIG_GEOCORE_TYPE) {
       try {
         const layerConfig = { geoviewLayerId: serviceAccessString, geoviewLayerType: layerType };
@@ -499,7 +499,7 @@ export class ConfigApi {
   }
 
   /**
-   * Create the layer tree from the service metadata.
+   * Create the layer tree from the service metadata. If an error is detected, throw an error.
    *
    * @param {string} serviceAccessString The service access string (a URL or a layer identifier).
    * @param {TypeGeoviewLayerType | CV_CONFIG_GEOCORE_TYPE} layerType The GeoView layer type or 'geoCore'.
@@ -520,6 +520,6 @@ export class ConfigApi {
       await geoviewLayerConfig.fetchServiceMetadata();
       if (!geoviewLayerConfig.getErrorDetectedFlag()) return geoviewLayerConfig.getMetadataLayerTree();
     }
-    return [];
+    throw new MapConfigError('Unable to build metadata layer tree.');
   }
 }

@@ -117,7 +117,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
+  // GV Layers Refactoring - Obsolete (in config)
   protected override async fetchServiceMetadata(): Promise<void> {
     const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
     if (metadataUrl) {
@@ -195,7 +195,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config?)
+  // GV Layers Refactoring - Obsolete (in config)
   async #getServiceMetadata(url: string): Promise<TypeJsonObject | null> {
     try {
       const response = await fetch(url);
@@ -217,7 +217,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config?)
+  // GV Layers Refactoring - Obsolete (in config)
   async #fetchXmlServiceMetadata(metadataUrl: string): Promise<void> {
     try {
       const parser = new WMSCapabilities();
@@ -261,7 +261,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {number[]} An array containing the path to the layer or [] if not found.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config?)
+  // GV Layers Refactoring - Obsolete (in config)
   #getMetadataLayerPath(layerName: string, layerProperty: TypeJsonObject, pathToTheParentLayer: number[] = []): number[] {
     const newLayerPath = [...pathToTheParentLayer];
     if (Array.isArray(layerProperty)) {
@@ -294,7 +294,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} layerToAdd The layer property to add
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config?)
+  // GV Layers Refactoring - Obsolete (in config)
   #addLayerToMetadataInstance(
     metadataLayerPathToAdd: number[],
     metadataLayer: TypeJsonObject | undefined,
@@ -323,7 +323,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeLayerEntryConfig[]} The array of layer configurations.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config?)
+  // GV Layers Refactoring - Obsolete (in config)
   #getLayersToQuery(): TypeLayerEntryConfig[] {
     const arrayOfLayerIds: TypeLayerEntryConfig[] = [];
     const gatherLayerIds = (listOfLayerEntryConfig = this.listOfLayerEntryConfig): void => {
@@ -345,7 +345,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject | undefined} layer The layer property from the metadata that will inherit the values
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config?)
+  // GV Layers Refactoring - Obsolete (in config)
   #processMetadataInheritance(parentLayer?: TypeJsonObject, layer: TypeJsonObject | undefined = this.metadata?.Capability?.Layer): void {
     if (parentLayer && layer) {
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
@@ -438,11 +438,11 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
    * @private
    */
-  // TODO: Refactor - Layers Refactoring - Check here for layer metadata config vs layers
-  // GV Layers Refactoring - Obsolete (in config? in layers?)
+  // GV Layers Refactoring - Obsolete (in config)
   #createGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig): void {
     // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
     // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
+    // TODO: The answer is no. Even if the final structure is the same, the input structure is different for each geoview layer types.
     const newListOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
     const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : ([layer.Layer] as TypeJsonArray);
 
@@ -483,7 +483,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @private
    */
   // TODO: Refactor - Layers Refactoring - Check here for layer metadata config vs layers
-  // GV Layers Refactoring - Obsolete (in config? in layers?)
+  // GV Layers Refactoring - Obsolete (in config)
   #getLayerMetadataEntry(layerId: string, layer: TypeJsonObject | undefined = this.metadata?.Capability?.Layer): TypeJsonObject | null {
     if (!layer) return null;
     if ('Name' in layer && (layer.Name as string) === layerId) return layer;
@@ -657,7 +657,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
    * @param {OgcWmsLayerEntryConfig} layerConfig The layer entry to configure
    */
-  // GV Layers Refactoring - Obsolete (in config?)
+  // GV Layers Refactoring - Obsolete (in config)
   protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: OgcWmsLayerEntryConfig): void {
     if (wmsTimeDimension !== undefined) {
       this.setTemporalDimension(layerConfig.layerPath, DateMgt.createDimensionFromOGC(wmsTimeDimension));

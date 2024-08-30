@@ -815,6 +815,24 @@
         }
       ]
     },
+    "WmsLayerConfig": {
+      "description": "Structure used by the viewer to describe the configuration of a WMS layer.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractGeoviewLayerConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "geoviewLayerType": {
+              "enum": ["ogcWms"]
+            }
+          }
+        }
+      ]
+    },
     "EntryConfigBaseClass": {
       "description": "Base class from which we derive all the nodes (group and leaves) in the layer tree.",
       "type": "object",
@@ -1027,6 +1045,27 @@
         }
       ]
     },
+    "OgcWmsLayerEntryConfig": {
+      "description": "Class from which we derive all the WMS leaf nodes in the layer tree.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractBaseLayerEntryConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "source": {
+              "$ref": "#/definitions/TypeSourceEsriFeatureInitialConfig"
+            },
+            "style": {
+              "$ref": "#/definitions/TypeStyleConfig"
+            }
+          }
+        }
+      ]
+    },
     "TypeStyleGeometry": {
       "description": "Valid keys for the geometryType property.",
       "enum": ["point", "linestring", "polygon"]
@@ -1039,7 +1078,7 @@
           "$ref": "#/definitions/TypeValidMapProjectionCodes"
         },
         "crossOrigin": {
-          "description": "The crossOrigin attribute if needed to load the data.",
+          "description": "The crossOrigin attribute if needed to load the data (default: Anonymous).",
           "type": "string"
         }
       }
@@ -1064,7 +1103,7 @@
         }
       ]
     },
-    "TypeSourceImageWmsInitialConfig": {
+    "TypeSourceWmsInitialConfig": {
       "description": "Initial settings for tile image sources.",
       "additionalProperties": false,
       "type": "object",
@@ -1692,7 +1731,7 @@
               "maxItems": 2
             },
             "crossOrigin": {
-              "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer.",
+              "description": "The crossOrigin attribute for loaded images (default: Anonymous). Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer.",
               "type": "string"
             }
           }

@@ -1,4 +1,4 @@
-import { TypeBaseSourceInitialConfig, TypeTemporalDimension, TypeStyleGeometry, TypeLayerEntryType } from '@config/types/map-schema-types';
+import { TypeTemporalDimension, TypeStyleGeometry, TypeLayerEntryType } from '@config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 // ========================
@@ -11,9 +11,6 @@ export abstract class AbstractBaseLayerEntryConfig extends EntryConfigBaseClass 
   // #region PUBLIC PROPERTIES
   /** The geometry type of the leaf node. */
   geometryType?: TypeStyleGeometry;
-
-  /** Source settings to apply to the GeoView vector layer source at creation time. */
-  source?: TypeBaseSourceInitialConfig;
 
   /** Optional temporal dimension. */
   temporalDimension?: TypeTemporalDimension;
