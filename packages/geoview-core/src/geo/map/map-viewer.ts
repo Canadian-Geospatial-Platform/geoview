@@ -356,11 +356,14 @@ export class MapViewer {
       // Get the north visibility
       const isNorthVisible = this.getNorthVisibility();
 
+      // Get the map Extent
+      const extent = this.getView().calculateExtent();
+
       // Get the scale information
       const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
 
       // Save in the store
-      MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, scale);
+      MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, extent, scale);
 
       // Emit to the outside
       this.#emitMapMoveEnd({ lnglat: centerCoordinates });
