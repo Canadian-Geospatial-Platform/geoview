@@ -176,6 +176,32 @@
                   }
                 }
               ]
+            },
+            {
+              'geoviewLayerId': 'layerDef',
+              'geoviewLayerName': {
+                'en': 'IACC FR',
+                'fr': 'IAAC FR'
+              },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_fr/MapServer/',
+                'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_fr/MapServer/'
+              },
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': {
+                    'en': 'IACC FR',
+                    'fr': 'IAAC FR'
+                  },
+                  'initialSettings': {
+                  'states': {
+                    'visible': true
+                    }
+                  }
+                }
+              ]
             }
           ]
         },
@@ -204,6 +230,9 @@
         </li>
         <li>
           Protected and conserved area - esri dynamic data table not fetching because of geometry in url - Issue #2200
+        </li>
+        <li>
+          Impact Assessment Agency of Canada – Environmental and Impact Assessments (French) - esri layer definition character in French - Issue #2413
         </li>
       </ul>
     </div>

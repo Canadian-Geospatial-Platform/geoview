@@ -510,10 +510,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
 
+      // GV: We cannot directly use the view extent and reproject. If we do so some layers (issue #2413) identify will return empty resultset
+      // GV-CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the repojection it works
       const mapViewer = this.getMapViewer();
-      const bounds = mapViewer.convertExtentMapProjToLngLat(mapViewer.getView().calculateExtent());
-
-      const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
+      const mapExtent = mapViewer.getView().calculateExtent();
+      const boundsLL = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[0], mapExtent[1]]);
+      const boundsUR = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[2], mapExtent[3]]);
+      const extent = { xmin: boundsLL[0], ymin: boundsLL[1], xmax: boundsUR[0], ymax: boundsUR[1] };
 
       const source = layer.getSource();
       const layerDefs = source?.getParams().layerDefs || '';
