@@ -315,8 +315,9 @@
       "description": "Universal map settings",
       "properties": {
         "canRemoveSublayers": {
+          "description": "Whether or not sublayers can be removed from layer groups.",
           "type": "boolean",
-          "description": "Whether or not sublayers can be removed from layer groups. Default = true."
+          "default": true
         }
       }
     },
@@ -398,16 +399,19 @@
           "$ref": "#/definitions/TypeGeoviewLayerType"
         },
         "serviceDateFormat": {
-          "description": "Date format used by the service endpoint (default 'DD/MM/YYYY HH:MM:SSZ').",
-          "type": "string"
+          "description": "Date format used by the service endpoint.",
+          "type": "string",
+          "default": "DD/MM/YYYY HH:MM:SSZ"
         },
         "externalDateFormat": {
-          "description": "Date format used by the getFeatureInfo to output date variable (default 'DD/MM/YYYY HH:MM:SSZ').",
-          "type": "string"
+          "description": "Date format used by the getFeatureInfo to output date variable.",
+          "type": "string",
+          "default": "DD/MM/YYYY HH:MM:SSZ"
         },
         "isTimeAware": {
+          "description": "Flag to mention if layer will use its time dimension if provided. Used to remove a layer from time enabled functions like time slider.",
           "type": "boolean",
-          "description": "Flag to mention if layer will use its time dimension if provided (default: true). Used to remove a layer from time enabled functions like time slider."
+          "default": true
         },
         "listOfLayerEntryConfig": {
           "description": "The layer entries to use from the GeoView layer.",
@@ -557,8 +561,9 @@
           "default": 1
         },
         "projection": {
+          "description": "The projection code of the coordinates.",
           "type": "number",
-          "description": "The projection code of the coordinates. Default value is 4326."
+          "default": 4326
         }
       },
       "required": ["id", "coordinate"]
@@ -877,12 +882,12 @@
           }
         },
         "minScale": {
-          "description": "Minimum scale the layer can display (default: 0).",
+          "description": "Minimum scale the layer can display.",
           "type": "number",
           "default": 0
         },
         "maxScale": {
-          "description": "Maximum scale the layer can display (default: 0).",
+          "description": "Maximum scale the layer can display.",
           "type": "number",
           "default": 0
         },
@@ -1005,7 +1010,7 @@
               }
             },
             "entryType": {
-              "enum": ["raster-tile"]
+              "enum": ["raster-image"]
             },
             "source": {
               "$ref": "#/definitions/TypeSourceEsriDynamicInitialConfig"
@@ -1057,7 +1062,7 @@
           "type": "object",
           "properties": {
             "source": {
-              "$ref": "#/definitions/TypeSourceEsriFeatureInitialConfig"
+              "$ref": "#/definitions/TypeSourceWmsInitialConfig"
             },
             "style": {
               "$ref": "#/definitions/TypeStyleConfig"
@@ -1078,8 +1083,9 @@
           "$ref": "#/definitions/TypeValidMapProjectionCodes"
         },
         "crossOrigin": {
-          "description": "The crossOrigin attribute if needed to load the data (default: Anonymous).",
-          "type": "string"
+          "description": "The crossOrigin attribute if needed to load the data.",
+          "type": "string",
+          "default": "Anonymous"
         }
       }
     },
@@ -1105,45 +1111,36 @@
     },
     "TypeSourceWmsInitialConfig": {
       "description": "Initial settings for tile image sources.",
-      "additionalProperties": false,
       "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/TypeBaseSourceInitialConfig"
         },
         {
-          "additionalProperties": false,
           "type": "object",
           "properties": {
             "featureInfo": {
               "$ref": "#/definitions/TypeFeatureInfoLayerConfig"
             },
             "serverType": {
-              "$ref": "#/definitions/TypeOfServer",
-              "description": "The type of the remote WMS server. The default value is mapserver."
+              "description": "The type of the remote WMS server.",
+              "$ref": "#/definitions/TypeOfServer"
             },
-            "style": {
-              "oneOf": [
-                {
-                  "type": "string",
-                  "description": "Single style to apply"
-                },
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "description": "Array of style to choose."
-                }
-              ]
+            "wmsStyle": {
+              "description": "Array of style to choose from.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         }
       ]
     },
     "TypeOfServer": {
-      "description": "The type of the remote WMS server. The default value is mapserver.",
-      "enum": ["mapserver", "geoserver", "qgis"]
+      "description": "The type of the remote WMS server.",
+      "enum": ["mapserver", "geoserver", "qgis"],
+      "default": "mapserver"
     },
     "TypeSourceImageStaticInitialConfig": {
       "description": "Initial settings for static image sources.",
@@ -1181,8 +1178,9 @@
           "type": "object",
           "properties": {
             "maxRecordCount": {
-              "description": "Maximum number of records to fetch (default: 0).",
-              "type": "number"
+              "description": "Maximum number of records to fetch.",
+              "type": "number",
+              "default": 0
             },
             "layerFilter": {
               "description": "Filter to apply on features of this layer.",
@@ -1195,9 +1193,9 @@
               "$ref": "#/definitions/TypeVectorSourceFormats"
             },
             "strategy": {
+              "description": "The loading strategy to use. By default an all strategy is used, a one-off strategy which loads all features at once.",
               "enum": ["all", "bbox"],
-              "default": "all",
-              "description": "The loading strategy to use. By default an all strategy is used, a one-off strategy which loads all features at once."
+              "default": "all"
             }
           }
         }
@@ -1300,8 +1298,9 @@
           "type": "object",
           "properties": {
             "maxRecordCount": {
-              "description": "Maximum number of records to fetch (default: 0).",
-              "type": "number"
+              "description": "Maximum number of records to fetch.",
+              "type": "number",
+              "default": 0
             },
             "layerFilter": {
               "description": "Filter to apply on features of this layer.",
@@ -1323,7 +1322,7 @@
       ]
     },
     "TypeEsriFormatParameter": {
-      "description": "The format of the exported image. The default format is png.",
+      "description": "The format of the exported image.",
       "enum": ["png", "jpg", "gif", "svg"],
       "default": "png"
     },
@@ -1338,8 +1337,9 @@
           "type": "object",
           "properties": {
             "maxRecordCount": {
-              "description": "Maximum number of records to fetch (default: 0).",
-              "type": "number"
+              "description": "Maximum number of records to fetch.",
+              "type": "number",
+              "default": 0
             },
             "layerFilter": {
               "description": "Filter to apply on features of this layer.",
@@ -1359,7 +1359,7 @@
       "type": "object",
       "properties": {
         "queryable": {
-          "description": "Allow querying. Default = false.",
+          "description": "Allow querying.",
           "type": "boolean",
           "default": false
         },
@@ -1389,11 +1389,21 @@
         },
         "type": {
           "description": "The field type.",
-          "type": "string"
+          "$ref": "#/definitions/TypeOutfieldsType"
         },
         "domain": {
-          "description": "An array of values that constitute the domain.",
-          "type": "array"
+          "description": "The domain of values.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/codedValueType"
+            },
+            {
+              "$ref": "#/definitions/rangeDomainType"
+            }
+          ]
         }
       },
       "required": ["name", "alias", "type", "domain"]
@@ -1402,6 +1412,64 @@
       "description": "The types supported by the outfields object.",
       "additionalProperties": false,
       "enum": ["string", "number", "date", "url"]
+    },
+    "codedValueType": {
+      "description": "Coded value definition.",
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": ["codedValue"]
+        },
+        "name": {
+          "description": "The domain name.",
+          "type": "string"
+        },
+        "description": {
+          "description": "A description of the domain.",
+          "type": "string"
+        },
+        "codedValues": {
+          "description": "The list of coded values.",
+          "$ref": "#/definitions/codeValueEntryType"
+        }
+      }
+    },
+    "codeValueEntryType": {
+      "description": "The structure of a code value.",
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "code": {
+          "description": "The code property has an unknown type."
+        }
+      }
+    },
+    "rangeDomainType": {
+      "description": "The structure of a range domain.",
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": ["range"]
+        },
+        "name": {
+          "description": "The domain name.",
+          "type": "string"
+        },
+        "range": {
+          "type":"array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "description": "The code property has an unknown type."
+          }
+        }
+      },
+      "required": ["type", "name", "range"]
     },
     "TypeLayerEntryType": {
       "description": "Layer entry data type.",
@@ -1459,8 +1527,7 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "minItems": 1
+          }
         },
         "hasDefault": {
           "description": "Flag used to indicate that the symbology has a default value.",
@@ -1483,14 +1550,15 @@
       "type": "object",
       "properties": {
         "visible": {
-          "description": "Flag used to show/hide features associated to the label (default: true).",
-          "type": "boolean"
+          "description": "Flag used to show/hide features associated to the label.",
+          "type": "boolean",
+          "default": true
         },
         "label": {
           "type": "string"
         },
         "values": {
-          "description": "Simple type has a single value at index 0; uniqueValue type has many entries (up to 3 for ESRI) and classBreaks type has two entries (index 0 for min and index 1 for max).",
+          "description": "Simple type has an empty array; uniqueValue type has many entries (up to 3 for ESRI) and classBreaks type has two entries (index 0 for min and index 1 for max).",
           "type": "array",
           "items": {
             "oneOf": [
@@ -1501,8 +1569,7 @@
                 "type": "number"
               }
             ]
-          },
-          "minItems": 1
+          }
         },
         "settings": {
           "$ref": "#/definitions/TypeKindOfVectorSettings"
@@ -1622,16 +1689,19 @@
               "$ref": "#/definitions/TypeStrokeSymbolConfig"
             },
             "paternSize": {
-              "description": "Distance between patern lines. Default = 8",
-              "type": "number"
+              "description": "Distance between patern lines.",
+              "type": "number",
+              "default": 8
             },
             "paternWidth": {
-              "description": "Patern line width.default = 1.",
-              "type": "number"
+              "description": "Patern line width.",
+              "type": "number",
+              "default": 1
             },
             "fillStyle": {
-              "description": "Kind of filling  for vector features. Default = solid. ",
-              "$ref": "#/definitions/TypeFillStyle"
+              "description": "Kind of filling  for vector features.",
+              "$ref": "#/definitions/TypeFillStyle",
+              "default": "solid"
             }
           }
         }
@@ -1731,8 +1801,9 @@
               "maxItems": 2
             },
             "crossOrigin": {
-              "description": "The crossOrigin attribute for loaded images (default: Anonymous). Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer.",
-              "type": "string"
+              "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer.",
+              "type": "string",
+              "default": "Anonymous"
             }
           }
         }

@@ -3,6 +3,8 @@ import axios from 'axios';
 import { TypeJsonObject } from '@config/types/config-types';
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
 import { Extent } from '@config/types/map-schema-types';
+import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
+import { isvalidComparedToInternalSchema } from '@config/utils';
 
 import { logger } from '@/core/utils/logger';
 import { Projection } from '@/geo/utils/projection';
@@ -64,8 +66,14 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
         logger.logError('Error detected while reading Layer metadata.', error);
         this.setErrorDetectedFlag();
       }
+    }
 
-      await this.fetchListOfLayerMetadata();
+    await this.fetchListOfLayerMetadata();
+
+    if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
+      throw new GeoviewLayerConfigError(
+        `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`
+      );
     }
   }
   // #endregion OVERRIDE

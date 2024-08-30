@@ -64,13 +64,24 @@
               "hasDefault": false,
               "info": [
                 {
+                  "visible": true,
                   "label": "",
-                  "visible": false,
+                  "values": [],
                   "settings": {
-                    "symbol": "square",
+                    "type": "simpleSymbol",
+                    "rotation": 0,
+                    "color": "rgba(156,0,130,1)",
                     "stroke": {
-                      "color": "rgba(128,128,128,1)"
-                    }
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 1
+                    },
+                    "size": 2.668,
+                    "symbol": "square",
+                    "offset": [
+                      0,
+                      0
+                    ]
                   }
                 }
               ]

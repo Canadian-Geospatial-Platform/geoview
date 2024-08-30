@@ -1,0 +1,104 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wmsLYR1-Root",
+        "geoviewLayerName": { "en": "Weather Group" },
+        "metadataAccessPath": { "en": "https://geo.weather.gc.ca/geomet" },
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "isLayerGroup": true,
+            "layerId": "wmsLYR1-Group",
+            "layerName": { "en": "Group" },
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "CURRENT_CONDITIONS"
+              },
+              {
+                "layerId": "GDPS.ETA_ICEC",
+                "layerFilter": "time = date \\'2023-04-18T07:00:00-04:00\\'",
+                "layerName": { "en": "Ice Cover" },
+                "source": {
+                  "wmsStyle": ["SEA_ICECONC"]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-msi",
+        "geoviewLayerName": { "en": "MSI" },
+        "metadataAccessPath": { "en": "https://datacube.services.geo.ca/ows/msi" },
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "msi-94-or-more",
+            "layerName": { "en": "Permanent Snow" },
+            "source": {
+              "wmsStyle": ["msi-binary"],
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "band-0-pixel-value",
+                "outfields": [
+                  {
+                    "name": "band-0-pixel-value",
+                    "alias": "Pixel value",
+                    "type": "number",
+                    "domain": null
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-spatiotemporel",
+        "geoviewLayerName": { "en": "Spatiotemporel" },
+        "metadataAccessPath": { "en": "https://geo.weather.gc.ca/geomet" },
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "RADAR_1KM_RSNO",
+            "layerName": { "en": "Test Spatiotemporel" },
+            "source": {
+              "wmsStyle": ["Radar-Snow_14colors"]
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR1",
+        "geoviewLayerName": { "en": "Canada Energy Regulator" },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer"
+        },
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

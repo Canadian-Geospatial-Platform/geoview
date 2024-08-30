@@ -11,14 +11,20 @@ import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { ConfigError, GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
-import { xmlToJson } from '@/app';
+import { xmlToJson } from '@/core/utils/utilities';
 
 export type TypeWmsLayerNode = WmsGroupLayerConfig | WmsLayerEntryConfig;
+
+// ========================
+// #region CLASS DEFINITION
 
 /**
  * The WMS geoview layer class.
  */
 export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
+  // ==================
+  // #region PROPERTIES
+
   /**
    * Type of GeoView layer.
    */
@@ -27,16 +33,46 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
   /** The layer entries to use from the GeoView layer. */
   declare listOfLayerEntryConfig: TypeWmsLayerNode[];
 
+  // #endregion PROPERTIES
+  // ===================
+  // #region CONSTRUCTOR
+  /**
+   * The class constructor.
+   *
+   * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
+   */
+  constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
+    super(geoviewLayerConfig, language);
+    const metadataAccessPathItems = this.metadataAccessPath.split(/\?Layers=/i);
+    const lastPathItem = metadataAccessPathItems[1];
+    if (lastPathItem) {
+      // The metadataAccessPath ends with a layer parameter. It is therefore a path to a data layer rather than a path to service metadata.
+      // We therefore need to correct the configuration by separating the layer parameter and the path to the service metadata.
+      [this.metadataAccessPath] = metadataAccessPathItems;
+      if (this.listOfLayerEntryConfig.length) {
+        this.setErrorDetectedFlag();
+        logger.logError('When an WMS metadataAccessPath ends with a layerId, the listOfLayerEntryConfig must be empty.');
+      }
+      this.listOfLayerEntryConfig = [this.createLeafNode(toJsonObject({ layerId: lastPathItem }), language, this)! as TypeWmsLayerNode];
+    }
+  }
+  // #endregion CONSTRUCTOR
+
+  // ===============
+  // #region METHODS
   /*
-   * Methods are listed in the following order: abstract, override, private, protected and public.
+   * Methods are listed in the following order: abstract, override, private, protected, public and static.
    */
 
+  // ================
+  // #region OVERRIDE
   /**
-   * @protected @override
    * The getter method that returns the geoview layer schema to use for the validation. Each geoview layer type knows what
    * section of the schema must be used to do its validation.
    *
    * @returns {string} The GeoView layer schema associated to the config.
+   * @protected @override
    */
   protected override getGeoviewLayerSchema(): string {
     /** The GeoView layer schema associated to WmsLayerConfig */
@@ -44,16 +80,16 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
   }
 
   /**
-   * @override
    * The method used to implement the class factory model that returns the instance of the class based on the sublayer
    * type needed.
    *
    * @param {TypeJsonObject} layerConfig The sublayer configuration.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
-   * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
+   * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    *
    * @returns {EntryConfigBaseClass} The sublayer instance or undefined if there is an error.
+   * @override
    */
   override createLeafNode(
     layerConfig: TypeJsonObject,
@@ -65,16 +101,16 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
   }
 
   /**
-   * @override
    * The method used to implement the class factory model that returns the instance of the class based on the group
    * type needed.
    *
    * @param {TypeJsonObject} layerConfig The group node configuration.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
-   * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
+   * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    *
    * @returns {EntryConfigBaseClass} The sublayer instance or undefined if there is an error.
+   * @override
    */
   override createGroupNode(
     layerConfig: TypeJsonObject,
@@ -86,7 +122,8 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
   }
 
   /**
-   * Get the service metadata from the metadataAccessPath and store it in a protected property of the geoview layer.
+   * Get the service metadata from the metadataAccessPath and store it in the private property of the geoview layer.
+   * @override @async
    */
   override async fetchServiceMetadata(): Promise<void> {
     const metadataAccessPathIsXmlFile = this.metadataAccessPath.slice(-4).toLowerCase() === '.xml';
@@ -111,6 +148,9 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     this.setMetadataLayerTree(this.listOfLayerEntryConfig.length ? this.listOfLayerEntryConfig : this.createLayerTree());
     await this.fetchListOfLayerMetadata();
   }
+  // #endregion OVERRIDE
+  // ===============
+  // #region PRIVATE
 
   /**
    * A recursive method to process the listOfLayerEntryConfig. The goal is to process each valid sublayer, searching the service's
@@ -278,7 +318,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    * @param {string} url The GetCapabilities request to execute
    *
    * @returns {Promise<void>} A promise that the execution is completed.
-   * @private
+   * @private @async
    */
   static async #executeServiceMetadataRequest(url: string): Promise<TypeJsonObject> {
     const response = await fetch(url);
@@ -286,7 +326,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
 
     const xmlDomResponse = new DOMParser().parseFromString(capabilitiesString, 'text/xml');
     const errorObject = xmlToJson(xmlDomResponse)?.['ogc:ServiceExceptionReport']?.['ogc:ServiceException'];
-    if (errorObject) throw new GeoviewLayerConfigError(errorObject['#text'] as string)
+    if (errorObject) throw new GeoviewLayerConfigError(errorObject['#text'] as string);
 
     const parser = new WMSCapabilities();
     const serviceMetadata: TypeJsonObject = parser.read(capabilitiesString);
@@ -343,7 +383,12 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
-      logger.logError(`Error detected while reading WMS metadata for geoview layer ${this.geoviewLayerId}.\n${(error as GeoviewLayerConfigError).message || ''}`, error);
+      logger.logError(
+        `Error detected while reading WMS metadata for geoview layer ${this.geoviewLayerId}.\n${
+          (error as GeoviewLayerConfigError).message || ''
+        }`,
+        error
+      );
     }
   }
 
@@ -477,6 +522,9 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     if (layer?.Layer !== undefined) (layer.Layer as TypeJsonArray).forEach((subLayer) => this.#processMetadataInheritance(layer, subLayer));
   }
 
+  // #endregion PRIVATE
+  // =================
+  // #region PROTECTED
   /**
    * Create the layer tree using the service metadata.
    *
@@ -501,6 +549,9 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     return [this.createLeafNode(layerConfig, this.getLanguage(), this)!];
   }
 
+  // #endregion PROTECTED
+  // =================
+  // #region STATIC
   /** ****************************************************************************************************************************
    * This method search recursively the layerId in the layer entry of the capabilities.
    *
@@ -535,4 +586,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     // If we get here, the layer doesn't exist, we return a null.
     return null;
   }
+  // #endregion PROTECTED
+  // #endregion METHODS
+  // #endregion CLASS DEFINITION
 }
