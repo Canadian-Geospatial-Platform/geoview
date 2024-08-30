@@ -139,11 +139,12 @@
           Configuration to load:
           <select id="configLoaderTab1">
             <option value="">--select--</option>
-            <option value="./configs/validator/01-simple.json">Simple</option>
-            <option value="./configs/validator/02-unique-value.json">Unique Value</option>
-            <option value="./configs/validator/03-class-breaks.json">Class Breaks</option>
+            <option value="./configs/validator/01-simple-esri-feature.json">Simple EsriFeature</option>
+            <option value="./configs/validator/02-unique-value-esri-dynamic.json">Unique Value EsriDynamic</option>
+            <option value="./configs/validator/03-class-breaks-esri-feature.json">Class Breaks EsriFeature</option>
             <option value="./configs/validator/04-geocore.json">Geocore</option>
-            <option value="./configs/validator/05-metadata-group.json">Metadata Group</option>
+            <option value="./configs/validator/05-esri-feature-and-dynamic.json">EsriFeature And EsriDynamic</option>
+            <option value="./configs/validator/06-ogc-wms.json">OGC WMS</option>
           </select>
         </div>
       </div>
@@ -566,8 +567,8 @@
       fetchJSONData();
     });
 
-    // Set the initial configuration of the drop-down to 'Simple' and load it
-    configLoaderTab1.value = './configs/validator/01-simple.json';
+    // Set the initial configuration of the drop-down to 'Simple EsriFeature' and load it
+    configLoaderTab1.value = './configs/validator/01-simple-esri-feature.json';
     configLoaderTab1.dispatchEvent(new Event('change'));
 
     // Create the listener for the Element Displayed drop-down located at the bottom of the output zone.

@@ -34,11 +34,11 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConfig {
   // #region OVERRIDE
 
   /**
-   * @protected @override
    * The getter method that returns the geoview layer schema to use for the validation. Each geoview layer type knows what
    * section of the schema must be used to do its validation.
    *
    * @returns {string} The GeoView layer schema associated to the config.
+   * @protected @override
    */
   protected override getGeoviewLayerSchema(): string {
     /** The GeoView layer schema associated to EsriDynamicLayerConfig */
@@ -46,7 +46,6 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConfig {
   }
 
   /**
-   * @override
    * The method used to implement the class factory model that returns the instance of the class based on the sublayer
    * type needed.
    *
@@ -56,6 +55,7 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConfig {
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
    * @returns {EntryConfigBaseClass} The sublayer instance or undefined if there is an error.
+   * @override
    */
   override createLeafNode(
     layerConfig: TypeJsonObject,
@@ -67,7 +67,6 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConfig {
   }
 
   /**
-   * @override
    * The method used to implement the class factory model that returns the instance of the class based on the group
    * type needed.
    *
@@ -77,6 +76,7 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConfig {
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
    * @returns {EntryConfigBaseClass} The sublayer instance or undefined if there is an error.
+   * @override
    */
   override createGroupNode(
     layerConfig: TypeJsonObject,
