@@ -4,7 +4,7 @@ import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
-import { TypeBasemapOptions, TypeViewSettings, TypeInteraction, TypeHighlightColors, TypeValidMapProjectionCodes, TypeDisplayTheme, TypeLocalizedString, TypeLayerStates, TypeLayerControls, TypePostSettings, TypeServiceUrls, TypeNavBarProps, TypeAppBarProps, TypeFooterBarProps, TypeOverviewMapProps, TypeMapComponents, TypeMapCorePackages, TypeExternalPackages, TypeGlobalSettings } from '@config/types/map-schema-types';
+import { TypeBasemapOptions, TypeViewSettings, TypeInteraction, TypeHighlightColors, TypeOverlayObjects, TypeValidMapProjectionCodes, TypeDisplayTheme, TypeLocalizedString, TypeLayerStates, TypeLayerControls, TypePostSettings, TypeServiceUrls, TypeNavBarProps, TypeAppBarProps, TypeFooterBarProps, TypeOverviewMapProps, TypeMapComponents, TypeMapCorePackages, TypeExternalPackages, TypeGlobalSettings } from '@config/types/map-schema-types';
 import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -333,6 +333,8 @@ export type TypeMapConfig = {
     viewSettings: TypeViewSettings;
     /** Highlight color. */
     highlightColor?: TypeHighlightColors;
+    /** Highlight color. */
+    overlayObjects?: TypeOverlayObjects;
     /** Additional options used for OpenLayers map options. */
     extraOptions?: Record<string, unknown>;
 };

@@ -5,6 +5,7 @@ import * as Utilities from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { MapViewer } from '@/geo/map/map-viewer';
 import * as GeoUtilities from '@/geo/utils/utilities';
+import { EventDelegateBase } from './events/event-helper';
 /**
  * Class used to handle api calls (events, functions etc...)
  *
@@ -35,4 +36,25 @@ export declare class API {
      * @param {string} mapConfig - config passed in from the function call (string or url of a config path)
      */
     createMapFromConfig(divId: string, mapConfig: string): Promise<void>;
+    /**
+     * Registers a map added to div event handler.
+     * @param {MapAddedToDivDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapAddedToDiv(callback: MapAddedToDivDelegate): void;
+    /**
+     * Unregisters a map added to div event handler.
+     * @param {MapAddedToDivdDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapAddedToDiv(callback: MapAddedToDivDelegate): void;
 }
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapAddedToDivDelegate = EventDelegateBase<API, MapAddedToDivEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapAddedToDivEvent = {
+    mapId: string;
+};
+export {};

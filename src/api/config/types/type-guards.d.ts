@@ -1,10 +1,10 @@
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-config/raster-leaf/esri-dynamic-layer-entry-config';
+import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
 import { TypeJsonObject } from '@config/types/config-types';
 import { AbstractBaseLayerEntryConfig, TypeBaseVectorGeometryConfig, TypeIconSymbolVectorConfig, TypeLineStringVectorConfig, TypePolygonVectorConfig, TypeSimpleSymbolVectorConfig } from '@config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
+import { EsriDynamicLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/esri-dynamic-layer-entry-config';
 /**
  * Type guard function that redefines a EntryConfigBaseClass as a GroupLayerEntryConfig if the entryType attribute of the verifyIfLayer
  * parameter is CV_CONST_SUB_LAYER_TYPES.GROUP. The type assertion applies only to the true block of the if clause that use this

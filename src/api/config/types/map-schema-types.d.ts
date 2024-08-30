@@ -1,4 +1,6 @@
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { Coordinate } from 'ol/coordinate';
+import { TimeDimension } from '@/core/utils/date-mgt';
 /** An array of numbers representing an extent: `[minx, miny, maxx, maxy]`. */
 export type Extent = Array<number>;
 /** ISO 639-1 language code prefix. */
@@ -116,6 +118,8 @@ export type TypeMapConfig = {
     viewSettings: TypeViewSettings;
     /** Highlight color. */
     highlightColor?: TypeHighlightColors;
+    /** Point markers to add to map. */
+    overlayObjects?: TypeOverlayObjects;
     /** Additional options used for OpenLayers map options. */
     extraOptions?: Record<string, unknown>;
 };
@@ -183,6 +187,26 @@ export type TypeMapViewSettings = {
 export type TypeValidMapProjectionCodes = 3978 | 3857;
 /** Type used to define valid highlight colors. */
 export type TypeHighlightColors = 'black' | 'white' | 'red' | 'green';
+/** Type used to define overlay objects. */
+export type TypeOverlayObjects = {
+    /** Non interactive markers */
+    pointMarkers?: TypePointMarkers;
+};
+/** Type used to define point markers object. */
+type TypePointMarkers = Record<string, TypePointMarker[]>;
+/** Type used to define point marker. */
+export type TypePointMarker = {
+    /** ID for marker, must be unique within group */
+    id: string;
+    /** Marker coordinates, unique in group, projection code must be added if not in lon/lat */
+    coordinate: Coordinate;
+    /** Marker color */
+    color?: string;
+    /** Marker opacity */
+    opacity?: number;
+    /** Projection code if coordinates are not in lon/lat */
+    projectionCode?: number;
+};
 /** Parent class of the GeoView layers. */
 export { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 /** Child classes derived from the AbstractGeoviewLayerConfig. */
@@ -240,24 +264,17 @@ export type TypeLayerStates = {
     queryable?: boolean;
 };
 export { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
-export { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
-export { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
+export { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
+export { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
 /** Child classes derived from the AbstractBaseLayerEntryConfig. */
-export { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-config/raster-leaf/esri-dynamic-layer-entry-config';
-export { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/vector-leaf/esri-feature-layer-entry-config';
+export { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/raster/esri-dynamic-layer-entry-config';
+export { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/esri-feature-layer-entry-config';
 /** Valid keys for the geometryType property. */
 export type TypeStyleGeometry = 'point' | 'linestring' | 'polygon';
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
 export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group';
 /** Temporal dimension associated to the layer. */
-export type TypeTemporalDimension = {
-    field: string;
-    default: string;
-    unitSymbol: string;
-    range: TypeRangeItems;
-    nearestValues: TypeNearestValues;
-    singleHandle: boolean;
-};
+export type TypeTemporalDimension = TimeDimension;
 /** Definition of the range object that is part of the temporal dimension. */
 export type TypeRangeItems = {
     type: string;
@@ -373,10 +390,25 @@ export type TypeOutfields = {
     name: string;
     alias: string;
     type: TypeOutfieldsType;
-    domain: unknown[];
+    domain: null | codedValueType | rangeDomainType;
 };
 /** The types supported by the outfields object. */
 export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url';
+export type codedValueType = {
+    type: 'codedValue';
+    name: string;
+    description: string;
+    codedValues: codeValueEntryType[];
+};
+export type rangeDomainType = {
+    type: 'range';
+    name: string;
+    range: [minValue: unknown, maxValue: unknown];
+};
+export type codeValueEntryType = {
+    name: string;
+    code: unknown;
+};
 /** Type of Style to apply to the GeoView vector layer based on geometry types. */
 export type TypeStyleConfig = {
     type: TypeStyleConfigType;
