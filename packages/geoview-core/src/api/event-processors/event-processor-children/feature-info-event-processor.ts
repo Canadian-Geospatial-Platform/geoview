@@ -112,6 +112,11 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  static setSelectedLayerPath(mapId: string, layerPath: string): void {
+    // Save in store
+    this.getFeatureInfoState(mapId).setterActions.setSelectedLayerPath(layerPath);
+  }
+
   /**
    * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
    *

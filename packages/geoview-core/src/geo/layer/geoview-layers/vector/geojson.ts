@@ -33,6 +33,7 @@ import { Projection } from '@/geo/utils/projection';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -275,6 +276,8 @@ export class GeoJSON extends AbstractGeoViewVector {
       MapEventProcessor.removeHighlightedFeature(this.mapId, 'all');
 
       // Update feature info
+      FeatureInfoEventProcessor.deleteFeatureInfo(this.mapId, layerPath);
+      FeatureInfoEventProcessor.setSelectedLayerPath(this.mapId, '');
       DataTableEventProcessor.triggerGetAllFeatureInfo(this.mapId, layerPath).catch((error) => {
         // Log
         logger.logPromiseFailed(`Update all feature info in overrideGeojsonSource failed for layer ${layerPath}`, error);
