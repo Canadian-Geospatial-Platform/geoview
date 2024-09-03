@@ -11,3 +11,9 @@ We need to trap the navigation inside the map element: https://mui.com/base-ui/r
 Manage focus (Modal Dialogs or any full-screen tasks): https://www.npmjs.com/package/react-focus-on
 
 Further documenation: https://simplyaccessible.com/article/react-a11y/
+
+Additional tools:
+https://mn.gov/mnit/about-mnit/accessibility/maps/
+https://microsoftedge.microsoft.com/addons/detail/axe-devtools-web-access/kcenlimkmjjkdfcaleembgmldmnnlfkn
+https://accessibilityinsights.io/downloads/
+https://github.com/dequelabs/axe-core

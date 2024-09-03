@@ -10,6 +10,8 @@ import defaultsDeep from 'lodash/defaultsDeep';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
+import VectorLayer from 'ol/layer/Vector';
+import { GeoJSONObject } from 'ol/format/GeoJSON';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
@@ -26,6 +28,8 @@ import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { Projection } from '@/geo/utils/projection';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -232,5 +236,37 @@ export class GeoJSON extends AbstractGeoViewVector {
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
     return vectorSource;
+  }
+
+  /** ***************************************************************************************************************************
+   * Override the features of a geojson layer with new geojson.
+   * @param {string} layerPath - The path of the layer to override.
+   * @param {GeoJSONObject | string} geojson - The new geoJSON.
+   */
+  overrideGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void {
+    // Convert string to geoJSON if necessary
+    const geojsonObject = typeof geojson === 'string' ? JSON.parse(geojson) : geojson;
+
+    // Create features from geoJSON
+    const dataProjection = geojsonObject.crs?.properties?.name || Projection.PROJECTION_NAMES.LNGLAT;
+    const features = new FormatGeoJSON().readFeatures(geojsonObject, {
+      dataProjection,
+      featureProjection: this.getMapViewer().getProjection(),
+    });
+
+    const olLayer = this.getOLLayer(layerPath) as VectorLayer<Feature>;
+
+    if (olLayer && features.length) {
+      // Remove current features and add new ones
+      olLayer!.getSource()?.clear();
+      olLayer!.getSource()?.addFeatures(features);
+      olLayer.changed();
+
+      // Update the bounds in the store
+      const bounds = this.getBounds(layerPath);
+      if (bounds) {
+        LegendEventProcessor.setLayerBounds(this.mapId, layerPath, bounds);
+      }
+    }
   }
 }

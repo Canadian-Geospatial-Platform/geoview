@@ -226,8 +226,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             // If feature info is queryable
             if (layerConfig.source?.featureInfo?.queryable) {
               const featureInfo = (layerConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
-              const fieldTypes = featureInfo.fieldTypes?.split(',');
-              const fieldNames = getLocalizedValue(featureInfo.outfields, AppEventProcessor.getDisplayLanguage(this.mapId))!.split(',');
+              const fieldTypes = featureInfo.fieldTypes?.split(',') || [];
+              const fieldNames =
+                getLocalizedValue(featureInfo.outfields, AppEventProcessor.getDisplayLanguage(this.mapId))?.split(',') || [];
               const dateFields = fieldTypes?.reduce<string[]>((accumulator, entryFieldType, i) => {
                 if (entryFieldType === 'date') accumulator.push(fieldNames[i]);
                 return accumulator;
@@ -576,7 +577,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true): void {
+  applyViewFilter(layerPath: string, filter: string, combineLegendFilter: boolean = true): void {
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-VECTOR - applyViewFilter', layerPath);
 
