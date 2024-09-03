@@ -88,7 +88,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // If layer bounds are not set, or have infinity (can be due to setting before features load), recalculate
     if (layer && (!layer.bounds || layer.bounds?.includes(Infinity))) {
       const newBounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
-      if (newBounds) {
+
+      if (newBounds && (!newBounds.includes(Infinity) || !layer.bounds)) {
         // Set layer bounds
         layer.bounds = newBounds;
 
@@ -104,6 +105,25 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // No bounds found
     return undefined;
+  }
+
+  /**
+   * Gets the layer bounds for a layer path
+   * @param mapId - The map id
+   * @param layerPath - The layer path
+   * @returns {Extent | undefined} The extent of the layer at the given path
+   */
+  static setLayerBounds(mapId: string, layerPath: string, bounds: Extent): void {
+    // Find the layer for the given layer path
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      // Set layer bounds
+      layer.bounds = bounds;
+      // Set updated legend layers
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    }
   }
 
   /**
@@ -312,7 +332,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         const legendLayerEntry: TypeLegendLayer = {
           bounds,
           controls,
-          layerId: layerPathNodes[currentLevel],
+          layerId: layerPathNodes[currentLevel - 1],
           layerPath: entryLayerPath,
           layerAttribution: layer?.getAttributions(),
           layerName,
