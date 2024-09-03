@@ -47,8 +47,7 @@ export declare class DataTableEventProcessor extends AbstractEventProcessor {
      * Propagates feature info layer sets to the store.
      * The propagation actually happens only if it wasn't already there. Otherwise, no update is propagated.
      * @param {string} mapId - The map identifier of the modified result set.
-     * @param {string} layerPath - The layer path that has changed.
-     * @param {TypeFeatureInfoResultSet} resultSet - The result set associated to the map.
+     * @param {TypeAllFeatureInfoResultSetEntry} resultSetEntry - The result set associated to the map.
      */
     static propagateFeatureInfoToStore(mapId: string, resultSetEntry: TypeAllFeatureInfoResultSetEntry): void;
     /**

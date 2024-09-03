@@ -1,5 +1,5 @@
-import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-esri-layer-entry-config';
-import { TypeStyleConfig, TypeLayerEntryType, TypeSourceEsriFeatureInitialConfig, TypeLayerInitialSettings } from '@config/types/map-schema-types';
+import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
+import { TypeStyleConfig, TypeLayerEntryType, TypeSourceEsriFeatureInitialConfig } from '@config/types/map-schema-types';
 /**
  * The ESRI feature geoview sublayer class.
  */
@@ -9,39 +9,29 @@ export declare class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEn
     /** Style to apply to the feature layer. */
     style?: TypeStyleConfig;
     /**
-     * Validate the node configuration using the schema associated to its layer type.
-     * @protected
-     * /
-    protected override validateLayerConfig(layerConfig: TypeJsonObject): void {
-      super.validateLayerConfig(layerConfig);
-      if (!isvalidComparedToInputSchema(this.schemaPath, layerConfig)) this.setErrorDetectedFlag();
-    }
-  
-    /**
-     * Apply default value to undefined fields. The default values to be used for the initialSettings are
-     * inherited from the object that owns this sublayer instance.
-     *
-     * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited by the parent container.
-     */
-    applyDefaultValueToUndefinedFields(initialSettings: TypeLayerInitialSettings): void;
-    /**
+     * @protected @override
      * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
      * used to do its validation.
      *
      * @returns {string} The schemaPath associated to the sublayer.
-     * @protected
      */
     protected getSchemaPath(): string;
     /**
+     * @protected @override
      * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
      *
      * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
-     * @protected
      */
     protected getEntryType(): TypeLayerEntryType;
     /** ***************************************************************************************************************************
+     * @protected @override
      * This method is used to parse the layer metadata and extract the style and source information.
-     * @protected
      */
     protected parseLayerMetadata(): void;
+    /**
+     * @override
+     * Apply default values. The default values will be overwritten by the values in the metadata when they are analyzed.
+     * The resulting config will then be overwritten by the values provided in the user config.
+     */
+    applyDefaultValues(): void;
 }

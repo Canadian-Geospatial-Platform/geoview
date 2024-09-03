@@ -2,7 +2,9 @@ import { TypeJsonObject } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { TypeDisplayLanguage, TypeStyleGeometry } from '@config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
-/** The ESRI dynamic geoview layer class. */
+/**
+ * The ESRI dynamic geoview layer class.
+ */
 export declare abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLayerConfig {
     #private;
     /**
@@ -14,8 +16,16 @@ export declare abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeo
     constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage);
     /**
      * Get the service metadata from the metadataAccessPath and store it in a protected property of the geoview layer.
+     * @override
      */
     fetchServiceMetadata(): Promise<void>;
+    /**
+     * Converts an esri geometry type string to a TypeStyleGeometry.
+     * @param {string} esriGeometryType - The esri geometry type to convert
+     * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
+     * @protected @static
+     */
+    protected static convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry;
     /**
      * Create the layer tree using the service metadata.
      *
@@ -23,10 +33,4 @@ export declare abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeo
      * @protected
      */
     protected createLayerTree(): EntryConfigBaseClass[];
-    /**
-     * Converts an esri geometry type string to a TypeStyleGeometry.
-     * @param {string} esriGeometryType - The esri geometry type to convert
-     * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
-     */
-    protected static convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry;
 }

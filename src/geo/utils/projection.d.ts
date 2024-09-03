@@ -59,7 +59,7 @@ export declare abstract class Projection {
      */
     static transformPoints(points: Coordinate[], fromProj: string, toProj: string): Array<Array<number>>;
     /**
-     * Wrapper around OpenLayers function to transforms a coordinate from lone projection to another.
+     * Wrapper around OpenLayers function to transforms a coordinate from one projection to another.
      *
      * @param {Coordinate} coordinate Longitude/latitude coordinate
      * @param {ProjectionLike} inProjection Actual projection of the coordinate

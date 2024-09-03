@@ -2,7 +2,7 @@ import { Root } from 'react-dom/client';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
-import { TypeBasemapOptions, TypeInteraction, TypeLayerInitialSettings, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
+import { TypeBasemapOptions, TypeInteraction, TypeLayerInitialSettings, TypeValidMapProjectionCodes, TypePointMarker } from '@config/types/map-schema-types';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { MapConfigLayerEntry, TypeFeatureInfoEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
@@ -74,6 +74,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @returns {string | undefined} The initial filter(s) for the layer
      */
     static getInitialFilter(mapId: string, layerPath: string): string | undefined;
+    static getPointMarkers(mapId: string): Record<string, TypePointMarker[]>;
     static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void;
     static clickMarkerIconHide(mapId: string): void;
     static highlightBBox(mapId: string, extent: Extent, isLayerHighlight?: boolean): void;
@@ -92,7 +93,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setZoom(mapId: string, zoom: number): void;
     static setRotation(mapId: string, rotation: number): void;
     static setMapChangeSize(mapId: string, size: [number, number], scale: TypeScaleInfo): void;
-    static setMapMoveEnd(mapId: string, centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: string, isNorthVisible: boolean, scale: TypeScaleInfo): void;
+    static setMapMoveEnd(mapId: string, centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: string, isNorthVisible: boolean, mapExtent: Extent, scale: TypeScaleInfo): void;
     static setInteraction(mapId: string, interaction: TypeInteraction): void;
     static setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): Promise<void>;
     static rotate(mapId: string, rotation: number): void;
@@ -115,6 +116,20 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
     static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void;
     static removeHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry | 'all'): void;
+    /**
+     * Add a point marker
+     * @param {string} mapId - The ID of the map.
+     * @param {string} group - The group to add the markers to.
+     * @param {TypePointMarker} pointMarkers - The point markers to add.
+     */
+    static addPointMarkers(mapId: string, group: string, pointMarkers: TypePointMarker[]): void;
+    /**
+     * Remove a point marker
+     * @param {string} mapId - The ID of the map.
+     * @param {string} group - The group to remove the markers from.
+     * @param {string | Coordinate} idsOrCoordinates - The IDs or coordinates of the markers to remove.
+     */
+    static removePointMarkersOrGroup(mapId: string, group: string, idsOrCoordinates?: string[] | Coordinate[]): void;
     /**
      * Update or remove the layer highlight.
      * @param {string} mapId - The ID of the map.

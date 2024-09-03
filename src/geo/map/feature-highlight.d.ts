@@ -1,9 +1,11 @@
 import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import { Extent } from 'ol/extent';
 import { TypeHighlightColors } from '@config/types/map-schema-types';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeFeatureInfoEntry } from './map-schema-types';
+import { PointMarkers } from '@/core/components/point-markers/point-markers';
 /** *****************************************************************************************************************************
  * A class to handle highlighting of features
  *
@@ -12,8 +14,11 @@ import { TypeFeatureInfoEntry } from './map-schema-types';
  */
 export declare class FeatureHighlight {
     #private;
+    /** The vector source to use for the animation features */
+    highlighSource: VectorSource;
     /** The hidden layer to display animations. */
     overlayLayer: VectorLayer<Feature>;
+    pointMarkers: PointMarkers;
     /**
      * Initializes feature higlight classes
      * @param {MapViewer} mapViewer a reference to the map viewer

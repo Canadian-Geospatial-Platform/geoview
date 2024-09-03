@@ -158,5 +158,5 @@ export declare const esriRendererIsClassBreaks: (verifyIfRenderer: EsriBaseRende
  *
  * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-export declare function parseStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeStyleConfig | undefined;
+export declare function createStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeStyleConfig | undefined;
 export {};
