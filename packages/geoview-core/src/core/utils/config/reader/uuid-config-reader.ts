@@ -89,7 +89,7 @@ export class UUIDmapConfigReader {
 
           if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
             const geoviewLayerConfig: TypeEsriDynamicLayerConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${(id as string).split('.')[1]}`, // Remove rcs. and .[lang] from geocore response
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CONST_LAYER_TYPES.ESRI_DYNAMIC,
