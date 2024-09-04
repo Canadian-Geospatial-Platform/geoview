@@ -169,10 +169,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
         {layerDetails.items.length > 1 && (
           <Grid container direction="row" justifyContent="center" alignItems="stretch" justifyItems="stretch">
-            <Grid item xs="auto">
-              {renderHeaderCheckbox()}
-            </Grid>
-            <Grid item xs="auto">
+            <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
+            <Grid size={{ xs: 'auto' }}>
               <Box component="span">{t('general.name')}</Box>
             </Grid>
           </Grid>
@@ -185,10 +183,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             justifyContent="center"
             alignItems="stretch"
           >
-            <Grid item xs="auto">
-              {renderItemCheckbox(item)}
-            </Grid>
-            <Grid item xs="auto">
+            <Grid size={{ xs: 'auto' }}>{renderItemCheckbox(item)}</Grid>
+            <Grid size={{ xs: 'auto' }}>
               {item.icon ? <Box component="img" alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
               <Box component="span" style={sxClasses.tableIconLabel}>
                 {item.name}

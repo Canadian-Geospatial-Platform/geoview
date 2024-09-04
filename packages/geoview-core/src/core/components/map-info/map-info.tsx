@@ -49,12 +49,12 @@ export function MapInfo(): JSX.Element {
       {interaction === 'dynamic' && <MapInfoExpandButton />}
       <Grid container justifyContent="space-between">
         {interaction === 'dynamic' && (
-          <Grid item md={1}>
+          <Grid size={{ md: 1 }}>
             <Attribution />
           </Grid>
         )}
 
-        <Grid container item md={interaction === 'dynamic' ? 11 : 12} spacing={2}>
+        <Grid container size={{ md: interaction === 'dynamic' ? 11 : 12 }} spacing={2}>
           <Grid
             container
             justifyContent="flex-end"
@@ -64,14 +64,14 @@ export function MapInfo(): JSX.Element {
               },
             }}
           >
-            <Grid item md={interaction === 'dynamic' ? 10 : 12}>
+            <Grid size={{ md: interaction === 'dynamic' ? 11 : 12 }}>
               <Box id="mouseAndScaleControls" sx={sxClasses.mouseScaleControlsContainer}>
                 {interaction === 'dynamic' && <MousePosition />}
                 <Scale />
               </Box>
             </Grid>
             {interaction === 'dynamic' && (
-              <Grid item md={2}>
+              <Grid size={{ md: 2 }}>
                 <Box
                   sx={{
                     ...sxClasses.rotationControlsContainer,

@@ -93,7 +93,7 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
           <ListItem component="div" disablePadding>
             <ListItemButton onClick={() => handleZoomToGeoLocator([geoListItem.lng, geoListItem.lat], geoListItem.bbox)}>
               <Grid container>
-                <Grid item xs={12} sm={8}>
+                <Grid size={{ xs: 12, sm: 8 }}>
                   <Typography sx={sxClassesList.listStyle}>
                     {transformListTitle(
                       geoListItem.name,
@@ -102,7 +102,7 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
                     )}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} sm={4} sx={{ textAlign: 'right' }}>
+                <Grid size={{ xs: 12, sm: 4 }} sx={{ textAlign: 'right' }}>
                   {!!geoListItem.category && geoListItem.category !== 'null' && (
                     <Typography component="p" sx={sxClassesList.main}>
                       <Typography component="span"> {geoListItem.category}</Typography>

@@ -442,7 +442,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
       return (
         <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
           <Grid container sx={sxClasses.rightPanelBtnHolder}>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
               <Box style={{ marginLeft: '1.375rem' }}>
                 {t('details.featureDetailsTitle')
                   .replace('{count}', `${currentFeatureIndex + 1}`)
@@ -460,7 +460,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
                 </IconButton>
               </Box>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
               <Box sx={{ textAlign: 'right', marginRight: '1.625rem' }}>
                 <IconButton
                   aria-label="backward"
