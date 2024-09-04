@@ -218,10 +218,10 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
 
     // If any response
-    let olLayer: VectorTileLayer<Feature> | undefined;
+    let olLayer: VectorTileLayer<VectorTileSource<Feature>, never> | undefined;
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
-      olLayer = requestResult[0] as VectorTileLayer<Feature>;
+      olLayer = requestResult[0] as VectorTileLayer<VectorTileSource<Feature>, never>;
     }
 
     // If no olLayer was obtained
@@ -355,6 +355,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (just should be removed?)
   setVectorTileStyle(layerPath: string, styleUrl: string): Promise<unknown> {
     // FIXME: Check if this should be removed or done somewhere else?
-    return applyStyle(this.getMapViewer().layer.getOLLayer(layerPath) as VectorTileLayer<Feature>, styleUrl);
+    return applyStyle(this.getMapViewer().layer.getOLLayer(layerPath) as VectorTileLayer<VectorTileSource<never>, never>, styleUrl);
   }
 }
