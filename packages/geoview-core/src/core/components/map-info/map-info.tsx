@@ -47,31 +47,30 @@ export function MapInfo(): JSX.Element {
       ref={mapInfoRef as MutableRefObject<HTMLDivElement>}
     >
       {interaction === 'dynamic' && <MapInfoExpandButton />}
-      <Grid container justifyContent="space-between">
+      <Grid container justifyContent="space-between" size={12}>
         {interaction === 'dynamic' && (
-          <Grid item md={1}>
+          <Grid size={{ md: 1 }}>
             <Attribution />
           </Grid>
         )}
 
-        <Grid container item md={interaction === 'dynamic' ? 11 : 12} spacing={2}>
+        <Grid container spacing={2} size={{ md: interaction === 'dynamic' ? 11 : 12 }}>
           <Grid
             container
-            justifyContent="flex-end"
             sx={{
-              [theme.breakpoints.down('md')]: {
-                marginTop: '-32px',
-              },
+              justifyContent: 'flexEnd',
+              flexWrap: 'nowrap',
+              width: '100%',
             }}
           >
-            <Grid item md={interaction === 'dynamic' ? 10 : 12}>
+            <Grid size={{ md: interaction === 'dynamic' ? 11 : 12 }}>
               <Box id="mouseAndScaleControls" sx={sxClasses.mouseScaleControlsContainer}>
                 {interaction === 'dynamic' && <MousePosition />}
                 <Scale />
               </Box>
             </Grid>
             {interaction === 'dynamic' && (
-              <Grid item md={2}>
+              <Grid size={{ md: 2 }}>
                 <Box
                   sx={{
                     ...sxClasses.rotationControlsContainer,

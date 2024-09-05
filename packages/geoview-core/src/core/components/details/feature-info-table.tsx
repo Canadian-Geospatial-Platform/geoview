@@ -109,12 +109,10 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
           }}
           key={`${featureInfoItem.alias} ${index.toString()}`}
         >
-          <Grid item xs="auto" sx={{ fontWeight: 'bold', width: '80% !important' }}>
+          <Grid size={{ xs: 'auto' }} sx={{ fontWeight: 'bold', width: '80% !important' }}>
             {featureInfoItem.alias}
           </Grid>
-          <Grid item sx={{ ml: 'auto', wordWrap: 'break-word', pr: '0.3125rem' }}>
-            {setFeatureItem(featureInfoItem)}
-          </Grid>
+          <Grid sx={{ ml: 'auto', wordWrap: 'break-word', pr: '0.3125rem' }}>{setFeatureItem(featureInfoItem)}</Grid>
         </Grid>
       ))}
       <LightBoxComponent />
