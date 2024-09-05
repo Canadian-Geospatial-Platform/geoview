@@ -241,7 +241,7 @@
         });
 
         // listen to layer visibility changed event (individual geoview layer)
-        cgpv.api.maps.Map1.layer.getGeoviewLayer('rcs.f4c51eaa-a6ca-48b9-a1fc-b0651da20509.en').onVisibleChanged((sender, payload) => {
+        cgpv.api.maps.Map1.layer.getGeoviewLayer('f4c51eaa-a6ca-48b9-a1fc-b0651da20509').onVisibleChanged((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visible} - individual`);
         });
 

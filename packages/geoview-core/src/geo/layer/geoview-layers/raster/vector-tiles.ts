@@ -1,5 +1,3 @@
-import View from 'ol/View';
-import Map from 'ol/Map';
 import BaseLayer from 'ol/layer/Base';
 import TileLayer from 'ol/layer/Tile';
 import VectorTileLayer from 'ol/layer/VectorTile';
@@ -8,7 +6,7 @@ import VectorTileSource, { Options as SourceOptions } from 'ol/source/VectorTile
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import { Extent } from 'ol/extent';
 
-import olms, { applyStyle } from 'ol-mapbox-style';
+import { applyStyle } from 'ol-mapbox-style';
 
 import Feature from 'ol/Feature';
 import { MVT } from 'ol/format';
@@ -323,26 +321,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
     // Return the calculated layer bounds
     return sourceExtent;
-  }
-
-  // TODO: This section needs documentation (a header at least). Also, is it normal to have things hardcoded like that?
-  // GV Layers Refactoring - Obsolete (just should be removed?)
-  static async addVectorTileLayer(): Promise<void> {
-    // GV from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it works good
-    // GV from inside GeoView, even when not use, something is wrong.
-    const map = await olms(
-      'LYR3',
-      'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/resources/styles/root.json?f=json'
-    );
-
-    // Configure the map with a view with EPSG:3978 projection
-    (map as Map).setView(
-      new View({
-        projection: 'EPSG:3857',
-        center: [(-2750565.340500001 + -936703.1849000007) / 2, (3583872.5053000003 + 4659267.001500003) / 2],
-        zoom: 5,
-      })
-    );
   }
 
   /**
