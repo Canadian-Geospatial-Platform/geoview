@@ -71,8 +71,7 @@ const ResponsiveGridLeftPanel = forwardRef(
     return (
       <Grid
         className={className}
-        item
-        {...getLeftPanelSize(fullWidth, isRightPanelVisible, isEnlarged)}
+        size={getLeftPanelSize(fullWidth, isRightPanelVisible, isEnlarged)}
         sx={{
           ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: isRightPanelVisible ? 'none' : 'block' } }),
           ...(fullWidth && { display: isRightPanelVisible ? 'none' : 'block' }),
@@ -133,9 +132,8 @@ const ResponsiveGridRightPanel = forwardRef(
     const theme = useTheme();
     return (
       <Grid
-        item
         className={className}
-        {...getRightPanelSize(fullWidth, isRightPanelVisible, isEnlarged)}
+        size={getRightPanelSize(fullWidth, isRightPanelVisible, isEnlarged)}
         sx={{
           position: 'relative',
           [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
