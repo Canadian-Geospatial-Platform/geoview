@@ -608,6 +608,7 @@ export class MapViewer {
 
     // Zoom to extent provided in config, it present
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent)
+      // TODO: Timeout allows for map height to be set before zoom happens, so padding is applied properly
       setTimeout(
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         () =>
@@ -629,23 +630,38 @@ export class MapViewer {
         ? this.mapFeaturesConfig.map.viewSettings.initialView.layerIds
         : this.layer.getGeoviewLayerIds();
 
-      let layerExtents = this.layer.getExtentOfMultipleLayers(layerIdsToZoomTo);
+      // Start an interval checker
+      const mapInterval = setInterval(() => {
+        if (this.layer) {
+          // Check if all registered layers are registered
+          const [allGood] = this.layer.checkLayerStatus('loaded', this.mapFeaturesConfig.map.listOfGeoviewLayerConfig, (geoviewLayer) => {
+            logger.logTraceDetailed('checkMapReady - 1 - waiting on layer registration...', geoviewLayer.geoviewLayerId);
+          });
 
-      // If extents have infinity, use default instead
-      if (layerExtents.includes(Infinity))
-        layerExtents = this.convertExtentLngLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
+          if (allGood) {
+            // Clear interval
+            clearInterval(mapInterval);
 
-      // Zoom to calculated extent
-      if (layerExtents.length)
-        // TODO: Timeout allows for map height to be set before zoom happens, so padding is applied properly
-        setTimeout(
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          () =>
-            this.zoomToExtent(layerExtents).catch((error) =>
-              logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)
-            ),
-          200
-        );
+            let layerExtents = this.layer.getExtentOfMultipleLayers(layerIdsToZoomTo);
+
+            // If extents have infinity, use default instead
+            if (layerExtents.includes(Infinity))
+              layerExtents = this.convertExtentLngLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
+
+            // Zoom to calculated extent
+            if (layerExtents.length)
+              // TODO: Timeout allows for map height to be set before zoom happens, so padding is applied properly
+              setTimeout(
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                () =>
+                  this.zoomToExtent(layerExtents).catch((error) =>
+                    logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)
+                  ),
+                200
+              );
+          }
+        }
+      }, 250);
     }
   }
 

@@ -32,7 +32,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 import { Projection } from '@/geo/utils/projection';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -257,7 +257,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       featureProjection: this.getMapViewer().getProjection(),
     });
 
-    const olLayer = this.getOLLayer(layerPath) as VectorLayer<Feature>;
+    const olLayer = this.getOLLayer(layerPath) as VectorLayer<VectorSource<Feature>>;
 
     if (olLayer && features.length) {
       // Remove current features and add new ones
@@ -265,14 +265,16 @@ export class GeoJSON extends AbstractGeoViewVector {
       olLayer!.getSource()?.addFeatures(features);
       olLayer.changed();
 
+      // TODO: This is coupled with the processor. Maybe we should have a processor event to trigger this and
+      // TODO.CONT: keep this functio not tie with UI.
       // Update the bounds in the store
       const bounds = this.getBounds(layerPath);
       if (bounds) {
         LegendEventProcessor.setLayerBounds(this.mapId, layerPath, bounds);
       }
 
-      // Remove highlighted features
-      MapEventProcessor.removeHighlightedFeature(this.mapId, 'all');
+      // Reset the feature info result set
+      FeatureInfoEventProcessor.resetResultSet(this.mapId, layerPath);
 
       // Update feature info
       DataTableEventProcessor.triggerGetAllFeatureInfo(this.mapId, layerPath).catch((error) => {
