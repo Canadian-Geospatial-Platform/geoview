@@ -163,7 +163,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
       // Get the button panel
       const buttonPanel = buttonPanelGroups[groupName][buttonId];
-      setActiveAppBarTab(buttonId, groupName, !buttonPanel.panel?.status);
+      setActiveAppBarTab(buttonId, groupName, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
     [buttonPanelGroups, setActiveAppBarTab]
   );
@@ -173,7 +173,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Log
       logger.logTraceUseCallback('APP-BAR - handleGeneralCloseClicked');
 
-      setActiveAppBarTab(buttonId, groupName, false);
+      setActiveAppBarTab(buttonId, groupName, false, false);
     },
     [setActiveAppBarTab]
   );
@@ -255,6 +255,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('APP-BAR - PANEL - OPEN/CLOSE ', isOpen);
 
+    // Open and close of the panel.
     if (isOpen) {
       openPanelById(tabId, tabGroup);
     } else {

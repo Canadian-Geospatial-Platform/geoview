@@ -16,6 +16,7 @@ export type ActiveAppBarTabType = {
   tabId: string;
   tabGroup: string;
   isOpen: boolean;
+  isFocusTrapped?: boolean;
 };
 
 export interface IUIState {
@@ -40,7 +41,7 @@ export interface IUIState {
     disableFocusTrap: () => void;
     showTab: (tab: string) => void;
     setActiveFooterBarTab: (id: string) => void;
-    setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
+    setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
     setMapInfoExpanded: (expanded: boolean) => void;
@@ -52,7 +53,7 @@ export interface IUIState {
     enableFocusTrap: (uiFocus: FocusItemProps) => void;
     disableFocusTrap: () => void;
     setActiveFooterBarTab: (id: string) => void;
-    setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
+    setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
     setHiddenTabs: (hiddenTabs: string[]) => void;
@@ -74,7 +75,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
   const init = {
     appBarComponents: ['geolocator'],
     activeFooterBarTabId: '',
-    activeAppBarTab: { tabId: '', tabGroup: '', isOpen: false },
+    activeAppBarTab: { tabId: '', tabGroup: '', isOpen: false, isFocusTrapped: false },
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusItem: { activeElementId: false, callbackElementId: false },
@@ -98,6 +99,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
               : '',
             tabGroup: geoviewConfig.appBar?.selectedTab || '',
             isOpen: geoviewConfig.appBar?.collapsed !== undefined ? !geoviewConfig.appBar.collapsed : true,
+            isFocusTrapped: false,
           },
           activeFooterBarTabId: geoviewConfig.footerBar?.selectedTab || '',
           corePackagesComponents: geoviewConfig.corePackages || [],
@@ -146,9 +148,9 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to setter
         get().uiState.setterActions.setFooterBarIsCollapsed(collapsed);
       },
-      setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => {
+      setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => {
         // Redirect to setter
-        get().uiState.setterActions.setActiveAppBarTab(tabId, tabGroup, isOpen);
+        get().uiState.setterActions.setActiveAppBarTab(tabId, tabGroup, isOpen, isFocusTrapped);
       },
       setSelectedFooterLayerListItem: (layerListItem: string) => {
         // Redirect to setter
@@ -222,7 +224,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
-      setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => {
+      setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean = false) => {
         set({
           uiState: {
             ...get().uiState,
@@ -230,6 +232,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
               tabId,
               tabGroup,
               isOpen,
+              isFocusTrapped,
             },
           },
         });
