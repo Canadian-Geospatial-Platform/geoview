@@ -35,6 +35,13 @@ export declare abstract class GroupLayerEntryConfig extends EntryConfigBaseClass
      */
     protected getEntryType(): TypeLayerEntryType;
     /**
+     * Fetch the metadata of all layer entry configurations defined in the layer tree.
+     *
+     * @returns {Promise<void>} A promise that will resolve when the process has completed.
+     * @protected @async
+     */
+    protected fetchListOfLayerMetadata(): Promise<void>;
+    /**
      * Scan the list of sublayers for duplicates. If duplicates exist, mark them as an error layer.
      */
     findDuplicatesAndMarkThemAsErrors(): void;

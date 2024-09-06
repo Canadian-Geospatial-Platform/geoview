@@ -104,7 +104,7 @@ export declare class ConfigApi {
      */
     static createLayerConfig(serviceAccessString: string, layerType: TypeGeoviewLayerType | typeof CV_CONFIG_GEOCORE_TYPE, listOfLayerId?: TypeJsonArray, language?: TypeDisplayLanguage): Promise<AbstractGeoviewLayerConfig | undefined>;
     /**
-     * Create the layer tree from the service metadata.
+     * Create the layer tree from the service metadata. If an error is detected, throw an error.
      *
      * @param {string} serviceAccessString The service access string (a URL or a layer identifier).
      * @param {TypeGeoviewLayerType | CV_CONFIG_GEOCORE_TYPE} layerType The GeoView layer type or 'geoCore'.
