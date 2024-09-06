@@ -27,7 +27,7 @@ importers:
         version: 8.57.0
       eslint-config-airbnb:
         specifier: ^19.0.4
-        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.9.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.1)(eslint@8.57.0)
+        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.10.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.2)(eslint@8.57.0)
       eslint-config-prettier:
         specifier: ^8.3.0
         version: 8.10.0(eslint@8.57.0)
@@ -39,13 +39,13 @@ importers:
         version: 26.9.0(@typescript-eslint/eslint-plugin@7.8.0)(eslint@8.57.0)(jest@27.5.1)(typescript@4.9.5)
       eslint-plugin-jsx-a11y:
         specifier: ^6.5.1
-        version: 6.9.0(eslint@8.57.0)
+        version: 6.10.0(eslint@8.57.0)
       eslint-plugin-prettier:
         specifier: ^4.0.0
         version: 4.2.1(eslint-config-prettier@8.10.0)(eslint@8.57.0)(prettier@2.8.8)
       eslint-plugin-react:
         specifier: ^7.28.0
-        version: 7.35.1(eslint@8.57.0)
+        version: 7.35.2(eslint@8.57.0)
       eslint-plugin-react-hooks:
         specifier: ^4.3.0
         version: 4.6.2(eslint@8.57.0)
@@ -88,7 +88,7 @@ importers:
         version: 8.57.0
       eslint-config-airbnb:
         specifier: ^19.0.4
-        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.9.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.1)(eslint@8.57.0)
+        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.10.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.2)(eslint@8.57.0)
       eslint-config-prettier:
         specifier: ^8.3.0
         version: 8.10.0(eslint@8.57.0)
@@ -100,13 +100,13 @@ importers:
         version: 26.9.0(@typescript-eslint/eslint-plugin@7.8.0)(eslint@8.57.0)(jest@27.5.1)(typescript@4.9.5)
       eslint-plugin-jsx-a11y:
         specifier: ^6.5.1
-        version: 6.9.0(eslint@8.57.0)
+        version: 6.10.0(eslint@8.57.0)
       eslint-plugin-prettier:
         specifier: ^4.0.0
         version: 4.2.1(eslint-config-prettier@8.10.0)(eslint@8.57.0)(prettier@2.8.8)
       eslint-plugin-react:
         specifier: ^7.28.0
-        version: 7.35.1(eslint@8.57.0)
+        version: 7.35.2(eslint@8.57.0)
       eslint-plugin-react-hooks:
         specifier: ^4.3.0
         version: 4.6.2(eslint@8.57.0)
@@ -155,7 +155,7 @@ importers:
         version: 8.57.0
       eslint-config-airbnb:
         specifier: ^19.0.4
-        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.9.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.1)(eslint@8.57.0)
+        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.10.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.2)(eslint@8.57.0)
       eslint-config-prettier:
         specifier: ^8.3.0
         version: 8.10.0(eslint@8.57.0)
@@ -167,13 +167,13 @@ importers:
         version: 26.9.0(@typescript-eslint/eslint-plugin@7.8.0)(eslint@8.57.0)(jest@27.5.1)(typescript@4.9.5)
       eslint-plugin-jsx-a11y:
         specifier: ^6.5.1
-        version: 6.9.0(eslint@8.57.0)
+        version: 6.10.0(eslint@8.57.0)
       eslint-plugin-prettier:
         specifier: ^4.0.0
         version: 4.2.1(eslint-config-prettier@8.10.0)(eslint@8.57.0)(prettier@2.8.8)
       eslint-plugin-react:
         specifier: ^7.28.0
-        version: 7.35.1(eslint@8.57.0)
+        version: 7.35.2(eslint@8.57.0)
       eslint-plugin-react-hooks:
         specifier: ^4.3.0
         version: 4.6.2(eslint@8.57.0)
@@ -193,19 +193,11 @@ importers:
   ../../packages/geoview-core:
     dependencies:
       '@emotion/react':
-<<<<<<< HEAD
         specifier: ^11.13.3
-        version: 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/styled':
-        specifier: ^11.13.0
-        version: 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1)
-=======
-        specifier: ^11.11.0
         version: 11.13.3(@types/react@18.3.5)(react@18.3.1)
       '@emotion/styled':
-        specifier: ^11.11.0
+        specifier: ^11.13.0
         version: 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1)
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
       '@fontsource/roboto':
         specifier: ^5.0.13
         version: 5.0.14
@@ -213,43 +205,23 @@ importers:
         specifier: 5.0.0-beta.37
         version: 5.0.0-beta.37(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
       '@mui/icons-material':
-<<<<<<< HEAD
         specifier: ^6.0.2
-        version: 6.0.2(@mui/material@6.0.2)(@types/react@18.3.3)(react@18.3.1)
+        version: 6.0.2(@mui/material@6.0.2)(@types/react@18.3.5)(react@18.3.1)
       '@mui/lab':
         specifier: 6.0.0-beta.9
-        version: 6.0.0-beta.9(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@6.0.2)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
+        version: 6.0.0-beta.9(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@6.0.2)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
       '@mui/material':
         specifier: ^6.0.2
-        version: 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
+        version: 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
       '@mui/styles':
         specifier: ^6.0.2
-        version: 6.0.2(@types/react@18.3.3)(react@18.3.1)
+        version: 6.0.2(@types/react@18.3.5)(react@18.3.1)
       '@mui/system':
         specifier: ^6.0.2
-        version: 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react@18.3.1)
+        version: 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react@18.3.1)
       '@mui/x-date-pickers':
         specifier: ^7.15.0
-        version: 7.15.0(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@6.0.2)(@mui/system@6.0.2)(@types/react@18.3.3)(dayjs@1.11.12)(react-dom@18.3.1)(react@18.3.1)
-=======
-        specifier: ^5.15.11
-        version: 5.16.7(@mui/material@5.16.7)(@types/react@18.3.5)(react@18.3.1)
-      '@mui/lab':
-        specifier: 5.0.0-alpha.168
-        version: 5.0.0-alpha.168(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@5.16.7)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
-      '@mui/material':
-        specifier: ^5.15.11
-        version: 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
-      '@mui/styles':
-        specifier: ^5.15.11
-        version: 5.16.7(@types/react@18.3.5)(react@18.3.1)
-      '@mui/system':
-        specifier: ^5.15.11
-        version: 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react@18.3.1)
-      '@mui/x-date-pickers':
-        specifier: ^7.6.1
-        version: 7.15.0(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@5.16.7)(@mui/system@5.16.7)(@types/react@18.3.5)(dayjs@1.11.13)(react-dom@18.3.1)(react@18.3.1)
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
+        version: 7.16.0(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@6.0.2)(@mui/system@6.0.2)(@types/react@18.3.5)(dayjs@1.11.13)(react-dom@18.3.1)(react@18.3.1)
       '@nieuwlandgeo/sldreader':
         specifier: ^0.3.1
         version: 0.3.1(ol@10.1.0)
@@ -302,13 +274,8 @@ importers:
         specifier: ~7.4.0
         version: 7.4.7(react@18.3.1)
       material-react-table:
-<<<<<<< HEAD
         specifier: ^2.13.2
-        version: 2.13.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/icons-material@6.0.2)(@mui/material@6.0.2)(@mui/x-date-pickers@7.15.0)(react-dom@18.3.1)(react@18.3.1)
-=======
-        specifier: ^2.13.0
-        version: 2.13.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/icons-material@5.16.7)(@mui/material@5.16.7)(@mui/x-date-pickers@7.15.0)(react-dom@18.3.1)(react@18.3.1)
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
+        version: 2.13.3(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/icons-material@6.0.2)(@mui/material@6.0.2)(@mui/x-date-pickers@7.16.0)(react-dom@18.3.1)(react@18.3.1)
       ol:
         specifier: ^10.1.0
         version: 10.1.0
@@ -498,7 +465,7 @@ importers:
         version: 8.57.0
       eslint-config-airbnb:
         specifier: ^19.0.4
-        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.9.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.1)(eslint@8.57.0)
+        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.10.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.2)(eslint@8.57.0)
       eslint-config-prettier:
         specifier: ^8.3.0
         version: 8.10.0(eslint@8.57.0)
@@ -510,13 +477,13 @@ importers:
         version: 26.9.0(@typescript-eslint/eslint-plugin@7.8.0)(eslint@8.57.0)(jest@27.5.1)(typescript@4.9.5)
       eslint-plugin-jsx-a11y:
         specifier: ^6.5.1
-        version: 6.9.0(eslint@8.57.0)
+        version: 6.10.0(eslint@8.57.0)
       eslint-plugin-prettier:
         specifier: ^4.0.0
         version: 4.2.1(eslint-config-prettier@8.10.0)(eslint@8.57.0)(prettier@2.8.8)
       eslint-plugin-react:
         specifier: ^7.28.0
-        version: 7.35.1(eslint@8.57.0)
+        version: 7.35.2(eslint@8.57.0)
       eslint-plugin-react-hooks:
         specifier: ^4.3.0
         version: 4.6.2(eslint@8.57.0)
@@ -549,10 +516,10 @@ importers:
         version: 2.8.8
       sass:
         specifier: ^1.49.7
-        version: 1.77.8
+        version: 1.78.0
       sass-loader:
         specifier: ^12.4.0
-        version: 12.6.0(sass@1.77.8)(webpack@5.94.0)
+        version: 12.6.0(sass@1.78.0)(webpack@5.94.0)
       simple-zustand-devtools:
         specifier: ^1.1.0
         version: 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)(zustand@4.4.7)
@@ -590,13 +557,8 @@ importers:
   ../../packages/geoview-geochart:
     dependencies:
       '@mui/material':
-<<<<<<< HEAD
         specifier: ^6.0.2
-        version: 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
-=======
-        specifier: ^5.15.11
-        version: 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
+        version: 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
       geochart:
         specifier: Canadian-Geospatial-Platform/geochart#develop
         version: github.com/Canadian-Geospatial-Platform/geochart/9e0aece295bb511352d1981168bc3c99102ac7e5(@types/react@18.3.5)
@@ -636,7 +598,7 @@ importers:
         version: 8.57.0
       eslint-config-airbnb:
         specifier: ^19.0.4
-        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.9.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.1)(eslint@8.57.0)
+        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.10.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.2)(eslint@8.57.0)
       eslint-config-prettier:
         specifier: ^8.3.0
         version: 8.10.0(eslint@8.57.0)
@@ -648,13 +610,13 @@ importers:
         version: 26.9.0(@typescript-eslint/eslint-plugin@7.8.0)(eslint@8.57.0)(jest@27.5.1)(typescript@4.9.5)
       eslint-plugin-jsx-a11y:
         specifier: ^6.5.1
-        version: 6.9.0(eslint@8.57.0)
+        version: 6.10.0(eslint@8.57.0)
       eslint-plugin-prettier:
         specifier: ^4.0.0
         version: 4.2.1(eslint-config-prettier@8.10.0)(eslint@8.57.0)(prettier@2.8.8)
       eslint-plugin-react:
         specifier: ^7.28.0
-        version: 7.35.1(eslint@8.57.0)
+        version: 7.35.2(eslint@8.57.0)
       eslint-plugin-react-hooks:
         specifier: ^4.3.0
         version: 4.6.2(eslint@8.57.0)
@@ -712,7 +674,7 @@ importers:
         version: 8.57.0
       eslint-config-airbnb:
         specifier: ^19.0.4
-        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.9.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.1)(eslint@8.57.0)
+        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.10.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.2)(eslint@8.57.0)
       eslint-config-prettier:
         specifier: ^8.3.0
         version: 8.10.0(eslint@8.57.0)
@@ -724,13 +686,13 @@ importers:
         version: 26.9.0(@typescript-eslint/eslint-plugin@7.8.0)(eslint@8.57.0)(jest@27.5.1)(typescript@4.9.5)
       eslint-plugin-jsx-a11y:
         specifier: ^6.5.1
-        version: 6.9.0(eslint@8.57.0)
+        version: 6.10.0(eslint@8.57.0)
       eslint-plugin-prettier:
         specifier: ^4.0.0
         version: 4.2.1(eslint-config-prettier@8.10.0)(eslint@8.57.0)(prettier@2.8.8)
       eslint-plugin-react:
         specifier: ^7.28.0
-        version: 7.35.1(eslint@8.57.0)
+        version: 7.35.2(eslint@8.57.0)
       eslint-plugin-react-hooks:
         specifier: ^4.3.0
         version: 4.6.2(eslint@8.57.0)
@@ -750,13 +712,8 @@ importers:
   ../../packages/geoview-time-slider:
     dependencies:
       '@mui/material':
-<<<<<<< HEAD
         specifier: ^6.0.2
-        version: 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
-=======
-        specifier: ^5.15.11
-        version: 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
+        version: 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
       geoview-core:
         specifier: workspace:~1.0.0
         version: link:../geoview-core
@@ -787,7 +744,7 @@ importers:
         version: 8.57.0
       eslint-config-airbnb:
         specifier: ^19.0.4
-        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.9.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.1)(eslint@8.57.0)
+        version: 19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.10.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.2)(eslint@8.57.0)
       eslint-config-prettier:
         specifier: ^8.3.0
         version: 8.10.0(eslint@8.57.0)
@@ -799,13 +756,13 @@ importers:
         version: 26.9.0(@typescript-eslint/eslint-plugin@7.8.0)(eslint@8.57.0)(jest@27.5.1)(typescript@4.9.5)
       eslint-plugin-jsx-a11y:
         specifier: ^6.5.1
-        version: 6.9.0(eslint@8.57.0)
+        version: 6.10.0(eslint@8.57.0)
       eslint-plugin-prettier:
         specifier: ^4.0.0
         version: 4.2.1(eslint-config-prettier@8.10.0)(eslint@8.57.0)(prettier@2.8.8)
       eslint-plugin-react:
         specifier: ^7.28.0
-        version: 7.35.1(eslint@8.57.0)
+        version: 7.35.2(eslint@8.57.0)
       eslint-plugin-react-hooks:
         specifier: ^4.3.0
         version: 4.6.2(eslint@8.57.0)
@@ -2360,20 +2317,8 @@ packages:
     dependencies:
       regenerator-runtime: 0.14.1
 
-<<<<<<< HEAD
-  /@babel/runtime@7.25.6:
-    resolution: {integrity: sha512-VBj9MYyDb9tuLq7yzqjgzt6Q+IBQLrGZfdjOekyEirZPHxXWoTSGUTMrpsfi58Up73d13NfYLv8HT9vmznjzhQ==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      regenerator-runtime: 0.14.1
-    dev: false
-
-  /@babel/template@7.24.7:
-    resolution: {integrity: sha512-jYqfPrU9JTF0PmPy1tLYHW4Mp4KlgxJD9l2nP9fD6yT/ICi554DmrWBAEYpIelzjHf1msDP3PxJIRt/nFNfBig==}
-=======
   /@babel/template@7.25.0:
     resolution: {integrity: sha512-aOOgh1/5XzKvg1jvVz7AVrx2piJ2XBi227DHmbY6y+bM9H2FlN+IfecYu4Xl0cNiiVejlsCri89LUsbj8vJD9Q==}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/code-frame': 7.24.7
@@ -2439,16 +2384,6 @@ packages:
       stylis: 4.2.0
     dev: false
 
-  /@emotion/cache@11.13.1:
-    resolution: {integrity: sha512-iqouYkuEblRcXmylXIwwOodiEK5Ifl7JcX7o6V4jI3iW4mLXX3dmt5xwBtIkJiQEXFAI+pC8X0i67yiPkH9Ucw==}
-    dependencies:
-      '@emotion/memoize': 0.9.0
-      '@emotion/sheet': 1.4.0
-      '@emotion/utils': 1.4.0
-      '@emotion/weak-memoize': 0.4.0
-      stylis: 4.2.0
-    dev: false
-
   /@emotion/hash@0.9.2:
     resolution: {integrity: sha512-MyqliTZGuOm3+5ZRSaaBGP3USLw6+EGykkwZns2EPC5g8jJ4z9OrdZY9apkl3+UP9+sdz76YYkwCKP5gh8iY3g==}
     dev: false
@@ -2463,11 +2398,7 @@ packages:
     resolution: {integrity: sha512-30FAj7/EoJ5mwVPOWhAyCX+FPfMDrVecJAM+Iw9NRoSl4BBAQeqj4cApHHUXOVvIPgLVDsCFoz/hGD+5QQD1GQ==}
     dev: false
 
-<<<<<<< HEAD
-  /@emotion/react@11.13.3(@types/react@18.3.3)(react@18.3.1):
-=======
   /@emotion/react@11.13.3(@types/react@18.3.5)(react@18.3.1):
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     resolution: {integrity: sha512-lIsdU6JNrmYfJ5EbUCf4xW1ovy5wKQ2CkPRM4xogziOxH1nXxBSjpC9YqbFAP7circxMfYp+6x676BqWcEiixg==}
     peerDependencies:
       '@types/react': '*'
@@ -2478,11 +2409,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.25.6
       '@emotion/babel-plugin': 11.12.0
-<<<<<<< HEAD
-      '@emotion/cache': 11.13.0
-=======
       '@emotion/cache': 11.13.1
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
       '@emotion/serialize': 1.3.1
       '@emotion/use-insertion-effect-with-fallbacks': 1.1.0(react@18.3.1)
       '@emotion/utils': 1.4.0
@@ -2504,25 +2431,11 @@ packages:
       csstype: 3.1.3
     dev: false
 
-  /@emotion/serialize@1.3.1:
-    resolution: {integrity: sha512-dEPNKzBPU+vFPGa+z3axPRn8XVDetYORmDC0wAiej+TNcOZE70ZMJa0X7JdeoM6q/nWTMZeLpN/fTnD9o8MQBA==}
-    dependencies:
-      '@emotion/hash': 0.9.2
-      '@emotion/memoize': 0.9.0
-      '@emotion/unitless': 0.10.0
-      '@emotion/utils': 1.4.0
-      csstype: 3.1.3
-    dev: false
-
   /@emotion/sheet@1.4.0:
     resolution: {integrity: sha512-fTBW9/8r2w3dXWYM4HCB1Rdp8NLibOw2+XELH5m5+AkWiL/KqYX6dc0kKYlaYyKjrQ6ds33MCdMPEwgs2z1rqg==}
     dev: false
 
-<<<<<<< HEAD
-  /@emotion/styled@11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1):
-=======
   /@emotion/styled@11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1):
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     resolution: {integrity: sha512-tkzkY7nQhW/zC4hztlwucpT8QEZ6eUzpXDRhww/Eej4tFfO0FxQYWRyg/c5CCXa4d/f174kqeXYjuQRnhzf6dA==}
     peerDependencies:
       '@emotion/react': ^11.0.0-rc.0
@@ -2535,13 +2448,8 @@ packages:
       '@babel/runtime': 7.25.6
       '@emotion/babel-plugin': 11.12.0
       '@emotion/is-prop-valid': 1.3.0
-<<<<<<< HEAD
-      '@emotion/react': 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/serialize': 1.3.0
-=======
       '@emotion/react': 11.13.3(@types/react@18.3.5)(react@18.3.1)
       '@emotion/serialize': 1.3.1
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
       '@emotion/use-insertion-effect-with-fallbacks': 1.1.0(react@18.3.1)
       '@emotion/utils': 1.4.0
       '@types/react': 18.3.5
@@ -2552,13 +2460,6 @@ packages:
 
   /@emotion/unitless@0.10.0:
     resolution: {integrity: sha512-dFoMUuQA20zvtVTuxZww6OHoJYgrzfKM1t52mVySDJnMSEa08ruEvdYQbhvyu6soU+NeLVd3yKfTfT0NeV6qGg==}
-<<<<<<< HEAD
-    dev: false
-
-  /@emotion/unitless@0.9.0:
-    resolution: {integrity: sha512-TP6GgNZtmtFaFcsOgExdnfxLLpRDla4Q66tnenA9CktvVSdNKDvMVuUah4QvWPIpNjrWsGg3qeGo9a43QooGZQ==}
-=======
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     dev: false
 
   /@emotion/use-insertion-effect-with-fallbacks@1.1.0(react@18.3.1):
@@ -2689,7 +2590,7 @@ packages:
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       chalk: 4.1.2
       jest-message-util: 27.5.1
       jest-util: 27.5.1
@@ -2710,7 +2611,7 @@ packages:
       '@jest/test-result': 27.5.1
       '@jest/transform': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       emittery: 0.8.1
@@ -2747,7 +2648,7 @@ packages:
     dependencies:
       '@jest/fake-timers': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       jest-mock: 27.5.1
     dev: true
 
@@ -2757,7 +2658,7 @@ packages:
     dependencies:
       '@jest/types': 27.5.1
       '@sinonjs/fake-timers': 8.1.0
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       jest-message-util: 27.5.1
       jest-mock: 27.5.1
       jest-util: 27.5.1
@@ -2786,7 +2687,7 @@ packages:
       '@jest/test-result': 27.5.1
       '@jest/transform': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       chalk: 4.1.2
       collect-v8-coverage: 1.0.2
       exit: 0.1.2
@@ -2870,7 +2771,7 @@ packages:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       '@types/yargs': 16.0.9
       chalk: 4.1.2
     dev: true
@@ -2965,15 +2866,9 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
-<<<<<<< HEAD
-  /@mui/base@5.0.0-beta.58(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1):
+  /@mui/base@5.0.0-beta.58(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-P0E7ZrxOuyYqBvVv9w8k7wm+Xzx/KRu+BGgFcR2htTsGCpJNQJCSUXNUZ50MUmSU9hzqhwbQWNXhV1MBTl6F7A==}
     engines: {node: '>=14.0.0'}
-=======
-  /@mui/base@5.0.0-beta.39(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-puyUptF7VJ+9/dMIRLF+DLR21cWfvejsA6OnatfJfqFp8aMhya7xQtvYLEfCch6ahvFZvNC9FFEGGR+qkgFjUg==}
-    engines: {node: '>=12.0.0'}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
       react: ^17.0.0 || ^18.0.0
@@ -2984,44 +2879,26 @@ packages:
     dependencies:
       '@babel/runtime': 7.25.6
       '@floating-ui/react-dom': 2.1.1(react-dom@18.3.1)(react@18.3.1)
-<<<<<<< HEAD
-      '@mui/types': 7.2.16(@types/react@18.3.3)
-      '@mui/utils': 6.0.0-rc.0(@types/react@18.3.3)(react@18.3.1)
-      '@popperjs/core': 2.11.8
-      '@types/react': 18.3.3
-=======
       '@mui/types': 7.2.16(@types/react@18.3.5)
-      '@mui/utils': 5.16.6(@types/react@18.3.5)(react@18.3.1)
+      '@mui/utils': 6.0.0-rc.0(@types/react@18.3.5)(react@18.3.1)
       '@popperjs/core': 2.11.8
       '@types/react': 18.3.5
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
       clsx: 2.1.1
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-<<<<<<< HEAD
-    dev: false
-
-  /@mui/core-downloads-tracker@5.16.4:
-    resolution: {integrity: sha512-rNdHXhclwjEZnK+//3SR43YRx0VtjdHnUFhMSGYmAMJve+KiwEja/41EYh8V3pZKqF2geKyfcFUenTfDTYUR4w==}
-    dev: false
-
-  /@mui/core-downloads-tracker@6.0.2:
-    resolution: {integrity: sha512-Cg68oOlAfbJgMgvbCwcX3Y3HdygCl6X1nREYTdEWcEKUQhNarrC45Cc35mP+zA7p3ZXE/7FLiaTCCgwuSoef/Q==}
-    dev: false
-
-  /@mui/icons-material@5.16.4(@mui/material@5.16.4)(@types/react@18.3.3)(react@18.3.1):
-    resolution: {integrity: sha512-j9/CWctv6TH6Dou2uR2EH7UOgu79CW/YcozxCYVLJ7l03pCsiOlJ5sBArnWJxJ+nGkFwyL/1d1k8JEPMDR125A==}
-=======
     dev: false
 
   /@mui/core-downloads-tracker@5.16.7:
     resolution: {integrity: sha512-RtsCt4Geed2/v74sbihWzzRs+HsIQCfclHeORh5Ynu2fS4icIKozcSubwuG7vtzq2uW3fOR1zITSP84TNt2GoQ==}
     dev: false
 
+  /@mui/core-downloads-tracker@6.0.2:
+    resolution: {integrity: sha512-Cg68oOlAfbJgMgvbCwcX3Y3HdygCl6X1nREYTdEWcEKUQhNarrC45Cc35mP+zA7p3ZXE/7FLiaTCCgwuSoef/Q==}
+    dev: false
+
   /@mui/icons-material@5.16.7(@mui/material@5.16.7)(@types/react@18.3.5)(react@18.3.1):
     resolution: {integrity: sha512-UrGwDJCXEszbDI7yV047BYU5A28eGJ79keTCP4cc74WyncuVrnurlmIRxaHL8YK+LI1Kzq+/JM52IAkNnv4u+Q==}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     engines: {node: '>=12.0.0'}
     peerDependencies:
       '@mui/material': ^5.0.0
@@ -3031,14 +2908,13 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.8
-      '@mui/material': 5.16.4(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
-      '@types/react': 18.3.3
+      '@babel/runtime': 7.25.6
+      '@mui/material': 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
+      '@types/react': 18.3.5
       react: 18.3.1
     dev: false
 
-  /@mui/icons-material@6.0.2(@mui/material@6.0.2)(@types/react@18.3.3)(react@18.3.1):
+  /@mui/icons-material@6.0.2(@mui/material@6.0.2)(@types/react@18.3.5)(react@18.3.1):
     resolution: {integrity: sha512-WaTPSvKcx8X7NdWAHzJWDZv+YXvK0MUY8+JI/r4/q2GgIa5RW+n4+08CGX6jB7sWhU1R3zy28NfsDUwwQjOThw==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -3050,25 +2926,14 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.25.6
-      '@mui/material': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
-      '@types/react': 18.3.3
-      react: 18.3.1
-    dev: false
-
-  /@mui/lab@6.0.0-beta.9(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@6.0.2)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-rgwgf9mNUpXxPlI3tnM3i+HNAtDZ2amAollDqbe6RZ/3fltcir/o/0zBvnZRkJIBOAk6qIGmL59GCasuQQtPKA==}
-    engines: {node: '>=14.0.0'}
-=======
-      '@babel/runtime': 7.25.6
-      '@mui/material': 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
+      '@mui/material': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
       '@types/react': 18.3.5
       react: 18.3.1
     dev: false
 
-  /@mui/lab@5.0.0-alpha.168(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@5.16.7)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-VKLQP5J/SujylvW3/riMtQYTspTluUkKLW/eu48RwuKby583cFCg8p4fWl4PpC3drwq6g9AeJ7DG4w0K+zFbdA==}
-    engines: {node: '>=12.0.0'}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
+  /@mui/lab@6.0.0-beta.9(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@6.0.2)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-rgwgf9mNUpXxPlI3tnM3i+HNAtDZ2amAollDqbe6RZ/3fltcir/o/0zBvnZRkJIBOAk6qIGmL59GCasuQQtPKA==}
+    engines: {node: '>=14.0.0'}
     peerDependencies:
       '@emotion/react': ^11.5.0
       '@emotion/styled': ^11.3.0
@@ -3088,38 +2953,22 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.25.6
-<<<<<<< HEAD
-      '@emotion/react': 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/base': 5.0.0-beta.58(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
-      '@mui/material': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
-      '@mui/system': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/types': 7.2.16(@types/react@18.3.3)
-      '@mui/utils': 6.0.2(@types/react@18.3.3)(react@18.3.1)
-      '@types/react': 18.3.3
-=======
       '@emotion/react': 11.13.3(@types/react@18.3.5)(react@18.3.1)
       '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1)
-      '@mui/base': 5.0.0-beta.39(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
-      '@mui/material': 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
-      '@mui/system': 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react@18.3.1)
+      '@mui/base': 5.0.0-beta.58(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
+      '@mui/material': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
+      '@mui/system': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react@18.3.1)
       '@mui/types': 7.2.16(@types/react@18.3.5)
-      '@mui/utils': 5.16.6(@types/react@18.3.5)(react@18.3.1)
+      '@mui/utils': 6.0.2(@types/react@18.3.5)(react@18.3.1)
       '@types/react': 18.3.5
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
       clsx: 2.1.1
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
-<<<<<<< HEAD
-  /@mui/material@5.16.4(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-dBnh3/zRYgEVIS3OE4oTbujse3gifA0qLMmuUk13ywsDCbngJsdgwW5LuYeiT5pfA8PGPGSqM7mxNytYXgiMCw==}
-=======
   /@mui/material@5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-cwwVQxBhK60OIOqZOVLFt55t01zmarKJiJUWbk0+8s/Ix5IaUzAShqlJchxsIQ4mSrWqgcKCCXKtIlG5H+/Jmg==}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     engines: {node: '>=12.0.0'}
     peerDependencies:
       '@emotion/react': ^11.5.0
@@ -3135,15 +2984,6 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.8
-      '@emotion/react': 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/core-downloads-tracker': 5.16.4
-      '@mui/system': 5.16.4(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/types': 7.2.15(@types/react@18.3.3)
-      '@mui/utils': 5.16.4(@types/react@18.3.3)(react@18.3.1)
-=======
       '@babel/runtime': 7.25.6
       '@emotion/react': 11.13.3(@types/react@18.3.5)(react@18.3.1)
       '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1)
@@ -3151,7 +2991,6 @@ packages:
       '@mui/system': 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react@18.3.1)
       '@mui/types': 7.2.16(@types/react@18.3.5)
       '@mui/utils': 5.16.6(@types/react@18.3.5)(react@18.3.1)
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
       '@popperjs/core': 2.11.8
       '@types/react': 18.3.5
       '@types/react-transition-group': 4.4.11
@@ -3164,8 +3003,7 @@ packages:
       react-transition-group: 4.4.5(react-dom@18.3.1)(react@18.3.1)
     dev: false
 
-<<<<<<< HEAD
-  /@mui/material@6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1):
+  /@mui/material@6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-KrnkJFSyhsAh8V30DNUbWyRyxMi4ZHjFg1ikQGx+mUAIffFTYIEx9Q+Kxd3vCT0FUFGOmbsuh6F6yRhpybsjkg==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -3186,14 +3024,14 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.25.6
-      '@emotion/react': 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1)
+      '@emotion/react': 11.13.3(@types/react@18.3.5)(react@18.3.1)
+      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1)
       '@mui/core-downloads-tracker': 6.0.2
-      '@mui/system': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/types': 7.2.16(@types/react@18.3.3)
-      '@mui/utils': 6.0.2(@types/react@18.3.3)(react@18.3.1)
+      '@mui/system': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react@18.3.1)
+      '@mui/types': 7.2.16(@types/react@18.3.5)
+      '@mui/utils': 6.0.2(@types/react@18.3.5)(react@18.3.1)
       '@popperjs/core': 2.11.8
-      '@types/react': 18.3.3
+      '@types/react': 18.3.5
       '@types/react-transition-group': 4.4.11
       clsx: 2.1.1
       csstype: 3.1.3
@@ -3204,12 +3042,8 @@ packages:
       react-transition-group: 4.4.5(react-dom@18.3.1)(react@18.3.1)
     dev: false
 
-  /@mui/private-theming@5.16.4(@types/react@18.3.3)(react@18.3.1):
-    resolution: {integrity: sha512-ZsAm8cq31SJ37SVWLRlu02v9SRthxnfQofaiv14L5Bht51B0dz6yQEoVU/V8UduZDCCIrWkBHuReVfKhE/UuXA==}
-=======
   /@mui/private-theming@5.16.6(@types/react@18.3.5)(react@18.3.1):
     resolution: {integrity: sha512-rAk+Rh8Clg7Cd7shZhyt2HGTTE5wYKNSJ5sspf28Fqm/PZ69Er9o6KX25g03/FG2dfpg5GCwZh/xOojiTfm3hw==}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     engines: {node: '>=12.0.0'}
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
@@ -3225,8 +3059,7 @@ packages:
       react: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /@mui/private-theming@6.0.2(@types/react@18.3.3)(react@18.3.1):
+  /@mui/private-theming@6.0.2(@types/react@18.3.5)(react@18.3.1):
     resolution: {integrity: sha512-emddFcRhA0hPGVIwIbW5g0V8vtCgw2g/H/A7jTdGe7dpCWEPpp6jPIXRRKcEUWgmg91R6rBNfV+LFHxBxmZXOQ==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -3237,18 +3070,14 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.25.6
-      '@mui/utils': 6.0.2(@types/react@18.3.3)(react@18.3.1)
-      '@types/react': 18.3.3
+      '@mui/utils': 6.0.2(@types/react@18.3.5)(react@18.3.1)
+      '@types/react': 18.3.5
       prop-types: 15.8.1
       react: 18.3.1
     dev: false
 
-  /@mui/styled-engine@5.16.4(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(react@18.3.1):
-    resolution: {integrity: sha512-0+mnkf+UiAmTVB8PZFqOhqf729Yh0Cxq29/5cA3VAyDVTRIUUQ8FXQhiAhUIbijFmM72rY80ahFPXIm4WDbzcA==}
-=======
   /@mui/styled-engine@5.16.6(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(react@18.3.1):
     resolution: {integrity: sha512-zaThmS67ZmtHSWToTiHslbI8jwrmITcN93LQaR2lKArbvS7Z3iLkwRoiikNWutx9MBs8Q6okKvbZq1RQYB3v7g==}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     engines: {node: '>=12.0.0'}
     peerDependencies:
       '@emotion/react': ^11.4.1
@@ -3260,31 +3089,18 @@ packages:
       '@emotion/styled':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.8
-      '@emotion/cache': 11.13.0
-      '@emotion/react': 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1)
-=======
       '@babel/runtime': 7.25.6
       '@emotion/cache': 11.13.1
       '@emotion/react': 11.13.3(@types/react@18.3.5)(react@18.3.1)
       '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1)
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
       csstype: 3.1.3
       prop-types: 15.8.1
       react: 18.3.1
     dev: false
 
-<<<<<<< HEAD
   /@mui/styled-engine@6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(react@18.3.1):
     resolution: {integrity: sha512-qd3Vlhted0SYVGotnCfVNcxff7vW2WN0fclbAexff60NeNS1qs/H/CImHEHUBiUGeNWMPRochbN6VF1arQ7/jA==}
     engines: {node: '>=14.0.0'}
-=======
-  /@mui/styles@5.16.7(@types/react@18.3.5)(react@18.3.1):
-    resolution: {integrity: sha512-FfXhHP/2MlqH+vLs2tIHMeCChmqSRgkOALVNLKkPrDsvtoq5J8OraOutCn1scpvRjr9mO8ZhW6jKx2t/vUDxtQ==}
-    engines: {node: '>=12.0.0'}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     peerDependencies:
       '@emotion/react': ^11.4.1
       '@emotion/styled': ^11.3.0
@@ -3297,14 +3113,14 @@ packages:
     dependencies:
       '@babel/runtime': 7.25.6
       '@emotion/cache': 11.13.1
-      '@emotion/react': 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1)
+      '@emotion/react': 11.13.3(@types/react@18.3.5)(react@18.3.1)
+      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1)
       csstype: 3.1.3
       prop-types: 15.8.1
       react: 18.3.1
     dev: false
 
-  /@mui/styles@6.0.2(@types/react@18.3.3)(react@18.3.1):
+  /@mui/styles@6.0.2(@types/react@18.3.5)(react@18.3.1):
     resolution: {integrity: sha512-NDk7DwEQ1sUlw0BBVRjxiHBcZ521FAVj8msdakKv48R3YoC24JCdEBzTmqgASeIHeMbBQJNreyGCSWSoICSrBw==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -3316,17 +3132,10 @@ packages:
     dependencies:
       '@babel/runtime': 7.25.6
       '@emotion/hash': 0.9.2
-<<<<<<< HEAD
-      '@mui/private-theming': 6.0.2(@types/react@18.3.3)(react@18.3.1)
-      '@mui/types': 7.2.16(@types/react@18.3.3)
-      '@mui/utils': 6.0.2(@types/react@18.3.3)(react@18.3.1)
-      '@types/react': 18.3.3
-=======
-      '@mui/private-theming': 5.16.6(@types/react@18.3.5)(react@18.3.1)
+      '@mui/private-theming': 6.0.2(@types/react@18.3.5)(react@18.3.1)
       '@mui/types': 7.2.16(@types/react@18.3.5)
-      '@mui/utils': 5.16.6(@types/react@18.3.5)(react@18.3.1)
+      '@mui/utils': 6.0.2(@types/react@18.3.5)(react@18.3.1)
       '@types/react': 18.3.5
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
       clsx: 2.1.1
       csstype: 3.1.3
       hoist-non-react-statics: 3.3.2
@@ -3342,13 +3151,8 @@ packages:
       react: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /@mui/system@5.16.4(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react@18.3.1):
-    resolution: {integrity: sha512-ET1Ujl2/8hbsD611/mqUuNArMCGv/fIWO/f8B3ZqF5iyPHM2aS74vhTNyjytncc4i6dYwGxNk+tLa7GwjNS0/w==}
-=======
   /@mui/system@5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react@18.3.1):
     resolution: {integrity: sha512-Jncvs/r/d/itkxh7O7opOunTqbbSSzMTHzZkNLM+FjAOg+cYAZHrPDlYe1ZGKUYORwwb2XexlWnpZp0kZ4AHuA==}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     engines: {node: '>=12.0.0'}
     peerDependencies:
       '@emotion/react': ^11.5.0
@@ -3363,16 +3167,6 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.8
-      '@emotion/react': 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/private-theming': 5.16.4(@types/react@18.3.3)(react@18.3.1)
-      '@mui/styled-engine': 5.16.4(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(react@18.3.1)
-      '@mui/types': 7.2.15(@types/react@18.3.3)
-      '@mui/utils': 5.16.4(@types/react@18.3.3)(react@18.3.1)
-      '@types/react': 18.3.3
-=======
       '@babel/runtime': 7.25.6
       '@emotion/react': 11.13.3(@types/react@18.3.5)(react@18.3.1)
       '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1)
@@ -3381,15 +3175,13 @@ packages:
       '@mui/types': 7.2.16(@types/react@18.3.5)
       '@mui/utils': 5.16.6(@types/react@18.3.5)(react@18.3.1)
       '@types/react': 18.3.5
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
       clsx: 2.1.1
       csstype: 3.1.3
       prop-types: 15.8.1
       react: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /@mui/system@6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react@18.3.1):
+  /@mui/system@6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react@18.3.1):
     resolution: {integrity: sha512-AZv1/C4PuHgWFTA8YraIzl3FTVLdRz0RIMRwEADWZBdIhnuTHS/4+r8qE9+3CcpTHg1WsEu8btaO3AhQahSM9A==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -3406,25 +3198,21 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.25.6
-      '@emotion/react': 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/private-theming': 6.0.2(@types/react@18.3.3)(react@18.3.1)
+      '@emotion/react': 11.13.3(@types/react@18.3.5)(react@18.3.1)
+      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1)
+      '@mui/private-theming': 6.0.2(@types/react@18.3.5)(react@18.3.1)
       '@mui/styled-engine': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(react@18.3.1)
-      '@mui/types': 7.2.16(@types/react@18.3.3)
-      '@mui/utils': 6.0.2(@types/react@18.3.3)(react@18.3.1)
-      '@types/react': 18.3.3
+      '@mui/types': 7.2.16(@types/react@18.3.5)
+      '@mui/utils': 6.0.2(@types/react@18.3.5)(react@18.3.1)
+      '@types/react': 18.3.5
       clsx: 2.1.1
       csstype: 3.1.3
       prop-types: 15.8.1
       react: 18.3.1
     dev: false
 
-  /@mui/types@7.2.15(@types/react@18.3.3):
-    resolution: {integrity: sha512-nbo7yPhtKJkdf9kcVOF8JZHPZTmqXjJ/tI0bdWgHg5tp9AnIN4Y7f7wm9T+0SyGYJk76+GYZ8Q5XaTYAsUHN0Q==}
-=======
   /@mui/types@7.2.16(@types/react@18.3.5):
     resolution: {integrity: sha512-qI8TV3M7ShITEEc8Ih15A2vLzZGLhD+/UPNwck/hcls2gwg7dyRjNGXcQYHKLB5Q7PuTRfrTkAoPa2VV1s67Ag==}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0 || ^19.0.0
     peerDependenciesMeta:
@@ -3434,24 +3222,8 @@ packages:
       '@types/react': 18.3.5
     dev: false
 
-<<<<<<< HEAD
-  /@mui/types@7.2.16(@types/react@18.3.3):
-    resolution: {integrity: sha512-qI8TV3M7ShITEEc8Ih15A2vLzZGLhD+/UPNwck/hcls2gwg7dyRjNGXcQYHKLB5Q7PuTRfrTkAoPa2VV1s67Ag==}
-    peerDependencies:
-      '@types/react': ^17.0.0 || ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-    dependencies:
-      '@types/react': 18.3.3
-    dev: false
-
-  /@mui/utils@5.16.4(@types/react@18.3.3)(react@18.3.1):
-    resolution: {integrity: sha512-nlppYwq10TBIFqp7qxY0SvbACOXeOjeVL3pOcDsK0FT8XjrEXh9/+lkg8AEIzD16z7YfiJDQjaJG2OLkE7BxNg==}
-=======
   /@mui/utils@5.16.6(@types/react@18.3.5)(react@18.3.1):
     resolution: {integrity: sha512-tWiQqlhxAt3KENNiSRL+DIn9H5xNVK6Jjf70x3PnfQPz1MPBdh7yyIcAyVBT9xiw7hP3SomRhPR7hzBMBCjqEA==}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     engines: {node: '>=12.0.0'}
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
@@ -3470,28 +3242,7 @@ packages:
       react-is: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /@mui/utils@5.16.6(@types/react@18.3.3)(react@18.3.1):
-    resolution: {integrity: sha512-tWiQqlhxAt3KENNiSRL+DIn9H5xNVK6Jjf70x3PnfQPz1MPBdh7yyIcAyVBT9xiw7hP3SomRhPR7hzBMBCjqEA==}
-    engines: {node: '>=12.0.0'}
-    peerDependencies:
-      '@types/react': ^17.0.0 || ^18.0.0
-      react: ^17.0.0 || ^18.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.25.6
-      '@mui/types': 7.2.15(@types/react@18.3.3)
-      '@types/prop-types': 15.7.12
-      '@types/react': 18.3.3
-      clsx: 2.1.1
-      prop-types: 15.8.1
-      react: 18.3.1
-      react-is: 18.3.1
-    dev: false
-
-  /@mui/utils@6.0.0-rc.0(@types/react@18.3.3)(react@18.3.1):
+  /@mui/utils@6.0.0-rc.0(@types/react@18.3.5)(react@18.3.1):
     resolution: {integrity: sha512-tBp0ILEXDL0bbDDT8PnZOjCqSm5Dfk2N0Z45uzRw+wVl6fVvloC9zw8avl+OdX1Bg3ubs/ttKn8nRNv17bpM5A==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -3502,16 +3253,16 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.25.6
-      '@mui/types': 7.2.16(@types/react@18.3.3)
+      '@mui/types': 7.2.16(@types/react@18.3.5)
       '@types/prop-types': 15.7.12
-      '@types/react': 18.3.3
+      '@types/react': 18.3.5
       clsx: 2.1.1
       prop-types: 15.8.1
       react: 18.3.1
       react-is: 18.3.1
     dev: false
 
-  /@mui/utils@6.0.2(@types/react@18.3.3)(react@18.3.1):
+  /@mui/utils@6.0.2(@types/react@18.3.5)(react@18.3.1):
     resolution: {integrity: sha512-TeFrYsxcmeoDSlkoPhX+LjIuuqC5Pyj+xz2kRceKCkUpwMNTEeVOfowXDPe+mboZwmpJ5ZxP4eiAgQMdeEasjg==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -3522,20 +3273,17 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.25.6
-      '@mui/types': 7.2.16(@types/react@18.3.3)
+      '@mui/types': 7.2.16(@types/react@18.3.5)
       '@types/prop-types': 15.7.12
-      '@types/react': 18.3.3
+      '@types/react': 18.3.5
       clsx: 2.1.1
       prop-types: 15.8.1
       react: 18.3.1
       react-is: 18.3.1
     dev: false
 
-  /@mui/x-date-pickers@7.15.0(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@6.0.2)(@mui/system@6.0.2)(@types/react@18.3.3)(dayjs@1.11.12)(react-dom@18.3.1)(react@18.3.1):
-=======
-  /@mui/x-date-pickers@7.15.0(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@5.16.7)(@mui/system@5.16.7)(@types/react@18.3.5)(dayjs@1.11.13)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
-    resolution: {integrity: sha512-YQEQICNxUEFYp/I/yP58cqihA8yhXaXSNZ1/N0JANu2IlCwoJ4Jzi+S0s4RN7RghpiDyoSMFijROBC5HfpTjiw==}
+  /@mui/x-date-pickers@7.16.0(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@6.0.2)(@mui/system@6.0.2)(@types/react@18.3.5)(dayjs@1.11.13)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-NjFAoI6NiJ/65LJf5A38Y+aA/zSIow+7i52QBcgryrdBlIu46nssqzohPRWNUFwnxNXhWstfcV3YAb2avCIY5A==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       '@emotion/react': ^11.9.0
@@ -3572,19 +3320,12 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.25.6
-<<<<<<< HEAD
-      '@emotion/react': 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/material': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
-      '@mui/system': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/utils': 5.16.6(@types/react@18.3.3)(react@18.3.1)
-=======
       '@emotion/react': 11.13.3(@types/react@18.3.5)(react@18.3.1)
       '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1)
-      '@mui/material': 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
-      '@mui/system': 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react@18.3.1)
+      '@mui/material': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
+      '@mui/system': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react@18.3.1)
       '@mui/utils': 5.16.6(@types/react@18.3.5)(react@18.3.1)
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
+      '@mui/x-internals': 7.16.0(@types/react@18.3.5)(react@18.3.1)
       '@types/react-transition-group': 4.4.11
       clsx: 2.1.1
       dayjs: 1.11.13
@@ -3592,6 +3333,19 @@ packages:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-transition-group: 4.4.5(react-dom@18.3.1)(react@18.3.1)
+    transitivePeerDependencies:
+      - '@types/react'
+    dev: false
+
+  /@mui/x-internals@7.16.0(@types/react@18.3.5)(react@18.3.1):
+    resolution: {integrity: sha512-ijer5XYmWlJqWaTmF6TGH1odG7EAupv8iDWYmDm2yVR9IQ+L2nQSuhiFClI+wmGx40KS2VKOlzDMPpF0t7/HCg==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@babel/runtime': 7.25.6
+      '@mui/utils': 5.16.6(@types/react@18.3.5)(react@18.3.1)
+      react: 18.3.1
     transitivePeerDependencies:
       - '@types/react'
     dev: false
@@ -3795,26 +3549,26 @@ packages:
     resolution: {integrity: sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==}
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /@types/bonjour@3.5.13:
     resolution: {integrity: sha512-z9fJ5Im06zvUL548KvYNecEVlA7cVDkGUi6kZusb04mpyEFKCIZJvloCcmpmLaIahDpOQGHaHmG6imtPMmPXGQ==}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /@types/connect-history-api-fallback@1.5.4:
     resolution: {integrity: sha512-n6Cr2xS1h4uAulPRdlw6Jl6s1oG8KrVilPN2yUITEs+K48EzMJJ3W1xy8K5eWuFvjp3R74AOIGSmp2UfBJ8HFw==}
     dependencies:
       '@types/express-serve-static-core': 4.19.5
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /@types/connect@3.4.38:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /@types/create-react-class@15.6.8:
@@ -3835,7 +3589,7 @@ packages:
   /@types/express-serve-static-core@4.19.5:
     resolution: {integrity: sha512-y6W03tvrACO72aijJ5uF02FRq5cgDR9lUxddQ8vyF+GvmjJQqbzDcJngEjURc+ZsG31VI3hODNZJ2URj86pzmg==}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       '@types/qs': 6.9.15
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -3865,13 +3619,13 @@ packages:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /@types/graceful-fs@4.1.9:
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /@types/history@4.7.11:
@@ -3889,7 +3643,7 @@ packages:
   /@types/http-proxy@1.17.15:
     resolution: {integrity: sha512-25g5atgiVNTIv0LBDTg1H74Hvayx0ajtJPLLcYE3whFv75J0pWNtOBzaXJQgDTmrX1bx5U9YC2w/n65BN1HwRQ==}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /@types/istanbul-lib-coverage@2.0.6:
@@ -3944,11 +3698,11 @@ packages:
   /@types/node-forge@1.3.11:
     resolution: {integrity: sha512-FQx220y22OKNTqaByeBGqHWYz4cl94tpcxeFdvBo3wjG6XPBuZ0BNgNZRV5J5TFmmcsJ4IzsLkmGRiQbnYsBEQ==}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
-  /@types/node@22.5.2:
-    resolution: {integrity: sha512-acJsPTEqYqulZS/Yp/S3GgeE6GZ0qYODUR8aVr/DkhHQ8l9nd4j5x1/ZJy9/gHrRlFMqkO6i0I3E27Alu4jjPg==}
+  /@types/node@22.5.4:
+    resolution: {integrity: sha512-FDuKUJQm/ju9fT/SeX/6+gBzoPzlVCzfzmGkwKvRHQVxi4BntVbyIwf6a4Xn62mrvndLiml6z/UBXIdEVjQLXg==}
     dependencies:
       undici-types: 6.19.8
     dev: true
@@ -4007,19 +3761,8 @@ packages:
       '@types/react': 18.3.5
     dev: false
 
-<<<<<<< HEAD
-  /@types/react-transition-group@4.4.11:
-    resolution: {integrity: sha512-RM05tAniPZ5DZPzzNFP+DmrcOdD0efDUxMy3145oljWSl3x9ZV5vhme98gTxFrj2lhXvmGNnUiuDyJgY9IKkNA==}
-    dependencies:
-      '@types/react': 18.3.3
-    dev: false
-
-  /@types/react@18.3.3:
-    resolution: {integrity: sha512-hti/R0pS0q1/xx+TsI73XIqk26eBsISZ2R0wUijXIngRK9R/e7Xw/cXVxQK7R5JjW+SV4zGcn5hXjudkN/pLIw==}
-=======
   /@types/react@18.3.5:
     resolution: {integrity: sha512-WeqMfGJLGuLCqHGYRGHxnKrXcTitc6L/nBUWfWPcTarG3t9PsquqUMuVeXZeca+mglY4Vo5GZjCi0A3Or2lnxA==}
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
     dependencies:
       '@types/prop-types': 15.7.12
       csstype: 3.1.3
@@ -4042,7 +3785,7 @@ packages:
     resolution: {integrity: sha512-x2EM6TJOybec7c52BX0ZspPodMsQUd5L6PRwOunVyVUhXiBSKf3AezDL8Dgvgt5o0UfKNfuA0eMLr2wLT4AiBA==}
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /@types/serve-index@1.9.4:
@@ -4055,14 +3798,14 @@ packages:
     resolution: {integrity: sha512-W8Ym+h8nhuRwaKPaDw34QUkwsGi6Rc4yYqvKFo5rm2FUEhCFbzVWrxXUxuKK8TASjWsysJY0nsmNCGhCOIsrOw==}
     dependencies:
       '@types/http-errors': 2.0.4
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       '@types/send': 0.17.4
     dev: true
 
   /@types/sockjs@0.3.36:
     resolution: {integrity: sha512-MK9V6NzAS1+Ud7JV9lJLFqW85VbC9dq3LmwZCuBe4wBDgKC0Kj/jd8Xl+nSviU+Qc3+m7umHHyHg//2KSa0a0Q==}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /@types/source-list-map@0.1.6:
@@ -4073,7 +3816,7 @@ packages:
     resolution: {integrity: sha512-ep8b36RKHlgWPqjNG9ToUrPiwkhwh0AEzy883mO5Xnd+cL6VBH1EvSjBAAuxLUFF2Vn/moE3Me6v9E1Lo+48GQ==}
     dependencies:
       '@types/emscripten': 1.39.13
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /@types/stack-utils@2.0.3:
@@ -4093,7 +3836,7 @@ packages:
   /@types/webpack-sources@3.2.3:
     resolution: {integrity: sha512-4nZOdMwSPHZ4pTEZzSp0AsTM4K7Qmu40UKW4tJDiOVs20UzYF9l+qUe4s0ftfN0pin06n+5cWWDJXH+sbhAiDw==}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       '@types/source-list-map': 0.1.6
       source-map: 0.7.4
     dev: true
@@ -4101,7 +3844,7 @@ packages:
   /@types/webpack@4.41.39:
     resolution: {integrity: sha512-otxUJvoi6FbBq/64gGH34eblpKLgdi+gf08GaAh8Bx6So0ZZic028Ev/SUxD22gbthMKCkeeiXEat1kHLDJfYg==}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       '@types/tapable': 1.0.12
       '@types/uglify-js': 3.17.5
       '@types/webpack-sources': 3.2.3
@@ -4112,7 +3855,7 @@ packages:
   /@types/ws@8.5.12:
     resolution: {integrity: sha512-3tPRkv1EtkDpzlgyKyI8pGsGZAGPEaXeu0DOj5DI25Ja91bdAYddYHbADRYVrZMRbfW+1l5YwXVDKohDJNQxkQ==}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /@types/yargs-parser@21.0.3:
@@ -4797,17 +4540,16 @@ packages:
   /axios@1.7.7:
     resolution: {integrity: sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==}
     dependencies:
-      follow-redirects: 1.15.6
+      follow-redirects: 1.15.8
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
     dev: false
 
-  /axobject-query@3.1.1:
-    resolution: {integrity: sha512-goKlv8DZrK9hUh975fnHzhNIO4jUnFCfv/dszV5VwUGDFjI6vQ2VwoyjYjYNEbBE8AH87TduWP5uyDR1D+Iteg==}
-    dependencies:
-      deep-equal: 2.2.3
+  /axobject-query@4.1.0:
+    resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
+    engines: {node: '>= 0.4'}
     dev: true
 
   /babel-jest@27.5.1(@babel/core@7.25.2):
@@ -5042,8 +4784,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001655
-      electron-to-chromium: 1.5.13
+      caniuse-lite: 1.0.30001657
+      electron-to-chromium: 1.5.15
       node-releases: 2.0.18
       update-browserslist-db: 1.1.0(browserslist@4.23.3)
     dev: true
@@ -5100,8 +4842,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /caniuse-lite@1.0.30001655:
-    resolution: {integrity: sha512-jRGVy3iSGO5Uutn2owlb5gR6qsGngTw9ZTb4ali9f3glshcNmJ2noam4Mo9zia5P9Dk3jNNydy7vQjuE5dQmfg==}
+  /caniuse-lite@1.0.30001657:
+    resolution: {integrity: sha512-DPbJAlP8/BAXy3IgiWmZKItubb3TYGP0WscQQlVGIfT4s/YlFYVuJgyOsQNP7rJRChx/qdMeLJQJP0Sgg2yjNA==}
     dev: true
 
   /chalk@2.4.2:
@@ -5435,12 +5177,12 @@ packages:
       webpack:
         optional: true
     dependencies:
-      icss-utils: 5.1.0(postcss@8.4.44)
-      postcss: 8.4.44
-      postcss-modules-extract-imports: 3.1.0(postcss@8.4.44)
-      postcss-modules-local-by-default: 4.0.5(postcss@8.4.44)
-      postcss-modules-scope: 3.2.0(postcss@8.4.44)
-      postcss-modules-values: 4.0.0(postcss@8.4.44)
+      icss-utils: 5.1.0(postcss@8.4.45)
+      postcss: 8.4.45
+      postcss-modules-extract-imports: 3.1.0(postcss@8.4.45)
+      postcss-modules-local-by-default: 4.0.5(postcss@8.4.45)
+      postcss-modules-scope: 3.2.0(postcss@8.4.45)
+      postcss-modules-values: 4.0.0(postcss@8.4.45)
       postcss-value-parser: 4.2.0
       semver: 7.6.3
       webpack: 5.94.0(webpack-cli@4.10.0)
@@ -5786,8 +5528,8 @@ packages:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: true
 
-  /electron-to-chromium@1.5.13:
-    resolution: {integrity: sha512-lbBcvtIJ4J6sS4tb5TLp1b4LyfCdMkwStzXPyAgVgTRAsep4bvrAGaBOP7ZJtQMNJpSQ9SqG4brWOroNaQtm7Q==}
+  /electron-to-chromium@1.5.15:
+    resolution: {integrity: sha512-Z4rIDoImwEJW+YYKnPul4DzqsWVqYetYVN3XqDmRpgV0mjz0hYTaeeh+8/9CL1bk3AHYmF4freW/NTiVoXA2gA==}
     dev: true
 
   /email-addresses@3.1.0:
@@ -6030,7 +5772,7 @@ packages:
       semver: 6.3.1
     dev: true
 
-  /eslint-config-airbnb@19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.9.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.1)(eslint@8.57.0):
+  /eslint-config-airbnb@19.0.4(eslint-plugin-import@2.30.0)(eslint-plugin-jsx-a11y@6.10.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.35.2)(eslint@8.57.0):
     resolution: {integrity: sha512-T75QYQVQX57jiNgpF9r1KegMICE94VYwoFQyMGhrvc+lB8YF2E/M/PYDaQe1AJcWaEgqLE+ErXV1Og/+6Vyzew==}
     engines: {node: ^10.12.0 || ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
@@ -6043,8 +5785,8 @@ packages:
       eslint: 8.57.0
       eslint-config-airbnb-base: 15.0.0(eslint-plugin-import@2.30.0)(eslint@8.57.0)
       eslint-plugin-import: 2.30.0(eslint@8.57.0)
-      eslint-plugin-jsx-a11y: 6.9.0(eslint@8.57.0)
-      eslint-plugin-react: 7.35.1(eslint@8.57.0)
+      eslint-plugin-jsx-a11y: 6.10.0(eslint@8.57.0)
+      eslint-plugin-react: 7.35.2(eslint@8.57.0)
       eslint-plugin-react-hooks: 4.6.2(eslint@8.57.0)
       object.assign: 4.1.5
       object.entries: 1.1.8
@@ -6129,18 +5871,18 @@ packages:
       - typescript
     dev: true
 
-  /eslint-plugin-jsx-a11y@6.9.0(eslint@8.57.0):
-    resolution: {integrity: sha512-nOFOCaJG2pYqORjK19lqPqxMO/JpvdCZdPtNdxY3kvom3jTvkAbOvQvD8wuD0G8BYR0IGAGYDlzqWJOh/ybn2g==}
+  /eslint-plugin-jsx-a11y@6.10.0(eslint@8.57.0):
+    resolution: {integrity: sha512-ySOHvXX8eSN6zz8Bywacm7CvGNhUtdjvqfQDVe6020TUK34Cywkw7m0KsCCk1Qtm9G1FayfTN1/7mMYnYO2Bhg==}
     engines: {node: '>=4.0'}
     peerDependencies:
-      eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
+      eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9
     dependencies:
       aria-query: 5.1.3
       array-includes: 3.1.8
       array.prototype.flatmap: 1.3.2
       ast-types-flow: 0.0.8
       axe-core: 4.10.0
-      axobject-query: 3.1.1
+      axobject-query: 4.1.0
       damerau-levenshtein: 1.0.8
       emoji-regex: 9.2.2
       es-iterator-helpers: 1.0.19
@@ -6180,8 +5922,8 @@ packages:
       eslint: 8.57.0
     dev: true
 
-  /eslint-plugin-react@7.35.1(eslint@8.57.0):
-    resolution: {integrity: sha512-B5ok2JgbaaWn/zXbKCGgKDNL2tsID3Pd/c/yvjcpsd9HQDwyYc/TQv3AZMmOvrJgCs3AnYNUHRCQEMMQAYJ7Yg==}
+  /eslint-plugin-react@7.35.2(eslint@8.57.0):
+    resolution: {integrity: sha512-Rbj2R9zwP2GYNcIak4xoAMV57hrBh3hTaR0k7hVjwCQgryE/pw5px4b13EYjduOI0hfXyZhwBxaGpOTbWSGzKQ==}
     engines: {node: '>=4'}
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
@@ -6579,8 +6321,8 @@ packages:
     resolution: {integrity: sha512-X8cqMLLie7KsNUDSdzeN8FYK9rEt4Dt67OsG/DNGnYTSDBG4uFAJFBnUeiV+zCVAvwFy56IjM9sH51jVaEhNxw==}
     dev: true
 
-  /follow-redirects@1.15.6:
-    resolution: {integrity: sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==}
+  /follow-redirects@1.15.8:
+    resolution: {integrity: sha512-xgrmBhBToVKay1q2Tao5LI26B83UhrB/vM1avwVSDzt8rx3rO6AizBAaF46EgksTVr+rFTQaqZZ9MVBfUe4nig==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -7105,7 +6847,7 @@ packages:
     engines: {node: '>=8.0.0'}
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.15.6
+      follow-redirects: 1.15.8
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
@@ -7161,13 +6903,13 @@ packages:
       safer-buffer: 2.1.2
     dev: true
 
-  /icss-utils@5.1.0(postcss@8.4.44):
+  /icss-utils@5.1.0(postcss@8.4.45):
     resolution: {integrity: sha512-soFhflCVWLfRNOPU3iv5Z9VUdT44xFRbzjLsEzSr5AQmgqPMTHdU3PMT1Cf1ssx8fLNJDA1juftYl+PUcv3MqA==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      postcss: 8.4.44
+      postcss: 8.4.45
     dev: true
 
   /ignore@5.3.2:
@@ -7575,7 +7317,7 @@ packages:
       '@jest/environment': 27.5.1
       '@jest/test-result': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       chalk: 4.1.2
       co: 4.6.0
       dedent: 0.7.0
@@ -7700,7 +7442,7 @@ packages:
       '@jest/environment': 27.5.1
       '@jest/fake-timers': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       jest-mock: 27.5.1
       jest-util: 27.5.1
       jsdom: 16.7.0
@@ -7718,7 +7460,7 @@ packages:
       '@jest/environment': 27.5.1
       '@jest/fake-timers': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       jest-mock: 27.5.1
       jest-util: 27.5.1
     dev: true
@@ -7734,7 +7476,7 @@ packages:
     dependencies:
       '@jest/types': 27.5.1
       '@types/graceful-fs': 4.1.9
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       graceful-fs: 4.2.11
@@ -7756,7 +7498,7 @@ packages:
       '@jest/source-map': 27.5.1
       '@jest/test-result': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       chalk: 4.1.2
       co: 4.6.0
       expect: 27.5.1
@@ -7811,7 +7553,7 @@ packages:
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
     dev: true
 
   /jest-pnp-resolver@1.2.3(jest-resolve@27.5.1):
@@ -7867,7 +7609,7 @@ packages:
       '@jest/test-result': 27.5.1
       '@jest/transform': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       chalk: 4.1.2
       emittery: 0.8.1
       graceful-fs: 4.2.11
@@ -7924,7 +7666,7 @@ packages:
     resolution: {integrity: sha512-jZCyo6iIxO1aqUxpuBlwTDMkzOAJS4a3eYz3YzgxxVQFwLeSA7Jfq5cbqCY+JLvTDrWirgusI/0KwxKMgrdf7w==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       graceful-fs: 4.2.11
     dev: true
 
@@ -7963,7 +7705,7 @@ packages:
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -7988,7 +7730,7 @@ packages:
     dependencies:
       '@jest/test-result': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       jest-util: 27.5.1
@@ -7999,7 +7741,7 @@ packages:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 22.5.2
+      '@types/node': 22.5.4
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: true
@@ -8244,8 +7986,8 @@ packages:
       language-subtag-registry: 0.3.23
     dev: true
 
-  /launch-editor@2.8.2:
-    resolution: {integrity: sha512-eF5slEUZXmi6WvFzI3dYcv+hA24/iKnROf24HztcURJpSz9RBmBgz5cNCVOeguouf1llrwy6Yctl4C4HM+xI8g==}
+  /launch-editor@2.9.1:
+    resolution: {integrity: sha512-Gcnl4Bd+hRO9P9icCP/RVVT2o8SFlPXofuCxvA2SaZuH45whSvf5p8x5oih5ftLiVhEI4sp5xDY+R+b3zJBh5w==}
     dependencies:
       picocolors: 1.1.0
       shell-quote: 1.8.1
@@ -8409,12 +8151,8 @@ packages:
     hasBin: true
     dev: true
 
-<<<<<<< HEAD
-  /material-react-table@2.13.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/icons-material@6.0.2)(@mui/material@6.0.2)(@mui/x-date-pickers@7.15.0)(react-dom@18.3.1)(react@18.3.1):
-=======
-  /material-react-table@2.13.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/icons-material@5.16.7)(@mui/material@5.16.7)(@mui/x-date-pickers@7.15.0)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
-    resolution: {integrity: sha512-8q2Jq723rqCNNxZ9yKZOBU9A2EzcdjT/6IQIXoigRZO2IUROEhcv5bvg8Sqojz+Au5bNQJ8f7RNzSP1UOzirNA==}
+  /material-react-table@2.13.3(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/icons-material@6.0.2)(@mui/material@6.0.2)(@mui/x-date-pickers@7.16.0)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-xeyAEG6UYG3qgBIo17epAP5zsWT1pH0uCEkaUxvhki9sGcP35OqfOMSZJNhISvmqEqXKYHdqKbZI6iOwsg1sYA==}
     engines: {node: '>=16'}
     peerDependencies:
       '@emotion/react': '>=11.11'
@@ -8425,19 +8163,11 @@ packages:
       react: '>=17.0'
       react-dom: '>=17.0'
     dependencies:
-<<<<<<< HEAD
-      '@emotion/react': 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/icons-material': 6.0.2(@mui/material@6.0.2)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/material': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
-      '@mui/x-date-pickers': 7.15.0(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@6.0.2)(@mui/system@6.0.2)(@types/react@18.3.3)(dayjs@1.11.12)(react-dom@18.3.1)(react@18.3.1)
-=======
       '@emotion/react': 11.13.3(@types/react@18.3.5)(react@18.3.1)
       '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1)
-      '@mui/icons-material': 5.16.7(@mui/material@5.16.7)(@types/react@18.3.5)(react@18.3.1)
-      '@mui/material': 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
-      '@mui/x-date-pickers': 7.15.0(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@5.16.7)(@mui/system@5.16.7)(@types/react@18.3.5)(dayjs@1.11.13)(react-dom@18.3.1)(react@18.3.1)
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
+      '@mui/icons-material': 6.0.2(@mui/material@6.0.2)(@types/react@18.3.5)(react@18.3.1)
+      '@mui/material': 6.0.2(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
+      '@mui/x-date-pickers': 7.16.0(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@6.0.2)(@mui/system@6.0.2)(@types/react@18.3.5)(dayjs@1.11.13)(react-dom@18.3.1)(react@18.3.1)
       '@tanstack/match-sorter-utils': 8.19.4
       '@tanstack/react-table': 8.20.5(react-dom@18.3.1)(react@18.3.1)
       '@tanstack/react-virtual': 3.10.6(react-dom@18.3.1)(react@18.3.1)
@@ -8964,45 +8694,45 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /postcss-modules-extract-imports@3.1.0(postcss@8.4.44):
+  /postcss-modules-extract-imports@3.1.0(postcss@8.4.45):
     resolution: {integrity: sha512-k3kNe0aNFQDAZGbin48pL2VNidTF0w4/eASDsxlyspobzU3wZQLOGj7L9gfRe0Jo9/4uud09DsjFNH7winGv8Q==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      postcss: 8.4.44
+      postcss: 8.4.45
     dev: true
 
-  /postcss-modules-local-by-default@4.0.5(postcss@8.4.44):
+  /postcss-modules-local-by-default@4.0.5(postcss@8.4.45):
     resolution: {integrity: sha512-6MieY7sIfTK0hYfafw1OMEG+2bg8Q1ocHCpoWLqOKj3JXlKu4G7btkmM/B7lFubYkYWmRSPLZi5chid63ZaZYw==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      icss-utils: 5.1.0(postcss@8.4.44)
-      postcss: 8.4.44
+      icss-utils: 5.1.0(postcss@8.4.45)
+      postcss: 8.4.45
       postcss-selector-parser: 6.1.2
       postcss-value-parser: 4.2.0
     dev: true
 
-  /postcss-modules-scope@3.2.0(postcss@8.4.44):
+  /postcss-modules-scope@3.2.0(postcss@8.4.45):
     resolution: {integrity: sha512-oq+g1ssrsZOsx9M96c5w8laRmvEu9C3adDSjI8oTcbfkrTE8hx/zfyobUoWIxaKPO8bt6S62kxpw5GqypEw1QQ==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      postcss: 8.4.44
+      postcss: 8.4.45
       postcss-selector-parser: 6.1.2
     dev: true
 
-  /postcss-modules-values@4.0.0(postcss@8.4.44):
+  /postcss-modules-values@4.0.0(postcss@8.4.45):
     resolution: {integrity: sha512-RDxHkAiEGI78gS2ofyvCsu7iycRv7oqw5xMWn9iMoR0N/7mf9D50ecQqUo5BZ9Zh2vH4bCUR/ktCqbB9m8vJjQ==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      icss-utils: 5.1.0(postcss@8.4.44)
-      postcss: 8.4.44
+      icss-utils: 5.1.0(postcss@8.4.45)
+      postcss: 8.4.45
     dev: true
 
   /postcss-selector-parser@6.1.2:
@@ -9017,8 +8747,8 @@ packages:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
     dev: true
 
-  /postcss@8.4.44:
-    resolution: {integrity: sha512-Aweb9unOEpQ3ezu4Q00DPvvM2ZTUitJdNKeP/+uQgr1IBIqu574IaZoURId7BKtWMREwzKa9OgzPzezWGPWFQw==}
+  /postcss@8.4.45:
+    resolution: {integrity: sha512-7KTLTdzdZZYscUc65XmjFiB73vBhBfbPztCYdUNvlaso9PrzjzcmjqBPR0lNGkcVlcO4BjiO5rK/qNz+XAen1Q==}
     engines: {node: ^10 || ^12 || >=14}
     dependencies:
       nanoid: 3.3.7
@@ -9555,10 +9285,10 @@ packages:
       htmlparser2: 8.0.2
       is-plain-object: 5.0.0
       parse-srcset: 1.0.2
-      postcss: 8.4.44
+      postcss: 8.4.45
     dev: false
 
-  /sass-loader@12.6.0(sass@1.77.8)(webpack@5.94.0):
+  /sass-loader@12.6.0(sass@1.78.0)(webpack@5.94.0):
     resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
     engines: {node: '>= 12.13.0'}
     peerDependencies:
@@ -9579,12 +9309,12 @@ packages:
     dependencies:
       klona: 2.0.6
       neo-async: 2.6.2
-      sass: 1.77.8
+      sass: 1.78.0
       webpack: 5.94.0(webpack-cli@4.10.0)
     dev: true
 
-  /sass@1.77.8:
-    resolution: {integrity: sha512-4UHg6prsrycW20fqLGPShtEvo/WyHRVRHwOP4DzkUrObWoWI05QBSfzU71TVB7PFaL104TwNaHpjlWXAZbQiNQ==}
+  /sass@1.78.0:
+    resolution: {integrity: sha512-AaIqGSrjo5lA2Yg7RvFZrlXDBCp3nV4XP73GrLGvdRWWwk+8H3l0SDvq/5bA4eF+0RFPLuWUk3E+P1U/YqnpsQ==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
@@ -10687,7 +10417,7 @@ packages:
       html-entities: 2.5.2
       http-proxy-middleware: 2.0.6(@types/express@4.17.21)
       ipaddr.js: 2.2.0
-      launch-editor: 2.8.2
+      launch-editor: 2.9.1
       open: 8.4.2
       p-retry: 4.6.2
       rimraf: 3.0.2
@@ -11008,17 +10738,10 @@ packages:
     name: geoview-geochart
     version: 0.1.0
     dependencies:
-<<<<<<< HEAD
-      '@emotion/react': 11.13.3(@types/react@18.3.3)(react@18.3.1)
-      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/icons-material': 5.16.4(@mui/material@5.16.4)(@types/react@18.3.3)(react@18.3.1)
-      '@mui/material': 5.16.4(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
-=======
       '@emotion/react': 11.13.3(@types/react@18.3.5)(react@18.3.1)
       '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.5)(react@18.3.1)
       '@mui/icons-material': 5.16.7(@mui/material@5.16.7)(@types/react@18.3.5)(react@18.3.1)
       '@mui/material': 5.16.7(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.5)(react-dom@18.3.1)(react@18.3.1)
->>>>>>> 6ba8b3efc (core(dependecies): UPgrade to OpenLayer version 10.1 with minor ol fixes)
       ajv: 8.17.1
       ajv-formats: 2.1.1
       chart.js: 4.4.4

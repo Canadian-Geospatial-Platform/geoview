@@ -1219,11 +1219,17 @@ export class MapViewer {
     // If no config is provided, get the original from the store
     const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(this.mapId);
 
+    // Get map height
+    // GV: This is important becuse on reload, the mapHeight is set to 0px then reset to a bad value.
+    // GV.CONT: This fix maintain the height on reload for the createMapFromConfig function. On first past the optional
+    // GV.CONT: does not have to be provided because the div exist and map will take is height.
+    const height = this.map.getSize() !== undefined ? this.map.getSize()![1] : 800;
+
     // Remove the map
     const mapDiv = await this.remove(false);
 
     // TODO: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
-    api.createMapFromConfig(mapDiv.id, JSON.stringify(config)).catch((error) => {
+    api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height).catch((error) => {
       // Log
       logger.logError(`Couldn't reload the map in map-viewer`, error);
     });
