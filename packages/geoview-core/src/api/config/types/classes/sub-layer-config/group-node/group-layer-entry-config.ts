@@ -79,6 +79,26 @@ export abstract class GroupLayerEntryConfig extends EntryConfigBaseClass {
   }
   // #endregion OVERRIDE
 
+  // #region PROTECTED
+  /**
+   * Fetch the metadata of all layer entry configurations defined in the layer tree.
+   *
+   * @returns {Promise<void>} A promise that will resolve when the process has completed.
+   * @protected @async
+   */
+  protected async fetchListOfLayerMetadata(): Promise<void> {
+    const arrayOfLayerPromises: Promise<void>[] = [];
+    this.listOfLayerEntryConfig.forEach((subLayerConfig) => {
+      arrayOfLayerPromises.push(subLayerConfig.fetchLayerMetadata());
+    });
+
+    const awaitedPromises = await Promise.allSettled(arrayOfLayerPromises);
+    awaitedPromises.forEach((promise, i) => {
+      if (promise.status === 'rejected') this.listOfLayerEntryConfig[i].setErrorDetectedFlag();
+    });
+  }
+  // #endregion PROTECTED
+
   // #region PUBLIC
   /**
    * Scan the list of sublayers for duplicates. If duplicates exist, mark them as an error layer.

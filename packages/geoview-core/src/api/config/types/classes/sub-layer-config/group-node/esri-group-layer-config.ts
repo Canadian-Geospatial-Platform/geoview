@@ -3,6 +3,8 @@ import axios from 'axios';
 import { TypeJsonObject } from '@config/types/config-types';
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
 import { Extent } from '@config/types/map-schema-types';
+import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
+import { isvalidComparedToInternalSchema } from '@config/utils';
 
 import { logger } from '@/core/utils/logger';
 import { Projection } from '@/geo/utils/projection';
@@ -45,27 +47,34 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
       this.setLayerMetadata(serviceMetadata);
       // parse the raw service metadata and build the geoview configuration.
       this.#parseServiceMetadata();
-      return;
-    }
+    } else {
+      // The layer exists and we can fetch its metadata and parse it.
+      const serviceUrl = serviceMetadata.metadataAccessPath as string;
+      const queryUrl = serviceUrl.endsWith('/') ? `${serviceUrl}${this.layerId}` : `${serviceUrl}/${this.layerId}`;
 
-    // The layer exists and we can fetch its metadata and parse it.
-    const serviceUrl = serviceMetadata.metadataAccessPath as string;
-    const queryUrl = serviceUrl.endsWith('/') ? `${serviceUrl}${this.layerId}` : `${serviceUrl}/${this.layerId}`;
-
-    try {
-      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
-      if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
-      else {
-        // The metadata used are the layer metadata.
-        this.setLayerMetadata(data);
-        // Parse the raw layer metadata and build the geoview configuration.
-        this.#parseLayerMetadata();
-        return;
+      try {
+        const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
+        if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
+        else {
+          // The metadata used are the layer metadata.
+          this.setLayerMetadata(data);
+          // Parse the raw layer metadata and build the geoview configuration.
+          this.#parseLayerMetadata();
+          return;
+        }
+      } catch (error) {
+        logger.logError('Error detected while reading Layer metadata.', error);
+        this.setErrorDetectedFlag();
       }
-    } catch (error) {
-      logger.logError('Error detected while reading Layer metadata.', error);
     }
-    this.setErrorDetectedFlag();
+
+    await this.fetchListOfLayerMetadata();
+
+    if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
+      throw new GeoviewLayerConfigError(
+        `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`
+      );
+    }
   }
   // #endregion OVERRIDE
 

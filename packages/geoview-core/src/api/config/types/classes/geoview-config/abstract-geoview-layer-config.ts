@@ -1,12 +1,12 @@
-import merge from 'lodash/merge';
+import mergeWith from 'lodash/mergeWith';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { Cast, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { TypeGeoviewLayerType, TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { isvalidComparedToInputSchema, normalizeLocalizedString } from '@config/utils';
-import { EsriGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/esri-group-layer-config';
+import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema, normalizeLocalizedString } from '@config/utils';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
+import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
+import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
 
 import { generateId } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -129,7 +129,7 @@ export abstract class AbstractGeoviewLayerConfig {
     // Instanciate the sublayer list.
     this.listOfLayerEntryConfig = (this.#userGeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)
       ?.map((subLayerConfig) => {
-        if (layerEntryIsGroupLayer(subLayerConfig)) return new EsriGroupLayerConfig(subLayerConfig, language, this);
+        if (layerEntryIsGroupLayer(subLayerConfig)) return this.createGroupNode(subLayerConfig, language, this);
         return this.createLeafNode(subLayerConfig, language, this);
       })
       // When a sublayer cannot be created, the value returned is undefined. These values will be filtered.
@@ -226,6 +226,29 @@ export abstract class AbstractGeoviewLayerConfig {
    */
   protected getLanguage(): TypeDisplayLanguage {
     return this.#language;
+  }
+
+  /**
+   * Fetch the metadata of all layer entry configurations defined in the list of layer entry config.
+   *
+   * @returns {Promise<void>} A promise that will resolve when the process has completed.
+   * @protected @async
+   */
+  protected async fetchListOfLayerMetadata(): Promise<void> {
+    // The root of the GeoView layer tree is an array that contains only one node.
+    const rootLayer = this.listOfLayerEntryConfig[0];
+
+    try {
+      if (rootLayer) {
+        // If an error has been detected, there is a problem with the metadata and the layer is unusable.
+        if (rootLayer.getErrorDetectedFlag()) return;
+
+        await rootLayer.fetchLayerMetadata();
+      }
+    } catch (error) {
+      logger.logError(`An error occured while reading the metadata for the layerPath ${rootLayer.getLayerPath()}.`, error);
+      rootLayer.setErrorDetectedFlag();
+    }
   }
   // #endregion PROTECTED
 
@@ -347,10 +370,21 @@ export abstract class AbstractGeoviewLayerConfig {
         return sublayer;
       });
     };
-    this.listOfLayerEntryConfig = merge(
-      this.listOfLayerEntryConfig,
-      convertUserConfigToInternalConfig(geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)
-    );
+    const internalConfig = convertUserConfigToInternalConfig(geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray);
+    this.listOfLayerEntryConfig = mergeWith(this.listOfLayerEntryConfig, internalConfig, (target, newValue, key) => {
+      // Keep the listOfLayerEntryConfig as it is. Do not replace it with the user' array. Only the internal properties will be replaced.
+      // This is because the newValue is not an instance of EntryConfigBaseClass. The type of the newValue property is a plain JSON object.
+      if (key === 'listOfLayerEntryConfig') return undefined;
+      // Replace arrays with user config arrays if they exist.
+      if (Array.isArray(target) && Array.isArray(newValue)) return newValue;
+      return undefined;
+    });
+
+    if (!isvalidComparedToInternalSchema(this.getGeoviewLayerSchema(), this, true)) {
+      throw new GeoviewLayerConfigError(
+        `GeoView internal configuration ${this.geoviewLayerId} is invalid compared to the internal schema specification.`
+      );
+    }
   }
 
   /**
