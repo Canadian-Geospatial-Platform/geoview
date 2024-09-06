@@ -139,11 +139,12 @@
           Configuration to load:
           <select id="configLoaderTab1">
             <option value="">--select--</option>
-            <option value="./configs/validator/01-simple.json">Simple</option>
-            <option value="./configs/validator/02-unique-value.json">Unique Value</option>
-            <option value="./configs/validator/03-class-breaks.json">Class Breaks</option>
+            <option value="./configs/validator/01-simple-esri-feature.json">Simple EsriFeature</option>
+            <option value="./configs/validator/02-unique-value-esri-dynamic.json">Unique Value EsriDynamic</option>
+            <option value="./configs/validator/03-class-breaks-esri-feature.json">Class Breaks EsriFeature</option>
             <option value="./configs/validator/04-geocore.json">Geocore</option>
-            <option value="./configs/validator/05-metadata-group.json">Metadata Group</option>
+            <option value="./configs/validator/05-esri-feature-and-dynamic.json">EsriFeature And EsriDynamic</option>
+            <option value="./configs/validator/06-ogc-wms.json">OGC WMS</option>
           </select>
         </div>
       </div>
@@ -223,6 +224,7 @@
           <option value="esriDynamic">EsriDynamic</option>
           <option value="esriFeature">EsriFeature</option>
           <option value="geoCore">GeoCore</option>
+          <option value="ogcWms">WMS</option>
         </select>
       </div>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL:&nbsp;
@@ -320,6 +322,7 @@
           <option value="unknown">unknown</option>
           <option value="esriDynamic">EsriDynamic</option>
           <option value="esriFeature">EsriFeature</option>
+          <option value="ogcWms">WMS</option>
         </select>
       </div>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL:&nbsp;
@@ -564,8 +567,8 @@
       fetchJSONData();
     });
 
-    // Set the initial configuration of the drop-down to 'Simple' and load it
-    configLoaderTab1.value = './configs/validator/01-simple.json';
+    // Set the initial configuration of the drop-down to 'Simple EsriFeature' and load it
+    configLoaderTab1.value = './configs/validator/01-simple-esri-feature.json';
     configLoaderTab1.dispatchEvent(new Event('change'));
 
     // Create the listener for the Element Displayed drop-down located at the bottom of the output zone.
@@ -652,6 +655,7 @@
       geoCore: '12acd145-626a-49eb-b850-0a59c9bc7506',
       esriDynamic: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
       esriFeature: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
+      ogcWms: 'https://geo.weather.gc.ca/geomet',
     };
 
     // Get the GeoView Layer Type drop-down object used to select the type of layer.
@@ -838,6 +842,7 @@
       unknown: 'unknown',
       esriDynamic: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
       esriFeature: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
+      ogcWms: 'https://geo.weather.gc.ca/geomet',
     };
 
     // Get the GeoView Layer Type drop-down object used to select the type of layer.
@@ -908,7 +913,11 @@
         languageTab4
       );
       // Output instanciation result
-      metadataLayerTreeString = `${JSON.stringify(metadataLayerTree, undefined, 2)}\n`;
+      metadataLayerTreeString = `${JSON.stringify(metadataLayerTree, (key, value) => {
+        if (['', 'layerId', 'layerName', 'isLayerGroup', 'listOfLayerEntryConfig'].includes(key)) return value;
+        if (/^\d+$/.test(key)) return value;
+        return undefined;
+      }, 2)}\n`;
       layerPathErrorFlag = generateLayerPathErrorFlag(metadataLayerTree);
 
       if (metadataLayerTree) printMessage(messageTab4, 'Layer tree is valid');

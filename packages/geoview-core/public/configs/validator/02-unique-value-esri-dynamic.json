@@ -1,0 +1,62 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "minZoom": 5,
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "LYR1",
+        "geoviewLayerName": {
+          "en": "Earthquakes",
+          "fr": "Tremblements de terre"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
+          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_fr/MapServer/"
+        },
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": {
+              "en": "Earthquakes 1980-1990",
+              "fr": "Tremblements de terre 1980-1990"
+            },
+            "initialSettings": {
+              "controls": {
+                "query": true
+              },
+              "states": {
+                "queryable": true
+              }
+            },
+            "attributions": ["Ressources naturelles Canada, Secteur des terres et des minéraux, Commission Géologique du Canada, Service canadien d\\'information sur les risques"]
+          },
+          {
+            "layerId": "1",
+            "layerName": {
+              "en": "Earthquakes 1990-2000",
+              "fr": " Tremblements de terre 1990-2000"
+            },
+            "attributions": ["Ressources naturelles Canada, Secteur des terres et des minéraux, Commission Géologique du Canada, Service canadien d\\'information sur les risques"]
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

@@ -8,6 +8,8 @@ import { logger } from '@/core/utils/logger';
 import { DateMgt, TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { Projection } from '@/geo/utils/projection';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { isvalidComparedToInternalSchema } from '@/api/config/utils';
+import { GeoviewLayerConfigError } from '../../config-exceptions';
 
 // ========================
 // #region CLASS DEFINITION
@@ -45,6 +47,12 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
         this.setLayerMetadata(data);
         // Parse the raw layer metadata and build the geoview configuration.
         this.parseLayerMetadata();
+
+        if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
+          throw new GeoviewLayerConfigError(
+            `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`
+          );
+        }
         return;
       }
     } catch (error) {
@@ -142,7 +150,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
           name: fieldEntry.name,
           alias: fieldEntry.alias,
           type: AbstractBaseEsriLayerEntryConfig.#convertEsriFieldType(fieldEntry.type as string),
-          domaine: Cast<null | codedValueType | rangeDomainType>(fieldEntry.domain),
+          domain: Cast<null | codedValueType | rangeDomainType>(fieldEntry.domain),
         })
       );
     });
