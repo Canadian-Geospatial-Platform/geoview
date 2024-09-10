@@ -47,6 +47,7 @@ export function Geolocator(): JSX.Element {
 
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const fetchTimerRef = useRef<NodeJS.Timeout | undefined>();
   const MIN_SEARCH_LENGTH = 3;
 
   /**
@@ -94,6 +95,7 @@ export function Geolocator(): JSX.Element {
       // Abort any pending requests
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
+        clearTimeout(fetchTimerRef.current);
       }
 
       // Create new abort controller
@@ -117,9 +119,19 @@ export function Geolocator(): JSX.Element {
       setData(result);
       setError(null);
       setIsLoading(false);
+      clearTimeout(fetchTimerRef?.current);
     } catch (err) {
       setError(err as Error);
     }
+  };
+
+  /**
+   * Reset loading and data state and clear fetch timer.
+   */
+  const resetGeoLocatorState = (): void => {
+    setIsLoading(false);
+    setData([]);
+    clearTimeout(fetchTimerRef.current);
   };
 
   /**
@@ -171,6 +183,7 @@ export function Geolocator(): JSX.Element {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
+      resetGeoLocatorState();
       doRequest.cancel();
       setData(undefined);
     }
@@ -195,9 +208,26 @@ export function Geolocator(): JSX.Element {
       // Cleanup function to abort any pending requests
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
+        clearTimeout(fetchTimerRef.current);
       }
     };
   }, []);
+
+  /**
+   * Effect that will track fetch call, so that after 30 seconds if no response comes back,
+   * Error will be displayed.
+   */
+  useEffect(() => {
+    if (isLoading) {
+      fetchTimerRef.current = setTimeout(() => {
+        resetGeoLocatorState();
+        setError(new Error('No result found.'));
+      }, 30000);
+    }
+    return () => {
+      clearTimeout(fetchTimerRef.current);
+    };
+  }, [isLoading]);
 
   return (
     <FocusTrapContainer open={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen} id="geolocator-focus-trap">
@@ -245,7 +275,7 @@ export function Geolocator(): JSX.Element {
             <ProgressBar />
           </Box>
         )}
-        {!!data && searchValue?.length >= MIN_SEARCH_LENGTH && !error && (
+        {!!data && searchValue?.length >= MIN_SEARCH_LENGTH && (
           <Box sx={sxClasses.searchResult}>
             <GeolocatorResult geoLocationData={data} searchValue={searchValue} error={error} />
           </Box>
