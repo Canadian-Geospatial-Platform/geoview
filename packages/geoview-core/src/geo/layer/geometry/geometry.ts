@@ -1,5 +1,5 @@
 import VectorLayer from 'ol/layer/Vector';
-import Feature, { FeatureLike } from 'ol/Feature';
+import Feature from 'ol/Feature';
 import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
 import { Geometry as OLGeometry, Circle, LineString, Point, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
@@ -22,7 +22,7 @@ import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './geome
  */
 interface FeatureCollection {
   geometryGroupId: string;
-  vectorLayer: VectorLayer<Feature>;
+  vectorLayer: VectorLayer<VectorSource>;
   vectorSource: VectorSource;
 }
 
@@ -428,7 +428,7 @@ export class GeometryApi {
   createGeometryGroup(
     geometryGroupId: string,
     options?: {
-      vectorLayerOptions?: VectorLayerOptions<VectorSource<FeatureLike>>;
+      vectorLayerOptions?: VectorLayerOptions<Feature, VectorSource>;
       vectorSourceOptions?: VectorSourceOptions<Feature>;
     }
   ): FeatureCollection {
@@ -438,7 +438,7 @@ export class GeometryApi {
     if (!geometryGroup) {
       const vectorSource = new VectorSource<Feature>(geometryGroupOptions.vectorSourceOptions);
 
-      const vectorLayer = new VectorLayer<Feature>({
+      const vectorLayer = new VectorLayer<VectorSource>({
         ...geometryGroupOptions.vectorLayerOptions,
         source: vectorSource,
       });
