@@ -32,8 +32,13 @@ export abstract class AbstractGeoviewLayerConfig {
   /** The metadata returned by the service endpoint. */
   #serviceMetadata: TypeJsonObject = {};
 
-  /** The metadata layer tree definition */
-  #metadataLayerTree: EntryConfigBaseClass[] = [];
+  /**
+   * Before the call to fetchServiceMetadata, this property contains the tree filter. The value specified will guide the layer
+   * tree process. if the value is undefined, the layer tree will not be created. if it is an empty array, The layer tree will
+   * be created for all layers found in the service metadata. If the array is not empty, only the layerIds specified will be
+   * retained. When the fetchServiceMetadata call returns, this property is undefined or it contains a layer tree.
+   */
+  #metadataLayerTree?: EntryConfigBaseClass[];
   // #endregion PRIVATE PROPERTIES
 
   // =========================
@@ -210,16 +215,6 @@ export abstract class AbstractGeoviewLayerConfig {
   // #region PROTECTED
   /**
    * @protected
-   * The setter method that sets the metadataLayerTree private property.
-   *
-   * @param {TypeJsonObject} metadataLayerTree The GeoView service metadata.
-   */
-  protected setMetadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]): void {
-    this.#metadataLayerTree = metadataLayerTree;
-  }
-
-  /**
-   * @protected
    * The getter method that returns the language used to create the geoview layer.
    *
    * @returns {TypeDisplayLanguage} The GeoView layer schema associated to the config.
@@ -229,14 +224,16 @@ export abstract class AbstractGeoviewLayerConfig {
   }
 
   /**
-   * Fetch the metadata of all layer entry configurations defined in the list of layer entry config.
+   * Fetch the metadata of all layer entry configurations defined in the list of layer entry config
+   * or the ressulting layer tree.
    *
    * @returns {Promise<void>} A promise that will resolve when the process has completed.
    * @protected @async
    */
-  protected async fetchListOfLayerMetadata(): Promise<void> {
+  protected async fetchListOfLayerMetadata(layerTreeFilter: EntryConfigBaseClass[] | undefined = undefined): Promise<void> {
     // The root of the GeoView layer tree is an array that contains only one node.
-    const rootLayer = this.listOfLayerEntryConfig[0];
+    // If the layer tree is provided, use it. Otherwise use the list of layer entry config.
+    const rootLayer = layerTreeFilter ? layerTreeFilter[0] : this.listOfLayerEntryConfig[0];
 
     try {
       if (rootLayer) {
@@ -279,8 +276,17 @@ export abstract class AbstractGeoviewLayerConfig {
    *
    * @returns {EntryConfigBaseClass[]} The metadata layer tree.
    */
-  getMetadataLayerTree(): EntryConfigBaseClass[] {
+  getMetadataLayerTree(): EntryConfigBaseClass[] | undefined {
     return this.#metadataLayerTree;
+  }
+
+  /**
+   * The setter method that sets the metadataLayerTree private property.
+   *
+   * @param {TypeJsonObject} metadataLayerTree The GeoView service metadata.
+   */
+  setMetadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]): void {
+    this.#metadataLayerTree = metadataLayerTree;
   }
 
   /**
