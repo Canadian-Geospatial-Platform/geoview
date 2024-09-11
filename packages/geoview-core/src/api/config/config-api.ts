@@ -1,4 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
+import mergeWith from 'lodash/mergeWith';
 
 import { CV_DEFAULT_MAP_FEATURE_CONFIG, CV_CONFIG_GEOCORE_TYPE, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
 import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray, Cast } from '@config/types/config-types';
@@ -12,7 +13,15 @@ import {
 } from '@config/types/map-schema-types';
 import { MapConfigError } from '@config/types/classes/config-exceptions';
 
-import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
+import {
+  createLocalizedString,
+  findPropertyNameByRegex,
+  generateId,
+  getXMLHttpRequest,
+  isJsonString,
+  removeCommentsFromJSON,
+  xmlToJson,
+} from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';
 
 /**
@@ -486,7 +495,7 @@ export class ConfigApi {
         geoviewLayerId: generateId(),
         geoviewLayerName: { en: 'unknown', fr: 'inconnu' },
         geoviewLayerType: layerType,
-        metadataAccessPath: { en: serviceAccessString, fr: serviceAccessString },
+        metadataAccessPath: createLocalizedString(serviceAccessString),
         listOfLayerEntryConfig: listOfLayerId.map((layerId) => {
           return { layerId };
         }),
@@ -515,10 +524,116 @@ export class ConfigApi {
     listOfLayerId: TypeJsonArray = [],
     language: TypeDisplayLanguage = 'en'
   ): Promise<EntryConfigBaseClass[]> {
-    const geoviewLayerConfig = await ConfigApi.createLayerConfig(serviceAccessString, layerType, listOfLayerId, language);
+    // GV: TEMPORARY SECTION TO BE DELETED WHEN ALL LAYER TYPES ARE IMPLEMENTED
+    // GV: BEGIN
+    async function fetchJsonMetadata(url: string): Promise<TypeJsonObject> {
+      const response = await fetch(`${url}?f=json`);
+      return response.json();
+    }
+
+    async function fetchXmlMetadata(url: string): Promise<TypeJsonObject> {
+      let metadataUrl = url;
+      // check if url contains metadata parameters for the getCapabilities request and reformat the urls
+      const getCapabilitiesUrl =
+        metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(metadataUrl!.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
+      metadataUrl = metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(0, metadataUrl!.indexOf('?')) : metadataUrl;
+      if (metadataUrl) {
+        const metadataString = await getXMLHttpRequest(`${metadataUrl}${getCapabilitiesUrl}`);
+        if (metadataString === '{}') throw new MapConfigError('Unable to build metadata layer tree (empty metadata).');
+        else {
+          // need to pass a xmldom to xmlToJson
+          const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
+          const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
+          const capabilitiesObject = findPropertyNameByRegex(xmlJsonCapabilities, /(?:WFS_Capabilities)/);
+          return capabilitiesObject as TypeJsonObject;
+        }
+      } else throw new MapConfigError('Unable to build metadata layer tree (empty metadata url).');
+    }
+
+    let jsonData: TypeJsonObject;
+    switch (layerType) {
+      case 'ogcWfs':
+        jsonData = (await fetchXmlMetadata(serviceAccessString))?.FeatureTypeList?.FeatureType;
+        if (Array.isArray(jsonData))
+          return (jsonData as TypeJsonArray).map((layer) => {
+            return Cast<EntryConfigBaseClass>({
+              layerId: layer.Name['#text'],
+              layerName: layer.Title['#text'],
+            });
+          });
+        return [];
+        break;
+      case 'ogcFeature':
+        jsonData = await fetchJsonMetadata(serviceAccessString);
+        if (jsonData.collections)
+          return (jsonData.collections as TypeJsonArray).map((layer) => {
+            return Cast<EntryConfigBaseClass>({
+              layerId: layer.id,
+              layerName: layer.title,
+            });
+          });
+        if (jsonData.id)
+          return [
+            Cast<EntryConfigBaseClass>({
+              layerId: jsonData.id,
+              layerName: jsonData.title,
+            }),
+          ];
+        return [];
+        break;
+      case 'esriImage':
+        jsonData = await fetchJsonMetadata(serviceAccessString);
+        if (jsonData.name)
+          return [
+            Cast<EntryConfigBaseClass>({
+              layerId: jsonData.name,
+              layerName: jsonData.name,
+            }),
+          ];
+        return [];
+        break;
+      case 'GeoJSON':
+        if (
+          serviceAccessString.toLowerCase().split('?')[0].endsWith('.json') ||
+          serviceAccessString.toLowerCase().split('?')[0].endsWith('.geojson')
+        ) {
+          jsonData = await fetchJsonMetadata(serviceAccessString.split('?')[0]);
+          jsonData = mergeWith(jsonData, cloneDeep(jsonData), (property, sourceValue) => {
+            if (property.en || property.fr) return sourceValue[language] || sourceValue.en || sourceValue.fr;
+            return undefined;
+          });
+          return Cast<EntryConfigBaseClass[]>(jsonData.listOfLayerEntryConfig);
+        }
+        return [];
+        break;
+      case 'CSV':
+      case 'xyzTiles':
+      case 'imageStatic':
+      case 'vectorTiles':
+      case 'GeoPackage':
+        return [];
+        break;
+      default:
+        break;
+    }
+
+    // GV: END OF TEMPORARY SECTION
+
+    const geoviewLayerConfig = await ConfigApi.createLayerConfig(serviceAccessString, layerType, [], language);
+
     if (geoviewLayerConfig && !geoviewLayerConfig.getErrorDetectedFlag()) {
+      // set layer tree creation filter (only the layerIds specified will be retained).
+      // If an empty Array [] is used, the layer tree will be built using the service metadata.
+      geoviewLayerConfig.setMetadataLayerTree(
+        Cast<EntryConfigBaseClass[]>(
+          listOfLayerId.map((layerId) => {
+            return { layerId };
+          })
+        )
+      );
+
       await geoviewLayerConfig.fetchServiceMetadata();
-      if (!geoviewLayerConfig.getErrorDetectedFlag()) return geoviewLayerConfig.getMetadataLayerTree();
+      if (!geoviewLayerConfig.getErrorDetectedFlag()) return geoviewLayerConfig.getMetadataLayerTree()!;
     }
     throw new MapConfigError('Unable to build metadata layer tree.');
   }
