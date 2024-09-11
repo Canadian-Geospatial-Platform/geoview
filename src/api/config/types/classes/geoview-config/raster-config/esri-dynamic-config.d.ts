@@ -15,15 +15,14 @@ export declare class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConf
     /** The layer entries to use from the GeoView layer. */
     listOfLayerEntryConfig: TypeEsriDynamicLayerNode[];
     /**
-     * @protected @override
      * The getter method that returns the geoview layer schema to use for the validation. Each geoview layer type knows what
      * section of the schema must be used to do its validation.
      *
      * @returns {string} The GeoView layer schema associated to the config.
+     * @protected @override
      */
     protected getGeoviewLayerSchema(): string;
     /**
-     * @override
      * The method used to implement the class factory model that returns the instance of the class based on the sublayer
      * type needed.
      *
@@ -33,10 +32,10 @@ export declare class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConf
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
      *
      * @returns {EntryConfigBaseClass} The sublayer instance or undefined if there is an error.
+     * @override
      */
     createLeafNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
     /**
-     * @override
      * The method used to implement the class factory model that returns the instance of the class based on the group
      * type needed.
      *
@@ -46,6 +45,7 @@ export declare class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConf
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
      *
      * @returns {EntryConfigBaseClass} The sublayer instance or undefined if there is an error.
+     * @override
      */
     createGroupNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
 }

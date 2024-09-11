@@ -85,6 +85,6 @@ export declare const sxClassesList: {
         };
     };
 };
-export declare const StyledInputField: ((props: import("@mui/material").InputProps) => JSX.Element) & {
+export declare const StyledInputField: ((props: import("@mui/material").InputProps) => import("react").JSX.Element) & {
     muiName: string;
 };

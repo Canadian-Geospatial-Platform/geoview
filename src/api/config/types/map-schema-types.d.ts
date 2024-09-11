@@ -144,7 +144,7 @@ export type TypeViewSettings = {
     enableRotation?: boolean;
     /**
      * The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by
-     * the viewer. Domaine = [0..360], default = 0.
+     * the viewer. Domain = [0..360], default = 0.
      */
     rotation?: number;
     /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates.
@@ -153,12 +153,12 @@ export type TypeViewSettings = {
     maxExtent?: Extent;
     /**
      * The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
-     * Domaine = [0..50].
+     * Domain = [0..50].
      */
     minZoom?: number;
     /**
      * The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
-     * Domaine = [0..50].
+     * Domain = [0..50].
      */
     maxZoom?: number;
     /**
@@ -298,13 +298,13 @@ export interface TypeSourceTileInitialConfig extends TypeBaseSourceInitialConfig
     tileGrid?: TypeTileGrid;
 }
 /** Initial settings for WMS image sources. */
-export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialConfig {
+export interface TypeSourceWmsInitialConfig extends TypeBaseSourceInitialConfig {
     /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
     featureInfo?: TypeFeatureInfoLayerConfig;
     /** The type of the remote WMS server. The default value is mapserver. */
     serverType?: TypeOfServer;
     /** Style to apply. Default = '' */
-    style?: string | string[];
+    wmsStyle?: string[];
 }
 /** Type of server. */
 export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';

@@ -1,6 +1,6 @@
 import { TypeJsonObject } from '@config/types/config-types';
 import { TypeGeoviewLayerType, TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
+import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
 /**
  *  Base class for the definition of a Geoview layer configuration.
  */
@@ -90,6 +90,13 @@ export declare abstract class AbstractGeoviewLayerConfig {
      * @returns {TypeDisplayLanguage} The GeoView layer schema associated to the config.
      */
     protected getLanguage(): TypeDisplayLanguage;
+    /**
+     * Fetch the metadata of all layer entry configurations defined in the list of layer entry config.
+     *
+     * @returns {Promise<void>} A promise that will resolve when the process has completed.
+     * @protected @async
+     */
+    protected fetchListOfLayerMetadata(): Promise<void>;
     /**
      * The getter method that returns the serviceMetadata private property.
      *
