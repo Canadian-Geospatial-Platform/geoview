@@ -232,8 +232,8 @@ export class AppBarApi {
    * @param {string} tabGroup - The id of the panel
    * @param {boolean} open - Open (true) or closed (false) panel: default = true
    */
-  selectAppBarTab(tabId: string, tabGroup: string, open: boolean = true): void {
-    UIEventProcessor.setActiveAppBarTab(this.mapId, tabId, tabGroup, open);
+  selectAppBarTab(tabId: string, tabGroup: string, open: boolean = true, isFocusTrapped: boolean = true): void {
+    UIEventProcessor.setActiveAppBarTab(this.mapId, tabId, tabGroup, open, isFocusTrapped);
   }
 }
 

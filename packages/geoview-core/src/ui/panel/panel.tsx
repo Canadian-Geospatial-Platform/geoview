@@ -40,7 +40,7 @@ export type TypePanelAppProps = {
  */
 export function Panel(props: TypePanelAppProps): JSX.Element {
   const { panel, button, onPanelOpened, onPanelClosed, onGeneralCloseClicked, ...rest } = props;
-  const { status: open = false, panelStyles, panelGroupName } = panel;
+  const { status: open = false, isFocusTrapped = false, panelStyles, panelGroupName } = panel;
 
   const { t } = useTranslation<string>();
 
@@ -122,7 +122,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   return (
     <Box sx={panelContainerStyles} ref={panelContainerRef}>
-      <FocusTrapContainer open={open} id="app-bar-focus-trap">
+      <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap">
         <Card
           sx={{
             ...sxClasses.panelContainer,
