@@ -214,7 +214,7 @@ export function Geolocator(): JSX.Element {
   }, []);
 
   /**
-   * Effect that will track fetch call, so that after 30 seconds if no response comes back,
+   * Effect that will track fetch call, so that after 15 seconds if no response comes back,
    * Error will be displayed.
    */
   useEffect(() => {
@@ -222,7 +222,7 @@ export function Geolocator(): JSX.Element {
       fetchTimerRef.current = setTimeout(() => {
         resetGeoLocatorState();
         setError(new Error('No result found.'));
-      }, 30000);
+      }, 15000);
     }
     return () => {
       clearTimeout(fetchTimerRef.current);
