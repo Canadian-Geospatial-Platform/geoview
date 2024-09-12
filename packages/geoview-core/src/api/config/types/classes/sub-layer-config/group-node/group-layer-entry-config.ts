@@ -7,7 +7,7 @@ import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-confi
 import { logger } from '@/core/utils/logger';
 
 // ========================
-// #region CLASS DEFINITION
+// #region CLASS HEADER
 /**
  * Type used to define a group of layers. It can be either subgroups or sublayers.
  */
@@ -115,5 +115,5 @@ export abstract class GroupLayerEntryConfig extends EntryConfigBaseClass {
   }
   // #endregion PUBLIC
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }

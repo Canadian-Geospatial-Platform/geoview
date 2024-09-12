@@ -838,6 +838,24 @@
         }
       ]
     },
+    "WfsLayerConfig": {
+      "description": "Structure used by the viewer to describe the configuration of a WFS layer.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractGeoviewLayerConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "geoviewLayerType": {
+              "enum": ["ogcWfs"]
+            }
+          }
+        }
+      ]
+    },
     "EntryConfigBaseClass": {
       "description": "Base class from which we derive all the nodes (group and leaves) in the layer tree.",
       "type": "object",
@@ -1050,7 +1068,7 @@
         }
       ]
     },
-    "OgcWmsLayerEntryConfig": {
+    "WmsLayerEntryConfig": {
       "description": "Class from which we derive all the WMS leaf nodes in the layer tree.",
       "type": "object",
       "allOf": [
@@ -1063,6 +1081,27 @@
           "properties": {
             "source": {
               "$ref": "#/definitions/TypeSourceWmsInitialConfig"
+            },
+            "style": {
+              "$ref": "#/definitions/TypeStyleConfig"
+            }
+          }
+        }
+      ]
+    },
+    "WfsLayerEntryConfig": {
+      "description": "Class from which we derive all the WMS leaf nodes in the layer tree.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractBaseLayerEntryConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "source": {
+              "$ref": "#/definitions/TypeSourceWfsInitialConfig"
             },
             "style": {
               "$ref": "#/definitions/TypeStyleConfig"
@@ -1332,26 +1371,15 @@
       "allOf": [
         {
           "$ref": "#/definitions/TypeBaseVectorSourceInitialConfig"
-        },
+        }
+      ]
+    },
+    "TypeSourceWfsInitialConfig": {
+      "description": "Type from which we derive the source properties for all the ESRI feature leaf nodes in the layer tree.",
+      "type": "object",
+      "allOf": [
         {
-          "type": "object",
-          "properties": {
-            "maxRecordCount": {
-              "description": "Maximum number of records to fetch.",
-              "type": "number",
-              "default": 0
-            },
-            "layerFilter": {
-              "description": "Filter to apply on features of this layer.",
-              "type": "string"
-            },
-            "featureInfo": {
-              "$ref": "#/definitions/TypeFeatureInfoLayerConfig"
-            },
-            "format": {
-              "enum": ["EsriJSON"]
-            }
-          }
+          "$ref": "#/definitions/TypeBaseVectorSourceInitialConfig"
         }
       ]
     },

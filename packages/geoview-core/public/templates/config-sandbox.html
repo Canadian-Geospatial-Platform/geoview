@@ -13,6 +13,14 @@
     <link rel="stylesheet" href="css/style.css" />
 
     <style>
+      .config-json-valid {
+        color: green;
+      }
+
+      .config-error {
+        color: red;
+      }
+
       .tab-container {
           width: 100%;
           margin: 0 auto;
@@ -225,6 +233,7 @@
           <option value="esriFeature">EsriFeature</option>
           <option value="geoCore">GeoCore</option>
           <option value="ogcWms">WMS</option>
+          <option value="ogcWfs">WFS</option>
           <option value="esriImage">EsriImage</option>
           <option value="GeoJSON">GeoJSON</option>
         </select>
@@ -667,6 +676,7 @@
       esriDynamic: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
       esriFeature: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
       ogcWms: 'https://geo.weather.gc.ca/geomet',
+      ogcWfs: 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
       esriImage: 'NOT IMPLEMENTED', // 'https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer',
       GeoJSON: 'NOT IMPLEMENTED', // 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.json',
     };

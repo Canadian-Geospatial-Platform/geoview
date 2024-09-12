@@ -30,10 +30,7 @@ export class WmsGroupLayerConfig extends GroupLayerEntryConfig {
     if (this.getErrorDetectedFlag()) return;
 
     // WMS service metadata contains the layer's metadata. We don't have to fetch again.
-    const layerMetadata = WmsLayerConfig.getLayerMetadataEntry(
-      this.layerId,
-      this.getGeoviewLayerConfig().getServiceMetadata().Capability.Layer
-    );
+    const layerMetadata = (this.getGeoviewLayerConfig() as WmsLayerConfig).findLayerMetadataEntry(this.layerId);
     if (layerMetadata) {
       // The layer group exists in the service metadata, use its metadata
       this.setLayerMetadata(layerMetadata);
@@ -80,5 +77,5 @@ export class WmsGroupLayerConfig extends GroupLayerEntryConfig {
   }
   // #endregion PRIVATE
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }

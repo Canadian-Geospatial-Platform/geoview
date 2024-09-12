@@ -10,7 +10,7 @@ import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-confi
 export type TypeEsriDynamicLayerNode = EsriGroupLayerConfig | EsriDynamicLayerEntryConfig;
 
 // ========================
-// #region CLASS DEFINITION
+// #region CLASS HEADER
 /**
  * The ESRI dynamic geoview layer class.
  */
@@ -88,5 +88,5 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConfig {
   }
   // #endregion OVERRIDE
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }

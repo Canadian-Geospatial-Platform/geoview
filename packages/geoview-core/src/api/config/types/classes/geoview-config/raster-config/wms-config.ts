@@ -3,12 +3,12 @@ import WMSCapabilities from 'ol/format/WMSCapabilities';
 import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@config/types/config-constants';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { WmsGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/wms-group-layer-config';
-import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
+import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { TypeDisplayLanguage } from '@config/types/map-schema-types';
 import { WmsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
 import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { ConfigError, GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
+import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
 import { createLocalizedString, xmlToJson } from '@/core/utils/utilities';
@@ -16,7 +16,7 @@ import { createLocalizedString, xmlToJson } from '@/core/utils/utilities';
 export type TypeWmsLayerNode = WmsGroupLayerConfig | WmsLayerEntryConfig;
 
 // ========================
-// #region CLASS DEFINITION
+// #region CLASS HEADER
 
 /**
  * The WMS geoview layer class.
@@ -165,47 +165,35 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     }
 
     if (!this.getErrorDetectedFlag()) {
-      (this.listOfLayerEntryConfig as EntryConfigBaseClass[]) = this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+      (this.listOfLayerEntryConfig as EntryConfigBaseClass[]) = this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
       await this.fetchListOfLayerMetadata();
 
-      await this.#createLayerTree();
+      await this.createLayerTree();
     }
   }
-  // #endregion OVERRIDE
-
-  // ===============
-  // #region PRIVATE
 
   /**
-   * A recursive method to process the listOfLayerEntryConfig. The goal is to process each valid sublayer, searching the service's
-   * metadata to verify the layer's existence and whether it is a layer group, in order to determine the node's final structure.
-   * If it is a layer group, it will be created.
+   * Create the layer tree using the service metadata.
    *
-   * @param {TypeWmsLayerNode[]} listOfLayerEntryConfig the list of sublayers to process.
-   *
-   * @returns {TypeWmsLayerNode[]} the new list of sublayer configurations.
-   * @private
+   * @returns {TypeJsonObject[]} The layer tree created from the metadata.
+   * @protected @override
    */
-  #processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeWmsLayerNode[]): EntryConfigBaseClass[] {
-    return listOfLayerEntryConfig.map((subLayer) => {
-      if (subLayer.getErrorDetectedFlag()) return subLayer;
+  protected override createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[] {
+    const metadataLayer = this.getServiceMetadata().Capability.Layer;
+    // If it is a group layer, then create it.
+    if ('Layer' in metadataLayer) {
+      // Sometime, the Name property is undefined. However, the Title property is mandatory.
+      const groupId = (metadataLayer.Name || metadataLayer.Title) as string;
+      const jsonConfig = this.#createGroupNodeJsonConfig(groupId, metadataLayer.Layer as TypeJsonArray);
+      return [this.createGroupNode(jsonConfig, this.getLanguage(), this)!];
+    }
 
-      if (layerEntryIsGroupLayer(subLayer)) {
-        // The next line replace the listOfLayerEntryConfig stored in the subLayer parameter
-        // Since subLayer is the function parameter, we must disable the eslint no-param-reassign
-        // eslint-disable-next-line no-param-reassign
-        subLayer.listOfLayerEntryConfig = this.#processListOfLayerEntryConfig(subLayer.listOfLayerEntryConfig as TypeWmsLayerNode[]);
-        return subLayer;
-      }
-
-      try {
-        return this.#createLayerEntryNode(subLayer.layerId, subLayer.getParentNode());
-      } catch (error) {
-        subLayer.setErrorDetectedFlag();
-        logger.logError((error as ConfigError).message, error);
-        return subLayer;
-      }
+    // Create a single layer using the metadata
+    const layerConfig = toJsonObject({
+      layerId: metadataLayer.Name,
+      layerName: createLocalizedString(metadataLayer.Name),
     });
+    return [this.createLeafNode(layerConfig, this.getLanguage(), this)!];
   }
 
   /**
@@ -216,11 +204,11 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    * @param {TypeWmsLayerNode | undefined} parentNode The layer's parent node.
    *
    * @returns {TypeWmsLayerNode} The subLayer created from the metadata.
-   * @private
+   * @protected @override
    */
-  #createLayerEntryNode(layerId: string, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass {
+  protected override createLayerEntryNode(layerId: string, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass {
     // If we cannot find the layerId in the layer definitions, throw an error.
-    const layerFound = WmsLayerConfig.getLayerMetadataEntry(layerId, this.getServiceMetadata().Capability.Layer);
+    const layerFound = this.findLayerMetadataEntry(layerId);
     if (!layerFound) {
       throw new GeoviewLayerInvalidParameterError('LayerIdNotFound', [layerId?.toString()]);
     }
@@ -238,7 +226,10 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     });
     return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
   }
+  // #endregion OVERRIDE
 
+  // ===============
+  // #region PRIVATE
   /**
    * Create a group node JSON config for a specific layer id.
    *
@@ -277,7 +268,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    * @param {string} metadataUrl The localized value of the metadataAccessPath
    *
    * @returns {Promise<void>} A promise that the execution is completed.
-   * @private
+   * @private @async
    */
   async #fetchXmlServiceMetadata(metadataUrl: string): Promise<void> {
     try {
@@ -319,11 +310,11 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
 
   /** ***************************************************************************************************************************
    * This method fetch the service metadata using a getCapabilities request.
-   * @private
+   * @private @async
    */
   async #fetchUsingGetCapabilities(): Promise<void> {
     try {
-      const serviceMetadata = await WmsLayerConfig.#executeServiceMetadataRequest(this.metadataAccessPath);
+      const serviceMetadata = await this.#executeServiceMetadataRequest();
       this.setServiceMetadata(serviceMetadata);
       this.#processMetadataInheritance();
     } catch (error) {
@@ -343,11 +334,11 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private @async
    */
-  static async #executeServiceMetadataRequest(url: string): Promise<TypeJsonObject> {
-    let newUrl: string;
+  async #executeServiceMetadataRequest(url?: string): Promise<TypeJsonObject> {
+    let newUrl = url || this.metadataAccessPath;
 
     // Use user-provided parameters, if applicable.
-    const metadataAccessPathItems = url.split('?');
+    const metadataAccessPathItems = newUrl.split('?');
     if (metadataAccessPathItems.length === 2) {
       const [metadataAccessPath, metadataAccessParameters] = metadataAccessPathItems;
       // Get the list of parameters (a lower case version).
@@ -368,7 +359,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       newUrl = `${metadataAccessPath}?${service}&${version}&${request}${layers}`;
     } else {
       // If no parameter was specified, use default values.
-      newUrl = `${url}?service=WMS&version=1.3.0&request=GetCapabilities`;
+      newUrl = `${newUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
     }
 
     const response = await fetch(newUrl);
@@ -393,7 +384,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    * Which is not the case for the Geomet service.
    *
    * @param {WmsLayerEntryConfig} layerConfigsToQuery The array of layers to process.
-   * @private
+   * @private @async
    */
   async #fetchUsingGetCapabilitiesAndLayers(layerConfigsToQuery: WmsLayerEntryConfig[]): Promise<void> {
     try {
@@ -405,9 +396,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
         if (i === layerIndex)
           // if the layer found is the same as the current layer index,
           // this is the first time we execute this request
-          promisedArrayOfMetadata.push(
-            WmsLayerConfig.#executeServiceMetadataRequest(`${this.metadataAccessPath}?Layers=${layerConfig.layerId}`)
-          );
+          promisedArrayOfMetadata.push(this.#executeServiceMetadataRequest(`${this.metadataAccessPath}?Layers=${layerConfig.layerId}`));
         // otherwise, we are already waiting for the same request and we will wait for it to finish.
         else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
       });
@@ -418,7 +407,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       // Initialize service metadata using index 0 of arrayOfMetadata as a starting point. Other indexes will be added to it.
       this.setServiceMetadata(arrayOfMetadata[0]);
       for (i = 1; i < arrayOfMetadata.length; i++) {
-        if (!WmsLayerConfig.getLayerMetadataEntry(layerConfigsToQuery[i].layerId, this.getServiceMetadata().Capability.Layer)) {
+        if (!this.findLayerMetadataEntry(layerConfigsToQuery[i].layerId, this.getServiceMetadata().Capability.Layer)) {
           const metadataLayerPathToAdd = this.#getMetadataLayerPath(layerConfigsToQuery[i].layerId!, arrayOfMetadata[i]!.Capability.Layer);
           this.#addLayerToMetadataInstance(
             metadataLayerPathToAdd,
@@ -571,75 +560,10 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     if (layer?.Layer !== undefined && Array.isArray(layer.layer))
       (layer.Layer as TypeJsonArray).forEach((subLayer) => this.#processMetadataInheritance(layer, subLayer));
   }
-
-  /**
-   * Create the layer tree associated to the GeoView layer if the layer tree filter stored in the metadataLayerTree private property
-   * is set.
-   * @private
-   */
-  async #createLayerTree(): Promise<void> {
-    let layerTreeFilter = this.getMetadataLayerTree();
-    if (layerTreeFilter !== undefined) {
-      if (layerTreeFilter.length === 0) {
-        this.setMetadataLayerTree(this.#processListOfLayerEntryConfig(this.#createLayerTreeFromServiceMetadata() as TypeWmsLayerNode[]));
-      } else {
-        if (layerTreeFilter.length > 1) {
-          layerTreeFilter = [
-            Cast<EntryConfigBaseClass>({
-              layerId: this.geoviewLayerId,
-              layerName: createLocalizedString(this.geoviewLayerName),
-              isLayerGroup: true,
-              listOfLayerEntryConfig: layerTreeFilter,
-            }),
-          ];
-        }
-
-        // Instanciate the sublayer list.
-        layerTreeFilter = layerTreeFilter
-          ?.map((layerFilter) => {
-            if (layerEntryIsGroupLayer(layerFilter))
-              return this.createGroupNode(Cast<TypeJsonObject>(layerFilter), this.getLanguage(), this);
-            return this.createLeafNode(Cast<TypeJsonObject>(layerFilter), this.getLanguage(), this);
-          })
-          // When a sublayer cannot be created, the value returned is undefined. These values will be filtered.
-          ?.filter((subLayerConfig) => {
-            return subLayerConfig;
-          }) as EntryConfigBaseClass[];
-
-        this.applyDefaultValues();
-        this.setMetadataLayerTree(this.#processListOfLayerEntryConfig(layerTreeFilter as TypeWmsLayerNode[]));
-      }
-      await this.fetchListOfLayerMetadata(this.getMetadataLayerTree());
-    }
-  }
-
-  /**
-   * Create the layer tree using the service metadata.
-   *
-   * @returns {TypeJsonObject[]} The layer tree created from the metadata.
-   * @private
-   */
-  #createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[] {
-    const metadataLayer = this.getServiceMetadata().Capability.Layer;
-    // If it is a group layer, then create it.
-    if ('Layer' in metadataLayer) {
-      // Sometime, the Name property is undefined. However, the Title property is mandatory.
-      const groupId = (metadataLayer.Name || metadataLayer.Title) as string;
-      const jsonConfig = this.#createGroupNodeJsonConfig(groupId, metadataLayer.Layer as TypeJsonArray);
-      return [this.createGroupNode(jsonConfig, this.getLanguage(), this)!];
-    }
-
-    // Create a single layer using the metadata
-    const layerConfig = toJsonObject({
-      layerId: metadataLayer.Name,
-      layerName: createLocalizedString(metadataLayer.Name),
-    });
-    return [this.createLeafNode(layerConfig, this.getLanguage(), this)!];
-  }
   // #endregion PRIVATE
 
   // ==============
-  // #region STATIC
+  // #region PUBLIC
   /** ****************************************************************************************************************************
    * This method search recursively the layerId in the layer entry of the capabilities.
    *
@@ -647,9 +571,11 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    * @param {TypeJsonObject | undefined} layer The layer entry from the capabilities that will be searched.
    *
    * @returns {TypeJsonObject | null} The found layer from the capabilities or null if not found.
-   * @static
    */
-  static getLayerMetadataEntry(layerId: string, layer: TypeJsonObject | undefined): TypeJsonObject | null {
+  findLayerMetadataEntry(
+    layerId: string,
+    layer: TypeJsonObject | undefined = this.getServiceMetadata().Capability.Layer
+  ): TypeJsonObject | null {
     // return null if the metadata doesn't have a Layer property in Capability (metadata fetch failed).
     if (!layer) return null;
 
@@ -660,21 +586,22 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       // if we have a layer group, search recursively in it.
       if (Array.isArray(layer.Layer)) {
         for (let i = 0; i < layer.Layer.length; i++) {
-          const layerFound = WmsLayerConfig.getLayerMetadataEntry(layerId, layer.Layer[i]);
+          const layerFound = this.findLayerMetadataEntry(layerId, layer.Layer[i]);
           // return the layer if it has been found.
           if (layerFound) return layerFound;
         }
         // the recursive search failed, we return a null.
         return null;
       }
-      // If the Layer property is not an array, use a single call to the getLayerMetadataEntryto test the layer's existance.
-      return WmsLayerConfig.getLayerMetadataEntry(layerId, layer.Layer);
+      // If the Layer property is not an array, use a single call to the findLayerMetadataEntry to test the layer's existance.
+      return this.findLayerMetadataEntry(layerId, layer.Layer);
     }
 
     // If we get here, the layer doesn't exist, we return a null.
     return null;
   }
-  // #endregion PROTECTED
+
+  // #endregion PUBLIC
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }
