@@ -131,25 +131,23 @@ We'll go through the simplest way to use the Canadian Geospatial Platform Viewer
 
 ### Using the viewer on your own project
 
-For the moment, the released bundle of the viewer is hosted under:
+For the moment, the developement bundle of the viewer is hosted under:
 
 ```
 https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js
 ```
 
-_As the viewer is still in development, this bundle will always contain the latest commits._
+_As the viewer is still in development, this bundle will always contain the latest commits. We really recommand to use one of our release on your web server_
 
-To use the viewer on your own project, you need to include the above script in a script tag in the header of your **HTML** file
+To use the viewer on your own project, you need to include the above script in a script tag in your **HTML** file
 
 ```html
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script>
-  </head>
   <body>
     ...
   </body>
+  <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script>
 </html>
 ```
 
@@ -165,7 +163,7 @@ For the viewer to recognize that you are trying to render a map on the page, you
 
 It's **recommended** to pass in an **id attribute**, if an id is not passed then the viewer will auto generate an id for you. If you want to use APIs that control this map then you will need to view all created maps on the page and figure out the id of the created map.
 
-_Tip: to view all maps on the page you can console out the maps using this function `console.log(cgpv.api.maps)_
+_Tip: to view all maps on the page you can console out the maps using this function: console.log(cgpv.api.maps)_
 
 Below is an example of a simple map, with an id **mapOne**. This map will be using LCC projection (EPSG:3978) and will have a zoom of 4, a center of 60 latitude and -100 longtitude. The interaction of the map will be dynamic (meaning that you can move around and zoom in/out). It will use the transport, shaded with labels as the basemap. It will display an esri dynamic layer with multiple sub layers. The language of the map will be English.
 
@@ -223,9 +221,6 @@ Full example:
 ```html
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script>
-  </head>
   <body>
     <div
       id="mapOne"
@@ -234,6 +229,7 @@ Full example:
       data-lang="en"
       data-config="{... insert your configuration ...}"
     ></div>
+    <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script>
     <script>
       // init functions, takes one parameter as a function callback. Any code inside the callback will run once map has finished rendering.
       cgpv.init(function () {});

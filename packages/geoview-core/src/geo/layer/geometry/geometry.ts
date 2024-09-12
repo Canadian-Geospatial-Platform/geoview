@@ -1,5 +1,5 @@
 import VectorLayer from 'ol/layer/Vector';
-import Feature, { FeatureLike } from 'ol/Feature';
+import Feature from 'ol/Feature';
 import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
 import { Geometry as OLGeometry, Circle, LineString, Point, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
@@ -22,7 +22,7 @@ import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './geome
  */
 interface FeatureCollection {
   geometryGroupId: string;
-  vectorLayer: VectorLayer<Feature>;
+  vectorLayer: VectorLayer<VectorSource>;
   vectorSource: VectorSource;
 }
 
@@ -428,7 +428,7 @@ export class GeometryApi {
   createGeometryGroup(
     geometryGroupId: string,
     options?: {
-      vectorLayerOptions?: VectorLayerOptions<VectorSource<FeatureLike>>;
+      vectorLayerOptions?: VectorLayerOptions<Feature, VectorSource>;
       vectorSourceOptions?: VectorSourceOptions<Feature>;
     }
   ): FeatureCollection {
@@ -438,7 +438,7 @@ export class GeometryApi {
     if (!geometryGroup) {
       const vectorSource = new VectorSource<Feature>(geometryGroupOptions.vectorSourceOptions);
 
-      const vectorLayer = new VectorLayer<Feature>({
+      const vectorLayer = new VectorLayer<VectorSource>({
         ...geometryGroupOptions.vectorLayerOptions,
         source: vectorSource,
       });
@@ -514,7 +514,7 @@ export class GeometryApi {
     for (let i = 0; i < this.geometryGroups.length; i++) {
       const geometries = this.geometryGroups[i].vectorLayer.getSource()?.getFeatures() || [];
       for (let j = 0; j < geometries.length; j++) {
-        const geometry = geometries[j];
+        const geometry = geometries[j] as Feature;
 
         if (geometry.get('featureId') === featureId) returnValue.push(this.geometryGroups[i]);
       }
@@ -567,7 +567,7 @@ export class GeometryApi {
     }
 
     try {
-      geometryGroup.vectorLayer.getSource()?.addFeature(geometry);
+      geometryGroup.vectorLayer.getSource()?.addFeature(geometry as never);
       geometryGroup.vectorLayer.changed();
     } catch (error) {
       logger.logError(`Error adding geometry to group ${geometryGroupId}`, error);
@@ -587,7 +587,7 @@ export class GeometryApi {
         ?.getFeatures()
         .forEach((layerGeometry) => {
           if (geometry === layerGeometry) {
-            this.geometryGroups[i].vectorLayer.getSource()?.removeFeature(geometry);
+            this.geometryGroups[i].vectorLayer.getSource()?.removeFeature(geometry as never);
           }
         });
       this.geometryGroups[i].vectorLayer.changed();
@@ -609,7 +609,7 @@ export class GeometryApi {
       ?.getFeatures()
       .forEach((layerGeometry) => {
         if (geometry === layerGeometry) {
-          geometryGroup.vectorLayer.getSource()?.removeFeature(geometry);
+          geometryGroup.vectorLayer.getSource()?.removeFeature(geometry as never);
         }
       });
     geometryGroup.vectorLayer.changed();

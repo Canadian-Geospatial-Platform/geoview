@@ -43,7 +43,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const label = getLocalizedValue(layerConfig.layerName, language) || layerConfig.layerId;
 
     // Create the vector layer options.
-    const layerOptions: VectorLayerOptions<VectorSource> = {
+    const layerOptions: VectorLayerOptions<Feature, VectorSource> = {
       properties: { layerConfig },
       source: olSource,
       style: (feature) => {
@@ -71,11 +71,11 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   // Disabling 'any', because too many renderer types in OpenLayers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  override getOLLayer(): VectorLayer<Feature> {
+  override getOLLayer(): VectorLayer<VectorSource> {
     // Call parent and cast
     // Disabling 'any', because too many renderer types in OpenLayers
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return super.getOLLayer() as VectorLayer<Feature>;
+    return super.getOLLayer() as VectorLayer<VectorSource>;
   }
 
   /**
@@ -272,8 +272,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       // Determine max extent from features
       let calculatedExtent: Extent | undefined;
       requestedFeatures.forEach((feature) => {
-        if (feature?.getGeometry()) {
-          const extent = feature.getGeometry()?.getExtent();
+        if ((feature as unknown as Feature)?.getGeometry()) {
+          const extent = (feature as unknown as Feature).getGeometry()?.getExtent();
           if (extent) {
             // If calculatedExtent has not been defined, set it to extent
             if (!calculatedExtent) calculatedExtent = extent;
@@ -296,7 +296,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const mapProjection: ProjectionLike = this.getMapViewer().getProjection().getCode();
 
     const format = new FormatGeoJSON();
-    const geoJsonStr = format.writeFeatures((this.getOLLayer() as VectorLayer<Feature>).getSource()!.getFeatures(), {
+    const geoJsonStr = format.writeFeatures((this.getOLLayer() as VectorLayer<VectorSource>).getSource()!.getFeatures(), {
       dataProjection: 'EPSG:4326', // Output projection,
       featureProjection: mapProjection,
     });
