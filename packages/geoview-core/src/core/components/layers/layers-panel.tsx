@@ -77,6 +77,8 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
           fontSize: theme.palette.geoViewFontSize.lg,
           fontWeight: '600',
           marginTop: '12px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
           [theme.breakpoints.up('md')]: { display: 'none' },
         }}
         component="div"
