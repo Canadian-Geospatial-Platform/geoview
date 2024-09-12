@@ -32,7 +32,7 @@ function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element
 
   const { t } = useTranslation();
   return (
-    <Tooltip title={datatableSettings[layerPath] ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
+    <Tooltip title={datatableSettings[layerPath].mapFilteredRecord ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
       <Switch
         size="medium"
         onChange={() => setMapFilteredEntry(!datatableSettings[layerPath].mapFilteredRecord ?? true, layerPath)}

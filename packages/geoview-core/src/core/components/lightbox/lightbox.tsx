@@ -68,10 +68,10 @@ export function LightboxImg(props: LightboxProps): JSX.Element {
       controller={{ closeOnPullDown, closeOnBackdropClick }}
       animation={{ fade, swipe }}
       labels={{
-        Next: t('lightbox.next') as string,
-        Previous: t('lightbox.previous') as string,
-        Close: t('lightbox.close') as string,
-        Download: t('lightbox.download') as string,
+        Next: t('lightbox.next') || undefined,
+        Previous: t('lightbox.previous') || undefined,
+        Close: t('lightbox.close') || undefined,
+        Download: t('lightbox.download') || undefined,
       }}
       on={{
         entered: () => {

@@ -198,12 +198,15 @@ export function Shell(props: ShellProps): JSX.Element {
    * Set the map height based on mapDiv
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SHELL - setOrigHeight geoviewElement', geoviewElement);
+
     if (mapContainerRef.current && mapShellContainerRef.current) {
       // NOTE: grab height from data attribute of parent div, if not present then grab client height
       const height = geoviewElement!.dataset?.height ?? `${geoviewElement!.clientHeight}px`;
       setOrigHeight(height);
     }
-  }, [mapLoaded, mapId, geoviewElement]);
+  }, [geoviewElement]);
 
   /**
    * Update map height when switch on/off the fullscreen
