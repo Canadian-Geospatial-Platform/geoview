@@ -66,6 +66,17 @@
                   'layerId': 'blank.json'
                 }
               ]
+            },
+            {
+              'geoviewLayerId': 'uniqueValueId',
+              'geoviewLayerName': { 'en': 'dummy layer' },
+              'metadataAccessPath': { 'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/' },
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
             }
           ]
         },
@@ -169,7 +180,7 @@
       var addPoints2Button = document.getElementById('Add-points2');
 
       const points2 =
-        '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"data":"92;43.54;12.3;66;75","label":"Red;Green;Blue;Yellow;Orange","creationDate":"14/01/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-141,52]}},{"type":"Feature","properties":{"data":"92;43.54;12.3;66;75","label":"Red;Green;Blue;Yellow;Orange","creationDate":"16/02/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-141,83]}},{"type":"Feature","properties":{"data":"553;54;32;5.43;55","label":"Red;Green;Blue;Yellow;Orange;","creationDate":"19/08/2022T14:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-53,83]}},{"type":"Feature","properties":{"data":"255;255;255;5.43;55","label":"Red;Green;Blue;Yellow;Orange;","creationDate":"30/10/2022T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-53,49]}},{"type":"Feature","properties":{"Red":92,"Green":"1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Blue":"2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Yellow":"3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Orange":75,"creationDate":"15/02/2022T05:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-100,57]}},{"type":"Feature","properties":{"Red":553,"Green":54,"Blue":32.3,"Yellow":5.43,"Orange":55,"creationDate":"07/01/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-113,55]}},{"type":"Feature","properties":{"Red":255,"Green":255,"Blue":32.3,"Yellow":5.43,"Orange":55,"creationDate":"15/02/2019T17:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-103,54]}}]}';
+        '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"data":"92;43.54;12.3;66;75","label":"Red;Green;Blue;Yellow;Orange","creationDate":"14/01/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-141,52]}},{"type":"Feature","properties":{"data":"92;43.54;12.3;66;75","label":"Red;Green;Blue;Yellow;Orange","creationDate":"16/02/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-141,83]}},{"type":"Feature","properties":{"data":"553;54;32;5.43;55","label":"Red;Green;Blue;Yellow;Orange;","creationDate":"19/08/2022T14:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-53,83]}},{"type":"Feature","properties":{"data":"255;255;255;5.43;55","label":"Red;Green;Blue;Yellow;Orange;","creationDate":"30/10/2022T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-53,49]}},{"type":"Feature","properties":{"Red":92,"Green":"1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Blue":"2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Yellow":"3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Orange":75,"creationDate":"15/02/2022T05:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-100,57]}},{"type":"Feature","properties":{"Red":553,"Green":54,"Blue":32.3,"Yellow":5.43,"Orange":55,"creationDate":"07/01/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-113,55]}},{"type":"Feature","properties":{"Red":255,"Green":255,"Blue":32.3,"Yellow":5.43,"Orange":55,"creationDate":"15/02/2019T17:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-72.33, 46.33]}}]}';
 
       // add an event listener when a button is clicked
       addPoints2Button.addEventListener('click', () => {

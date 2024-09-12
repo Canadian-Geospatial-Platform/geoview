@@ -263,7 +263,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       layerFeatures: getFeaturesOfLayer(layer.layerPath),
       tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
       mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
-        <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
+        <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main, verticalAlign: 'middle' }} />
       ),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps

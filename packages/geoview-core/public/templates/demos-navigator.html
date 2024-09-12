@@ -215,14 +215,13 @@
         const id = document.createAttribute('id');
         const style = document.createAttribute('style');
         id.value = 'sandboxMap';
-        style.value = 'height: 150px !important; width: 100px;';
         newDiv.setAttributeNode(id);
         document.getElementById('mapSection').appendChild(newDiv);
 
         // wait until map is removed before recreating it
         setTimeout(() => {
           // create map
-          cgpv.api.createMapFromConfig('sandboxMap', e.target.value);
+          cgpv.api.createMapFromConfig('sandboxMap', e.target.value, 800);
         }, 1500);
 
         // fetch JSON config file to show in the text are section

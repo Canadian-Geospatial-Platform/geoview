@@ -6,6 +6,7 @@ import { UIEventProcessor } from './ui-event-processor';
 import { TypeResultSetEntry } from '@/geo/map/map-schema-types';
 import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import { MapEventProcessor } from './map-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -67,7 +68,38 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Deletes the specified layer path from the layer sets in the store.The update of the array will also trigger an update in a batched manner.
+   * Get the selectedLayerPath value
+   * @param {string} mapId - The map identifier
+   * @returns {string}} the selected layer path
+   */
+  static getSelectedLayerPath(mapId: string): string {
+    return this.getFeatureInfoState(mapId).selectedLayerPath;
+  }
+
+  /**
+   * Deletes the feature from a resultSet for a specific layerPath. At the same time it check for
+   * removing the higlight and the click marker if selected layer path is the reset path
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The layer path to delete features from resultSet
+   */
+  static resetResultSet(mapId: string, layerPath: string): void {
+    const { resultSet } = MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet;
+    if (resultSet[layerPath]) {
+      resultSet[layerPath].features = [];
+      this.propagateFeatureInfoToStore(mapId, 'click', resultSet[layerPath]).catch((err) =>
+        logger.logError('Not able to reset resultSet', err, layerPath)
+      );
+    }
+
+    // Remove highlighted features and marker if it is the selected layer path
+    if (FeatureInfoEventProcessor.getSelectedLayerPath(mapId) === layerPath) {
+      MapEventProcessor.removeHighlightedFeature(mapId, 'all');
+      MapEventProcessor.clickMarkerIconHide(mapId);
+    }
+  }
+
+  /**
+   * Deletes the specified layer path from the layer sets in the store. The update of the array will also trigger an update in a batched manner.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete
    * @returns {Promise<void>}
