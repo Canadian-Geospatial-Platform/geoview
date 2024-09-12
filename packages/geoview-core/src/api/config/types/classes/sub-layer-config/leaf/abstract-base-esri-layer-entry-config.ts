@@ -12,7 +12,7 @@ import { isvalidComparedToInternalSchema } from '@/api/config/utils';
 import { GeoviewLayerConfigError } from '../../config-exceptions';
 
 // ========================
-// #region CLASS DEFINITION
+// #region CLASS HEADER
 /**
  * Base type used to define the common implementation of an ESRI GeoView sublayer to display on the map.
  */
@@ -27,7 +27,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
   /**
    * This method is used to fetch, parse and extract the relevant information from the metadata of the leaf node.
    * The same method signature is used by layer group nodes and leaf nodes (layers).
-   * @override
+   * @override @async
    */
   override async fetchLayerMetadata(): Promise<void> {
     // If an error has already been detected, then the layer is unusable.
@@ -61,28 +61,6 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
     this.setErrorDetectedFlag();
   }
   // #endregion OVERRIDE
-
-  // ==========================
-  // #region PRIVATE
-  /**
-   * Convert the esri type to the type used by the viewer.
-   *
-   * @param {string} esriFieldType The ESRI field type.
-   *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
-   * @static @private
-   */
-  static #convertEsriFieldType(esriFieldType: string): 'string' | 'date' | 'number' {
-    if (esriFieldType === 'esriFieldTypeDate') return 'date';
-    if (
-      ['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger', 'esriFieldTypeOID'].includes(
-        esriFieldType
-      )
-    )
-      return 'number';
-    return 'string';
-  }
-  // #endregion PRIVATE
 
   // ==========================
   // #region PROTECTED
@@ -160,6 +138,29 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
     return { queryable, nameField, outfields };
   }
   // #endregion PROTECTED
+
+  // ==============
+  // #region STATIC
+  /**
+   * Convert the esri type to the type used by the viewer.
+   *
+   * @param {string} esriFieldType The ESRI field type.
+   *
+   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @static @private
+   */
+  static #convertEsriFieldType(esriFieldType: string): 'string' | 'date' | 'number' {
+    if (esriFieldType === 'esriFieldTypeDate') return 'date';
+    if (
+      ['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger', 'esriFieldTypeOID'].includes(
+        esriFieldType
+      )
+    )
+      return 'number';
+    return 'string';
+  }
+  // #endregion STATIC
+
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }

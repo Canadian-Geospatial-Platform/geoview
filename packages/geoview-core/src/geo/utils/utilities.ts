@@ -457,9 +457,9 @@ export function validateExtent(extent: Extent, code: string = 'EPSG:4326'): Exte
 
   // Replace any invalid entries with maximum value
   const minX = extent[0] < maxExtents[code][0] || extent[0] === -Infinity || Number.isNaN(extent[0]) ? maxExtents[code][0] : extent[0];
-  const minY = extent[1] < maxExtents[code][1] || extent[0] === -Infinity || Number.isNaN(extent[1]) ? maxExtents[code][1] : extent[1];
-  const maxX = extent[0] > maxExtents[code][2] || extent[0] === Infinity || Number.isNaN(extent[2]) ? maxExtents[code][2] : extent[2];
-  const maxY = extent[0] > maxExtents[code][3] || extent[0] === Infinity || Number.isNaN(extent[3]) ? maxExtents[code][3] : extent[3];
+  const minY = extent[1] < maxExtents[code][1] || extent[1] === -Infinity || Number.isNaN(extent[1]) ? maxExtents[code][1] : extent[1];
+  const maxX = extent[2] > maxExtents[code][2] || extent[2] === Infinity || Number.isNaN(extent[2]) ? maxExtents[code][2] : extent[2];
+  const maxY = extent[3] > maxExtents[code][3] || extent[3] === Infinity || Number.isNaN(extent[3]) ? maxExtents[code][3] : extent[3];
 
   // Check the order
   const validatedExtent: Extent = [

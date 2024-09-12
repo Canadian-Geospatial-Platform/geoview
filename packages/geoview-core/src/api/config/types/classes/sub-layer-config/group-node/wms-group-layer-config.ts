@@ -20,6 +20,17 @@ export class WmsGroupLayerConfig extends GroupLayerEntryConfig {
 
   // ================
   // #region OVERRIDE
+  /**
+   * Shadow method used to do a cast operation on the parent method to return WmsLayerConfig instead of
+   * AbstractGeoviewLayerConfig.
+   *
+   * @returns {WmsLayerConfig} The Geoview layer configuration that owns this WFS layer entry config.
+   * @override @async
+   */
+  override getGeoviewLayerConfig(): WmsLayerConfig {
+    return super.getGeoviewLayerConfig() as WmsLayerConfig;
+  }
+
   /** ***************************************************************************************************************************
    * This method is used to fetch, parse and extract the relevant information from the metadata of the group layer.
    * The same method signature is used by layer group nodes and leaf nodes (layers).
@@ -30,10 +41,7 @@ export class WmsGroupLayerConfig extends GroupLayerEntryConfig {
     if (this.getErrorDetectedFlag()) return;
 
     // WMS service metadata contains the layer's metadata. We don't have to fetch again.
-    const layerMetadata = WmsLayerConfig.getLayerMetadataEntry(
-      this.layerId,
-      this.getGeoviewLayerConfig().getServiceMetadata().Capability.Layer
-    );
+    const layerMetadata = this.getGeoviewLayerConfig().findLayerMetadataEntry(this.layerId);
     if (layerMetadata) {
       // The layer group exists in the service metadata, use its metadata
       this.setLayerMetadata(layerMetadata);
@@ -80,5 +88,5 @@ export class WmsGroupLayerConfig extends GroupLayerEntryConfig {
   }
   // #endregion PRIVATE
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }
