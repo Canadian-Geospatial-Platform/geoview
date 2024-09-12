@@ -43,6 +43,9 @@
             <td>
               <a href="#HMap1">1. Metadata Issue Layers</a><br />
             </td>
+            <td></td>
+              <a href="#HMap2">2. ESRI service Issue Layers</a><br />
+            </td>
           </tr>
         </tbody>
       </table>
@@ -164,6 +167,56 @@
       </ul>
     </div>
 
+    <hr />
+
+    <div class="map-title-holder"></div>
+      <h4 id="HMap2">2. ESRI Service Issue Layers</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HMap2-state" class="panel map-title-holder"></pre>
+    <hr />
+    <div
+      id="Map2"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'f182f1f8-9c9b-49e5-8702-9dd37093a768',
+              'geoviewLayerType': 'geoCore'
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"
+    ></div>
+    <hr />
+    <div>
+      Outlier Service:
+      <ul>
+        <li>
+          Sewer Overflow - Services has inexistant layer index (https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/)
+        </li>
+      </ul>
+    </div>
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>

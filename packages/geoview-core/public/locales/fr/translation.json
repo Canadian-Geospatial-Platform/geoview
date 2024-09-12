@@ -116,6 +116,8 @@
     "toggleCollapse": "Basculer la fermeture",
     "querying": "Requête en cours",
     "layerAdded": "Couche __param__  ajoutée",
+    "layerAddedAndLoading": "Couche __param__ ajoutée et en chargement",
+    "layerAddedWithError": "Couche __param__  en erreur",
     "instructionsNoLayersTitle": "Aucune couche visible",
     "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte."
   },
