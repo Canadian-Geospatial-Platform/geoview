@@ -56,9 +56,11 @@ export const CV_CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> =
  * Definition of the sub schema to use for each type of Geoview layer
  */
 export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
-  CSV: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
   ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/EsriDynamicLayerEntryConfig',
   ESRI_FEATURE: 'https://cgpv/schema#/definitions/EsriFeatureLayerEntryConfig',
+  WMS: 'https://cgpv/schema#/definitions/WmsLayerEntryConfig',
+  WFS: 'https://cgpv/schema#/definitions/WfsLayerEntryConfig',
+
   ESRI_IMAGE: 'https://cgpv/schema#/definitions/EsriImageLayerEntryConfig',
   IMAGE_STATIC: 'https://cgpv/schema#/definitions/ImageStaticLayerEntryConfig',
   GEOJSON: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
@@ -66,14 +68,15 @@ export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   XYZ_TILES: 'https://cgpv/schema#/definitions/TileLayerEntryConfig',
   VECTOR_TILES: 'Thttps://cgpv/schema#/definitions/TileLayerEntryConfig',
   OGC_FEATURE: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
-  WFS: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
-  WMS: 'https://cgpv/schema#/definitions/OgcWmsLayerEntryConfig',
+  CSV: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
 };
 
 export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
-  CSV: '',
   ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/EsriDynamicLayerConfig',
   ESRI_FEATURE: 'https://cgpv/schema#/definitions/EsriFeatureLayerConfig',
+  WMS: 'https://cgpv/schema#/definitions/WmsLayerConfig',
+  WFS: 'https://cgpv/schema#/definitions/WfsLayerConfig',
+
   ESRI_IMAGE: '',
   IMAGE_STATIC: '',
   GEOJSON: '',
@@ -81,8 +84,7 @@ export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   XYZ_TILES: '',
   VECTOR_TILES: '',
   OGC_FEATURE: '',
-  WFS: '',
-  WMS: 'https://cgpv/schema#/definitions/WmsLayerConfig',
+  CSV: '',
 };
 export const CV_MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/MapFeatureConfig';
 export const CV_LAYER_GROUP_SCHEMA_PATH = 'https://cgpv/schema#/definitions/GroupLayerEntryConfig';

@@ -13,7 +13,7 @@ import {
 import { isvalidComparedToInputSchema } from '@/api/config/utils';
 
 // ========================
-// #region CLASS DEFINITION
+// #region CLASS HEADER
 /**
  * Base type used to define a GeoView sublayer to display on the map. The sublayer can be a group or an abstract sublayer.
  */
@@ -256,5 +256,5 @@ export abstract class EntryConfigBaseClass {
   }
   // #endregion PUBLIC
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }

@@ -306,7 +306,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config?)
+  // GV Layers Refactoring - Obsolete (in config)
   #processFeatureInfoConfig(fields: TypeJsonArray, layerConfig: VectorLayerEntryConfig): void {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
@@ -368,6 +368,7 @@ export class WFS extends AbstractGeoViewVector {
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       let sourceUrl = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
       sourceUrl = sourceUrl!.indexOf('?') > -1 ? sourceUrl!.substring(0, sourceUrl!.indexOf('?')) : sourceUrl;
+      // GV: Use processUrlParameters('GetFeature') method of GeoView layer config to get the sourceUrl and append &typeName= to it.
       sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.#version}`;
       sourceUrl = `${sourceUrl}&typeName=${layerConfig.layerId}`;
       // if an extent is provided, use it in the url
