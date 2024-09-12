@@ -630,38 +630,25 @@ export class MapViewer {
         ? this.mapFeaturesConfig.map.viewSettings.initialView.layerIds
         : this.layer.getGeoviewLayerIds();
 
-      // Start an interval checker
-      const mapInterval = setInterval(() => {
-        if (this.layer) {
-          // Check if all registered layers are registered
-          const [allGood] = this.layer.checkLayerStatus('loaded', this.mapFeaturesConfig.map.listOfGeoviewLayerConfig, (geoviewLayer) => {
-            logger.logTraceDetailed('checkMapReady - 1 - waiting on layer registration...', geoviewLayer.geoviewLayerId);
-          });
+      this.onMapLayersLoaded(() => {
+        let layerExtents = this.layer.getExtentOfMultipleLayers(layerIdsToZoomTo);
 
-          if (allGood) {
-            // Clear interval
-            clearInterval(mapInterval);
+        // If extents have infinity, use default instead
+        if (layerExtents.includes(Infinity))
+          layerExtents = this.convertExtentLngLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
 
-            let layerExtents = this.layer.getExtentOfMultipleLayers(layerIdsToZoomTo);
-
-            // If extents have infinity, use default instead
-            if (layerExtents.includes(Infinity))
-              layerExtents = this.convertExtentLngLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
-
-            // Zoom to calculated extent
-            if (layerExtents.length)
-              // TODO: Timeout allows for map height to be set before zoom happens, so padding is applied properly
-              setTimeout(
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                () =>
-                  this.zoomToExtent(layerExtents).catch((error) =>
-                    logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)
-                  ),
-                200
-              );
-          }
-        }
-      }, 250);
+        // Zoom to calculated extent
+        if (layerExtents.length)
+          // TODO: Timeout allows for map height to be set before zoom happens, so padding is applied properly
+          setTimeout(
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            () =>
+              this.zoomToExtent(layerExtents).catch((error) =>
+                logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)
+              ),
+            200
+          );
+      });
     }
   }
 
@@ -1220,9 +1207,9 @@ export class MapViewer {
     const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(this.mapId);
 
     // Get map height
-    // GV: This is important becuse on reload, the mapHeight is set to 0px then reset to a bad value.
+    // GV: This is important because on reload, the mapHeight is set to 0px then reset to a bad value.
     // GV.CONT: This fix maintain the height on reload for the createMapFromConfig function. On first past the optional
-    // GV.CONT: does not have to be provided because the div exist and map will take is height.
+    // GV.CONT: does not have to be provided because the div exist and map will take its height.
     const height = this.map.getSize() !== undefined ? this.map.getSize()![1] : 800;
 
     // Remove the map
