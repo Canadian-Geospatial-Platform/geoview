@@ -27,7 +27,7 @@ export class FeatureHighlight {
 
   /** The hidden layer to display animations. */
   // GV It's public, to save an eslint warning, because even if it's not read in this class, it's actually important to instanciate per OpenLayer design.
-  overlayLayer: VectorLayer<VectorSource<never>>;
+  overlayLayer: VectorLayer;
 
   // Used to access point markers
   pointMarkers: PointMarkers;
@@ -55,7 +55,7 @@ export class FeatureHighlight {
    * @param {MapViewer} mapViewer a reference to the map viewer
    */
   constructor(mapViewer: MapViewer) {
-    this.overlayLayer = new VectorLayer({ source: this.highlighSource as unknown as VectorSource<never>, map: mapViewer.map });
+    this.overlayLayer = new VectorLayer({ source: this.highlighSource, map: mapViewer.map });
     this.pointMarkers = new PointMarkers(mapViewer, this);
     // if (this.#highlightColor !== undefined)
     //   this.changeHighlightColor(MapEventProcessor.getMapHighlightColor(this.#mapId) as TypeHighlightColors);

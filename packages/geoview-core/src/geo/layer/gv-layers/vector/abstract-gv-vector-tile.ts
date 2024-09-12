@@ -15,11 +15,11 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
    */
   // Disabling 'any', because too many renderer types in OpenLayers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  override getOLLayer(): VectorTileLayer<VectorTile<never>> {
+  override getOLLayer(): VectorTileLayer<VectorTile> {
     // Call parent and cast
     // Disabling 'any', because too many renderer types in OpenLayers
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return super.getOLLayer() as VectorTileLayer<VectorTile<never>>;
+    return super.getOLLayer() as VectorTileLayer<VectorTile>;
   }
 
   /**

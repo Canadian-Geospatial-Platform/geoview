@@ -71,11 +71,11 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   // Disabling 'any', because too many renderer types in OpenLayers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  override getOLLayer(): VectorLayer<VectorSource<never>> {
+  override getOLLayer(): VectorLayer<VectorSource> {
     // Call parent and cast
     // Disabling 'any', because too many renderer types in OpenLayers
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return super.getOLLayer() as VectorLayer<VectorSource<never>>;
+    return super.getOLLayer() as VectorLayer<VectorSource>;
   }
 
   /**
@@ -296,7 +296,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const mapProjection: ProjectionLike = this.getMapViewer().getProjection().getCode();
 
     const format = new FormatGeoJSON();
-    const geoJsonStr = format.writeFeatures((this.getOLLayer() as VectorLayer<VectorSource<never>>).getSource()!.getFeatures(), {
+    const geoJsonStr = format.writeFeatures((this.getOLLayer() as VectorLayer<VectorSource>).getSource()!.getFeatures(), {
       dataProjection: 'EPSG:4326', // Output projection,
       featureProjection: mapProjection,
     });

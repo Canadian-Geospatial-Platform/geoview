@@ -22,7 +22,7 @@ import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './geome
  */
 interface FeatureCollection {
   geometryGroupId: string;
-  vectorLayer: VectorLayer<VectorSource<Feature>>;
+  vectorLayer: VectorLayer<VectorSource>;
   vectorSource: VectorSource;
 }
 
@@ -438,7 +438,7 @@ export class GeometryApi {
     if (!geometryGroup) {
       const vectorSource = new VectorSource<Feature>(geometryGroupOptions.vectorSourceOptions);
 
-      const vectorLayer = new VectorLayer<VectorSource<Feature>>({
+      const vectorLayer = new VectorLayer<VectorSource>({
         ...geometryGroupOptions.vectorLayerOptions,
         source: vectorSource,
       });
