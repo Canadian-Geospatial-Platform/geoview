@@ -315,11 +315,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'space-between',
+              width: '100%',
+              alignItems: 'center',
             }}
           >
-            <Box sx={{ textAlign: 'left', [theme.breakpoints.down('md')]: { display: 'none' } }}>
-              <Typography sx={sxClasses.categoryTitle} title={layerDetails.layerName}>{layerDetails.layerName} </Typography>
-              <Typography sx={{ fontSize: theme.palette.geoViewFontSize.sm }}> {getSubTitle()} </Typography>
+            <Box sx={{ textAlign: 'left', maxWidth: '70%', [theme.breakpoints.down('md')]: { display: 'none' } }}>
+              <Typography sx={sxClasses.categoryTitle} title={layerDetails.layerName}>
+                {layerDetails.layerName}
+              </Typography>
+              {getSubTitle() && <Typography sx={{ fontSize: theme.palette.geoViewFontSize.sm }}> {getSubTitle()} </Typography>}
             </Box>
             {renderLayerButtons()}
           </Box>

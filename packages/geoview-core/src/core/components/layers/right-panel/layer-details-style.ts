@@ -8,11 +8,11 @@ export const getSxClasses = (theme: Theme): any => ({
     fontWeight: '600',
     fontSize: theme.palette.geoViewFontSize.lg,
     overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: { md: '300px', lg: '500px' },
+    textOverflow: 'ellipsis'
   },
   layerDetails: {
     padding: '20px',
+    width: '100%',
   },
   buttonDescriptionContainer: {
     display: 'flex',
