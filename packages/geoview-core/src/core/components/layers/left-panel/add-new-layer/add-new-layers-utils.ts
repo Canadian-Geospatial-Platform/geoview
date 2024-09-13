@@ -8,6 +8,7 @@ type ListOfLayerEntry = {
   entryType?: string;
   listOfLayerEntryConfig?: ListOfLayerEntry[];
 };
+
 type GeoViewLayerToAdd = {
   geoviewLayerId: string;
   geoviewLayerName: TypeLocalizedString;
@@ -29,21 +30,28 @@ export const getLayerById = (layersList: GroupLayerEntryConfig[], layerId: strin
     if (branchGroup.layerId === layerId) return branchGroup;
 
     const layer = branchGroup.listOfLayerEntryConfig?.find((childLayer) => childLayer.layerId === layerId);
+
     if (layer) return layer as GroupLayerEntryConfig;
+
     if (branchGroup.listOfLayerEntryConfig) {
       let foundLayer: GroupLayerEntryConfig | null = null;
+
       for (let i = 0; i < branchGroup.listOfLayerEntryConfig.length; i++) {
         const layer2 = branchGroup.listOfLayerEntryConfig[i] as GroupLayerEntryConfig;
+
         if (layer2.listOfLayerEntryConfig) {
           const name = searchBranchForLayer(layer2 as GroupLayerEntryConfig);
+
           if (name) {
             foundLayer = name;
             break;
           }
         }
       }
+
       return foundLayer;
     }
+
     return null;
   }
 
@@ -77,6 +85,7 @@ export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput):
       treeRoot.entryType = 'group';
       // eslint-disable-next-line no-param-reassign
       treeRoot.layerName = createLocalizedString(getLayerNameById(layersList, treeRoot.layerId) ?? 'unknown');
+
       if (!treeRoot.listOfLayerEntryConfig) {
         // eslint-disable-next-line no-param-reassign
         treeRoot.listOfLayerEntryConfig = [];
@@ -86,8 +95,10 @@ export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput):
     }
 
     if (treeRoot.listOfLayerEntryConfig) {
+
       for (let i = 0; i < treeRoot.listOfLayerEntryConfig.length; i++) {
         const layer = treeRoot.listOfLayerEntryConfig[i] as ListOfLayerEntry;
+
         if (layer.listOfLayerEntryConfig) {
           appendChildLayerNode(layer, layerId, parentLayerId);
         }
@@ -97,12 +108,14 @@ export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput):
 
   function addRootLayerNode(layerId: string) {
     const exists = geoviewLayerConfig.listOfLayerEntryConfig.find((entry) => entry.layerId === layerId);
+
     if (exists) return;
     geoviewLayerConfig.listOfLayerEntryConfig.push({ layerId });
   }
 
   layerIdsToAdd.forEach((layerId) => {
     const layerTokens = layerId.split('/');
+    
     layerTokens.forEach((layerToken, index) => {
       if (index === 0) {
         addRootLayerNode(layerToken);
