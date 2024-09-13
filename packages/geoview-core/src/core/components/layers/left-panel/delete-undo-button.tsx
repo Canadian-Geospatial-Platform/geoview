@@ -57,7 +57,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // get store actions
   const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
   const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
-  const { setSelectedFooterLayerListItem } = useUIStoreActions();
+  const { setSelectedFooterLayerListItemId } = useUIStoreActions();
 
   const handleDeleteClick = (): void => {
     if (getVisibilityFromOrderedLayerInfo(layer.layerPath)) setOrToggleLayerVisibility(layer.layerPath);
@@ -75,14 +75,14 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleDeleteClick();
-      setSelectedFooterLayerListItem(layer.layerId);
+      setSelectedFooterLayerListItemId(layer.layerId);
     }
   };
 
   const handleUndoDeleteKeyDown = (e: KeyboardEvent): void => {
     if (e.key === 'Enter') {
       handleUndoClick();
-      setSelectedFooterLayerListItem('');
+      setSelectedFooterLayerListItemId('');
       e.preventDefault();
     }
   };

@@ -34,7 +34,7 @@ export function Layout({
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
   const theme = useTheme();
 
-  const { setSelectedFooterLayerListItem } = useUIStoreActions();
+  const { setSelectedFooterLayerListItemId } = useUIStoreActions();
   /**
    * Handles clicks to layers in left panel. Sets selected layer.
    *
@@ -47,9 +47,9 @@ export function Layout({
       responsiveLayoutRef.current?.setIsRightPanelVisible(true);
       responsiveLayoutRef.current?.setRightPanelFocus();
       // set the focus item when layer item clicked.
-      setSelectedFooterLayerListItem(`${layer.layerUniqueId}`);
+      setSelectedFooterLayerListItemId(`${layer.layerUniqueId}`);
     },
-    [onLayerListClicked, setSelectedFooterLayerListItem]
+    [onLayerListClicked, setSelectedFooterLayerListItemId]
   );
 
   /**
