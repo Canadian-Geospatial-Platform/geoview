@@ -16,7 +16,7 @@
     "lodash": "^4.17.21",
     "geoview-core": "workspace:~1.0.0",
     "geochart": "Canadian-Geospatial-Platform/geochart#develop",
-    "@mui/material": "^5.15.11"
+    "@mui/material": "^6.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.17.0",

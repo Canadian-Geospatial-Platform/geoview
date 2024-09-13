@@ -408,17 +408,36 @@ export abstract class DateMgt {
     const min: string = endsWithZ ? `${dayjs(date1).utc(false).format(format).slice(0, -6)}Z` : dayjs(date1).utc(false).format(format);
     const max: string = endsWithZ ? `${dayjs(date2).utc(false).format(format).slice(0, -6)}Z` : dayjs(date2).utc(false).format(format);
 
-    // create intervalle items
+    // create interval items
     const msDuration: number = dayjs.duration(durationCheck).asMilliseconds();
     const calcDuration = dayjs.duration(msDuration);
     const items: string[] = [];
     let i = 0;
 
     items.push(min);
+
+    let nextDate: string;
     do {
-      let nextDate: string = dayjs(items[i]).add(calcDuration).utc(false).format(format);
+      // When we deal with MONTH duration, dayjs doesnt know if the month is 30 or 31 days. This creates bad intervals...
+      // NOTE: We do this ONLY when duration is for month and nothing else....
+      if (durationCheck.endsWith('M')) {
+        // Add the month duration manually and increase years if needed
+        const dateValue = items[i].split('-');
+        const monthValueUpdated = Number(dateValue[1]) + calcDuration.months();
+        const yearValue = monthValueUpdated <= 12 ? dateValue[0] : String(Number(dateValue[0]) + 1);
+        const monthValue = monthValueUpdated <= 12 ? monthValueUpdated : monthValueUpdated - 12;
+
+        nextDate = dayjs(`${yearValue}-${String(monthValue).padStart(2, '0')}-${dateValue[2]}`)
+          .utc(false)
+          .format(format);
+      } else {
+        nextDate = dayjs(items[i]).add(calcDuration).utc(false).format(format);
+      }
+
+      // Check if we need to remove time information then push
       if (endsWithZ) nextDate = `${nextDate.slice(0, -6)}Z`;
       items.push(nextDate);
+
       // Apply a correction if it is a leap year
       if (msDuration === 31536000000 && items[i].slice(4, 10) !== items[i + 1].slice(4, 10)) {
         nextDate = dayjs(items[i])
@@ -428,11 +447,12 @@ export abstract class DateMgt {
         if (endsWithZ) nextDate = `${nextDate.slice(0, -6)}Z`;
         items[i + 1] = nextDate;
       }
+
       i++;
     } while (dayjs(items[items.length - 1]).isBefore(max));
 
-    // add last item
-    items.push(max);
+    // add last item if needed
+    if (items[items.length - 1] !== max) items.push(max);
 
     return items;
   }

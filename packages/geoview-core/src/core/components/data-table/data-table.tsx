@@ -437,17 +437,19 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     muiTableHeadCellProps: {
       sx: () => sxClasses.tableHeadCell,
     },
+    defaultColumn: {
+      muiFilterTextFieldProps: {
+        sx: () => ({
+          minWidth: '50px',
+        }),
+      },
+    },
     // override z-index of table when table is in fullscreen mode
     muiTablePaperProps: ({ table }) => ({
       style: {
         zIndex: table.getState().isFullScreen ? 999999 : undefined,
       },
     }),
-    muiFilterTextFieldProps: {
-      sx: () => ({
-        minWidth: '50px',
-      }),
-    },
     muiTableBodyProps: {
       sx: (theme) => ({
         // stripe the rows, make odd rows a darker color

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useDataTableSelectedFeature } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -27,6 +27,7 @@ export default function FeatureDetailModal(): JSX.Element {
   const { disableFocusTrap } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const feature = useDataTableSelectedFeature()!;
+  const [nameFieldValue, setNameFieldValue] = useState('');
 
   /**
    * Build features list to displayed in table
@@ -34,6 +35,10 @@ export default function FeatureDetailModal(): JSX.Element {
   const featureInfoList: TypeFieldEntry[] = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DETAILS PANEL - Feature Detail Modal - featureInfoList');
+
+    // Extract value of field info nameField for item symbol description
+    const nameFieldValueTmp = feature.fieldInfo[feature.nameField !== null ? feature.nameField : 0];
+    setNameFieldValue(nameFieldValueTmp !== undefined ? (nameFieldValueTmp.value as string) : '');
 
     return Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
       return {
@@ -59,7 +64,7 @@ export default function FeatureDetailModal(): JSX.Element {
         <Box display="flex" flexDirection="row" alignItems="center" pb={10}>
           <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon.toDataURL().toString()} className="layer-icon" />
           <Typography sx={{ display: 'inline-block' }} component="div">
-            {feature.nameField}
+            {nameFieldValue}
           </Typography>
         </Box>
         <List sx={sxClasses.featureDetailListContainer}>

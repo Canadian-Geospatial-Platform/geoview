@@ -61,6 +61,8 @@ export function esriGetFieldType(
  * @param {string} fieldName field name for which we want to get the domain.
  * @returns {codedValueType | rangeDomainType | null} The domain of the field.
  */
+// TODO: ESRI domains are translated to GeoView domains in the configuration. Any GeoView layer that support geoview domains can
+// TODO.CONT: call a method getFieldDomain that use config.source.featureInfo.outfields to find a field domain.
 export function esriGetFieldDomain(
   layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
   fieldName: string

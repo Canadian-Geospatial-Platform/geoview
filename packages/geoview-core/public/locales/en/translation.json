@@ -117,6 +117,7 @@
     "querying": "Querying",
     "layerAdded": "Layer __param__ added",
     "layerAddedAndLoading": "Layer __param__ added and loading",
+    "layerAddedWithError": "Layer __param__ in error",
     "instructionsNoLayersTitle": "No layers visible",
     "instructionsNoLayersBody": "Add visible layers on the map."
   },

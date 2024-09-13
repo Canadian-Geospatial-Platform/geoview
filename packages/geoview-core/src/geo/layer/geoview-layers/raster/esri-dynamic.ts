@@ -510,10 +510,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
 
+      // GV: We cannot directly use the view extent and reproject. If we do so some layers (issue #2413) identify will return empty resultset
+      // GV-CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the repojection it works
       const mapViewer = this.getMapViewer();
-      const bounds = mapViewer.convertExtentMapProjToLngLat(mapViewer.getView().calculateExtent());
-
-      const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
+      const mapExtent = mapViewer.getView().calculateExtent();
+      const boundsLL = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[0], mapExtent[1]]);
+      const boundsUR = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[2], mapExtent[3]]);
+      const extent = { xmin: boundsLL[0], ymin: boundsLL[1], xmax: boundsUR[0], ymax: boundsUR[1] };
 
       const source = layer.getSource();
       const layerDefs = source?.getParams().layerDefs || '';
@@ -941,14 +944,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (combineLegendFilter) filterValueToUse = this.getViewFilter(layerPath);
 
     // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
-    // GV this regex is different then the other layers because if not we have this error: The source image cannot be decoded.
     // TODO: Standardize the regex across all layer types
     const searchDateEntry = [
-      ...filterValueToUse.matchAll(
-        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi
+      ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
+        /(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi
       ),
     ];
-
     searchDateEntry.reverse();
     searchDateEntry.forEach((dateFound) => {
       // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign

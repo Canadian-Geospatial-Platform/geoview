@@ -425,10 +425,18 @@ export class MapEventProcessor extends AbstractEventProcessor {
     pointerPosition: TypeMapMouseInfo,
     degreeRotation: string,
     isNorthVisible: boolean,
+    mapExtent: Extent,
     scale: TypeScaleInfo
   ): void {
     // Save in store
-    this.getMapStateProtected(mapId).setterActions.setMapMoveEnd(centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, scale);
+    this.getMapStateProtected(mapId).setterActions.setMapMoveEnd(
+      centerCoordinates,
+      pointerPosition,
+      degreeRotation,
+      isNorthVisible,
+      mapExtent,
+      scale
+    );
   }
 
   static setInteraction(mapId: string, interaction: TypeInteraction): void {
@@ -1203,13 +1211,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
         const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
         if (filter) geoviewLayer.applyViewFilter(layerPath, filter);
       } else {
-        const filters = this.getActiveVectorFilters(mapId, layerPath);
+        const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
 
-        if (filters && filters.length)
-          (geoviewLayer as AbstractGeoViewVector | AbstractGVVector | EsriDynamic | GVEsriDynamic).applyViewFilter(
-            layerPath,
-            filters.join(' and ')
-          );
+        // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
+        (geoviewLayer as AbstractGeoViewVector | AbstractGVVector | EsriDynamic | GVEsriDynamic).applyViewFilter(
+          layerPath,
+          filters.join(' and ')
+        );
       }
     }
   }

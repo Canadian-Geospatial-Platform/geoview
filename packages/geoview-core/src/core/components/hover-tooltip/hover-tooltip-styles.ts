@@ -17,6 +17,7 @@ export const getSxClasses = (theme: Theme): any => ({
     display: 'flex',
     top: '-5px',
     left: '3px',
+    zIndex: 250,
   },
   tooltipText: {
     fontSize: theme.palette.geoViewFontSize.default,

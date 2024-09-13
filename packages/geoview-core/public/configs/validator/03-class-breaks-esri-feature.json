@@ -1,0 +1,44 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "minZoom": 5,
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "LYR1",
+        "geoviewLayerName": {
+          "en": "ClassBreaks",
+          "fr": "ClassBreaks"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "11",
+            "layerName": {
+              "en": "2021 Combined sewer overflow : total volume discharged - Watewater"
+            },
+            "attributions": ["Environment and Climate Change Canada and ministère de l\\'Environnement et de la Lutte contre les changements climatiques du Québec"]
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

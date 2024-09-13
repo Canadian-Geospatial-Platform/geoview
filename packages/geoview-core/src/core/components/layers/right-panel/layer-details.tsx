@@ -168,11 +168,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
         {layerDetails.items.length > 1 && (
-          <Grid container direction="row" justifyContent="center" alignItems="stretch" justifyItems="stretch">
-            <Grid item xs="auto">
-              {renderHeaderCheckbox()}
-            </Grid>
-            <Grid item xs="auto">
+          <Grid container direction="row" alignItems="center" justifyItems="stretch">
+            <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
+            <Grid size={{ xs: 'auto' }}>
               <Box component="span">{t('general.name')}</Box>
             </Grid>
           </Grid>
@@ -182,13 +180,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             container
             direction="row"
             key={`${item.name}/${layerDetails.items.indexOf(item)}`}
-            justifyContent="center"
-            alignItems="stretch"
+            alignItems="center"
+            justifyItems="stretch"
           >
-            <Grid item xs="auto">
-              {renderItemCheckbox(item)}
-            </Grid>
-            <Grid item xs="auto">
+            <Grid size={{ xs: 'auto' }}>{renderItemCheckbox(item)}</Grid>
+            <Grid size={{ xs: 'auto' }}>
               {item.icon ? <Box component="img" alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
               <Box component="span" style={sxClasses.tableIconLabel}>
                 {item.name}
@@ -319,11 +315,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'space-between',
+              width: '100%',
+              alignItems: 'center',
             }}
           >
-            <Box sx={{ textAlign: 'left', [theme.breakpoints.down('md')]: { display: 'none' } }}>
-              <Typography sx={sxClasses.categoryTitle}> {layerDetails.layerName} </Typography>
-              <Typography sx={{ fontSize: theme.palette.geoViewFontSize.sm }}> {getSubTitle()} </Typography>
+            <Box sx={{ textAlign: 'left', maxWidth: '70%', [theme.breakpoints.down('md')]: { display: 'none' } }}>
+              <Typography sx={sxClasses.categoryTitle} title={layerDetails.layerName}>
+                {layerDetails.layerName}
+              </Typography>
+              {getSubTitle() && <Typography sx={{ fontSize: theme.palette.geoViewFontSize.sm }}> {getSubTitle()} </Typography>}
             </Box>
             {renderLayerButtons()}
           </Box>

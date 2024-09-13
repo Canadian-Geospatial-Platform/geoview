@@ -343,7 +343,7 @@ function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeStyl
       uniqueValueStyleInfo.push({
         label: symbolInfo.label,
         visible: true,
-        values: symbolInfo.value.split(renderer.fieldDelimiter),
+        values: symbolInfo.value.replaceAll("'", "''").split(renderer.fieldDelimiter), // GV: We need to escape the ' character with double '' for ESRI
         settings,
       });
     }

@@ -105,6 +105,7 @@ export interface IMapState {
       pointerPosition: TypeMapMouseInfo,
       degreeRotation: string,
       isNorthVisible: boolean,
+      mapExtent: Extent,
       scale: TypeScaleInfo
     ) => void;
     setPointerPosition: (pointerPosition: TypeMapMouseInfo) => void;
@@ -656,6 +657,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         pointerPosition: TypeMapMouseInfo,
         degreeRotation: string,
         isNorthVisible: boolean,
+        mapExtent: Extent,
         scale: TypeScaleInfo
       ): void => {
         set({
@@ -666,6 +668,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
               degreeRotation,
               isNorthVisible,
             },
+            mapExtent,
             scale,
           },
         });

@@ -57,7 +57,7 @@ export function FocusTrapContainer({ children, open = false, id, containerType }
   return (
     <FocusTrap open={id === focusItem.activeElementId || open} disableAutoFocus>
       <Box tabIndex={id === focusItem.activeElementId || open ? 0 : -1} sx={{ height: '100%' }}>
-        {containerType === CONTAINER_TYPE.FOOTER_BAR && (
+        {containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView && (
           <Button
             id={`${id}-exit-btn`}
             type="text"

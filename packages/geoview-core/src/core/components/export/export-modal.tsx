@@ -26,6 +26,7 @@ export default function ExportModal(): JSX.Element {
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
   const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
   const appBarLegendContainer = mapElement.querySelector(`[id^="${mapId}-appBar-legendContainer"]`);
+  const legendId = `${mapId}AppbarPanelButtonLegend`;
 
   const theme = useTheme();
 
@@ -65,7 +66,7 @@ export default function ExportModal(): JSX.Element {
         .then((dataUrl) => {
           setIsMapExporting(false);
           exportPNG(dataUrl, mapId);
-          setActiveAppBarTab('AppbarPanelButtonLegend', 'legend', false);
+          setActiveAppBarTab(legendId, 'legend', false, false);
           disableFocusTrap();
         })
         .catch((error: Error) => {
@@ -75,7 +76,7 @@ export default function ExportModal(): JSX.Element {
   }) as MouseEventHandler<HTMLButtonElement>;
 
   const handleCloseModal = (): void => {
-    setActiveAppBarTab('AppbarPanelButtonLegend', 'legend', false);
+    setActiveAppBarTab(legendId, 'legend', false, false);
     disableFocusTrap();
   };
   /**
@@ -102,7 +103,7 @@ export default function ExportModal(): JSX.Element {
       const dialogBox = dialogRef.current;
       // open legend in appbar when only appbar exists
       if (appBarLegendContainer && !footerbarLegendContainer) {
-        setActiveAppBarTab('AppbarPanelButtonLegend', 'legend', true);
+        setActiveAppBarTab(legendId, 'legend', true, false);
       }
       // Reason for timer, so that content of the export modal will be loaded
       // after modal is fully opened.

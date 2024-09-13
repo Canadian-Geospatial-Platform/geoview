@@ -11,7 +11,7 @@ import { logger } from '@/core/utils/logger';
 
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 import { getSxClasses } from './panel-style';
-import { useUIActiveTrapGeoView, useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -40,7 +40,7 @@ export type TypePanelAppProps = {
  */
 export function Panel(props: TypePanelAppProps): JSX.Element {
   const { panel, button, onPanelOpened, onPanelClosed, onGeneralCloseClicked, ...rest } = props;
-  const { status: open = false, panelStyles, panelGroupName } = panel;
+  const { status: open = false, isFocusTrapped = false, panelStyles, panelGroupName } = panel;
 
   const { t } = useTranslation<string>();
 
@@ -53,8 +53,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const mapInfoExpanded = useUIMapInfoExpanded();
 
   // internal state
-  // set the active trap value for FocusTrap
-  const activeTrapGeoView = useUIActiveTrapGeoView();
   const panelContainerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLButtonElement>(null);
   const panelHeader = useRef<HTMLButtonElement>(null);
@@ -124,7 +122,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   return (
     <Box sx={panelContainerStyles} ref={panelContainerRef}>
-      <FocusTrapContainer open={activeTrapGeoView && open} id="app-bar-focus-trap">
+      <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap">
         <Card
           sx={{
             ...sxClasses.panelContainer,

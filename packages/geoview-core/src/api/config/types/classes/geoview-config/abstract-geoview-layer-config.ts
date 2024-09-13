@@ -1,12 +1,12 @@
-import merge from 'lodash/merge';
+import mergeWith from 'lodash/mergeWith';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { Cast, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { TypeGeoviewLayerType, TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { isvalidComparedToInputSchema, normalizeLocalizedString } from '@config/utils';
-import { EsriGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/esri-group-layer-config';
+import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema, normalizeLocalizedString } from '@config/utils';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
+import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
+import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
 
 import { generateId } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -32,8 +32,13 @@ export abstract class AbstractGeoviewLayerConfig {
   /** The metadata returned by the service endpoint. */
   #serviceMetadata: TypeJsonObject = {};
 
-  /** The metadata layer tree definition */
-  #metadataLayerTree: EntryConfigBaseClass[] = [];
+  /**
+   * Before the call to fetchServiceMetadata, this property contains the tree filter. The value specified will guide the layer
+   * tree process. if the value is undefined, the layer tree will not be created. if it is an empty array, The layer tree will
+   * be created for all layers found in the service metadata. If the array is not empty, only the layerIds specified will be
+   * retained. When the fetchServiceMetadata call returns, this property is undefined or it contains a layer tree.
+   */
+  #metadataLayerTree?: EntryConfigBaseClass[];
   // #endregion PRIVATE PROPERTIES
 
   // =========================
@@ -129,7 +134,7 @@ export abstract class AbstractGeoviewLayerConfig {
     // Instanciate the sublayer list.
     this.listOfLayerEntryConfig = (this.#userGeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)
       ?.map((subLayerConfig) => {
-        if (layerEntryIsGroupLayer(subLayerConfig)) return new EsriGroupLayerConfig(subLayerConfig, language, this);
+        if (layerEntryIsGroupLayer(subLayerConfig)) return this.createGroupNode(subLayerConfig, language, this);
         return this.createLeafNode(subLayerConfig, language, this);
       })
       // When a sublayer cannot be created, the value returned is undefined. These values will be filtered.
@@ -210,22 +215,37 @@ export abstract class AbstractGeoviewLayerConfig {
   // #region PROTECTED
   /**
    * @protected
-   * The setter method that sets the metadataLayerTree private property.
-   *
-   * @param {TypeJsonObject} metadataLayerTree The GeoView service metadata.
-   */
-  protected setMetadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]): void {
-    this.#metadataLayerTree = metadataLayerTree;
-  }
-
-  /**
-   * @protected
    * The getter method that returns the language used to create the geoview layer.
    *
    * @returns {TypeDisplayLanguage} The GeoView layer schema associated to the config.
    */
   protected getLanguage(): TypeDisplayLanguage {
     return this.#language;
+  }
+
+  /**
+   * Fetch the metadata of all layer entry configurations defined in the list of layer entry config
+   * or the ressulting layer tree.
+   *
+   * @returns {Promise<void>} A promise that will resolve when the process has completed.
+   * @protected @async
+   */
+  protected async fetchListOfLayerMetadata(layerTreeFilter: EntryConfigBaseClass[] | undefined = undefined): Promise<void> {
+    // The root of the GeoView layer tree is an array that contains only one node.
+    // If the layer tree is provided, use it. Otherwise use the list of layer entry config.
+    const rootLayer = layerTreeFilter ? layerTreeFilter[0] : this.listOfLayerEntryConfig[0];
+
+    try {
+      if (rootLayer) {
+        // If an error has been detected, there is a problem with the metadata and the layer is unusable.
+        if (rootLayer.getErrorDetectedFlag()) return;
+
+        await rootLayer.fetchLayerMetadata();
+      }
+    } catch (error) {
+      logger.logError(`An error occured while reading the metadata for the layerPath ${rootLayer.getLayerPath()}.`, error);
+      rootLayer.setErrorDetectedFlag();
+    }
   }
   // #endregion PROTECTED
 
@@ -256,8 +276,17 @@ export abstract class AbstractGeoviewLayerConfig {
    *
    * @returns {EntryConfigBaseClass[]} The metadata layer tree.
    */
-  getMetadataLayerTree(): EntryConfigBaseClass[] {
+  getMetadataLayerTree(): EntryConfigBaseClass[] | undefined {
     return this.#metadataLayerTree;
+  }
+
+  /**
+   * The setter method that sets the metadataLayerTree private property.
+   *
+   * @param {TypeJsonObject} metadataLayerTree The GeoView service metadata.
+   */
+  setMetadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]): void {
+    this.#metadataLayerTree = metadataLayerTree;
   }
 
   /**
@@ -347,10 +376,21 @@ export abstract class AbstractGeoviewLayerConfig {
         return sublayer;
       });
     };
-    this.listOfLayerEntryConfig = merge(
-      this.listOfLayerEntryConfig,
-      convertUserConfigToInternalConfig(geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)
-    );
+    const internalConfig = convertUserConfigToInternalConfig(geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray);
+    this.listOfLayerEntryConfig = mergeWith(this.listOfLayerEntryConfig, internalConfig, (target, newValue, key) => {
+      // Keep the listOfLayerEntryConfig as it is. Do not replace it with the user' array. Only the internal properties will be replaced.
+      // This is because the newValue is not an instance of EntryConfigBaseClass. The type of the newValue property is a plain JSON object.
+      if (key === 'listOfLayerEntryConfig') return undefined;
+      // Replace arrays with user config arrays if they exist.
+      if (Array.isArray(target) && Array.isArray(newValue)) return newValue;
+      return undefined;
+    });
+
+    if (!isvalidComparedToInternalSchema(this.getGeoviewLayerSchema(), this, true)) {
+      throw new GeoviewLayerConfigError(
+        `GeoView internal configuration ${this.geoviewLayerId} is invalid compared to the internal schema specification.`
+      );
+    }
   }
 
   /**

@@ -267,7 +267,7 @@ export function AddNewLayer(): JSX.Element {
 
   const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer): void => {
     if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
-      api.maps[mapId].notifications.showMessage('layers.layerAddedWithError', [layerName]);
+      api.maps[mapId].notifications.showError('layers.layerAddedWithError', [layerName]);
     else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
       api.maps[mapId].notifications.showMessage('layers.layerAdded', [layerName]);
     else api.maps[mapId].notifications.showMessage('layers.layerAddedAndLoading', [layerName]);

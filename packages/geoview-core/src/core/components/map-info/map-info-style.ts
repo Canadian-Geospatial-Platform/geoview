@@ -9,7 +9,6 @@ export const getSxClasses = (theme: Theme): any => ({
     zIndex: 200,
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     width: 'calc(100%)',
     minHeight: '35px',
@@ -20,7 +19,6 @@ export const getSxClasses = (theme: Theme): any => ({
     pointerEvents: 'all',
     gap: 0.5,
     order: 3,
-
     fill: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
     position: 'absolute',
     bottom: 0,
@@ -47,6 +45,7 @@ export const getSxClasses = (theme: Theme): any => ({
   mouseScaleControlsContainer: {
     display: 'flex',
     flexDirection: 'row',
+    flexWrap: 'noWrap',
     '& button': {
       cursor: 'pointer',
       margin: 'auto 0 auto auto',

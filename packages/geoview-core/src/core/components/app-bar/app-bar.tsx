@@ -99,7 +99,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
-  const { setActiveAppBarTab, setActiveTrapGeoView } = useUIStoreActions();
+  const { setActiveAppBarTab } = useUIStoreActions();
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
@@ -163,10 +163,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
       // Get the button panel
       const buttonPanel = buttonPanelGroups[groupName][buttonId];
-      setActiveTrapGeoView(true);
-      setActiveAppBarTab(buttonId, groupName, !buttonPanel.panel?.status);
+      setActiveAppBarTab(buttonId, groupName, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
-    [buttonPanelGroups, setActiveAppBarTab, setActiveTrapGeoView]
+    [buttonPanelGroups, setActiveAppBarTab]
   );
 
   const handleGeneralCloseClicked = useCallback(
@@ -174,10 +173,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Log
       logger.logTraceUseCallback('APP-BAR - handleGeneralCloseClicked');
 
-      setActiveTrapGeoView(false);
-      setActiveAppBarTab(buttonId, groupName, false);
+      setActiveAppBarTab(buttonId, groupName, false, false);
     },
-    [setActiveAppBarTab, setActiveTrapGeoView]
+    [setActiveAppBarTab]
   );
 
   const handleAddButtonPanel = useCallback(
@@ -257,6 +255,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('APP-BAR - PANEL - OPEN/CLOSE ', isOpen);
 
+    // Open and close of the panel.
     if (isOpen) {
       openPanelById(tabId, tabGroup);
     } else {
