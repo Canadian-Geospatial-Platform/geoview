@@ -7,6 +7,7 @@ import { GeoCaIcon, IconButton, Popper } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GitHubIcon } from '@/ui/icons';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -30,6 +31,8 @@ export default function Version(): JSX.Element {
 
   const mapId = useGeoViewMapId();
   const interaction = useMapInteraction();
+  const { handleEscapeKey } = useUIStoreActions();
+
   const mapElem = document.getElementById(`shell-${mapId}`);
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -92,7 +95,14 @@ export default function Version(): JSX.Element {
           </SvgIcon>
         </IconButton>
 
-        <Popper open={open} anchorEl={anchorEl} placement="right-end" onClose={handleClickAway} container={mapElem}>
+        <Popper
+          open={open}
+          anchorEl={anchorEl}
+          placement="right-end"
+          onClose={handleClickAway}
+          container={mapElem}
+          handleKeyDown={(key, callBackFn) => handleEscapeKey(key, callBackFn)}
+        >
           <Paper sx={sxClasses.versionInfoPanel}>
             <Typography sx={sxClasses.versionsInfoTitle} component="h3">
               {t('appbar.version')}

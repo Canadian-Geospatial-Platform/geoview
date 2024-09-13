@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useRef, useEffect, useCallback, Fragment, useMemo, ReactNode } from 'react';
+import { useState, useRef, useEffect, useCallback, Fragment, useMemo, ReactNode, KeyboardEvent } from 'react';
 import { capitalize, camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -99,7 +99,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
-  const { setActiveAppBarTab } = useUIStoreActions();
+  const { setActiveAppBarTab, handleEscapeKey } = useUIStoreActions();
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
@@ -439,6 +439,16 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     button={buttonPanel.button}
                     onPanelOpened={buttonPanel.onPanelOpened}
                     onPanelClosed={hideClickMarker}
+                    handleKeyDown={(e: KeyboardEvent) =>
+                      handleEscapeKey(
+                        e.key,
+                        (cb?: () => void) => {
+                          handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '');
+                          cb?.();
+                        },
+                        buttonPanel?.button?.id ?? ''
+                      )
+                    }
                     onGeneralCloseClicked={() => handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '')}
                   />
                 );
