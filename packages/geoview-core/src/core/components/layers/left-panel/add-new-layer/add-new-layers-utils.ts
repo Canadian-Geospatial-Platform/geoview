@@ -95,7 +95,6 @@ export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput):
     }
 
     if (treeRoot.listOfLayerEntryConfig) {
-
       for (let i = 0; i < treeRoot.listOfLayerEntryConfig.length; i++) {
         const layer = treeRoot.listOfLayerEntryConfig[i] as ListOfLayerEntry;
 
@@ -115,7 +114,7 @@ export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput):
 
   layerIdsToAdd.forEach((layerId) => {
     const layerTokens = layerId.split('/');
-    
+
     layerTokens.forEach((layerToken, index) => {
       if (index === 0) {
         addRootLayerNode(layerToken);
