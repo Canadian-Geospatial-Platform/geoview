@@ -28,6 +28,9 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   // this use effect acts like onComponentDidMount
   useEffect(() => {
     if (isInitialized) return;
+    // Log
+    logger.logTraceUseEffect('Add Layer Tree - startingSelectedItems', startingSelectedItems);
+
     setSelectedItems(startingSelectedItems);
     setDefaultSelectedItems(startingSelectedItems);
 
@@ -42,9 +45,16 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   }, [startingSelectedItems]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('Add Layer Tree - selectedItems ', selectedItems);
     onSelectedItemsChange(selectedItems);
   }, [selectedItems]);
 
+  /** 
+   * Recursive function to render tree item. It renders the layer and its children.
+   * @param layer - the layer to render
+   * @param parentId - the parent id of the layer
+   */
   const renderTreeItem = function (layer: GroupLayerEntryConfig, parentId: string | null): JSX.Element {
     const curLayerId = `${parentId ? `${parentId}/` : ''}${layer.layerId}`;
     return (
@@ -57,6 +67,11 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     );
   };
 
+  /**
+   * Get all children of a layer
+   * @param treeLayerId - the id of the layer
+   * @returns - the list of children of the layer
+   */
   const getLayerChildren = function (treeLayerId: string): string[] {
     const result: string[] = [];
 
