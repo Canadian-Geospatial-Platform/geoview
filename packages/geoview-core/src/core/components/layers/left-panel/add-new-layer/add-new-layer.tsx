@@ -28,6 +28,7 @@ import { CONST_LAYER_ENTRY_TYPES } from '@/geo/map/map-schema-types';
 import { GroupLayerEntryConfig } from '@/api/config/types/map-schema-types';
 import { AddLayerTree } from './add-layer-tree';
 import { buildGeoLayerToAdd } from './add-new-layers-utils';
+import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 export function AddNewLayer(): JSX.Element {
   // Log
@@ -60,6 +61,7 @@ export function AddNewLayer(): JSX.Element {
   // get values from store
   const mapId = useGeoViewMapId();
   const { setDisplayState } = useLayerStoreActions();
+  const language = useAppDisplayLanguage();
 
   const isMultiple = (): boolean =>
     hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
@@ -185,7 +187,7 @@ export function AddNewLayer(): JSX.Element {
 
     const populateLayerList = async (curlayerType: TypeGeoviewLayerType) => {
       try {
-        const layersTree = await api.config.createMetadataLayerTree(layerURL, curlayerType, [], 'en');
+        const layersTree = await api.config.createMetadataLayerTree(layerURL, curlayerType, [], language);
         setLayerList(layersTree as GroupLayerEntryConfig[]);
         setHasMetadata(true);
         return true;
@@ -215,18 +217,7 @@ export function AddNewLayer(): JSX.Element {
       // wmsValidation();
       // wfsValidation();
     }
-    // else if (layerType === WFS) promise = wfsValidation();
-    // else if (layerType === OGC_FEATURE) promise = ogcFeatureValidation();
-    // else if (layerType === XYZ_TILES) promise = xyzValidation();
-    // else if (layerType === ESRI_DYNAMIC) promise = esriValidation(ESRI_DYNAMIC);
-    // else if (layerType === ESRI_FEATURE) promise = esriValidation(ESRI_FEATURE);
-    // else if (layerType === ESRI_IMAGE) promise = esriImageValidation();
-    // else if (layerType === GEOJSON) promise = geoJSONValidation();
-    // else if (layerType === GEOPACKAGE) promise = Promise.resolve(geoPackageValidation());
-    else if (layerType === GEOCORE) {
-      // promise = geocoreValidation();
-      // else if (layerType === CSV) promise = csvValidation();
-    }
+    
     // If we have a promise of a layer validation
     if (promise) {
       promise
