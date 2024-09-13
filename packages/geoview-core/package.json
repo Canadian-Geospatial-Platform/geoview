@@ -54,6 +54,7 @@
     "@mui/material": "^6.0.2",
     "@mui/styles": "^6.0.2",
     "@mui/system": "^6.0.2",
+    "@mui/x-tree-view": "^7.17.0",
     "@nieuwlandgeo/sldreader": "^0.3.1",
     "@mui/x-date-pickers": "^7.15.0",
     "@react-spring/web": "^9.7.3",
