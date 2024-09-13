@@ -50,7 +50,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     onSelectedItemsChange(selectedItems);
   }, [selectedItems]);
 
-  /** 
+  /**
    * Recursive function to render tree item. It renders the layer and its children.
    * @param layer - the layer to render
    * @param parentId - the parent id of the layer

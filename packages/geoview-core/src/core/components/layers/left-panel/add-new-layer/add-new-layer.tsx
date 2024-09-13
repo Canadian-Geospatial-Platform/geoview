@@ -217,7 +217,7 @@ export function AddNewLayer(): JSX.Element {
       // wmsValidation();
       // wfsValidation();
     }
-    
+
     // If we have a promise of a layer validation
     if (promise) {
       promise
