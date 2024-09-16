@@ -48,6 +48,7 @@ export function Geolocator(): JSX.Element {
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
   const abortControllerRef = useRef<AbortController | null>(null);
   const fetchTimerRef = useRef<NodeJS.Timeout | undefined>();
+  const searchInputRef = useRef<HTMLInputElement>();
   const MIN_SEARCH_LENGTH = 3;
 
   /**
@@ -213,6 +214,13 @@ export function Geolocator(): JSX.Element {
     };
   }, []);
 
+  useEffect(() => {
+    // Set the focus on search field when geolocator is opened.
+    if (isOpen && tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && searchInputRef.current) {
+      searchInputRef.current.querySelector('input')?.focus();
+    }
+  }, [isOpen, tabGroup]);
+
   /**
    * Effect that will track fetch call, so that after 15 seconds if no response comes back,
    * Error will be displayed.
@@ -249,7 +257,13 @@ export function Geolocator(): JSX.Element {
                   }
                 }}
               >
-                <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
+                <StyledInputField
+                  placeholder={t('geolocator.search')!}
+                  autoFocus
+                  onChange={onChange}
+                  value={searchValue}
+                  ref={searchInputRef}
+                />
                 <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
                   <IconButton
                     size="small"
