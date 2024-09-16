@@ -162,8 +162,8 @@ export function commonValidateListOfLayerEntryConfig(
         subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
         subLayerEntryConfig.layerId = `${layerId}`;
         subLayerEntryConfig.layerName = {
-          en: layer.metadata!.layers[layerId as number].name as string,
-          fr: layer.metadata!.layers[layerId as number].name as string,
+          en: (layer.metadata!.layers as TypeJsonArray).filter((item) => item.id === layerId)[0].name as string,
+          fr: (layer.metadata!.layers as TypeJsonArray).filter((item) => item.id === layerId)[0].name as string,
         };
         newListOfLayerEntryConfig.push(subLayerEntryConfig);
 
