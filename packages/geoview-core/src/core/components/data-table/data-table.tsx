@@ -140,7 +140,11 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
         );
       }
       // convert string to react component.
-      return typeof cellValue === 'string' ? <HtmlToReact htmlContent={cellValue} /> : cellValue;
+      return typeof cellValue === 'string' && cellValue.length ? (
+        <HtmlToReact htmlContent={cellValue} itemOptions={{ tabIndex: 0 }} />
+      ) : (
+        cellValue
+      );
     },
     [initLightBox, t]
   );
@@ -183,7 +187,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     const formattedDate = DateMgt.formatDate(date, 'YYYY-MM-DDThh:mm:ss');
     return (
       <Tooltip title={formattedDate} arrow>
-        <Box>{formattedDate}</Box>
+        <Box tabIndex={0}>{formattedDate}</Box>
       </Tooltip>
     );
   }, []);
