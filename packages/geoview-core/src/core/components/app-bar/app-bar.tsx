@@ -92,7 +92,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
-  const { tabId, tabGroup, isOpen } = useActiveAppBarTab();
+  const { tabId, tabGroup, isOpen, isFocusTrapped } = useActiveAppBarTab();
   const { hideClickMarker } = useMapStoreActions();
 
   const isMapFullScreen = useAppFullscreenActive();
@@ -151,9 +151,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Log
       logger.logTraceUseCallback('APP-BAR - openPanelById', buttonId);
       // Redirect to helper
-      helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups);
+      helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, isFocusTrapped);
     },
-    [buttonPanelGroups]
+    [buttonPanelGroups, isFocusTrapped]
   );
 
   const handleButtonClicked = useCallback(
