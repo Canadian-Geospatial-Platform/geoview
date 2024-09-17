@@ -58,7 +58,7 @@ export function MapInfo(): JSX.Element {
           <Grid
             container
             sx={{
-              justifyContent: 'flexEnd',
+              justifyContent: 'flex-end',
               flexWrap: 'nowrap',
               width: '100%',
             }}
