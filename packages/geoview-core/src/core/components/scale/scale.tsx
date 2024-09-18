@@ -85,7 +85,11 @@ export function Scale(): JSX.Element {
                     <Box
                       component="span"
                       className={`${index === 0 ? 'hasScaleLine' : ''}`}
-                      sx={{ ...sxClasses.scaleText, borderBottom: !value.borderBottom ? 'none' : '1px solid' }}
+                      sx={{
+                        ...sxClasses.scaleText,
+                        borderBottom: !value.borderBottom ? 'none' : '1px solid',
+                        width: scaleValues[scaleMode].borderBottom ? scale.lineWidth : 'none',
+                      }}
                     >
                       {value.label}
                     </Box>
