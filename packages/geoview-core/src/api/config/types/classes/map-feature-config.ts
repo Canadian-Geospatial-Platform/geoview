@@ -5,6 +5,7 @@ import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
 import { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vector-config/esri-feature-config';
+import { EsriImageLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-image-config';
 import { WmsLayerConfig } from '@config/types/classes/geoview-config/raster-config/wms-config';
 import { WfsLayerConfig } from '@config/types/classes/geoview-config/vector-config/wfs-config';
 import {
@@ -445,24 +446,26 @@ export class MapFeatureConfig {
         return new EsriDynamicLayerConfig(layerConfig, language);
       case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
         return new EsriFeatureLayerConfig(layerConfig, language);
+      case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
+        return new EsriImageLayerConfig(layerConfig, language);
       case CV_CONST_LAYER_TYPES.WMS:
         return new WmsLayerConfig(layerConfig, language);
       case CV_CONST_LAYER_TYPES.WFS:
         return new WfsLayerConfig(layerConfig, language);
-      // case CONST_LAYER_TYPES.ESRI_IMAGE:
-      //   return new EsriImageLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.GEOJSON:
-      //   return new GeojsonLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.GEOPACKAGE:
-      //   return new GeopackageLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.XYZ_TILES:
-      //   return new XyzLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.VECTOR_TILES:
-      //   return new VectorTileLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.OGC_FEATURE:
-      //   return new OgcFeatureLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.CSV:
-      //   return new CsvLayerConfig(layerConfig);
+      // case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
+      //   return new EsriImageLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.GEOJSON:
+      //   return new GeojsonLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.GEOPACKAGE:
+      //   return new GeopackageLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.XYZ_TILES:
+      //   return new XyzLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.VECTOR_TILES:
+      //   return new VectorTileLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.OGC_FEATURE:
+      //   return new OgcFeatureLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.CSV:
+      //   return new CsvLayerConfig(layerConfig, language);
       default:
         // TODO: Restore the commented line and remove the next line when we have converted our code to the new framework.
         // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);

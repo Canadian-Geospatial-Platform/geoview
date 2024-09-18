@@ -90,18 +90,26 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
     this.minScale = layerMetadata.minScale as number;
     this.maxScale = layerMetadata.maxScale as number;
 
-    const metadataExtent = [
+    let metadataExtent = [
       layerMetadata.extent.xmin,
       layerMetadata.extent.ymin,
       layerMetadata.extent.xmax,
       layerMetadata.extent.ymax,
     ] as Extent;
+
     const sourceProj = layerMetadata.extent.spatialReference.wkid;
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
-    else
-      this.initialSettings.extent = validateExtentWhenDefined(
-        Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT)
+    else {
+      metadataExtent = Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT);
+      this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
+    }
+
+    if (this?.initialSettings?.extent?.find?.((value, i) => value !== metadataExtent[i]))
+      logger.logWarning(
+        `The extent specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`
       );
+
+    this.bounds = this.initialSettings.extent;
 
     if (layerMetadata.defaultVisibility !== undefined) this.initialSettings.states!.visible = layerMetadata.defaultVisibility as boolean;
 

@@ -227,8 +227,11 @@ export type TypeMapViewSettings = {
   layerIds?: string[];
 };
 
-/** Type used to define valid projection codes. */
+/** Type used to define valid map projection codes. */
 export type TypeValidMapProjectionCodes = 3978 | 3857;
+
+/** Type used to define valid source projection codes. */
+export type TypeValidSourceProjectionCodes = 3978 | 3857 | 4326;
 
 /** Type used to define valid highlight colors. */
 export type TypeHighlightColors = 'black' | 'white' | 'red' | 'green';
@@ -367,10 +370,10 @@ export type TypeNearestValues = 'discrete' | 'absolute';
 /** Base type from which we derive the source properties for all the leaf nodes in the layer tree. */
 export type TypeBaseSourceInitialConfig = {
   /**
-   * Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.
+   * Spatial Reference EPSG code supported (https://epsg.io/). We support lat/long, Web Mercator and Lambert Conical Conform Canada.
    * Default = 3978.
    */
-  projection: TypeValidMapProjectionCodes;
+  projection: TypeValidSourceProjectionCodes;
   /** The crossOrigin attribute if needed to load the data. */
   crossOrigin?: string;
 };
@@ -458,6 +461,17 @@ export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitia
   layerFilter?: string;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
+  /** The format used by the image layer. */
+  format: TypeEsriFormatParameter;
+  /**
+   * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png
+   * and .gif formats support transparency.
+   */
+  transparent?: boolean;
+}
+
+/** Type from which we derive the source properties for all the ESRI Image leaf nodes in the layer tree. */
+export interface TypeSourceEsriImageInitialConfig extends TypeBaseSourceInitialConfig {
   /** The format used by the image layer. */
   format: TypeEsriFormatParameter;
   /**
