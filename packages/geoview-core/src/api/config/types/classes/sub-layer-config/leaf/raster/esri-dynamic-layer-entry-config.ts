@@ -11,7 +11,7 @@ import { AbstractBaseEsriLayerEntryConfig } from '@/api/config/types/classes/sub
 import { EsriBaseRenderer, createStyleUsingEsriRenderer } from '@/api/config/esri-renderer-parser';
 
 // ========================
-// #region CLASS DEFINITION
+// #region CLASS HEADER
 /**
  * The ESRI dynamic geoview sublayer class.
  */
@@ -34,29 +34,30 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   // ==========================
   // #region OVERRIDE
   /**
-   * @protected @override
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
    * used to do its validation.
    *
    * @returns {string} The schemaPath associated to the sublayer.
+   * @protected @override
    */
   protected override getSchemaPath(): string {
     return CV_CONST_LEAF_LAYER_SCHEMA_PATH.ESRI_DYNAMIC;
   }
 
   /**
-   * @protected @override
    * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
    *
    * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
+   * @protected @override
    */
   protected override getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE;
   }
 
   /** ***************************************************************************************************************************
-   * @protected @override
    * This method is used to parse the layer metadata and extract the style, source information and other properties.
+   *
+   * @protected @override
    */
   protected override parseLayerMetadata(): void {
     super.parseLayerMetadata();
@@ -79,9 +80,10 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   }
 
   /**
-   * @override
    * Apply default values. The default values will be overwritten by the values in the metadata when they are analyzed.
    * The resulting config will then be overwritten by the values provided in the user config.
+   *
+   * @override
    */
   override applyDefaultValues(): void {
     super.applyDefaultValues();
@@ -98,5 +100,5 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   }
   // #endregion OVERRIDE
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }

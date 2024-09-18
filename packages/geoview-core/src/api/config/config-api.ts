@@ -13,15 +13,7 @@ import {
 } from '@config/types/map-schema-types';
 import { MapConfigError } from '@config/types/classes/config-exceptions';
 
-import {
-  createLocalizedString,
-  findPropertyNameByRegex,
-  generateId,
-  getXMLHttpRequest,
-  isJsonString,
-  removeCommentsFromJSON,
-  xmlToJson,
-} from '@/core/utils/utilities';
+import { createLocalizedString, generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';
 
 /**
@@ -533,38 +525,8 @@ export class ConfigApi {
       return response.json();
     }
 
-    async function fetchXmlMetadata(url: string): Promise<TypeJsonObject> {
-      let metadataUrl = url;
-      // check if url contains metadata parameters for the getCapabilities request and reformat the urls
-      const getCapabilitiesUrl =
-        metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(metadataUrl!.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
-      metadataUrl = metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(0, metadataUrl!.indexOf('?')) : metadataUrl;
-      if (metadataUrl) {
-        const metadataString = await getXMLHttpRequest(`${metadataUrl}${getCapabilitiesUrl}`);
-        if (metadataString === '{}') throw new MapConfigError('Unable to build metadata layer tree (empty metadata).');
-        else {
-          // need to pass a xmldom to xmlToJson
-          const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
-          const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
-          const capabilitiesObject = findPropertyNameByRegex(xmlJsonCapabilities, /(?:WFS_Capabilities)/);
-          return capabilitiesObject as TypeJsonObject;
-        }
-      } else throw new MapConfigError('Unable to build metadata layer tree (empty metadata url).');
-    }
-
     let jsonData: TypeJsonObject;
     switch (layerType) {
-      case 'ogcWfs':
-        jsonData = (await fetchXmlMetadata(serviceAccessString))?.FeatureTypeList?.FeatureType;
-        if (Array.isArray(jsonData))
-          return (jsonData as TypeJsonArray).map((layer) => {
-            return Cast<EntryConfigBaseClass>({
-              layerId: layer.Name['#text'],
-              layerName: layer.Title['#text'],
-            });
-          });
-        return [];
-        break;
       case 'ogcFeature':
         jsonData = await fetchJsonMetadata(serviceAccessString);
         if (jsonData.collections)
