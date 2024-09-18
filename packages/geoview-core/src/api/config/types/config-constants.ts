@@ -77,9 +77,9 @@ export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   ESRI_FEATURE: 'https://cgpv/schema#/definitions/EsriFeatureLayerConfig',
   WMS: 'https://cgpv/schema#/definitions/WmsLayerConfig',
   WFS: 'https://cgpv/schema#/definitions/WfsLayerConfig',
+  GEOJSON: 'https://cgpv/schema#/definitions/GeoJsonLayerConfig',
 
   IMAGE_STATIC: '',
-  GEOJSON: '',
   GEOPACKAGE: '',
   XYZ_TILES: '',
   VECTOR_TILES: '',
