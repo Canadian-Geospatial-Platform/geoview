@@ -784,6 +784,11 @@
       "enum": [3978, 3857],
       "default": 3978
     },
+    "TypeValidSourceProjectionCodes": {
+      "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.",
+      "enum": [3978, 3857, 4326],
+      "default": 3978
+    },
     "EsriDynamicLayerConfig": {
       "description": "Structure used by the viewer to describe the configuration of an ESRI dynamic layer.",
       "type": "object",
@@ -797,6 +802,24 @@
           "properties": {
             "geoviewLayerType": {
               "enum": ["esriDynamic"]
+            }
+          }
+        }
+      ]
+    },
+    "EsriImageLayerConfig": {
+      "description": "Structure used by the viewer to describe the configuration of an ESRI Image layer.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractGeoviewLayerConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "geoviewLayerType": {
+              "enum": ["esriImage"]
             }
           }
         }
@@ -1040,6 +1063,30 @@
         }
       ]
     },
+    "EsriImageLayerEntryConfig": {
+      "description": "Class from which we derive all the ESRI Dynamic leaf nodes in the layer tree.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The actual parent class is AbstractBaseEsriLayerEntryConfig, whose parent class is AbstractBaseLayerEntryConfig. Both classes have the same properties.",
+          "$ref": "#/definitions/AbstractBaseLayerEntryConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "entryType": {
+              "enum": ["raster-image"]
+            },
+            "source": {
+              "$ref": "#/definitions/TypeSourceEsriImageInitialConfig"
+            },
+            "style": {
+              "$ref": "#/definitions/TypeStyleConfig"
+            }
+          }
+        }
+      ]
+    },
     "EsriFeatureLayerEntryConfig": {
       "description": "Class from which we derive all the ESRI Feature leaf nodes in the layer tree.",
       "type": "object",
@@ -1119,7 +1166,7 @@
       "type": "object",
       "properties": {
         "projection": {
-          "$ref": "#/definitions/TypeValidMapProjectionCodes"
+          "$ref": "#/definitions/TypeValidSourceProjectionCodes"
         },
         "crossOrigin": {
           "description": "The crossOrigin attribute if needed to load the data.",
@@ -1348,6 +1395,28 @@
             "featureInfo": {
               "$ref": "#/definitions/TypeFeatureInfoLayerConfig"
             },
+            "format": {
+              "$ref": "#/definitions/TypeEsriFormatParameter"
+            },
+            "transparent": {
+              "description": "If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and .gif formats support transparency.",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        }
+      ]
+    },
+    "TypeSourceEsriImageInitialConfig": {
+      "description": "Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/TypeBaseSourceInitialConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
             "format": {
               "$ref": "#/definitions/TypeEsriFormatParameter"
             },

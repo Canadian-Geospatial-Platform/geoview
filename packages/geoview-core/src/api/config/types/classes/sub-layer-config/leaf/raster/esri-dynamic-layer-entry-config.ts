@@ -10,14 +10,14 @@ import {
 import { AbstractBaseEsriLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
 import { EsriBaseRenderer, createStyleUsingEsriRenderer } from '@/api/config/esri-renderer-parser';
 
-// ========================
+// ====================
 // #region CLASS HEADER
 /**
  * The ESRI dynamic geoview sublayer class.
  */
 
 export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfig {
-  // =========================
+  // ==================
   // #region PROPERTIES
   /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceEsriDynamicInitialConfig;
@@ -31,7 +31,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   /*
    * Methods are listed in the following order: abstract, override, private, protected, public and static.
    */
-  // ==========================
+  // ================
   // #region OVERRIDE
   /**
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
