@@ -79,6 +79,7 @@ export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput):
     listOfLayerEntryConfig: [],
   };
 
+  // this functionadds a child layer to a parent layer in the geoviewLayerConfig
   function appendChildLayerNode(treeRoot: ListOfLayerEntry, layerId: string, parentLayerId: string) {
     if (treeRoot.layerId === parentLayerId) {
       // eslint-disable-next-line no-param-reassign
@@ -105,7 +106,8 @@ export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput):
     }
   }
 
-  function addRootLayerNode(layerId: string) {
+  // adds a root layer node to the geoviewLayerConfig (a layer wthout children)
+  function addLevel1LayerNode(layerId: string) {
     const exists = geoviewLayerConfig.listOfLayerEntryConfig.find((entry) => entry.layerId === layerId);
 
     if (exists) return;
@@ -117,7 +119,7 @@ export const buildGeoLayerToAdd = function (inputProps: BuildGeoViewLayerInput):
 
     layerTokens.forEach((layerToken, index) => {
       if (index === 0) {
-        addRootLayerNode(layerToken);
+        addLevel1LayerNode(layerToken);
       } else {
         geoviewLayerConfig.listOfLayerEntryConfig.forEach((entry) => {
           appendChildLayerNode(entry, layerToken, layerTokens[index - 1]);
