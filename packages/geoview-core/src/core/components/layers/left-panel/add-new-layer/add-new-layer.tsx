@@ -130,41 +130,6 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Attempt to determine the layer type based on the URL format
-   */
-  const bestGuessLayerType = (): void => {
-    const layerTokens = displayURL.toUpperCase().split('/');
-    const layerId = parseInt(layerTokens[layerTokens.length - 1], 10);
-    if (displayURL.toUpperCase().endsWith('MAPSERVER') || displayURL.toUpperCase().endsWith('MAPSERVER/')) {
-      setLayerType(ESRI_DYNAMIC);
-    } else if (
-      displayURL.toUpperCase().indexOf('FEATURESERVER') !== -1 ||
-      (displayURL.toUpperCase().indexOf('MAPSERVER') !== -1 && !Number.isNaN(layerId))
-    ) {
-      setLayerType(ESRI_FEATURE);
-    } else if (displayURL.toUpperCase().indexOf('IMAGESERVER') !== -1) {
-      setLayerType(ESRI_IMAGE);
-    } else if (layerTokens.indexOf('WFS') !== -1) {
-      setLayerType(WFS);
-    } else if (displayURL.toUpperCase().endsWith('.JSON') || displayURL.toUpperCase().endsWith('.GEOJSON')) {
-      setLayerType(GEOJSON);
-    } else if (displayURL.toUpperCase().endsWith('.GPKG')) {
-      setLayerType(GEOPACKAGE);
-    } else if (displayURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || displayURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
-      setLayerType(XYZ_TILES);
-    } else if (displayURL.indexOf('/') === -1 && displayURL.replaceAll('-', '').length === 32) {
-      setLayerType(GEOCORE);
-    } else if (displayURL.toUpperCase().indexOf('WMS') !== -1) {
-      setLayerType(WMS);
-    } else if (displayURL.toUpperCase().endsWith('.CSV')) {
-      setLayerType(CSV);
-    } else {
-      setLayerType('');
-      setStepButtonDisable(true);
-    }
-  };
-
-  /**
    * Handle the behavior of the 'Continue' button in the Stepper UI
    */
   const handleStep1 = (): void => {
@@ -174,8 +139,13 @@ export function AddNewLayer(): JSX.Element {
       emitErrorNone();
     }
     if (valid) {
-      bestGuessLayerType();
-      setActiveStep(1);
+      const guestedLayerType = api.config.guessLayerType(layerURL);
+      if (guestedLayerType) {
+        setLayerType(guestedLayerType as TypeGeoviewLayerType);
+        setActiveStep(1);
+      } else {
+        emitErrorNone();
+      }
     }
   };
 
@@ -188,7 +158,11 @@ export function AddNewLayer(): JSX.Element {
     const populateLayerList = async (curlayerType: TypeGeoviewLayerType) => {
       try {
         const layersTree = await api.config.createMetadataLayerTree(layerURL, curlayerType, [], language);
+        console.log('layersTree', layersTree);
         setLayerList(layersTree as GroupLayerEntryConfig[]);
+        if (layersTree.length > 0) {
+          setLayerName(layersTree[0].layerName ?? '');
+        }
         setHasMetadata(true);
         return true;
       } catch (err) {
@@ -196,6 +170,10 @@ export function AddNewLayer(): JSX.Element {
         return false;
       }
     };
+
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////
 
     let promise;
     if (layerType === undefined) {
@@ -277,6 +255,8 @@ export function AddNewLayer(): JSX.Element {
       layerURL,
       layersList: layerList,
     });
+
+    console.log('newGeoViewLayer to add', newGeoViewLayer);
 
     // Add the layer using the proper function
     const addedLayer = api.maps[mapId].layer.addGeoviewLayer(newGeoViewLayer);
