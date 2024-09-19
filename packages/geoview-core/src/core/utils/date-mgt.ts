@@ -420,7 +420,7 @@ export abstract class DateMgt {
     do {
       // When we deal with MONTH duration, dayjs doesnt know if the month is 30 or 31 days. This creates bad intervals...
       // NOTE: We do this ONLY when duration is for month and nothing else....
-      if (durationCheck.endsWith('M')) {
+      if (durationCheck.endsWith('M') && !durationCheck.startsWith('PT')) {
         // Add the month duration manually and increase years if needed
         const dateValue = items[i].split('-');
         const monthValueUpdated = Number(dateValue[1]) + calcDuration.months();
