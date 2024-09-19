@@ -2,7 +2,7 @@ import { TypeTemporalDimension, TypeStyleGeometry, TypeLayerEntryType } from '@c
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 // ========================
-// #region CLASS DEFINITION
+// #region CLASS HEADER
 /**
  * Base type used to define a GeoView sublayer to display on the map.
  */
@@ -21,7 +21,7 @@ export abstract class AbstractBaseLayerEntryConfig extends EntryConfigBaseClass 
   /*
    * Methods are listed in the following order: abstract, override, private, protected and public.
    */
-  // ==========================
+  // ================
   // #region ABSTRACT
   /**
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
@@ -41,5 +41,5 @@ export abstract class AbstractBaseLayerEntryConfig extends EntryConfigBaseClass 
   protected abstract override getEntryType(): TypeLayerEntryType;
   // #endregion ABSTRACT
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }

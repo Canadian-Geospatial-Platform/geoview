@@ -1,8 +1,7 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
-import { TypeStyleConfig, TypeLayerEntryType, TypeSourceWmsInitialConfig, Extent } from '@config/types/map-schema-types';
+import { TypeStyleConfig, TypeLayerEntryType, TypeSourceWmsInitialConfig, Extent, WmsLayerConfig } from '@config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
-import { WmsLayerConfig } from '@config/types/classes/geoview-config/raster-config/wms-config';
 import { isvalidComparedToInternalSchema } from '@config/utils';
 import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
 
@@ -10,7 +9,7 @@ import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
 
 // ========================
-// #region CLASS DEFINITION
+// #region CLASS HEADER
 /**
  * The OGC WMS geoview sublayer class.
  */
@@ -30,7 +29,7 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /*
    * Methods are listed in the following order: abstract, override, private, protected, public and static.
    */
-  // ==========================
+  // ================
   // #region OVERRIDE
 
   /**
@@ -55,6 +54,17 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
+   * Shadow method used to do a cast operation on the parent method to return WmsLayerConfig instead of
+   * AbstractGeoviewLayerConfig.
+   *
+   * @returns {WmsLayerConfig} The Geoview layer configuration that owns this WFS layer entry config.
+   * @override @async
+   */
+  override getGeoviewLayerConfig(): WmsLayerConfig {
+    return super.getGeoviewLayerConfig() as WmsLayerConfig;
+  }
+
+  /**
    * This method is used to fetch, parse and extract the relevant information from the metadata of the leaf node.
    * The same method signature is used by layer group nodes and leaf nodes (layers).
    * @override
@@ -64,10 +74,7 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     if (this.getErrorDetectedFlag()) return Promise.resolve();
 
     // WMS service metadata contains the layer's metadata.
-    const layerMetadata = WmsLayerConfig.getLayerMetadataEntry(
-      this.layerId,
-      this.getGeoviewLayerConfig().getServiceMetadata().Capability.Layer
-    );
+    const layerMetadata = this.getGeoviewLayerConfig().findLayerMetadataEntry(this.layerId);
     if (layerMetadata) {
       this.setLayerMetadata(layerMetadata);
       // Parse the raw layer metadata and build the geoview configuration.
@@ -111,7 +118,7 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   // #region PRIVATE
   /**
    * This method is used to parse the layer metadata and extract the source information and other properties.
-   * @protected
+   * @private
    */
   #parseLayerMetadata(): void {
     const layerMetadata = this.getLayerMetadata();
@@ -134,7 +141,7 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** ***************************************************************************************************************************
    * This method will create a Geoview temporal dimension if it existds in the service metadata
    * @param {TypeJsonObject} wmsDimension The WMS time dimension object
-   * @protected
+   * @private
    */
   #processTemporalDimension(wmsDimension: TypeJsonObject): void {
     if (wmsDimension) {
@@ -144,5 +151,5 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
   // #endregion PRIVATE
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }
