@@ -51,6 +51,7 @@ import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
+import { handleEscapeKey } from '@/core/utils/utilities';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -99,7 +100,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
-  const { setActiveAppBarTab, handleEscapeKey } = useUIStoreActions();
+  const { setActiveAppBarTab } = useUIStoreActions();
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
@@ -440,14 +441,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     onPanelOpened={buttonPanel.onPanelOpened}
                     onPanelClosed={hideClickMarker}
                     handleKeyDown={(e: KeyboardEvent) =>
-                      handleEscapeKey(
-                        e.key,
-                        (cb?: () => void) => {
-                          handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '');
-                          cb?.();
-                        },
-                        buttonPanel?.button?.id ?? ''
-                      )
+                      handleEscapeKey(e.key, tabId, isFocusTrapped, () => {
+                        handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '');
+                      })
                     }
                     onGeneralCloseClicked={() => handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '')}
                   />

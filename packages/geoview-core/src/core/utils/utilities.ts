@@ -514,3 +514,12 @@ export async function createGuideObject(
     return undefined;
   }
 }
+
+export function handleEscapeKey(key: string, callbackId: string, isFocusTrapped?: boolean, cb?: () => void): void {
+  if (key === 'Escape') {
+    if (isFocusTrapped && callbackId) {
+      document.getElementById(callbackId ?? '')?.focus();
+    }
+    cb?.();
+  }
+}

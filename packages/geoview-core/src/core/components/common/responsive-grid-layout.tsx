@@ -10,9 +10,10 @@ import FullScreenDialog from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUISelectedFooterLayerListItemId, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { handleEscapeKey } from '@/core/utils/utilities';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -54,7 +55,6 @@ const ResponsiveGridLayout = forwardRef(
     const guide = useAppGuide();
     const isMapFullScreen = useAppFullscreenActive();
     const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
-    const { handleEscapeKey } = useUIStoreActions();
 
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
     const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -107,8 +107,8 @@ const ResponsiveGridLayout = forwardRef(
     }, [selectedFooterLayerListItemId]);
 
     const handleKeyDown = useCallback(
-      (event: KeyboardEvent): void => handleEscapeKey(event.key, handleEscapeKeyCallback, selectedFooterLayerListItemId),
-      [handleEscapeKey, handleEscapeKeyCallback, selectedFooterLayerListItemId]
+      (event: KeyboardEvent): void => handleEscapeKey(event.key, selectedFooterLayerListItemId, true, handleEscapeKeyCallback),
+      [handleEscapeKeyCallback, selectedFooterLayerListItemId]
     );
 
     // return back the focus to layeritem for which right panel was opened.

@@ -8,7 +8,7 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
 import { HtmlToReact } from '@/core/containers/html-to-react';
-import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { handleEscapeKey } from '@/core/utils/utilities';
 
 interface NavbarPanelButtonType {
   buttonPanel: TypeButtonPanel;
@@ -28,7 +28,6 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
 
   const mapId = useGeoViewMapId();
   const geoviewElement = useAppGeoviewHTMLElement();
-  const { handleEscapeKey } = useUIStoreActions();
 
   const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
 
@@ -74,7 +73,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
           onClose={handleClickAway}
           container={shellContainer}
           sx={{ marginRight: '5px !important' }}
-          handleKeyDown={(key, callBackFn) => handleEscapeKey(key, callBackFn)}
+          handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >
           <Paper sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
             <DialogTitle sx={sxClasses.popoverTitle}>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>

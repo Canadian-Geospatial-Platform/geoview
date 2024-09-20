@@ -1,5 +1,5 @@
 import { useStore } from 'zustand';
-import { capitalize, delay } from 'lodash';
+import { capitalize } from 'lodash';
 import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@config/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
@@ -18,8 +18,6 @@ export type ActiveAppBarTabType = {
   isOpen: boolean;
   isFocusTrapped?: boolean;
 };
-
-type HandleEscapeKeyCallFn = (callbackFn?: () => void) => void;
 
 export interface IUIState {
   activeFooterBarTabId: string;
@@ -49,7 +47,6 @@ export interface IUIState {
     setMapInfoExpanded: (expanded: boolean) => void;
     setFooterBarIsCollapsed: (collapsed: boolean) => void;
     setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
-    handleEscapeKey: (key: string, callbackFn?: HandleEscapeKeyCallFn, callbackElementId?: string) => void;
   };
 
   setterActions: {
@@ -63,7 +60,6 @@ export interface IUIState {
     setMapInfoExpanded: (expanded: boolean) => void;
     setFooterBarIsCollapsed: (collapsed: boolean) => void;
     setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
-    handleEscapeKey: (key: string, callbackFn?: HandleEscapeKeyCallFn, callbackElementId?: string) => void;
   };
 }
 
@@ -160,10 +156,6 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to setter
         get().uiState.setterActions.setSelectedFooterLayerListItemId(layerListItemId);
       },
-      handleEscapeKey: (key, callbackFn, callbackElementId) => {
-        // Redirect to setter
-        get().uiState.setterActions.handleEscapeKey(key, callbackFn, callbackElementId);
-      },
     },
 
     setterActions: {
@@ -252,11 +244,6 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
             selectedFooterLayerListItemId: layerListItemId,
           },
         });
-      },
-      handleEscapeKey: (key, callbackFn, callbackElementId = '') => {
-        if (key === 'Escape') {
-          callbackFn?.(() => delay(() => document.getElementById(callbackElementId)?.focus(), 10));
-        }
       },
     },
 

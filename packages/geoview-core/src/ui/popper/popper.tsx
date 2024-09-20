@@ -19,16 +19,10 @@ export const Popper: React.FC<EnhancedPopperProps> = ({ open, onClose, handleKey
   const popperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent): void =>
-      handleKeyDown?.(event.key, () => {
-        if (event.key === 'Escape' && open && onClose) {
-          // Close the Popper when 'Escape' key is pressed
-          onClose();
-        }
-      });
-
+    const onKeyDown = (event: KeyboardEvent): void => {
+      handleKeyDown?.(event.key, () => open && onClose?.());
+    };
     document.addEventListener('keydown', onKeyDown);
-
     return () => {
       document.removeEventListener('keydown', onKeyDown);
     };
