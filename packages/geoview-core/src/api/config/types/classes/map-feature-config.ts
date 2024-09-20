@@ -6,6 +6,7 @@ import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@config/types
 import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
 import { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vector-config/esri-feature-config';
 import { WmsLayerConfig } from '@config/types/classes/geoview-config/raster-config/wms-config';
+import { WfsLayerConfig } from '@config/types/classes/geoview-config/vector-config/wfs-config';
 import {
   CV_BASEMAP_ID,
   CV_BASEMAP_LABEL,
@@ -42,7 +43,8 @@ import { logger } from '@/core//utils/logger';
 import { ConfigApi } from '../../config-api';
 
 // ========================
-// #region CLASS DEFINITION
+// #region CLASS HEADER
+
 /**
  * The map feature configuration class.
  */
@@ -439,12 +441,14 @@ export class MapFeatureConfig {
    */
   static nodeFactory(layerConfig: TypeJsonObject, language: TypeDisplayLanguage): AbstractGeoviewLayerConfig | undefined {
     switch (layerConfig.geoviewLayerType) {
-      // case CONST_LAYER_TYPES.CSV:
-      //   return new CsvLayerConfig(layerConfig);
       case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
         return new EsriDynamicLayerConfig(layerConfig, language);
       case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
         return new EsriFeatureLayerConfig(layerConfig, language);
+      case CV_CONST_LAYER_TYPES.WMS:
+        return new WmsLayerConfig(layerConfig, language);
+      case CV_CONST_LAYER_TYPES.WFS:
+        return new WfsLayerConfig(layerConfig, language);
       // case CONST_LAYER_TYPES.ESRI_IMAGE:
       //   return new EsriImageLayerConfig(layerConfig);
       // case CONST_LAYER_TYPES.GEOJSON:
@@ -457,10 +461,8 @@ export class MapFeatureConfig {
       //   return new VectorTileLayerConfig(layerConfig);
       // case CONST_LAYER_TYPES.OGC_FEATURE:
       //   return new OgcFeatureLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.WFS:
-      //   return new WfsLayerConfig(layerConfig);
-      case CV_CONST_LAYER_TYPES.WMS:
-        return new WmsLayerConfig(layerConfig, language);
+      // case CONST_LAYER_TYPES.CSV:
+      //   return new CsvLayerConfig(layerConfig);
       default:
         // TODO: Restore the commented line and remove the next line when we have converted our code to the new framework.
         // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
@@ -470,5 +472,5 @@ export class MapFeatureConfig {
   }
   // #endregion PUBLIC
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }

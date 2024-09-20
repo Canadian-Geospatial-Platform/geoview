@@ -11,7 +11,7 @@ import {
 import { EsriBaseRenderer, createStyleUsingEsriRenderer } from '@/api/config/esri-renderer-parser';
 
 // ========================
-// #region CLASS DEFINITION
+// #region CLASS HEADER
 /**
  * The ESRI feature geoview sublayer class.
  */
@@ -30,32 +30,33 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   /*
    * Methods are listed in the following order: abstract, override, private, protected and public.
    */
-  // ==========================
+  // ================
   // #region OVERRIDE
   /**
-   * @protected @override
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
    * used to do its validation.
    *
    * @returns {string} The schemaPath associated to the sublayer.
+   * @protected @override
    */
   protected override getSchemaPath(): string {
     return CV_CONST_LEAF_LAYER_SCHEMA_PATH.ESRI_FEATURE;
   }
 
   /**
-   * @protected @override
    * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
    *
    * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
+   * @protected @override
    */
   protected override getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.VECTOR;
   }
 
   /** ***************************************************************************************************************************
-   * @protected @override
    * This method is used to parse the layer metadata and extract the style and source information.
+   *
+   * @protected @override
    */
   protected override parseLayerMetadata(): void {
     super.parseLayerMetadata();
@@ -78,9 +79,10 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   }
 
   /**
-   * @override
    * Apply default values. The default values will be overwritten by the values in the metadata when they are analyzed.
    * The resulting config will then be overwritten by the values provided in the user config.
+   *
+   * @override
    */
   override applyDefaultValues(): void {
     super.applyDefaultValues();
@@ -97,5 +99,5 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   }
   // #endregion OVERRIDE
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }

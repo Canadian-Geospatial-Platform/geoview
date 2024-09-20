@@ -12,7 +12,7 @@ import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { TypeJsonArray } from '@/app';
 
 // ========================
-// #region CLASS DEFINITION
+// #region CLASS HEADER
 /**
  * Base type used to define the common implementation of an ESRI GeoView sublayer to display on the map.
  */
@@ -141,5 +141,5 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
   }
   // #endregion PRIVATE
   // #endregion METHODS
-  // #endregion CLASS DEFINITION
+  // #endregion CLASS HEADER
 }
