@@ -33,7 +33,7 @@ export function NorthArrow(): JSX.Element {
 
   const { rotationAngle, northOffset } = useManageArrow();
 
-  return `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC ? (
+  return `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC || `EPSG:${mapProjection}` !== Projection.PROJECTION_NAMES.WM ? (
     <Box
       ref={northArrowRef}
       sx={sxClasses.northArrowContainer}
