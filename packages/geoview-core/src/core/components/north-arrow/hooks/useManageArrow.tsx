@@ -44,7 +44,7 @@ const useManageArrow = (): any => {
     const arrowWidth = 24;
     const offsetX = mapWidth - arrowWidth / 2;
 
-    if (!fixNorth && getPixelFromCoordinate(NORTH_POLE_POSITION) !== null) {
+    if (!fixNorth && getPixelFromCoordinate(NORTH_POLE_POSITION) !== null && `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC) {
       // hard code north pole so that arrow does not continue pointing past it
       const screenNorthPoint = getPixelFromCoordinate(NORTH_POLE_POSITION);
       const screenY = screenNorthPoint[1];
@@ -115,16 +115,21 @@ const useManageArrow = (): any => {
           setRotationAngle({ angle: 0 });
         } else {
           // set arrow rotation
-          const mapRotationValue = fixNorth ? mapRotation * (180 / Math.PI) : 0;
+          const mapRotationValue = fixNorth ? mapRotation * (180 / Math.PI) : mapRotation * (180 / Math.PI);
           setRotationAngle({ angle: 90 - angleDegrees + mapRotationValue });
         }
 
         // set arrow offset
         setOffset(angleDegrees);
       }
+    } else if (`EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.WM) {
+      setOffset(0);
+
+      // set arrow rotation to map rotation as Web /mercator always has north straight up
+      setRotationAngle({ angle: mapRotation * (180 / Math.PI) });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [northArrowElement, fixNorth]);
+  }, [northArrowElement, fixNorth, mapSize, mapRotation]);
 
   return { rotationAngle, northOffset };
 };
