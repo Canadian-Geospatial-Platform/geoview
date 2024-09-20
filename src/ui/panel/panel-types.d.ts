@@ -35,6 +35,8 @@ export type TypePanelProps = {
     convertHtmlContent?: boolean;
     /** Custom panel styles */
     panelStyles?: PanelStyles;
+    /** is focus trapped for panel */
+    isFocusTrapped?: boolean;
 };
 export interface PanelStyles {
     /** Panel/Card Container style object */

@@ -96,7 +96,6 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
      * @returns {Extent | undefined} The new layer bounding box.
      */
     getBounds(layerPath: string): Extent | undefined;
-    static addVectorTileLayer(): Promise<void>;
     /**
      * Set Vector Tile style
      *

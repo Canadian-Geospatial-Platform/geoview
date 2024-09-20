@@ -110,12 +110,12 @@ export declare function parseJSONConfig(configObjStr: string): unknown;
  */
 export declare function exportPNG(dataUrl: string, name: string): void;
 /**
- * Find an object property by regex value
+ * Find an object property by regex values. The find is case insensitive.
  * @param {TypeJsonObject} objectItem the object item
- * @param {RegExp} regex the regex value to find
+ * @param {RegExp | RegExp[]} regex the regex value or the regex sequence to search
  * @returns {TypeJsonObject | undefined} the object if it exist or undefined
  */
-export declare const findPropertyNameByRegex: (objectItem: TypeJsonObject, regex: RegExp) => TypeJsonObject | undefined;
+export declare const findPropertyNameByRegex: (objectItem: TypeJsonObject, regex: RegExp | RegExp[]) => TypeJsonObject | undefined;
 /**
  * Check string to see if it is an image
  *

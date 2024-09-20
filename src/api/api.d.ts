@@ -34,8 +34,9 @@ export declare class API {
      *
      * @param {string} divId - id of the div to create map in
      * @param {string} mapConfig - config passed in from the function call (string or url of a config path)
+     * @param {number} divHeight - height of the div to inject the map in (mandatory if the map reloads)
      */
-    createMapFromConfig(divId: string, mapConfig: string): Promise<void>;
+    createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<void>;
     /**
      * Registers a map added to div event handler.
      * @param {MapAddedToDivDelegate} callback - The callback to be executed whenever the event is emitted

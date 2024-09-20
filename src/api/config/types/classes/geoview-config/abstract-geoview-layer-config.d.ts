@@ -36,20 +36,19 @@ export declare abstract class AbstractGeoviewLayerConfig {
      */
     constructor(userGeoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage);
     /**
-     * @protected @abstract
      * The getter method that returns the geoview layer schema to use for the validation.
      *
      * @returns {string} The GeoView layer schema associated to the config.
+     * @protected @abstract
      */
     protected abstract getGeoviewLayerSchema(): string;
     /**
-     * @abstract
      * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
      * The benifit of using a private #metadata is that it is invisible to the schema validation and JSON serialization.
+     * @abstract
      */
     abstract fetchServiceMetadata(): Promise<void>;
     /**
-     * @abstract
      * The method used to implement the class factory model that returns the instance of the class based on the leaf
      * type needed.
      *
@@ -60,10 +59,10 @@ export declare abstract class AbstractGeoviewLayerConfig {
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
      *
      * @returns {EntryConfigBaseClass | undefined} The sublayer instance or undefined if there is an error.
+     * @abstract
      */
     abstract createLeafNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass | undefined;
     /**
-     * @abstract
      * The method used to implement the class factory model that returns the instance of the class based on the group
      * type needed.
      *
@@ -74,29 +73,59 @@ export declare abstract class AbstractGeoviewLayerConfig {
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
      *
      * @returns {EntryConfigBaseClass | undefined} The sublayer instance or undefined if there is an error.
+     * @abstract
      */
     abstract createGroupNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass | undefined;
     /**
-     * @protected
-     * The setter method that sets the metadataLayerTree private property.
+     * Create a layer entry node for a specific layerId using the service metadata. The node returned can be a
+     * layer or a group layer.
      *
-     * @param {TypeJsonObject} metadataLayerTree The GeoView service metadata.
+     * @param {string} layerId The layer id to use for the subLayer creation.
+     * @param {EntryConfigBaseClass | undefined} parentNode The layer's parent node.
+     *
+     * @returns {EntryConfigBaseClass} The subLayer created from the metadata.
+     * @protected @abstract
      */
-    protected setMetadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]): void;
+    protected abstract createLayerEntryNode(layerId: string, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass;
     /**
-     * @protected
+     * Create the layer tree using the service metadata.
+     *
+     * @returns {TypeJsonObject[]} The layer tree created from the metadata.
+     * @protected @abstract
+     */
+    protected abstract createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[];
+    /**
      * The getter method that returns the language used to create the geoview layer.
      *
      * @returns {TypeDisplayLanguage} The GeoView layer schema associated to the config.
+     * @protected
      */
     protected getLanguage(): TypeDisplayLanguage;
     /**
-     * Fetch the metadata of all layer entry configurations defined in the list of layer entry config.
+     * Fetch the metadata of all layer entry configurations defined in the list of layer entry config
+     * or the ressulting layer tree.
      *
      * @returns {Promise<void>} A promise that will resolve when the process has completed.
      * @protected @async
      */
-    protected fetchListOfLayerMetadata(): Promise<void>;
+    protected fetchListOfLayerMetadata(layerTreeFilter?: EntryConfigBaseClass[] | undefined): Promise<void>;
+    /**
+     * Create the layer tree associated to the GeoView layer if the layer tree filter stored in the metadataLayerTree private property
+     * is set.
+     * @protected @async
+     */
+    protected createLayerTree(): Promise<void>;
+    /**
+     * A recursive method to process the listOfLayerEntryConfig. The goal is to process each valid sublayer, searching the service's
+     * metadata to verify the layer's existence and whether it is a layer group, in order to determine the node's final structure.
+     * If it is a layer group, it will be created.
+     *
+     * @param {EntryConfigBaseClass[]} listOfLayerEntryConfig the list of sublayers to process.
+     *
+     * @returns {EntryConfigBaseClass[]} the new list of sublayer configurations.
+     * @protected
+     */
+    protected processListOfLayerEntryConfig(listOfLayerEntryConfig: EntryConfigBaseClass[]): EntryConfigBaseClass[];
     /**
      * The getter method that returns the serviceMetadata private property.
      *
@@ -114,7 +143,13 @@ export declare abstract class AbstractGeoviewLayerConfig {
      *
      * @returns {EntryConfigBaseClass[]} The metadata layer tree.
      */
-    getMetadataLayerTree(): EntryConfigBaseClass[];
+    getMetadataLayerTree(): EntryConfigBaseClass[] | undefined;
+    /**
+     * The setter method that sets the metadataLayerTree private property.
+     *
+     * @param {TypeJsonObject} metadataLayerTree The GeoView service metadata.
+     */
+    setMetadataLayerTree(metadataLayerTree: EntryConfigBaseClass[]): void;
     /**
      * The getter method that returns the errorDetected flag.
      *

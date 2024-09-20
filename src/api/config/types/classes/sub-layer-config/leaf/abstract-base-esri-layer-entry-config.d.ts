@@ -9,7 +9,7 @@ export declare abstract class AbstractBaseEsriLayerEntryConfig extends AbstractB
     /**
      * This method is used to fetch, parse and extract the relevant information from the metadata of the leaf node.
      * The same method signature is used by layer group nodes and leaf nodes (layers).
-     * @override
+     * @override @async
      */
     fetchLayerMetadata(): Promise<void>;
     /**

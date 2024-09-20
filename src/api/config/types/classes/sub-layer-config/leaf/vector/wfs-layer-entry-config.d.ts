@@ -1,12 +1,13 @@
-import { TypeStyleConfig, TypeLayerEntryType, TypeSourceWmsInitialConfig, WmsLayerConfig } from '@config/types/map-schema-types';
+import { TypeStyleConfig, TypeLayerEntryType, TypeSourceWfsInitialConfig } from '@config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
+import { WfsLayerConfig } from '@config/types/classes/geoview-config/vector-config/wfs-config';
 /**
- * The OGC WMS geoview sublayer class.
+ * The OGC WFS geoview sublayer class.
  */
-export declare class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export declare class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     #private;
     /** Source settings to apply to the GeoView image layer source at creation time. */
-    source: TypeSourceWmsInitialConfig;
+    source: TypeSourceWfsInitialConfig;
     /** Style to apply to the raster layer. */
     style?: TypeStyleConfig;
     /**
@@ -25,17 +26,17 @@ export declare class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
      */
     protected getEntryType(): TypeLayerEntryType;
     /**
-     * Shadow method used to do a cast operation on the parent method to return WmsLayerConfig instead of
+     * Shadow method used to do a cast operation on the parent method to return WfsLayerConfig instead of
      * AbstractGeoviewLayerConfig.
      *
-     * @returns {WmsLayerConfig} The Geoview layer configuration that owns this WFS layer entry config.
+     * @returns {WfsLayerConfig} The Geoview layer configuration that owns this WFS layer entry config.
      * @override @async
      */
-    getGeoviewLayerConfig(): WmsLayerConfig;
+    getGeoviewLayerConfig(): WfsLayerConfig;
     /**
      * This method is used to fetch, parse and extract the relevant information from the metadata of the leaf node.
      * The same method signature is used by layer group nodes and leaf nodes (layers).
-     * @override
+     * @override @async
      */
     fetchLayerMetadata(): Promise<void>;
     /**
