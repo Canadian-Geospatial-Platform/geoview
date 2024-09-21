@@ -53,13 +53,19 @@ export class ConfigApi {
    * @returns {string | undefined} The GeoView layer type or undefined if it cannot be guessed.
    */
   static guessLayerType(url: string): string | undefined {
-    const upperUrl = url.toUpperCase();
+    if (!url) return undefined;
+
+    const urlItems = url.toUpperCase().split('?');
+    const [upperUrl] = urlItems;
+    const upperParams = urlItems[1] || '';
+    const upperParamArray = upperParams ? upperParams.split('&') : [];
     const urlTokens = upperUrl.split('/');
     const layerIdString = urlTokens[urlTokens.length - 1];
     // GV: Important - Testing for NaN after parseInt is not a good way to check whether a string is a number, as parseInt('1a2', 10)
     // GV: returns 1 instead of NaN. To be detected as NaN, the string passed to parseInt must not begin with a number.
     // GV: Regex /^\d+$/ is used instead to check whether a string is a number.
     const layerId = /^\d+$/.test(layerIdString) ? parseInt(layerIdString, 10) : Number.NaN;
+
     if (upperUrl.endsWith('MAPSERVER') || upperUrl.endsWith('MAPSERVER/')) return CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
     if (upperUrl.indexOf('FEATURESERVER') !== -1 || (upperUrl.indexOf('MAPSERVER') !== -1 && !Number.isNaN(layerId)))
@@ -67,19 +73,23 @@ export class ConfigApi {
 
     if (upperUrl.indexOf('IMAGESERVER') !== -1) return CV_CONST_LAYER_TYPES.ESRI_IMAGE;
 
-    if (urlTokens.indexOf('WFS') !== -1) return CV_CONST_LAYER_TYPES.WFS;
+    if (upperParamArray.indexOf('SERVICE=WFS') !== -1 || upperUrl.indexOf('WFS') !== -1) return CV_CONST_LAYER_TYPES.WFS;
 
-    if (upperUrl.endsWith('.JSON') || upperUrl.endsWith('.GEOJSON')) return CV_CONST_LAYER_TYPES.GEOJSON;
+    if (upperUrl.endsWith('.META') || upperUrl.endsWith('.JSON') || upperUrl.endsWith('.GEOJSON')) return CV_CONST_LAYER_TYPES.GEOJSON;
 
     if (upperUrl.endsWith('.GPKG')) return CV_CONST_LAYER_TYPES.GEOPACKAGE;
+
+    if (upperUrl.includes('VECTORTILESERVER')) return CV_CONST_LAYER_TYPES.VECTOR_TILES;
 
     if (upperUrl.indexOf('{Z}/{X}/{Y}') !== -1 || upperUrl.indexOf('{Z}/{Y}/{X}') !== -1) return CV_CONST_LAYER_TYPES.XYZ_TILES;
 
     if (ConfigApi.isValidUUID(url)) return CV_CONFIG_GEOCORE_TYPE;
 
-    if (upperUrl.indexOf('WMS') !== -1) return CV_CONST_LAYER_TYPES.WMS;
+    if (upperParamArray.indexOf('SERVICE=WMS') !== -1 || upperUrl.indexOf('WMS') !== -1) return CV_CONST_LAYER_TYPES.WMS;
 
     if (upperUrl.endsWith('.CSV')) return CV_CONST_LAYER_TYPES.CSV;
+
+    if (upperUrl.includes('COLLECTIONS')) return CV_CONST_LAYER_TYPES.OGC_FEATURE;
 
     return undefined;
   }
@@ -500,6 +510,7 @@ export class ConfigApi {
 
   /**
    * Create the layer tree from the service metadata. If an error is detected, throw an error.
+   * When listOfLayerId is [], then the entire metadata layer tree is returned.
    *
    * @param {string} serviceAccessString The service access string (a URL or a layer identifier).
    * @param {TypeGeoviewLayerType | CV_CONFIG_GEOCORE_TYPE} layerType The GeoView layer type or 'geoCore'.

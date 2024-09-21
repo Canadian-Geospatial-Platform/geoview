@@ -13,7 +13,7 @@
       {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": { "en": "GeoJSON Sample" },
-        "metadataAccessPath": { "en": "./datasets/geojson/metadata-new.json" },
+        "metadataAccessPath": { "en": "./datasets/geojson/metadata-new.meta" },
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {

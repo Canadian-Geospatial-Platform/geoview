@@ -181,6 +181,7 @@
     {
       "layerId": "pointGroup1",
       "layerName": "Point Group 1",
+      "bounds": [77, 47, 66, 55],
       "isLayerGroup": true,
       "listOfLayerEntryConfig": [
         {

@@ -69,7 +69,7 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * AbstractGeoviewLayerConfig.
    *
    * @returns {GeoJsonLayerConfig} The Geoview layer configuration that owns this GeoJson layer entry config.
-   * @override @async
+   * @override
    */
   override getGeoviewLayerConfig(): GeoJsonLayerConfig {
     return super.getGeoviewLayerConfig() as GeoJsonLayerConfig;
@@ -83,6 +83,11 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   override fetchLayerMetadata(): Promise<void> {
     // If an error has already been detected, then the layer is unusable.
     if (this.getErrorDetectedFlag()) return Promise.resolve();
+
+    if (Object.keys(this.getGeoviewLayerConfig().getServiceMetadata()).length === 0) {
+      this.setLayerMetadata({});
+      return Promise.resolve();
+    }
 
     const layerMetadata = this.getGeoviewLayerConfig().findLayerMetadataEntry(this.layerId);
     if (layerMetadata) {

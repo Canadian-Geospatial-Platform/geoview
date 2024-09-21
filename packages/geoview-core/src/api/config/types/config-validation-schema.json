@@ -1134,11 +1134,11 @@
       ]
     },
     "GeoJsonLayerEntryConfig": {
-      "description": "Class from which we derive all the ESRI Feature leaf nodes in the layer tree.",
+      "description": "Class from which we derive all the GeoJson leaf nodes in the layer tree.",
       "type": "object",
       "allOf": [
         {
-          "description": "The actual parent class is AbstractBaseEsriLayerEntryConfig, whose parent class is AbstractBaseLayerEntryConfig. Both classes have the same properties.",
+          "description": "The parent class.",
           "$ref": "#/definitions/AbstractBaseLayerEntryConfig"
         },
         {
