@@ -69,7 +69,7 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * AbstractGeoviewLayerConfig.
    *
    * @returns {GeoJsonLayerConfig} The Geoview layer configuration that owns this GeoJson layer entry config.
-   * @override @async
+   * @override
    */
   override getGeoviewLayerConfig(): GeoJsonLayerConfig {
     return super.getGeoviewLayerConfig() as GeoJsonLayerConfig;
