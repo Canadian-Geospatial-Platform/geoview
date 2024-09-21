@@ -122,28 +122,28 @@ export abstract class EntryConfigBaseClass {
   // ================
   // #region ABSTRACT
   /**
-   * @protected @abstract
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
    * used to do its validation.
    *
    * @returns {string} The schemaPath associated to the sublayer.
+   * @protected @abstract
    */
   protected abstract getSchemaPath(): string;
 
   /**
-   * @protected @abstract
    * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
    *
    * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
+   * @protected @abstract
    */
   protected abstract getEntryType(): TypeLayerEntryType;
 
   /**
-   * @abstract
    * Fetch the layer metadata from the metadataAccessPath and store it in a private variable of the sublayer.
    * The same method signature is used by layer group nodes and leaf nodes (layers).
    *
    * @returns {Promise<void>} A Promise that will resolve when the execution will be completed.
+   * @abstract
    */
   abstract fetchLayerMetadata(): Promise<void>;
 
@@ -152,8 +152,18 @@ export abstract class EntryConfigBaseClass {
   // =================
   // #region PROTECTED
   /**
+   * The getter method that returns the language used to create the  sublayer.
+   *
+   * @returns {TypeDisplayLanguage} The language associated to the config.
    * @protected
+   */
+  protected getLanguage(): TypeDisplayLanguage {
+    return this.#language;
+  }
+
+  /**
    * Validate the node configuration using the schema associated to its layer type.
+   * @protected
    */
   protected validateLayerConfig(layerConfig: TypeJsonObject): void {
     if (!isvalidComparedToInputSchema(this.getSchemaPath(), layerConfig)) this.setErrorDetectedFlag();

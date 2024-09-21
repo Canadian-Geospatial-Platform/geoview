@@ -1133,6 +1133,27 @@
         }
       ]
     },
+    "GeoJsonLayerEntryConfig": {
+      "description": "Class from which we derive all the ESRI Feature leaf nodes in the layer tree.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The actual parent class is AbstractBaseEsriLayerEntryConfig, whose parent class is AbstractBaseLayerEntryConfig. Both classes have the same properties.",
+          "$ref": "#/definitions/AbstractBaseLayerEntryConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "source": {
+              "$ref": "#/definitions/TypeBaseVectorSourceInitialConfig"
+            },
+            "style": {
+              "$ref": "#/definitions/TypeStyleConfig"
+            }
+          }
+        }
+      ]
+    },
     "WmsLayerEntryConfig": {
       "description": "Class from which we derive all the WMS leaf nodes in the layer tree.",
       "type": "object",
