@@ -348,6 +348,7 @@ export { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-con
 export { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/esri-feature-layer-entry-config';
 export { WmsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
 export { WfsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
+export { GeoJsonLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
 
 /** Valid keys for the geometryType property. */
 export type TypeStyleGeometry = 'point' | 'linestring' | 'polygon';
@@ -452,6 +453,9 @@ export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | '
 
 /** Type from which we derive the source properties for all the ESRI feature leaf nodes in the layer tree. */
 export type TypeSourceEsriFeatureInitialConfig = TypeBaseVectorSourceInitialConfig;
+
+/** Type from which we derive the source properties for all the GeoJson feature leaf nodes in the layer tree. */
+export type TypeSourceGeoJsonInitialConfig = TypeBaseVectorSourceInitialConfig;
 
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {

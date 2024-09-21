@@ -7,8 +7,11 @@ import { GeoJsonLayerEntryConfig } from '@config/types/classes/sub-layer-config/
 import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
 
-import { logger } from '@/core/utils/logger';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+import { mergeWith } from 'lodash';
+import { logger } from '@/core/utils/logger';
+import { createLocalizedString } from '@/core/utils/utilities';
+import { Cast } from '@/app';
 
 export type TypeGeoJsonLayerNode = GeoJsonGroupLayerConfig | GeoJsonLayerEntryConfig;
 
@@ -137,8 +140,13 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
       throw new GeoviewLayerInvalidParameterError('LayerIdNotFound', [layerId?.toString()]);
     }
 
-    if (layerEntryIsGroupLayer(layerFound)) return this.createGroupNode(layerFound, this.getLanguage(), this, parentNode);
-    return this.createLeafNode(layerFound, this.getLanguage(), this, parentNode)!;
+    const layerConfig = mergeWith({}, layerFound, (destValue, sourceValue, key) => {
+      if (key === 'layerName') return createLocalizedString(sourceValue);
+      return undefined;
+    });
+
+    if (layerEntryIsGroupLayer(layerFound)) return this.createGroupNode(layerConfig, this.getLanguage(), this, parentNode);
+    return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
   }
 
   /**
@@ -148,9 +156,22 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    * @protected @override
    */
   protected override createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[] {
-    const layerTree = this.getServiceMetadata().listOfLayerEntryConfig;
-    if (layerEntryIsGroupLayer(layerTree)) return [this.createGroupNode(layerTree, this.getLanguage(), this)];
-    return [this.createLeafNode(layerTree, this.getLanguage(), this)!];
+    let layerTree = this.getServiceMetadata().listOfLayerEntryConfig as TypeJsonArray;
+    if (layerTree.length > 1)
+      layerTree = Cast<TypeJsonArray>({
+        layerId: this.geoviewLayerId,
+        layerName: 'Layer Tree',
+        isLayerGroup: true,
+        listOfLayerEntryConfig: layerTree,
+      });
+
+    const layerConfig = mergeWith({}, layerTree, (destValue, sourceValue, key) => {
+      if (key === 'layerName') return createLocalizedString(sourceValue);
+      return undefined;
+    }) as TypeJsonObject;
+
+    if (layerEntryIsGroupLayer(layerConfig)) return [this.createGroupNode(layerConfig, this.getLanguage(), this)];
+    return [this.createLeafNode(layerConfig, this.getLanguage(), this)!];
   }
   // #endregion OVERRIDE
 
@@ -163,22 +184,25 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    *
    * @returns {TypeJsonObject | null} The found layer from the capabilities or null if not found.
    */
-  findLayerMetadataEntry(layerId: string, listOfLayerEntryConfig = this.getServiceMetadata().listOfLayerEntryConfig as TypeJsonArray): TypeJsonObject | null {
+  findLayerMetadataEntry(
+    layerId: string,
+    listOfLayerEntryConfig = this.getServiceMetadata().listOfLayerEntryConfig as TypeJsonArray
+  ): TypeJsonObject | null {
     return listOfLayerEntryConfig.reduce((layerFound, layerEntry) => {
       if (layerFound) return layerFound;
-  
+
       if (layerEntry.layerId === layerId) {
-        return layerEntry; 
+        return layerEntry;
       }
-  
+
       if (layerEntry.isLayerGroup || layerEntry.entryType === CV_CONST_SUB_LAYER_TYPES.GROUP) {
         return this.findLayerMetadataEntry(layerId, layerEntry.listOfLayerEntryConfig as TypeJsonArray);
       }
-  
+
       return null;
     }, null as TypeJsonObject | null);
   }
-  
+
   // #endregion PUBLIC
   // #endregion METHODS
   // #endregion CLASS HEADER

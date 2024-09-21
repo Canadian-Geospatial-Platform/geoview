@@ -1,5 +1,4 @@
 import cloneDeep from 'lodash/cloneDeep';
-import mergeWith from 'lodash/mergeWith';
 
 import { CV_DEFAULT_MAP_FEATURE_CONFIG, CV_CONFIG_GEOCORE_TYPE, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
 import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray, Cast } from '@config/types/config-types';
@@ -543,20 +542,6 @@ export class ConfigApi {
               layerName: jsonData.title,
             }),
           ];
-        return [];
-        break;
-      case 'GeoJSON':
-        if (
-          serviceAccessString.toLowerCase().split('?')[0].endsWith('.json') ||
-          serviceAccessString.toLowerCase().split('?')[0].endsWith('.geojson')
-        ) {
-          jsonData = await fetchJsonMetadata(serviceAccessString.split('?')[0]);
-          jsonData = mergeWith(jsonData, cloneDeep(jsonData), (property, sourceValue) => {
-            if (property.en || property.fr) return sourceValue[language] || sourceValue.en || sourceValue.fr;
-            return undefined;
-          });
-          return Cast<EntryConfigBaseClass[]>(jsonData.listOfLayerEntryConfig);
-        }
         return [];
         break;
       case 'CSV':
