@@ -103,7 +103,11 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
   override async fetchServiceMetadata(): Promise<void> {
     try {
       if (this.metadataAccessPath.toLowerCase().endsWith('.json') || this.metadataAccessPath.toLowerCase().endsWith('.geojson')) {
-        const layerMetadata = (await (await fetch(this.metadataAccessPath)).json()) as TypeJsonObject;
+        const fetchResponse = await fetch(this.metadataAccessPath);
+        if (fetchResponse.status === 404) throw new GeoviewLayerConfigError('The service metadata fetch returned a 404 status (Not Found)');
+        const layerMetadata = (await fetchResponse.json()) as TypeJsonObject;
+        const metadataAccessPathElements = this.metadataAccessPath.split('/');
+        this.metadataAccessPath = metadataAccessPathElements.slice(0, metadataAccessPathElements.length - 1).join('/');
         if (layerMetadata) this.setServiceMetadata(layerMetadata);
         else throw new GeoviewLayerConfigError('The metadata object returned is undefined');
       } else {
@@ -156,7 +160,8 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    * @protected @override
    */
   protected override createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[] {
-    let layerTree = this.getServiceMetadata().listOfLayerEntryConfig as TypeJsonArray;
+    let layerTree = this.getServiceMetadata()?.listOfLayerEntryConfig as TypeJsonArray;
+    if (!layerTree) return [];
     if (layerTree.length > 1)
       layerTree = Cast<TypeJsonArray>({
         layerId: this.geoviewLayerId,
