@@ -545,17 +545,6 @@ export class ConfigApi {
           ];
         return [];
         break;
-      case 'esriImage':
-        jsonData = await fetchJsonMetadata(serviceAccessString);
-        if (jsonData.name)
-          return [
-            Cast<EntryConfigBaseClass>({
-              layerId: jsonData.name,
-              layerName: jsonData.name,
-            }),
-          ];
-        return [];
-        break;
       case 'GeoJSON':
         if (
           serviceAccessString.toLowerCase().split('?')[0].endsWith('.json') ||

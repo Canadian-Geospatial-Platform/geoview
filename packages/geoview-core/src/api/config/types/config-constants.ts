@@ -57,11 +57,11 @@ export const CV_CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> =
  */
 export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/EsriDynamicLayerEntryConfig',
+  ESRI_IMAGE: 'https://cgpv/schema#/definitions/EsriImageLayerEntryConfig',
   ESRI_FEATURE: 'https://cgpv/schema#/definitions/EsriFeatureLayerEntryConfig',
   WMS: 'https://cgpv/schema#/definitions/WmsLayerEntryConfig',
   WFS: 'https://cgpv/schema#/definitions/WfsLayerEntryConfig',
 
-  ESRI_IMAGE: 'https://cgpv/schema#/definitions/EsriImageLayerEntryConfig',
   IMAGE_STATIC: 'https://cgpv/schema#/definitions/ImageStaticLayerEntryConfig',
   GEOJSON: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
   GEOPACKAGE: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
@@ -73,11 +73,11 @@ export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
 
 export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/EsriDynamicLayerConfig',
+  ESRI_IMAGE: 'https://cgpv/schema#/definitions/EsriImageLayerConfig',
   ESRI_FEATURE: 'https://cgpv/schema#/definitions/EsriFeatureLayerConfig',
   WMS: 'https://cgpv/schema#/definitions/WmsLayerConfig',
   WFS: 'https://cgpv/schema#/definitions/WfsLayerConfig',
 
-  ESRI_IMAGE: '',
   IMAGE_STATIC: '',
   GEOJSON: '',
   GEOPACKAGE: '',
