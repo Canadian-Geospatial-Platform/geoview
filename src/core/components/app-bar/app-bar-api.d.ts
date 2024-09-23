@@ -79,7 +79,7 @@ export declare class AppBarApi {
      * @param {string} tabGroup - The id of the panel
      * @param {boolean} open - Open (true) or closed (false) panel: default = true
      */
-    selectAppBarTab(tabId: string, tabGroup: string, open?: boolean): void;
+    selectAppBarTab(tabId: string, tabGroup: string, open?: boolean, isFocusTrapped?: boolean): void;
 }
 /**
  * Define an event for the delegate

@@ -1,28 +1,20 @@
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { WmsGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/wms-group-layer-config';
+import { WfsGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/wfs-group-layer-config';
 import { TypeJsonObject } from '@config/types/config-types';
 import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { WmsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
+import { WfsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
 import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
-export type TypeWmsLayerNode = WmsGroupLayerConfig | WmsLayerEntryConfig;
+export type TypeWfsLayerNode = WfsGroupLayerConfig | WfsLayerEntryConfig;
 /**
- * The WMS geoview layer class.
+ * The WFS geoview layer class.
  */
-export declare class WmsLayerConfig extends AbstractGeoviewLayerConfig {
-    #private;
+export declare class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     /**
      * Type of GeoView layer.
      */
     geoviewLayerType: import("@config/types/map-schema-types").TypeGeoviewLayerType;
     /** The layer entries to use from the GeoView layer. */
-    listOfLayerEntryConfig: TypeWmsLayerNode[];
-    /**
-     * The class constructor.
-     *
-     * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
-     */
-    constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage);
+    listOfLayerEntryConfig: EntryConfigBaseClass[] | TypeWfsLayerNode[];
     /**
      * The getter method that returns the geoview layer schema to use for the validation. Each geoview layer type knows what
      * section of the schema must be used to do its validation.
@@ -58,9 +50,7 @@ export declare class WmsLayerConfig extends AbstractGeoviewLayerConfig {
      */
     createGroupNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
     /**
-     * Get the service metadata from the metadataAccessPath and store it in a protected property of the geoview layer.
-     * Verify that all sublayers defined in the listOfLayerEntryConfig exist in the metadata and fetch all sublayers metadata.
-     * If the metadata layer tree property is defined, build it using the service metadata.
+     * Get the service metadata from the metadataAccessPath and store it in the private property of the geoview layer.
      * @override @async
      */
     fetchServiceMetadata(): Promise<void>;
@@ -72,23 +62,41 @@ export declare class WmsLayerConfig extends AbstractGeoviewLayerConfig {
      */
     protected createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[];
     /**
-     * Create a layer entry node for a specific layerId using the service metadata. The node returned can be a
-     * layer or a group layer.
+     * Create a layer entry node for a specific layerId using the service metadata. The node returned can only be a
+     * layer because the concept of group layer doesn't exist in WFS.
      *
      * @param {string} layerId The layer id to use for the subLayer creation.
-     * @param {TypeWmsLayerNode | undefined} parentNode The layer's parent node.
+     * @param {EntryConfigBaseClass | undefined} parentNode The layer's parent node.
      *
-     * @returns {TypeWmsLayerNode} The subLayer created from the metadata.
+     * @returns {EntryConfigBaseClass} The subLayer created from the metadata.
      * @protected @override
      */
     protected createLayerEntryNode(layerId: string, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass;
+    /**
+     * Process URL parameters. If a parameter is not provided by the user, a default value will be used.
+     * Defaults are: service=WFS
+     *               request=GetCapabilities
+     *               version=2.0.0
+     *
+     * @param {string} requestToExecute The request to execute (default=GetCapabilities).
+     *
+     * @returns {string} The new URL.
+     * @public
+     */
+    processUrlParameters(requestToExecute?: string): string;
+    /**
+     * Extract the WFS version from the URL provided by the user. If version is unspecified, version 2.0.0 will be used.
+     *
+     * @returns {string} The version number.
+     * @public
+     */
+    getWfsVersion(): string;
     /** ****************************************************************************************************************************
      * This method search recursively the layerId in the layer entry of the capabilities.
      *
      * @param {string} layerId The layer identifier that must exists on the server.
-     * @param {TypeJsonObject | undefined} layer The layer entry from the capabilities that will be searched.
      *
      * @returns {TypeJsonObject | null} The found layer from the capabilities or null if not found.
      */
-    findLayerMetadataEntry(layerId: string, layer?: TypeJsonObject | undefined): TypeJsonObject | null;
+    findLayerMetadataEntry(layerId: string): TypeJsonObject | null;
 }

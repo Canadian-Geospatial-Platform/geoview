@@ -6,6 +6,7 @@ export type ActiveAppBarTabType = {
     tabId: string;
     tabGroup: string;
     isOpen: boolean;
+    isFocusTrapped?: boolean;
 };
 export interface IUIState {
     activeFooterBarTabId: string;
@@ -28,7 +29,7 @@ export interface IUIState {
         disableFocusTrap: () => void;
         showTab: (tab: string) => void;
         setActiveFooterBarTab: (id: string) => void;
-        setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
+        setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
         setMapInfoExpanded: (expanded: boolean) => void;
@@ -39,7 +40,7 @@ export interface IUIState {
         enableFocusTrap: (uiFocus: FocusItemProps) => void;
         disableFocusTrap: () => void;
         setActiveFooterBarTab: (id: string) => void;
-        setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
+        setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
         setHiddenTabs: (hiddenTabs: string[]) => void;

@@ -4,7 +4,7 @@ import Style from 'ol/style/Style';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import Feature, { FeatureLike } from 'ol/Feature';
+import { FeatureLike } from 'ol/Feature';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
@@ -25,7 +25,7 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * Overrides the get of the OpenLayers Layer
      * @returns {VectorLayer<Feature>} The OpenLayers Layer
      */
-    getOLLayer(): VectorLayer<Feature>;
+    getOLLayer(): VectorLayer<VectorSource>;
     /**
      * Overrides the get of the OpenLayers Layer Source
      * @returns {VectorSource} The OpenLayers Layer Source

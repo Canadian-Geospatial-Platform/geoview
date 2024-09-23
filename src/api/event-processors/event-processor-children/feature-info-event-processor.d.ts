@@ -20,7 +20,20 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
      */
     protected static getFeatureInfoState(mapId: string): IFeatureInfoState;
     /**
-     * Deletes the specified layer path from the layer sets in the store.The update of the array will also trigger an update in a batched manner.
+     * Get the selectedLayerPath value
+     * @param {string} mapId - The map identifier
+     * @returns {string}} the selected layer path
+     */
+    static getSelectedLayerPath(mapId: string): string;
+    /**
+     * Deletes the feature from a resultSet for a specific layerPath. At the same time it check for
+     * removing the higlight and the click marker if selected layer path is the reset path
+     * @param {string} mapId - The map identifier
+     * @param {string} layerPath - The layer path to delete features from resultSet
+     */
+    static resetResultSet(mapId: string, layerPath: string): void;
+    /**
+     * Deletes the specified layer path from the layer sets in the store. The update of the array will also trigger an update in a batched manner.
      * @param {string} mapId - The map identifier
      * @param {string} layerPath - The layer path to delete
      * @returns {Promise<void>}
