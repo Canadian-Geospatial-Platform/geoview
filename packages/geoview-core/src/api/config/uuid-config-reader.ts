@@ -42,15 +42,15 @@ export class UUIDmapConfigReader {
    */
   static #getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject[] {
     // If invalid response
-    if (!result?.data || !result.data.reponse || !result.data.reponse.rcs || !result.data.reponse.rcs[lang]) {
+    if (!result?.data || !result.data.response || !result.data.response.rcs || !result.data.response.rcs[lang]) {
       const errorMessage = result?.data?.errorMessage || '';
       throw new Error(`Invalid response from GeoCore service\n${errorMessage}\n`);
     }
-    if (result.data.reponse.rcs[lang].length === 0) throw new Error('No layers returned by GeoCore service');
+    if (result.data.response.rcs[lang].length === 0) throw new Error('No layers returned by GeoCore service');
 
     const listOfGeoviewLayerConfig: TypeJsonObject[] = [];
-    for (let i = 0; i < (result.data.reponse.rcs[lang] as TypeJsonArray).length; i++) {
-      const data = result.data.reponse.rcs[lang][i];
+    for (let i = 0; i < (result.data.response.rcs[lang] as TypeJsonArray).length; i++) {
+      const data = result.data.response.rcs[lang][i];
 
       if (data?.layers && (data.layers as TypeJsonArray).length > 0) {
         const layer = data.layers[0];

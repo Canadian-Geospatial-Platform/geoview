@@ -71,13 +71,13 @@ export class UUIDmapConfigReader {
    */
   static #getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeGeoviewLayerConfig[] {
     // If invalid response
-    if (!result?.data || !result.data.reponse || !result.data.reponse.rcs || !result.data.reponse.rcs[lang])
+    if (!result?.data || !result.data.response || !result.data.response.rcs || !result.data.response.rcs[lang])
       throw new Error('Invalid response from GeoCore service');
-    if (result.data.reponse.rcs[lang].length === 0) throw new Error('No layers returned by GeoCore service');
+    if (result.data.response.rcs[lang].length === 0) throw new Error('No layers returned by GeoCore service');
 
     const listOfGeoviewLayerConfig: TypeGeoviewLayerConfig[] = [];
-    for (let i = 0; i < (result.data.reponse.rcs[lang] as TypeJsonArray).length; i++) {
-      const data = result.data.reponse.rcs[lang][i];
+    for (let i = 0; i < (result.data.response.rcs[lang] as TypeJsonArray).length; i++) {
+      const data = result.data.response.rcs[lang][i];
 
       if (data?.layers && (data.layers as TypeJsonArray).length > 0) {
         const layer = data.layers[0];
@@ -381,10 +381,10 @@ export class UUIDmapConfigReader {
    */
   static #getGeoChartConfigFromResponse(result: AxiosResponse<GeoChartGeoCoreConfig>, lang: string): GeoChartConfig[] {
     // If no geochart information
-    if (!result?.data || !result.data.reponse || !result.data.reponse.gcs || !Array.isArray(result.data.reponse.gcs)) return [];
+    if (!result?.data || !result.data.response || !result.data.response.gcs || !Array.isArray(result.data.response.gcs)) return [];
 
     // Find all Geochart configs
-    const foundConfigs = result.data.reponse.gcs
+    const foundConfigs = result.data.response.gcs
       .map((gcs) => gcs?.[lang]?.packages?.geochart as GeoChartGeoCoreConfig)
       .filter((geochartValue) => !!geochartValue);
 

@@ -507,7 +507,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         {fieldAlias && (
           <Grid item xs={12}>
             <Typography component="div" sx={{ px: '20px', py: '5px' }}>
-              {`${fieldAlias} (${field})`}
+              {`${getLocalizedMessage('timeSlider.slider.temporalField', displayLanguage)}${fieldAlias} (${field})`}
             </Typography>
           </Grid>
         )}
