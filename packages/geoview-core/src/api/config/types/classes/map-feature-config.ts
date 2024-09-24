@@ -129,6 +129,11 @@ export class MapFeatureConfig {
       // Default map config depends on map projection.
       defaultsDeep(gvMap, MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes))
     );
+
+    // Above code will add default zoomAndCenter, remove if other initial view is provided
+    if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)
+      delete this.map.viewSettings.initialView.zoomAndCenter;
+
     this.map.listOfGeoviewLayerConfig = this.map.listOfGeoviewLayerConfig
       .map((geoviewLayerConfig) => {
         return MapFeatureConfig.nodeFactory(toJsonObject(geoviewLayerConfig), this.#language);
