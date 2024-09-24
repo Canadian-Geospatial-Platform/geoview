@@ -87,6 +87,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   override applyDefaultValues(): void {
     super.applyDefaultValues();
     this.source = {
+      strategy: 'all',
       maxRecordCount: 0,
       format: 'EsriJSON',
       projection: 3978,

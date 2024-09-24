@@ -879,6 +879,24 @@
         }
       ]
     },
+    "GeoJsonLayerConfig": {
+      "description": "Structure used by the viewer to describe the configuration of a GeoJSON layer.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractGeoviewLayerConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "geoviewLayerType": {
+              "enum": ["GeoJSON"]
+            }
+          }
+        }
+      ]
+    },
     "EntryConfigBaseClass": {
       "description": "Base class from which we derive all the nodes (group and leaves) in the layer tree.",
       "type": "object",
@@ -1107,6 +1125,27 @@
             },
             "source": {
               "$ref": "#/definitions/TypeSourceEsriFeatureInitialConfig"
+            },
+            "style": {
+              "$ref": "#/definitions/TypeStyleConfig"
+            }
+          }
+        }
+      ]
+    },
+    "GeoJsonLayerEntryConfig": {
+      "description": "Class from which we derive all the GeoJson leaf nodes in the layer tree.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractBaseLayerEntryConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "source": {
+              "$ref": "#/definitions/TypeBaseVectorSourceInitialConfig"
             },
             "style": {
               "$ref": "#/definitions/TypeStyleConfig"

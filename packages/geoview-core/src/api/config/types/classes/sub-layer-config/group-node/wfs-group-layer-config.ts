@@ -5,7 +5,7 @@ import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions
 // ========================
 // #region CLASS HEADER
 /**
- * Base type used to define the common implementation of an ESRI GeoView sublayer to display on the map.
+ * Base type used to define the common implementation of a WFS GeoView sublayer to display on the map.
  */
 export class WfsGroupLayerConfig extends GroupLayerEntryConfig {
   // ===============

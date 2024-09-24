@@ -236,7 +236,7 @@ export abstract class AbstractGeoviewLayerConfig {
   /**
    * The getter method that returns the language used to create the geoview layer.
    *
-   * @returns {TypeDisplayLanguage} The GeoView layer schema associated to the config.
+   * @returns {TypeDisplayLanguage} The language associated to the config.
    * @protected
    */
   protected getLanguage(): TypeDisplayLanguage {

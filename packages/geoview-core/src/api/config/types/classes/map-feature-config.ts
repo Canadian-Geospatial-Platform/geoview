@@ -8,6 +8,7 @@ import { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vec
 import { EsriImageLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-image-config';
 import { WmsLayerConfig } from '@config/types/classes/geoview-config/raster-config/wms-config';
 import { WfsLayerConfig } from '@config/types/classes/geoview-config/vector-config/wfs-config';
+import { GeoJsonLayerConfig } from '@config/types/classes/geoview-config/vector-config/geojson-config';
 import {
   CV_BASEMAP_ID,
   CV_BASEMAP_LABEL,
@@ -452,10 +453,10 @@ export class MapFeatureConfig {
         return new WmsLayerConfig(layerConfig, language);
       case CV_CONST_LAYER_TYPES.WFS:
         return new WfsLayerConfig(layerConfig, language);
+      case CV_CONST_LAYER_TYPES.GEOJSON:
+        return new GeoJsonLayerConfig(layerConfig, language);
       // case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
       //   return new EsriImageLayerConfig(layerConfig, language);
-      // case CV_CONST_LAYER_TYPES.GEOJSON:
-      //   return new GeojsonLayerConfig(layerConfig, language);
       // case CV_CONST_LAYER_TYPES.GEOPACKAGE:
       //   return new GeopackageLayerConfig(layerConfig, language);
       // case CV_CONST_LAYER_TYPES.XYZ_TILES:

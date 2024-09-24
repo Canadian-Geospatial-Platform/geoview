@@ -61,9 +61,9 @@ export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   ESRI_FEATURE: 'https://cgpv/schema#/definitions/EsriFeatureLayerEntryConfig',
   WMS: 'https://cgpv/schema#/definitions/WmsLayerEntryConfig',
   WFS: 'https://cgpv/schema#/definitions/WfsLayerEntryConfig',
+  GEOJSON: 'https://cgpv/schema#/definitions/GeoJsonLayerEntryConfig',
 
   IMAGE_STATIC: 'https://cgpv/schema#/definitions/ImageStaticLayerEntryConfig',
-  GEOJSON: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
   GEOPACKAGE: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
   XYZ_TILES: 'https://cgpv/schema#/definitions/TileLayerEntryConfig',
   VECTOR_TILES: 'Thttps://cgpv/schema#/definitions/TileLayerEntryConfig',
@@ -77,9 +77,9 @@ export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   ESRI_FEATURE: 'https://cgpv/schema#/definitions/EsriFeatureLayerConfig',
   WMS: 'https://cgpv/schema#/definitions/WmsLayerConfig',
   WFS: 'https://cgpv/schema#/definitions/WfsLayerConfig',
+  GEOJSON: 'https://cgpv/schema#/definitions/GeoJsonLayerConfig',
 
   IMAGE_STATIC: '',
-  GEOJSON: '',
   GEOPACKAGE: '',
   XYZ_TILES: '',
   VECTOR_TILES: '',
