@@ -35,7 +35,6 @@ export type TypeMapContext = {
  */
 interface AppStartProps {
   mapFeaturesConfig: TypeMapFeaturesConfig;
-  // eslint-disable-next-line react/require-default-props
   onMapViewerInit?: (mapViewer: MapViewer) => void;
 }
 
@@ -75,16 +74,8 @@ function AppStart(props: AppStartProps): JSX.Element {
     // TODO: use store, remove the use of feature by viewer class and use state to gather values
     if (!(mapId in api.maps)) {
       const mapViewer = new MapViewer(mapFeaturesConfig, i18nInstance);
-      api.maps[mapId] = mapViewer;
+      api.setMapViewer(mapId, mapViewer, onMapViewerInit);
     }
-
-    // Register a handler (which will only happen once) for when the map viewer will get initialized.
-    // At the time of writing, this happens later, asynchronously, via the components/map/map.tsx when 'MapViewer.initMap()' is called.
-    // That should be fixed eventually, but that refactoring is out of the scope at the time of writing. So, I'm doing like this for now.
-    api.maps[mapId].onMapInit((mapViewer) => {
-      // MapViewer has been created and initialized, callback about it
-      onMapViewerInit?.(mapViewer);
-    });
 
     return (
       <I18nextProvider i18n={i18nInstance}>
