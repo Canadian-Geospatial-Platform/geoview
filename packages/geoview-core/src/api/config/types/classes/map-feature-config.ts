@@ -5,8 +5,10 @@ import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
 import { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vector-config/esri-feature-config';
+import { EsriImageLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-image-config';
 import { WmsLayerConfig } from '@config/types/classes/geoview-config/raster-config/wms-config';
 import { WfsLayerConfig } from '@config/types/classes/geoview-config/vector-config/wfs-config';
+import { GeoJsonLayerConfig } from '@config/types/classes/geoview-config/vector-config/geojson-config';
 import {
   CV_BASEMAP_ID,
   CV_BASEMAP_LABEL,
@@ -128,6 +130,11 @@ export class MapFeatureConfig {
       // Default map config depends on map projection.
       defaultsDeep(gvMap, MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes))
     );
+
+    // Above code will add default zoomAndCenter, remove if other initial view is provided
+    if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)
+      delete this.map.viewSettings.initialView.zoomAndCenter;
+
     this.map.listOfGeoviewLayerConfig = this.map.listOfGeoviewLayerConfig
       .map((geoviewLayerConfig) => {
         return MapFeatureConfig.nodeFactory(toJsonObject(geoviewLayerConfig), this.#language);
@@ -445,24 +452,26 @@ export class MapFeatureConfig {
         return new EsriDynamicLayerConfig(layerConfig, language);
       case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
         return new EsriFeatureLayerConfig(layerConfig, language);
+      case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
+        return new EsriImageLayerConfig(layerConfig, language);
       case CV_CONST_LAYER_TYPES.WMS:
         return new WmsLayerConfig(layerConfig, language);
       case CV_CONST_LAYER_TYPES.WFS:
         return new WfsLayerConfig(layerConfig, language);
-      // case CONST_LAYER_TYPES.ESRI_IMAGE:
-      //   return new EsriImageLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.GEOJSON:
-      //   return new GeojsonLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.GEOPACKAGE:
-      //   return new GeopackageLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.XYZ_TILES:
-      //   return new XyzLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.VECTOR_TILES:
-      //   return new VectorTileLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.OGC_FEATURE:
-      //   return new OgcFeatureLayerConfig(layerConfig);
-      // case CONST_LAYER_TYPES.CSV:
-      //   return new CsvLayerConfig(layerConfig);
+      case CV_CONST_LAYER_TYPES.GEOJSON:
+        return new GeoJsonLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
+      //   return new EsriImageLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.GEOPACKAGE:
+      //   return new GeopackageLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.XYZ_TILES:
+      //   return new XyzLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.VECTOR_TILES:
+      //   return new VectorTileLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.OGC_FEATURE:
+      //   return new OgcFeatureLayerConfig(layerConfig, language);
+      // case CV_CONST_LAYER_TYPES.CSV:
+      //   return new CsvLayerConfig(layerConfig, language);
       default:
         // TODO: Restore the commented line and remove the next line when we have converted our code to the new framework.
         // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);

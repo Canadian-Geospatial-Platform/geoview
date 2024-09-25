@@ -1,38 +1,32 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
-import { Cast } from '@config/types/config-types';
-import {
-  TypeStyleConfig,
-  TypeLayerEntryType,
-  TypeSourceEsriDynamicInitialConfig,
-  TypeEsriFormatParameter,
-  TypeValidMapProjectionCodes,
-} from '@config/types/map-schema-types';
+import { TypeLayerEntryType, TypeSourceEsriImageInitialConfig, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
 import { AbstractBaseEsriLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
-import { EsriBaseRenderer, createStyleUsingEsriRenderer } from '@/api/config/esri-renderer-parser';
 
-// ====================
+// ========================
 // #region CLASS HEADER
 /**
- * The ESRI dynamic geoview sublayer class.
+ * The ESRI Image geoview sublayer class.
  */
 
-export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfig {
+export class EsriImageLayerEntryConfig extends AbstractBaseEsriLayerEntryConfig {
   // ==================
   // #region PROPERTIES
-  /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeSourceEsriDynamicInitialConfig;
 
-  /** Style to apply to the raster layer. */
-  style?: TypeStyleConfig;
+  /** Source settings to apply to the GeoView image layer source at creation time. */
+  declare source: TypeSourceEsriImageInitialConfig;
+
   // #endregion PROPERTIES
 
   // ===============
   // #region METHODS
+
   /*
    * Methods are listed in the following order: abstract, override, private, protected, public and static.
    */
+
   // ================
   // #region OVERRIDE
+
   /**
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
    * used to do its validation.
@@ -41,7 +35,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
    * @protected @override
    */
   protected override getSchemaPath(): string {
-    return CV_CONST_LEAF_LAYER_SCHEMA_PATH.ESRI_DYNAMIC;
+    return CV_CONST_LEAF_LAYER_SCHEMA_PATH.ESRI_IMAGE;
   }
 
   /**
@@ -55,7 +49,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   }
 
   /** ***************************************************************************************************************************
-   * This method is used to parse the layer metadata and extract the style, source information and other properties.
+   * This method is used to parse the layer metadata and extract the source information and other properties.
    *
    * @protected @override
    */
@@ -64,19 +58,9 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
 
     const layerMetadata = this.getLayerMetadata();
 
-    this.source = {
-      maxRecordCount: (layerMetadata?.maxRecordCount || 0) as number,
-      // layerFilter?: is optional,
-      featureInfo: this.createFeatureInfoUsingMetadata(),
-      format: 'png' as TypeEsriFormatParameter,
-      transparent: true,
-      projection: layerMetadata.sourceSpatialReference.wkid as TypeValidMapProjectionCodes,
-    };
-
-    const renderer = Cast<EsriBaseRenderer>(layerMetadata.drawingInfo?.renderer);
-    if (renderer) this.style = createStyleUsingEsriRenderer(renderer);
-
-    this.processTemporalDimension(layerMetadata.timeInfo);
+    this.source.projection = (layerMetadata?.spatialReference?.latestWkid ||
+      layerMetadata?.sourceSpatialReference?.latestWkid ||
+      this.source.projection) as TypeValidMapProjectionCodes;
   }
 
   /**
@@ -88,14 +72,10 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   override applyDefaultValues(): void {
     super.applyDefaultValues();
     this.source = {
-      maxRecordCount: 0,
+      crossOrigin: 'anonymous',
       format: 'png',
+      transparent: true,
       projection: 3978,
-      featureInfo: {
-        queryable: false,
-        nameField: '',
-        outfields: [],
-      },
     };
   }
   // #endregion OVERRIDE

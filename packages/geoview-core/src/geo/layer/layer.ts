@@ -1201,7 +1201,7 @@ export class LayerApi {
         // Unregister layer
         this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath)!);
         // Remove from registered layers
-        delete this.#layerEntryConfigs[layerPath];
+        delete this.#layerEntryConfigs[registeredLayerPath];
       }
     });
 
@@ -1334,14 +1334,17 @@ export class LayerApi {
       // Get sublayerpaths and layerpaths from layer IDs.
       const subLayerPaths = Object.keys(this.#layerEntryConfigs).filter((layerPath) => layerPath.startsWith(layerId));
 
-      // Get max extents from all selected layers.
-      subLayerPaths.forEach((layerPath) => {
-        // Get the bounds for the layer path
-        const layerBounds = LegendEventProcessor.getLayerBounds(this.getMapId(), layerPath);
-        // If bounds has not yet been defined, set to this layers bounds.
-        if (!bounds.length && layerBounds) bounds = layerBounds;
-        else if (layerBounds) bounds = getMinOrMaxExtents(bounds, layerBounds);
-      });
+      if (subLayerPaths.length) {
+        // Get max extents from all selected layers.
+        subLayerPaths.forEach((layerPath) => {
+          // Get the bounds for the layer path
+          const layerBounds = LegendEventProcessor.getLayerBounds(this.getMapId(), layerPath);
+
+          // If bounds has not yet been defined, set to this layers bounds.
+          if (!bounds.length && layerBounds) bounds = layerBounds;
+          else if (layerBounds) bounds = getMinOrMaxExtents(bounds, layerBounds);
+        });
+      }
     });
 
     return bounds;

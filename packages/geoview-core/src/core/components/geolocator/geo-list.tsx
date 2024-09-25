@@ -49,7 +49,7 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
   /**
    * Transform the search value in search result with bold css.
    * @param {string} title list title in search result
-   * @param {string} searchValue value with user did the search
+   * @param {string} searchValue value that user search
    * @param {string} province province of the list title in search result
    * @returns {JSX.Element}
    */
@@ -58,19 +58,16 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
     // NOTE: Commenting out because it fires too often and leads console pollution.
     // logger.logTraceUseCallback('GEOLOCATOR - geolist - transformListTitle', _title, _searchValue, province);
 
-    const title = _title.toUpperCase();
-    const searchItem = _searchValue.toUpperCase();
-    const idx = title.indexOf(searchItem);
-    const len = searchItem.length;
-    if (!searchItem || idx === -1) return _title;
+    const searchPattern = `${_searchValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`.replace(/\s+/g, '[ ,]*');
+    const regex = new RegExp(searchPattern, 'i');
 
-    return (
-      <HtmlToReact
-        extraOptions={{ component: 'span' }}
-        itemOptions={{ component: 'span' }}
-        htmlContent={`${_title.slice(0, idx)}<b>${_title.slice(idx, idx + len)}</b>${_title.slice(idx + len)}${province}`}
-      />
-    );
+    let title = _title;
+    if (regex.test(_title)) {
+      // make matched substring bold.
+      title = _title.replace(regex, '<strong>$&</strong>');
+    }
+
+    return <HtmlToReact extraOptions={{ component: 'span' }} itemOptions={{ component: 'span' }} htmlContent={`${title} ${province}`} />;
   }, []);
 
   const handleZoomToGeoLocator = (latLng: [number, number], bbox: [number, number, number, number]): void => {
@@ -92,7 +89,7 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
         >
           <ListItem component="div" disablePadding>
             <ListItemButton onClick={() => handleZoomToGeoLocator([geoListItem.lng, geoListItem.lat], geoListItem.bbox)}>
-              <Grid container>
+              <Grid container sx={{ width: '100%' }}>
                 <Grid size={{ xs: 12, sm: 8 }}>
                   <Typography sx={sxClassesList.listStyle}>
                     {transformListTitle(

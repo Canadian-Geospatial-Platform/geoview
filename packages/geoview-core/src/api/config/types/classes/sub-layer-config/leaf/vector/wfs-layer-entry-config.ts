@@ -17,14 +17,14 @@ import { logger } from '@/core/utils/logger';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { findPropertyNameByRegex, xmlToJson } from '@/core/utils/utilities';
 
-// ========================
+// ====================
 // #region CLASS HEADER
 /**
  * The OGC WFS geoview sublayer class.
  */
 
 export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  // =========================
+  // ==================
   // #region PROPERTIES
   /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceWfsInitialConfig;
@@ -38,7 +38,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /*
    * Methods are listed in the following order: abstract, override, private, protected, public and static.
    */
-  // ==========================
+  // ================
   // #region OVERRIDE
 
   /**
@@ -225,8 +225,8 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       ).split(' ');
       const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])] as Extent;
 
-      this.initialSettings!.extent = validateExtentWhenDefined(bounds)!;
-      if (this.initialSettings!.extent.find((value, i) => value !== bounds[i]))
+      this.initialSettings!.extent = validateExtentWhenDefined(bounds);
+      if (this.initialSettings?.extent?.find?.((value, i) => value !== bounds[i]))
         logger.logWarning(
           `The extent specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`
         );
@@ -269,7 +269,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   // #endregion PRIVATE
 
-  // ===============
+  // ==============
   // #region STATIC
   /** ***************************************************************************************************************************
    * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
