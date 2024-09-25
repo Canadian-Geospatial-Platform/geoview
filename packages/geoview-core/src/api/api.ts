@@ -34,6 +34,9 @@ export class API {
   utilities;
 
   // Keep all callback delegates references
+  #onMapViewerReadyHandlers: MapViewerReadyDelegate[] = [];
+
+  // Keep all callback delegates references
   #onMapAddedToDivHandlers: MapAddedToDivDelegate[] = [];
 
   /**
@@ -124,6 +127,41 @@ export class API {
   }
 
   /**
+   * Triggers the mapViewerReady event for users who need map status outside of cgpv.init
+   * @param {string} mapId - The ID of the map
+   */
+  mapViewerReady(mapId: string): void {
+    this.#emitMapViewerReady({ mapId });
+  }
+
+  /**
+   * Emits a map viewer ready event to all handlers.
+   * @private
+   */
+  #emitMapViewerReady(event: MapViewerReadyEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onMapViewerReadyHandlers, event);
+  }
+
+  /**
+   * Registers a map viewer ready event callback.
+   * @param {MapViewerReadyDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onMapViewerReady(callback: MapViewerReadyDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onMapViewerReadyHandlers, callback);
+  }
+
+  /**
+   * Unregisters a map viewer ready event callback.
+   * @param {MapViewerReadyDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapViewerReady(callback: MapViewerReadyDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onMapViewerReadyHandlers, callback);
+  }
+
+  /**
    * Emits an event to all handlers.
    * @param {MapAddedToDivEvent} event - The event to emit
    * @private
@@ -155,12 +193,25 @@ export class API {
 /**
  * Define a delegate for the event handler function signature
  */
+type MapViewerReadyDelegate = EventDelegateBase<API, MapViewerReadyEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type MapViewerReadyEvent = {
+  // The added map
+  mapId: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
 type MapAddedToDivDelegate = EventDelegateBase<API, MapAddedToDivEvent, void>;
 
 /**
  * Define an event for the delegate
  */
 export type MapAddedToDivEvent = {
-  // The added layer
+  // The added map
   mapId: string;
 };

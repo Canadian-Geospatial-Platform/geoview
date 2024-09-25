@@ -561,6 +561,9 @@ export class MapViewer {
     this.#mapReady = true;
     this.#emitMapReady();
 
+    // Emit API event for use outside of cgpv.init
+    api.mapViewerReady(this.mapId);
+
     // Load the Map itself and the UI controls
     MapEventProcessor.initMapControls(this.mapId);
 
