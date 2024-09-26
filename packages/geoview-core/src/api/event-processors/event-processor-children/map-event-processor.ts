@@ -17,6 +17,7 @@ import {
   TypeViewSettings,
   TypePointMarker,
 } from '@config/types/map-schema-types';
+import { cloneDeep } from 'lodash';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
@@ -1050,7 +1051,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
         : undefined,
       initialSettings,
       style: legendLayerInfo!.styleConfig ? legendLayerInfo!.styleConfig : undefined,
-      source: (layerEntryConfig! as VectorLayerEntryConfig).source ? (layerEntryConfig! as VectorLayerEntryConfig).source : undefined,
+      source: (layerEntryConfig! as VectorLayerEntryConfig).source
+        ? cloneDeep((layerEntryConfig! as VectorLayerEntryConfig).source)
+        : undefined,
       entryType: listOfLayerEntryConfig.length ? 'group' : undefined,
       listOfLayerEntryConfig: listOfLayerEntryConfig.length ? listOfLayerEntryConfig : [],
     };

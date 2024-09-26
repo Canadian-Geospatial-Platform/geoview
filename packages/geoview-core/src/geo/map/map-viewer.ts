@@ -1201,7 +1201,7 @@ export class MapViewer {
     if (deleteContainer) mapContainer.remove();
 
     // Delete the map instance from the maps array, will delete attached plugins
-    delete api.maps[this.mapId];
+    api.setMapViewer(this.mapId, null);
 
     // Return the map container to be remove
     return mapContainer;
