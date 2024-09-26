@@ -274,13 +274,11 @@
             }
           },
           "style": {
-            "Point": {
-              "styleType": "simple",
-              "label": "Point label",
-              "settings": {
-                "type": "simpleSymbol",
-                "symbol": "star"
-              }
+            "styleType": "simple",
+            "label": "Point label",
+            "settings": {
+              "type": "simpleSymbol",
+              "symbol": "star"
             }
           }
         },
@@ -338,13 +336,11 @@
                 }
               },
               "style": {
-                "Point": {
-                  "styleType": "simple",
-                  "label": "Point label",
-                  "settings": {
-                    "type": "simpleSymbol",
-                    "symbol": "star"
-                  }
+                "styleType": "simple",
+                "label": "Point label",
+                "settings": {
+                  "type": "simpleSymbol",
+                  "symbol": "star"
                 }
               }
             },
@@ -397,13 +393,11 @@
                 }
               },
               "style": {
-                "Point": {
-                  "styleType": "simple",
-                  "label": "Point label",
-                  "settings": {
-                    "type": "simpleSymbol",
-                    "symbol": "star"
-                  }
+                "styleType": "simple",
+                "label": "Point label",
+                "settings": {
+                  "type": "simpleSymbol",
+                  "symbol": "star"
                 }
               }
             },
@@ -456,13 +450,11 @@
                 }
               },
               "style": {
-                "Point": {
-                  "styleType": "simple",
-                  "label": "Point label",
-                  "settings": {
-                    "type": "simpleSymbol",
-                    "symbol": "star"
-                  }
+                "styleType": "simple",
+                "label": "Point label",
+                "settings": {
+                  "type": "simpleSymbol",
+                  "symbol": "star"
                 }
               }
             }
