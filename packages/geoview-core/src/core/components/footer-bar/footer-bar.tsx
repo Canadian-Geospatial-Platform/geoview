@@ -116,14 +116,14 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // inject guide tab at last position of tabs.
     return Object.keys({ ...tabsList, ...{ guide: {} } }).map((tab, index) => {
       return {
-        id: tab,
+        id: `${mapId}-${tab}${index}`,
         value: index,
         label: `${camelCase(tab)}.title`,
         icon: allTabs[tab]?.icon ?? '',
         content: allTabs[tab]?.content ?? '',
       } as TypeTabs;
     });
-  }, [memoTabs, tabsList]);
+  }, [memoTabs, tabsList, mapId]);
 
   /**
    * Calculate resize values from popover values defined in store.

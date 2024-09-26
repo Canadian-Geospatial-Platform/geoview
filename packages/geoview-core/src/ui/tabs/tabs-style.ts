@@ -14,6 +14,7 @@ export const getSxClasses = (theme: Theme): any => ({
     paddingTop: '0 !important',
     borderColor: 'divider',
     height: '100%',
+    width: '100%',
   },
   tab: {
     fontSize: theme.palette.geoViewFontSize.default,

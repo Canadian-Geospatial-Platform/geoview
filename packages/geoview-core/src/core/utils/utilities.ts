@@ -532,7 +532,9 @@ export async function createGuideObject(
 export function handleEscapeKey(key: string, callbackId: string, isFocusTrapped?: boolean, cb?: () => void): void {
   if (key === 'Escape') {
     if (isFocusTrapped && callbackId) {
-      document.getElementById(callbackId ?? '')?.focus();
+      setTimeout(() => {
+        document.getElementById(callbackId ?? '')?.focus();
+      }, 100);
     }
     cb?.();
   }
