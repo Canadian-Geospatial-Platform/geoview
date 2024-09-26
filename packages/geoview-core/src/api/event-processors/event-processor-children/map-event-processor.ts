@@ -916,16 +916,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     // If extent is in config, use it
-    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.extent)
-      extent = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.extent as Extent;
-
-    // Get extents of provided layer IDs if available
-    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.layerIds) {
-      const layerExtents = api.maps[mapId].layer.getExtentOfMultipleLayers(
-        getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.layerIds
-      );
-
-      if (layerExtents) extent = layerExtents;
+    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.extent) {
+      const lnglatExtent = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.extent as Extent;
+      extent = Projection.transformExtent(lnglatExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
+      options.padding = [0, 0, 0, 0];
     }
 
     return this.zoomToExtent(mapId, extent, options);

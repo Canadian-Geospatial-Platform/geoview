@@ -26,7 +26,7 @@ import {
   TypeDisplayLanguage,
   TypeDisplayTheme,
 } from '@config/types/map-schema-types';
-import { removeGeoviewStore } from '@/core/stores/stores-managers';
+import { getGeoViewStore, removeGeoviewStore } from '@/core/stores/stores-managers';
 
 import { Basemap } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
@@ -612,14 +612,9 @@ export class MapViewer {
       setTimeout(
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         () =>
-          this.zoomToExtent(
-            Projection.transformExtent(
-              this.mapFeaturesConfig.map.viewSettings.initialView?.extent as Extent,
-              Projection.PROJECTION_NAMES.LNGLAT,
-              `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
-            ),
-            { padding: [0, 0, 0, 0] }
-          ).catch((error) => logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)),
+          this.zoomToExtent(this.convertExtentLngLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent), {
+            padding: [0, 0, 0, 0],
+          }).catch((error) => logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)),
         200
       );
 
@@ -638,16 +633,30 @@ export class MapViewer {
           layerExtents = this.convertExtentLngLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
 
         // Zoom to calculated extent
-        if (layerExtents.length)
+        if (layerExtents.length) {
+          // GV Breaking the rule to not change the config here to prevent later issues
+          // GV Here we replace the ids in the config with an extent in case the layers are removed
+          // Replace layerIds with extent in configs
+          delete this.mapFeaturesConfig.map.viewSettings.initialView!.layerIds;
+
+          // The conversions may cause a small amount of inaccuracy as we go to lon/lat for config and convert back when zooming
+          const lnglatExtent = this.convertExtentMapProjToLngLat(layerExtents);
+          this.mapFeaturesConfig.map.viewSettings.initialView!.extent = lnglatExtent;
+
+          const storeConfig = getGeoViewStore(this.mapId).getState().mapConfig;
+          delete storeConfig!.map.viewSettings.initialView!.layerIds;
+          storeConfig!.map.viewSettings.initialView!.extent = lnglatExtent;
+
           // TODO: Timeout allows for map height to be set before zoom happens, so padding is applied properly
           setTimeout(
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             () =>
               this.zoomToExtent(layerExtents).catch((error) =>
-                logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)
+                logger.logPromiseFailed('zoomtToExtent in #checkMapReadyGo in map-viewer', error)
               ),
             200
           );
+        }
       });
     }
   }

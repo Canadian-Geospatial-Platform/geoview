@@ -101,8 +101,22 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
    * @protected @override
    */
   protected override createLayerEntryNode(layerId: string, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass {
+    let layerFound: TypeJsonObject | null = null;
+
+    // test to find if the GeoView layer is linked to an ESRI Image service.
+    const serviceMetadata = this.getServiceMetadata();
+    if ((serviceMetadata?.serviceDataType as string)?.toLowerCase?.().includes?.('esriimageservice')) {
+      // If it is the case, the layer's metadata are the service metadata.
+      if (layerId !== (serviceMetadata.name as string)) throw new GeoviewLayerInvalidParameterError('LayerIdNotFound', [layerId]);
+      const layerConfig = toJsonObject({
+        layerId,
+        layerName: createLocalizedString(layerId),
+      });
+      return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
+    }
+
     // If we cannot find the layerId in the layer definitions, throw an error.
-    const layerFound = this.#findLayerMetadataEntry(Number(layerId));
+    layerFound = this.#findLayerMetadataEntry(Number(layerId));
     if (!layerFound) {
       throw new GeoviewLayerInvalidParameterError('LayerIdNotFound', [layerId?.toString()]);
     }
@@ -128,6 +142,22 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
    * @protected @override
    */
   protected override createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[] {
+    // test to find if the GeoView layer is linked to an ESRI Image service.
+    const serviceMetadata = this.getServiceMetadata();
+    if ((serviceMetadata?.serviceDataType as string)?.toLowerCase?.().includes?.('esriimageservice')) {
+      // If it is the case, the layer's metadata are the service metadata.
+      return [
+        this.createLeafNode(
+          toJsonObject({
+            layerId: serviceMetadata.name,
+            layerName: createLocalizedString(serviceMetadata.name)!,
+          }),
+          this.getLanguage(),
+          this
+        )!,
+      ];
+    }
+
     const layers = this.getServiceMetadata().layers as TypeJsonArray;
     if (layers.length > 1) {
       const groupName = this.getServiceMetadata().mapName as string;
@@ -154,7 +184,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
   // ================
   // #region PRIVATE
   /** ****************************************************************************************************************************
-   * This method search recursively the layerId in the layer entry of the capabilities.
+   * This method search the layerId in the layer entry of the capabilities.
    *
    * @param {number} layerId The layer identifier that must exists on the server.
    * @param {TypeJsonObject | undefined} layerd The layer entry from the service metadata that will be searched.
