@@ -140,12 +140,8 @@ export function AddNewLayer(): JSX.Element {
     }
     if (valid) {
       const guestedLayerType = api.config.guessLayerType(layerURL);
-      if (guestedLayerType) {
-        setLayerType(guestedLayerType as TypeGeoviewLayerType);
-        setActiveStep(1);
-      } else {
-        emitErrorNone();
-      }
+      setLayerType(guestedLayerType as TypeGeoviewLayerType);
+      setActiveStep(1);
     }
   };
 
@@ -155,10 +151,10 @@ export function AddNewLayer(): JSX.Element {
   const handleStep2 = (): void => {
     setIsLoading(true);
 
-    const populateLayerList = async (curlayerType: TypeGeoviewLayerType) => {
+    const populateLayerList = async (curlayerType: TypeGeoviewLayerType): Promise<boolean> => {
       try {
         const layersTree = await api.config.createMetadataLayerTree(layerURL, curlayerType, [], language);
-        console.log('layersTree', layersTree);
+        logger.logDebug('layersTree', layersTree);
         setLayerList(layersTree as GroupLayerEntryConfig[]);
         if (layersTree.length > 0) {
           setLayerName(layersTree[0].layerName ?? '');
@@ -254,9 +250,10 @@ export function AddNewLayer(): JSX.Element {
       layerType,
       layerURL,
       layersList: layerList,
+      language,
     });
 
-    console.log('newGeoViewLayer to add', newGeoViewLayer);
+    logger.logDebug('newGeoViewLayer to add', newGeoViewLayer);
 
     // Add the layer using the proper function
     const addedLayer = api.maps[mapId].layer.addGeoviewLayer(newGeoViewLayer);
@@ -276,7 +273,6 @@ export function AddNewLayer(): JSX.Element {
       // Failed to add, remove spinning, but stay on the add ui
       setIsLoading(false);
     }
-    // }
   };
 
   /**

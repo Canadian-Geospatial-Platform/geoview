@@ -393,12 +393,15 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       layerConfigsToQuery.forEach((layerConfig: WmsLayerEntryConfig, layerIndex: number) => {
         // verify if the a request with the same layerId has already been sent up to now.
         for (i = 0; layerConfigsToQuery[i].layerId !== layerConfig.layerId; i++);
-        if (i === layerIndex)
+        if (i === layerIndex) {
           // if the layer found is the same as the current layer index,
           // this is the first time we execute this request
-          promisedArrayOfMetadata.push(this.#executeServiceMetadataRequest(`${this.metadataAccessPath}?Layers=${layerConfig.layerId}`));
-        // otherwise, we are already waiting for the same request and we will wait for it to finish.
-        else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
+          const urlToQuery = this.metadataAccessPath.includes('?')
+            ? `${this.metadataAccessPath}&Layers=${layerConfig.layerId}`
+            : `${this.metadataAccessPath}?Layers=${layerConfig.layerId}`;
+          promisedArrayOfMetadata.push(this.#executeServiceMetadataRequest(urlToQuery));
+          // otherwise, we are already waiting for the same request and we will wait for it to finish.
+        } else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
       });
 
       // Since we use Promise.all, If one of the Promise awaited fails, then the whole service metadata fetching will fail.
