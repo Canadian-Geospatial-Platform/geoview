@@ -1,8 +1,9 @@
 import cloneDeep from 'lodash/cloneDeep';
 
 import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@config/types/config-constants';
-import { TypeJsonObject } from '@config/types/config-types';
+import { toJsonObject, TypeJsonObject } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import {
   TypeGeoviewLayerType,
   TypeLayerEntryType,
@@ -56,7 +57,7 @@ export abstract class EntryConfigBaseClass {
   bounds: Extent | undefined;
 
   /** Layer entry data type. */
-  entryType: TypeLayerEntryType;
+  entryType?: TypeLayerEntryType;
 
   // GV NOTE START ****************************************************************************************************
   // The following attributes use the 'definite assignment assertion' (! after the property name) to indicate that
@@ -152,16 +153,6 @@ export abstract class EntryConfigBaseClass {
   // =================
   // #region PROTECTED
   /**
-   * The getter method that returns the language used to create the  sublayer.
-   *
-   * @returns {TypeDisplayLanguage} The language associated to the config.
-   * @protected
-   */
-  protected getLanguage(): TypeDisplayLanguage {
-    return this.#language;
-  }
-
-  /**
    * Validate the node configuration using the schema associated to its layer type.
    * @protected
    */
@@ -197,6 +188,11 @@ export abstract class EntryConfigBaseClass {
     return this.#geoviewLayerConfig.geoviewLayerType;
   }
 
+  /** Set the geoview layer that owns this sub-layer configuration. */
+  setGeoviewLayerConfig(geoviewLayerConfig: AbstractGeoviewLayerConfig): void {
+    this.#geoviewLayerConfig = geoviewLayerConfig;
+  }
+
   /** The geoview layer that owns this sub-layer configuration. */
   getGeoviewLayerConfig(): AbstractGeoviewLayerConfig {
     return this.#geoviewLayerConfig;
@@ -221,9 +217,11 @@ export abstract class EntryConfigBaseClass {
   /**
    * Method used to set the EntryConfigBaseClass error flag to true. Once this operation has been performed, the layer entry
    * config is no longer considered viable.
+   *
+   * @param {boolean} value The value to assign to the flag.
    */
-  setErrorDetectedFlag(): void {
-    this.#errorDetectedFlag = true;
+  setErrorDetectedFlag(value = true): void {
+    this.#errorDetectedFlag = value;
   }
 
   /**
@@ -236,12 +234,39 @@ export abstract class EntryConfigBaseClass {
   }
 
   /**
+   * Method used to set the parent node.
+   *
+   * @param {EntryConfigBaseClass | undefined} parentNode The parent node.
+   */
+  setParentNode(parentNode: EntryConfigBaseClass | undefined): void {
+    this.#parentNode = parentNode;
+  }
+
+  /**
    * The getter method that returns the parentNode.
    *
    * @returns {EntryConfigBaseClass | undefined} The parentNode property associated to the entry config.
    */
   getParentNode(): EntryConfigBaseClass | undefined {
     return this.#parentNode;
+  }
+
+  /**
+   * The setter method that sets the language used to create the sublayer.
+   *
+   * @param {TypeDisplayLanguage} language The language associated to the config.
+   */
+  setLanguage(language: TypeDisplayLanguage): void {
+    this.#language = language;
+  }
+
+  /**
+   * The getter method that returns the language used to create the sublayer.
+   *
+   * @returns {TypeDisplayLanguage} The language associated to the config.
+   */
+  getLanguage(): TypeDisplayLanguage {
+    return this.#language;
   }
 
   /**
@@ -264,6 +289,74 @@ export abstract class EntryConfigBaseClass {
     this.minScale = 0;
     this.maxScale = 0;
   }
+
+  /**
+   * Create a clone of this node. This method is mainly used to clone a node from the layer tree to store a copy in the
+   * list of layer entry config of the GeoView Layer. It was created to preserve the private fields created using the #
+   * operator because cloneDeep doesn't copy them to the cloned instance.
+   *
+   * @param {EntryConfigBaseClass | undefined} parentNode The layer group that owns this node.
+   *
+   * @returns {EntryConfigBaseClass} The clone copy of the node.
+   */
+  clone(parentNode: EntryConfigBaseClass | undefined = undefined): EntryConfigBaseClass {
+    let cloneOfTheNode: EntryConfigBaseClass = cloneDeep(this);
+
+    // Remove the following properties to avoid schema validation errors.
+    delete cloneOfTheNode.layerName;
+    delete cloneOfTheNode.entryType;
+    if ('listOfLayerEntryConfig' in cloneOfTheNode) cloneOfTheNode.listOfLayerEntryConfig = [];
+
+    // Create a new instance using the cloned config.
+    if (cloneOfTheNode.isLayerGroup)
+      cloneOfTheNode = this.#geoviewLayerConfig.createGroupNode(
+        toJsonObject(cloneOfTheNode),
+        this.#language,
+        this.#geoviewLayerConfig,
+        parentNode
+      )!;
+    else
+      cloneOfTheNode = this.#geoviewLayerConfig.createLeafNode(
+        toJsonObject(cloneOfTheNode),
+        this.#language,
+        this.#geoviewLayerConfig,
+        parentNode
+      )!;
+    // Restore the layerName and the private properties.
+    cloneOfTheNode.layerName = this.layerName;
+    cloneOfTheNode.setErrorDetectedFlag(this.#errorDetectedFlag);
+    cloneOfTheNode.setLayerMetadata(this.#layerMetadata);
+    return cloneOfTheNode;
+  }
+
+  /**
+   * The getter method that returns the sublayer configuration. If the layer path doesn't exists, return undefined.
+   *
+   * @returns {EntryConfigBaseClass | undefined} The sublayer configuration.
+   */
+  getSubLayerConfig(layerPath: string): EntryConfigBaseClass | undefined {
+    // The node is a group
+    if (this.isLayerGroup && 'listOfLayerEntryConfig' in this) {
+      const pathItems = layerPath.split('/');
+      if (pathItems[0] !== this.layerId) return undefined;
+      if (pathItems.length === 1) return this;
+      let { listOfLayerEntryConfig } = this;
+      let nodeFound: EntryConfigBaseClass | undefined;
+      for (let i = 1; i < pathItems.length; i++) {
+        nodeFound = (listOfLayerEntryConfig as EntryConfigBaseClass[]).find(
+          (layerEntryConfig) => layerEntryConfig.layerId === pathItems[i]
+        );
+        if (!nodeFound) break;
+        listOfLayerEntryConfig = layerEntryIsGroupLayer(nodeFound) ? nodeFound.listOfLayerEntryConfig : [];
+      }
+      return nodeFound;
+    }
+
+    // The node is a leaf.
+    if (layerPath === this.layerId) return this;
+    return undefined;
+  }
+
   // #endregion PUBLIC
   // #endregion METHODS
   // #endregion CLASS HEADER
