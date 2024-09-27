@@ -12,6 +12,7 @@ import { logger } from '@/core/utils/logger';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { FocusTrapContainer } from '@/core/components/common';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { handleEscapeKey } from '@/core/utils/utilities';
 
 export interface GeoListItem {
   key: string;
@@ -46,8 +47,10 @@ export function Geolocator(): JSX.Element {
   const { tabGroup, isOpen } = useActiveAppBarTab();
 
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
+  const geolocatorRef = useRef<HTMLDivElement>();
   const abortControllerRef = useRef<AbortController | null>(null);
   const fetchTimerRef = useRef<NodeJS.Timeout | undefined>();
+  const searchInputRef = useRef<HTMLInputElement>();
   const MIN_SEARCH_LENGTH = 3;
 
   /**
@@ -204,6 +207,16 @@ export function Geolocator(): JSX.Element {
   }, [searchValue]);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOLOCATOR - mount');
+
+    const handleGeolocatorEscapeKey = (e: KeyboardEvent): void => {
+      handleEscapeKey(e.key, '', false, () => resetSearch());
+    };
+    geolocatorRef.current?.addEventListener('keydown', handleGeolocatorEscapeKey);
+  }, [mapId, resetSearch]);
+
+  useEffect(() => {
     return () => {
       // Cleanup function to abort any pending requests
       if (abortControllerRef.current) {
@@ -212,6 +225,13 @@ export function Geolocator(): JSX.Element {
       }
     };
   }, []);
+
+  useEffect(() => {
+    // Set the focus on search field when geolocator is opened.
+    if (isOpen && tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && searchInputRef.current) {
+      searchInputRef.current.querySelector('input')?.focus();
+    }
+  }, [isOpen, tabGroup]);
 
   /**
    * Effect that will track fetch call, so that after 15 seconds if no response comes back,
@@ -236,6 +256,7 @@ export function Geolocator(): JSX.Element {
         visibility={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
         id="geolocator-search"
         tabIndex={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 0 : -1}
+        ref={geolocatorRef}
       >
         <Box sx={sxClasses.geolocator}>
           <AppBarUI position="static">
@@ -249,7 +270,13 @@ export function Geolocator(): JSX.Element {
                   }
                 }}
               >
-                <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
+                <StyledInputField
+                  placeholder={t('geolocator.search')!}
+                  autoFocus
+                  onChange={onChange}
+                  value={searchValue}
+                  ref={searchInputRef}
+                />
                 <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
                   <IconButton
                     size="small"

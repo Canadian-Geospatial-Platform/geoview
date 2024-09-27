@@ -26,7 +26,7 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const [isLayoutEnlarged, setIsLayoutEnlarged] = useState<boolean>(false);
 
   const { setSelectedLayerPath } = useLayerStoreActions();
-  const { setSelectedFooterLayerListItem } = useUIStoreActions();
+  const { setSelectedFooterLayerListItemId } = useUIStoreActions();
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
@@ -34,7 +34,7 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
     responsiveLayoutRef.current?.setIsRightPanelVisible(true);
     responsiveLayoutRef.current?.setRightPanelFocus();
     // set the focus item when layer item clicked.
-    setSelectedFooterLayerListItem(`${layer.layerId}`);
+    setSelectedFooterLayerListItemId(`${layer.layerId}`);
   };
 
   const leftPanel = (): JSX.Element => {

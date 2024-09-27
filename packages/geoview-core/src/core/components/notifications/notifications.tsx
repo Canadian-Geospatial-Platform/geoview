@@ -26,6 +26,7 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useShake } from '@/core/utils/useSpringAnimations';
+import { handleEscapeKey } from '@/core/utils/utilities';
 
 export type NotificationDetailsType = {
   key: string;
@@ -168,7 +169,14 @@ export default function Notifications(): JSX.Element {
           </IconButton>
         </Badge>
 
-        <Popper open={open} anchorEl={anchorEl} placement="right-end" onClose={handleClickAway} container={mapElem}>
+        <Popper
+          open={open}
+          anchorEl={anchorEl}
+          placement="right-end"
+          onClose={handleClickAway}
+          container={mapElem}
+          handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
+        >
           <Paper sx={sxClasses.notificationPanel}>
             <Box sx={sxClasses.notificationsHeader}>
               <Typography component="h3" sx={sxClasses.notificationsTitle}>

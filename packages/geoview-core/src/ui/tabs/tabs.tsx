@@ -1,7 +1,16 @@
-import { SyntheticEvent, ReactNode, useState, useEffect, useMemo, MouseEvent, useCallback } from 'react';
+import { SyntheticEvent, ReactNode, useState, useEffect, useMemo, MouseEvent, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps, Box, SelectChangeEvent } from '@mui/material';
+import {
+  Grid2 as Grid,
+  Tab as MaterialTab,
+  Tabs as MaterialTabs,
+  TabsProps,
+  TabProps,
+  BoxProps,
+  Box,
+  SelectChangeEvent,
+} from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { logger } from '@/core/utils/logger';
@@ -12,6 +21,7 @@ import { TabPanel } from './tab-panel';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIHiddenTabs } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TypeContainerBox } from '@/core/types/global-types';
+import { handleEscapeKey } from '@/core/utils/utilities';
 
 /**
  * Type used for properties of each tab
@@ -76,6 +86,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     tabsProps = {},
     tabProps = {},
     containerType,
+    isCollapsed,
   } = props;
 
   const { t } = useTranslation<string>();
@@ -86,6 +97,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   // boolean value in state reflects when tabs will be collapsed state, then value needs to false.
   const [value, setValue] = useState<number | boolean>(0);
   const [tabPanels, setTabPanels] = useState([tabs[0]]);
+  const tabPanelRef = useRef<HTMLDivElement>();
 
   // get store values and actions
   const mapSize = useMapSize();
@@ -140,13 +152,15 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const handleClick = useCallback(
     (e: MouseEvent<HTMLDivElement>): void => {
-      const index = Number((e.target as HTMLDivElement).id.split('-')[1]);
+      const { id } = e.target as HTMLDivElement;
+      const index = Number(id.slice(-1));
+
       // toggle on -1, so that when no tab is selected on fullscreen
       // and tab is selected again to open the panel.
       if (value === index || value === -1) onToggleCollapse?.();
 
       // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
-      if (activeTrap) onOpenKeyboard?.({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
+      if (activeTrap) onOpenKeyboard?.({ activeElementId: id, callbackElementId: id });
       else onCloseKeyboard?.();
     },
     [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value]
@@ -190,10 +204,21 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     }
   }, [mapSize, theme.breakpoints.values.sm]);
 
+  useEffect(() => {
+    const handleFooterbarEscapeKey = (e: KeyboardEvent): void => {
+      if (!isCollapsed) {
+        handleEscapeKey(e.key, tabs[selectedTab ?? 0]?.id, true, () => {
+          onCloseKeyboard?.();
+        });
+      }
+    };
+    tabPanelRef.current?.addEventListener('keydown', handleFooterbarEscapeKey);
+  }, [selectedTab, isCollapsed, tabs, onCloseKeyboard]);
+
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
-      <Grid container sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}>
-        <Grid item xs={7} sm={10}>
+      <Grid container id="footerbar-header" sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100], width: '100%' }}>
+        <Grid size={{ xs: 7, sm: 10 }}>
           {!showMobileDropdown ? (
             <MaterialTabs
               variant="scrollable"
@@ -204,14 +229,14 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
               aria-label="basic tabs"
               {...tabsProps}
             >
-              {tabs.map((tab, index) => {
+              {tabs.map((tab) => {
                 return (
                   <MaterialTab
                     label={t(tab.label)}
                     key={`${t(tab.label)}`}
                     icon={tab.icon}
                     iconPosition="start"
-                    id={`tab-${index}`}
+                    id={tab.id}
                     onClick={handleClick}
                     sx={hiddenTabs.includes(tab.id) ? { display: 'none' } : sxClasses.tab}
                     aria-controls={`${shellContainer?.id ?? ''}-${tab.id}`}
@@ -238,14 +263,12 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
             </Box>
           )}
         </Grid>
-        <Grid item xs={5} sm={2} sx={sxClasses.rightIcons}>
+        <Grid size={{ xs: 5, sm: 2 }} sx={sxClasses.rightIcons}>
           {rightButtons as ReactNode}
         </Grid>
       </Grid>
-      <Grid
+      <Box
         id="tabPanel"
-        item
-        xs={12}
         sx={{
           ...sxClasses.panel,
           visibility: TabContentVisibilty,
@@ -260,6 +283,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
               id={`${shellContainer?.id ?? ''}-${tab.id}`}
               tabId={tab.id}
               containerType={containerType}
+              ref={tabPanelRef}
             >
               {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
             </TabPanel>
@@ -267,7 +291,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
             ''
           );
         })}
-      </Grid>
+      </Box>
     </Grid>
   );
 }

@@ -30,6 +30,8 @@ export type TypePanelAppProps = {
   onPanelOpened?: () => void;
   // Callback when the panel has been closed
   onPanelClosed?: () => void;
+  // Callback when the panel has been closed by escape key
+  handleKeyDown?: (event: KeyboardEvent) => void;
 };
 
 /**
@@ -39,7 +41,7 @@ export type TypePanelAppProps = {
  * @returns {JSX.Element} the created Panel element
  */
 export function Panel(props: TypePanelAppProps): JSX.Element {
-  const { panel, button, onPanelOpened, onPanelClosed, onGeneralCloseClicked, ...rest } = props;
+  const { panel, button, onPanelOpened, onPanelClosed, onGeneralCloseClicked, handleKeyDown, ...rest } = props;
   const { status: open = false, isFocusTrapped = false, panelStyles, panelGroupName } = panel;
 
   const { t } = useTranslation<string>();
@@ -130,11 +132,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
           ref={panelRef as React.MutableRefObject<null>}
-          onKeyDown={(e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-              onGeneralCloseClicked?.();
-            }
-          }}
+          onKeyDown={(e: KeyboardEvent) => handleKeyDown?.(e)}
           {...{ 'data-id': button.id }}
           {...rest}
         >

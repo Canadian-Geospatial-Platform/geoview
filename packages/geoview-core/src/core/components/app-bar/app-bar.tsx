@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useRef, useEffect, useCallback, Fragment, useMemo, ReactNode } from 'react';
+import { useState, useRef, useEffect, useCallback, Fragment, useMemo, ReactNode, KeyboardEvent } from 'react';
 import { capitalize, camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -51,6 +51,7 @@ import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
+import { handleEscapeKey } from '@/core/utils/utilities';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -92,7 +93,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
-  const { tabId, tabGroup, isOpen } = useActiveAppBarTab();
+  const { tabId, tabGroup, isOpen, isFocusTrapped } = useActiveAppBarTab();
   const { hideClickMarker } = useMapStoreActions();
 
   const isMapFullScreen = useAppFullscreenActive();
@@ -151,9 +152,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Log
       logger.logTraceUseCallback('APP-BAR - openPanelById', buttonId);
       // Redirect to helper
-      helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups);
+      helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, isFocusTrapped);
     },
-    [buttonPanelGroups]
+    [buttonPanelGroups, isFocusTrapped]
   );
 
   const handleButtonClicked = useCallback(
@@ -439,6 +440,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     button={buttonPanel.button}
                     onPanelOpened={buttonPanel.onPanelOpened}
                     onPanelClosed={hideClickMarker}
+                    handleKeyDown={(e: KeyboardEvent) =>
+                      handleEscapeKey(e.key, tabId, isFocusTrapped, () => {
+                        handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '');
+                      })
+                    }
                     onGeneralCloseClicked={() => handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '')}
                   />
                 );

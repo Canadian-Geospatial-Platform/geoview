@@ -10,9 +10,10 @@ import FullScreenDialog from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUISelectedFooterLayerListItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { handleEscapeKey } from '@/core/utils/utilities';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -53,7 +54,7 @@ const ResponsiveGridLayout = forwardRef(
     const { t } = useTranslation<string>();
     const guide = useAppGuide();
     const isMapFullScreen = useAppFullscreenActive();
-    const selectedFooterLayerListItem = useUISelectedFooterLayerListItem();
+    const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
 
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
     const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -98,22 +99,27 @@ const ResponsiveGridLayout = forwardRef(
       }
     }, [hideEnlargeBtn, isEnlarged]);
 
+    // Callback to be executed after escape key is pressed.
+    const handleEscapeKeyCallback = useCallback((): void => {
+      if (rightMainRef.current && selectedFooterLayerListItemId.length) {
+        rightMainRef.current.tabIndex = -1;
+      }
+    }, [selectedFooterLayerListItemId]);
+
+    const handleKeyDown = useCallback(
+      (event: KeyboardEvent): void => handleEscapeKey(event.key, selectedFooterLayerListItemId, true, handleEscapeKeyCallback),
+      [handleEscapeKeyCallback, selectedFooterLayerListItemId]
+    );
+
     // return back the focus to layeritem for which right panel was opened.
     useEffect(() => {
-      const handleEscapeKey = (event: KeyboardEvent): void => {
-        if (event.key === 'Escape' && selectedFooterLayerListItem.length && rightMainRef.current) {
-          rightMainRef.current.tabIndex = -1;
-          document.getElementById(selectedFooterLayerListItem)?.focus();
-        }
-      };
-
       const rightPanel = rightMainRef.current;
-      rightPanel?.addEventListener('keydown', handleEscapeKey);
+      rightPanel?.addEventListener('keydown', handleKeyDown);
 
       return () => {
-        rightPanel?.removeEventListener('keydown', handleEscapeKey);
+        rightPanel?.removeEventListener('keydown', handleKeyDown);
       };
-    }, [selectedFooterLayerListItem]);
+    }, [handleKeyDown]);
 
     /**
      * Handles click on the Enlarge button.

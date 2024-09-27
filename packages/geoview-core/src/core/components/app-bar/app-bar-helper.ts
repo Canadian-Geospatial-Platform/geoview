@@ -20,7 +20,8 @@ export const helpOpenClosePanelByIdState = (
   buttonId: string,
   groupName: string | undefined,
   setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>,
-  status: boolean
+  status: boolean,
+  isFocusTrapped: boolean = false
 ): void => {
   // Read the group name
   const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
@@ -32,7 +33,13 @@ export const helpOpenClosePanelByIdState = (
       panelGroups[buttonPanelGroupName] = Object.entries(buttonPanelGroup).reduce((acc, [buttonGroupName, buttonGroup]) => {
         acc[buttonGroupName] = {
           ...buttonGroup,
-          ...(buttonGroup.panel && { panel: { ...buttonGroup.panel, status: buttonGroupName === buttonId ? status : false } }),
+          ...(buttonGroup.panel && {
+            panel: {
+              ...buttonGroup.panel,
+              status: buttonGroupName === buttonId ? status : false,
+              isFocusTrapped: buttonGroupName === buttonId ? isFocusTrapped : false,
+            },
+          }),
         };
 
         return acc;
@@ -47,13 +54,14 @@ export const helpOpenPanelById = (
   buttonPanelGroups: ButtonPanelGroupType,
   buttonId: string,
   groupName: string | undefined,
-  setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>
+  setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>,
+  isFocusTrapped?: boolean
 ): void => {
   // Read the group name
   const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
 
   // Open the panel
-  helpOpenClosePanelByIdState(buttonPanelGroups, buttonId, theGroupName, setterCallback, true);
+  helpOpenClosePanelByIdState(buttonPanelGroups, buttonId, theGroupName, setterCallback, true, isFocusTrapped);
 };
 
 export const helpClosePanelById = (

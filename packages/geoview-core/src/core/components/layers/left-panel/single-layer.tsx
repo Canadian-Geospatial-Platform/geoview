@@ -35,7 +35,7 @@ import { useDataTableLayerSettings, useDataTableStoreActions } from '@/core/stor
 import { ArrowDownwardIcon, ArrowUpIcon, TableViewIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useUISelectedFooterLayerListItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -76,7 +76,7 @@ export function SingleLayer({
   const displayState = useLayerDisplayState();
   const datatableSettings = useDataTableLayerSettings();
   const selectedLayerSortingArrowId = useSelectedLayerSortingArrowId();
-  const selectedFooterLayerListItem = useUISelectedFooterLayerListItem();
+  const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
   const legendLayers = useLayerLegendLayers();
 
   useDataTableStoreActions();
@@ -340,7 +340,7 @@ export function SingleLayer({
 
   useEffect(() => {
     // set the focus to first layer, after layer has been deleted.
-    if (displayState === 'remove' && selectedFooterLayerListItem.length) {
+    if (displayState === 'remove' && selectedFooterLayerListItemId.length) {
       const firstLayer = document.getElementById('layers-left-panel');
       if (firstLayer?.getElementsByTagName('li')) {
         const listItems = firstLayer?.getElementsByTagName('li');

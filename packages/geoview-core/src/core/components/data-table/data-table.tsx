@@ -26,6 +26,7 @@ import {
   type MRT_RowVirtualizer as MRTRowVirtualizer,
   type MRT_ColumnFiltersState as MRTColumnFiltersState,
   type MRT_DensityState as MRTDensityState,
+  type MRT_ColumnVirtualizer as MRTColumnVirtualizer,
   Box,
   Button,
   IconButton,
@@ -72,6 +73,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
   const rowVirtualizerInstanceRef = useRef<MRTRowVirtualizer>(null);
+  const columnVirtualizerInstanceRef = useRef<MRTColumnVirtualizer>(null);
   const [sorting, setSorting] = useState<MRTSortingState>([]);
 
   // get store actions and values
@@ -139,8 +141,13 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           </Button>
         );
       }
+
       // convert string to react component.
-      return typeof cellValue === 'string' ? <HtmlToReact htmlContent={cellValue} /> : cellValue;
+      return (typeof cellValue === 'string' && cellValue.length) || typeof cellValue === 'number' ? (
+        <HtmlToReact htmlContent={cellValue.toString()} itemOptions={{ tabIndex: 0 }} />
+      ) : (
+        cellValue
+      );
     },
     [initLightBox, t]
   );
@@ -183,7 +190,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     const formattedDate = DateMgt.formatDate(date, 'YYYY-MM-DDThh:mm:ss');
     return (
       <Tooltip title={formattedDate} arrow>
-        <Box>{formattedDate}</Box>
+        <Box tabIndex={0}>{formattedDate}</Box>
       </Tooltip>
     );
   }, []);
@@ -431,6 +438,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     enableRowVirtualization: true,
     muiTableContainerProps: { sx: { maxHeight: tableHeight } },
     rowVirtualizerInstanceRef,
+    columnVirtualizerInstanceRef,
     rowVirtualizerOptions: { overscan: 5 },
     columnVirtualizerOptions: { overscan: 2 },
     localization: dataTableLocalization,

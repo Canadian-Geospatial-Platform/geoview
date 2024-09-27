@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { ReactNode } from 'react';
+import { forwardRef, ReactNode } from 'react';
 import { Box } from '@/ui';
 import { FocusTrapContainer } from '@/core/components/common';
 import { TypeContainerBox } from '@/core/types/global-types';
@@ -24,14 +24,16 @@ export interface TypeTabPanelProps {
  * @param {TypeTabPanelProps} props properties for the tab panel
  * @returns {JSX.Element} returns the tab panel
  */
-export function TabPanel(props: TypeTabPanelProps): JSX.Element {
+export const TabPanel = forwardRef((props: TypeTabPanelProps, ref) => {
   const { children, value, index, id, containerType, tabId, ...other } = props;
 
   return (
-    <Box role="tabpanel" hidden={value !== index} id={id} aria-labelledby={`${tabId} layers`} {...other}>
-      <FocusTrapContainer id={`panel-${index}`} containerType={containerType}>
+    <Box role="tabpanel" hidden={value !== index} id={id} aria-labelledby={`${tabId} layers`} {...other} ref={ref}>
+      <FocusTrapContainer id={tabId} containerType={containerType}>
         {children}
       </FocusTrapContainer>
     </Box>
   );
-}
+});
+
+TabPanel.displayName = 'TabPanel';
