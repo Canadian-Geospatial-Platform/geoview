@@ -25,10 +25,11 @@ import {
   TypeGeoviewLayerType,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { CONST_LAYER_ENTRY_TYPES } from '@/geo/map/map-schema-types';
-import { GroupLayerEntryConfig } from '@/api/config/types/map-schema-types';
+import { EntryConfigBaseClass, GroupLayerEntryConfig } from '@/api/config/types/map-schema-types';
 import { AddLayerTree } from './add-layer-tree';
 import { buildGeoLayerToAdd } from './add-new-layers-utils';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 
 export function AddNewLayer(): JSX.Element {
   // Log
@@ -153,14 +154,34 @@ export function AddNewLayer(): JSX.Element {
 
     const populateLayerList = async (curlayerType: TypeGeoviewLayerType): Promise<boolean> => {
       try {
-        const layersTree = await api.config.createMetadataLayerTree(layerURL, curlayerType, [], language);
-        logger.logDebug('layersTree', layersTree);
-        setLayerList(layersTree as GroupLayerEntryConfig[]);
-        if (layersTree.length > 0) {
-          setLayerName(layersTree[0].layerName ?? '');
+        // create an instance of the GeoView layer. The list of layer entry config is empty, but if the URL specify a sublayer
+        // the instance created will adjust the metadata access path and the list of sublayers accordingly.
+        const geoviewLayerConfig = await api.config.createLayerConfig(layerURL, curlayerType, [], language);
+        if (geoviewLayerConfig && !geoviewLayerConfig.getErrorDetectedFlag()) {
+          // GV: Here, the list of layer entry config may be empty or it may contain one layer Id specified in the URL.
+          // GV: This list of layer entry config will be used as a filter for the layer tree. Also, when we want to build the layer tree,
+          // GV: we set the metadata layer tree with the layer tree filter and use an empty list of layer entry config. This is how the
+          // GV: GeoView instance differentiate the creation of a layer tree and the creation of a GeoView layer with its list of sublayers.
+          // Set the layer tree filter.
+          geoviewLayerConfig.setMetadataLayerTree(
+            (geoviewLayerConfig.listOfLayerEntryConfig.length
+              ? [{ layerId: geoviewLayerConfig.listOfLayerEntryConfig[0].layerId }]
+              : []) as EntryConfigBaseClass[]
+          );
+          // GV: The listOfLayerEntryConfig must be empty when we want to build the layer tree.
+          geoviewLayerConfig.listOfLayerEntryConfig = [];
+          // Then, we fetch the service metadata. This will populate the layer tree.
+          await geoviewLayerConfig.fetchServiceMetadata();
+          const layersTree = geoviewLayerConfig.getMetadataLayerTree()!;
+          logger.logDebug('layersTree', layersTree);
+          setLayerList(layersTree as GroupLayerEntryConfig[]);
+          if (layersTree.length > 0) {
+            setLayerName(layersTree[0].layerName ?? '');
+          }
+          setHasMetadata(true);
+          return true;
         }
-        setHasMetadata(true);
-        return true;
+        throw new GeoviewLayerConfigError(`Unable to create ${curlayerType} GeoView layer using "${layerURL} URL.`);
       } catch (err) {
         emitErrorServer(curlayerType);
         return false;
@@ -213,8 +234,10 @@ export function AddNewLayer(): JSX.Element {
   const handleStep3 = (): void => {
     let valid = true;
     if (layerIdsToAdd.length === 0) {
-      valid = false;
-      emitErrorEmpty(t('layers.layer'));
+      if (!layerName) {
+        valid = false;
+        emitErrorEmpty(t('layers.layer'));
+      }
     }
     if (valid) setActiveStep(3);
   };
@@ -460,7 +483,7 @@ export function AddNewLayer(): JSX.Element {
             size="small"
             type="text"
             onClick={handleBack}
-            onKeyDown={(e) => handleKeyDown(e)}
+            onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => handleKeyDown(e)}
           >
             {t('layers.back')}
           </Button>
@@ -484,10 +507,10 @@ export function AddNewLayer(): JSX.Element {
                 <Box
                   className="dropzone"
                   style={{ position: 'relative' }}
-                  onDrop={(e) => handleDrop(e)}
-                  onDragOver={(e) => handleDragOver(e)}
-                  onDragEnter={(e) => handleDragEnter(e)}
-                  onDragLeave={(e) => handleDragLeave(e)}
+                  onDrop={(e: React.DragEvent<HTMLDivElement>) => handleDrop(e)}
+                  onDragOver={(e: React.DragEvent<HTMLDivElement>) => handleDragOver(e)}
+                  onDragEnter={(e: React.DragEvent<HTMLDivElement>) => handleDragEnter(e)}
+                  onDragLeave={(e: React.DragEvent<HTMLDivElement>) => handleDragLeave(e)}
                 >
                   {drag && (
                     <Box

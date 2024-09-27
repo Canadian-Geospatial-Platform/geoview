@@ -10,23 +10,7 @@ import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { createLocalizedString, generateId } from '@/core/utils/utilities';
 import { TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
-
-/*
-type ListOfLayerEntry = {
-  layerId: string;
-  layerName?: TypeLocalizedString;
-  isLayerGroup?: boolean;
-  listOfLayerEntryConfig?: ListOfLayerEntry[];
-};
-
-type GeoViewLayerToAdd = {
-  geoviewLayerId: string;
-  geoviewLayerName: TypeLocalizedString;
-  geoviewLayerType: TypeGeoviewLayerType;
-  metadataAccessPath: TypeLocalizedString;
-  listOfLayerEntryConfig: ListOfLayerEntry[];
-};
-*/
+import { TypeJsonArray, TypeJsonObject } from '@/app';
 
 type BuildGeoViewLayerInput = {
   layerIdsToAdd: string[];
@@ -93,7 +77,7 @@ export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): TypeGeov
           geoviewLayerId: generateId(),
           geoviewLayerType: layerType as TypeGeoviewLayerType,
           metadataAccessPath: createLocalizedString(layerURL),
-          listOfLayerEntryConfig: [],
+          listOfLayerEntryConfig: layerName ? [{ layerId: layerName, layerName: createLocalizedString(layerName) }] : [],
         }),
         language
       );
@@ -148,9 +132,6 @@ export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): TypeGeov
         // Insert a copy of the current node in the parent list of layer entry config
         parentLayerGroupArray!.push(layerNode!.clone(parentLayerGroup));
       }
-      /*
-      https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata-new.meta
-      */
     });
 
     const removeUnselectedGroups = (listOfLayerEntryConfig: EntryConfigBaseClass[]): EntryConfigBaseClass[] => {
@@ -176,22 +157,130 @@ export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): TypeGeov
   const patchForTheListOfLayerEntryConfig = (listOfLayerEntryConfig: EntryConfigBaseClass[]): EntryConfigBaseClass[] => {
     return Cast<EntryConfigBaseClass[]>(
       listOfLayerEntryConfig.map((layer) => {
-        if (layerEntryIsGroupLayer(layer))
-          return {
+        if (layerEntryIsGroupLayer(layer)) {
+          const groupLayerToUse = {
             layerId: layer.layerId,
             layerName: createLocalizedString(layer.layerName!),
             isLayerGroup: layer.isLayerGroup,
             entryType: 'group',
             listOfLayerEntryConfig: patchForTheListOfLayerEntryConfig(layer.listOfLayerEntryConfig!),
           };
-        return {
-          layerId: layer.layerId,
-          layerName: createLocalizedString(layer.layerName!),
-          isLayerGroup: false,
-          source: {
-            dataAccessPath: createLocalizedString(geoviewLayerConfig!.metadataAccessPath),
-          },
-        };
+          return groupLayerToUse;
+        }
+
+        const leafToUse = toJsonObject(layer);
+        leafToUse.schemaTag = Cast<TypeJsonObject>(geoviewLayerConfig?.geoviewLayerType);
+        if (leafToUse.layerName) leafToUse.layerName = toJsonObject(createLocalizedString(layer.layerName!));
+        if (leafToUse.source) {
+          const { source } = leafToUse;
+          if ('maxRecordCount' in source) delete source.maxRecordCount;
+          if ('layerFilter' in source) leafToUse.layerFilter = source.layerFilter;
+          delete leafToUse.maxRecordCount;
+          if ('projection' in source) {
+            source.dataProjection = source.projection;
+            delete source.projection;
+          }
+          if (!source.dataAccessPath) {
+            if (!geoviewLayerConfig!.metadataAccessPath.toLowerCase().endsWith('.xml'))
+              if (geoviewLayerConfig!.metadataAccessPath.toLowerCase().endsWith('.meta')) {
+                const metadataAccessPathItems = geoviewLayerConfig!.metadataAccessPath.split('/');
+                source.dataAccessPath = Cast<TypeJsonObject>(
+                  createLocalizedString(metadataAccessPathItems.slice(0, metadataAccessPathItems.length - 1).join('/'))
+                );
+              } else source.dataAccessPath = Cast<TypeJsonObject>(createLocalizedString(geoviewLayerConfig!.metadataAccessPath));
+          }
+          // ===================================================================================================
+          if (source.featureInfo) {
+            const { featureInfo } = source;
+            if ('nameField' in featureInfo) featureInfo.nameField = toJsonObject(createLocalizedString(featureInfo.nameField));
+            if (featureInfo?.outfields?.length) {
+              if (featureInfo.outfields[0].type)
+                featureInfo.fieldTypes = (featureInfo.outfields as TypeJsonArray)
+                  .map((item) => {
+                    return item.type;
+                  })
+                  .join(',') as TypeJsonObject;
+              if (featureInfo.outfields[0].alias)
+                featureInfo.aliasFields = toJsonObject(
+                  createLocalizedString(
+                    (featureInfo.outfields as TypeJsonArray)
+                      .map((item) => {
+                        return item.alias;
+                      })
+                      .join(',')
+                  )
+                );
+              if (featureInfo.outfields[0].name)
+                featureInfo.outfields = toJsonObject(
+                  createLocalizedString(
+                    (featureInfo.outfields as TypeJsonArray)
+                      .map((item) => {
+                        return item.name;
+                      })
+                      .join(',')
+                  )
+                );
+            }
+            leafToUse.source.dataProjection = leafToUse.source.projection;
+            delete leafToUse.source.projection;
+          }
+        }
+        // =====================================================================================================
+        if (leafToUse.style) {
+          const { style } = leafToUse;
+          const geometryStyle = {} as TypeJsonObject;
+          const geometryType = (leafToUse.geometryType as string) === 'linestring' ? 'LineString' : (leafToUse.geometryType as string);
+          style[`${geometryType.slice(0, 1).toUpperCase()}${geometryType.slice(1)}`] = geometryStyle;
+          if (style.type === 'simple') {
+            geometryStyle.styleType = 'simple' as TypeJsonObject;
+            geometryStyle.label = style?.info?.label;
+            geometryStyle.settings = style?.info[0]?.settings;
+          } else if (style.type === 'uniqueValue') {
+            geometryStyle.styleType = 'uniqueValue' as TypeJsonObject;
+            geometryStyle.fields = style?.fields;
+            const defaultIndex = (style.info.length as number) - 1;
+            (geometryStyle.uniqueValueStyleInfo as TypeJsonArray) = (
+              (style.info as TypeJsonArray).slice(0, style.hasDefault ? defaultIndex : undefined) as TypeJsonArray
+            ).map((item) => {
+              return {
+                label: item.label,
+                visible: item.visible,
+                values: item.values,
+                settings: item.settings,
+              };
+            }) as TypeJsonArray;
+            if (style.hasDefault) {
+              geometryStyle.defaultLabel = (style.info as TypeJsonArray)[defaultIndex].label;
+              geometryStyle.defaultVisible = (style.info as TypeJsonArray)[defaultIndex].visible;
+              geometryStyle.defaultSettings = (style.info as TypeJsonArray)[defaultIndex].settings;
+            }
+          } else {
+            geometryStyle.styleType = 'classBreaks' as TypeJsonObject;
+            geometryStyle.fields = style?.fields[0];
+            const defaultIndex = (style.info.length as number) - 1;
+            (geometryStyle.classBreakStyleInfo as TypeJsonArray) = (
+              (style.info as TypeJsonArray).slice(0, style.hasDefault ? defaultIndex : undefined) as TypeJsonArray
+            ).map((item) => {
+              return {
+                label: item.label,
+                visible: item.visible,
+                minValue: (item.values as TypeJsonArray)[0],
+                miaxValue: (item.values as TypeJsonArray)[1],
+                settings: item.settings,
+              };
+            }) as TypeJsonArray;
+            if (leafToUse.hasDefault) {
+              geometryStyle.defaultLabel = (style.info as TypeJsonArray)[defaultIndex].label;
+              geometryStyle.defaultVisible = (style.info as TypeJsonArray)[defaultIndex].visible;
+              geometryStyle.defaultSettings = (style.info as TypeJsonArray)[defaultIndex].settings;
+            }
+          }
+          delete style.type;
+          delete style.info;
+          delete style.fields;
+          delete style.hasDefault;
+        }
+        return leafToUse;
       })
     );
   };
