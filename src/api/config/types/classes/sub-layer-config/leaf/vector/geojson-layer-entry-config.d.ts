@@ -1,12 +1,13 @@
-import { TypeStyleConfig, TypeLayerEntryType, TypeSourceWmsInitialConfig, WmsLayerConfig } from '@config/types/map-schema-types';
+import { TypeStyleConfig, TypeLayerEntryType, TypeSourceGeoJsonInitialConfig } from '@config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
+import { GeoJsonLayerConfig } from '@config/types/classes/geoview-config/vector-config/geojson-config';
 /**
- * The OGC WMS geoview sublayer class.
+ * The GeoJson geoview sublayer class.
  */
-export declare class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export declare class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     #private;
     /** Source settings to apply to the GeoView image layer source at creation time. */
-    source: TypeSourceWmsInitialConfig;
+    source: TypeSourceGeoJsonInitialConfig;
     /** Style to apply to the raster layer. */
     style?: TypeStyleConfig;
     /**
@@ -25,17 +26,17 @@ export declare class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
      */
     protected getEntryType(): TypeLayerEntryType;
     /**
-     * Shadow method used to do a cast operation on the parent method to return WmsLayerConfig instead of
+     * Shadow method used to do a cast operation on the parent method to return GeoJsonLayerConfig instead of
      * AbstractGeoviewLayerConfig.
      *
-     * @returns {WmsLayerConfig} The Geoview layer configuration that owns this WMS layer entry config.
-     * @override @async
+     * @returns {GeoJsonLayerConfig} The Geoview layer configuration that owns this GeoJson layer entry config.
+     * @override
      */
-    getGeoviewLayerConfig(): WmsLayerConfig;
+    getGeoviewLayerConfig(): GeoJsonLayerConfig;
     /**
      * This method is used to fetch, parse and extract the relevant information from the metadata of the leaf node.
      * The same method signature is used by layer group nodes and leaf nodes (layers).
-     * @override
+     * @override @async
      */
     fetchLayerMetadata(): Promise<void>;
     /**

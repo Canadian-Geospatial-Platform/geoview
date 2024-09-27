@@ -183,8 +183,10 @@ export type TypeMapViewSettings = {
     /** Geoview layer ID(s) or layer path(s) of layer(s) to use as initial map focus. If empty, will use all layers. */
     layerIds?: string[];
 };
-/** Type used to define valid projection codes. */
+/** Type used to define valid map projection codes. */
 export type TypeValidMapProjectionCodes = 3978 | 3857;
+/** Type used to define valid source projection codes. */
+export type TypeValidSourceProjectionCodes = 3978 | 3857 | 4326;
 /** Type used to define valid highlight colors. */
 export type TypeHighlightColors = 'black' | 'white' | 'red' | 'green';
 /** Type used to define overlay objects. */
@@ -273,6 +275,7 @@ export { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-con
 export { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/esri-feature-layer-entry-config';
 export { WmsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
 export { WfsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
+export { GeoJsonLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
 /** Valid keys for the geometryType property. */
 export type TypeStyleGeometry = 'point' | 'linestring' | 'polygon';
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
@@ -289,10 +292,10 @@ export type TypeNearestValues = 'discrete' | 'absolute';
 /** Base type from which we derive the source properties for all the leaf nodes in the layer tree. */
 export type TypeBaseSourceInitialConfig = {
     /**
-     * Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.
+     * Spatial Reference EPSG code supported (https://epsg.io/). We support lat/long, Web Mercator and Lambert Conical Conform Canada.
      * Default = 3978.
      */
-    projection: TypeValidMapProjectionCodes;
+    projection: TypeValidSourceProjectionCodes;
     /** The crossOrigin attribute if needed to load the data. */
     crossOrigin?: string;
 };
@@ -361,6 +364,8 @@ export type TypeTileGrid = {
 export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV' | 'MVT';
 /** Type from which we derive the source properties for all the ESRI feature leaf nodes in the layer tree. */
 export type TypeSourceEsriFeatureInitialConfig = TypeBaseVectorSourceInitialConfig;
+/** Type from which we derive the source properties for all the GeoJson feature leaf nodes in the layer tree. */
+export type TypeSourceGeoJsonInitialConfig = TypeBaseVectorSourceInitialConfig;
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
     /** Maximum number of records to fetch (default: 0). */
@@ -369,6 +374,16 @@ export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitia
     layerFilter?: string;
     /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
     featureInfo?: TypeFeatureInfoLayerConfig;
+    /** The format used by the image layer. */
+    format: TypeEsriFormatParameter;
+    /**
+     * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png
+     * and .gif formats support transparency.
+     */
+    transparent?: boolean;
+}
+/** Type from which we derive the source properties for all the ESRI Image leaf nodes in the layer tree. */
+export interface TypeSourceEsriImageInitialConfig extends TypeBaseSourceInitialConfig {
     /** The format used by the image layer. */
     format: TypeEsriFormatParameter;
     /**
