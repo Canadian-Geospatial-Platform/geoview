@@ -42,12 +42,14 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
       .concat(selectedItems);
     setDefaultExpandedItems(result);
     setIsInitialized(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startingSelectedItems]);
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('Add Layer Tree - selectedItems ', selectedItems);
     onSelectedItemsChange(selectedItems);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItems]);
 
   /**
@@ -55,7 +57,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
    * @param layer - the layer to render
    * @param parentId - the parent id of the layer
    */
-  const renderTreeItem = function (layer: GroupLayerEntryConfig, parentId: string | null): JSX.Element {
+  const renderTreeItem = (layer: GroupLayerEntryConfig, parentId: string | null): JSX.Element => {
     const curLayerId = `${parentId ? `${parentId}/` : ''}${layer.layerId}`;
     return (
       <TreeItem key={curLayerId} itemId={curLayerId} label={layer.layerName} aria-label={layer.layerName}>
@@ -72,7 +74,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
    * @param treeLayerId - the id of the layer
    * @returns - the list of children of the layer
    */
-  const getLayerChildren = function (treeLayerId: string): string[] {
+  const getLayerChildren = (treeLayerId: string): string[] => {
     const result: string[] = [];
 
     function populateLayerChildren(origLayerId: string, parentViewId: string | null): void {
@@ -100,7 +102,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     return _.uniq(result).sort();
   };
 
-  const handleItemSelectionToggle = function (event: React.SyntheticEvent, itemId: string, isSelected: boolean): void {
+  const handleItemSelectionToggle = (event: React.SyntheticEvent, itemId: string, isSelected: boolean): void => {
     const layerChildren = getLayerChildren(itemId);
     const toAddOrRemove = [itemId, ...layerChildren];
 
@@ -115,8 +117,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     return null;
   }
 
-  const renderTreeItems = function () {
-    // return layersData[0].listOfLayerEntryConfig.map((layer) => renderTreeItem(layer as GroupLayerEntryConfig, null));
+  const renderTreeItems = (): JSX.Element[] => {
     return layersData.map((layer) => renderTreeItem(layer as GroupLayerEntryConfig, null));
   };
 
