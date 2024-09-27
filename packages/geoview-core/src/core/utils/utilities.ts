@@ -45,6 +45,18 @@ export function getLocalizedMessage(localizedKey: string, language: TypeDisplayL
 }
 
 /**
+ * Deep merge objects togheter. Latest object will overwrite value on previous one
+ * if property exist.
+ *
+ * @param {TypeJsonObject} objects - The objects to deep merge
+ * @returns {TypeJsonObject} The merged object
+ */
+export function deepMergeObjects(...objects: TypeJsonObject[]): TypeJsonObject {
+  const deepCopyObjects = objects.map((object) => JSON.parse(JSON.stringify(object)));
+  return deepCopyObjects.reduce((merged, current) => ({ ...merged, ...current }), {});
+}
+
+/**
  * Get the URL of main script cgpv-main so we can access the assets
  * @returns {string} the URL of the main script
  */

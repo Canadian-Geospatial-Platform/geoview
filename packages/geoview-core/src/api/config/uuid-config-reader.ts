@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 
 import { TypeJsonObject, TypeJsonArray, toJsonObject } from '@config/types/config-types';
 import { CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
-import { createLocalizedString } from '@/core/utils/utilities';
+import { createLocalizedString, deepMergeObjects } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 // The GeoChart Json object coming out of the GeoCore response
@@ -57,6 +57,9 @@ export class UUIDmapConfigReader {
 
         if (layer) {
           const { layerType, layerEntries, name, url, id, serverType, isTimeAware } = layer;
+
+          // Get Geocore custom config layer entries values
+          const customGeocoreLayerConfig = this.#getGeocoreCustomLayerConfig(result, lang);
 
           const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
@@ -126,12 +129,27 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return toJsonObject({
+                const originalConfig = {
                   layerId: `${item.id}`,
                   source: {
                     serverType: serverType === undefined ? 'mapserver' : serverType,
                   },
-                });
+                };
+
+                // Overwrite default from geocore custom config
+                const mergedConfig = deepMergeObjects(
+                  originalConfig as unknown as TypeJsonObject,
+                  customGeocoreLayerConfig as unknown as TypeJsonObject
+                );
+
+                return mergedConfig;
+
+                // return toJsonObject({
+                //   layerId: `${item.id}`,
+                //   source: {
+                //     serverType: serverType === undefined ? 'mapserver' : serverType,
+                //   },
+                // });
               }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -298,6 +316,26 @@ export class UUIDmapConfigReader {
     return listOfGeoviewLayerConfig;
   }
 
+  /**
+   * Reads the layers config from uuid request result
+   * @param {AxiosResponse<GeoChartGeoCoreConfig>} result - the uuid request result
+   * @param {string} lang - the language to use to read results
+   * @returns {TypeJsonObject} the layers snippet configs
+   * @private
+   */
+  static #getGeocoreCustomLayerConfig(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject {
+    // If no custon geocore information
+    if (!result?.data || !result.data.response || !result.data.response.gcs || !Array.isArray(result.data.response.gcs)) return {};
+
+    // TODO: Once refactor done rename to layers
+    // TODO: Before moving to the new api, layers will need to link to ids inside the gsc response so we can customize group, or specific id
+    // Find custom layer entry configuration
+    const foundConfigs = result.data.response.gcs.map((gcs) => gcs?.[lang]?.layersNew as TypeJsonObject);
+
+    return foundConfigs[0] || {};
+  }
+
+  // GV This is important, it sets the geochart config, we need to relink
   // TODO: Check - Commented out as not called anymore by method `getGVConfigFromUUIDs`, but maybe it should still?
   // /**
   //  * Reads and parses GeoChart configs from uuid request result

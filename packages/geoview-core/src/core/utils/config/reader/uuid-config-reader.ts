@@ -13,7 +13,7 @@ import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojso
 import { TypeGeoPackageLayerConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { TypeXYZTilesConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { TypeVectorTilesConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { createLocalizedString } from '@/core/utils/utilities';
+import { createLocalizedString, deepMergeObjects } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -48,7 +48,7 @@ export type GeoChartConfig = TypeJsonObject & {
 
 // The returned parsed response
 export type UUIDmapConfigReaderResponse = {
-  layers: TypeGeoviewLayerConfig[];
+  layers?: TypeGeoviewLayerConfig[];
   geocharts?: GeoChartConfig[];
 };
 
@@ -83,7 +83,11 @@ export class UUIDmapConfigReader {
         const layer = data.layers[0];
 
         if (layer) {
+          // Get RCS values
           const { layerType, layerEntries, name, url, id, serverType, isTimeAware } = layer;
+
+          // Get Geocore custom config layer entries values
+          const customGeocoreLayerConfig = this.#getGeocoreCustomLayerConfig(result, lang);
 
           const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
@@ -97,7 +101,7 @@ export class UUIDmapConfigReader {
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriDynamicLayerEntryConfig => {
-              const esriDynamicLayerEntryConfig = new EsriDynamicLayerEntryConfig({
+              const originalConfig = {
                 geoviewLayerConfig,
                 schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
                 entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
@@ -105,7 +109,15 @@ export class UUIDmapConfigReader {
                 source: {
                   dataAccessPath: createLocalizedString(url),
                 },
-              } as unknown as EsriDynamicLayerEntryConfig);
+              };
+
+              // Overwrite default from geocore custom config
+              const mergedConfig = deepMergeObjects(
+                originalConfig as unknown as TypeJsonObject,
+                customGeocoreLayerConfig as unknown as TypeJsonObject
+              );
+              const esriDynamicLayerEntryConfig = new EsriDynamicLayerEntryConfig(mergedConfig as unknown as EsriDynamicLayerEntryConfig);
+
               return esriDynamicLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -170,7 +182,7 @@ export class UUIDmapConfigReader {
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): OgcWmsLayerEntryConfig => {
-              const wmsLayerEntryConfig = new OgcWmsLayerEntryConfig({
+              const originalConfig = {
                 geoviewLayerConfig,
                 schemaTag: CONST_LAYER_TYPES.WMS,
                 entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
@@ -179,7 +191,15 @@ export class UUIDmapConfigReader {
                   dataAccessPath: createLocalizedString(url),
                   serverType: (serverType === undefined ? 'mapserver' : serverType) as TypeOfServer,
                 },
-              } as OgcWmsLayerEntryConfig);
+              };
+
+              // Overwrite default from geocore custom config
+              const mergedConfig = deepMergeObjects(
+                originalConfig as unknown as TypeJsonObject,
+                customGeocoreLayerConfig as unknown as TypeJsonObject
+              );
+              const wmsLayerEntryConfig = new OgcWmsLayerEntryConfig(mergedConfig as unknown as OgcWmsLayerEntryConfig);
+
               return wmsLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -370,6 +390,23 @@ export class UUIDmapConfigReader {
       }
     }
     return listOfGeoviewLayerConfig;
+  }
+
+  /**
+   * Reads the layers config from uuid request result
+   * @param {AxiosResponse<GeoChartGeoCoreConfig>} result - the uuid request result
+   * @param {string} lang - the language to use to read results
+   * @returns {TypeJsonObject} the layers snippet configs
+   * @private
+   */
+  static #getGeocoreCustomLayerConfig(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject {
+    // If no custon geocore information
+    if (!result?.data || !result.data.response || !result.data.response.gcs || !Array.isArray(result.data.response.gcs)) return {};
+
+    // Find custom layer entry configuration
+    const foundConfigs = result.data.response.gcs.map((gcs) => gcs?.[lang]?.layers as TypeJsonObject);
+
+    return foundConfigs[0] || {};
   }
 
   /**
