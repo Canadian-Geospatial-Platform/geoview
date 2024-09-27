@@ -48,7 +48,7 @@ export type GeoChartConfig = TypeJsonObject & {
 
 // The returned parsed response
 export type UUIDmapConfigReaderResponse = {
-  layers?: TypeGeoviewLayerConfig[];
+  layers: TypeGeoviewLayerConfig[];
   geocharts?: GeoChartConfig[];
 };
 
