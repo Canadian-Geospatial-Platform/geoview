@@ -51,7 +51,7 @@ export class WmsGroupLayerConfig extends GroupLayerEntryConfig {
     }
 
     // Parse the raw layer metadata and build the geoview configuration.
-    this.#parseLayerMetadata();
+    this.parseLayerMetadata();
 
     await this.fetchListOfLayerMetadata();
 
@@ -62,16 +62,12 @@ export class WmsGroupLayerConfig extends GroupLayerEntryConfig {
     }
   }
 
-  // #endregion OVERRIDE
-
-  // ===============
-  // #region PRIVATE
   /** ***************************************************************************************************************************
    * This method is used to analyze metadata and extract the relevant information from a group layer based on a definition
    * provided by the WMS service.
-   * @private
+   * @override @protected
    */
-  #parseLayerMetadata(): void {
+  protected override parseLayerMetadata(): void {
     const layerMetadata = this.getLayerMetadata();
 
     this.layerName = layerMetadata.Title as string;
@@ -86,7 +82,8 @@ export class WmsGroupLayerConfig extends GroupLayerEntryConfig {
     this.initialSettings.extent = validateExtentWhenDefined(layerMetadata.EX_GeographicBoundingBox as Extent);
     this.initialSettings.bounds = this.initialSettings.extent;
   }
-  // #endregion PRIVATE
+
+  // #endregion OVERRIDE
   // #endregion METHODS
   // #endregion CLASS HEADER
 }
