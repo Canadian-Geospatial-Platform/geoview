@@ -236,6 +236,7 @@ export interface TypeTimeSliderValues {
   delay: number;
   description?: string;
   discreteValues: boolean;
+  step?: number;
   field: string;
   fieldAlias: string;
   filtering: boolean;

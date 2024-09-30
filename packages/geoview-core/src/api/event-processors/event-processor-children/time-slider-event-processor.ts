@@ -166,10 +166,18 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       ? [new Date(temporalDimensionInfo.default[0]).getTime(), new Date(temporalDimensionInfo.default[1]).getTime()]
       : [...minAndMax];
 
+    // If using discrete axis
+    let step: number | undefined;
+    if (nearestValues === 'discrete') {
+      // Try to guess the steps that should be used
+      step = TimeSliderEventProcessor.guessEstimatedStep(minAndMax[0], minAndMax[1]);
+    }
+
     return {
       range,
       defaultValue,
       discreteValues: nearestValues === 'discrete',
+      step,
       minAndMax,
       field,
       fieldAlias,
@@ -180,6 +188,28 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       locked: undefined,
       reversed: undefined,
     };
+  }
+
+  /**
+   * Guesses the estimated steps that should be used by the slider, depending on the value range
+   * @param {number} minValue - The minimum value
+   * @param {number} maxValue - The maximum value
+   * @returns The estimated stepping value based on the min and max values
+   */
+  static guessEstimatedStep(minValue: number, maxValue: number): number | undefined {
+    const day1 = 86400000; // 24h x 60m x 60s x 1000ms = 86,400,000ms in a day
+    const month1 = day1 * 30; // 2,592,000,000ms in 1 month
+    const year1 = day1 * 365; // 31,536,000,000ms in 1 year
+    const years2 = year1 * 2; // 63,072,000,000ms in 2 years
+    const years10 = year1 * 10; // 63,072,000,000ms in 2 years
+    const months2 = month1 * 2; // 315,360,000,000 in 10 years
+    const intervalDiff = maxValue - minValue;
+
+    let step: number | undefined;
+    if (intervalDiff > months2) step = day1; // Daily stepping
+    if (intervalDiff > years2) step = month1; // Monthly stepping
+    if (intervalDiff > years10) step = year1; // Yearly stepping
+    return step;
   }
 
   /**
