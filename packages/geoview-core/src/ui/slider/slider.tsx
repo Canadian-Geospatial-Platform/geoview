@@ -26,7 +26,7 @@ type SliderProps = {
   // custom onChange callback
   onChange?: (value: number | number[], activeThumb: number) => void;
   onChangeCommitted?: (value: number | number[]) => void;
-  onValueDisplay?: (value: number, index: number) => string;
+  onValueLabelFormat?: (value: number, index: number) => string;
   onValueDisplayAriaLabel?: (value: number, index: number) => string;
 
   // MUI optional props
@@ -51,7 +51,7 @@ type SliderProps = {
  * @returns {JSX.Element} the created Slider element
  */
 export function Slider(props: SliderProps): JSX.Element {
-  const { value: parentValue, min, max, onChange, onChangeCommitted, onValueDisplay, onValueDisplayAriaLabel, ...properties } = props;
+  const { value: parentValue, min, max, onChange, onChangeCommitted, onValueLabelFormat, onValueDisplayAriaLabel, ...properties } = props;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -199,12 +199,12 @@ export function Slider(props: SliderProps): JSX.Element {
       step={properties.step}
       size={properties.size}
       disableSwap={false}
-      valueLabelDisplay="auto"
-      onChange={handleChange}
-      onChangeCommitted={handleChangeCommitted}
-      valueLabelFormat={onValueDisplay}
+      valueLabelDisplay="on"
+      valueLabelFormat={onValueLabelFormat}
       getAriaLabel={(): string => 'To implement with translation'}
       getAriaValueText={onValueDisplayAriaLabel}
+      onChange={handleChange}
+      onChangeCommitted={handleChangeCommitted}
     />
   );
 }

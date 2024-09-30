@@ -23,6 +23,13 @@ export const getSxClasses = (theme: Theme): any => ({
         height: 30,
       },
     },
+    '&  .MuiSlider-thumb:hover, .MuiSlider-thumb.Mui-focusVisible': {
+      boxShadow: 'rgba(1, 0, 155, 0.7) 0px 0px 0px 3px !important',
+    },
+    '& .MuiSlider-valueLabel': {
+      fontSize: '0.7rem',
+      padding: '0.25rem 0.4rem',
+    },
     '& .MuiSlider-rail': {
       opacity: 0.35,
       color: theme.palette.geoViewColor?.grey.darken(0.9, 0.87),
