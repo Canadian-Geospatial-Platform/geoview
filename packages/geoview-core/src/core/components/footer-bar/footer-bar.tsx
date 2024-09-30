@@ -192,7 +192,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     logger.logTraceUseEffect('FOOTER-TABS - arrayOfLayerDataBatch', arrayOfLayerDataBatch, selectedTab, isCollapsed);
 
     // If we're on the details panel and the footer is collapsed
-    if (selectedTab === 'details' && isCollapsed) {
+    if (selectedTab === `${mapId}-details-2` && isCollapsed) {
       // Uncollapse it
       setFooterBarIsCollapsed(false);
     }

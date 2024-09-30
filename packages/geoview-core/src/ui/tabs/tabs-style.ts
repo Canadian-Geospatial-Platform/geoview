@@ -27,6 +27,10 @@ export const getSxClasses = (theme: Theme): any => ({
       marginRight: '7px',
       maxWidth: '18px',
     },
+    ':focus-visible': {
+      border: `2px solid ${theme.palette.common.black}`,
+      outline: 'none',
+    },
   },
   mobileDropdown: {
     maxWidth: '200px',

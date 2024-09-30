@@ -38,7 +38,7 @@ export interface IUIState {
   actions: {
     hideTab: (tab: string) => void;
     enableFocusTrap: (uiFocus: FocusItemProps) => void;
-    disableFocusTrap: () => void;
+    disableFocusTrap: (callbackElementId?: string) => void;
     showTab: (tab: string) => void;
     setActiveFooterBarTab: (id: string) => void;
     setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
@@ -51,7 +51,7 @@ export interface IUIState {
 
   setterActions: {
     enableFocusTrap: (uiFocus: FocusItemProps) => void;
-    disableFocusTrap: () => void;
+    disableFocusTrap: (callbackElementId?: string) => void;
     setActiveFooterBarTab: (id: string) => void;
     setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
@@ -120,9 +120,9 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to setter
         get().uiState.setterActions.enableFocusTrap(uiFocus);
       },
-      disableFocusTrap: () => {
+      disableFocusTrap: (callbackElementId: string) => {
         // Redirect to setter
-        get().uiState.setterActions.disableFocusTrap();
+        get().uiState.setterActions.disableFocusTrap(callbackElementId);
       },
       showTab: (tab: string): void => {
         // Redirect to event processor
@@ -167,8 +167,9 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
-      disableFocusTrap: () => {
-        document.getElementById(get().uiState.focusItem.callbackElementId as string)?.focus();
+      disableFocusTrap: (callBackElementId: string) => {
+        const id = callBackElementId ?? (get().uiState.focusItem.callbackElementId as string);
+        document.getElementById(id)?.focus();
         set({
           uiState: {
             ...get().uiState,
