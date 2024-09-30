@@ -148,6 +148,12 @@ export abstract class EntryConfigBaseClass {
    */
   abstract fetchLayerMetadata(): Promise<void>;
 
+  /**
+   * This method is used to parse the layer metadata and extract the style, source information and other properties.
+   * @abstract @protected
+   */
+  protected abstract parseLayerMetadata(): void;
+
   // #endregion ABSTRACT
 
   // =================
@@ -157,7 +163,32 @@ export abstract class EntryConfigBaseClass {
    * @protected
    */
   protected validateLayerConfig(layerConfig: TypeJsonObject): void {
+    // TODO: Code to be deleted when the configuration api is used permanently. We do that to avoid validation errors.
+    // GV: Delete this
+    // GV:    |||
+    // GV:    vvv
+    const entryType = layerConfig?.entryType;
+    // eslint-disable-next-line no-param-reassign
+    delete layerConfig.entryType;
+    // eslint-disable-next-line no-param-reassign
+    if (entryType === 'group') (layerConfig.isLayerGroup as boolean) = true;
+    // GV:    ^^^
+    // GV:    |||
+
+    // GV: Do not delete the following line.
+
     if (!isvalidComparedToInputSchema(this.getSchemaPath(), layerConfig)) this.setErrorDetectedFlag();
+
+    // TODO: Code to be deleted when the configuration api is used permanently.
+    // GV: Delete this
+    // GV:    |||
+    // GV:    vvv
+    // eslint-disable-next-line no-param-reassign
+    if (entryType) layerConfig.entryType = entryType;
+    // eslint-disable-next-line no-param-reassign
+    if (entryType === 'group') delete layerConfig.isLayerGroup;
+    // GV:    ^^^
+    // GV:    |||
   }
   // #endregion PROTECTED
 
@@ -326,6 +357,7 @@ export abstract class EntryConfigBaseClass {
     cloneOfTheNode.layerName = this.layerName;
     cloneOfTheNode.setErrorDetectedFlag(this.#errorDetectedFlag);
     cloneOfTheNode.setLayerMetadata(this.#layerMetadata);
+    cloneOfTheNode.parseLayerMetadata();
     return cloneOfTheNode;
   }
 
