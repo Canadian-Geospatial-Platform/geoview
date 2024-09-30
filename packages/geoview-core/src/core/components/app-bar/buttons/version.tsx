@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Typography, Box, Link, Theme, SvgIcon, ClickAwayListener, Paper } from '@mui/material';
 
 import { GITHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
-import { GeoCaIcon, IconButton, Popper } from '@/ui';
+import { GeoCaIcon, IconButton, Popper, CloseIcon } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GitHubIcon } from '@/ui/icons';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import { FocusTrapContainer } from '../../common';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -31,6 +33,7 @@ export default function Version(): JSX.Element {
 
   const mapId = useGeoViewMapId();
   const interaction = useMapInteraction();
+  const activeTrapGeoView = useUIActiveTrapGeoView();
 
   const mapElem = document.getElementById(`shell-${mapId}`);
 
@@ -62,12 +65,16 @@ export default function Version(): JSX.Element {
         textDecoration: 'underLine',
       },
     },
+    versionHeading: {
+      display: 'flex',
+      alignItems: 'center',
+      borderBottom: (theme: Theme) => `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}}`,
+    },
     versionsInfoTitle: {
       fontSize: (theme: Theme) => theme.palette.geoViewFontSize.default,
       fontWeight: '700',
       padding: '20px',
       color: (theme: Theme) => theme.palette.geoViewColor.textColor.main,
-      borderBottom: (theme: Theme) => `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}}`,
       marginBottom: '10px',
     },
     versionInfoContent: {
@@ -101,30 +108,38 @@ export default function Version(): JSX.Element {
           onClose={handleClickAway}
           container={mapElem}
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
+          disablePortal
         >
-          <Paper sx={sxClasses.versionInfoPanel}>
-            <Typography sx={sxClasses.versionsInfoTitle} component="h3">
-              {t('appbar.version')}
-            </Typography>
-            <Box sx={sxClasses.versionInfoContent}>
-              <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
-                <SvgIcon viewBox="-4 -2 38 36">
-                  <GeoCaIcon />
-                </SvgIcon>
-                <Link rel="noopener" href={GEO_URL_TEXT.url} target="_black">
-                  {GEO_URL_TEXT.text}
-                </Link>
+          <FocusTrapContainer id={`${mapId}-version`} open={open && activeTrapGeoView}>
+            <Paper sx={sxClasses.versionInfoPanel}>
+              <Box sx={sxClasses.versionHeading}>
+                <Typography sx={sxClasses.versionsInfoTitle} component="h3">
+                  {t('appbar.version')}
+                </Typography>
+                <IconButton onClick={handleClickAway}>
+                  <CloseIcon />
+                </IconButton>
               </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
-                <GitHubIcon />
-                <Link rel="noopener" href={GITHUB_REPO} target="_black">
-                  {t('appbar.repoLink')}
-                </Link>
+              <Box sx={sxClasses.versionInfoContent}>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
+                  <SvgIcon viewBox="-4 -2 38 36">
+                    <GeoCaIcon />
+                  </SvgIcon>
+                  <Link rel="noopener" href={GEO_URL_TEXT.url} target="_black">
+                    {GEO_URL_TEXT.text}
+                  </Link>
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
+                  <GitHubIcon />
+                  <Link rel="noopener" href={GITHUB_REPO} target="_black">
+                    {t('appbar.repoLink')}
+                  </Link>
+                </Box>
+                <Typography component="div">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</Typography>
+                <Typography component="div">{new Date(__VERSION__.timestamp).toLocaleDateString()}</Typography>
               </Box>
-              <Typography component="div">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</Typography>
-              <Typography component="div">{new Date(__VERSION__.timestamp).toLocaleDateString()}</Typography>
-            </Box>
-          </Paper>
+            </Paper>
+          </FocusTrapContainer>
         </Popper>
       </Box>
     </ClickAwayListener>
