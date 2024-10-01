@@ -18,5 +18,5 @@ export interface TypeTabPanelProps {
  * @param {TypeTabPanelProps} props properties for the tab panel
  * @returns {JSX.Element} returns the tab panel
  */
-export declare function TabPanel(props: TypeTabPanelProps): JSX.Element;
+export declare const TabPanel: import("react").ForwardRefExoticComponent<TypeTabPanelProps & import("react").RefAttributes<unknown>>;
 export {};

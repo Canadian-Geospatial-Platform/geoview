@@ -1,6 +1,6 @@
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
 /**
- * Base type used to define the common implementation of an ESRI GeoView sublayer to display on the map.
+ * Base type used to define the common implementation of a WFS GeoView sublayer to display on the map.
  */
 export declare class WfsGroupLayerConfig extends GroupLayerEntryConfig {
     /** ***************************************************************************************************************************

@@ -21,7 +21,7 @@ export interface IUIState {
     footerPanelResizeValue: number;
     footerPanelResizeValues: number[];
     footerBarIsCollapsed: boolean;
-    selectedFooterLayerListItem: string;
+    selectedFooterLayerListItemId: string;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         hideTab: (tab: string) => void;
@@ -34,7 +34,7 @@ export interface IUIState {
         setFooterPanelResizeValue: (value: number) => void;
         setMapInfoExpanded: (expanded: boolean) => void;
         setFooterBarIsCollapsed: (collapsed: boolean) => void;
-        setSelectedFooterLayerListItem: (layerListItem: string) => void;
+        setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
     };
     setterActions: {
         enableFocusTrap: (uiFocus: FocusItemProps) => void;
@@ -46,7 +46,7 @@ export interface IUIState {
         setHiddenTabs: (hiddenTabs: string[]) => void;
         setMapInfoExpanded: (expanded: boolean) => void;
         setFooterBarIsCollapsed: (collapsed: boolean) => void;
-        setSelectedFooterLayerListItem: (layerListItem: string) => void;
+        setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
     };
 }
 /**
@@ -72,6 +72,6 @@ export declare const useUIHiddenTabs: () => string[];
 export declare const useUIMapInfoExpanded: () => boolean;
 export declare const useUINavbarComponents: () => TypeNavBarProps;
 export declare const useUIFooterBarIsCollapsed: () => boolean;
-export declare const useUISelectedFooterLayerListItem: () => string;
+export declare const useUISelectedFooterLayerListItemId: () => string;
 export declare const useUIStoreActions: () => UIActions;
 export {};

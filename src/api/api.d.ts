@@ -28,6 +28,13 @@ export declare class API {
      */
     constructor();
     /**
+     * Sets a map viewer in maps, or removes one if the mapViewer property is null.
+     * @param {string} mapId - ID of the map
+     * @param {MapViewer | null} mapViewer - The viewer to be added or null to remove
+     * @param {(mapViewer: MapViewer) => void} onMapViewerInit - Function to run on map init
+     */
+    setMapViewer(mapId: string, mapViewer: MapViewer | null, onMapViewerInit?: (mapViewer: MapViewer) => void): void;
+    /**
      * Create a new map in a given div id.
      * GV The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
      * If is present, the div will be created with a default config
@@ -37,6 +44,16 @@ export declare class API {
      * @param {number} divHeight - height of the div to inject the map in (mandatory if the map reloads)
      */
     createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<void>;
+    /**
+     * Registers a map viewer ready event callback.
+     * @param {MapViewerReadyDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapViewerReady(callback: MapViewerReadyDelegate): void;
+    /**
+     * Unregisters a map viewer ready event callback.
+     * @param {MapViewerReadyDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapViewerReady(callback: MapViewerReadyDelegate): void;
     /**
      * Registers a map added to div event handler.
      * @param {MapAddedToDivDelegate} callback - The callback to be executed whenever the event is emitted
@@ -48,6 +65,16 @@ export declare class API {
      */
     offMapAddedToDiv(callback: MapAddedToDivDelegate): void;
 }
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapViewerReadyDelegate = EventDelegateBase<API, MapViewerReadyEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapViewerReadyEvent = {
+    mapId: string;
+};
 /**
  * Define a delegate for the event handler function signature
  */

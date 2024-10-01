@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import { KeyboardEvent } from 'react';
 import { TypePanelProps } from '..';
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 /**
@@ -10,6 +10,7 @@ export type TypePanelAppProps = {
     onGeneralCloseClicked?: () => void;
     onPanelOpened?: () => void;
     onPanelClosed?: () => void;
+    handleKeyDown?: (event: KeyboardEvent) => void;
 };
 /**
  * Create a panel with a header title, icon and content
