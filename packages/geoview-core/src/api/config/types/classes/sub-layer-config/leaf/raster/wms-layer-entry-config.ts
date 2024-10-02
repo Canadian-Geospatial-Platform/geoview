@@ -78,7 +78,7 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     if (layerMetadata) {
       this.setLayerMetadata(layerMetadata);
       // Parse the raw layer metadata and build the geoview configuration.
-      this.#parseLayerMetadata();
+      this.parseLayerMetadata();
 
       if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
         throw new GeoviewLayerConfigError(
@@ -112,15 +112,12 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       },
     };
   }
-  // #endregion OVERRIDE
 
-  // ===============
-  // #region PRIVATE
   /**
    * This method is used to parse the layer metadata and extract the source information and other properties.
-   * @private
+   * @override @protected
    */
-  #parseLayerMetadata(): void {
+  protected override parseLayerMetadata(): void {
     const layerMetadata = this.getLayerMetadata();
 
     if (layerMetadata?.Attribution?.Title) this.attributions.push(layerMetadata.Attribution.Title as string);
@@ -138,6 +135,10 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     this.#processTemporalDimension(layerMetadata.Dimension);
   }
 
+  // #endregion OVERRIDE
+
+  // ===============
+  // #region PRIVATE
   /** ***************************************************************************************************************************
    * This method will create a Geoview temporal dimension if it existds in the service metadata
    * @param {TypeJsonObject} wmsDimension The WMS time dimension object

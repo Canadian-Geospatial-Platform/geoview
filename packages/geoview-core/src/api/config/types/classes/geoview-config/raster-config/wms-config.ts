@@ -276,7 +276,8 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       const response = await fetch(metadataUrl);
       const capabilitiesString = await response.text();
       this.setServiceMetadata(parser.read(capabilitiesString));
-      if (this.getServiceMetadata()) {
+      // GV: If this.getServiceMetadata() returns {}, we need to verify if the object is empty to conclude there is no metadata.
+      if (Object.keys(this.getServiceMetadata()).length) {
         this.#processMetadataInheritance();
         this.metadataAccessPath = this.getServiceMetadata().Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
       } else throw new GeoviewLayerConfigError('Unable to read the metadata, value returned is empty.');

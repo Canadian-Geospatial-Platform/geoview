@@ -279,7 +279,9 @@ export abstract class AbstractGeoviewLayerConfig {
     if (layerTreeFilter !== undefined) {
       // When the filter is an empty array, we create the layer tree for all the metadata in the service metadata.
       if (layerTreeFilter.length === 0) {
-        this.setMetadataLayerTree(this.processListOfLayerEntryConfig(this.createLayerTreeFromServiceMetadata()));
+        const layerTree = this.processListOfLayerEntryConfig(this.createLayerTreeFromServiceMetadata());
+        await this.fetchListOfLayerMetadata(layerTree);
+        this.setMetadataLayerTree(layerTree);
       } else {
         // When the filter contains one or many layer identifiers, we create the layer tree using only the specified layers.
         // If the filter contains several layer identifiers, we create a group layer, as the root of the tree must contain
@@ -312,7 +314,7 @@ export abstract class AbstractGeoviewLayerConfig {
   /**
    * A recursive method to process the listOfLayerEntryConfig. The goal is to process each valid sublayer, searching the service's
    * metadata to verify the layer's existence and whether it is a layer group, in order to determine the node's final structure.
-   * If it is a layer group, it will be created.
+   * If the metadata indicate the node is a layer group, it will be created by the createLayerEntryNode.
    *
    * @param {EntryConfigBaseClass[]} listOfLayerEntryConfig the list of sublayers to process.
    *

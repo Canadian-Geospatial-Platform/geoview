@@ -59,7 +59,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
           // The metadata used are the layer metadata.
           this.setLayerMetadata(data);
           // Parse the raw layer metadata and build the geoview configuration.
-          this.#parseLayerMetadata();
+          this.parseLayerMetadata();
           return;
         }
       } catch (error) {
@@ -76,28 +76,25 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
       );
     }
   }
-  // #endregion OVERRIDE
 
-  // ===============
-  // #region PRIVATE
   /**
    * This method is used to analyze metadata and extract the relevant information from a group layer based on a definition
    * provided by the ESRI service.
-   * @private
+   * @override @protected
    */
-  #parseLayerMetadata(): void {
+  protected override parseLayerMetadata(): void {
     const layerMetadata = this.getLayerMetadata();
 
     this.minScale = layerMetadata.minScale as number;
     this.maxScale = layerMetadata.maxScale as number;
 
     const metadataExtent = [
-      layerMetadata.extent.xmin,
-      layerMetadata.extent.ymin,
-      layerMetadata.extent.xmax,
-      layerMetadata.extent.ymax,
+      layerMetadata.initialExtent.xmin,
+      layerMetadata.initialExtent.ymin,
+      layerMetadata.initialExtent.xmax,
+      layerMetadata.initialExtent.ymax,
     ] as Extent;
-    const sourceProj = layerMetadata.extent.spatialReference.wkid;
+    const sourceProj = layerMetadata.initialExtent.spatialReference.wkid;
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else
       this.initialSettings.extent = validateExtentWhenDefined(
@@ -111,6 +108,10 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
     if (layerMetadata.copyrightText) this.attributions.push(layerMetadata.copyrightText as string);
   }
 
+  // #endregion OVERRIDE
+
+  // ===============
+  // #region PRIVATE
   /**
    * This method is used to analyze metadata and extract the relevant information from a group layer based on a definition
    * provided by the user's configuration. In this case, we use the service metadata.

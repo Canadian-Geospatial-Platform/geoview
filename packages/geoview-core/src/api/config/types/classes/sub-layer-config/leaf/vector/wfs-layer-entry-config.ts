@@ -93,7 +93,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       });
 
       // Parse the raw layer metadata and build the geoview configuration.
-      this.#parseLayerMetadata();
+      this.parseLayerMetadata();
 
       this.source.featureInfo = this.#createFeatureInfoUsingMetadata();
 
@@ -129,6 +129,37 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       },
     };
   }
+
+  /**
+   * This method is used to parse the layer metadata and extract the source information and other properties.
+   * @override @protected
+   */
+  protected override parseLayerMetadata(): void {
+    const layerMetadata = this.getLayerMetadata().fromGetCapabilities;
+
+    if (findPropertyNameByRegex(layerMetadata, /(?:WGS84BoundingBox)/)) {
+      const lowerCorner = (
+        findPropertyNameByRegex(layerMetadata, [/(?:WGS84BoundingBox)/, /(?:LowerCorner)/, /(?:#text)/]) as string
+      ).split(' ');
+      const upperCorner = (
+        findPropertyNameByRegex(layerMetadata, [/(?:WGS84BoundingBox)/, /(?:UpperCorner)/, /(?:#text)/]) as string
+      ).split(' ');
+      const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])] as Extent;
+
+      this.initialSettings!.extent = validateExtentWhenDefined(bounds);
+      if (this.initialSettings?.extent?.find?.((value, i) => value !== bounds[i]))
+        logger.logWarning(
+          `The extent specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`
+        );
+
+      this.bounds = this.initialSettings!.extent;
+    }
+
+    this.source.featureInfo!.queryable = this.#layerIsQueryable();
+
+    // this.#processTemporalDimension(layerMetadata.Dimension);
+  }
+
   // #endregion OVERRIDE
 
   // ===============
@@ -207,36 +238,6 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     logger.logError(`Unsupported WFS output format (${supportedOutputFormat}) for layerPath ${this.getLayerPath()}`);
     this.setErrorDetectedFlag();
     return [];
-  }
-
-  /**
-   * This method is used to parse the layer metadata and extract the source information and other properties.
-   * @private
-   */
-  #parseLayerMetadata(): void {
-    const layerMetadata = this.getLayerMetadata().fromGetCapabilities;
-
-    if (findPropertyNameByRegex(layerMetadata, /(?:WGS84BoundingBox)/)) {
-      const lowerCorner = (
-        findPropertyNameByRegex(layerMetadata, [/(?:WGS84BoundingBox)/, /(?:LowerCorner)/, /(?:#text)/]) as string
-      ).split(' ');
-      const upperCorner = (
-        findPropertyNameByRegex(layerMetadata, [/(?:WGS84BoundingBox)/, /(?:UpperCorner)/, /(?:#text)/]) as string
-      ).split(' ');
-      const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])] as Extent;
-
-      this.initialSettings!.extent = validateExtentWhenDefined(bounds);
-      if (this.initialSettings?.extent?.find?.((value, i) => value !== bounds[i]))
-        logger.logWarning(
-          `The extent specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`
-        );
-
-      this.bounds = this.initialSettings!.extent;
-    }
-
-    this.source.featureInfo!.queryable = this.#layerIsQueryable();
-
-    // this.#processTemporalDimension(layerMetadata.Dimension);
   }
 
   /**

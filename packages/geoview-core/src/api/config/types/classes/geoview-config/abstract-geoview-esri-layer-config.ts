@@ -235,15 +235,15 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
   };
   // #endregion PRIVATE
 
-  // =================
-  // #region PROTECTED
+  // ==============
+  // #region STATIC
   /**
    * Converts an esri geometry type string to a TypeStyleGeometry.
    * @param {string} esriGeometryType - The esri geometry type to convert
    * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
-   * @protected @static
+   * @static
    */
-  protected static convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
+  static convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
     switch (esriGeometryType) {
       case 'esriGeometryPoint':
       case 'esriGeometryMultipoint':
@@ -260,7 +260,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         throw new Error(`Unsupported geometry type: ${esriGeometryType}`);
     }
   }
-  // #endregion PROTECTED
+  // #endregion STATIC
   // #endregion METHODS
   // #endregion CLASS HEADER
 }

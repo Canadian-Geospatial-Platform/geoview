@@ -48,7 +48,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
     const pathItemLength = metadataAccessPathItems.length;
     const lastPathItem = metadataAccessPathItems[pathItemLength - 1];
     if (lastPathItem.toLowerCase().endsWith('.json') || lastPathItem.toLowerCase().endsWith('.geojson')) {
-      // The metadataAccessPath ends with a layer index. It is therefore a path to a data layer rather than a path to service metadata.
+      // The metadataAccessPath ends with a layer reference. It is therefore a path to a data layer rather than a path to service metadata.
       // We therefore need to correct the configuration by separating the layer index and the path to the service metadata.
       this.metadataAccessPath = metadataAccessPathItems.slice(0, -1).join('/');
       if (this.listOfLayerEntryConfig.length) {
@@ -134,17 +134,12 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
         const fetchResponse = await fetch(this.metadataAccessPath);
         if (fetchResponse.status === 404) throw new GeoviewLayerConfigError('The service metadata fetch returned a 404 status (Not Found)');
         const layerMetadata = (await fetchResponse.json()) as TypeJsonObject;
-        const metadataAccessPathElements = this.metadataAccessPath.split('/');
-        this.metadataAccessPath = metadataAccessPathElements.slice(0, metadataAccessPathElements.length - 1).join('/');
         if (layerMetadata) this.setServiceMetadata(layerMetadata);
         else throw new GeoviewLayerConfigError('The metadata object returned is undefined');
-      } else {
-        await this.createLayerTree();
-        return;
-      }
 
-      this.listOfLayerEntryConfig = this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
-      await this.fetchListOfLayerMetadata();
+        this.listOfLayerEntryConfig = this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+        await this.fetchListOfLayerMetadata();
+      }
 
       await this.createLayerTree();
     } catch (error) {
@@ -166,13 +161,15 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    * @protected @override
    */
   protected override createLayerEntryNode(layerId: string, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass {
-    if (this.getServiceMetadata())
+    // GV: To determine if service metadata exists, we must verify that the object is not empty.
+    if (Object.keys(this.getServiceMetadata()).length === 0)
       return this.createLeafNode(
         toJsonObject({ layerId, layerName: createLocalizedString(layerId) }),
         this.getLanguage(),
         this,
         parentNode
       )!;
+
     // If we cannot find the layerId in the layer definitions, throw an error.
     const layerFound = this.findLayerMetadataEntry(layerId);
     if (!layerFound) {

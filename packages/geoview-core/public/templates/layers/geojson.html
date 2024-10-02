@@ -64,7 +64,7 @@
             'projection': 3978
           },
           'basemapOptions': {
-            'basemapId': 'imagery',
+            'basemapId': 'transport',
             'shaded': false,
             'labeled': false
           },
@@ -77,13 +77,11 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'polygons.json',
-                  'layerName': { 'en': 'Polygons' },
-                  'layerFilter': 'creationDate >= date \'2020/02/15\''
+                  'layerName': { 'en': 'Polygons' }
                 },
                 {
                   'layerId': 'lines.json',
-                  'layerName': { 'en': 'Lines' },
-                  'layerFilter': 'creationDate >= date \'2020-05-28T12:00:00-05:00\''
+                  'layerName': { 'en': 'Lines' }
                 },
                 {
                   'entryType': 'group',
@@ -93,13 +91,11 @@
                     {
                       'layerId': 'icon_points.json',
                       'layerName': { 'en': 'Icons' },
-                      'initialSettings': { 'states': {'visible' : false} },
-                      'layerFilter': 'creationDate >= date \'2020-01-14T12:00:01-05:00\''
+                      'initialSettings': { 'states': {'visible' : false} }
                     },
                     {
                       'layerId': 'points.json',
-                      'layerName': { 'en': 'Points' },
-                      'layerFilter': 'creationDate >= date \'2019-02-15T22:00:00Z\''
+                      'layerName': { 'en': 'Points' }
                     }
                   ]
                 }
@@ -112,7 +108,7 @@
         'corePackages': [],
         'theme': 'geo.ca'
         }"></div>
-  <button type="button" class="collapsible">Visibility and filters</button>
+  <button type="button" class="collapsible active">Visibility and filters</button>
   <pre id="layer1-buttons-pre" class="panel"></pre>
   <button class="collapsible">Get Legend</button>
   <pre id="LegendsId1-table-pre" class="panel">
@@ -223,7 +219,7 @@
     window.addEventListener('load', () => {
       createCodeSnippet();
       createConfigSnippet();
-    }); 
+    });
   </script>
 </body>
 

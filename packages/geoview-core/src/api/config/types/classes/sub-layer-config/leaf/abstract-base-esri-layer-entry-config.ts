@@ -2,14 +2,16 @@ import axios from 'axios';
 
 import { Cast, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { codedValueType, Extent, rangeDomainType, TypeFeatureInfoLayerConfig, TypeOutfields } from '@config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 
-import { logger } from '@/core/utils/logger';
-import { DateMgt, TimeDimensionESRI } from '@/core/utils/date-mgt';
+import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
+import { AbstractGeoviewEsriLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-esri-layer-config';
+
 import { Projection } from '@/geo/utils/projection';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { isvalidComparedToInternalSchema } from '@/api/config/utils';
-import { GeoviewLayerConfigError } from '../../config-exceptions';
+import { logger } from '@/core/utils/logger';
+import { DateMgt, TimeDimensionESRI } from '@/core/utils/date-mgt';
 
 // ========================
 // #region CLASS HEADER
@@ -60,32 +62,16 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
     }
     this.setErrorDetectedFlag();
   }
-  // #endregion OVERRIDE
-
-  // ==========================
-  // #region PROTECTED
-  /**
-   * This method will create a Geoview temporal dimension if it exist in the service metadata.
-   *
-   * @param {TypeJsonObject} timeDimension The ESRI time dimension object.
-   * @protected
-   */
-  // TODO: Issue #2139 - There is a bug with the temporal dimension returned by service URL:
-  // TODO.CONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
-  protected processTemporalDimension(timeDimension: TypeJsonObject): void {
-    if (timeDimension?.timeExtent) {
-      // The singleHandle property is True for ESRI Image and false for ESRI Feature and Dynamic.
-      const singleHandle = false;
-      this.temporalDimension = DateMgt.createDimensionFromESRI(Cast<TimeDimensionESRI>(timeDimension), singleHandle);
-    }
-  }
 
   /**
    * This method is used to parse the layer metadata and extract the style, source information and other properties.
-   * @protected
+   * @override @protected
    */
-  protected parseLayerMetadata(): void {
+  protected override parseLayerMetadata(): void {
     const layerMetadata = this.getLayerMetadata();
+
+    if (layerMetadata.geometryType)
+      this.geometryType = AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layerMetadata.geometryType as string);
 
     this.minScale = layerMetadata.minScale as number;
     this.maxScale = layerMetadata.maxScale as number;
@@ -116,6 +102,26 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
     this.initialSettings.states!.queryable = (layerMetadata?.capabilities as string)?.includes('Query') || false;
 
     if (layerMetadata.copyrightText) this.attributions.push(layerMetadata.copyrightText as string);
+  }
+
+  // #endregion OVERRIDE
+
+  // ==========================
+  // #region PROTECTED
+  /**
+   * This method will create a Geoview temporal dimension if it exist in the service metadata.
+   *
+   * @param {TypeJsonObject} timeDimension The ESRI time dimension object.
+   * @protected
+   */
+  // TODO: Issue #2139 - There is a bug with the temporal dimension returned by service URL:
+  // TODO.CONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
+  protected processTemporalDimension(timeDimension: TypeJsonObject): void {
+    if (timeDimension?.timeExtent) {
+      // The singleHandle property is True for ESRI Image and false for ESRI Feature and Dynamic.
+      const singleHandle = false;
+      this.temporalDimension = DateMgt.createDimensionFromESRI(Cast<TimeDimensionESRI>(timeDimension), singleHandle);
+    }
   }
 
   /**

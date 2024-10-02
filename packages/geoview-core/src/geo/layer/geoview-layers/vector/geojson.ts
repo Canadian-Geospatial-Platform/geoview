@@ -131,13 +131,10 @@ export class GeoJSON extends AbstractGeoViewVector {
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
 
-      // Note that geojson metadata as we defined it does not contains layer group. If you need geogson layer group,
-      // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-        const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-        const foundEntry = metadataLayerList.find(
-          (layerMetadata) =>
-            layerMetadata.layerId === layerConfig.layerId && layerMetadata.layerIdExtension === layerConfig.layerIdExtension
+        const foundEntry = this.#recursiveSearch(
+          `${layerConfig.layerId}${layerConfig.layerIdExtension ? `.${layerConfig.layerIdExtension}` : ''}`,
+          Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
         );
         if (!foundEntry) {
           this.layerLoadError.push({
@@ -157,6 +154,27 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
+   * This method is used to do a recursive search in the array of layer entry config.
+   *
+   * @param {string} layerId The layer list to search.
+   * @param {TypeLayerEntryConfig[]} metadataLayerList The layer list to search.
+   *
+   * @returns {TypeLayerEntryConfig | undefined} The found layer or undefined if not found.
+   * @private
+   */
+  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig | undefined {
+    for (const layerMetadata of metadataLayerList) {
+      if (searchKey === `${layerMetadata.layerId}${layerMetadata.layerIdExtension ? `.${layerMetadata.layerIdExtension}` : ''}`)
+        return layerMetadata;
+      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean)) {
+        const foundLayer = this.#recursiveSearch(searchKey, layerMetadata.listOfLayerEntryConfig);
+        if (foundLayer) return foundLayer;
+      }
+    }
+    return undefined;
+  }
+
+  /** ***************************************************************************************************************************
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
@@ -170,10 +188,10 @@ export class GeoJSON extends AbstractGeoViewVector {
     if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     if (this.metadata) {
-      const metadataLayerList = Cast<VectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-      const layerMetadataFound = metadataLayerList.find(
-        (layerMetadata) => layerMetadata.layerId === layerConfig.layerId && layerMetadata.layerIdExtension === layerConfig.layerIdExtension
-      );
+      const layerMetadataFound = this.#recursiveSearch(
+        `${layerConfig.layerId}${layerConfig.layerIdExtension ? `.${layerConfig.layerIdExtension}` : ''}`,
+        Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
+      ) as VectorLayerEntryConfig;
       if (layerMetadataFound) {
         layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
         layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);

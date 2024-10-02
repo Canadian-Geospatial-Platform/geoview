@@ -47,7 +47,7 @@ export class GeoJsonGroupLayerConfig extends GroupLayerEntryConfig {
       this.setLayerMetadata(layerMetadata);
 
       // Parse the raw layer metadata and build the geoview configuration.
-      this.#parseLayerMetadata();
+      this.parseLayerMetadata();
     }
 
     // Fetch the sub-layers metadata that compose the group.
@@ -60,15 +60,11 @@ export class GeoJsonGroupLayerConfig extends GroupLayerEntryConfig {
     }
   }
 
-  // #endregion OVERRIDE
-
-  // ===============
-  // #region PRIVATE
   /**
    * This method is used to parse the layer metadata and extract the source information and other properties.
-   * @private
+   * @override @protected
    */
-  #parseLayerMetadata(): void {
+  protected override parseLayerMetadata(): void {
     const layerMetadata = this.getLayerMetadata();
 
     if (layerMetadata?.attributions) this.attributions.push(layerMetadata.attributions as string);
@@ -95,7 +91,7 @@ export class GeoJsonGroupLayerConfig extends GroupLayerEntryConfig {
     }
   }
 
-  // #endregion PRIVATE
+  // #endregion OVERRIDE
   // #endregion METHODS
   // #endregion CLASS HEADER
 }
