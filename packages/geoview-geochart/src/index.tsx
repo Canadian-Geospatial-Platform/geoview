@@ -4,6 +4,7 @@ import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { ChartIcon } from 'geoview-core/src/ui/icons';
 
 import { GeochartEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/geochart-event-processor';
+import { isObjectEmpty } from 'geoview-core/src/core/utils/utilities';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
 import { GeoChartPanel } from './geochart-panel';
@@ -61,8 +62,8 @@ class GeoChartFooterPlugin extends FooterPlugin {
    * Overrides the addition of the GeoChart Footer Plugin to make sure to set the chart configs into the store.
    */
   override onAdd(): void {
-    // Initialize the store with geochart provided configuration
-    GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
+    // Initialize the store with geochart provided configuration in there is one
+    if (!isObjectEmpty(this.configObj.charts)) GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
 
     // Call parent
     super.onAdd();
