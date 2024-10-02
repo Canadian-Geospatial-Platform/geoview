@@ -26,7 +26,7 @@ type SliderProps = {
   // custom onChange callback
   onChange?: (value: number | number[], activeThumb: number) => void;
   onChangeCommitted?: (value: number | number[]) => void;
-  onValueDisplay?: (value: number, index: number) => string;
+  onValueLabelFormat?: (value: number, index: number) => string;
   onValueDisplayAriaLabel?: (value: number, index: number) => string;
 
   // MUI optional props
@@ -51,7 +51,7 @@ type SliderProps = {
  * @returns {JSX.Element} the created Slider element
  */
 export function Slider(props: SliderProps): JSX.Element {
-  const { value: parentValue, min, max, onChange, onChangeCommitted, onValueDisplay, onValueDisplayAriaLabel, ...properties } = props;
+  const { value: parentValue, min, max, onChange, onChangeCommitted, onValueLabelFormat, onValueDisplayAriaLabel, ...properties } = props;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -60,6 +60,12 @@ export function Slider(props: SliderProps): JSX.Element {
   // internal state
   const [value, setValue] = useState<number[] | number>(parentValue);
   const [activeThumb, setActiveThumb] = useState<number>(-1);
+
+  // If spreading the label using an offset
+  if (Array.isArray(value) && value.length >= 2 && (!properties.orientation || properties.orientation === 'horizontal')) {
+    // Dynamically add a class name to the className properties
+    properties.className = properties.className ? `${properties.className} MuiSlider-labelSpread` : 'MuiSlider-labelSpread';
+  }
 
   // handle constant change on the slider to set active thumb and instant values
   const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], newActiveThumb: number): void => {
@@ -185,26 +191,17 @@ export function Slider(props: SliderProps): JSX.Element {
     <MaterialSlider
       {...properties}
       id={containerId}
-      sx={{ ...(!properties.className ? sxClasses.slider : {}) }}
-      className={properties.className !== undefined ? properties.className : ''}
-      style={properties.style}
-      aria-labelledby={properties.ariaLabelledby}
+      sx={sxClasses.slider}
       value={value}
       min={min}
       max={max}
-      disabled={properties.disabled}
-      marks={properties.marks}
-      track={properties.track}
-      orientation={properties.orientation}
-      step={properties.step}
-      size={properties.size}
-      disableSwap={false}
-      valueLabelDisplay="auto"
-      onChange={handleChange}
-      onChangeCommitted={handleChangeCommitted}
-      valueLabelFormat={onValueDisplay}
+      disableSwap
+      valueLabelDisplay="on"
+      valueLabelFormat={onValueLabelFormat}
       getAriaLabel={(): string => 'To implement with translation'}
       getAriaValueText={onValueDisplayAriaLabel}
+      onChange={handleChange}
+      onChangeCommitted={handleChangeCommitted}
     />
   );
 }

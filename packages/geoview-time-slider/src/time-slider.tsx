@@ -73,6 +73,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     description,
     defaultValue,
     discreteValues,
+    step,
     range,
     minAndMax,
     field,
@@ -408,9 +409,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               max={minAndMax[1]}
               value={values}
               marks={sliderMarks}
-              step={!discreteValues ? null : 0.1}
+              step={discreteValues ? step || 0.1 : null}
               onChangeCommitted={handleSliderChange}
-              onValueDisplay={handleLabelFormat}
+              onValueLabelFormat={handleLabelFormat}
             />
           </div>
         </Grid>
