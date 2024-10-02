@@ -20,7 +20,7 @@ export const getSxClasses = (theme: Theme): any => ({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '20px',
+    padding: '1.25rem 0.25rem 1.25rem 1.25rem',
     borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}}`,
   },
   notificationsTitle: {

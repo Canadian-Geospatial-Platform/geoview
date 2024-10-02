@@ -159,7 +159,7 @@ export default function ExportModal(): JSX.Element {
   }, [activeModalId, isOpen]);
 
   return (
-    <Dialog open={activeModalId === 'export'} onClose={disableFocusTrap} fullWidth maxWidth="xl" disablePortal>
+    <Dialog open={activeModalId === 'export'} onClose={() => disableFocusTrap()} fullWidth maxWidth="xl" disablePortal>
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
       <DialogContent dividers ref={dialogRef}>
         <Box ref={exportContainerRef} textAlign="center">

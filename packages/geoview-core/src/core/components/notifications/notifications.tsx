@@ -27,6 +27,8 @@ import { logger } from '@/core/utils/logger';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useShake } from '@/core/utils/useSpringAnimations';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import { FocusTrapContainer } from '../common';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 export type NotificationDetailsType = {
   key: string;
@@ -63,6 +65,8 @@ export default function Notifications(): JSX.Element {
   // get values from the store
   const notifications = useAppNotifications();
   const interaction = useMapInteraction();
+  const activeTrapGeoView = useUIActiveTrapGeoView();
+
   const { removeNotification, removeAllNotifications } = useAppStoreActions();
 
   useEffect(() => {
@@ -175,34 +179,42 @@ export default function Notifications(): JSX.Element {
           placement="right-end"
           onClose={handleClickAway}
           container={mapElem}
+          disablePortal
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >
-          <Paper sx={sxClasses.notificationPanel}>
-            <Box sx={sxClasses.notificationsHeader}>
-              <Typography component="h3" sx={sxClasses.notificationsTitle}>
-                {t('appbar.notifications')}
-              </Typography>
-              <Button
-                type="text"
-                variant="contained"
-                disabled={notifications.length === 0}
-                size="small"
-                onClick={handleRemoveAllNotificationsClick}
-                aria-label={t('appbar.removeAllNotifications') ?? ''}
-              >
-                {t('appbar.removeAllNotifications')}
-              </Button>
-            </Box>
-            <Box sx={sxClasses.notificationsList}>
-              {notifications.length > 0 ? (
-                notifications.map((notification, index) => renderNotification(notification, index))
-              ) : (
-                <Typography component="div" sx={{ padding: '10px 15px' }}>
-                  {t('appbar.no_notifications_available')}
+          <FocusTrapContainer id={`${mapId}-notification`} open={open && activeTrapGeoView}>
+            <Paper sx={sxClasses.notificationPanel}>
+              <Box sx={sxClasses.notificationsHeader}>
+                <Typography component="h3" sx={sxClasses.notificationsTitle}>
+                  {t('appbar.notifications')}
                 </Typography>
-              )}
-            </Box>
-          </Paper>
+                <Box>
+                  <Button
+                    type="text"
+                    variant="contained"
+                    disabled={notifications.length === 0}
+                    size="small"
+                    onClick={handleRemoveAllNotificationsClick}
+                    aria-label={t('appbar.removeAllNotifications') ?? ''}
+                  >
+                    {t('appbar.removeAllNotifications')}
+                  </Button>
+                  <IconButton sx={{ ml: '0.25rem' }} onClick={handleClickAway}>
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+              </Box>
+              <Box sx={sxClasses.notificationsList}>
+                {notifications.length > 0 ? (
+                  notifications.map((notification, index) => renderNotification(notification, index))
+                ) : (
+                  <Typography component="div" sx={{ padding: '10px 15px' }}>
+                    {t('appbar.no_notifications_available')}
+                  </Typography>
+                )}
+              </Box>
+            </Paper>
+          </FocusTrapContainer>
         </Popper>
       </Box>
     </ClickAwayListener>

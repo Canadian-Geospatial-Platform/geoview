@@ -31,7 +31,7 @@ export function FocusTrapContainer({ children, open = false, id, containerType }
   const focusItem = useUIActiveFocusItem();
 
   const handleClose = (): void => {
-    disableFocusTrap();
+    disableFocusTrap(id);
   };
 
   // #region REACT HOOKS
