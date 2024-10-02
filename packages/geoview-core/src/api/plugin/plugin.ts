@@ -32,7 +32,7 @@ export abstract class Plugin {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static loadScript(pluginId: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      const existingScript = document.getElementById(pluginId);
+      const existingScript = document.querySelector(`script#${pluginId}`);
 
       if (!existingScript) {
         // Get the main script URL
@@ -42,6 +42,7 @@ export abstract class Plugin {
         const script = document.createElement('script');
         script.src = `${scriptPath}/corePackages/geoview-${pluginId}.js`;
         script.id = pluginId;
+        script.setAttribute('data-name', `geoview-${pluginId}`);
         document.body.appendChild(script);
         script.onload = () => {
           resolve(window.geoviewPlugins[pluginId]);
