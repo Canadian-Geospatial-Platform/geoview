@@ -8,7 +8,6 @@ import { Extent } from 'ol/extent';
 
 import { applyStyle } from 'ol-mapbox-style';
 
-import Feature from 'ol/Feature';
 import { MVT } from 'ol/format';
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -175,7 +174,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // Instance check
     if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
-    const sourceOptions: SourceOptions<Feature> = {
+    const sourceOptions: SourceOptions = {
       url: getLocalizedValue(layerConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId)),
     };
 
@@ -225,7 +224,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // If no olLayer was obtained
     if (!olLayer) {
       // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
-      const tileLayerOptions: TileOptions<VectorTileSource<Feature>> = { source };
+      const tileLayerOptions: TileOptions<VectorTileSource> = { source };
       // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
       if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
       if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings.extent;
