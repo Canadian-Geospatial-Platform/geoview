@@ -57,6 +57,15 @@ export function deepMergeObjects(...objects: TypeJsonObject[]): TypeJsonObject {
 }
 
 /**
+ * Check if an object is empty
+ * @param {object} obj - The object to test
+ * @returns true is object is empty, false otherwise
+ */
+export function isObjectEmpty(obj: object): boolean {
+  return Object.keys(obj).length === 0;
+}
+
+/**
  * Get the URL of main script cgpv-main so we can access the assets
  * @returns {string} the URL of the main script
  */
