@@ -59,7 +59,7 @@ export function deepMergeObjects(...objects: TypeJsonObject[]): TypeJsonObject {
 /**
  * Check if an object is empty
  * @param {object} obj - The object to test
- * @returns true is object is empty, false otherwise
+ * @returns true if the object is empty, false otherwise
  */
 export function isObjectEmpty(obj: object): boolean {
   return Object.keys(obj).length === 0;

@@ -59,7 +59,7 @@ export class UUIDmapConfigReader {
           const { layerType, layerEntries, name, url, id, serverType, isTimeAware } = layer;
 
           // Get Geocore custom config layer entries values
-          // TODO: The prrof of concept is done only for WMS layers. We need to implement other layer types after the refactor
+          // TODO: The proof of concept is done only for WMS layers. We need to implement other layer types after the refactor
           // TODO.CONT: We need to support config for the geoviewLAyer and children layer entries...
           const customGeocoreLayerConfig = this.#getGeocoreCustomLayerConfig(result, lang);
 
