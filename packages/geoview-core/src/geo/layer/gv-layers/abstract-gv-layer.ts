@@ -7,9 +7,6 @@ import { Layer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
 
-import { TypeLocalizedString } from '@config/types/map-schema-types';
-
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { TimeDimension, DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { AsyncSemaphore } from '@/core/utils/async-semaphore';
@@ -538,11 +535,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         });
       };
 
-      const featureInfo = layerConfig?.source?.featureInfo;
-      const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
-      // TODO: Refactor - Remove the 2 hardcoded 'en' here
-      const outfields = getLocalizedValue(featureInfo?.outfields as TypeLocalizedString, 'en')?.split(',');
-      const aliasFields = getLocalizedValue(featureInfo?.aliasFields as TypeLocalizedString, 'en')?.split(',');
+      const outfields = layerConfig?.source?.featureInfo?.outfields;
 
       // Loop on the features to build the array holding the promises for their canvas
       const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement }>[] = [];
@@ -585,7 +578,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         let extent;
         if (feature.getGeometry()) extent = feature.getGeometry()!.getExtent();
 
-        // TODO: Refactor - Remove the hardcoded 'en' here
         const featureInfoEntry: TypeFeatureInfoEntry = {
           // feature key for building the data-grid
           featureKey: featureKeyCounter++,
@@ -594,7 +586,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           geometry: feature,
           featureIcon: canvas,
           fieldInfo: {},
-          nameField: getLocalizedValue(layerConfig?.source?.featureInfo?.nameField as TypeLocalizedString, 'en') || null,
+          nameField: layerConfig?.source?.featureInfo?.nameField || null,
         };
 
         const featureFields = feature.getKeys();
@@ -613,13 +605,14 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
             }
             const fieldType = dictFieldTypes[fieldName];
 
-            if (outfields?.includes(fieldName)) {
-              const fieldIndex = outfields.indexOf(fieldName);
+            if (outfields?.find((outfield) => outfield.name === fieldName)) {
+              const fieldEntry = outfields.find((outfield) => outfield.name === fieldName);
+
               featureInfoEntry.fieldInfo[fieldName] = {
                 fieldKey: fieldKeyCounter++,
-                value: this.getFieldValue(feature, fieldName, fieldTypes![fieldIndex]),
-                dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
-                alias: aliasFields![fieldIndex],
+                value: this.getFieldValue(feature, fieldName, fieldEntry!.type as 'string' | 'number' | 'date'),
+                dataType: fieldEntry!.type,
+                alias: fieldEntry!.alias,
                 domain: fieldDomain,
               };
             } else if (!outfields) {
@@ -633,8 +626,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
             }
           }
         });
+
         queryResult.push(featureInfoEntry);
       });
+
       return queryResult;
     } catch (error) {
       // Log

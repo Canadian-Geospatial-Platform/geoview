@@ -114,7 +114,7 @@
           cgpv.api.utilities.geo.polygonToExtent(polygon)
         </li>
         <li><button id="Redefine-alias-fields">Redefine alias fields for polygons layer</button><br />
-          cgpv.api.maps.Map1.layer.redefineFeatureFields('geojsonLYR1/geojsonLYR1/polygons.json', 'Location Province,Date Created,Images', 'aliasFields')
+          cgpv.api.maps.Map1.layer.redefineFeatureFields('geojsonLYR1/geojsonLYR1/polygons.json', 'Location Province,Date Created,Images', 'alias')
         </li>
         <li><button id="Open-details">Open details tab in footer</button><br />
           cgpv.api.maps.Map1.footerBarApi.selectTab('details')
@@ -317,10 +317,15 @@
                 'style': 'msi-binary',
                 'featureInfo': {
                   'queryable': true,
-                  'nameField': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
-                  'fieldTypes': 'number',
-                  'outfields': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
-                  'aliasFields':  { 'en': 'Pixel value', 'fr': 'Valeur du pixel' }
+                  'nameField': 'band-0-pixel-value',
+                  'outfields': [
+                    {
+                      "name": "band-0-pixel-value",
+                      "alias": "Pixel value",
+                      "type": "number",
+                      "domain": []
+                    }
+                  ]
                 }
               }
             }
@@ -443,7 +448,7 @@
 
       // add an event listener when a button is clicked
       redefineAliasFieldsButton.addEventListener('click', async () => {
-        cgpv.api.maps.Map1.layer.redefineFeatureFields('geojsonLYR1/geojsonLYR1/polygons.json', 'Location Province,Date Created,Images', 'aliasFields')
+        cgpv.api.maps.Map1.layer.redefineFeatureFields('geojsonLYR1/geojsonLYR1/polygons.json', 'Location Province,Date Created,Images', 'alias')
       });
 
       // Open details Button========================================================================================================

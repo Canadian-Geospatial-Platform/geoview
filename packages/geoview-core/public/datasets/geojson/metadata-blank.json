@@ -8,10 +8,15 @@
       "source": {
         "featureInfo": {
           "queryable": true,
-          "nameField": { "en": "Red", "fr": "Red" },
-          "outfields": { "en": "Red,Green,Blue,Yellow,Orange,creationDate", "fr": "Red,Green,Blue,Yellow,Orange,creationDate" },
-          "fieldTypes": "number,number,number,number,number,date",
-          "aliasFields": { "en": "Red,Green,Blue,Yellow,Orange,Creation Date", "fr": "Rouge,Vert,Bleu,Jaune,Orange,Date de création" }
+          "nameField": "Red",
+          "outfields": [
+            { "name": "Red", "alias": "Red", "type": "number", "domain": null },
+            { "name": "Green", "alias": "Green", "type": "number", "domain": null },
+            { "name": "Blue", "alias": "Blue", "type": "number", "domain": null },
+            { "name": "Yellow", "alias": "Yellow", "type": "number", "domain": null },
+            { "name": "Orange", "alias": "Orange", "type": "number", "domain": null },
+            { "name": "creationDate", "alias": "Creation Date", "type": "date", "domain": null }
+          ]
         }
       },
       "style": {

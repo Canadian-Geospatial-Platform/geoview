@@ -29,15 +29,242 @@
             "en": "name_en",
             "fr": "name_fr"
           },
-          "outfields": {
-            "en": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id",
-            "fr": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id"
-          },
-          "fieldTypes": "string,number,number,number,number,number,number,number,number,number,number,string,string,number,number,string,string,string,number,number,number,number,number,number,number,number,number,number,number,number,string,number,number,number,number,string,number,number,number",
-          "aliasFields": {
-            "en": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id",
-            "fr": "feature_date,groupe_id,hydrosequence_id,level_path_id,slope,fid,feature_type,name_id,shreve_order,downstream_main_path_hydro_seq,feature_id,feature_type_en,name_en,strahler_order,downstream_minor_path_hydro_seq,md_id,feature_type_fr,name_fr,from_node,start_flag,code_spec,permanency,flow_priority,to_node,terminal_flag,mainstemid,isolated,flow_direction,comid,divergence,work_unit_code,in_isolated_network,hack_order,tocomid,length_km,drainage_area_code,in_network,horton_order,terminal_path_id"
-          }
+          "outfields": [
+            {
+              "name": "feature_date",
+              "alias": "feature_date",
+              "type": "string",
+              "domain": []
+            },
+            {
+              "name": "groupe_id",
+              "alias": "groupe_id",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "hydrosequence_id",
+              "alias": "hydrosequence_id",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "level_path_id",
+              "alias": "level_path_id",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "slope",
+              "alias": "slope",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "fid",
+              "alias": "fid",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "feature_type",
+              "alias": "feature_type",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "name_id",
+              "alias": "name_id",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "shreve_order",
+              "alias": "shreve_order",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "downstream_main_path_hydro_seq",
+              "alias": "downstream_main_path_hydro_seq",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "feature_id",
+              "alias": "feature_id",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "feature_type_en",
+              "alias": "feature_type_en",
+              "type": "string",
+              "domain": []
+            },
+            {
+              "name": "name_en",
+              "alias": "name_en",
+              "type": "string",
+              "domain": []
+            },
+            {
+              "name": "strahler_order",
+              "alias": "strahler_order",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "downstream_minor_path_hydro_seq",
+              "alias": "downstream_minor_path_hydro_seq",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "md_id",
+              "alias": "dmd_id",
+              "type": "string",
+              "domain": []
+            },
+            {
+              "name": "feature_type_fr",
+              "alias": "feature_type_fr",
+              "type": "string",
+              "domain": []
+            },
+            {
+              "name": "name_fr",
+              "alias": "name_fr",
+              "type": "string",
+              "domain": []
+            },
+            {
+              "name": "from_node",
+              "alias": "from_node",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "start_flag",
+              "alias": "start_flag",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "code_spec",
+              "alias": "code_spec",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "permanency",
+              "alias": "permanency",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "flow_priority",
+              "alias": "flow_priority",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "to_node",
+              "alias": "to_node",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "terminal_flag",
+              "alias": "terminal_flag",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "mainstemid",
+              "alias": "mainstemid",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "isolated",
+              "alias": "isolated",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "flow_direction",
+              "alias": "flow_direction",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "comid",
+              "alias": "comid",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "divergence",
+              "alias": "divergence",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "work_unit_code",
+              "alias": "work_unit_code",
+              "type": "string",
+              "domain": []
+            },
+            {
+              "name": "in_isolated_network",
+              "alias": "in_isolated_network",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "hack_order",
+              "alias": "hack_order",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "tocomid",
+              "alias": "tocomid",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "length_km",
+              "alias": "length_km",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "drainage_area_code",
+              "alias": "drainage_area_code",
+              "type": "string",
+              "domain": []
+            },
+            {
+              "name": "in_network",
+              "alias": "in_network",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "horton_order",
+              "alias": "horton_order",
+              "type": "number",
+              "domain": []
+            },
+            {
+              "name": "terminal_path_id",
+              "alias": "terminal_path_id",
+              "type": "number",
+              "domain": []
+            }
+          ]
         }
       },
       "initialSettings": {
