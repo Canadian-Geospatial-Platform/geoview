@@ -62,7 +62,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
    * Overrides the addition of the GeoChart Footer Plugin to make sure to set the chart configs into the store.
    */
   override onAdd(): void {
-    // Initialize the store with geochart provided configuration in there is one
+    // Initialize the store with geochart provided configuration if there is one
     if (!isObjectEmpty(this.configObj.charts)) GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
 
     // Call parent

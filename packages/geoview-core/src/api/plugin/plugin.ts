@@ -42,7 +42,6 @@ export abstract class Plugin {
         const script = document.createElement('script');
         script.src = `${scriptPath}/corePackages/geoview-${pluginId}.js`;
         script.id = pluginId;
-        script.setAttribute('data-name', `geoview-${pluginId}`);
         document.body.appendChild(script);
         script.onload = () => {
           resolve(window.geoviewPlugins[pluginId]);
