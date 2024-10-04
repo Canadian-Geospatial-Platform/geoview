@@ -1001,7 +1001,6 @@ export class WMS extends AbstractGeoViewRaster {
     layerConfig: OgcWmsLayerEntryConfig,
     clickCoordinate: Coordinate
   ): TypeFeatureInfoEntry[] {
-    const outfields = layerConfig?.source?.featureInfo?.outfields;
     const queryResult: TypeFeatureInfoEntry[] = [];
 
     let featureKeyCounter = 0;
@@ -1044,28 +1043,7 @@ export class WMS extends AbstractGeoViewRaster {
       });
     };
     createFieldEntries(featureMember);
-
-    if (!outfields) queryResult.push(featureInfoEntry);
-    else {
-      fieldKeyCounter = 0;
-      const fieldsToDelete = Object.keys(featureInfoEntry.fieldInfo).filter((fieldName) => {
-        if (outfields.find((outfield) => outfield.name === fieldName)) {
-          const fieldIndex = outfields.findIndex((outfield) => outfield.name === fieldName);
-          featureInfoEntry.fieldInfo[fieldName]!.fieldKey = fieldKeyCounter++;
-          featureInfoEntry.fieldInfo[fieldName]!.alias = outfields![fieldIndex].alias;
-          featureInfoEntry.fieldInfo[fieldName]!.dataType = outfields![fieldIndex].type;
-          return false; // keep this entry
-        }
-
-        return true; // delete this entry
-      });
-
-      fieldsToDelete.forEach((entryToDelete) => {
-        delete featureInfoEntry.fieldInfo[entryToDelete];
-      });
-
-      queryResult.push(featureInfoEntry);
-    }
+    queryResult.push(featureInfoEntry);
 
     return queryResult;
   }

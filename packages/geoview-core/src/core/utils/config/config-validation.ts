@@ -387,7 +387,7 @@ export class ConfigValidation {
       const validateLocalizedString = (config: TypeJsonObject): void => {
         if (typeof config === 'object') {
           Object.keys(config).forEach((key) => {
-            if (!key.startsWith('_') && typeof config[key] === 'object') {
+            if (!key.startsWith('_') && config[key] !== null && typeof config[key] === 'object') {
               if (config?.[key]?.en || config?.[key]?.fr) {
                 // delete empty localized strings
                 if (!config[key].en && !config[key].fr) delete config[key];
@@ -420,7 +420,7 @@ export class ConfigValidation {
       const propagateLocalizedString = (config: TypeJsonObject): void => {
         if (typeof config === 'object') {
           Object.keys(config).forEach((key) => {
-            if (!key.startsWith('_') && typeof config[key] === 'object') {
+            if (!key.startsWith('_') && config[key] !== null  && typeof config[key] === 'object') {
               // Leaving the commented line here in case a developer needs to quickly uncomment it again to troubleshoot
               // logger.logDebug(`Key=${key}`, config[key]);
               if (config?.[key]?.en || config?.[key]?.fr)

@@ -61,7 +61,14 @@
         },
         "domain": {
           "description": "An array of values that constitute the domain.",
-          "type": "array"
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array"
+            }
+          ]
         }
       },
       "required": ["name", "alias", "type", "domain"]
