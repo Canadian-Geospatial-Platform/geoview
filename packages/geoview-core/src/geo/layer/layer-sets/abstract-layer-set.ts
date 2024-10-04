@@ -447,7 +447,7 @@ export abstract class AbstractLayerSet {
   }
 
   /**
-   * Align recoreds with informatiom provided by OutFields from layer config.
+   * Align records with informatiom provided by OutFields from layer config.
    * This will update fields in and delete unwanted fields from the arrayOfRecords
    * @param {TypeLayerEntryConfig} layerPath - Path of the layerto get config from.
    * @param {TypeFeatureInfoEntry[]} arrayOfRecords - Features to delete fields from.
