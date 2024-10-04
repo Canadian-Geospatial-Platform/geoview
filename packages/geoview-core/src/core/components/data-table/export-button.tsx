@@ -61,6 +61,9 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
     // Log
     logger.logTraceUseMemo('DATA-TABLE - EXPORT BUTTON - getCsvOptions', columns);
 
+    // Remove the utility columns
+    const filteredColumns = columns.filter((col) => !['ICON', 'ZOOM', 'DETAILS', 'internalID'].includes(col.id as string));
+
     return (): Options => ({
       fieldSeparator: ',',
       quoteStrings: '"',
@@ -68,7 +71,7 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
       showLabels: true,
       useBom: true,
       useKeysAsHeaders: false,
-      headers: columns.map((c) => c.id as string),
+      headers: filteredColumns.map((c) => c.id as string),
     });
   }, [columns]);
 

@@ -12,7 +12,7 @@ import {
 import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { AbstractGeoViewLayer, LayerNameChangedEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { getLocalizedValue, whenThisThen } from '@/core/utils/utilities';
+import { generateId, getLocalizedValue, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { LayerApi } from '@/geo/layer/layer';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -491,6 +491,14 @@ export abstract class AbstractLayerSet {
           fieldsToDelete.forEach((entryToDelete) => {
             delete record.fieldInfo[entryToDelete];
           });
+
+          record.fieldInfo['internalID'] = {
+            fieldKey: fieldKeyCounter,
+            alias: 'internalID',
+            dataType: 'string',
+            value: generateId(),
+            domain: null,
+          }
         });
       }
     }

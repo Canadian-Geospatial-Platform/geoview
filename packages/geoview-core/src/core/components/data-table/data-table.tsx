@@ -70,19 +70,20 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   const sxtheme = useTheme();
   const sxClasses = getSxClasses(sxtheme);
 
-  // internal state
-  const [density, setDensity] = useState<MRTDensityState>('compact');
-  const rowVirtualizerInstanceRef = useRef<MRTRowVirtualizer>(null);
-  const columnVirtualizerInstanceRef = useRef<MRTColumnVirtualizer>(null);
-  const [sorting, setSorting] = useState<MRTSortingState>([]);
-
   // get store actions and values
   const { zoomToExtent, highlightBBox, transformPoints, showClickMarker, addHighlightedFeature, removeHighlightedFeature } =
     useMapStoreActions();
-  const { applyMapFilters, setSelectedFeature } = useDataTableStoreActions();
+  const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility } = useDataTableStoreActions();
   const { getExtentFromFeatures } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
+
+  // internal state
+  const [density, setDensity] = useState<MRTDensityState>('compact');
+  const [showColumnFilters, setShowColumnFilters] = useState<boolean>(datatableSettings[layerPath].columnsFiltersVisibility);
+  const rowVirtualizerInstanceRef = useRef<MRTRowVirtualizer>(null);
+  const columnVirtualizerInstanceRef = useRef<MRTColumnVirtualizer>(null);
+  const [sorting, setSorting] = useState<MRTSortingState>([]);
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
@@ -345,7 +346,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     // Log
     logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
     return (data?.features ?? []).map((feature) => {
-      return {
+      const featureInfo = {
         ICON: (
           <Box
             component="img"
@@ -380,6 +381,8 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
         ),
         ...feature.fieldInfo,
       };
+
+      return featureInfo;
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.features, handleZoomIn]);
@@ -389,12 +392,17 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     data: rows,
     enableDensityToggle: true,
     onDensityChange: setDensity,
+    onShowColumnFiltersChange: () => {
+      setShowColumnFilters(!showColumnFilters);
+      setColumnsFiltersVisibility(false, layerPath);
+    },
     // NOTE: showGlobalFilter as true when layer change and we want to show global filter by default
-    initialState: { showColumnFilters: !!columnFilters.length, showGlobalFilter: true },
+    initialState: { showColumnFilters: datatableSettings[layerPath].columnsFiltersVisibility, showGlobalFilter: true, columnVisibility: { internalID: false } },
     state: {
       sorting,
       columnFilters,
       density,
+      showColumnFilters,
       columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
       globalFilter,
     },
@@ -421,8 +429,9 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
               table={{ ...table, options: { ...table.options, enableColumnPinning: false } }}
             />
             <MRTToggleDensePaddingButton className="buttonOutline" table={table} />
-            <ExportButton rows={rows} columns={columns}>
-              <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
+            {/* Only use filtered rows from material table */}
+            <ExportButton rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} columns={columns}>
+              <JSONExportButton rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
             </ExportButton>
           </Box>
           <Box sx={{ marginLeft: 'auto', maxWidth: '15rem', marginRight: '1rem' }}>

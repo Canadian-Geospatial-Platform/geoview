@@ -39,7 +39,7 @@ export function useToolbarActionMessage({ data, columnFilters, globalFilter, lay
         .replace('{rowsFiltered}', tableInstance.getFilteredRowModel().rows.length.toString())
         .replace('{totalRows}', data.features?.length.toString() ?? '');
     } else {
-      message = '';
+      message = `${data.features?.length} ${t('dataTable.features')}`;
     }
 
     setToolbarRowSelectedMessageEntry(message, layerPath);
@@ -61,7 +61,7 @@ export function useToolbarActionMessage({ data, columnFilters, globalFilter, lay
           .replace('{rowsFiltered}', rowsFiltered.rows.length.toString())
           .replace('{totalRows}', data?.features?.length.toString() ?? '');
       } else {
-        message = '';
+        message = `${data.features?.length} ${t('dataTable.features')}`;;
         length = 0;
       }
       setRowsFilteredEntry(length, layerPath);

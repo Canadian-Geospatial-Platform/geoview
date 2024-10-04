@@ -9,6 +9,7 @@ import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 
 interface JSONExportButtonProps {
+  rows: any[];
   features: TypeFeatureInfoEntry[];
   layerPath: string;
 }
@@ -20,7 +21,7 @@ interface JSONExportButtonProps {
  * @returns {JSX.Element} returns Menu Item
  *
  */
-function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.Element {
+function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   // get store value - projection config to transfer lat long.
@@ -60,12 +61,28 @@ function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.E
    * @returns {string} Json file content as string
    */
   const getJson = useCallback((): string => {
-    const geoData = features.map((feature) => {
+    // Filter features from filtered rows
+    const rowsID = rows.map((row) => row.internalID.value);
+    const filteredFeatures = features.filter((feature) => rowsID.includes(feature.fieldInfo.internalID!.value))
+
+    // create GeoJSON feature
+    const geoData = filteredFeatures.map((feature) => {
       const { geometry, fieldInfo } = feature;
+
+      // Format the feature info to extract only value and remove the internalID field
+      const formattedInfo: any= []
+      Object.keys(fieldInfo).forEach((key) => {
+        if (key !== 'internalID') {
+          let tmpObj: any = {};
+          tmpObj[key] = fieldInfo[key]!.value;
+          formattedInfo.push(tmpObj);
+        }
+      });
+
       return {
         type: 'Feature',
         geometry: buildGeometry(geometry?.getGeometry() as Geometry),
-        properties: fieldInfo,
+        properties: formattedInfo,
       };
     });
 

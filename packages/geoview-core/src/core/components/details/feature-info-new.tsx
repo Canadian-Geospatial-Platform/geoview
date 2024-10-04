@@ -54,7 +54,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
     // Log
     logger.logTraceUseMemo('DETAILS PANEL - Feature Info new - featureInfoList');
 
-    return Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
+   let featureInfo = Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
       return {
         fieldKey: feature.fieldInfo[fieldName]!.fieldKey,
         value: feature.fieldInfo[fieldName]!.value,
@@ -63,6 +63,11 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
         domain: null,
       };
     });
+
+    // Remove last item who is the internalID
+    featureInfo.pop();
+
+    return featureInfo;
   }, [feature]);
 
   /**
