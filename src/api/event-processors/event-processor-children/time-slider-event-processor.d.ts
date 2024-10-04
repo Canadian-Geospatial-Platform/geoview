@@ -45,6 +45,13 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      */
     static getInitialTimeSliderValues(mapId: string, layerConfig: TypeLayerEntryConfig): TypeTimeSliderValues | undefined;
     /**
+     * Guesses the estimated steps that should be used by the slider, depending on the value range
+     * @param {number} minValue - The minimum value
+     * @param {number} maxValue - The maximum value
+     * @returns The estimated stepping value based on the min and max values
+     */
+    static guessEstimatedStep(minValue: number, maxValue: number): number | undefined;
+    /**
      * Sets the selected layer path
      * @param {string} mapId - The map id of the state to act on
      * @param {string} layerPath - The layer path to use

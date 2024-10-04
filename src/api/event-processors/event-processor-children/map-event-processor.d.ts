@@ -2,7 +2,7 @@ import { Root } from 'react-dom/client';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
-import { TypeBasemapOptions, TypeInteraction, TypeLayerInitialSettings, TypeValidMapProjectionCodes, TypePointMarker } from '@config/types/map-schema-types';
+import { TypeBasemapOptions, TypeInteraction, TypeLayerInitialSettings, TypeValidMapProjectionCodes, TypePointMarker, TypeHighlightColors } from '@config/types/map-schema-types';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { MapConfigLayerEntry, TypeFeatureInfoEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
@@ -75,6 +75,12 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      */
     static getInitialFilter(mapId: string, layerPath: string): string | undefined;
     static getPointMarkers(mapId: string): Record<string, TypePointMarker[]>;
+    /**
+     * Gets feature highlight color.
+     * @param {string} mapId - The ID of the map
+     * @returns {TypeHighlightColors} The highlight color
+     */
+    static getFeatureHighlightColor(mapId: string): TypeHighlightColors;
     static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void;
     static clickMarkerIconHide(mapId: string): void;
     static highlightBBox(mapId: string, extent: Extent, isLayerHighlight?: boolean): void;

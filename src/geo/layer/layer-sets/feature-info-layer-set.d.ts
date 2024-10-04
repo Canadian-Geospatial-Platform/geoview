@@ -1,6 +1,6 @@
 import { Coordinate } from 'ol/coordinate';
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeFeatureInfoEntry, TypeResultSet } from '@/geo/map/map-schema-types';
+import { TypeResultSet } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
 import { EventType, AbstractLayerSet, PropagationType } from './abstract-layer-set';
@@ -67,12 +67,6 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
      * @returns {boolean | undefined} The flag value for the map or layer.
      */
     isClickListenerEnabled(layerPath?: string): boolean | undefined;
-    /**
-     * Updates outfields, aliases and data types from query result if not provided in metadata
-     * @param {string} layerPath - Path of the layer to update.
-     * @param {TypeFeatureInfoEntry} record - Feature info to parse.
-     */
-    patchMissingMetadataIfNecessary(layerPath: string, record: TypeFeatureInfoEntry): void;
     /**
      * Registers a query ended event handler.
      * @param {QueryEndedDelegate} callback - The callback to be executed whenever the event is emitted

@@ -5,7 +5,7 @@ import { Extent } from 'ol/extent';
 import LayerGroup from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 import Source from 'ol/source/Source';
-import { TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeLocalizedString, TypeOutfieldsType } from '@config/types/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -453,13 +453,13 @@ export declare abstract class AbstractGeoViewLayer {
      * Get and format the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
      * since the base date. Vector feature dates must be in ISO format.
      *
-     * @param {Feature} features The features that hold the field values.
-     * @param {string} fieldName The field name.
-     * @param {'number' | 'string' | 'date'} fieldType The field type.
+     * @param {Feature} feature - The features that hold the field values.
+     * @param {string} fieldName - The field name.
+     * @param {'number' | 'string' | 'date'} fieldType - The field type.
      *
      * @returns {string | number | Date} The formatted value of the field.
      */
-    protected getFieldValue(feature: Feature, fieldName: string, fieldType: 'number' | 'string' | 'date'): string | number | Date;
+    protected getFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType): string | number | Date;
     /** ***************************************************************************************************************************
      * Convert the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
      *

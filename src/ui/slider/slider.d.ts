@@ -12,7 +12,7 @@ type SliderProps = {
     style?: CSSProperties;
     onChange?: (value: number | number[], activeThumb: number) => void;
     onChangeCommitted?: (value: number | number[]) => void;
-    onValueDisplay?: (value: number, index: number) => string;
+    onValueLabelFormat?: (value: number, index: number) => string;
     onValueDisplayAriaLabel?: (value: number, index: number) => string;
     disabled?: boolean;
     marks?: Mark[];

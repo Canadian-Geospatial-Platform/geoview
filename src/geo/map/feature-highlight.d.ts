@@ -25,7 +25,7 @@ export declare class FeatureHighlight {
     constructor(mapViewer: MapViewer);
     /**
      * Changes the highlight color
-     * @param {TypeHighlightColor} color - New color
+     * @param {TypeHighlightColors} color - New color
      */
     changeHighlightColor(color: TypeHighlightColors): void;
     /**
