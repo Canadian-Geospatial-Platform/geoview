@@ -449,15 +449,12 @@ export abstract class AbstractLayerSet {
   /**
    * Align records with informatiom provided by OutFields from layer config.
    * This will update fields in and delete unwanted fields from the arrayOfRecords
-   * @param {TypeLayerEntryConfig} layerPath - Path of the layerto get config from.
+   * @param {TypeLayerEntryConfig} layerPath - Path of the layer to get config from.
    * @param {TypeFeatureInfoEntry[]} arrayOfRecords - Features to delete fields from.
    * @protected
    * @static
    */
-  protected static alingRecordsWithOutFields(layerEntryConfig: TypeLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
-    // Get layer config
-    // const layerEntryConfig = this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig;
-
+  protected static alignRecordsWithOutFields(layerEntryConfig: TypeLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
     // If source featureInfo is provided, continue
     if (layerEntryConfig.source && layerEntryConfig.source.featureInfo) {
       const sourceFeatureInfo = layerEntryConfig.source!.featureInfo as TypeFeatureInfoLayerConfig;

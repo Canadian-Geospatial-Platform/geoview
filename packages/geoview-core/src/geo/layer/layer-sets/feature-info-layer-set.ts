@@ -156,7 +156,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           .then((arrayOfRecords) => {
             // Use the response to align arrayOfRecords fields with layerConfig fields
             if (arrayOfRecords?.length)
-              AbstractLayerSet.alingRecordsWithOutFields(
+              AbstractLayerSet.alignRecordsWithOutFields(
                 this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig,
                 arrayOfRecords
               );
