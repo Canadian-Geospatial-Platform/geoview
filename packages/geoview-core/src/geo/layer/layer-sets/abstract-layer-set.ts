@@ -2,6 +2,8 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
   QueryType,
   TypeFeatureInfoEntry,
+  TypeFeatureInfoLayerConfig,
+  TypeLayerEntryConfig,
   TypeLayerStatus,
   TypeLocation,
   TypeResultSet,
@@ -442,6 +444,50 @@ export abstract class AbstractLayerSet {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     // Return false when it's clearly false, otherwise, return true
     return !((layer.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig)?.initialSettings?.states?.queryable === false);
+  }
+
+  /**
+   * Align records with informatiom provided by OutFields from layer config.
+   * This will update fields in and delete unwanted fields from the arrayOfRecords
+   * @param {TypeLayerEntryConfig} layerPath - Path of the layer to get config from.
+   * @param {TypeFeatureInfoEntry[]} arrayOfRecords - Features to delete fields from.
+   * @protected
+   * @static
+   */
+  protected static alignRecordsWithOutFields(layerEntryConfig: TypeLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
+    // If source featureInfo is provided, continue
+    if (layerEntryConfig.source && layerEntryConfig.source.featureInfo) {
+      const sourceFeatureInfo = layerEntryConfig.source!.featureInfo as TypeFeatureInfoLayerConfig;
+
+      // If outFields is provided, compare record fields with outFields to remove unwanted one
+      // If there is no outFields, this will be created in the next function patchMissingMetadataIfNecessary
+      if (sourceFeatureInfo.outfields) {
+        const outFields = sourceFeatureInfo.outfields;
+
+        // Loop the array of records to delete fields or align fields info for each record
+        arrayOfRecords.forEach((recordOriginal) => {
+          // Create a copy to avoid the no param reassign ESLint rule
+          const record = { ...recordOriginal };
+          let fieldKeyCounter = 0;
+
+          const fieldsToDelete = Object.keys(record.fieldInfo).filter((fieldName) => {
+            if (outFields.find((outfield) => outfield.name === fieldName)) {
+              const fieldIndex = outFields.findIndex((outfield) => outfield.name === fieldName);
+              record.fieldInfo[fieldName]!.fieldKey = fieldKeyCounter++;
+              record.fieldInfo[fieldName]!.alias = outFields![fieldIndex].alias;
+              record.fieldInfo[fieldName]!.dataType = outFields![fieldIndex].type;
+              return false; // keep this entry
+            }
+
+            return true; // delete this entry
+          });
+
+          fieldsToDelete.forEach((entryToDelete) => {
+            delete record.fieldInfo[entryToDelete];
+          });
+        });
+      }
+    }
   }
 
   /**

@@ -13,7 +13,7 @@ import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojso
 import { TypeGeoPackageLayerConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { TypeXYZTilesConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { TypeVectorTilesConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
-import { createLocalizedString } from '@/core/utils/utilities';
+import { createLocalizedString, deepMergeObjects } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -83,13 +83,22 @@ export class UUIDmapConfigReader {
         const layer = data.layers[0];
 
         if (layer) {
+          // Get RCS values
           const { layerType, layerEntries, name, url, id, serverType, isTimeAware } = layer;
+
+          // Remove rcs. and .[lang] from geocore response
+          const idClean = `${(id as string).split('.')[1]}`;
+
+          // Get Geocore custom config layer entries values
+          // TODO: Modification done only for WMS and esriDynamic... If we have esriFeature, esriImage later, we will need to fix
+          // TODO.CONT: These 4 types are the only one stored in RCS
+          const customGeocoreLayerConfig = this.#getGeocoreCustomLayerConfig(result, lang);
 
           const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
           if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
             const geoviewLayerConfig: TypeEsriDynamicLayerConfig = {
-              geoviewLayerId: `${(id as string).split('.')[1]}`, // Remove rcs. and .[lang] from geocore response
+              geoviewLayerId: idClean,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CONST_LAYER_TYPES.ESRI_DYNAMIC,
@@ -97,7 +106,7 @@ export class UUIDmapConfigReader {
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriDynamicLayerEntryConfig => {
-              const esriDynamicLayerEntryConfig = new EsriDynamicLayerEntryConfig({
+              const originalConfig = {
                 geoviewLayerConfig,
                 schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
                 entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
@@ -105,7 +114,15 @@ export class UUIDmapConfigReader {
                 source: {
                   dataAccessPath: createLocalizedString(url),
                 },
-              } as unknown as EsriDynamicLayerEntryConfig);
+              };
+
+              // Overwrite default from geocore custom config
+              const mergedConfig = deepMergeObjects(
+                originalConfig as unknown as TypeJsonObject,
+                customGeocoreLayerConfig as unknown as TypeJsonObject
+              );
+              const esriDynamicLayerEntryConfig = new EsriDynamicLayerEntryConfig(mergedConfig as unknown as EsriDynamicLayerEntryConfig);
+
               return esriDynamicLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -117,7 +134,7 @@ export class UUIDmapConfigReader {
             const layerId = (url as string).split('/').pop();
 
             const geoviewLayerConfig: TypeEsriFeatureLayerConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${idClean}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(serviceUrl),
               geoviewLayerType: CONST_LAYER_TYPES.ESRI_FEATURE,
@@ -139,7 +156,7 @@ export class UUIDmapConfigReader {
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
             const geoviewLayerConfig: TypeEsriFeatureLayerConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${idClean}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CONST_LAYER_TYPES.ESRI_FEATURE,
@@ -162,7 +179,7 @@ export class UUIDmapConfigReader {
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.WMS) {
             const geoviewLayerConfig: TypeWMSLayerConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${idClean}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CONST_LAYER_TYPES.WMS,
@@ -170,7 +187,7 @@ export class UUIDmapConfigReader {
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): OgcWmsLayerEntryConfig => {
-              const wmsLayerEntryConfig = new OgcWmsLayerEntryConfig({
+              const originalConfig = {
                 geoviewLayerConfig,
                 schemaTag: CONST_LAYER_TYPES.WMS,
                 entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
@@ -179,13 +196,21 @@ export class UUIDmapConfigReader {
                   dataAccessPath: createLocalizedString(url),
                   serverType: (serverType === undefined ? 'mapserver' : serverType) as TypeOfServer,
                 },
-              } as OgcWmsLayerEntryConfig);
+              };
+
+              // Overwrite default from geocore custom config
+              const mergedConfig = deepMergeObjects(
+                originalConfig as unknown as TypeJsonObject,
+                customGeocoreLayerConfig as unknown as TypeJsonObject
+              );
+              const wmsLayerEntryConfig = new OgcWmsLayerEntryConfig(mergedConfig as unknown as OgcWmsLayerEntryConfig);
+
               return wmsLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.WFS) {
             const geoviewLayerConfig: TypeWFSLayerConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${idClean}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CONST_LAYER_TYPES.WFS,
@@ -209,7 +234,7 @@ export class UUIDmapConfigReader {
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
             const geoviewLayerConfig: TypeOgcFeatureLayerConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${idClean}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CONST_LAYER_TYPES.OGC_FEATURE,
@@ -232,7 +257,7 @@ export class UUIDmapConfigReader {
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
             const geoviewLayerConfig: TypeGeoJSONLayerConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${idClean}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CONST_LAYER_TYPES.GEOJSON,
@@ -255,7 +280,7 @@ export class UUIDmapConfigReader {
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.XYZ_TILES) {
             const geoviewLayerConfig: TypeXYZTilesConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${idClean}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CONST_LAYER_TYPES.XYZ_TILES,
@@ -277,7 +302,7 @@ export class UUIDmapConfigReader {
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.VECTOR_TILES) {
             const geoviewLayerConfig: TypeVectorTilesConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${idClean}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CONST_LAYER_TYPES.VECTOR_TILES,
@@ -299,7 +324,7 @@ export class UUIDmapConfigReader {
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.GEOPACKAGE) {
             const geoviewLayerConfig: TypeGeoPackageLayerConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${idClean}`,
               geoviewLayerName: createLocalizedString(name),
               geoviewLayerType: CONST_LAYER_TYPES.GEOPACKAGE,
               isTimeAware: isTimeAware as boolean,
@@ -321,7 +346,7 @@ export class UUIDmapConfigReader {
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.IMAGE_STATIC) {
             const geoviewLayerConfig: TypeImageStaticLayerConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${idClean}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CONST_LAYER_TYPES.IMAGE_STATIC,
@@ -346,7 +371,7 @@ export class UUIDmapConfigReader {
             // GV: Everything needed to create the geoview layer is in the URL. The layerId of the layerEntryConfig is not used,
             // GV: but we need to create a layerEntryConfig in the list for the layer to be displayed.
             const geoviewLayerConfig: TypeEsriImageLayerConfig = {
-              geoviewLayerId: `${id}`,
+              geoviewLayerId: `${idClean}`,
               geoviewLayerName: createLocalizedString(name),
               metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CONST_LAYER_TYPES.ESRI_IMAGE,
@@ -370,6 +395,23 @@ export class UUIDmapConfigReader {
       }
     }
     return listOfGeoviewLayerConfig;
+  }
+
+  /**
+   * Reads the layers config from uuid request result
+   * @param {AxiosResponse<GeoChartGeoCoreConfig>} result - the uuid request result
+   * @param {string} lang - the language to use to read results
+   * @returns {TypeJsonObject} the layers snippet configs
+   * @private
+   */
+  static #getGeocoreCustomLayerConfig(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject {
+    // If no custon geocore information
+    if (!result?.data || !result.data.response || !result.data.response.gcs || !Array.isArray(result.data.response.gcs)) return {};
+
+    // Find custom layer entry configuration
+    const foundConfigs = result.data.response.gcs.map((gcs) => gcs?.[lang]?.layers as TypeJsonObject);
+
+    return foundConfigs[0] || {};
   }
 
   /**

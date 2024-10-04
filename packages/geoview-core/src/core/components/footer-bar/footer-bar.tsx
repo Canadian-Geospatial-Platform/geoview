@@ -116,14 +116,14 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // inject guide tab at last position of tabs.
     return Object.keys({ ...tabsList, ...{ guide: {} } }).map((tab, index) => {
       return {
-        id: `${mapId}-${tab}${index}`,
+        id: `${tab}`,
         value: index,
         label: `${camelCase(tab)}.title`,
         icon: allTabs[tab]?.icon ?? '',
         content: allTabs[tab]?.content ?? '',
       } as TypeTabs;
     });
-  }, [memoTabs, tabsList, mapId]);
+  }, [memoTabs, tabsList]);
 
   /**
    * Calculate resize values from popover values defined in store.
@@ -192,7 +192,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     logger.logTraceUseEffect('FOOTER-TABS - arrayOfLayerDataBatch', arrayOfLayerDataBatch, selectedTab, isCollapsed);
 
     // If we're on the details panel and the footer is collapsed
-    if (selectedTab === `${mapId}-details-2` && isCollapsed) {
+    if (selectedTab === `details` && isCollapsed) {
       // Uncollapse it
       setFooterBarIsCollapsed(false);
     }
