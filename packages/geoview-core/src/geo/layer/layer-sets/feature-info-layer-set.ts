@@ -154,8 +154,12 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         // When the promise is done, propagate to store
         promiseResult
           .then((arrayOfRecords) => {
-            // Use the response to delete unwanted fields
-            if (arrayOfRecords?.length) this.#deleteUnwantedFields(layerPath, arrayOfRecords);
+            // Use the response to align arrayOfRecords fields with layerConfig fields
+            if (arrayOfRecords?.length)
+              AbstractLayerSet.alingRecordsWithOutFields(
+                this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig,
+                arrayOfRecords
+              );
 
             // Use the response to possibly patch the layer config metadata
             if (arrayOfRecords?.length) this.#patchMissingMetadataIfNecessary(layerPath, arrayOfRecords[0]);
@@ -282,48 +286,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     }
 
     if (!sourceFeatureInfo.nameField) sourceFeatureInfo.nameField = sourceFeatureInfo.outfields[0].name;
-  }
-
-  /**
-   * If user provided outFields information, remove unwanted fields from the arrayOfRecords
-   * @param {string} layerPath - Path of the layerto get config from.
-   * @param {TypeFeatureInfoEntry[]} arrayOfRecords - Features to delete fields from.
-   * @private
-   */
-  #deleteUnwantedFields(layerPath: string, arrayOfRecords: TypeFeatureInfoEntry[]): void {
-    // Get layer config
-    const layerEntryConfig = this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig;
-
-    // If source featureInfo is provided, continue
-    if (layerEntryConfig.source && layerEntryConfig.source.featureInfo) {
-      const sourceFeatureInfo = layerEntryConfig.source!.featureInfo as TypeFeatureInfoLayerConfig;
-
-      // If outFields is provided, compare record fields with outFields to remove unwanted one
-      // If there is no outFields, this will be created in the next function patchMissingMetadataIfNecessary
-      if (sourceFeatureInfo.outfields) {
-        const outFields = sourceFeatureInfo.outfields;
-
-        // Loop the array of records to delete fields from each record
-        arrayOfRecords.forEach((record) => {
-          let fieldKeyCounter = 0;
-          const fieldsToDelete = Object.keys(record.fieldInfo).filter((fieldName) => {
-            if (outFields.find((outfield) => outfield.name === fieldName)) {
-              const fieldIndex = outFields.findIndex((outfield) => outfield.name === fieldName);
-              record.fieldInfo[fieldName]!.fieldKey = fieldKeyCounter++;
-              record.fieldInfo[fieldName]!.alias = outFields![fieldIndex].alias;
-              record.fieldInfo[fieldName]!.dataType = outFields![fieldIndex].type;
-              return false; // keep this entry
-            }
-
-            return true; // delete this entry
-          });
-
-          fieldsToDelete.forEach((entryToDelete) => {
-            delete record.fieldInfo[entryToDelete];
-          });
-        });
-      }
-    }
   }
 
   /**

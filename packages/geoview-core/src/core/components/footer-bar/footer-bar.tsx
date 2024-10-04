@@ -123,7 +123,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         content: allTabs[tab]?.content ?? '',
       } as TypeTabs;
     });
-  }, [memoTabs, tabsList, mapId]);
+  }, [memoTabs, tabsList]);
 
   /**
    * Calculate resize values from popover values defined in store.

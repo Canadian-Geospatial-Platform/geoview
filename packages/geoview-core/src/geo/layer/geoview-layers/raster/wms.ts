@@ -772,7 +772,7 @@ export class WMS extends AbstractGeoViewRaster {
           featureMember = { plain_text: { '#text': response.data } };
         }
         if (featureMember) {
-          const featureInfoResult = this.#formatWmsFeatureInfoResult(featureMember, layerConfig, clickCoordinate);
+          const featureInfoResult = this.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
           return featureInfoResult;
         }
       }
@@ -989,18 +989,13 @@ export class WMS extends AbstractGeoViewRaster {
    * Translate the get feature information result set to the TypeFeatureInfoEntry[] used by GeoView.
    *
    * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
-   * @param {OgcWmsLayerEntryConfig} layerConfig The layer configuration.
    * @param {Coordinate} clickCoordinate The coordinate where the user has clicked.
    *
    * @returns {TypeFeatureInfoEntry[]} The feature info table.
    * @private
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  #formatWmsFeatureInfoResult(
-    featureMember: TypeJsonObject,
-    layerConfig: OgcWmsLayerEntryConfig,
-    clickCoordinate: Coordinate
-  ): TypeFeatureInfoEntry[] {
+  #formatWmsFeatureInfoResult(featureMember: TypeJsonObject, clickCoordinate: Coordinate): TypeFeatureInfoEntry[] {
     const queryResult: TypeFeatureInfoEntry[] = [];
 
     let featureKeyCounter = 0;
