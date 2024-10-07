@@ -169,7 +169,7 @@ export class GVWMS extends AbstractGVRaster {
           }
         } else featureMember = { plain_text: { '#text': response.data } };
         if (featureMember) {
-          const featureInfoResult = this.#formatWmsFeatureInfoResult(featureMember, layerConfig, clickCoordinate);
+          const featureInfoResult = this.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
           return featureInfoResult;
         }
       }
@@ -397,17 +397,11 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Translates the get feature information result set to the TypeFeatureInfoEntry[] used by GeoView.
    * @param {TypeJsonObject} featureMember - An object formatted using the query syntax.
-   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
    * @param {Coordinate} clickCoordinate - The coordinate where the user has clicked.
    * @returns {TypeFeatureInfoEntry[]} The feature info table.
    * @private
    */
-  #formatWmsFeatureInfoResult(
-    featureMember: TypeJsonObject,
-    layerConfig: OgcWmsLayerEntryConfig,
-    clickCoordinate: Coordinate
-  ): TypeFeatureInfoEntry[] {
-    const outfields = layerConfig?.source?.featureInfo?.outfields;
+  #formatWmsFeatureInfoResult(featureMember: TypeJsonObject, clickCoordinate: Coordinate): TypeFeatureInfoEntry[] {
     const queryResult: TypeFeatureInfoEntry[] = [];
 
     let featureKeyCounter = 0;
@@ -450,28 +444,7 @@ export class GVWMS extends AbstractGVRaster {
       });
     };
     createFieldEntries(featureMember);
-
-    if (!outfields) queryResult.push(featureInfoEntry);
-    else {
-      fieldKeyCounter = 0;
-      const fieldsToDelete = Object.keys(featureInfoEntry.fieldInfo).filter((fieldName) => {
-        if (outfields.find((outfield) => outfield.name === fieldName)) {
-          const fieldIndex = outfields.findIndex((outfield) => outfield.name === fieldName);
-          featureInfoEntry.fieldInfo[fieldName]!.fieldKey = fieldKeyCounter++;
-          featureInfoEntry.fieldInfo[fieldName]!.alias = outfields![fieldIndex].alias;
-          featureInfoEntry.fieldInfo[fieldName]!.dataType = outfields![fieldIndex].type;
-          return false; // keep this entry
-        }
-
-        return true; // delete this entry
-      });
-
-      fieldsToDelete.forEach((entryToDelete) => {
-        delete featureInfoEntry.fieldInfo[entryToDelete];
-      });
-
-      queryResult.push(featureInfoEntry);
-    }
+    queryResult.push(featureInfoEntry);
 
     return queryResult;
   }

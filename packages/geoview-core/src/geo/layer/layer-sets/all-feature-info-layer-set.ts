@@ -1,5 +1,5 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { QueryType } from '@/geo/map/map-schema-types';
+import { QueryType, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
@@ -125,6 +125,10 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
         // Wait for promise to resolve
         const arrayOfRecords = await promiseResult;
+
+        // Use the response to align arrayOfRecords fields with layerConfig fields
+        if (arrayOfRecords?.length)
+          AbstractLayerSet.alignRecordsWithOutFields(this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig, arrayOfRecords);
 
         // Keep the features retrieved
         this.resultSet[layerPath].features = arrayOfRecords;

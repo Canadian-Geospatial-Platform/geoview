@@ -154,8 +154,15 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         // When the promise is done, propagate to store
         promiseResult
           .then((arrayOfRecords) => {
+            // Use the response to align arrayOfRecords fields with layerConfig fields
+            if (arrayOfRecords?.length)
+              AbstractLayerSet.alignRecordsWithOutFields(
+                this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig,
+                arrayOfRecords
+              );
+
             // Use the response to possibly patch the layer config metadata
-            if (arrayOfRecords?.length) this.patchMissingMetadataIfNecessary(layerPath, arrayOfRecords[0]);
+            if (arrayOfRecords?.length) this.#patchMissingMetadataIfNecessary(layerPath, arrayOfRecords[0]);
 
             // Keep the features retrieved
             this.resultSet[layerPath].features = arrayOfRecords;
@@ -250,9 +257,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * Updates outfields, aliases and data types from query result if not provided in metadata
    * @param {string} layerPath - Path of the layer to update.
    * @param {TypeFeatureInfoEntry} record - Feature info to parse.
+   * @private
    */
-  patchMissingMetadataIfNecessary(layerPath: string, record: TypeFeatureInfoEntry): void {
-    // TODO Make sure this works with solution to #2259
+  #patchMissingMetadataIfNecessary(layerPath: string, record: TypeFeatureInfoEntry): void {
     // Set up feature info for layers that did not include it in the metadata
     const layerEntryConfig = this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig;
 
