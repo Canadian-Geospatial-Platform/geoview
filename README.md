@@ -85,8 +85,16 @@ $ rush update --full
 
 ### Build the project:
 
-```
+#### Windows
+
+```powershell
 $ rush build:core
+```
+
+#### Mac/Linux/WSL
+
+```BASH
+$ rush build:mac
 ```
 
 Output build files will be placed under
@@ -97,8 +105,16 @@ packages/geoview-core/dist
 
 ### Run/Serve the project
 
-```
+#### Windows
+
+```powershell
 $ rush serve
+```
+
+#### Mac/Linux/WSL
+
+```BASH
+$ rush serve:mac
 ```
 
 GeoView will be serve from http://localhost:8080/
@@ -107,8 +123,16 @@ GeoView will be serve from http://localhost:8080/
 
 ### Build the project:
 
-```
+#### Windows
+
+```powershell
 $ rush build:core
+```
+
+#### Mac/Linux/WSL
+
+```BASH
+$ rush build:mac
 ```
 
 ### Push the dist folder to your gh-pages
