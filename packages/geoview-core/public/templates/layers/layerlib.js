@@ -351,37 +351,35 @@ const createTableOfFilter = (mapId) => {
                   mapButtonsDiv.appendChild(br);
                 }
               }
-              if (geoviewLayer.getLayerFilter(layerPath)) {
-                const layerFilterText = document.createElement('p');
-                layerFilterText.innerText = `Extra filter: `;
-                mapButtonsDiv.appendChild(layerFilterText);
-                const layerFilterInput = document.createElement('input');
-                layerFilterInput.id = `filter-input-${mapId}-${geoviewLayer.getGeoviewLayerId()}`;
-                layerFilterInput.style.width = '50%';
-                layerFilterText.appendChild(layerFilterInput);
-                layerFilterInput.value = geoviewLayer.getLayerFilter(layerPath) || '';
-                const layerFilterButton = document.createElement('button');
-                layerFilterButton.addEventListener('click', (e) => {
-                  const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.getGeoviewLayerId()}`);
-                  geoviewLayer.applyViewFilter(layerPath, layerFilterInput.value, checkbox.value !== 'true');
-                });
-                layerFilterButton.innerText = 'Apply';
-                layerFilterText.style.width = 'max-content';
-                layerFilterText.appendChild(layerFilterButton);
+              const layerFilterText = document.createElement('p');
+              layerFilterText.innerText = `Extra filter: `;
+              mapButtonsDiv.appendChild(layerFilterText);
+              const layerFilterInput = document.createElement('input');
+              layerFilterInput.id = `filter-input-${mapId}-${geoviewLayer.getGeoviewLayerId()}`;
+              layerFilterInput.style.width = '50%';
+              layerFilterText.appendChild(layerFilterInput);
+              layerFilterInput.value = geoviewLayer.getLayerFilter(layerPath) || '';
+              const layerFilterButton = document.createElement('button');
+              layerFilterButton.addEventListener('click', (e) => {
+                const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.getGeoviewLayerId()}`);
+                geoviewLayer.applyViewFilter(layerPath, layerFilterInput.value, checkbox.value !== 'true');
+              });
+              layerFilterButton.innerText = 'Apply';
+              layerFilterText.style.width = 'max-content';
+              layerFilterText.appendChild(layerFilterButton);
 
-                const checkboxInput = document.createElement('input');
-                checkboxInput.type = 'checkbox';
-                checkboxInput.value = 'false';
-                checkboxInput.id = `checkbox-${mapId}-${geoviewLayer.getGeoviewLayerId()}`;
-                checkboxInput.addEventListener('click', (e) => {
-                  checkboxInput.value = checkboxInput.value === 'true' ? 'false' : 'true';
-                  geoviewLayer.applyViewFilter(layerPath, layerFilterInput.value, checkboxInput.value !== 'true');
-                });
-                mapButtonsDiv.appendChild(checkboxInput);
-                const checkboxText = document.createElement('label');
-                checkboxText.innerText = `apply only the extra filter`;
-                mapButtonsDiv.appendChild(checkboxText);
-              }
+              const checkboxInput = document.createElement('input');
+              checkboxInput.type = 'checkbox';
+              checkboxInput.value = 'false';
+              checkboxInput.id = `checkbox-${mapId}-${geoviewLayer.getGeoviewLayerId()}`;
+              checkboxInput.addEventListener('click', (e) => {
+                checkboxInput.value = checkboxInput.value === 'true' ? 'false' : 'true';
+                geoviewLayer.applyViewFilter(layerPath, layerFilterInput.value, checkboxInput.value !== 'true');
+              });
+              mapButtonsDiv.appendChild(checkboxInput);
+              const checkboxText = document.createElement('label');
+              checkboxText.innerText = `apply only the extra filter`;
+              mapButtonsDiv.appendChild(checkboxText);
             });
           }
         });
