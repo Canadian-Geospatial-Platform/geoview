@@ -26,7 +26,7 @@ export interface IUIState {
     actions: {
         hideTab: (tab: string) => void;
         enableFocusTrap: (uiFocus: FocusItemProps) => void;
-        disableFocusTrap: () => void;
+        disableFocusTrap: (callbackElementId?: string) => void;
         showTab: (tab: string) => void;
         setActiveFooterBarTab: (id: string) => void;
         setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
@@ -38,7 +38,7 @@ export interface IUIState {
     };
     setterActions: {
         enableFocusTrap: (uiFocus: FocusItemProps) => void;
-        disableFocusTrap: () => void;
+        disableFocusTrap: (callbackElementId?: string) => void;
         setActiveFooterBarTab: (id: string) => void;
         setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;

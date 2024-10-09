@@ -268,9 +268,9 @@ export declare class LayerApi {
      *
      * @param {string} layerPath - The path of the layer.
      * @param {string} fieldNames - The new field names to use, separated by commas.
-     * @param {'aliasFields' | 'outfields'} fields - The fields to change.
+     * @param {'alias' | 'name'} fields - The fields to change.
      */
-    redefineFeatureFields(layerPath: string, fieldNames: string, fields: 'aliasFields' | 'outfields'): void;
+    redefineFeatureFields(layerPath: string, fieldNames: string, fields: 'alias' | 'name'): void;
     /**
      * Calculates an union of all the layer extents based on the given layerPath and its possible children.
      * @param {string} layerPath - The layer path

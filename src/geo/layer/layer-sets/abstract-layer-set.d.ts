@@ -1,5 +1,5 @@
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { QueryType, TypeFeatureInfoEntry, TypeLayerStatus, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import { QueryType, TypeFeatureInfoEntry, TypeLayerEntryConfig, TypeLayerStatus, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
 import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -132,6 +132,15 @@ export declare abstract class AbstractLayerSet {
      * @returns {boolean} True if the state is queryable or undefined
      */
     protected static isStateQueryable(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean;
+    /**
+     * Align records with informatiom provided by OutFields from layer config.
+     * This will update fields in and delete unwanted fields from the arrayOfRecords
+     * @param {TypeLayerEntryConfig} layerPath - Path of the layer to get config from.
+     * @param {TypeFeatureInfoEntry[]} arrayOfRecords - Features to delete fields from.
+     * @protected
+     * @static
+     */
+    protected static alignRecordsWithOutFields(layerEntryConfig: TypeLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void;
     /**
      * Registers a callback to be executed whenever the layer set is updated.
      * @param {LayerSetUpdatedDelegate} callback - The callback function

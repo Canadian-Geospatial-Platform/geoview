@@ -27,6 +27,20 @@ export declare function getLocalizedValue(localizedString: TypeLocalizedString |
  */
 export declare function getLocalizedMessage(localizedKey: string, language: TypeDisplayLanguage): string;
 /**
+ * Deep merge objects togheter. Latest object will overwrite value on previous one
+ * if property exist.
+ *
+ * @param {TypeJsonObject} objects - The objects to deep merge
+ * @returns {TypeJsonObject} The merged object
+ */
+export declare function deepMergeObjects(...objects: TypeJsonObject[]): TypeJsonObject;
+/**
+ * Check if an object is empty
+ * @param {object} obj - The object to test
+ * @returns true if the object is empty, false otherwise
+ */
+export declare function isObjectEmpty(obj: object): boolean;
+/**
  * Get the URL of main script cgpv-main so we can access the assets
  * @returns {string} the URL of the main script
  */
