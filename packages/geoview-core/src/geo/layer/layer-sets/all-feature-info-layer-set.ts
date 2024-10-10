@@ -130,7 +130,6 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
         if (arrayOfRecords?.length)
           AbstractLayerSet.alignRecordsWithOutFields(this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig, arrayOfRecords);
 
-
         // Keep the features retrieved
         this.resultSet[layerPath].features = arrayOfRecords;
 

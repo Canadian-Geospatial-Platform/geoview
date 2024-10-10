@@ -54,7 +54,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
     // Log
     logger.logTraceUseMemo('DETAILS PANEL - Feature Info new - featureInfoList');
 
-   let featureInfo = Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
+    const featureInfo = Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
       return {
         fieldKey: feature.fieldInfo[fieldName]!.fieldKey,
         value: feature.fieldInfo[fieldName]!.value,

@@ -9,7 +9,7 @@ import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 
 interface JSONExportButtonProps {
-  rows: any[];
+  rows: unknown[];
   features: TypeFeatureInfoEntry[];
   layerPath: string;
 }
@@ -62,18 +62,31 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
    */
   const getJson = useCallback((): string => {
     // Filter features from filtered rows
-    const rowsID = rows.map((row) => row.internalID.value);
-    const filteredFeatures = features.filter((feature) => rowsID.includes(feature.fieldInfo.internalID!.value))
+    const rowsID = rows.map((row) => {
+      if (
+        typeof row === 'object' &&
+        row !== null &&
+        'internalID' in row &&
+        typeof row.internalID === 'object' &&
+        row.internalID !== null &&
+        'value' in row.internalID
+      ) {
+        return row.internalID.value;
+      }
+      return '';
+    });
+
+    const filteredFeatures = features.filter((feature) => rowsID.includes(feature.fieldInfo.internalID!.value));
 
     // create GeoJSON feature
     const geoData = filteredFeatures.map((feature) => {
       const { geometry, fieldInfo } = feature;
 
       // Format the feature info to extract only value and remove the internalID field
-      const formattedInfo: any= []
+      const formattedInfo: Record<string, unknown>[] = [];
       Object.keys(fieldInfo).forEach((key) => {
         if (key !== 'internalID') {
-          let tmpObj: any = {};
+          const tmpObj: Record<string, unknown> = {};
           tmpObj[key] = fieldInfo[key]!.value;
           formattedInfo.push(tmpObj);
         }
@@ -88,7 +101,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
 
     // Stringify with some indentation
     return JSON.stringify({ type: 'FeatureCollection', features: geoData }, null, 2);
-  }, [buildGeometry, features]);
+  }, [buildGeometry, features, rows]);
 
   /**
    * Exports the blob to a file
