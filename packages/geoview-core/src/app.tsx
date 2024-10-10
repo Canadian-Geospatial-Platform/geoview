@@ -57,19 +57,19 @@ async function fetchConfigFile(configUrl: string): Promise<string> {
 
 /**
  * Function to get a configuration from a div element who contains attributes to read from.
- * If the div has one of the folllowing atttributes data-config, data-config-url or data-shared,
- * it will try to get a valide configuration from the attribute content. If there is no such attributes,
+ * If the div has one of the following atttributes data-config, data-config-url or data-shared,
+ * it will try to get a valid configuration from the attribute content. If there is no such attributes,
  * it will return a default config. If the data-geocore is present, it will inject the layer in the
- * consifuration automatically
+ * configuration automatically.
  *
  * @param {Element} mapElement - Div map element with attributes
- * @returns {Promise<TypeMapFeaturesConfig>} A promise who contains the caonfiguration to use
+ * @returns {Promise<TypeMapFeaturesConfig>} A promise that contains the configuration to use
  */
 async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig> {
   // get language in wich we need to have the config file (if not provided, default to English)
+  const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
 
   // create a new config object and apply default
-  const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
   let mapConfig: MapFeatureConfig = api.config.getDefaultMapFeatureConfig(lang);
 
   // check what type of config is provided (data-config, data-config-url or data-shared)
