@@ -397,7 +397,11 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
       setColumnsFiltersVisibility(false, layerPath);
     },
     // NOTE: showGlobalFilter as true when layer change and we want to show global filter by default
-    initialState: { showColumnFilters: datatableSettings[layerPath].columnsFiltersVisibility, showGlobalFilter: true, columnVisibility: { internalID: false } },
+    initialState: {
+      showColumnFilters: datatableSettings[layerPath].columnsFiltersVisibility,
+      showGlobalFilter: true,
+      columnVisibility: { internalID: false },
+    },
     state: {
       sorting,
       columnFilters,
@@ -416,13 +420,21 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     positionToolbarAlertBanner: 'none', // hide existing row count
     renderTopToolbar: ({ table }) => (
       <Box display="flex" justifyContent="space-between" p={4}>
-        <Box>
+        <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
           <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>
-        </Box>
-        <Box>
-          <Box>
-            <MRTToggleFiltersButton className="buttonOutline" table={table} />
+          <Box display="flex">
+            <Box sx={sxClasses.selectedRows}>
+              {datatableSettings[layerPath].mapFilteredRecord ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}
+            </Box>
             <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
+          </Box>
+        </Box>
+        <Box display="flex" sx={{ flexDirection: 'column' }}>
+          <Box sx={{ float: 'right', marginLeft: 'auto', maxWidth: '15rem' }}>
+            <MRTGlobalFilterTextField className="buttonOutline" table={table} />
+          </Box>
+          <Box display="flex" sx={{ justifyContent: 'space-around' }}>
+            <MRTToggleFiltersButton className="buttonOutline" table={table} />
             {/* enable column pinning options is override, so that pinning option in menu can be hide. */}
             <MRTShowHideColumnsButton
               className="buttonOutline"
@@ -431,11 +443,12 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
             <MRTToggleDensePaddingButton className="buttonOutline" table={table} />
             {/* Only use filtered rows from material table */}
             <ExportButton rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} columns={columns}>
-              <JSONExportButton rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
+              <JSONExportButton
+                rows={useTable.getFilteredRowModel().rows.map((row) => row.original)}
+                features={data.features as TypeFeatureInfoEntry[]}
+                layerPath={layerPath}
+              />
             </ExportButton>
-          </Box>
-          <Box sx={{ marginLeft: 'auto', maxWidth: '15rem', marginRight: '1rem' }}>
-            <MRTGlobalFilterTextField className="buttonOutline" table={table} />
           </Box>
         </Box>
       </Box>

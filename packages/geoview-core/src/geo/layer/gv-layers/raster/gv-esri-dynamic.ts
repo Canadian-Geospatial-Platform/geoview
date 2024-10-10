@@ -408,7 +408,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
             if (i === 0) {
               if (styleSettings.classBreakStyleInfo[0].visible !== false && styleSettings.defaultVisible === false)
                 filterArray.push(
-                  `${styleSettings.field} >= ${this.#formatFieldValue(
+                  `${styleSettings.field} >= ${GVEsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[0].minValue!,
                     layerConfig.source.featureInfo!
@@ -416,7 +416,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
                 );
               else if (styleSettings.classBreakStyleInfo[0].visible === false && styleSettings.defaultVisible !== false) {
                 filterArray.push(
-                  `${styleSettings.field} < ${this.#formatFieldValue(
+                  `${styleSettings.field} < ${GVEsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[0].minValue!,
                     layerConfig.source.featureInfo!
@@ -426,7 +426,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
               }
             } else if (styleSettings.classBreakStyleInfo[i].visible !== false && styleSettings.defaultVisible === false) {
               filterArray.push(
-                `${styleSettings.field} > ${this.#formatFieldValue(
+                `${styleSettings.field} > ${GVEsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].minValue!,
                   layerConfig.source.featureInfo!
@@ -434,7 +434,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
               );
               if (i + 1 === styleSettings.classBreakStyleInfo.length)
                 filterArray.push(
-                  `${styleSettings.field} <= ${this.#formatFieldValue(
+                  `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[i].maxValue!,
                     layerConfig.source.featureInfo!
@@ -442,7 +442,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
                 );
             } else if (styleSettings.classBreakStyleInfo[i].visible === false && styleSettings.defaultVisible !== false) {
               filterArray.push(
-                `${styleSettings.field} <= ${this.#formatFieldValue(
+                `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].minValue!,
                   layerConfig.source.featureInfo!
@@ -453,7 +453,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
           } else if (styleSettings.defaultVisible === false) {
             if (styleSettings.classBreakStyleInfo[i].visible === false) {
               filterArray.push(
-                `${styleSettings.field} <= ${this.#formatFieldValue(
+                `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i - 1].maxValue!,
                   layerConfig.source.featureInfo!
@@ -461,7 +461,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
               );
             } else if (i + 1 === styleSettings.classBreakStyleInfo.length) {
               filterArray.push(
-                `${styleSettings.field} <= ${this.#formatFieldValue(
+                `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].maxValue!,
                   layerConfig.source.featureInfo!
@@ -470,7 +470,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
             }
           } else if (styleSettings.classBreakStyleInfo[i].visible !== false) {
             filterArray.push(
-              `${styleSettings.field} > ${this.#formatFieldValue(
+              `${styleSettings.field} > ${GVEsriDynamic.#formatFieldValue(
                 styleSettings.field,
                 styleSettings.classBreakStyleInfo[i - 1].maxValue!,
                 layerConfig.source.featureInfo!
@@ -483,7 +483,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         }
         if (visibleWhenGreatherThisIndex !== -1)
           filterArray.push(
-            `${styleSettings.field} > ${this.#formatFieldValue(
+            `${styleSettings.field} > ${GVEsriDynamic.#formatFieldValue(
               styleSettings.field,
               styleSettings.classBreakStyleInfo[visibleWhenGreatherThisIndex].maxValue!,
               layerConfig.source.featureInfo!
@@ -613,7 +613,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   ): string {
     let queryString = styleSettings.defaultVisible !== false && !level ? 'not (' : '(';
     for (let i = 0; i < queryTree.length; i++) {
-      const value = this.#formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, sourceFeatureInfo);
+      const value = GVEsriDynamic.#formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, sourceFeatureInfo);
       // The nextField array is not empty, then it is is not the last field
       if (queryTree[i].nextField.length) {
         // If i > 0 (true) then we add a OR clause
@@ -644,7 +644,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {string} The resulting field value.
    * @private
    */
-  #formatFieldValue(fieldName: string, rawValue: string | number | Date, sourceFeatureInfo: TypeFeatureInfoLayerConfig): string {
+  static #formatFieldValue(fieldName: string, rawValue: string | number | Date, sourceFeatureInfo: TypeFeatureInfoLayerConfig): string {
     const fieldEntry = sourceFeatureInfo.outfields?.find((outfield) => outfield.name === fieldName);
     const fieldType = fieldEntry?.type;
     switch (fieldType) {

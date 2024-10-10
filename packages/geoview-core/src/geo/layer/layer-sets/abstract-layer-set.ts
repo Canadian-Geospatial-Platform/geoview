@@ -486,13 +486,13 @@ export abstract class AbstractLayerSet {
             delete record.fieldInfo[entryToDelete];
           });
 
-          record.fieldInfo['internalID'] = {
+          record.fieldInfo.internalID = {
             fieldKey: fieldKeyCounter,
             alias: 'internalID',
             dataType: 'string',
             value: generateId(),
             domain: null,
-          }
+          };
         });
       }
     }

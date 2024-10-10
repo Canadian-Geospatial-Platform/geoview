@@ -61,7 +61,7 @@ export function useToolbarActionMessage({ data, columnFilters, globalFilter, lay
           .replace('{rowsFiltered}', rowsFiltered.rows.length.toString())
           .replace('{totalRows}', data?.features?.length.toString() ?? '');
       } else {
-        message = `${data.features?.length} ${t('dataTable.features')}`;;
+        message = `${data.features?.length} ${t('dataTable.features')}`;
         length = 0;
       }
       setRowsFilteredEntry(length, layerPath);
