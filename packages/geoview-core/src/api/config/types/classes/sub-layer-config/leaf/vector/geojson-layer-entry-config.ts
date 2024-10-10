@@ -84,6 +84,8 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // If an error has already been detected, then the layer is unusable.
     if (this.getErrorDetectedFlag()) return Promise.resolve();
 
+    // If the GeoJson GeoView layer doesn't have service metadata, the layer metadata are set using an empty object and they
+    // will be fetch on the fly by the layer api.
     if (Object.keys(this.getGeoviewLayerConfig().getServiceMetadata()).length === 0) {
       this.setLayerMetadata({});
       return Promise.resolve();
@@ -94,7 +96,7 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       this.setLayerMetadata(layerMetadata);
 
       // Parse the raw layer metadata and build the geoview configuration.
-      this.#parseLayerMetadata();
+      this.parseLayerMetadata();
 
       if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
         throw new GeoviewLayerConfigError(
@@ -129,16 +131,15 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       },
     };
   }
-  // #endregion OVERRIDE
 
-  // ===============
-  // #region PRIVATE
   /**
    * This method is used to parse the layer metadata and extract the source information and other properties.
-   * @private
+   * @override @protected
    */
-  #parseLayerMetadata(): void {
+  protected override parseLayerMetadata(): void {
     const layerMetadata = this.getLayerMetadata();
+    // return if the layer has no metadata.
+    if (Object.keys(layerMetadata).length === 0) return;
 
     if (layerMetadata?.attributions) this.attributions.push(layerMetadata.attributions as string);
     this.geometryType = (layerMetadata.geometryType || this.geometryType) as TypeStyleGeometry;
@@ -168,7 +169,7 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     }
   }
 
-  // #endregion PRIVATE
+  // #endregion OVERRIDE
   // #endregion METHODS
   // #endregion CLASS HEADER
 }
