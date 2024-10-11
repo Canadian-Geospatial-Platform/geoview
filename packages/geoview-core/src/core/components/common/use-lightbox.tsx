@@ -16,6 +16,7 @@ export function useLightBox(): UseLightBoxReturnType {
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
   const [imgScale, setImgScale] = useState<number | undefined>();
+  const [aliasIndex, setAliasIndex] = useState(0);
 
   /**
    * Initialize lightbox with state.
@@ -35,6 +36,7 @@ export function useLightBox(): UseLightBoxReturnType {
     setSlides(slidesList);
     setSlidesIndex(index ?? 0);
     setImgScale(scale);
+    setAliasIndex(alias.split('_')[0]);
   };
 
   /**
@@ -52,6 +54,8 @@ export function useLightBox(): UseLightBoxReturnType {
           setIsLightBoxOpen(false);
           setSlides([]);
           setSlidesIndex(0);
+
+          document.querySelector('.returnLightboxFocusItem')?.focus();
         }}
       />
     ) : (

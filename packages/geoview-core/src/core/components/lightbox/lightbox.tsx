@@ -8,6 +8,7 @@ import 'yet-another-react-lightbox/styles.css';
 
 import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Interface used for lightbox properties and slides
@@ -46,6 +47,9 @@ export function LightboxImg(props: LightboxProps): JSX.Element {
   const [fade] = useState(250);
   const [swipe] = useState(500);
 
+  // get mapId
+  const mapId = useGeoViewMapId();
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LIGHTBOX - open', open);
@@ -60,6 +64,7 @@ export function LightboxImg(props: LightboxProps): JSX.Element {
         container: { backgroundColor: 'rgba(0, 0, 0, .9)' },
         slide: { transform: `scale(${scale})` },
       }}
+      portal={{ root: document.getElementById(`shell-${mapId}`) }}
       open={isOpen}
       close={() => setIsOpen(false)}
       slides={slides}
@@ -75,7 +80,8 @@ export function LightboxImg(props: LightboxProps): JSX.Element {
       }}
       on={{
         entered: () => {
-          // TODO: Focus on close button on open #1113
+          // document.getElementsByClassName('yarl__button')[1] does not work, use main container
+          document.getElementsByClassName('yarl__root')[0].getElementsByTagName('button')[1].focus();
         },
         exited,
       }}
