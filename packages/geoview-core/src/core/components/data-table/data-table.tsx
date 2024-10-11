@@ -134,6 +134,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           <Button
             type="text"
             size="small"
+            className={`returnLightboxFocusItem-${cellId.split('_')[0]}`}
             onClick={() => initLightBox(cellValue, cellId, 0)}
             sx={{ height: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', textTransform: 'none' }}
           >

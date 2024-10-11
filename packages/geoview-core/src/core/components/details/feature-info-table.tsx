@@ -65,6 +65,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
             key={generateId()}
             sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
             alt={`${alias} ${index}`}
+            className={`returnLightboxFocusItem-${index}`}
             src={item}
             tabIndex={0}
             click={() => initLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
