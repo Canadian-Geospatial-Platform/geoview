@@ -32,6 +32,11 @@ export const api = new API();
 
 const reactRoot: Record<string, Root> = {};
 
+let cgpvCallbackMapInit: (mapId: string) => void | undefined;
+let cgpvCallbackMapReady: (mapId: string) => void | undefined;
+let cgpvCallbackLayersProcessed: (mapId: string) => void | undefined;
+let cgpvCallbackLayersLoaded: (mapId: string) => void | undefined;
+
 /**
  * Function to unmount a map element
  *
@@ -204,11 +209,10 @@ export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig:
 }
 
 /**
- * Initialize the cgpv and render it to root element
+ * Initializes the cgpv and render it to root element
  *
  * @param {(mapId: string) => void} callbackMapInit optional callback function to run once the map rendering is ready
  * @param {(mapId: string) => void} callbackMapLayersLoaded optional callback function to run once layers are loaded on the map
- * @returns {Promise<void>}
  */
 function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded?: (mapId: string) => void): void {
   const mapElements = document.getElementsByClassName('geoview-map');
@@ -220,31 +224,53 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
       // Render the map
       const promiseMapInit = renderMap(mapElement);
 
+      // The callback for the map init when the promiseMapInit will resolve
+      const theCallbackMapInit = cgpvCallbackMapInit;
+
+      // The callback for the map ready when the promiseMapInit will resolve
+      const theCallbackMapReady = cgpvCallbackMapReady;
+
+      // The callback for the layers processed when the promiseMapInit will resolve
+      const theCallbackLayersProcessed = cgpvCallbackLayersProcessed;
+
+      // The callback for the layers loaded when the promiseMapInit will resolve
+      const theCallbackLayersLoaded = cgpvCallbackLayersLoaded;
+
       // When the map init is done
       promiseMapInit
         .then(() => {
           // Log
-          logger.logInfo('Map initialized', mapElement.getAttribute('id')!);
-
-          // TODO: Fix this timeout issue when geoCore layer are use in config: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2380
-          // Set a timeout value if one of thelaeyrs is a geoCore type
           const mapId = mapElement.getAttribute('id')!;
-          const layerTypes = api.maps[mapId].mapFeaturesConfig.map.listOfGeoviewLayerConfig?.map((item) => item.geoviewLayerType) || [];
-          const geoCoreTimeout = layerTypes.includes('geoCore') ? 500 : 0;
+          logger.logInfo('Map initialized', mapId);
 
-          // TODO: Fix this timeout issue when geoCore layer are use in config: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2380
-          setTimeout(() => {
-            // Callback about it
-            callbackMapInit?.(mapId);
+          // Callback about it
+          theCallbackMapInit?.(mapId);
+          callbackMapInit?.(mapId); // TODO: Obsolete call, remove it eventually
 
-            // Register when the map viewer will have loaded layers
-            api.maps[mapId].onMapLayersLoaded((mapViewerLoaded) => {
-              logger.logInfo('Map layers loaded', mapViewerLoaded.mapId);
+          // Register when the map viewer will have a map ready
+          api.maps[mapId].onMapReady((mapViewer) => {
+            logger.logInfo('Map ready / layers registered', mapViewer.mapId);
 
-              // Callback for that particular map
-              callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
-            });
-          }, geoCoreTimeout);
+            // Callback for that particular map
+            theCallbackMapReady?.(mapViewer.mapId);
+          });
+
+          // Register when the map viewer will have loaded layers
+          api.maps[mapId].onMapLayersProcessed((mapViewer) => {
+            logger.logInfo('Map layers processed', mapViewer.mapId);
+
+            // Callback for that particular map
+            theCallbackLayersProcessed?.(mapViewer.mapId);
+          });
+
+          // Register when the map viewer will have loaded layers
+          api.maps[mapId].onMapLayersLoaded((mapViewer) => {
+            logger.logInfo('Map layers loaded', mapViewer.mapId);
+
+            // Callback for that particular map
+            theCallbackLayersLoaded?.(mapViewer.mapId);
+            callbackMapLayersLoaded?.(mapViewer.mapId); // TODO: Obsolete call, remove it eventually
+          });
         })
         .catch((error) => {
           // Log
@@ -254,9 +280,49 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
   }
 }
 
+/**
+ * Registers a callback when the map has been initialized
+ * @param {(mapId: string) => void} callback - The callback to be called
+ */
+export function onMapInit(callback: (mapId: string) => void): void {
+  // Keep the callback
+  cgpvCallbackMapInit = callback;
+}
+
+/**
+ * Registers a callback when the map has been initialized
+ * @param {(mapId: string) => void} callback - The callback to be called
+ */
+export function onMapReady(callback: (mapId: string) => void): void {
+  // Keep the callback
+  cgpvCallbackMapReady = callback;
+}
+
+/**
+ * Registers a callback when the layers have been processed
+ * @param {(mapId: string) => void} callback - The callback to be called
+ */
+export function onLayersProcessed(callback: (mapId: string) => void): void {
+  // Keep the callback
+  cgpvCallbackLayersProcessed = callback;
+}
+
+/**
+ * Registers a callback when the layers have been loaded
+ * @param {(mapId: string) => void} callback - The callback to be called
+ */
+export function onLayersLoaded(callback: (mapId: string) => void): void {
+  // Keep the callback
+  cgpvCallbackLayersLoaded = callback;
+}
+
 // cgpv object to be exported with the api for outside use
 export const cgpv: TypeCGPV = {
   init,
+  onMapInit,
+  onMapReady,
+  onLayersProcessed,
+  onLayersLoaded,
   api,
   react: React,
   createRoot,
