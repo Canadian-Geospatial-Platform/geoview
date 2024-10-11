@@ -7,6 +7,7 @@ import { MenuItem } from '@/ui';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
+import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface JSONExportButtonProps {
   rows: unknown[];
@@ -24,8 +25,9 @@ interface JSONExportButtonProps {
 function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
 
-  // get store value - projection config to transfer lat long.
+  // get store value - projection config to transfer lat long and layer
   const { transformPoints } = useMapStoreActions();
+  const { getLayer } = useLayerStoreActions();
 
   /**
    * Creates a geometry json
@@ -66,32 +68,33 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       if (
         typeof row === 'object' &&
         row !== null &&
-        'internalID' in row &&
-        typeof row.internalID === 'object' &&
-        row.internalID !== null &&
-        'value' in row.internalID
+        'geoviewID' in row &&
+        typeof row.geoviewID === 'object' &&
+        row.geoviewID !== null &&
+        'value' in row.geoviewID
       ) {
-        return row.internalID.value;
+        return row.geoviewID.value;
       }
       return '';
     });
 
-    const filteredFeatures = features.filter((feature) => rowsID.includes(feature.fieldInfo.internalID!.value));
+    const filteredFeatures = features.filter((feature) => rowsID.includes(feature.fieldInfo.geoviewID!.value));
 
     // create GeoJSON feature
     const geoData = filteredFeatures.map((feature) => {
       const { geometry, fieldInfo } = feature;
 
-      // Format the feature info to extract only value and remove the internalID field
+      // Format the feature info to extract only value and remove the geoviewID field
       const formattedInfo: Record<string, unknown>[] = [];
       Object.keys(fieldInfo).forEach((key) => {
-        if (key !== 'internalID') {
+        if (key !== 'geoviewID') {
           const tmpObj: Record<string, unknown> = {};
           tmpObj[key] = fieldInfo[key]!.value;
           formattedInfo.push(tmpObj);
         }
       });
 
+      // TODO: fix issue with geometry not available for esriDynamic: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2545
       return {
         type: 'Feature',
         geometry: buildGeometry(geometry?.getGeometry() as Geometry),
@@ -129,8 +132,8 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       type: 'text/json',
     });
 
-    exportBlob(blob, `table-${layerPath}.json`);
-  }, [exportBlob, getJson, layerPath]);
+    exportBlob(blob, `table-${getLayer(layerPath)?.layerName.replaceAll(' ', '-')}.json`);
+  }, [exportBlob, getJson, getLayer, layerPath]);
 
   return <MenuItem onClick={handleExportData}>{t('dataTable.jsonExportBtn')}</MenuItem>;
 }

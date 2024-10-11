@@ -22,6 +22,7 @@ export {
   CheckBoxOutlined as CheckBoxOutinedIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
+  ClearAll as ClearFiltersIcon,
   Close as CloseIcon,
   CropOriginal as AoiIcon,
   Delete as DeleteIcon,
