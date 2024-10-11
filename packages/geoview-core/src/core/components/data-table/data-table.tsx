@@ -31,6 +31,7 @@ import {
   Button,
   IconButton,
   Tooltip,
+  ClearFiltersIcon,
   ZoomInSearchIcon,
   InfoOutlinedIcon,
 } from '@/ui';
@@ -387,6 +388,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.features, handleZoomIn]);
 
+  // Create the Material React Table
   const useTable = useMaterialReactTable({
     columns,
     data: rows,
@@ -400,7 +402,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     initialState: {
       showColumnFilters: datatableSettings[layerPath].columnsFiltersVisibility,
       showGlobalFilter: true,
-      columnVisibility: { internalID: false },
+      columnVisibility: { geoviewID: false },
     },
     state: {
       sorting,
@@ -434,6 +436,12 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
             <MRTGlobalFilterTextField className="buttonOutline" table={table} />
           </Box>
           <Box display="flex" sx={{ justifyContent: 'space-around' }}>
+            <IconButton className="buttonOutline" color="primary" onClick={() => useTable.resetColumnFilters()}>
+              <Tooltip title={t('dataTable.clearFilters')} placement="bottom" arrow>
+                <ClearFiltersIcon />
+              </Tooltip>
+            </IconButton>
+
             <MRTToggleFiltersButton className="buttonOutline" table={table} />
             {/* enable column pinning options is override, so that pinning option in menu can be hide. */}
             <MRTShowHideColumnsButton
@@ -442,7 +450,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
             />
             <MRTToggleDensePaddingButton className="buttonOutline" table={table} />
             {/* Only use filtered rows from material table */}
-            <ExportButton rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} columns={columns}>
+            <ExportButton layerPath={layerPath} rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} columns={columns}>
               <JSONExportButton
                 rows={useTable.getFilteredRowModel().rows.map((row) => row.original)}
                 features={data.features as TypeFeatureInfoEntry[]}
@@ -579,7 +587,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
       .filter((filterValue) => filterValue.length)
       .join(' and ');
     applyMapFilters(filterStrings);
-  }, 1000);
+  }, 500);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedColumnFilters = useCallback(

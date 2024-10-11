@@ -55,7 +55,7 @@
     "crosshair": "Utiliser les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte, <strong>Entrée</strong> pour sélectionner et <strong>Shift+fléchées</strong> <strong>Haut</strong> et <strong>Bas</strong> pour modfier le déplacement."
   },
   "appbar": {
-    "export": "Exporter",
+    "export": "Télécharger la carte",
     "notifications": "Notification",
     "no_notifications_available": "Aucune notification disponible",
     "layers": "Couches",
@@ -172,9 +172,9 @@
     "invalidConfig": "Configuration JSON non valide, configuration par défaut appliquée."
   },
   "exportModal": {
-    "title": "Exporter la carte en PNG",
+    "title": "Télécharger la carte en PNG",
     "cancelBtn": "Annuler",
-    "exportBtn": "Exporter",
+    "exportBtn": "Télécharger",
     "exportTitle": "Titre",
     "approx": "approx"
   },
@@ -195,11 +195,12 @@
     "icon": "ICÔNE",
     "zoom": "ZOOM",
     "details": "DÉTAILS",
-    "exportBtn": "Exporter",
+    "exportBtn": "Télécharger",
     "jsonExportBtn": "Télécharger GeoJSON",
     "downloadAsCSV": "Télécharger CSV",
     "filterMap": "Filtrer la carte",
-    "stopFilterMap": "Arrêt des filtres",
+    "stopFilterMap": "Ne plus filtrer la carte",
+    "clearFilters": "Effacer les filtres",
     "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
     "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)",
     "enlargeBtn": "Agrandir",

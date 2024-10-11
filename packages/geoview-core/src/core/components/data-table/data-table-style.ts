@@ -12,6 +12,7 @@ export const getSxClasses = (theme: Theme) =>
       letterSpacing: '0.01071em',
       display: 'flex',
       padding: '6px',
+      alignItems: 'center',
     },
     selectedRowsDirection: {
       display: 'flex',

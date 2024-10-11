@@ -64,7 +64,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
       };
     });
 
-    // Remove last item who is the internalID
+    // Remove last item who is the geoviewID
     featureInfo.pop();
 
     return featureInfo;

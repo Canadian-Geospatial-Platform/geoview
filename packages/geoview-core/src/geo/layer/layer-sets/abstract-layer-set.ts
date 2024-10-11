@@ -492,9 +492,9 @@ export abstract class AbstractLayerSet {
             delete record.fieldInfo[entryToDelete];
           });
 
-          record.fieldInfo.internalID = {
+          record.fieldInfo.geoviewID = {
             fieldKey: fieldKeyCounter,
-            alias: 'internalID',
+            alias: 'geoviewID',
             dataType: 'string',
             value: generateId(),
             domain: null,
