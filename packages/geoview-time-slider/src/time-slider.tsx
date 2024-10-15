@@ -93,7 +93,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const name = LegendEventProcessor.findLayerByPath(legendLayers, layerPath).layerName;
 
   const timeStampRange = range.map((entry: string | number | Date) =>
-    typeof entry !== 'number' ? DateMgt.convertToMilliseconds(entry) : entry
+    typeof entry !== 'number' ? DateMgt.convertToMilliseconds(entry) : entry,
   );
 
   let timeMarks: number[] = [];
@@ -162,7 +162,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
       setValues(
         layerPath,
-        isForward ? [leftHandle, leftHandle + sliderDeltaRef.current] : [rightHandle - sliderDeltaRef.current, rightHandle]
+        isForward ? [leftHandle, leftHandle + sliderDeltaRef.current] : [rightHandle - sliderDeltaRef.current, rightHandle],
       );
       return;
     }
@@ -350,7 +350,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
       return DateMgt.formatDatePattern(theValue, displayPattern[0], displayPattern[1]);
     },
-    [displayPattern, values]
+    [displayPattern, values],
   );
   // #endregion
 

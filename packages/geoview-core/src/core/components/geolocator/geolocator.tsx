@@ -131,7 +131,7 @@ export function Geolocator(): JSX.Element {
         setError(err as Error);
       }
     },
-    [geolocatorServiceURL]
+    [geolocatorServiceURL],
   );
 
   /**

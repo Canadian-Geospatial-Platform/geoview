@@ -248,7 +248,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
           toJsonObject({
             layerId: layer.Name,
             layerName: layer.Name,
-          })
+          }),
         );
       }
       return accumulator;
@@ -426,7 +426,8 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
       logger.logError(
-        `Error detected while reading WMS metadata for geoview layer ${this.geoviewLayerId}.\n${(error as GeoviewLayerConfigError).message || ''
+        `Error detected while reading WMS metadata for geoview layer ${this.geoviewLayerId}.\n${
+          (error as GeoviewLayerConfigError).message || ''
         }`,
         error,
       );
