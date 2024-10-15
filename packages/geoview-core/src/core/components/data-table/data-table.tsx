@@ -113,7 +113,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
     return (
       <Tooltip title={header} placement="top" arrow>
-        <Box component="span" sx={{ whiteSpace: 'nowrap' }}>
+        <Box component="span" sx={{ whiteSpace: 'nowrap', justifyContent: 'end' }}>
           {header}
         </Box>
       </Tooltip>
@@ -421,13 +421,11 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     enableBottomToolbar: false,
     positionToolbarAlertBanner: 'none', // hide existing row count
     renderTopToolbar: ({ table }) => (
-      <Box display="flex" justifyContent="space-between" p={4}>
+      <Box display="flex" sx={{ justifyContent: 'space-between', borderBottom: '1px solid #9e9e9e' }} p={4}>
         <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
           <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>
           <Box display="flex">
-            <Box sx={sxClasses.selectedRows}>
-              {datatableSettings[layerPath].mapFilteredRecord ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}
-            </Box>
+            <Box sx={sxClasses.selectedRows}>{t('dataTable.filterMap')}</Box>
             <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
           </Box>
         </Box>
@@ -474,6 +472,9 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     localization: dataTableLocalization,
     muiTableHeadCellProps: {
       sx: () => sxClasses.tableHeadCell,
+    },
+    muiTableHeadProps: {
+      sx: () => sxClasses.tableHead,
     },
     defaultColumn: {
       muiFilterTextFieldProps: {
