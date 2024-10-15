@@ -31,6 +31,7 @@ import {
   Button,
   IconButton,
   Tooltip,
+  ClearFiltersIcon,
   ZoomInSearchIcon,
   InfoOutlinedIcon,
 } from '@/ui';
@@ -70,19 +71,20 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   const sxtheme = useTheme();
   const sxClasses = getSxClasses(sxtheme);
 
-  // internal state
-  const [density, setDensity] = useState<MRTDensityState>('compact');
-  const rowVirtualizerInstanceRef = useRef<MRTRowVirtualizer>(null);
-  const columnVirtualizerInstanceRef = useRef<MRTColumnVirtualizer>(null);
-  const [sorting, setSorting] = useState<MRTSortingState>([]);
-
   // get store actions and values
   const { zoomToExtent, highlightBBox, transformPoints, showClickMarker, addHighlightedFeature, removeHighlightedFeature } =
     useMapStoreActions();
-  const { applyMapFilters, setSelectedFeature } = useDataTableStoreActions();
+  const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility } = useDataTableStoreActions();
   const { getExtentFromFeatures } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
+
+  // internal state
+  const [density, setDensity] = useState<MRTDensityState>('compact');
+  const [showColumnFilters, setShowColumnFilters] = useState<boolean>(datatableSettings[layerPath].columnsFiltersVisibility);
+  const rowVirtualizerInstanceRef = useRef<MRTRowVirtualizer>(null);
+  const columnVirtualizerInstanceRef = useRef<MRTColumnVirtualizer>(null);
+  const [sorting, setSorting] = useState<MRTSortingState>([]);
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
@@ -111,7 +113,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
     return (
       <Tooltip title={header} placement="top" arrow>
-        <Box component="span" sx={{ whiteSpace: 'nowrap' }}>
+        <Box component="span" sx={{ whiteSpace: 'nowrap', justifyContent: 'end' }}>
           {header}
         </Box>
       </Tooltip>
@@ -345,7 +347,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     // Log
     logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
     return (data?.features ?? []).map((feature) => {
-      return {
+      const featureInfo = {
         ICON: (
           <Box
             component="img"
@@ -380,21 +382,33 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
         ),
         ...feature.fieldInfo,
       };
+
+      return featureInfo;
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.features, handleZoomIn]);
 
+  // Create the Material React Table
   const useTable = useMaterialReactTable({
     columns,
     data: rows,
     enableDensityToggle: true,
     onDensityChange: setDensity,
+    onShowColumnFiltersChange: () => {
+      setShowColumnFilters(!showColumnFilters);
+      setColumnsFiltersVisibility(false, layerPath);
+    },
     // NOTE: showGlobalFilter as true when layer change and we want to show global filter by default
-    initialState: { showColumnFilters: !!columnFilters.length, showGlobalFilter: true },
+    initialState: {
+      showColumnFilters: datatableSettings[layerPath].columnsFiltersVisibility,
+      showGlobalFilter: true,
+      columnVisibility: { geoviewID: false },
+    },
     state: {
       sorting,
       columnFilters,
       density,
+      showColumnFilters,
       columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
       globalFilter,
     },
@@ -407,26 +421,40 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     enableBottomToolbar: false,
     positionToolbarAlertBanner: 'none', // hide existing row count
     renderTopToolbar: ({ table }) => (
-      <Box display="flex" justifyContent="space-between" p={4}>
-        <Box>
+      <Box display="flex" sx={{ justifyContent: 'space-between', borderBottom: '1px solid #9e9e9e' }} p={4}>
+        <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
           <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>
-        </Box>
-        <Box>
-          <Box>
-            <MRTToggleFiltersButton className="buttonOutline" table={table} />
+          <Box display="flex">
+            <Box sx={sxClasses.selectedRows}>{t('dataTable.filterMap')}</Box>
             <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
+          </Box>
+        </Box>
+        <Box display="flex" sx={{ flexDirection: 'column' }}>
+          <Box sx={{ float: 'right', marginLeft: 'auto', maxWidth: '15rem' }}>
+            <MRTGlobalFilterTextField className="buttonOutline" table={table} />
+          </Box>
+          <Box display="flex" sx={{ justifyContent: 'space-around' }}>
+            <IconButton className="buttonOutline" color="primary" onClick={() => useTable.resetColumnFilters()}>
+              <Tooltip title={t('dataTable.clearFilters')} placement="bottom" arrow>
+                <ClearFiltersIcon />
+              </Tooltip>
+            </IconButton>
+
+            <MRTToggleFiltersButton className="buttonOutline" table={table} />
             {/* enable column pinning options is override, so that pinning option in menu can be hide. */}
             <MRTShowHideColumnsButton
               className="buttonOutline"
               table={{ ...table, options: { ...table.options, enableColumnPinning: false } }}
             />
             <MRTToggleDensePaddingButton className="buttonOutline" table={table} />
-            <ExportButton rows={rows} columns={columns}>
-              <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
+            {/* Only use filtered rows from material table */}
+            <ExportButton layerPath={layerPath} rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} columns={columns}>
+              <JSONExportButton
+                rows={useTable.getFilteredRowModel().rows.map((row) => row.original)}
+                features={data.features as TypeFeatureInfoEntry[]}
+                layerPath={layerPath}
+              />
             </ExportButton>
-          </Box>
-          <Box sx={{ marginLeft: 'auto', maxWidth: '15rem', marginRight: '1rem' }}>
-            <MRTGlobalFilterTextField className="buttonOutline" table={table} />
           </Box>
         </Box>
       </Box>
@@ -444,6 +472,9 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     localization: dataTableLocalization,
     muiTableHeadCellProps: {
       sx: () => sxClasses.tableHeadCell,
+    },
+    muiTableHeadProps: {
+      sx: () => sxClasses.tableHead,
     },
     defaultColumn: {
       muiFilterTextFieldProps: {
@@ -557,7 +588,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
       .filter((filterValue) => filterValue.length)
       .join(' and ');
     applyMapFilters(filterStrings);
-  }, 1000);
+  }, 500);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedColumnFilters = useCallback(

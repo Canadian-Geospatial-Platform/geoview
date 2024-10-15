@@ -55,7 +55,7 @@
     "crosshair": "Use <strong>Arrows</strong>, <strong>+</strong> and <strong>-</strong> keys to navigate the map, <strong>Enter</strong> to select and <strong>Shift+Arrow</strong> <strong>Up</strong> or <strong>Down</strong> to modify the pan value."
   },
   "appbar": {
-    "export": "Export",
+    "export": "Download map",
     "notifications": "Notification",
     "no_notifications_available": "No notifications available",
     "layers": "Layers",
@@ -172,9 +172,9 @@
     "invalidConfig": "Invalid JSON config, default configuration applied."
   },
   "exportModal": {
-    "title": "Export map as PNG",
+    "title": "Download map as PNG",
     "cancelBtn": "Cancel",
-    "exportBtn": "Export",
+    "exportBtn": "Download",
     "exportTitle": "Title",
     "approx": "approx"
   },
@@ -195,11 +195,12 @@
     "icon": "ICON",
     "zoom": "ZOOM",
     "details": "DETAILS",
-    "exportBtn": "Export",
+    "exportBtn": "Download",
     "jsonExportBtn": "Download GeoJSON",
     "downloadAsCSV": "Download CSV",
     "filterMap": "Filter map",
     "stopFilterMap": "Stop filter map",
+    "clearFilters": "Clear filters",
     "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
     "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",
     "enlargeBtn": "Enlarge",
