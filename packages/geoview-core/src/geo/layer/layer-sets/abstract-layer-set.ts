@@ -50,6 +50,9 @@ export abstract class AbstractLayerSet {
   // Keep all callback delegates references
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
 
+  // Keep all callback delegates references
+  #onLayerStatusUpdatedHandlers: LayerStatusUpdatedDelegate[] = [];
+
   // Keep a bounded reference to the handle layer status changed
   #boundHandleLayerStatusChanged: (config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) => void;
 
@@ -140,13 +143,16 @@ export abstract class AbstractLayerSet {
 
           // If the layer could be found
           if (layer) {
-            // Register the layer automatically in the layer set
+            // Register the layer itself (not the layer config) (recall the hybrid mode) automatically in the layer set
             this.registerLayer(layer, layerConfig.layerPath).catch((error) => {
               // Log
               logger.logPromiseFailed('in registerLayer in registerLayerConfig', error);
             });
           }
         }
+
+        // Emit that the layerConfig got their status changed
+        this.#emitLayerStatusUpdated({ layer: layerConfig });
       } catch (error) {
         // Error happened when trying to register the layer coming from the layer config
         logger.logError('Error trying to register the layer coming from the layer config', error);
@@ -517,6 +523,34 @@ export abstract class AbstractLayerSet {
     // Unregister the layersetupdated event callback
     EventHelper.offEvent(this.#onLayerSetUpdatedHandlers, callback);
   }
+
+  /**
+   * Emits an event to all registered handlers.
+   * @param {LayerStatusUpdatedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerStatusUpdated(event: LayerStatusUpdatedEvent): void {
+    // Emit the layersetupdated event
+    EventHelper.emitEvent(this, this.#onLayerStatusUpdatedHandlers, event);
+  }
+
+  /**
+   * Registers a callback to be executed whenever the layer status is updated.
+   * @param {LayerStatusUpdatedDelegate} callback - The callback function
+   */
+  onLayerStatusUpdated(callback: LayerStatusUpdatedDelegate): void {
+    // Register the layersetupdated event callback
+    EventHelper.onEvent(this.#onLayerStatusUpdatedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a callback from being called whenever the layer status is updated.
+   * @param {LayerStatusUpdatedDelegate} callback - The callback function to unregister
+   */
+  offLayerStatusUpdated(callback: LayerStatusUpdatedDelegate): void {
+    // Unregister the layersetupdated event callback
+    EventHelper.offEvent(this.#onLayerStatusUpdatedHandlers, callback);
+  }
 }
 
 // TODO: Rename this type to something like 'store-container-type' as it is now mostly used to indicate in which store to propagate the result set
@@ -541,4 +575,16 @@ type LayerSetUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerSetUpdat
 export type LayerSetUpdatedEvent = {
   layerPath: string;
   resultSet: TypeResultSet;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerStatusUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerStatusUpdatedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerStatusUpdatedEvent = {
+  layer: ConfigBaseClass;
 };
