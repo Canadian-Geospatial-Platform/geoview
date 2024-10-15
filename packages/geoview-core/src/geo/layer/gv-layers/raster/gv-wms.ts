@@ -169,7 +169,7 @@ export class GVWMS extends AbstractGVRaster {
           }
         } else featureMember = { plain_text: { '#text': response.data } };
         if (featureMember) {
-          const featureInfoResult = this.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
+          const featureInfoResult = GVWMS.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
           return featureInfoResult;
         }
       }
@@ -401,7 +401,7 @@ export class GVWMS extends AbstractGVRaster {
    * @returns {TypeFeatureInfoEntry[]} The feature info table.
    * @private
    */
-  #formatWmsFeatureInfoResult(featureMember: TypeJsonObject, clickCoordinate: Coordinate): TypeFeatureInfoEntry[] {
+  static #formatWmsFeatureInfoResult(featureMember: TypeJsonObject, clickCoordinate: Coordinate): TypeFeatureInfoEntry[] {
     const queryResult: TypeFeatureInfoEntry[] = [];
 
     let featureKeyCounter = 0;

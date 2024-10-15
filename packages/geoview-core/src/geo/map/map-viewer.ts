@@ -306,12 +306,10 @@ export class MapViewer {
     this.#mapInit = true;
     this.#emitMapInit();
 
-    MapEventProcessor.resetBasemap(this.mapId)
-      .then()
-      .catch((error) => {
-        // Log
-        logger.logPromiseFailed(' MapEventProcessor.resetBasemap in map-viewer', error);
-      });
+    MapEventProcessor.resetBasemap(this.mapId).catch((error) => {
+      // Log
+      logger.logPromiseFailed(' MapEventProcessor.resetBasemap in map-viewer', error);
+    });
 
     // Start checking for when the map will be ready
     this.#checkMapReady();
