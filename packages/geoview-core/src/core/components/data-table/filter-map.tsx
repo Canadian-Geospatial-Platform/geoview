@@ -35,7 +35,7 @@ function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element
     <Tooltip title={datatableSettings[layerPath].mapFilteredRecord ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
       <Switch
         size="medium"
-        onChange={() => setMapFilteredEntry(!datatableSettings[layerPath].mapFilteredRecord ?? true, layerPath)}
+        onChange={() => setMapFilteredEntry(!datatableSettings[layerPath].mapFilteredRecord, layerPath)}
         checked={!!datatableSettings[layerPath].mapFilteredRecord}
         sx={sxClasses.filterMap}
         disabled={isGlobalFilterOn}

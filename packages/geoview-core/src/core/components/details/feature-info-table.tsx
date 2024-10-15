@@ -71,7 +71,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
             click={() => initLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
             keyDown={(e: KeyboardEvent) => {
               if (e.key === 'Enter') {
-                initLightBox(featureInfoItem.value as string, featureInfoItem.alias, index);
+                initLightBox(featureInfoItem.value as string, `${index}_${featureInfoItem.alias}`, index);
               }
             }}
           />
