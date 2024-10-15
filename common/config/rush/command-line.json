@@ -9,12 +9,6 @@
     },
     {
       "commandKind": "global",
-      "name": "serve:mac",
-      "summary": "Serves the page locally with hot-reload for Mac users",
-      "shellCommand": "npm run --prefix packages/geoview-core serveMac"
-    },
-    {
-      "commandKind": "global",
       "name": "host",
       "summary": "Deploys the geoview project to github pages.",
       "shellCommand": "npm run --prefix packages/geoview-core deploy"
@@ -24,12 +18,6 @@
       "name": "build:core",
       "summary": "Build the packages and move them to the dist directory",
       "shellCommand": "npm run --prefix packages/geoview-core build"
-    },
-    {
-      "commandKind": "global",
-      "name": "build:mac",
-      "summary": "Build the packages and move them to the dist directory",
-      "shellCommand": "npm run --prefix packages/geoview-core buildMac"
     },
     {
       "commandKind": "bulk",

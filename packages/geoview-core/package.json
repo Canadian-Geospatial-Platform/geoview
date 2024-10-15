@@ -31,18 +31,13 @@
   "scripts": {
     "serve": "npm run format && npm run fix && webpack serve --progress --color --config webpack.dev.js",
     "build": "npm run format && npm run fix && npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
-    "serveMac": "npm run formatMac && npm run fixMac && webpack serve --progress --color --config webpack.dev.js",
-    "buildMac": "npm run formatMac && npm run fixMac && npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
     "doc": "typedoc src/app.tsx --logLevel Error --out public/docs",
     "deploy": "gh-pages -d dist",
     "test": "jest",
     "update_test": "jest --updateSnapshot",
-    "format": "prettier --write ../geoview-**/src/**/*.{ts,tsx,js}",
-    "lint": "eslint ../geoview-**/src/**/*.{ts,tsx,js}",
-    "fix": "eslint ../geoview-**/src/**/*.{ts,tsx,js} --fix",
-    "formatMac": "prettier --write '../geoview-**/src/**/*.{ts,tsx,js}'",
-    "lintMac": "eslint '../geoview-**/src/**/*.{ts,tsx,js}'",
-    "fixMac": "eslint '../geoview-**/src/**/*.{ts,tsx,js}' --fix",
+    "format": "prettier --write \"../geoview-**/src/**/*.{ts,tsx,js}\"",
+    "lint": "eslint \"../geoview-**/src/**/*.{ts,tsx,js}\"",
+    "fix": "eslint \"../geoview-**/src/**/*.{ts,tsx,js}\" --fix",
     "generate.d.ts": "tsc --noEmit false --skipLibCheck true --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {

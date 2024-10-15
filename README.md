@@ -69,6 +69,8 @@ $ cd geoview
 $ npm install -g @microsoft/rush
 ```
 
+* Note: you can also use the included `shell.nix` to setup your dev environment if you are on Mac/Linux/WSL.
+
 ### Install dependencies
 
 It's always recommended to run the below command if you pull any changes.
