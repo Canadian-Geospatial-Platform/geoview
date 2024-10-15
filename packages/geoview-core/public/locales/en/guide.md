@@ -94,7 +94,7 @@ _Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, 
 | <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"/>        | Legend        | Legend of map icons (_see Footer Bar section for help_)                                                                                |
 | <img src="{{assetsURL}}/img/guide/sidebar/details.svg" width="30"/>       | Details       | Details for selected features (_see Footer Bar section for help_)                                                                      |
 | <img src="{{assetsURL}}/img/guide/sidebar/guide.svg" width="30"/>         | Guide         | Help guide                                                                                         |
-| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" width="30"/>        | Export        | Download a PNG file of the map                                                                     |
+| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" width="30"/>        | Download        | Download a PNG file of the map                                                                     |
 | <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" width="30"/> | Notifications | Display messages and notifications for the map                                                     |
 | <img src="{{assetsURL}}/img/guide/sidebar/about.svg" width="30"/>         | About Geoview | Display information about Geoview viewer                                                           |
 
@@ -152,13 +152,13 @@ The basemap selector modifies the underlying basemap to provide a variety of geo
 <br>
 =2!export=
 
-### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Export
+### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Download
 
-You can export an image of the map and its visible layers along with a legend, title, north arrow, scalebar, and a timestamp.
+You can download an image of the map and its visible layers along with a legend, title, north arrow, scalebar, and a timestamp.
 
-Once **Export** button is clicked, a dialog will appear with an image of the map, and an option to enter a map title if desired.
+Once **Download** button is clicked, a dialog will appear with an image of the map, and an option to enter a map title if desired.
 
-Click on the Export button at the bottom to get the final generated map image.
+Click on the **Download** button at the bottom to get the final generated map image.
 
 =1!footerPanel=
 
@@ -330,7 +330,7 @@ _Note: Some options may not be available or are preselected depending on various
 | <img src="{{assetsURL}}/img/guide/datatable/filter.png" width="30"/>        | Filter switch   | Apply filters to the map                                                                                                                  |
 | <img src="{{assetsURL}}/img/guide/datatable/column_show.svg" width="30"/>   | Display Columns | Allows you to choose which columns you want visible and to pin columns to the left or right of the table                                  |
 | <img src="{{assetsURL}}/img/guide/datatable/density.svg" width="30"/>       | Density         | Toggle the height of the rows in the data table                                                                                           |
-| <img src="{{assetsURL}}/img/guide/datatable/export.svg" width="30"/>        | Export          | Export data table as CSV or GeoJSON. May not work as intended on mobile due to limitations with downloading files                         |
+| <img src="{{assetsURL}}/img/guide/datatable/export.svg" width="30"/>        | Download          | Download data table as CSV or GeoJSON. May not work as intended on mobile due to limitations with downloading files                         |
 
 The first three columns of the data table are Icon, Zoom and Details. The remaining columns vary depending on the layer selected.
 

@@ -12,6 +12,7 @@ export const getSxClasses = (theme: Theme) =>
       letterSpacing: '0.01071em',
       display: 'flex',
       padding: '6px',
+      alignItems: 'center',
     },
     selectedRowsDirection: {
       display: 'flex',
@@ -34,6 +35,11 @@ export const getSxClasses = (theme: Theme) =>
       },
       '& .MuiTouchRipple-root': {
         color: theme.palette.geoViewColor.grey.dark[900],
+      },
+    },
+    tableHead: {
+      '& th:nth-of-type(-n+3)': {
+        justifyContent: 'end',
       },
     },
     tableHeadCell: {

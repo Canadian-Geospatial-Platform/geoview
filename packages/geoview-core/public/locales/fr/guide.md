@@ -91,7 +91,7 @@ _N.B.&nbsp;: Certains outils dans la barre latérale se trouvent aussi sous form
 | <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"/>| Légende| Légende des icônes de la carte (_voir la section sur le pied de page pour en savoir plus_).|
 | <img src="{{assetsURL}}/img/guide/sidebar/details.svg" width="30"/>| Détails| Information détaillée des éléments sélectionnés (_voir la section sur le pied de page pour en savoir plus_).|
 | <img src="{{assetsURL}}/img/guide/sidebar/guide.svg" width="30"/>| Guide| Guide d’aide|
-| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" width="30"/>| Exporter| Pour télécharger la carte en fichier PNG.|
+| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" width="30"/>| Télécharger| Pour télécharger la carte en fichier PNG.|
 | <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" width="30"/>| Notification| Présente les messages et les notifications pour la carte.|
 | <img src="{{assetsURL}}/img/guide/sidebar/about.svg" width="30"/>| À propos de GéoView| Affiche les renseignements sur le visualiseur GéoView.|
 
@@ -146,13 +146,13 @@ Le sélecteur permet de modifier la carte de base pour obtenir différents conte
 
 <br>
 =2!export=
-### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Exporter
+### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Télécharger
 
-Vous pouvez exporter une image de la carte avec ses couches visibles, la légende, le titre, la flèche du nord, la barre d’échelle et un horodatage.
+Vous pouvez télécharger une image de la carte avec ses couches visibles, la légende, le titre, la flèche du nord, la barre d’échelle et un horodatage.
 
-Lorsque vous cliquez sur le bouton **Exporter**, une fenêtre de dialogue s’ouvre contenant l’image de la carte et un champ où vous pouvez entrer un titre.
+Lorsque vous cliquez sur le bouton **Télécharger**, une fenêtre de dialogue s’ouvre contenant l’image de la carte et un champ où vous pouvez entrer un titre.
 
-Cliquez sur le bouton **Exporter** au bas de la fenêtre pour générer l’image finale de la carte.
+Cliquez sur le bouton **Télécharger** au bas de la fenêtre pour générer l’image finale de la carte.
 
 =1!footerPanel=
 
@@ -320,7 +320,7 @@ _N.B.&nbsp;: Selon différents facteurs, certaines options sont désactivées ou
 | <img src="{{assetsURL}}/img/guide/datatable/filter.png" width="30"/>| Interrupteur de filtres| Appliquer les filtres à la carte.|
 | <img src="{{assetsURL}}/img/guide/datatable/column_show.svg" width="30"/>| Afficher/masquer les colonnes| Choisir les colonnes visibles et épingler des colonnes à gauche ou à droite du tableau.|
 | <img src="{{assetsURL}}/img/guide/datatable/density.svg" width="30"/>| Densité| Modifier la hauteur des lignes du tableau de données.|
-| <img src="{{assetsURL}}/img/guide/datatable/export.svg" width="30"/>| Exporter| Exporter le tableau en format CSV ou GeoJSON. Pourrait échouer sur un appareil mobile en raison des restrictions de téléchargement de fichiers.|
+| <img src="{{assetsURL}}/img/guide/datatable/export.svg" width="30"/>| Télécharger| Télécharger le tableau en format CSV ou GeoJSON. Pourrait échouer sur un appareil mobile en raison des restrictions de téléchargement de fichiers.|
 
 Les trois premières colonnes du tableau de données sont **Icône**, **Zoom** et **Détails**. Les autres colonnes varient selon la couche sélectionnée.
 

@@ -9,8 +9,10 @@ import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 import { IconButton, DownloadIcon, Tooltip, Menu, MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { ColumnsType } from './data-table-types';
+import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface ExportButtonProps {
+  layerPath: string;
   rows: ColumnsType[];
   columns: MRTColumnDef<ColumnsType>[];
   children?: ReactElement | undefined;
@@ -18,15 +20,18 @@ interface ExportButtonProps {
 
 /**
  * Custom  export button which will help to download data table data in csv format.
+ * @param {string} layerPath id of the layer
  * @param {ColumnsType} rows list of rows to be displayed in data table
  * @param {MRTColumnDef<ColumnsType>[]} columns array of object represent column header data.
  * @param {ReactElement} children Menu item to be rendered in Menu.
  * @returns {JSX.Element} returns export button
  *
  */
-function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Element {
+function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/export-button');
+
+  const { getLayer } = useLayerStoreActions();
 
   const { t } = useTranslation<string>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -61,16 +66,20 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
     // Log
     logger.logTraceUseMemo('DATA-TABLE - EXPORT BUTTON - getCsvOptions', columns);
 
+    // Remove the utility columns
+    const filteredColumns = columns.filter((col) => !['ICON', 'ZOOM', 'DETAILS', 'geoviewID'].includes(col.id as string));
+
     return (): Options => ({
+      filename: `table-${getLayer(layerPath)?.layerName.replaceAll(' ', '-')}`,
       fieldSeparator: ',',
       quoteStrings: '"',
       decimalSeparator: '.',
       showLabels: true,
       useBom: true,
       useKeysAsHeaders: false,
-      headers: columns.map((c) => c.id as string),
+      headers: filteredColumns.map((c) => c.id as string),
     });
-  }, [columns]);
+  }, [columns, getLayer, layerPath]);
 
   /**
    * Export data table in csv format.
