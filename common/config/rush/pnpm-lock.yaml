@@ -166,8 +166,8 @@ importers:
         specifier: ^5.0.3
         version: 5.0.3
       export-to-csv:
-        specifier: ^1.4.0
-        version: 1.4.0
+        specifier: 0.2.2
+        version: 0.2.2
       html-react-parser:
         specifier: ^5.1.18
         version: 5.1.18(@types/react@18.3.11)(react@18.3.1)
@@ -5813,9 +5813,8 @@ packages:
       jest-util: 29.7.0
     dev: true
 
-  /export-to-csv@1.4.0:
-    resolution: {integrity: sha512-6CX17Cu+rC2Fi2CyZ4CkgVG3hLl6BFsdAxfXiZkmDFIDY4mRx2y2spdeH6dqPHI9rP+AsHEfGeKz84Uuw7+Pmg==}
-    engines: {node: ^v12.20.0 || >=v14.13.0}
+  /export-to-csv@0.2.2:
+    resolution: {integrity: sha512-KHExLOjF2yvo8JU8Sv+5RuJAHzP1TpFvUgnWn8ex7zBrv1ZsABJAOpvG1RNRRWr1spYpDJmBBaR5/cV/8aBQSw==}
     dev: false
 
   /express@4.21.1:

@@ -57,7 +57,7 @@
     "axios": "^1.7.7",
     "dayjs": "^1.11.13",
     "domhandler": "^5.0.3",
-    "export-to-csv": "^1.4.0",
+    "export-to-csv": "0.2.2",
     "html-react-parser": "^5.1.18",
     "i18next": "^23.16.0",
     "i18next-http-backend": "^2.6.2",
