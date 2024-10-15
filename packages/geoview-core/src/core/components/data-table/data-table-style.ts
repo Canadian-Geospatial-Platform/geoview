@@ -37,6 +37,11 @@ export const getSxClasses = (theme: Theme) =>
         color: theme.palette.geoViewColor.grey.dark[900],
       },
     },
+    tableHead: {
+      '& th:nth-of-type(-n+3)': {
+        justifyContent: 'end',
+      },
+    },
     tableHeadCell: {
       '& .MuiCollapse-wrapperInner': {
         '& .MuiBox-root': {

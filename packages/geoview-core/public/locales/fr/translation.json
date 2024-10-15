@@ -199,7 +199,6 @@
     "jsonExportBtn": "Télécharger GeoJSON",
     "downloadAsCSV": "Télécharger CSV",
     "filterMap": "Filtrer la carte",
-    "stopFilterMap": "Ne plus filtrer la carte",
     "clearFilters": "Effacer les filtres",
     "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
     "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)",
