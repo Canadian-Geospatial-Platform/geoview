@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box } from '@/ui';
 import { LightBoxSlides, LightboxImg } from '@/core/components/lightbox/lightbox';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface UseLightBoxReturnType {
   initLightBox: (images: string, alias: string, index: number | undefined, scale?: number) => void;
@@ -12,11 +13,15 @@ interface UseLightBoxReturnType {
  * @returns {UseLightBoxReturnType}
  */
 export function useLightBox(): UseLightBoxReturnType {
+  // Internal state
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
   const [imgScale, setImgScale] = useState<number | undefined>();
-  const [aliasIndex, setAliasIndex] = useState(0);
+  const [aliasIndex, setAliasIndex] = useState('0');
+
+  // Store state
+  const activeTrapGeoView = useUIActiveTrapGeoView();
 
   /**
    * Initialize lightbox with state.
@@ -55,7 +60,14 @@ export function useLightBox(): UseLightBoxReturnType {
           setSlides([]);
           setSlidesIndex(0);
 
-          document.querySelector('.returnLightboxFocusItem')?.focus();
+          // If keyboard navigation mode enable, focus to caller item (with timeout so keyboard-focused class can be applied)
+          if (activeTrapGeoView) {
+            setTimeout(() => {
+              const element = document.querySelector(`.returnLightboxFocusItem-${aliasIndex}`) as HTMLElement;
+              element?.focus();
+              element?.classList.add('keyboard-focused');
+            }, 250);
+          }
         }}
       />
     ) : (
