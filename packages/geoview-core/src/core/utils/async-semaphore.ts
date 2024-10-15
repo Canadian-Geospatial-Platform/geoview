@@ -9,9 +9,11 @@ export class AsyncSemaphore {
   #workersCount: number;
 
   /** Queue of upcoming tasks. */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   #upcoming: Function[];
 
   /** Queue of tasks currently executing. */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   #heads: Function[];
 
   /** Completion callback function. */
@@ -86,6 +88,7 @@ export class AsyncSemaphore {
    * @returns {Function[]} The upcoming queue.
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   #queue(): Function[] {
     if (!this.#heads.length) {
       this.#heads = this.#upcoming.reverse();
@@ -105,6 +108,7 @@ export class AsyncSemaphore {
       return undefined;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     let fn: Function = () => {
       /***/
     };
