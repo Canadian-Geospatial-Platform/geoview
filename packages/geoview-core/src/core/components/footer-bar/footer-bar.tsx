@@ -33,6 +33,7 @@ import { GuidePanel } from '@/core/components/guide/guide-panel';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { isElementInViewport } from '@/core/utils/utilities';
 
 interface Tab {
   icon: ReactNode;
@@ -348,14 +349,18 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [footerBarTabsConfig, mapId]);
 
-  // Scroll the footer into view on mouse enter
+  // Scroll the footer into view on mouse click
   useEffect((): void => {
     // Log
     logger.logTraceUseEffect('FOOTER BAR - scrollIntoViewListener');
 
     if (tabsContainerRef && tabsContainerRef.current) {
-      tabsContainerRef.current.addEventListener('mouseenter', () => {
-        tabsContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      tabsContainerRef.current.addEventListener('click', () => {
+        // Register mouse interaction events (click). If element not in viewport, scroll the footer into view
+        if (!isElementInViewport(tabsContainerRef.current!)) {
+          const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
+          tabsContainerRef.current?.scrollIntoView({ behavior: behaviorScroll as ScrollBehavior, block: 'end' });
+        }
       });
     }
   }, [tabsContainerRef]);

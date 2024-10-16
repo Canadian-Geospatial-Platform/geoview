@@ -50,7 +50,7 @@ import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
-import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
+import { delay, generateId, getLocalizedMessage, isElementInViewport } from '@/core/utils/utilities';
 import { createEmptyBasemap } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
@@ -573,16 +573,24 @@ export class MapViewer {
     this.map.dispatchEvent('change:size'); // dispatch event to set initial value
 
     // Register mouse interaction events. On mouse enter or leave, focus or blur the map container
-    // and scroll the map into view (on mouseenter)
     const mapHTMLElement = this.map.getTargetElement();
     mapHTMLElement.addEventListener('mouseenter', () => {
-      const shell = document.getElementById(`shell-${this.mapId}`);
-      shell?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       mapHTMLElement.focus({ preventScroll: true });
     });
     mapHTMLElement.addEventListener('mouseleave', () => {
       mapHTMLElement.blur();
     });
+
+    // Register mouse interaction events (wheel or click). If element not in viewport, scroll the map into view
+    const myScrollIntoViewEvent = (): void => {
+      if (!isElementInViewport(mapHTMLElement)) {
+        const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
+        const shell = document.getElementById(`shell-${this.mapId}`);
+        shell?.scrollIntoView({ behavior: behaviorScroll as ScrollBehavior, block: 'start' });
+      }
+    };
+    mapHTMLElement.addEventListener('wheel', myScrollIntoViewEvent);
+    // mapHTMLElement.addEventListener('click', myScrollIntoViewEvent);
 
     // Start checking for layers result sets to be ready
     this.#checkLayerResultSetReady().catch((error) => {
