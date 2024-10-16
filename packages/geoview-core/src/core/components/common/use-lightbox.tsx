@@ -49,6 +49,7 @@ export function useLightBox(): UseLightBoxReturnType {
    * @returns {JSX.Element}
    */
   function LightBoxComponent(): JSX.Element {
+    // TODO: fix bug https://github.com/Canadian-Geospatial-Platform/geoview/issues/2553
     return isLightBoxOpen ? (
       <LightboxImg
         open={isLightBoxOpen}
