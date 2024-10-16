@@ -572,16 +572,15 @@ export class MapViewer {
     this.map.on('change:size', this.#handleMapChangeSize.bind(this));
     this.map.dispatchEvent('change:size'); // dispatch event to set initial value
 
-    // Register mouse interaction events
-    // set autofocus/blur on mouse enter/leave the map so user can scroll (zoom) without having to click the map
+    // Register mouse interaction events. On mouse enter or leave, focus or blur the map container
+    // and scroll the map into view (on mouseenter)
     const mapHTMLElement = this.map.getTargetElement();
-    mapHTMLElement.addEventListener('wheel', (event: WheelEvent) => {
-      event.preventDefault(); // Abort event
-      mapHTMLElement.focus();
+    mapHTMLElement.addEventListener('mouseenter', () => {
+      const shell = document.getElementById(`shell-${this.mapId}`);
+      shell?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      mapHTMLElement.focus({ preventScroll: true });
     });
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    mapHTMLElement.addEventListener('mouseleave', (event: MouseEvent) => {
+    mapHTMLElement.addEventListener('mouseleave', () => {
       mapHTMLElement.blur();
     });
 

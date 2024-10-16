@@ -2,7 +2,7 @@ import { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, u
 import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 
-import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
+import { Box, Tabs, TypeTabs } from '@/ui';
 import { Plugin } from '@/api/plugin/plugin';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/resize-footer-panel/resize-footer-panel';
@@ -58,8 +58,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-
-  const [isFocusToMap, setIsFocusToMap] = useState<boolean>(true);
 
   const tabsContainerRef = useRef<HTMLDivElement>();
 
@@ -350,16 +348,17 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [footerBarTabsConfig, mapId]);
 
-  // Handle focus using dynamic focus button
-  const handleDynamicFocus = useCallback((): void => {
+  // Scroll the footer into view on mouse enter
+  useEffect((): void => {
     // Log
-    logger.logTraceUseCallback('FOOTER BAR - handleDynamicFocus', isFocusToMap, mapId);
+    logger.logTraceUseEffect('FOOTER BAR - scrollIntoViewListener');
 
-    const shell = document.getElementById(`shell-${mapId}`);
-    const block = isFocusToMap ? 'start' : 'end';
-    shell?.scrollIntoView({ behavior: 'smooth', block });
-    setIsFocusToMap(!isFocusToMap);
-  }, [isFocusToMap, mapId]);
+    if (tabsContainerRef && tabsContainerRef.current) {
+      tabsContainerRef.current.addEventListener('mouseenter', () => {
+        tabsContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      });
+    }
+  }, [tabsContainerRef]);
 
   return memoFooterBarTabs.length > 0 ? (
     <Box
@@ -381,21 +380,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         tabs={memoFooterBarTabs}
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         containerType={CONTAINER_TYPE.FOOTER_BAR}
-        rightButtons={
-          <>
-            {!isCollapsed && isMapFullScreen && <ResizeFooterPanel />}
-            <IconButton
-              onClick={handleDynamicFocus}
-              tooltip={isFocusToMap ? 'footerBar.focusToMap' : 'footerBar.focusToFooter'}
-              className="buttonFilled"
-              disabled={
-                isCollapsed || isMapFullScreen || footerPanelResizeValues[footerPanelResizeValues.length - 1] === footerPanelResizeValue
-              }
-            >
-              {isFocusToMap ? <MoveUpRoundedIcon /> : <MoveDownRoundedIcon />}
-            </IconButton>
-          </>
-        }
+        rightButtons={!isCollapsed && isMapFullScreen && <ResizeFooterPanel />}
       />
     </Box>
   ) : null;

@@ -219,8 +219,6 @@
     "errorMessage": "Sorry, unable to find the help document!"
   },
   "footerBar": {
-    "focusToMap": "Focus to map",
-    "focusToFooter": "Focus to footer",
     "resizeTooltip": "Resize",
     "noTab": "No tab"
   }
