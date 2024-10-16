@@ -183,7 +183,14 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
       const imgSrc = layer.icons[0].iconImage;
       return (
         <Collapse in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
-          <Box component="img" src={imgSrc} sx={{ maxWidth: '100%', cursor: 'pointer' }} onClick={() => initLightBox(imgSrc, '', 0, 2)} />
+          <Box
+            component="img"
+            tabIndex={0}
+            src={imgSrc}
+            sx={{ maxWidth: '100%', cursor: 'pointer' }}
+            onClick={() => initLightBox(imgSrc, '', 0, 2)}
+            onKeyDown={(e) => (e.code === 'Space' || e.code === 'Enter' ? initLightBox(imgSrc, '', 0, 2) : null)}
+          />
         </Collapse>
       );
     }
