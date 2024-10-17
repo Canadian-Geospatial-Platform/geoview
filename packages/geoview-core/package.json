@@ -146,7 +146,7 @@
     "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.3.10",
     "typedoc": "^0.26.9",
-    "typescript": "^5.6.3",
+    "typescript": "5.5.4",
     "webpack": "^5.95.0",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-bundle-size-analyzer": "^3.1.0",
