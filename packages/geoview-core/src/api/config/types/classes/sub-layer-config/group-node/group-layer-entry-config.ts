@@ -34,7 +34,7 @@ export abstract class GroupLayerEntryConfig extends EntryConfigBaseClass {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewLayerConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass
+    parentNode?: EntryConfigBaseClass,
   ) {
     super(layerConfig, language, geoviewLayerConfig, parentNode);
     this.listOfLayerEntryConfig = (layerConfig.listOfLayerEntryConfig as TypeJsonArray)

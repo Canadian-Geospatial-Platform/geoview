@@ -98,7 +98,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass
+    parentNode?: EntryConfigBaseClass,
   ): EntryConfigBaseClass {
     return new GeoJsonLayerEntryConfig(layerConfig, language, geoviewConfig, parentNode);
   }
@@ -119,7 +119,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass
+    parentNode?: EntryConfigBaseClass,
   ): EntryConfigBaseClass {
     return new GeoJsonGroupLayerConfig(layerConfig, language, geoviewConfig, parentNode);
   }
@@ -167,7 +167,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
         toJsonObject({ layerId, layerName: createLocalizedString(layerId) }),
         this.getLanguage(),
         this,
-        parentNode
+        parentNode,
       )!;
 
     // If we cannot find the layerId in the layer definitions, throw an error.
@@ -223,22 +223,25 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    */
   findLayerMetadataEntry(
     layerId: string,
-    listOfLayerEntryConfig = this.getServiceMetadata()?.listOfLayerEntryConfig as TypeJsonArray
+    listOfLayerEntryConfig = this.getServiceMetadata()?.listOfLayerEntryConfig as TypeJsonArray,
   ): TypeJsonObject | null {
     if (listOfLayerEntryConfig === undefined) return null;
-    return listOfLayerEntryConfig.reduce((layerFound, layerEntry) => {
-      if (layerFound) return layerFound;
+    return listOfLayerEntryConfig.reduce(
+      (layerFound, layerEntry) => {
+        if (layerFound) return layerFound;
 
-      if (layerEntry.layerId === layerId) {
-        return layerEntry;
-      }
+        if (layerEntry.layerId === layerId) {
+          return layerEntry;
+        }
 
-      if (layerEntry.isLayerGroup || layerEntry.entryType === CV_CONST_SUB_LAYER_TYPES.GROUP) {
-        return this.findLayerMetadataEntry(layerId, layerEntry.listOfLayerEntryConfig as TypeJsonArray);
-      }
+        if (layerEntry.isLayerGroup || layerEntry.entryType === CV_CONST_SUB_LAYER_TYPES.GROUP) {
+          return this.findLayerMetadataEntry(layerId, layerEntry.listOfLayerEntryConfig as TypeJsonArray);
+        }
 
-      return null;
-    }, null as TypeJsonObject | null);
+        return null;
+      },
+      null as TypeJsonObject | null,
+    );
   }
 
   // #endregion PUBLIC

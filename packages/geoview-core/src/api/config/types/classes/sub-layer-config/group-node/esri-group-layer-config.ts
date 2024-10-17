@@ -72,7 +72,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
 
     if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
       throw new GeoviewLayerConfigError(
-        `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`
+        `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`,
       );
     }
   }
@@ -98,7 +98,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else
       this.initialSettings.extent = validateExtentWhenDefined(
-        Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT)
+        Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT),
       );
 
     if (layerMetadata.defaultVisibility !== undefined) this.initialSettings.states!.visible = layerMetadata.defaultVisibility as boolean;
@@ -133,7 +133,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else
       this.initialSettings.extent = validateExtentWhenDefined(
-        Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT)
+        Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT),
       );
 
     this.initialSettings.states!.queryable = (serviceMetadata?.capabilities as string)?.includes('Query') || false;

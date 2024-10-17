@@ -73,7 +73,7 @@ export default function DataTableModal(): JSX.Element {
         </Box>
       );
     },
-    [sxClasses.tableCell]
+    [sxClasses.tableCell],
   );
 
   /**

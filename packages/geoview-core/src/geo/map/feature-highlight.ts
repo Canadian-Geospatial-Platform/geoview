@@ -221,7 +221,7 @@ export class FeatureHighlight {
     if (!isLayerHighlight)
       this.#bboxTimeout = setTimeout(
         () => this.highlighSource.removeFeature(this.highlighSource.getFeatureById('geoLocatorFeature') as Feature),
-        5000
+        5000,
       );
   }
 

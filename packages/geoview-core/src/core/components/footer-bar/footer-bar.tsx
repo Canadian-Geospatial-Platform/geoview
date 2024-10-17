@@ -84,10 +84,13 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // Log
     logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabKeys', footerBarTabsConfig?.tabs?.core);
 
-    return (footerBarTabsConfig?.tabs?.core ?? []).reduce((acc, curr) => {
-      acc[curr] = {} as Tab;
-      return acc;
-    }, {} as Record<string, Tab>);
+    return (footerBarTabsConfig?.tabs?.core ?? []).reduce(
+      (acc, curr) => {
+        acc[curr] = {} as Tab;
+        return acc;
+      },
+      {} as Record<string, Tab>,
+    );
   }, [footerBarTabsConfig?.tabs?.core]);
 
   // List of Footer Tabs created from config file.
@@ -132,20 +135,23 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // Log
     logger.logTraceUseMemo('FOOTER-BAR - memoResizeValues', footerPanelResizeValue, footerPanelResizeValues);
 
-    return footerPanelResizeValues.reduce((acc, curr) => {
-      const windowHeight = window.screen.height;
-      let tabHeight = windowHeight - (windowHeight * footerPanelResizeValue) / 100;
+    return footerPanelResizeValues.reduce(
+      (acc, curr) => {
+        const windowHeight = window.screen.height;
+        let tabHeight = windowHeight - (windowHeight * footerPanelResizeValue) / 100;
 
-      if (curr === footerPanelResizeValues[0]) {
-        tabHeight = (windowHeight * footerPanelResizeValue) / 100;
-      }
-      if (curr === footerPanelResizeValues[footerPanelResizeValues.length - 1]) {
-        tabHeight = windowHeight;
-      }
+        if (curr === footerPanelResizeValues[0]) {
+          tabHeight = (windowHeight * footerPanelResizeValue) / 100;
+        }
+        if (curr === footerPanelResizeValues[footerPanelResizeValues.length - 1]) {
+          tabHeight = windowHeight;
+        }
 
-      acc[curr] = tabHeight;
-      return acc;
-    }, {} as Record<number, number>);
+        acc[curr] = tabHeight;
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
   }, [footerPanelResizeValue, footerPanelResizeValues]);
 
   /**
@@ -314,7 +320,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
             constructor,
             toJsonObject({
               mapId,
-            })
+            }),
           ).catch((error) => {
             // Log
             logger.logPromiseFailed('api.plugin.addPlugin(time-slider) in useEffect in FooterBar', error);
@@ -336,7 +342,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
             constructor,
             toJsonObject({
               mapId,
-            })
+            }),
           ).catch((error) => {
             // Log
             logger.logPromiseFailed('api.plugin.addPlugin(geochart) in useEffect in FooterBar', error);

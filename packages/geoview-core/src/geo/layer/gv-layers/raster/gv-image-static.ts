@@ -86,7 +86,7 @@ export class GVImageStatic extends AbstractGVRaster {
 
       let legendUrl: string | undefined = getLocalizedValue(
         layerConfig.source.dataAccessPath,
-        AppEventProcessor.getDisplayLanguage(this.getMapId())
+        AppEventProcessor.getDisplayLanguage(this.getMapId()),
       );
 
       if (legendUrl) {

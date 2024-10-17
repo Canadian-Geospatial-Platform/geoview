@@ -53,7 +53,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       // Set the layer path
       setSelectedLayerPath(layer.layerPath);
     },
-    [setSelectedLayerPath]
+    [setSelectedLayerPath],
   );
 
   /**
@@ -103,7 +103,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           layerFeatures: getFilterInfo(layer.timeSliderLayerInfo),
           tooltip: getLayerTooltip(
             layer.timeSliderLayerInfo,
-            LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath).layerName
+            LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath).layerName,
           ),
           layerStatus: 'loaded',
           queryStatus: 'processed',
@@ -129,7 +129,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         setSelectedLayerPath('');
       }
     },
-    [setSelectedLayerPath]
+    [setSelectedLayerPath],
   );
 
   /**

@@ -253,7 +253,7 @@ export class MapViewer {
           mapViewSettings.initialView?.zoomAndCenter
             ? mapViewSettings.initialView?.zoomAndCenter[1]
             : CV_MAP_CENTER[mapViewSettings.projection],
-          projection
+          projection,
         ),
         zoom: mapViewSettings.initialView?.zoomAndCenter ? mapViewSettings.initialView?.zoomAndCenter[0] : 3.5,
         extent: extentProjected || undefined,
@@ -388,7 +388,7 @@ export class MapViewer {
         lnglat: Projection.transformPoints(
           [(event as MapBrowserEvent<UIEvent>).coordinate],
           projCode,
-          Projection.PROJECTION_NAMES.LNGLAT
+          Projection.PROJECTION_NAMES.LNGLAT,
         )[0],
         dragging: (event as MapBrowserEvent<UIEvent>).dragging,
       };
@@ -421,7 +421,7 @@ export class MapViewer {
         lnglat: Projection.transformPoints(
           [(event as MapBrowserEvent<UIEvent>).coordinate],
           projCode,
-          Projection.PROJECTION_NAMES.LNGLAT
+          Projection.PROJECTION_NAMES.LNGLAT,
         )[0],
         dragging: (event as MapBrowserEvent<UIEvent>).dragging,
       };
@@ -528,7 +528,7 @@ export class MapViewer {
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
           (geoviewLayer) => {
             logger.logTraceDetailed('checkMapReady - 1 - waiting on layer registration...', geoviewLayer.geoviewLayerId);
-          }
+          },
         );
 
         if (allGood) {
@@ -613,7 +613,7 @@ export class MapViewer {
           this.zoomToExtent(this.convertExtentLngLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent), {
             padding: [0, 0, 0, 0],
           }).catch((error) => logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)),
-        200
+        200,
       );
 
     // Zoom to extents of layers selected in config, if provided.
@@ -650,9 +650,9 @@ export class MapViewer {
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             () =>
               this.zoomToExtent(layerExtents).catch((error) =>
-                logger.logPromiseFailed('zoomtToExtent in #checkMapReadyGo in map-viewer', error)
+                logger.logPromiseFailed('zoomtToExtent in #checkMapReadyGo in map-viewer', error),
               ),
-            200
+            200,
           );
         }
       });
@@ -674,7 +674,7 @@ export class MapViewer {
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
           (geoviewLayer) => {
             logger.logTraceDetailed('checkMapReady - 2 - waiting on layer processed...', geoviewLayer.geoviewLayerId);
-          }
+          },
         );
 
         if (allGood) {
@@ -711,7 +711,7 @@ export class MapViewer {
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
           (geoviewLayer) => {
             logger.logTraceDetailed('checkMapReady - 3 - waiting on layer loaded/error status...', geoviewLayer.geoviewLayerId);
-          }
+          },
         );
 
         if (allGood) {
@@ -996,7 +996,7 @@ export class MapViewer {
       ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], viewOptions.projection)
       : Projection.transformFromLonLat(
           Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
-          viewOptions.projection
+          viewOptions.projection,
         );
     viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
     viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
@@ -1265,7 +1265,7 @@ export class MapViewer {
     const projectedExtent = Projection.transformExtent(
       fullExtent,
       Projection.PROJECTION_NAMES.LNGLAT,
-      `EPSG:${this.getMapState().currentProjection}`
+      `EPSG:${this.getMapState().currentProjection}`,
     );
     return MapEventProcessor.zoomToExtent(this.mapId, projectedExtent, options);
   }

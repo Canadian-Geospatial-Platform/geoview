@@ -247,7 +247,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   async getFeatureInfo(
     queryType: QueryType,
     layerPath: string,
-    location: TypeLocation = null
+    location: TypeLocation = null,
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
     try {
@@ -510,7 +510,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   protected async formatFeatureInfoResult(
     features: Feature[],
-    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig
+    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig,
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       if (!features.length) return [];
@@ -548,7 +548,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
               layerConfig.filterEquation,
               layerConfig.legendFilterIsOff,
               true,
-              callbackToFetchDataUrl
+              callbackToFetchDataUrl,
             )
               .then((canvas) => {
                 resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
@@ -557,10 +557,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
                 // Log
                 logger.logPromiseFailed(
                   'getFeatureCanvas in featureNeedingItsCanvas loop in formatFeatureInfoResult in AbstractGVLayer',
-                  error
+                  error,
                 );
               });
-          })
+          }),
         );
       });
 
