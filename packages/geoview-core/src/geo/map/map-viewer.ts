@@ -590,7 +590,6 @@ export class MapViewer {
       }
     };
     mapHTMLElement.addEventListener('wheel', myScrollIntoViewEvent);
-    // mapHTMLElement.addEventListener('click', myScrollIntoViewEvent);
 
     // Start checking for layers result sets to be ready
     this.#checkLayerResultSetReady().catch((error) => {

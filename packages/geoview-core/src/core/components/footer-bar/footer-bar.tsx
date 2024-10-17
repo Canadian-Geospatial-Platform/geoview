@@ -355,11 +355,12 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     logger.logTraceUseEffect('FOOTER BAR - scrollIntoViewListener');
 
     if (tabsContainerRef && tabsContainerRef.current) {
-      tabsContainerRef.current.addEventListener('click', () => {
+      const header = tabsContainerRef.current.querySelector('#footerbar-header');
+      header?.addEventListener('click', () => {
         // Register mouse interaction events (click). If element not in viewport, scroll the footer into view
         if (!isElementInViewport(tabsContainerRef.current!)) {
           const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
-          tabsContainerRef.current?.scrollIntoView({ behavior: behaviorScroll as ScrollBehavior, block: 'end' });
+          tabsContainerRef.current?.scrollIntoView({ behavior: behaviorScroll as ScrollBehavior, block: 'center' });
         }
       });
     }

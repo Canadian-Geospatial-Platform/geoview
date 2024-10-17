@@ -163,17 +163,17 @@ Click on the **Download** button at the bottom to get the final generated map im
 =1!footerPanel=
 
 # Footer Bar
-
+<a id="footerSection"></a>
 The _Footer Bar_ appears below the map. The _Footer Bar_ can be expanded or collapsed by clicking on a tab in the _Footer Bar_ menu bar. To collapse the panel, simply click again on the active tab.
 
 The _Footer Bar_ menu bar has the following tabs:
 
-- Legend
-- Layers
-- Details
-- Data Table
-- Time Slider
-- Chart
+- [Legend](#legendSection)
+- [Layers](#layersSection)
+- [Details](#detailsSection)
+- [Data Table](#dataTableSection)
+- [Time Slider](#timeSliderSection)
+- [Chart](#chartSection)
 - Guide
 
 _Depending on viewer configuration some tabs may not be available_
@@ -182,8 +182,8 @@ _Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, 
 
 <br>
 =2!legend=
-
-### ![]({{assetsURL}}/img/guide/sidebar/legend_25.svg) Legend
+<a id="legendSection"></a>
+### ![]({{assetsURL}}/img/guide/sidebar/legend_25.svg) Legend [Top](#footerSection)
 
 The _Legend_ tab displays the symbology associated with the layers displayed on the map.
 
@@ -195,8 +195,8 @@ The symbology for the layer can be toggled open and closed which is expanded ben
 
 <br>
 =2!layers=
-
-### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Layers
+<a id="layersSection"></a>
+### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Layers [Top](#footerSection)
 
 The _Layers_ tab has the following submenu options:
 
@@ -294,8 +294,8 @@ To remove a layer, click on the delete icon ![]({{assetsURL}}/img/guide/layers/r
 
 <br>
 =2!details=
-
-### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Details
+<a id="detailsSection"></a>
+### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Details [Top](#footerSection)
 
 The **Details** tab has two sections. The available layers for the map are listed in the left section, and the feature details for each layer are displayed in the right section.
 
@@ -313,8 +313,8 @@ Check the highlight box ![]({{assetsURL}}/img/guide/layers/check.png) to keep th
 
 <br>
 =2!dataTable=
-
-### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Data Table
+<a id="dataTableSection"></a>
+### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Data Table [Top](#footerSection)
 
 The **Data Table** tab has two sections. The layers are listed on the left and the layer data on the right. Click on a layer to show the layer data in the table on the right.
 
@@ -326,6 +326,7 @@ _Note: Some options may not be available or are preselected depending on various
 
 | Symbol                                                        | Name            | Description                                                                                                                               |
 | ------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="{{assetsURL}}/img/guide/datatable/filters_clear.svg" width="30"/> | Clear Filters | Clear all data table filters                                                                                                            |
 | <img src="{{assetsURL}}/img/guide/datatable/filter_toggle.svg" width="30"/> | Display Filters | Toggle to show or hide filters                                                                                                            |
 | <img src="{{assetsURL}}/img/guide/datatable/filter.png" width="30"/>        | Filter switch   | Apply filters to the map                                                                                                                  |
 | <img src="{{assetsURL}}/img/guide/datatable/column_show.svg" width="30"/>   | Display Columns | Allows you to choose which columns you want visible and to pin columns to the left or right of the table                                  |
@@ -394,8 +395,8 @@ To access the buttons and/or input fields within a cell, make sure the cell is h
 
 <br>
 =2!timeSlider=
-
-### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Time Slider
+<a id="timeSliderSection"></a>
+### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Time Slider [Top](#footerSection)
 
 The Time Slider tab on the Footer Bar has two sections. Layers with a time dimension are listed in the left section. Click on a layer to display its Time Slider in the right section:
 
@@ -415,8 +416,8 @@ The field being filtered on is displayed in the lower left of the Time Slider se
 
 <br>
 =2!chart=
-
-### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Chart
+<a id="chartSection"></a>
+### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Chart [Top](#footerSection)
 
 The Chart tab on the Footer Bar has two sections. Layers with a chart are listed in the left section. Select a feature on the map to display its chart in the right section.
 
