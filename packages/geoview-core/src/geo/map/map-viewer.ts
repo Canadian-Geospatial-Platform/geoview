@@ -581,7 +581,7 @@ export class MapViewer {
       mapHTMLElement.blur();
     });
 
-    // Register mouse interaction events (wheel or click). If element not in viewport, scroll the map into view
+    // Register mouse interaction events (wheel). If element not in viewport, scroll the map into view
     const myScrollIntoViewEvent = (): void => {
       if (!isElementInViewport(mapHTMLElement)) {
         const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
