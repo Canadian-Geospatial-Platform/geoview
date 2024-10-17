@@ -38,6 +38,7 @@ type SliderProps = {
   track?: 'inverted' | 'normal' | false;
   ariaLabelledby?: string;
   valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
+  valueLabelDisplay?: 'auto' | 'on';
 
   // optional map id to link the slider to
   // TODO: Refactor - No mapId inside a ui component in ui folder.
@@ -51,11 +52,22 @@ type SliderProps = {
  * @returns {JSX.Element} the created Slider element
  */
 export function Slider(props: SliderProps): JSX.Element {
-  const { value: parentValue, min, max, onChange, onChangeCommitted, onValueLabelFormat, onValueDisplayAriaLabel, ...properties } = props;
+  const {
+    value: parentValue,
+    min,
+    max,
+    valueLabelDisplay,
+    onChange,
+    onChangeCommitted,
+    onValueLabelFormat,
+    onValueDisplayAriaLabel,
+    ...properties
+  } = props;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   const containerId = `${properties.mapId}-${properties?.sliderId ?? generateId()}` || '';
+  const valueLabelDisplayOption = valueLabelDisplay === undefined ? 'on' : 'auto';
 
   // internal state
   const [value, setValue] = useState<number[] | number>(parentValue);
@@ -196,7 +208,7 @@ export function Slider(props: SliderProps): JSX.Element {
       min={min}
       max={max}
       disableSwap
-      valueLabelDisplay="on"
+      valueLabelDisplay={valueLabelDisplayOption}
       valueLabelFormat={onValueLabelFormat}
       getAriaLabel={(): string => 'To implement with translation'}
       getAriaValueText={onValueDisplayAriaLabel}

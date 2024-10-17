@@ -97,6 +97,7 @@ export class API {
 
     // Add event listener for when tab pressed
     document.addEventListener('keyup', (e: KeyboardEvent) => {
+      console.log(document.activeElement);
       if (e.key !== 'Tab') return;
 
       // get array of map elements
