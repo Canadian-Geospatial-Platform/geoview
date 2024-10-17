@@ -1,0 +1,169 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Empty GeoJson Layer - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Empty GeoJSON Layer</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/></td></tr><tr><td><p>This page is used to show injecting geojson features into an existing layers</p></td></tr></tbody></table></div><div id="LYR1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857,
+            'maxExtent': [-170, -90, 170, 90]
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'geojsonLYR1',
+              'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+              'geoviewLayerType': 'GeoJSON',
+              'metadataAccessPath': { 'en': './datasets/geojson/metadata-blank.json' },
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'blank.json'
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'overviewMap': {'hideOnZoom': 7},
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+        }"></div><hr/><div><h3>API Functions:</h3><ul><li><button id="Add-points1">Place points set 1</button><br/>cgpv.api.maps.LYR1.layer.getGeoviewLayer('geojsonLYR1/blank.json').overrideGeojsonSource('geojsonLYR1/blank.json', points1)</li><li><button id="Add-points2">Place points set 2</button><br/>cgpv.api.maps.LYR1.layer.getGeoviewLayer('geojsonLYR1/blank.json').overrideGeojsonSource('geojsonLYR1/blank.json', points2)</li><li><button id="Add-points3">Place points set 3</button><br/>cgpv.api.maps.LYR1.layer.getGeoviewLayer('geojsonLYR1/blank.json').overrideGeojsonSource('geojsonLYR1/blank.json', points3)</li></ul></div><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {});
+
+      // Add points 1 button ====================================================================================
+      // find the button element by ID
+      var addPoints1Button = document.getElementById('Add-points1');
+
+      const points1 = {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {
+              Red: 92,
+              Green:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              Blue: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              Yellow:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              Orange: 75,
+              creationDate: '15/02/2022T05:00:00-05:00',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-120, 57],
+            },
+          },
+          {
+            type: 'Feature',
+            properties: {
+              Red: 553,
+              Green: 54,
+              Blue: 32.3,
+              Yellow: 5.43,
+              Orange: 55,
+              creationDate: '07/01/2020T12:00:00-05:00',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-117, 65],
+            },
+          },
+          {
+            type: 'Feature',
+            properties: {
+              Red: 255,
+              Green: 255,
+              Blue: 32.3,
+              Yellow: 5.43,
+              Orange: 55,
+              creationDate: '15/02/2019T17:00:00-05:00',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-83, 54],
+            },
+          },
+        ],
+      };
+      // add an event listener when a button is clicked
+      addPoints1Button.addEventListener('click', () => {
+        cgpv.api.maps.LYR1.layer.getGeoviewLayer('geojsonLYR1/blank.json').overrideGeojsonSource('geojsonLYR1/blank.json', points1);
+      });
+
+      // Add points 2 button ====================================================================================
+      // find the button element by ID
+      var addPoints2Button = document.getElementById('Add-points2');
+
+      const points2 =
+        '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"data":"92;43.54;12.3;66;75","label":"Red;Green;Blue;Yellow;Orange","creationDate":"14/01/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-141,52]}},{"type":"Feature","properties":{"data":"92;43.54;12.3;66;75","label":"Red;Green;Blue;Yellow;Orange","creationDate":"16/02/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-141,83]}},{"type":"Feature","properties":{"data":"553;54;32;5.43;55","label":"Red;Green;Blue;Yellow;Orange;","creationDate":"19/08/2022T14:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-53,83]}},{"type":"Feature","properties":{"data":"255;255;255;5.43;55","label":"Red;Green;Blue;Yellow;Orange;","creationDate":"30/10/2022T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-53,49]}},{"type":"Feature","properties":{"Red":92,"Green":"1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Blue":"2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Yellow":"3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Orange":75,"creationDate":"15/02/2022T05:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-100,57]}},{"type":"Feature","properties":{"Red":553,"Green":54,"Blue":32.3,"Yellow":5.43,"Orange":55,"creationDate":"07/01/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-113,55]}},{"type":"Feature","properties":{"Red":255,"Green":255,"Blue":32.3,"Yellow":5.43,"Orange":55,"creationDate":"15/02/2019T17:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-103,54]}}]}';
+
+      // add an event listener when a button is clicked
+      addPoints2Button.addEventListener('click', () => {
+        cgpv.api.maps.LYR1.layer.getGeoviewLayer('geojsonLYR1/blank.json').overrideGeojsonSource('geojsonLYR1/blank.json', points2);
+      });
+
+      // Add points 3 button ====================================================================================
+      // find the button element by ID
+      var addPoints3Button = document.getElementById('Add-points3');
+
+      const points3 = {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {
+              Red: 92,
+              Green: 40,
+              Blue: 86,
+              Yellow: 22,
+              Orange: 75,
+              creationDate: '15/02/2022T05:00:00-05:00',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-95, 49],
+            },
+          },
+          {
+            type: 'Feature',
+            properties: {
+              Red: 553,
+              Green: 54,
+              Blue: 32.3,
+              Yellow: 5.43,
+              Orange: 55,
+              creationDate: '07/01/2020T12:00:00-05:00',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-135, 60],
+            },
+          },
+          {
+            type: 'Feature',
+            properties: {
+              Red: 255,
+              Green: 255,
+              Blue: 32.3,
+              Yellow: 5.43,
+              Orange: 55,
+              creationDate: '15/02/2019T17:00:00-05:00',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-125, 49.5],
+            },
+          },
+        ],
+      };
+      // add an event listener when a button is clicked
+      addPoints3Button.addEventListener('click', () => {
+        cgpv.api.maps.LYR1.layer.getGeoviewLayer('geojsonLYR1/blank.json').overrideGeojsonSource('geojsonLYR1/blank.json', points3);
+      });</script></body></html>

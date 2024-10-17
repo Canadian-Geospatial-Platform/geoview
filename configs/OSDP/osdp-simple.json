@@ -1,0 +1,23 @@
+{
+  "map": {
+    "interaction": "static",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": []
+  },
+  "components": [],
+  "navBar": [],
+  "appBar": {
+    "tabs": {
+      "core": []
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

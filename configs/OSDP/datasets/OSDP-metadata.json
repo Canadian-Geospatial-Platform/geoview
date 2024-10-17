@@ -1,0 +1,36 @@
+{
+  "schemaVersionUsed": "1,0",
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "BC-MPI-1-2521_fr.json",
+      "layerName": { "en": "BC-MPI-1-2521_fr - Metadata" },
+      "source": {
+        "featureInfo": {
+          "queryable": true,
+          "nameField": { "en": "Titre", "fr": "Titre" },
+          "outfields": { "en": "Titre", "fr": "Titre" },
+          "fieldTypes": "string",
+          "aliasFields": { "en": "Title", "fr": "Titre" }
+        }
+      },
+      "style": {
+        "Polygon": {
+          "styleType": "simple",
+          "label": "LineString label",
+          "settings": {
+            "type": "filledPolygon",
+            "color": "rgba(0,0,255,0.5)",
+            "paternSize": 10,
+            "paternWidth": 2,
+            "fillStyle": "diagonalCross",
+            "stroke": {
+              "color": "rgba(128,0,0,1)",
+              "lineStyle": "dot"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

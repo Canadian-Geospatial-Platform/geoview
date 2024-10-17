@@ -1,0 +1,506 @@
+{
+  "schemaVersionUsed": "1,0",
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "polygons.json",
+      "layerName": "Polygons",
+      "geometryType": "polygon",
+      "source": {
+        "featureInfo": {
+          "queryable": true,
+          "nameField": "Province",
+          "outfields": [
+            {
+              "name": "Province",
+              "alias": "Province",
+              "type": "string",
+              "domain": null
+            },
+            {
+              "name": "creationDate",
+              "alias": "Creation Date",
+              "type": "date",
+              "domain": null
+            },
+            {
+              "name": "myImages",
+              "alias": "myImages",
+              "type": "string",
+              "domain": null
+            }
+          ]
+        }
+      },
+      "style": {
+        "type": "uniqueValue",
+        "fields": ["Province"],
+        "hasDefault": true,
+        "info": [
+          {
+            "label": "Quebec",
+            "visible": true,
+            "values": ["Quebec"],
+            "settings": {
+              "type": "filledPolygon",
+              "color": "rgba(0,128,128,0.5)",
+              "paternSize": 10,
+              "paternWidth": 2,
+              "fillStyle": "diagonalCross",
+              "stroke": {
+                "color": "rgba(128,128,0,1)",
+                "lineStyle": "dot"
+              }
+            }
+          },
+          {
+            "label": "Alberta",
+            "visible": false,
+            "values": ["Alberta"],
+            "settings": {
+              "type": "filledPolygon",
+              "color": "rgba(255,0,255,0.5)",
+              "paternSize": 10,
+              "paternWidth": 2,
+              "fillStyle": "diagonalCross",
+              "stroke": {
+                "color": "rgba(128,0,128,1)",
+                "lineStyle": "dot"
+              }
+            }
+          },
+          {
+            "label": "Other provinces",
+            "visible": true,
+            "values": ["Other provinces"],
+            "settings": {
+              "type": "filledPolygon",
+              "color": "rgba(0,0,255,0.5)",
+              "paternSize": 10,
+              "paternWidth": 2,
+              "fillStyle": "diagonalCross",
+              "stroke": {
+                "color": "rgba(128,0,0,1)",
+                "lineStyle": "dot"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "layerId": "multipolygons.geojson",
+      "layerName": "MultiPolygons",
+      "geometryType": "polygon",
+      "source": {
+        "featureInfo": {
+          "queryable": true,
+          "nameField": "Province",
+          "outfields": [
+            {
+              "name": "Province",
+              "alias": "Province",
+              "type": "string",
+              "domain": null
+            },
+            {
+              "name": "creationDate",
+              "alias": "Creation Date",
+              "type": "date",
+              "domain": null
+            }
+          ]
+        }
+      },
+      "style": {
+        "type": "uniqueValue",
+        "fields": ["Province"],
+        "hasDefault": true,
+        "info": [
+          {
+            "label": "Multiple provinces",
+            "visible": true,
+            "values": ["Other provinces"],
+            "settings": {
+              "type": "filledPolygon",
+              "color": "rgba(0,0,255,0.5)",
+              "paternSize": 10,
+              "paternWidth": 2,
+              "stroke": {
+                "color": "rgba(128,0,0,1)",
+                "lineStyle": "dot"
+              }
+            }
+          },
+          {
+            "label": "Default",
+            "visible": true,
+            "values": ["Default"],
+            "settings": {
+              "type": "filledPolygon",
+              "color": "rgba(0,0,255,0.5)",
+              "paternSize": 10,
+              "paternWidth": 2,
+              "fillStyle": "diagonalCross",
+              "stroke": {
+                "color": "rgba(0,0,128,1)",
+                "lineStyle": "dot"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "layerId": "lines.json",
+      "layerName": "Roads",
+      "geometryType": "linestring",
+      "source": {
+        "featureInfo": {
+          "queryable": true,
+          "nameField": "Road_Number",
+          "outfields": [
+            {
+              "name": "Road_Number",
+              "alias": "Road Number",
+              "type": "number",
+              "domain": null
+            },
+            {
+              "name": "Province",
+              "alias": "Province Number",
+              "type": "string",
+              "domain": null
+            },
+            {
+              "name": "creationDate",
+              "alias": "Creation Date",
+              "type": "date",
+              "domain": null
+            }
+          ]
+        }
+      },
+      "style": {
+        "type": "simple",
+        "fields": ["LineString label"],
+        "info": [
+          {
+            "settings": {
+              "type": "lineString",
+              "stroke": {
+                "lineStyle": "shortDash-dot-dot",
+                "color": "rgba(128,0,0,1)"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "layerId": "pointGroup1",
+      "layerName": "Point Group 1",
+      "bounds": [77, 47, 66, 55],
+      "isLayerGroup": true,
+      "listOfLayerEntryConfig": [
+        {
+          "layerId": "icon_points.json",
+          "layerName": "Icons",
+          "geometryType": "point",
+          "source": {
+            "featureInfo": {
+              "queryable": true,
+              "nameField": "data",
+              "outfields": [
+                {
+                  "name": "data",
+                  "alias": "data",
+                  "type": "string",
+                  "domain": null
+                },
+                {
+                  "name": "label",
+                  "alias": "label",
+                  "type": "string",
+                  "domain": null
+                },
+                {
+                  "name": "creationDate",
+                  "alias": "Creation Date",
+                  "type": "date",
+                  "domain": null
+                }
+              ]
+            }
+          },
+          "style": {
+            "type": "simple",
+            "fields": ["Icon point label"],
+            "info": [
+              {
+                "settings": {
+                  "type": "iconSymbol",
+                  "mimeType": "image/png",
+                  "src": "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAcNJREFUKJFjYSATsCBz/v//z/Tp8+fwO/cf273/+FmckZHxn6iQwBMVJbldXJyc27Bq/P//v8jVm3cmtUxf7rX+3nN+ZEVJ+srhd+8/3KikIFfMyMj4Fa7x////zBeu3JjuXDM55Ou//xjOmnfxrsS+8t7Uze1FLAwMDClwjU+fv0irmLzYH5smGHjw/TdTz7yVIe/ef9wiJMi/gYWBgYHhxp2HXgeev2dFVtjhb8Pw7dtPhqbdp+FiCy894E+4cz+IgYEBovHDp88qyJpmxngwxIf5wfnImt+9f68Ed+rff3/ZkTVycnDA2dxcHMhSDH/+/WeHa+Tm5HzJwMCgCJMsW7SZgYmZkeHHj18M5RsPo2jk4eJ+DdcoKSZyQoeX0+LK5+8MDAwMDC9+/WWImbkeI4D85MUZJMWED8A1qirKVjUlBvgETVqugqEa5mQmRoacKO9zWurKPXCNfHx8389evha5Njd8bfPCLXIXPn1F0eQgLshQGut7XUREOJCRkfEfXCMDAwODsa7WmQOnT+t150VMevn6ne33bz+kGBgZ/3FzcTyUEBXZxcb4p0RbTek3TD1KWnUwNf3IwMAQj8u5yAAAupehfivnXOEAAAAASUVORK5CYII=",
+                  "opacity": 0.5
+                }
+              }
+            ]
+          }
+        },
+        {
+          "layerId": "points.json",
+          "layerName": "Points",
+          "geometryType": "point",
+          "source": {
+            "featureInfo": {
+              "queryable": false,
+              "nameField": "Red",
+              "outfields": [
+                {
+                  "name": "Red",
+                  "alias": "Red",
+                  "type": "number",
+                  "domain": null
+                },
+                {
+                  "name": "Green",
+                  "alias": "Green",
+                  "type": "number",
+                  "domain": null
+                },
+                {
+                  "name": "Blue",
+                  "alias": "Blue",
+                  "type": "number",
+                  "domain": null
+                },
+                {
+                  "name": "Yellow",
+                  "alias": "Yellow",
+                  "type": "number",
+                  "domain": null
+                },
+                {
+                  "name": "Orange",
+                  "alias": "Orange",
+                  "type": "number",
+                  "domain": null
+                },
+                {
+                  "name": "creationDate",
+                  "alias": "Creation Date",
+                  "type": "date",
+                  "domain": null
+                }
+              ]
+            }
+          },
+          "style": {
+            "type": "simple",
+            "fields": ["Point label"],
+            "info": [
+              {
+                "settings": {
+                  "type": "simpleSymbol",
+                  "symbol": "star"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "layerId": "pointGroup2",
+          "layerName": "Point Group 2",
+          "isLayerGroup": true,
+          "listOfLayerEntryConfig": [
+            {
+              "layerId": "points_1.json",
+              "layerName": "Points 1",
+              "geometryType": "point",
+              "source": {
+                "featureInfo": {
+                  "queryable": false,
+                  "nameField": "Red",
+                  "outfields": [
+                    {
+                      "name": "Red",
+                      "alias": "Red",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Green",
+                      "alias": "Green",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Blue",
+                      "alias": "Blue",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Yellow",
+                      "alias": "Yellow",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Orange",
+                      "alias": "Orange",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "creationDate",
+                      "alias": "Creation Date",
+                      "type": "date",
+                      "domain": null
+                    }
+                  ]
+                }
+              },
+              "style": {
+                "type": "simple",
+                "fields": ["Point label"],
+                "info": [
+                  {
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "symbol": "star"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "layerId": "points_2.json",
+              "layerName": "Points 2",
+              "geometryType": "point",
+              "source": {
+                "featureInfo": {
+                  "queryable": false,
+                  "nameField": "Red",
+                  "outfields": [
+                    {
+                      "name": "Red",
+                      "alias": "Red",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Green",
+                      "alias": "Green",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Blue",
+                      "alias": "Blue",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Yellow",
+                      "alias": "Yellow",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Orange",
+                      "alias": "Orange",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "creationDate",
+                      "alias": "Creation Date",
+                      "type": "date",
+                      "domain": null
+                    }
+                  ]
+                }
+              },
+              "style": {
+                "type": "simple",
+                "fields": ["Point label"],
+                "info": [
+                  {
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "symbol": "star"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "layerId": "points_3.json",
+              "layerName": "Points 3",
+              "geometryType": "point",
+              "source": {
+                "featureInfo": {
+                  "queryable": false,
+                  "nameField": "Red",
+                  "outfields": [
+                    {
+                      "name": "Red",
+                      "alias": "Red",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Green",
+                      "alias": "Green",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Blue",
+                      "alias": "Blue",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Yellow",
+                      "alias": "Yellow",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "Orange",
+                      "alias": "Orange",
+                      "type": "number",
+                      "domain": null
+                    },
+                    {
+                      "name": "creationDate",
+                      "alias": "Creation Date",
+                      "type": "date",
+                      "domain": null
+                    }
+                  ]
+                }
+              },
+              "style": {
+                "type": "simple",
+                "fields": ["Point label"],
+                "info": [
+                  {
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "symbol": "star"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
