@@ -192,6 +192,16 @@ export abstract class DateMgt {
   }
 
   /**
+   * Convert a date local to a UTC date
+   * @param {Date | string} date date to use
+   * @returns {string} UTC date or empty string if invalid date (when field value is null)
+   */
+  static convertToUTC(date: Date | string): string {
+    // check if it is a valid date and if so, return ISO string
+    return typeof date === 'string' && !isValidDate(date) ? '' : dayjs(date).utc(false).format();
+  }
+
+  /**
    * Format a date to specific format like 'YYYY-MM-DD'
    * @param {Date | string} date date to use
    * @param {string} format format of the date.
@@ -205,23 +215,13 @@ export abstract class DateMgt {
   }
 
   /**
-   * Convert a date local to a UTC date
-   * @param {Date | string} date date to use
-   * @returns {string} UTC date or empty string if invalid date (when field value is null)
-   */
-  static convertToUTC(date: Date | string): string {
-    // check if it is a valid date and if so, return ISO string
-    return typeof date === 'string' && !isValidDate(date) ? '' : dayjs(date).utc(false).format();
-  }
-
-  /**
    * Format a date to a pattern
    * @param {Date | string} date date to use
    * @param {DatePrecision} datePattern the date precision pattern to use
    * @param {TimePrecision}timePattern the time precision pattern to use
    * @returns {string} formatted date
    */
-  static format(date: Date | string, datePattern: DatePrecision, timePattern?: TimePrecision): string {
+  static formatDateToISO(date: Date | string, datePattern: DatePrecision, timePattern?: TimePrecision): string {
     // check if it is a valid date
     if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (format)`);
 
@@ -230,6 +230,25 @@ export abstract class DateMgt {
 
     // output as local by default
     return dayjs(date).utc(false).format(pattern);
+  }
+
+  static guessAndFormatDateToISO(date: Date | number | string, dateMin: Date | string | number, dateMax: Date | string | number): string {
+    // check if it is a valid date
+    if (typeof dateMin === 'string' && !isValidDate(dateMin)) throw new Error(`${INVALID_DATE} (format)`);
+    if (typeof dateMax === 'string' && !isValidDate(dateMax)) throw new Error(`${INVALID_DATE} (format)`);
+
+    const dateMinMilliseconds = typeof dateMin !== 'number' ? DateMgt.convertToMilliseconds(dateMin) : dateMin;
+    const dateMaxilliseconds = typeof dateMax !== 'number' ? DateMgt.convertToMilliseconds(dateMax) : dateMax;
+    const timeDelta = dateMaxilliseconds - dateMinMilliseconds;
+
+    // If the delta between min and max is lower then a day, set time pattern.
+    const validDate = typeof date === 'number' ? DateMgt.convertMilisecondsToDate(date) : date;
+    const formatedDate =
+      timeDelta > 86400000
+        ? DateMgt.formatDateToISO(validDate, 'day')
+        : DateMgt.formatDateToISO(DateMgt.convertToLocal(DateMgt.convertToUTC(validDate)), 'day', 'minute');
+
+    return formatedDate.replace('T', ' ').split('+')[0];
   }
 
   /**
