@@ -73,8 +73,6 @@ export {
   Menu as MenuIcon,
   MoreHoriz as MoreHorizIcon,
   MoreVert as MoreVertIcon,
-  MoveDownRounded as MoveDownRoundedIcon,
-  MoveUpRounded as MoveUpRoundedIcon,
   Opacity as OpacityIcon,
   OpenInBrowser as OpenInBrowserIcon,
   Pause as PauseIcon,

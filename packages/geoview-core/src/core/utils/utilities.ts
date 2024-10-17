@@ -560,3 +560,19 @@ export function handleEscapeKey(key: string, callbackId: string, isFocusTrapped?
     cb?.();
   }
 }
+
+/**
+ * Check if elemetn is in viewport
+ * @param {Element} el - The element to check for
+ * @returns {Boolean} true if visible, false otherwise
+ */
+export function isElementInViewport(el: Element): boolean {
+  const rect = el.getBoundingClientRect();
+
+  return (
+    rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
+}
