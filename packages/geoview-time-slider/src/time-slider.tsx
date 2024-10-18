@@ -373,8 +373,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   return (
     <Grid>
-      <div>
-        <Grid container sx={sxClasses.rightPanelBtnHolder}>
+      <Box sx={{ padding: '0px 10px' }}>
+        <Grid container sx={{ ...sxClasses.rightPanelBtnHolder, flexWrap: 'nowrap' }}>
           <Grid item xs={9}>
             <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
               {`${title || name}`}
@@ -383,7 +383,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             </Typography>
           </Grid>
           <Grid item xs={3}>
-            <div style={{ textAlign: 'right', marginRight: '25px' }}>
+            <Box sx={{ textAlign: 'right', marginRight: '25px' }}>
               <Tooltip
                 title={
                   filtering
@@ -395,11 +395,11 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               >
                 <Checkbox checked={filtering} onChange={(event: never, child: boolean): void => handleCheckbox(child)} />
               </Tooltip>
-            </div>
+            </Box>
           </Grid>
         </Grid>
         <Grid item xs={12}>
-          <div style={{ textAlign: 'center', paddingTop: '20px' }}>
+          <Box sx={{ textAlign: 'center', paddingTop: '20px' }}>
             <Slider
               key={values[1] ? values[1] + values[0] : values[0]}
               sliderId={layerPath}
@@ -413,10 +413,10 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               onChangeCommitted={handleSliderChange}
               onValueLabelFormat={handleLabelFormat}
             />
-          </div>
+          </Box>
         </Grid>
         <Grid item xs={12}>
-          <div style={{ textAlign: 'center', paddingTop: '20px' }}>
+          <Box sx={{ textAlign: 'center', paddingTop: '20px' }}>
             {!singleHandle && (
               <IconButton
                 className="buttonOutline"
@@ -496,7 +496,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                 </NativeSelect>
               </FormControl>
             </Box>
-          </div>
+          </Box>
         </Grid>
         {description && (
           <Grid item xs={12}>
@@ -512,7 +512,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             </Typography>
           </Grid>
         )}
-      </div>
+      </Box>
     </Grid>
   );
 }
