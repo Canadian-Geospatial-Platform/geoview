@@ -37,16 +37,21 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
    * @returns {Extent | undefined} The OpenLayer projection
    */
   getMetadataExtent(): Extent | undefined {
-    // TODO: Layers refactoring. Johann: This should be converted to geoview schema in config
+    // Get the layer metadata precisely
+    const extent = this.getLayerConfig().getLayerMetadata()?.extent;
+
+    // If found
+    if (extent) {
+      return [extent.xmin, extent.ymin, extent.xmax, extent.ymax] as Extent;
+    }
+
+    // Here, we couldn't find the layer metadata, so we use the layer parent definition metadata
     const metadata = this.getLayerConfig().getServiceMetadata();
     if (metadata?.fullExtent) {
-      return [
-        metadata?.fullExtent.xmin as number,
-        metadata?.fullExtent.ymin as number,
-        metadata?.fullExtent.xmax as number,
-        metadata?.fullExtent.ymax as number,
-      ] as Extent;
+      return [metadata?.fullExtent.xmin, metadata?.fullExtent.ymin, metadata?.fullExtent.xmax, metadata?.fullExtent.ymax] as Extent;
     }
+
+    // No layer metadata extent could be found
     return undefined;
   }
 }

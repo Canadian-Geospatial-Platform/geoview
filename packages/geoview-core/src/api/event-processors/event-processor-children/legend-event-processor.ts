@@ -51,7 +51,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Get a specific state.
+   * Gets a specific state.
    * @param {string} mapId - The mapId
    * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'} state - The state to get
    * @returns {string | boolean | null | undefined} The requested state
@@ -64,7 +64,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Get a legend layer.
+   * Gets a legend layer.
    * @param {string} mapId - The mapId
    * @param {string} layerPath - The path of the layer to get
    * @returns {TypeLegendLayer | undefined} The requested legend layer
@@ -76,8 +76,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets the layer bounds for a layer path
-   * @param mapId - The map id
-   * @param layerPath - The layer path
+   * @param {string} mapId - The map id
+   * @param {string} layerPath - The layer path
    * @returns {Extent | undefined} The extent of the layer at the given path
    */
   static getLayerBounds(mapId: string, layerPath: string): Extent | undefined {
@@ -108,10 +108,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets the layer bounds for a layer path
-   * @param mapId - The map id
-   * @param layerPath - The layer path
-   * @returns {Extent | undefined} The extent of the layer at the given path
+   * Sets the layer bounds for a layer path
+   * @param {string} mapId - The map id
+   * @param {string} layerPath - The layer path
+   * @param {Extent | undefined} bounds - The extent of the layer at the given path
    */
   static setLayerBounds(mapId: string, layerPath: string, bounds: Extent): void {
     // Find the layer for the given layer path
@@ -127,7 +127,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Get the extent of a feature or group of features
+   * Gets the extent of a feature or group of features
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path
    * @param {string[]} objectIds - The IDs of features to get extents from.

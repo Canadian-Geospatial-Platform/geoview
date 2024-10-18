@@ -59,15 +59,26 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * Gets the metadata extent, if any.
    * @returns {Extent | undefined} The OpenLayer projection
    */
-  getMetadataExtent(): Extent | undefined {
+  getMetadataExtent(layerPath: string): Extent | undefined {
+    // Get the layer metadata precisely
+    const { extent } = this.getLayerMetadata(layerPath);
+
+    // If found
+    if (extent) {
+      return [extent.xmin, extent.ymin, extent.xmax, extent.ymax] as Extent;
+    }
+
+    // Here, we couldn't find the layer metadata, so we use the layer parent definition metadata
     if (this.metadata?.fullExtent) {
       return [
-        this.metadata?.fullExtent.xmin as number,
-        this.metadata?.fullExtent.ymin as number,
-        this.metadata?.fullExtent.xmax as number,
-        this.metadata?.fullExtent.ymax as number,
+        this.metadata?.fullExtent.xmin,
+        this.metadata?.fullExtent.ymin,
+        this.metadata?.fullExtent.xmax,
+        this.metadata?.fullExtent.ymax,
       ] as Extent;
     }
+
+    // No layer metadata extent could be found
     return undefined;
   }
 }
