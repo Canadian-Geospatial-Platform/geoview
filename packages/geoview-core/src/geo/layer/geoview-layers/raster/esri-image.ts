@@ -450,7 +450,7 @@ export class EsriImage extends AbstractGeoViewRaster {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override getBounds(layerPath: string): Extent | undefined {
     // Get the metadata extent
-    const metadataExtent = this.getMetadataExtent();
+    const metadataExtent = this.getMetadataExtent(layerPath);
 
     // If found
     let layerBounds;
