@@ -42,7 +42,7 @@ const DEFAULT_DATE_PRECISION = {
 /** ******************************************************************************************************************************
  * Type used to define the date precision pattern to use.
  */
-type DatePrecision = 'year' | 'month' | 'day';
+export type DatePrecision = 'year' | 'month' | 'day' | undefined;
 
 /** ******************************************************************************************************************************
  * constant/interface used to define the precision for time object (hh, mm, ss).
@@ -67,7 +67,7 @@ const timeUnitsESRI = {
 /** ******************************************************************************************************************************
  * Type used to define the time precision pattern to use.
  */
-type TimePrecision = 'hour' | 'minute' | 'second';
+export type TimePrecision = 'hour' | 'minute' | 'second' | undefined;
 
 /** ******************************************************************************************************************************
  * Type used to define the range values for an OGC time dimension.
@@ -87,6 +87,7 @@ export type TimeDimension = {
   range: RangeItems;
   nearestValues: 'discrete' | 'absolute';
   singleHandle: boolean;
+  displayPattern: [DatePrecision | undefined, TimePrecision | undefined];
 };
 
 /** ******************************************************************************************************************************
@@ -221,34 +222,54 @@ export abstract class DateMgt {
    * @param {TimePrecision}timePattern the time precision pattern to use
    * @returns {string} formatted date
    */
-  static formatDateToISO(date: Date | string, datePattern: DatePrecision, timePattern?: TimePrecision): string {
+  static formatDatePattern(date: Date | number | string, datePattern: DatePrecision, timePattern?: TimePrecision): string {
     // check if it is a valid date
     if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (format)`);
+    const validDate = typeof date !== 'number' ? DateMgt.convertToMilliseconds(date) : date;
 
     // create or reformat date in ISO format
-    const pattern = `${DEFAULT_DATE_PRECISION[datePattern]}${timePattern !== undefined ? DEFAULT_TIME_PRECISION[timePattern] : ''}`;
+    const pattern = `${datePattern !== undefined ? DEFAULT_DATE_PRECISION[datePattern] : ''}${
+      timePattern !== undefined ? DEFAULT_TIME_PRECISION[timePattern] : ''
+    }`;
 
     // output as local by default
-    return dayjs(date).utc(false).format(pattern);
+    return dayjs(new Date(validDate)).utc(true).format(pattern).replace('T', ' ').split('+')[0];
   }
 
-  static guessAndFormatDateToISO(date: Date | number | string, dateMin: Date | string | number, dateMax: Date | string | number): string {
+  static formatDateToISO(date: Date | number | string): string {
     // check if it is a valid date
-    if (typeof dateMin === 'string' && !isValidDate(dateMin)) throw new Error(`${INVALID_DATE} (format)`);
-    if (typeof dateMax === 'string' && !isValidDate(dateMax)) throw new Error(`${INVALID_DATE} (format)`);
-
-    const dateMinMilliseconds = typeof dateMin !== 'number' ? DateMgt.convertToMilliseconds(dateMin) : dateMin;
-    const dateMaxilliseconds = typeof dateMax !== 'number' ? DateMgt.convertToMilliseconds(dateMax) : dateMax;
-    const timeDelta = dateMaxilliseconds - dateMinMilliseconds;
-
-    // If the delta between min and max is lower then a day, set time pattern.
+    if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (format)`);
     const validDate = typeof date === 'number' ? DateMgt.convertMilisecondsToDate(date) : date;
-    const formatedDate =
-      timeDelta > 86400000
-        ? DateMgt.formatDateToISO(validDate, 'day')
-        : DateMgt.formatDateToISO(DateMgt.convertToLocal(DateMgt.convertToUTC(validDate)), 'day', 'minute');
 
-    return formatedDate.replace('T', ' ').split('+')[0];
+    return `${dayjs(validDate).utc(true).format('YYYY-MM-DDTHH:mm:ss')}Z`;
+  }
+
+  static guessDisplayPattern(
+    dates: Date[] | number[] | string[],
+    onlyMinMax = true
+  ): [DatePrecision | undefined, TimePrecision | undefined] {
+    // check if it is a valid dates array
+    const validDates = dates.map((date) => {
+      if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (format)`);
+      return typeof date !== 'number' ? DateMgt.convertToMilliseconds(date) : date;
+    });
+
+    // Check if range occurs in a single day or year
+    // TODO: we should check date pattern before and see if it should be only YYYY for example... use extractDateFormat
+    const delta: [DatePrecision | undefined, TimePrecision | undefined][] = [];
+    if (dates.length === 1) {
+      delta.push(['day', 'minute']);
+    } else if (onlyMinMax) {
+      const timeDelta = validDates[validDates.length - 1] - validDates[0];
+      delta.push(timeDelta > 86400000 ? ['day', undefined] : ['day', 'minute']);
+    } else {
+      for (let i = 0; i < validDates.length - 1; i++) {
+        const timeDelta = validDates[i + 1] - validDates[i];
+        delta.push(timeDelta > 86400000 ? ['day', undefined] : ['day', 'minute']);
+      }
+    }
+
+    return delta.some((item) => Array.isArray(item) && item[0] === 'day' && item[1] === 'minute') ? ['day', 'minute'] : ['day', undefined];
   }
 
   /**
@@ -329,6 +350,7 @@ export abstract class DateMgt {
       timeExtent[1]
     )}Z${calcDuration()}`;
     const rangeItem = this.createRangeOGC(dimensionValues);
+
     const timeDimension: TimeDimension = {
       field: startTimeField,
       default: rangeItem.range[rangeItem.range.length - 1],
@@ -336,6 +358,7 @@ export abstract class DateMgt {
       range: rangeItem,
       nearestValues: startTimeField === '' ? 'absolute' : 'discrete',
       singleHandle,
+      displayPattern: DateMgt.guessDisplayPattern(rangeItem.range),
     };
 
     return timeDimension;
@@ -348,13 +371,15 @@ export abstract class DateMgt {
    */
   static createDimensionFromOGC(ogcTimeDimension: TypeJsonObject | string): TimeDimension {
     const dimensionObject = typeof ogcTimeDimension === 'object' ? ogcTimeDimension : JSON.parse(<string>ogcTimeDimension);
+    const rangeItem = this.createRangeOGC(dimensionObject.values);
     const timeDimension: TimeDimension = {
       field: dimensionObject.name,
       default: dimensionObject.default,
       unitSymbol: dimensionObject.unitSymbol || '',
-      range: this.createRangeOGC(dimensionObject.values),
+      range: rangeItem,
       nearestValues: dimensionObject.nearestValues !== false ? 'absolute' : 'discrete',
       singleHandle: true,
+      displayPattern: DateMgt.guessDisplayPattern(rangeItem.range),
     };
 
     return timeDimension;
