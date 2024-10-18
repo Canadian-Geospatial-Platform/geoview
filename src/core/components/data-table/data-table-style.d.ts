@@ -16,6 +16,7 @@ export declare const getSxClasses: (theme: Theme) => {
         readonly letterSpacing: "0.01071em";
         readonly display: "flex";
         readonly padding: "6px";
+        readonly alignItems: "center";
     };
     readonly selectedRowsDirection: {
         readonly display: "flex";
@@ -42,6 +43,11 @@ export declare const getSxClasses: (theme: Theme) => {
         };
         readonly '& .MuiTouchRipple-root': {
             readonly color: string;
+        };
+    };
+    readonly tableHead: {
+        readonly '& th:nth-of-type(-n+3)': {
+            readonly justifyContent: "end";
         };
     };
     readonly tableHeadCell: {

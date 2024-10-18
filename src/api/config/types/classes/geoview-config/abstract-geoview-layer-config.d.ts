@@ -118,7 +118,7 @@ export declare abstract class AbstractGeoviewLayerConfig {
     /**
      * A recursive method to process the listOfLayerEntryConfig. The goal is to process each valid sublayer, searching the service's
      * metadata to verify the layer's existence and whether it is a layer group, in order to determine the node's final structure.
-     * If it is a layer group, it will be created.
+     * If the metadata indicate the node is a layer group, it will be created by the createLayerEntryNode.
      *
      * @param {EntryConfigBaseClass[]} listOfLayerEntryConfig the list of sublayers to process.
      *

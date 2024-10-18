@@ -190,3 +190,9 @@ export declare function createGuideObject(mapId: string, language: TypeDisplayLa
  * @param {Function} cb The callback function to be fired, if needed.
  */
 export declare function handleEscapeKey(key: string, callbackId: string, isFocusTrapped?: boolean, cb?: () => void): void;
+/**
+ * Check if elemetn is in viewport
+ * @param {Element} el - The element to check for
+ * @returns {Boolean} true if visible, false otherwise
+ */
+export declare function isElementInViewport(el: Element): boolean;

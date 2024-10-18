@@ -1,6 +1,7 @@
 /// <reference types="react" />
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 interface JSONExportButtonProps {
+    rows: unknown[];
     features: TypeFeatureInfoEntry[];
     layerPath: string;
 }
@@ -11,5 +12,5 @@ interface JSONExportButtonProps {
  * @returns {JSX.Element} returns Menu Item
  *
  */
-declare function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.Element;
+declare function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps): JSX.Element;
 export default JSONExportButton;

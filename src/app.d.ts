@@ -24,4 +24,24 @@ export declare function unmountMap(mapId: string): void;
  * @param {string} mapConfig - The new config passed in from the function call
  */
 export declare function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): Promise<void>;
+/**
+ * Registers a callback when the map has been initialized
+ * @param {(mapId: string) => void} callback - The callback to be called
+ */
+export declare function onMapInit(callback: (mapId: string) => void): void;
+/**
+ * Registers a callback when the map has turned ready / layers were registered
+ * @param {(mapId: string) => void} callback - The callback to be called
+ */
+export declare function onMapReady(callback: (mapId: string) => void): void;
+/**
+ * Registers a callback when the layers have been processed
+ * @param {(mapId: string) => void} callback - The callback to be called
+ */
+export declare function onLayersProcessed(callback: (mapId: string) => void): void;
+/**
+ * Registers a callback when the layers have been loaded
+ * @param {(mapId: string) => void} callback - The callback to be called
+ */
+export declare function onLayersLoaded(callback: (mapId: string) => void): void;
 export declare const cgpv: TypeCGPV;

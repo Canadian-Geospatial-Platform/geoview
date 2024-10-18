@@ -47,6 +47,10 @@ export interface TypeWindow extends Window {
  */
 export type TypeCGPV = {
     init: CGPVInitCallback;
+    onMapInit: CGPVCallback;
+    onMapReady: CGPVCallback;
+    onLayersProcessed: CGPVCallback;
+    onLayersLoaded: CGPVCallback;
     api: API;
     react: typeof React;
     createRoot: typeof createRoot;
@@ -57,6 +61,7 @@ export type TypeCGPV = {
  * Type used for a callback function.
  */
 export type CGPVInitCallback = (callbackMapsInit?: (mapId: string) => void, callbackMapsLayersLoaded?: (mapId: string) => void) => void;
+export type CGPVCallback = (callback: (mapId: string) => void) => void;
 /** ******************************************************************************************************************************
  * Type used for exporting UI
  */

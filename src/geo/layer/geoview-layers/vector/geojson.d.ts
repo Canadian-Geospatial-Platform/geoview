@@ -53,6 +53,7 @@ export declare const geoviewEntryIsGeoJSON: (verifyIfGeoViewEntry: TypeLayerEntr
  * @class GeoJSON
  */
 export declare class GeoJSON extends AbstractGeoViewVector {
+    #private;
     /** ***************************************************************************************************************************
      * Initialize layer
      *
