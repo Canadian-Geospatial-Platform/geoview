@@ -5,7 +5,6 @@ import { GeoJsonLayerConfig } from '@config/types/classes/geoview-config/vector-
  * The GeoJson geoview sublayer class.
  */
 export declare class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-    #private;
     /** Source settings to apply to the GeoView image layer source at creation time. */
     source: TypeSourceGeoJsonInitialConfig;
     /** Style to apply to the raster layer. */
@@ -45,4 +44,9 @@ export declare class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfi
      * @override
      */
     applyDefaultValues(): void;
+    /**
+     * This method is used to parse the layer metadata and extract the source information and other properties.
+     * @override @protected
+     */
+    protected parseLayerMetadata(): void;
 }

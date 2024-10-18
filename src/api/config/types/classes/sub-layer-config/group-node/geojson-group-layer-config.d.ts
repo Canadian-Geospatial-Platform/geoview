@@ -4,7 +4,6 @@ import { GeoJsonLayerConfig } from '@config/types/classes/geoview-config/vector-
  * Base type used to define the common implementation of a GeoJson GeoView sublayer to display on the map.
  */
 export declare class GeoJsonGroupLayerConfig extends GroupLayerEntryConfig {
-    #private;
     /**
      * Shadow method used to do a cast operation on the parent method to return GeoJsonLayerConfig instead of
      * AbstractGeoviewLayerConfig.
@@ -19,4 +18,9 @@ export declare class GeoJsonGroupLayerConfig extends GroupLayerEntryConfig {
      * @override @async
      */
     fetchLayerMetadata(): Promise<void>;
+    /**
+     * This method is used to parse the layer metadata and extract the source information and other properties.
+     * @override @protected
+     */
+    protected parseLayerMetadata(): void;
 }
