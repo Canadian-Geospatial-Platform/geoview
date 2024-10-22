@@ -4,7 +4,6 @@ import { WmsLayerConfig } from '@config/types/classes/geoview-config/raster-conf
  * Base type used to define the common implementation of an ESRI GeoView sublayer to display on the map.
  */
 export declare class WmsGroupLayerConfig extends GroupLayerEntryConfig {
-    #private;
     /**
      * Shadow method used to do a cast operation on the parent method to return WmsLayerConfig instead of
      * AbstractGeoviewLayerConfig.
@@ -19,4 +18,10 @@ export declare class WmsGroupLayerConfig extends GroupLayerEntryConfig {
      * @override @async
      */
     fetchLayerMetadata(): Promise<void>;
+    /** ***************************************************************************************************************************
+     * This method is used to analyze metadata and extract the relevant information from a group layer based on a definition
+     * provided by the WMS service.
+     * @override @protected
+     */
+    protected parseLayerMetadata(): void;
 }

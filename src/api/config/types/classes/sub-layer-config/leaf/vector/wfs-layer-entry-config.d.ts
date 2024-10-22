@@ -45,4 +45,9 @@ export declare class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
      * @override
      */
     applyDefaultValues(): void;
+    /**
+     * This method is used to parse the layer metadata and extract the source information and other properties.
+     * @override @protected
+     */
+    protected parseLayerMetadata(): void;
 }

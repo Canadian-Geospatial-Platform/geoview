@@ -43,7 +43,7 @@ export declare abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeo
      * Converts an esri geometry type string to a TypeStyleGeometry.
      * @param {string} esriGeometryType - The esri geometry type to convert
      * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
-     * @protected @static
+     * @static
      */
-    protected static convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry;
+    static convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry;
 }

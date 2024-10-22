@@ -9,4 +9,11 @@ export declare class WfsGroupLayerConfig extends GroupLayerEntryConfig {
      * @override @async
      */
     fetchLayerMetadata(): Promise<void>;
+    /** ***************************************************************************************************************************
+     * This method is used to parse the layer metadata and extract the style, source information and other properties.
+     * However, since WFS doesn't have groups in its metadata, this routine does nothing for the group nodes.
+     *
+     * @protected @override
+     */
+    protected parseLayerMetadata(): void;
 }

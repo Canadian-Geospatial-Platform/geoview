@@ -10,4 +10,10 @@ export declare class EsriGroupLayerConfig extends GroupLayerEntryConfig {
      * @override
      */
     fetchLayerMetadata(): Promise<void>;
+    /**
+     * This method is used to analyze metadata and extract the relevant information from a group layer based on a definition
+     * provided by the ESRI service.
+     * @override @protected
+     */
+    protected parseLayerMetadata(): void;
 }

@@ -63,6 +63,11 @@ export declare abstract class EntryConfigBaseClass {
      */
     abstract fetchLayerMetadata(): Promise<void>;
     /**
+     * This method is used to parse the layer metadata and extract the style, source information and other properties.
+     * @abstract @protected
+     */
+    protected abstract parseLayerMetadata(): void;
+    /**
      * Validate the node configuration using the schema associated to its layer type.
      * @protected
      */
