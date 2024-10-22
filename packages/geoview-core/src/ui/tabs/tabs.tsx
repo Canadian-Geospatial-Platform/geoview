@@ -166,7 +166,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       if (activeTrap) onOpenKeyboard?.({ activeElementId: id, callbackElementId: id });
       else onCloseKeyboard?.();
     },
-    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value],
+    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value, tabPanels]
   );
 
   useEffect(() => {
