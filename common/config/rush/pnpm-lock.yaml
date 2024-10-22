@@ -3341,6 +3341,52 @@ packages:
       - '@types/react'
     dev: false
 
+  /@mui/x-internals@7.17.0(@types/react@18.3.5)(react@18.3.1):
+    resolution: {integrity: sha512-FLlAGSJl/vsuaA/8hPGazXFppyzIzxApJJDZMoTS0geUmHd0hyooISV2ltllLmrZ/DGtHhI08m8GGnHL6/vVeg==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@babel/runtime': 7.25.6
+      '@mui/utils': 5.16.6(@types/react@18.3.8)(react@18.3.1)
+      react: 18.3.1
+    transitivePeerDependencies:
+      - '@types/react'
+    dev: false
+
+  /@mui/x-tree-view@7.18.0(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@mui/material@6.1.1)(@mui/system@6.1.1)(@types/react@18.3.8)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-3UJAYtBquc0SzKxEEdM68XlKOuuCl70ktZPqqI3z4wTZ0HK445XXc32t/s0VPIL94kRxWQcGPpgWFauScDwhug==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      '@emotion/react': ^11.9.0
+      '@emotion/styled': ^11.8.1
+      '@mui/material': ^5.15.14 || ^6.0.0
+      '@mui/system': ^5.15.14 || ^6.0.0
+      react: ^17.0.0 || ^18.0.0
+      react-dom: ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@emotion/react':
+        optional: true
+      '@emotion/styled':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.25.6
+      '@emotion/react': 11.13.3(@types/react@18.3.8)(react@18.3.1)
+      '@emotion/styled': 11.13.0(@emotion/react@11.13.3)(@types/react@18.3.8)(react@18.3.1)
+      '@mui/material': 6.1.1(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.8)(react-dom@18.3.1)(react@18.3.1)
+      '@mui/system': 6.1.1(@emotion/react@11.13.3)(@emotion/styled@11.13.0)(@types/react@18.3.8)(react@18.3.1)
+      '@mui/utils': 5.16.6(@types/react@18.3.8)(react@18.3.1)
+      '@mui/x-internals': 7.18.0(@types/react@18.3.8)(react@18.3.1)
+      '@types/react-transition-group': 4.4.11
+      clsx: 2.1.1
+      prop-types: 15.8.1
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-transition-group: 4.4.5(react-dom@18.3.1)(react@18.3.1)
+    transitivePeerDependencies:
+      - '@types/react'
+    dev: false
+
   /@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents.3:
     resolution: {integrity: sha512-s88O1aVtXftvp5bCPB7WnmXc5IwOZZ7YPuwNPt+GtOOXpPvad1LfbmjYv+qII7zP6RU2QGnqve27dnLycEnyEQ==}
     requiresBuild: true
