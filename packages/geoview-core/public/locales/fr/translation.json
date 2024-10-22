@@ -218,8 +218,6 @@
     "errorMessage": "Désolé, impossible de trouver le document d'aide!"
   },
   "footerBar": {
-    "focusToMap": "Aller à la carte",
-    "focusToFooter": "Aller au pied de page",
     "resizeTooltip": "Redimensionner",
     "noTab": "Pas d'onglet"
   }

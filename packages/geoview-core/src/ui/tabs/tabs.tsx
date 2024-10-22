@@ -152,8 +152,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const handleClick = useCallback(
     (e: MouseEvent<HTMLDivElement>): void => {
+      // Get the tab (if already created to extract the value, set -1 if tab does not exist)
+      // We need this information to know if we create, switch or collapse a tab
       const { id } = e.target as HTMLDivElement;
-      const index = Number(id.slice(-1));
+      const tab = tabPanels.filter((item) => item !== undefined && item.id === id);
+      const index = tab.length > 0 ? tab[0].value : -1;
 
       // toggle on -1, so that when no tab is selected on fullscreen
       // and tab is selected again to open the panel.
@@ -163,7 +166,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       if (activeTrap) onOpenKeyboard?.({ activeElementId: id, callbackElementId: id });
       else onCloseKeyboard?.();
     },
-    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value],
+    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value, tabPanels]
   );
 
   useEffect(() => {
