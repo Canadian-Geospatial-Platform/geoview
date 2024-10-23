@@ -29,12 +29,15 @@
     ]
   },
   "scripts": {
-    "serve": "webpack serve --progress --color --config webpack.dev.js",
-    "build": "npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
+    "serve": "npm run format && npm run fix && webpack serve --progress --color --config webpack.dev.js",
+    "build": "npm run format && npm run fix && npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
     "doc": "typedoc src/app.tsx --logLevel Error --out public/docs",
     "deploy": "gh-pages -d dist",
     "test": "jest",
     "update_test": "jest --updateSnapshot",
+    "format": "npm run format --prefix ../",
+    "lint": "npm run lint --prefix ../",
+    "fix": "npm run fix --prefix ../",
     "generate.d.ts": "tsc --noEmit false --skipLibCheck true --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {
