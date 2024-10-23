@@ -29,15 +29,12 @@
     ]
   },
   "scripts": {
-    "serve": "npm run format && npm run fix && webpack serve --progress --color --config webpack.dev.js",
-    "build": "npm run format && npm run fix && npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
+    "serve": "webpack serve --progress --color --config webpack.dev.js",
+    "build": "npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
     "doc": "typedoc src/app.tsx --logLevel Error --out public/docs",
     "deploy": "gh-pages -d dist",
     "test": "jest",
     "update_test": "jest --updateSnapshot",
-    "format": "prettier --write \"../geoview-**/src/**/*.{ts,tsx,js}\"",
-    "lint": "eslint \"../geoview-**/src/**/*.{ts,tsx,js}\"",
-    "fix": "eslint \"../geoview-**/src/**/*.{ts,tsx,js}\" --fix",
     "generate.d.ts": "tsc --noEmit false --skipLibCheck true --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {
@@ -59,8 +56,9 @@
     "domhandler": "^5.0.3",
     "export-to-csv": "^0.2.2",
     "html-react-parser": "^5.1.18",
-    "i18next": "^23.16.0",
-    "i18next-http-backend": "^2.6.2",
+    "i18next": "^22.4.13",
+    "react-i18next": "^12.2.0",
+    "i18next-http-backend": "^1.0.21",
     "immutable": "^4.3.7",
     "linkify-html": "^4.1.3",
     "linkifyjs": "^4.1.3",
@@ -73,7 +71,6 @@
     "query-string": "^9.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-i18next": "^15.0.3",
     "react-test-renderer": "^18.3.1",
     "sanitize-html": "^2.13.1",
     "sql.js": "^1.11.0",
