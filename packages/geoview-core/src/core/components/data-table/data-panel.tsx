@@ -90,7 +90,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
         });
       }
     },
-    [orderedLayerData, setSelectedLayerPath, triggerGetAllFeatureInfo]
+    [orderedLayerData, setSelectedLayerPath, triggerGetAllFeatureInfo],
   );
 
   /**
@@ -105,7 +105,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
       return datatableSettings[layerPath].mapFilteredRecord && !!datatableSettings[layerPath].rowsFilteredRecord;
     },
-    [datatableSettings]
+    [datatableSettings],
   );
 
   /**
@@ -128,7 +128,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       }
       return featureStr;
     },
-    [datatableSettings, orderedLayerData, t]
+    [datatableSettings, orderedLayerData, t],
   );
 
   /**
@@ -149,7 +149,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
         </Box>
       );
     },
-    [getFeaturesOfLayer, isMapFilteredSelectedForLayer]
+    [getFeaturesOfLayer, isMapFilteredSelectedForLayer],
   );
 
   /**
@@ -250,7 +250,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
         setSelectedLayerPath('');
       }
     },
-    [setSelectedLayerPath]
+    [setSelectedLayerPath],
   );
 
   const memoLayerList = useMemo(() => {

@@ -65,7 +65,7 @@ export class PointMarkers {
 
         const pointFeature = new Feature({
           geometry: new Point(
-            Projection.transformPoints([point.coordinate], `EPSG:${point.projectionCode || 4326}`, this.mapProjection)[0]
+            Projection.transformPoints([point.coordinate], `EPSG:${point.projectionCode || 4326}`, this.mapProjection)[0],
           ),
         });
 

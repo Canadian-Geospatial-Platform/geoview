@@ -52,7 +52,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
 
         if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
           throw new GeoviewLayerConfigError(
-            `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`
+            `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`,
           );
         }
         return;
@@ -92,7 +92,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
 
     if (this?.initialSettings?.extent?.find?.((value, i) => value !== metadataExtent[i]))
       logger.logWarning(
-        `The extent specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`
+        `The extent specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`,
       );
 
     this.bounds = this.initialSettings.extent;
@@ -144,7 +144,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
           type: AbstractBaseEsriLayerEntryConfig.#convertEsriFieldType(fieldEntry.type as string),
           // TODO refactor - investigate replacing null with empty array for domain
           domain: Cast<null | codedValueType | rangeDomainType>(fieldEntry.domain),
-        })
+        }),
       );
     });
 
@@ -168,7 +168,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
     if (esriFieldType === 'esriFieldTypeDate') return 'date';
     if (
       ['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger', 'esriFieldTypeOID'].includes(
-        esriFieldType
+        esriFieldType,
       )
     )
       return 'number';

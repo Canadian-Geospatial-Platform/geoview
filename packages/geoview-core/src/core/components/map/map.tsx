@@ -65,7 +65,7 @@ export function Map(props: MapProps): JSX.Element {
             toJsonObject({
               mapId,
               viewer,
-            })
+            }),
           ).catch((error) => {
             // Log
             logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);

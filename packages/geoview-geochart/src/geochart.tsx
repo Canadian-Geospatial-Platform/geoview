@@ -99,7 +99,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       // Show error
       addNotification({ key: 'geochart', message: error, notificationType: 'error', count: 0 });
     },
-    [addNotification, mapId]
+    [addNotification, mapId],
   );
 
   /**
@@ -111,7 +111,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       GeoViewGeoChartConfig<ChartType> | undefined,
       GeoViewGeoChartConfigLayer | undefined,
       TypeLayerEntryConfig | undefined,
-      TypeFeatureInfoEntry[] | undefined
+      TypeFeatureInfoEntry[] | undefined,
     ] = findLayerDataAndConfigFromQueryResults(config, MapEventProcessor.getMapViewerLayerAPI(mapId), layers);
 
     // If found a chart for the layer

@@ -123,7 +123,7 @@ export class ConfigValidation {
   #isValidTypeListOfLayerEntryConfig(
     geoviewLayerType: TypeGeoviewLayerType,
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
-    validator: Ajv
+    validator: Ajv,
   ): boolean {
     const layerSchemaPath = `https://cgpv/schema#/definitions/${CONST_GEOVIEW_SCHEMA_BY_TYPE[geoviewLayerType]}`;
     const groupSchemaPath = `https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig`;
@@ -186,7 +186,7 @@ export class ConfigValidation {
         isValid = this.#isValidTypeListOfLayerEntryConfig(
           gvLayerConfigCasted.geoviewLayerType,
           gvLayerConfigCasted.listOfLayerEntryConfig,
-          validator
+          validator,
         );
       }
     }
@@ -258,7 +258,7 @@ export class ConfigValidation {
   static #metadataAccessPathIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
     if (!geoviewLayerConfig.metadataAccessPath) {
       throw new Error(
-        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.geoviewLayerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
+        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.geoviewLayerId} of type ${geoviewLayerConfig.geoviewLayerType}.`,
       );
     }
   }
@@ -285,7 +285,7 @@ export class ConfigValidation {
   static #processLayerEntryConfig(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
-    parentLayerConfig?: GroupLayerEntryConfig
+    parentLayerConfig?: GroupLayerEntryConfig,
   ): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i: number) => {
       // links the entry to its GeoView layer config.
@@ -295,7 +295,7 @@ export class ConfigValidation {
       // layerConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
       layerConfig.initialSettings = defaultsDeep(
         layerConfig.initialSettings,
-        layerConfig.parentLayerConfig?.initialSettings || layerConfig.geoviewLayerConfig?.initialSettings
+        layerConfig.parentLayerConfig?.initialSettings || layerConfig.geoviewLayerConfig?.initialSettings,
       );
 
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -346,7 +346,7 @@ export class ConfigValidation {
   static #recursivelySetChildParent(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
-    parentLayerConfig?: GroupLayerEntryConfig
+    parentLayerConfig?: GroupLayerEntryConfig,
   ): void {
     listOfLayerEntryConfig.forEach((layerConfig) => {
       layerConfig.parentLayerConfig = parentLayerConfig;
@@ -355,7 +355,7 @@ export class ConfigValidation {
         ConfigValidation.#recursivelySetChildParent(
           geoviewLayerConfig,
           layerConfig.listOfLayerEntryConfig!,
-          layerConfig as GroupLayerEntryConfig
+          layerConfig as GroupLayerEntryConfig,
         );
     });
   }
@@ -370,7 +370,7 @@ export class ConfigValidation {
   static #synchronizeLocalizedString(
     localizedString: TypeLocalizedString,
     sourceKey: TypeDisplayLanguage,
-    destinationKey: TypeDisplayLanguage
+    destinationKey: TypeDisplayLanguage,
   ): void {
     localizedString[destinationKey] = localizedString[sourceKey];
   }

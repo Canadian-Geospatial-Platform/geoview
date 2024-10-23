@@ -171,7 +171,7 @@ export class Basemap {
     basemapId: string,
     basemapLayer: TypeJsonObject,
     opacity: number,
-    rest: boolean
+    rest: boolean,
   ): Promise<null | TypeBasemapLayer> {
     const resolutions: number[] = [];
     let minZoom = 0;
@@ -281,7 +281,7 @@ export class Basemap {
   async createCoreBasemap(
     basemapOptions: TypeBasemapOptions,
     projection?: TypeValidMapProjectionCodes,
-    language?: TypeDisplayLanguage
+    language?: TypeDisplayLanguage,
   ): Promise<TypeBasemapProps | undefined> {
     const basemapLayers: TypeBasemapLayer[] = [];
     const basemaplayerTypes: string[] = [];
@@ -318,7 +318,7 @@ export class Basemap {
           'transport',
           this.basemapsList[projectionCode].transport,
           coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
-          true
+          true,
         );
         if (transportLayer) {
           basemapLayers.push(transportLayer);
@@ -339,7 +339,7 @@ export class Basemap {
           'simple',
           this.basemapsList[projectionCode].simple,
           coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
-          true
+          true,
         );
 
         if (simpleLayer) {
@@ -382,7 +382,7 @@ export class Basemap {
           'imagery',
           this.basemapsList[projectionCode].imagery,
           coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
-          true
+          true,
         );
         if (imageryLayer) {
           basemapLayers.push(imageryLayer);
@@ -404,11 +404,11 @@ export class Basemap {
             url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll('xxxx', languageCode === 'en' ? 'CBMT' : 'CBCT'),
             jsonUrl: (this.basemapsList[projectionCode].label.jsonUrl as string)?.replaceAll(
               'xxxx',
-              languageCode === 'en' ? 'CBMT' : 'CBCT'
+              languageCode === 'en' ? 'CBMT' : 'CBCT',
             ),
           }),
           0.8,
-          true
+          true,
         );
         if (labelLayer) {
           basemapLayers.push(labelLayer);
@@ -426,7 +426,10 @@ export class Basemap {
         basemapOptions: coreBasemapOptions,
         attribution:
           coreBasemapOptions.basemapId === 'osm'
-            ? ['© OpenStreetMap', getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId))]
+            ? [
+                '© OpenStreetMap',
+                getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId)),
+              ]
             : [getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId))],
         zoomLevels: {
           min: minZoom,
@@ -459,7 +462,7 @@ export class Basemap {
   createCustomBasemap(
     basemapProps: TypeBasemapProps,
     projection: TypeValidMapProjectionCodes,
-    language?: TypeDisplayLanguage
+    language?: TypeDisplayLanguage,
   ): TypeBasemapProps {
     interface bilingual {
       en: string;

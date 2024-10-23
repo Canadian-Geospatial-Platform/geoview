@@ -18,7 +18,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     /** layerConfig.source.dataAccessPath is mandatory. */
     if (!layerConfig.source!.dataAccessPath) {
       throw new Error(
-        `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`
+        `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`,
       );
     }
   }

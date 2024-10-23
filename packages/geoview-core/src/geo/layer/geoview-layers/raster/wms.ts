@@ -148,7 +148,7 @@ export class WMS extends AbstractGeoViewRaster {
             if (i === layerIndex)
               // This is the first time we execute this query
               promisedArrayOfMetadata.push(
-                this.#getServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities&Layers=${layerConfig.layerId}`)
+                this.#getServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities&Layers=${layerConfig.layerId}`),
               );
             // query already done. Use previous returned value
             else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
@@ -164,12 +164,12 @@ export class WMS extends AbstractGeoViewRaster {
                 else if (!this.#getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
                   const metadataLayerPathToAdd = this.#getMetadataLayerPath(
                     layerConfigsToQuery[i].layerId!,
-                    arrayOfMetadata[i]!.Capability.Layer
+                    arrayOfMetadata[i]!.Capability.Layer,
                   );
                   this.#addLayerToMetadataInstance(
                     metadataLayerPathToAdd,
                     this.metadata?.Capability?.Layer,
-                    arrayOfMetadata[i]!.Capability.Layer
+                    arrayOfMetadata[i]!.Capability.Layer,
                   );
                 }
               }
@@ -296,20 +296,20 @@ export class WMS extends AbstractGeoViewRaster {
   #addLayerToMetadataInstance(
     metadataLayerPathToAdd: number[],
     metadataLayer: TypeJsonObject | undefined,
-    layerToAdd: TypeJsonObject
+    layerToAdd: TypeJsonObject,
   ): void {
     if (metadataLayerPathToAdd.length === 0 || !metadataLayer) return;
     if (metadataLayerPathToAdd[0] === -1)
       this.#addLayerToMetadataInstance(metadataLayerPathToAdd.slice(1), metadataLayer.Layer, layerToAdd.Layer);
     else {
       const metadataLayerFound = (metadataLayer as TypeJsonArray).find(
-        (layerEntry) => layerEntry.Name === layerToAdd[metadataLayerPathToAdd[0]].Name
+        (layerEntry) => layerEntry.Name === layerToAdd[metadataLayerPathToAdd[0]].Name,
       );
       if (metadataLayerFound)
         this.#addLayerToMetadataInstance(
           metadataLayerPathToAdd.slice(1),
           metadataLayerFound.Layer,
-          layerToAdd[metadataLayerPathToAdd[0]].Layer
+          layerToAdd[metadataLayerPathToAdd[0]].Layer,
         );
       else (metadataLayer as TypeJsonArray).push(layerToAdd[metadataLayerPathToAdd[0]]);
     }
@@ -641,7 +641,7 @@ export class WMS extends AbstractGeoViewRaster {
 
         if (layerCapabilities.Dimension) {
           const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
-            (dimension) => dimension.name === 'time'
+            (dimension) => dimension.name === 'time',
           );
           if (temporalDimension) this.processTemporalDimension(temporalDimension, layerConfig);
         }
@@ -687,7 +687,7 @@ export class WMS extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (in layers)
   protected override getFeatureInfoAtCoordinate(
     location: Coordinate,
-    layerPath: string
+    layerPath: string,
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const convertedLocation = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
     return this.getFeatureInfoAtLongLat(convertedLocation, layerPath);
@@ -704,7 +704,7 @@ export class WMS extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (in layers)
   protected override async getFeatureInfoAtLongLat(
     lnglat: Coordinate,
-    layerPath: string
+    layerPath: string,
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
@@ -854,7 +854,7 @@ export class WMS extends AbstractGeoViewRaster {
       else if (Object.keys(this.metadata?.Capability.Request || {}).includes('GetLegendGraphic'))
         queryUrl = `${getLocalizedValue(
           this.metadataAccessPath,
-          AppEventProcessor.getDisplayLanguage(this.mapId)
+          AppEventProcessor.getDisplayLanguage(this.mapId),
         )!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
 
       if (queryUrl) {
@@ -1127,7 +1127,7 @@ export class WMS extends AbstractGeoViewRaster {
           const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
           const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
           filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
-            dateFound.index! + dateFound[0].length + 2
+            dateFound.index! + dateFound[0].length + 2,
           )}`;
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });

@@ -249,7 +249,7 @@ export class ConsoleLogger {
     trackerKey: string,
     callbackObject: () => T,
     callbackCheck?: (prevObject: T, newObject: T) => boolean,
-    interval?: number
+    interval?: number,
   ): void {
     // Validate log active and existing tracker clearing
     if (!LOG_ACTIVE) return;
@@ -268,7 +268,8 @@ export class ConsoleLogger {
 
       // Check if changed
       let hasChanged = false;
-      if (callbackCheck) hasChanged = callbackCheck(object, newObject); // Use callback to know
+      if (callbackCheck)
+        hasChanged = callbackCheck(object, newObject); // Use callback to know
       else hasChanged = newObject !== object; // Use straight equality comparator
 
       // If has changed

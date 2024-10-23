@@ -156,8 +156,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const values = singleHandle
       ? [new Date(temporalDimensionInfo.default).getTime()]
       : defaultValueIsArray
-      ? [new Date(temporalDimensionInfo.default[0]).getTime(), new Date(temporalDimensionInfo.default[1]).getTime()]
-      : [...minAndMax];
+        ? [new Date(temporalDimensionInfo.default[0]).getTime(), new Date(temporalDimensionInfo.default[1]).getTime()]
+        : [...minAndMax];
 
     // If using discrete axis
     let step: number | undefined;
@@ -254,7 +254,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     field: string,
     filtering: boolean,
     minAndMax: number[],
-    values: number[]
+    values: number[],
   ): void {
     // Get the layer using the map event processor
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath)!;

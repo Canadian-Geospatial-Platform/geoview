@@ -107,7 +107,7 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
         `background: ${backgroundColorRef.current}; color: white; font-size: 10px`,
         '👇🏾',
         `${isFirstMount ? 'FIRST RUN' : 'UPDATES'}`,
-        `${suffixText}`
+        `${suffixText}`,
       );
 
       if (isBlankArrayAsDependency) {

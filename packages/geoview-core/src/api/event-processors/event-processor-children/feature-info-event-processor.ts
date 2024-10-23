@@ -32,10 +32,10 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
           // Log
           logger.logPromiseFailed(
             'propagateFeatureInfoToStoreBatch in layerDataArrayUpdateBatch subscribe in feature-info-event-processor',
-            error
+            error,
           );
         });
-      }
+      },
     );
 
     return [layerDataArrayUpdateBatch];
@@ -87,7 +87,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     if (resultSet[layerPath]) {
       resultSet[layerPath].features = [];
       this.propagateFeatureInfoToStore(mapId, 'click', resultSet[layerPath]).catch((err) =>
-        logger.logError('Not able to reset resultSet', err, layerPath)
+        logger.logError('Not able to reset resultSet', err, layerPath),
       );
     }
 
@@ -129,7 +129,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   static #deleteFromArray<T extends TypeResultSetEntry>(
     layerArray: T[],
     layerPath: string,
-    onDeleteCallback: (layerArray: T[]) => void
+    onDeleteCallback: (layerArray: T[]) => void,
   ): void {
     // Find the layer data info to delete from the array
     const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
@@ -218,7 +218,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       featureInfoState.setterActions.setLayerDataArrayBatch,
       'feature-info-processor',
       featureInfoState.layerDataArrayBatchLayerPathBypass,
-      featureInfoState.setterActions.setLayerDataArrayBatchLayerPathBypass
+      featureInfoState.setterActions.setLayerDataArrayBatchLayerPathBypass,
     );
   }
 

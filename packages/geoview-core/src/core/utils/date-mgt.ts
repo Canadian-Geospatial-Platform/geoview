@@ -307,7 +307,7 @@ export abstract class DateMgt {
     };
 
     const dimensionValues = `${this.convertMilisecondsToDate(timeExtent[0])}Z/${this.convertMilisecondsToDate(
-      timeExtent[1]
+      timeExtent[1],
     )}Z${calcDuration()}`;
     const rangeItem = this.createRangeOGC(dimensionValues);
     const timeDimension: TimeDimension = {
@@ -525,7 +525,7 @@ export abstract class DateMgt {
       formatToAnalyze = formatToAnalyze.replace(/\[?DD[-/]]?MM[-/]]?YYYY\[?[\sT]HH:MM:SS\[?[+-]\d\d:\d\d]?/, '');
       formatToAnalyze = formatToAnalyze.replace(
         /MM[-/]DD[-/]YYYY\[?[\sT]HH:MM:SS[+-]\d\d:\d\d]?|(\[MM[-/]DD[-/]]|MM[-/]\[DD[-/]])YYYY\[[T\s]HH:MM:SS[+-]\d\d:\d\d]/,
-        ''
+        '',
       );
       if (formatToAnalyze) throw new Error(`The string "${dateFormat}" is an invalid date format.`);
 
@@ -633,7 +633,7 @@ export abstract class DateMgt {
       const [dateString, timeString] = this.convertToUTC(
         `${utcDate.toUpperCase().slice(0, -6)}${reverseTimeZone ? reverseTimeZoneSign : separators[TIME_ZONE_SEPARATOR]}${
           separators[TIME_ZONE]
-        }`
+        }`,
       ).split('T');
       const dateFragments = dateString.toUpperCase().split('-');
 

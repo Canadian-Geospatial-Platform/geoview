@@ -28,7 +28,7 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     if (!this.source.dataAccessPath) {
       throw new Error(
-        `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`
+        `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`,
       );
     }
   }

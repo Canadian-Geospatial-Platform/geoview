@@ -94,14 +94,14 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
         setSelectedLayerPath('');
       }
     },
-    [setSelectedLayerPath]
+    [setSelectedLayerPath],
   );
 
   const handleIsEnlargeClicked = useCallback(
     (isEnlarged: boolean): void => {
       setIsLayoutEnlarged(isEnlarged);
     },
-    [setIsLayoutEnlarged]
+    [setIsLayoutEnlarged],
   );
 
   return (

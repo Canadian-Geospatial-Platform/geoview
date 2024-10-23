@@ -87,7 +87,7 @@ export function Slider(props: SliderProps): JSX.Element {
     prev: Element | null,
     curr: Element,
     next: Element | null,
-    orientation: string | undefined = 'horizontal'
+    orientation: string | undefined = 'horizontal',
   ): boolean => {
     const labelPadding = 10;
     const prevDim = prev ? prev.getBoundingClientRect() : null;
@@ -159,7 +159,7 @@ export function Slider(props: SliderProps): JSX.Element {
           checkOverlap(
             markers[middleIndices[testIdx]],
             markers[middleIndices[currIdx]],
-            currIdx === middleIndices.length - 1 ? null : markers[middleIndices[currIdx + 1]]
+            currIdx === middleIndices.length - 1 ? null : markers[middleIndices[currIdx + 1]],
           )
         ) {
           markers[middleIndices[currIdx]].classList.add('MuiSlider-markLabel-overlap');

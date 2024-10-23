@@ -207,7 +207,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     layerConfig: EsriDynamicLayerEntryConfig,
     url: string,
     maxRecordCount: number,
-    resultOffset?: number
+    resultOffset?: number,
   ): Promise<unknown[]> {
     const responseArray: unknown[] = [];
     // Add resultOffset to layer query
@@ -226,8 +226,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
             layerConfig,
             url,
             maxRecordCount,
-            resultOffset ? resultOffset + maxRecordCount : 2 * maxRecordCount
-          ))
+            resultOffset ? resultOffset + maxRecordCount : 2 * maxRecordCount,
+          )),
         );
     } catch (error) {
       logger.logError(`Error loading additional features for ${layerConfig.layerPath} from ${nextUrl}`, error);
@@ -308,7 +308,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       }
       const features = new EsriJSON().readFeatures(
         { features: jsonResponse.results },
-        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: mapViewer.getProjection().getCode() }
+        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: mapViewer.getProjection().getCode() },
       ) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
       return arrayOfFeatureInfoEntries;
@@ -343,7 +343,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         }
         return counter;
       },
-      styleSettings.fields.map<TypeFieldOfTheSameValue[]>(() => [])
+      styleSettings.fields.map<TypeFieldOfTheSameValue[]>(() => []),
     );
   }
 
@@ -411,16 +411,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
                   `${styleSettings.field} >= ${GVEsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[0].minValue!,
-                    layerConfig.source.featureInfo!
-                  )}`
+                    layerConfig.source.featureInfo!,
+                  )}`,
                 );
               else if (styleSettings.classBreakStyleInfo[0].visible === false && styleSettings.defaultVisible !== false) {
                 filterArray.push(
                   `${styleSettings.field} < ${GVEsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[0].minValue!,
-                    layerConfig.source.featureInfo!
-                  )}`
+                    layerConfig.source.featureInfo!,
+                  )}`,
                 );
                 visibleWhenGreatherThisIndex = i;
               }
@@ -429,24 +429,24 @@ export class GVEsriDynamic extends AbstractGVRaster {
                 `${styleSettings.field} > ${GVEsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].minValue!,
-                  layerConfig.source.featureInfo!
-                )}`
+                  layerConfig.source.featureInfo!,
+                )}`,
               );
               if (i + 1 === styleSettings.classBreakStyleInfo.length)
                 filterArray.push(
                   `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[i].maxValue!,
-                    layerConfig.source.featureInfo!
-                  )}`
+                    layerConfig.source.featureInfo!,
+                  )}`,
                 );
             } else if (styleSettings.classBreakStyleInfo[i].visible === false && styleSettings.defaultVisible !== false) {
               filterArray.push(
                 `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].minValue!,
-                  layerConfig.source.featureInfo!
-                )}`
+                  layerConfig.source.featureInfo!,
+                )}`,
               );
               visibleWhenGreatherThisIndex = i;
             }
@@ -456,16 +456,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
                 `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i - 1].maxValue!,
-                  layerConfig.source.featureInfo!
-                )}`
+                  layerConfig.source.featureInfo!,
+                )}`,
               );
             } else if (i + 1 === styleSettings.classBreakStyleInfo.length) {
               filterArray.push(
                 `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].maxValue!,
-                  layerConfig.source.featureInfo!
-                )}`
+                  layerConfig.source.featureInfo!,
+                )}`,
               );
             }
           } else if (styleSettings.classBreakStyleInfo[i].visible !== false) {
@@ -473,8 +473,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
               `${styleSettings.field} > ${GVEsriDynamic.#formatFieldValue(
                 styleSettings.field,
                 styleSettings.classBreakStyleInfo[i - 1].maxValue!,
-                layerConfig.source.featureInfo!
-              )}`
+                layerConfig.source.featureInfo!,
+              )}`,
             );
             visibleWhenGreatherThisIndex = -1;
           } else {
@@ -486,8 +486,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
             `${styleSettings.field} > ${GVEsriDynamic.#formatFieldValue(
               styleSettings.field,
               styleSettings.classBreakStyleInfo[visibleWhenGreatherThisIndex].maxValue!,
-              layerConfig.source.featureInfo!
-            )}`
+              layerConfig.source.featureInfo!,
+            )}`,
           );
 
         if (styleSettings.defaultVisible !== false) {
@@ -571,7 +571,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   static #getQueryTree(
     styleSettings: TypeUniqueValueStyleConfig,
     fieldOfTheSameValue: TypeFieldOfTheSameValue[][],
-    fieldOrder: number[]
+    fieldOrder: number[],
   ): TypeQueryTree {
     const queryTree: TypeQueryTree = [];
     styleSettings.uniqueValueStyleInfo.forEach((styleEntry) => {
@@ -609,7 +609,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     level: number,
     fieldOrder: number[],
     styleSettings: TypeUniqueValueStyleConfig,
-    sourceFeatureInfo: TypeFeatureInfoLayerConfig
+    sourceFeatureInfo: TypeFeatureInfoLayerConfig,
   ): string {
     let queryString = styleSettings.defaultVisible !== false && !level ? 'not (' : '(';
     for (let i = 0; i < queryTree.length; i++) {
@@ -624,7 +624,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
           level + 1,
           fieldOrder,
           styleSettings,
-          sourceFeatureInfo
+          sourceFeatureInfo,
         )}`;
       } else {
         // We have reached the last field and i = 0 (false) we concatenate 'fieldName in (value' else we concatenate ', value'
@@ -697,7 +697,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     //   ),
     const searchDateEntry = [
       ...filterValueToUse.matchAll(
-        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi
+        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi,
       ),
     ];
 
@@ -711,7 +711,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       reformattedDate = reformattedDate.slice(0, reformattedDate.length === 20 ? -1 : -6); // drop time zone.
       reformattedDate = reformattedDate.replace('T', ' ');
       filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
-        dateFound.index! + dateFound[0].length
+        dateFound.index! + dateFound[0].length,
       )}`;
     });
 
@@ -775,7 +775,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
           {
             dataProjection: `EPSG:${responseJson.spatialReference.wkid}`,
             featureProjection: this.getMapViewer().getProjection().getCode(),
-          }
+          },
         );
 
         // Determine max extent from features

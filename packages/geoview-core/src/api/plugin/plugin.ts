@@ -79,7 +79,7 @@ export abstract class Plugin {
     pluginId: string,
     mapId: string,
     constructor?: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
-    props?: TypeJsonObject
+    props?: TypeJsonObject,
   ): Promise<void> {
     const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
     if (!plugins[pluginId]) {
