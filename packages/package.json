@@ -13,6 +13,11 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
+  "scripts": {
+    "format": "prettier --write \"geoview-**/src/**/*.{ts,tsx,js}\"",
+    "lint": "eslint \"geoview-**/src/**/*.{ts,tsx,js}\"",
+    "fix": "eslint \"geoview-**/src/**/*.{ts,tsx,js}\" --fix"
+  },
   "devDependencies": {
     "@babel/core": "^7.25.8",
     "@babel/eslint-parser": "^7.25.8",
