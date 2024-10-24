@@ -236,6 +236,15 @@ export abstract class DateMgt {
     return dayjs(new Date(validDate)).utc(true).format(pattern).replace('T', ' ').split('+')[0];
   }
 
+  /**
+   * Converts a Date object to an ISO 8601 formatted string in the local time zone.
+   * The resulting string will be in the format: YYYY-MM-DDTHH:mm:ss.sss
+   *
+   * @param {Date | number | string} date - The Date object to be formatted.
+   * @returns {string} The formatted date string in ISO 8601 format.
+   *
+   * @throws {TypeError} If the input is not a valid Date object.
+   */
   static formatDateToISO(date: Date | number | string): string {
     // check if it is a valid date
     if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (format)`);
@@ -244,6 +253,13 @@ export abstract class DateMgt {
     return `${dayjs(validDate).utc(true).format('YYYY-MM-DDTHH:mm:ss')}Z`;
   }
 
+  /**
+   * Attempts to guess the display pattern for a given date based on the provided format string.
+   *
+   * @param {(Date | number | string)[]} dates - An array of dates to analyze. Can be Date objects, timestamps (numbers), or date strings.
+   * @param {boolean} [onlyMinMax=true] - If true, only considers the minimum and maximum dates in the array.
+   * @returns {[DatePrecision | undefined, TimePrecision | undefined]} A tuple containing the guessed date and time precision.
+   */
   static guessDisplayPattern(
     dates: Date[] | number[] | string[],
     onlyMinMax = true

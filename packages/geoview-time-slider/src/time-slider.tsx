@@ -96,14 +96,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     typeof entry !== 'number' ? DateMgt.convertToMilliseconds(entry) : entry
   );
 
-  // // Check if range occurs in a single day or year
-  // const timeDelta = minAndMax[1] - minAndMax[0];
-  // const dayDelta = new Date(minAndMax[1]).getDate() - new Date(minAndMax[0]).getDate();
-  // const yearDelta = new Date(minAndMax[1]).getFullYear() - new Date(minAndMax[0]).getFullYear();
-  // let timeframe: string | undefined;
-  // if (dayDelta === 0 && timeDelta < 86400000) timeframe = 'day';
-  // else if (yearDelta === 0) timeframe = 'year';
-
   let timeMarks: number[] = [];
   if (range.length < 4 && discreteValues) {
     const interval = (DateMgt.convertToMilliseconds(range[range.length - 1]) - DateMgt.convertToMilliseconds(range[0])) / 4;
@@ -129,11 +121,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           ? DateMgt.formatDatePattern(timeMarks[i], undefined, displayPattern[1])
           : DateMgt.formatDatePattern(timeMarks[i], displayPattern[0], displayPattern[1]),
     });
-
-    // If timeframe is a single day, use time. If it is a single year, drop year from dates.
-    //  label: displayPattern[1] !== undefined ? DateMgt.formatDatePattern(timeMarks[i], undefined, displayPattern[1])
-    //  ? `${timeframe === 'day' ? new Date(timeMarks[i]).toTimeString().split(' ')[0] : new Date(timeMarks[i]).toISOString().slice(5, 10)}`
-    //  : new Date(timeMarks[i]).toISOString().slice(0, 10),
   }
 
   /**

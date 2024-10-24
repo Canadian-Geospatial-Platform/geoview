@@ -250,12 +250,12 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           filterVariant: 'date',
           muiFilterDatePickerProps: {
             timezone: 'UTC',
-            format: 'YYYY/MM/DD',
+            format: 'YYYY-MM-DD',
             // NOTE: reason for type cast as undefined as x-mui-datepicker prop type saying Date cant be assigned to undefined.
-            minDate: DateMgt.getDayjsDate('1600/01/01') as unknown as undefined,
+            minDate: DateMgt.getDayjsDate('1600-01-01') as unknown as undefined,
             slotProps: {
               textField: {
-                placeholder: language === VALID_DISPLAY_LANGUAGE[1] ? 'AAAA/MM/JJ' : 'YYYY/MM/DD',
+                placeholder: language === VALID_DISPLAY_LANGUAGE[1] ? 'AAAA-MM-JJ' : 'YYYY-MM-DD',
               },
             },
           },

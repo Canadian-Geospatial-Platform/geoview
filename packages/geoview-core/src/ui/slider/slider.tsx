@@ -99,6 +99,7 @@ export function Slider(props: SliderProps): JSX.Element {
     onChangeCommitted?.(newValue);
   };
 
+  // Focus on slider handle
   const focusSlider = useCallback(() => {
     if (sliderRef.current) {
       // Find the hidden input element and focus it
@@ -150,9 +151,6 @@ export function Slider(props: SliderProps): JSX.Element {
 
   /**
    * Removes overlapping labels in a slider component.
-   *
-   * @function
-   * @name removeLabelOverlap
    *
    * @description
    * This function identifies and hides overlapping labels in a slider component.
