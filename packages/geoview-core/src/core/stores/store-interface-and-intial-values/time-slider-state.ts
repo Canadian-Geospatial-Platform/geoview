@@ -2,6 +2,7 @@ import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
+import { DatePrecision, TimePrecision } from '@/core/utils/date-mgt';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with TimeSliderEventProcessor vs TimeSliderState
 
@@ -25,6 +26,7 @@ export interface ITimeSliderState {
     setSelectedLayerPath: (layerPath: string) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
+    setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
   };
 
   setterActions: {
@@ -40,6 +42,7 @@ export interface ITimeSliderState {
     setSliderFilters: (newSliderFilters: Record<string, string>) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
+    setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
   };
 }
 
@@ -58,7 +61,6 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
     sliderFilters: {},
 
     // #region ACTIONS
-
     actions: {
       addOrUpdateSliderFilter(layerPath: string, filter: string): void {
         // Redirect to event processor
@@ -101,6 +103,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         // Redirect to TimeSliderEventProcessor
         const { defaultValue, field, minAndMax, filtering } = get().timeSliderState.timeSliderLayers[layerPath];
         TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+      },
+      setDisplayPattern(layerPath: string, value: [DatePrecision, TimePrecision]): void {
+        // Redirect to setter
+        get().timeSliderState.setterActions.setDisplayPattern(layerPath, value);
       },
     },
 
@@ -219,6 +225,16 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
           },
         });
       },
+      setDisplayPattern(layerPath: string, value: [DatePrecision, TimePrecision]): void {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        sliderLayers[layerPath].displayPattern = value;
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
     },
 
     // #endregion ACTIONS
@@ -247,6 +263,7 @@ export interface TypeTimeSliderValues {
   singleHandle: boolean;
   title?: string;
   values: number[];
+  displayPattern: [DatePrecision, TimePrecision];
 }
 
 // **********************************************************

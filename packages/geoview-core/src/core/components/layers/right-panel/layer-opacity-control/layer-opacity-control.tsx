@@ -52,6 +52,7 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
           value={(layerDetails.opacity ? layerDetails.opacity : 1) * 100}
           onChange={handleSetOpacity}
           marks={marks}
+          valueLabelDisplay="auto"
         />
       </Box>
     </Box>

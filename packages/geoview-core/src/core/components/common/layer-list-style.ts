@@ -54,6 +54,7 @@ export const getSxClasses = (theme: Theme): any => ({
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
+      paddingRight: '10px',
     },
     '>div': {
       display: 'flex',

@@ -13,6 +13,7 @@ import { UIEventProcessor } from './ui-event-processor';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { DateMgt } from '@/core/utils/date-mgt';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -140,8 +141,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const { range } = temporalDimensionInfo.range;
     const defaultValueIsArray = Array.isArray(temporalDimensionInfo.default);
     const defaultValue = defaultValueIsArray ? temporalDimensionInfo.default[0] : temporalDimensionInfo.default;
-    const minAndMax: number[] = [new Date(range[0]).getTime(), new Date(range[range.length - 1]).getTime()];
-    const { field, singleHandle, nearestValues } = temporalDimensionInfo;
+    const minAndMax: number[] = [DateMgt.convertToMilliseconds(range[0]), DateMgt.convertToMilliseconds(range[range.length - 1])];
+    const { field, singleHandle, nearestValues, displayPattern } = temporalDimensionInfo;
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
@@ -154,9 +155,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // eslint-disable-next-line no-nested-ternary
     const values = singleHandle
-      ? [new Date(temporalDimensionInfo.default).getTime()]
+      ? [DateMgt.convertToMilliseconds(temporalDimensionInfo.default)]
       : defaultValueIsArray
-      ? [new Date(temporalDimensionInfo.default[0]).getTime(), new Date(temporalDimensionInfo.default[1]).getTime()]
+      ? [DateMgt.convertToMilliseconds(temporalDimensionInfo.default[0]), DateMgt.convertToMilliseconds(temporalDimensionInfo.default[1])]
       : [...minAndMax];
 
     // If using discrete axis
@@ -180,6 +181,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       delay: 1000,
       locked: undefined,
       reversed: undefined,
+      displayPattern,
     };
   }
 
@@ -262,7 +264,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     let filter: string;
     if (geoviewLayer instanceof WMS || geoviewLayer instanceof GVWMS) {
       if (filtering) {
-        const newValue = `${new Date(values[0]).toISOString().slice(0, new Date(values[0]).toISOString().length - 5)}Z`;
+        const newValue = DateMgt.formatDateToISO(values[0]);
         filter = `${field}=date '${newValue}'`;
       } else {
         filter = `${field}=date '${defaultValue}'`;
@@ -274,14 +276,14 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
         filter = `time=${minAndMax[0]},${defaultValue}`;
       }
     } else if (filtering) {
-      filter = `${field} >= date '${new Date(values[0]).toISOString()}'`;
+      filter = `${field} >= date '${DateMgt.formatDateToISO(values[0])}'`;
       if (values.length > 1) {
-        filter += ` and ${field} <= date '${new Date(values[1]).toISOString()}'`;
+        filter += ` and ${field} <= date '${DateMgt.formatDateToISO(values[1])}'`;
       }
     } else {
-      filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
+      filter = `${field} >= date '${DateMgt.formatDateToISO(minAndMax[0])}'`;
       if (values.length > 1) {
-        filter += `and ${field} <= date '${new Date(minAndMax[1]).toISOString()}'`;
+        filter += `and ${field} <= date '${DateMgt.formatDateToISO(minAndMax[1])}'`;
       }
     }
 
