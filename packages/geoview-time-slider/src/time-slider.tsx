@@ -349,7 +349,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       sliderDeltaRef.current = undefined;
       setValues(layerPath, newValues as number[]);
     },
-    [layerPath, setValues],
+    [layerPath, setValues]
   );
 
   /**
@@ -368,7 +368,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       if (timeframe === 'year') return new Date(theValue).toISOString().slice(5, 10);
       return new Date(theValue).toISOString().slice(0, 10);
     },
-    [timeframe],
+    [timeframe]
   );
 
   return (

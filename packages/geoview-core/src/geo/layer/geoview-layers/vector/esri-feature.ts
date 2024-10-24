@@ -76,7 +76,7 @@ export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewL
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsEsriFeature = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig,
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is EsriFeatureLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
@@ -227,7 +227,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {},
+    readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     // ? The line below uses var because a var declaration has a wider scope than a let declaration.
     // eslint-disable-next-line no-var

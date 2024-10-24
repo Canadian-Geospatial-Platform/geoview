@@ -254,7 +254,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     field: string,
     filtering: boolean,
     minAndMax: number[],
-    values: number[],
+    values: number[]
   ): void {
     // Get the layer using the map event processor
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath)!;

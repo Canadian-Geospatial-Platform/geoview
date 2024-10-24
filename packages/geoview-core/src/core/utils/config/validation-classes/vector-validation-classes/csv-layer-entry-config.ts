@@ -19,7 +19,7 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
 
     if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
       throw new Error(
-        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type CSV when the metadataAccessPath is undefined.`,
+        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type CSV when the metadataAccessPath is undefined.`
       );
     }
     // Default value for this.entryType is vector

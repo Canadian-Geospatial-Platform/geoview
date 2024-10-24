@@ -128,7 +128,7 @@ export class MapFeatureConfig {
     const gvMap = cloneDeep(userMapFeatureConfig.map) as TypeJsonObject;
     this.map = Cast<TypeMapConfig>(
       // Default map config depends on map projection.
-      defaultsDeep(gvMap, MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes)),
+      defaultsDeep(gvMap, MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes))
     );
 
     // Above code will add default zoomAndCenter, remove if other initial view is provided
@@ -157,7 +157,7 @@ export class MapFeatureConfig {
     this.appBar = Cast<TypeAppBarProps>(defaultsDeep(userMapFeatureConfig.appBar, CV_DEFAULT_MAP_FEATURE_CONFIG.appBar));
     this.footerBar = Cast<TypeFooterBarProps>(userMapFeatureConfig.footerBar);
     this.overviewMap = Cast<TypeOverviewMapProps>(
-      defaultsDeep(userMapFeatureConfig.overviewMap, CV_DEFAULT_MAP_FEATURE_CONFIG.overviewMap),
+      defaultsDeep(userMapFeatureConfig.overviewMap, CV_DEFAULT_MAP_FEATURE_CONFIG.overviewMap)
     );
     this.components = [...((userMapFeatureConfig.components || CV_DEFAULT_MAP_FEATURE_CONFIG.components) as TypeMapComponents)];
     this.corePackages = [...((userMapFeatureConfig.corePackages || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages) as TypeMapCorePackages)];
@@ -316,7 +316,7 @@ export class MapFeatureConfig {
       logger.logWarning(
         `- Invalid projection code ${(providedMapConfig?.map as TypeJsonObject)?.viewSettings?.projection} replaced by ${
           this.map.viewSettings.projection
-        } -`,
+        } -`
       );
     }
 
@@ -328,7 +328,7 @@ export class MapFeatureConfig {
     ) {
       logger.logWarning(
         `- Invalid zoom level ${(providedMapConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0]}
-        replaced by ${this.map.viewSettings.initialView?.zoomAndCenter[0]} -`,
+        replaced by ${this.map.viewSettings.initialView?.zoomAndCenter[0]} -`
       );
     }
 
@@ -343,15 +343,15 @@ export class MapFeatureConfig {
     ) {
       logger.logWarning(
         `- Invalid center ${originalZoomAndCenter[1]}
-        replaced by ${this.map.viewSettings.initialView!.zoomAndCenter![1]}`,
+        replaced by ${this.map.viewSettings.initialView!.zoomAndCenter![1]}`
       );
     }
 
     if (JSON.stringify((providedMapConfig?.map as TypeJsonObject)?.basemapOptions) !== JSON.stringify(this.map.basemapOptions)) {
       logger.logWarning(
         `- Invalid basemap options ${JSON.stringify(
-          (providedMapConfig?.map as TypeJsonObject)?.basemapOptions,
-        )} replaced by ${JSON.stringify(this.map.basemapOptions)} -`,
+          (providedMapConfig?.map as TypeJsonObject)?.basemapOptions
+        )} replaced by ${JSON.stringify(this.map.basemapOptions)} -`
       );
     }
   }
@@ -424,7 +424,7 @@ export class MapFeatureConfig {
       // Use config pass as parameter if defined
       if (listOfGeoviewLayerConfig?.length) {
         const geoviewConfigToUse = listOfGeoviewLayerConfig.find(
-          (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId === geoviewConfig.geoviewLayerId,
+          (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId === geoviewConfig.geoviewLayerId
         );
         // If a GeoView layer config has been found, use it. Otherwise, do nothing
         if (geoviewConfigToUse) geoviewConfig.applyUserConfig(geoviewConfigToUse);

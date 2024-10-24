@@ -249,7 +249,7 @@ export function AddNewLayer(): JSX.Element {
                   geoviewLayerConfig: wmsGeoviewLayerConfig,
                   layerId: childLayer.Name as string,
                   layerName: createLocalizedString(childLayer.Title as string),
-                } as OgcWmsLayerEntryConfig),
+                } as OgcWmsLayerEntryConfig)
               );
             }
 
@@ -307,7 +307,7 @@ export function AddNewLayer(): JSX.Element {
             geoviewLayerConfig: wfsGeoviewLayerConfig,
             layerId: (aFeatureType.Name['#text'] as string).split(':')[1] as string,
             layerName: createLocalizedString(aFeatureType.Title['#text'] as string),
-          } as WfsLayerEntryConfig),
+          } as WfsLayerEntryConfig)
       );
 
       if (layers.length === 1) {
@@ -381,7 +381,7 @@ export function AddNewLayer(): JSX.Element {
                 geoviewLayerConfig: ogcFeatureGeoviewLayerConfig,
                 layerId: aFeatureType.id as string,
                 layerName: createLocalizedString(aFeatureType.title as string),
-              } as OgcFeatureLayerEntryConfig),
+              } as OgcFeatureLayerEntryConfig)
             );
           }
         });
@@ -395,7 +395,7 @@ export function AddNewLayer(): JSX.Element {
               geoviewLayerConfig: ogcFeatureGeoviewLayerConfig,
               layerId: aFeatureType.id as string,
               layerName: createLocalizedString(aFeatureType.title as string),
-            } as OgcFeatureLayerEntryConfig),
+            } as OgcFeatureLayerEntryConfig)
         );
       }
 
@@ -482,8 +482,8 @@ export function AddNewLayer(): JSX.Element {
                   geoviewLayerConfig: esriGeoviewLayerConfig,
                   layerId: aLayer.id as string,
                   layerName: createLocalizedString(aLayer.name as string),
-                } as EsriDynamicLayerEntryConfig),
-              ),
+                } as EsriDynamicLayerEntryConfig)
+              )
             );
           } else {
             layers.push(
@@ -491,7 +491,7 @@ export function AddNewLayer(): JSX.Element {
                 geoviewLayerConfig: esriGeoviewLayerConfig,
                 layerId: esriMetadata.layers[0].id as string,
                 layerName: createLocalizedString(esriMetadata.layers[0].name as string),
-              } as EsriFeatureLayerEntryConfig),
+              } as EsriFeatureLayerEntryConfig)
             );
           }
 
@@ -534,7 +534,7 @@ export function AddNewLayer(): JSX.Element {
           geoviewLayerConfig: esriImageGeoviewLayerConfig,
           layerId: esriImageGeoviewLayerConfig.geoviewLayerId,
           layerName: createLocalizedString(
-            typeof esriImageGeoviewLayerInstance.metadata?.name === 'string' ? esriImageGeoviewLayerInstance.metadata?.name : '',
+            typeof esriImageGeoviewLayerInstance.metadata?.name === 'string' ? esriImageGeoviewLayerInstance.metadata?.name : ''
           ),
           source: {
             dataAccessPath: createLocalizedString(layerURL),

@@ -196,7 +196,7 @@ function initLCCProjection(): void {
   // define 3978 projection
   proj4.defs(
     Projection.PROJECTION_NAMES.LCC,
-    '+proj=lcc +lat_1=49 +lat_2=77 +lat_0=49 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+    '+proj=lcc +lat_1=49 +lat_2=77 +lat_0=49 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
   );
   register(proj4);
 

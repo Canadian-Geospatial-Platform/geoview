@@ -73,7 +73,7 @@ export function Accordion(props: AccordionProps): ReactNode {
         }
       }
     },
-    [expandedStates, showLoadingIcon, transitionStates],
+    [expandedStates, showLoadingIcon, transitionStates]
   );
 
   return (

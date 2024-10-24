@@ -99,7 +99,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
       if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
         throw new GeoviewLayerConfigError(
-          `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`,
+          `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`
         );
       }
 
@@ -149,7 +149,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       this.initialSettings!.extent = validateExtentWhenDefined(bounds);
       if (this.initialSettings?.extent?.find?.((value, i) => value !== bounds[i]))
         logger.logWarning(
-          `The extent specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`,
+          `The extent specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`
         );
 
       this.bounds = this.initialSettings!.extent;
@@ -186,7 +186,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     const serviceMetadata = this.getGeoviewLayerConfig().getServiceMetadata();
     const operation = findPropertyNameByRegex(serviceMetadata, [/(?:OperationsMetadata)/, /(?:Operation)/]) as TypeJsonArray;
     const describeFeatureTypeOperation = operation?.find?.(
-      (operationDescription) => operationDescription['@attributes'].name === 'DescribeFeatureType',
+      (operationDescription) => operationDescription['@attributes'].name === 'DescribeFeatureType'
     ) as TypeJsonObject;
 
     // If the output format cannot be deduce from the metadata, try 'application/json' as output format.
@@ -201,7 +201,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // format URL for the DescribeFeatureType request.
     const describeFeatureUrl = `${this.getGeoviewLayerConfig().processUrlParameters(
-      'DescribeFeatureType',
+      'DescribeFeatureType'
     )}&outputFormat=${encodeURIComponent(supportedOutputFormat as string)}&typeName=${this.layerId}`;
 
     // Execute the request using a JSON output format.
@@ -259,7 +259,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
           alias: fieldEntry.name,
           type: WfsLayerEntryConfig.#convertFieldType(fieldType),
           domain: [],
-        }),
+        })
       );
     });
 

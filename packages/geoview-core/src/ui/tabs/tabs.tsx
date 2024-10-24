@@ -132,7 +132,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
         onSelectedTabChanged?.(tabs[tabValue]);
       }
     },
-    [onSelectedTabChanged, onToggleCollapse, tabPanels, tabs],
+    [onSelectedTabChanged, onToggleCollapse, tabPanels, tabs]
   );
 
   /**
@@ -143,7 +143,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     (event: SyntheticEvent<Element, Event>, newValue: number): void => {
       updateTabPanel(newValue);
     },
-    [updateTabPanel],
+    [updateTabPanel]
   );
 
   /**
@@ -166,7 +166,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       if (activeTrap) onOpenKeyboard?.({ activeElementId: id, callbackElementId: id });
       else onCloseKeyboard?.();
     },
-    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value, tabPanels],
+    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value, tabPanels]
   );
 
   useEffect(() => {

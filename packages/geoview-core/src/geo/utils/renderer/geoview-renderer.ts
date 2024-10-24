@@ -58,7 +58,7 @@ type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean,
+  legendFilterIsOff?: boolean
 ) => Style | undefined;
 
 let colorCount = 0;
@@ -269,7 +269,7 @@ function createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
     new LineString([
       [4, drawingCanvas.height - 4],
       [drawingCanvas.width - 4, 4],
-    ]),
+    ])
   );
   return drawingCanvas;
 }
@@ -304,7 +304,7 @@ function createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
         [4, drawingCanvas.height - 4],
         [4, 4],
       ],
-    ]),
+    ])
   );
 
   context.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height);
@@ -447,7 +447,7 @@ function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayTyp
           else {
             const regularExpression = new RegExp(
               operand2.nodeValue.toLowerCase().replaceAll('.', '\\.').replaceAll('%', '.*').replaceAll('_', '.'),
-              '',
+              ''
             );
             const match = operand1.nodeValue ? operand1.nodeValue.toLowerCase().match(regularExpression) : null;
             dataStack.push({ nodeType: NodeType.variable, nodeValue: match !== null && match[0] === operand1.nodeValue?.toLowerCase() });
@@ -707,7 +707,7 @@ function processRegularShape(
   settings: TypeSimpleSymbolVectorConfig,
   points: number,
   angle: number,
-  scale: [number, number],
+  scale: [number, number]
 ): Style | undefined {
   // eslint-disable-next-line no-param-reassign
   if (settings.color === undefined) settings.color = getDefaultColor(0.25, true);
@@ -803,7 +803,7 @@ const processSymbol: Record<TypeSymbol, (settings: TypeSimpleSymbolVectorConfig)
 function processSimplePoint(
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeArrayType
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -829,7 +829,7 @@ function processSimplePoint(
 function processSimpleLineString(
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeArrayType
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1020,7 +1020,7 @@ const processFillStyle: Record<TypeFillStyle, (settings: TypePolygonVectorConfig
 function processSimplePolygon(
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeArrayType
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1055,7 +1055,7 @@ function processSimplePolygon(
  */
 async function processArrayOfPointStyleConfig(
   layerStyles: TypeVectorLayerStyles,
-  arrayOfPointStyleConfig: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[],
+  arrayOfPointStyleConfig: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]
 ): Promise<TypeVectorLayerStyles> {
   try {
     // UniqueValue or ClassBreak point style configuration ============================================================
@@ -1070,7 +1070,7 @@ async function processArrayOfPointStyleConfig(
         promiseOfCanvasCreated.push(
           new Promise<HTMLCanvasElement | null>((resolveSimpleVectorSymbol) => {
             resolveSimpleVectorSymbol(createPointCanvas(processSimplePoint(arrayOfPointStyleConfig[i].settings)));
-          }),
+          })
         );
     }
     const listOfCanvasCreated = await Promise.all(promiseOfCanvasCreated);
@@ -1098,7 +1098,7 @@ async function processArrayOfPointStyleConfig(
  */
 async function getPointStyleSubRoutine(
   defaultSettings?: TypeKindOfVectorSettings,
-  arrayOfPointStyleConfig?: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[],
+  arrayOfPointStyleConfig?: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]
 ): Promise<TypeVectorLayerStyles> {
   try {
     const layerStyles: TypeVectorLayerStyles = { Point: {} };
@@ -1154,7 +1154,7 @@ export async function getLegendStyles(styleConfig: TypeStyleConfig | undefined):
       if (isUniqueValueStyleConfig(styleConfig.Point)) {
         const layerStyles = await getPointStyleSubRoutine(
           styleConfig.Point.defaultSettings,
-          (styleConfig.Point as TypeUniqueValueStyleConfig).uniqueValueStyleInfo,
+          (styleConfig.Point as TypeUniqueValueStyleConfig).uniqueValueStyleInfo
         );
         legendStyles.Point = layerStyles.Point;
       }
@@ -1162,7 +1162,7 @@ export async function getLegendStyles(styleConfig: TypeStyleConfig | undefined):
       if (isClassBreakStyleConfig(styleConfig.Point)) {
         const layerStyles = await getPointStyleSubRoutine(
           styleConfig.Point.defaultSettings,
-          (styleConfig.Point as TypeClassBreakStyleConfig).classBreakStyleInfo,
+          (styleConfig.Point as TypeClassBreakStyleConfig).classBreakStyleInfo
         );
         legendStyles.Point = layerStyles.Point;
       }
@@ -1309,7 +1309,7 @@ function processUniqueValuePoint(
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean,
+  legendFilterIsOff?: boolean
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1339,7 +1339,7 @@ function processUniqueLineString(
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean,
+  legendFilterIsOff?: boolean
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1369,7 +1369,7 @@ function processUniquePolygon(
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean,
+  legendFilterIsOff?: boolean
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1426,7 +1426,7 @@ function processClassBreaksPoint(
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean,
+  legendFilterIsOff?: boolean
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1456,7 +1456,7 @@ function processClassBreaksLineString(
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean,
+  legendFilterIsOff?: boolean
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1486,7 +1486,7 @@ function processClassBreaksPolygon(
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean,
+  legendFilterIsOff?: boolean
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1538,7 +1538,7 @@ export function getAndCreateFeatureStyle(
   label: string,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeBaseStyleConfig) => void,
+  callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeBaseStyleConfig) => void
 ): Style | undefined {
   // Get the geometry type
   const geometryType = getGeometryType(feature);
@@ -1587,7 +1587,7 @@ export async function getFeatureCanvas(
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
   useRecycling?: boolean,
-  callbackForDataUrl?: () => Promise<string | null>,
+  callbackForDataUrl?: () => Promise<string | null>
 ): Promise<HTMLCanvasElement> {
   // The canvas that will be returned (if calculated successfully)
   let canvas: HTMLCanvasElement | undefined;
@@ -1741,7 +1741,7 @@ function extractKeyword(filterNodeArray: FilterNodeArrayType, keyword: string, r
             nodeArray.push({ nodeType: getNodeType(keyword), nodeValue: keyword });
             return nodeArray;
           }, [] as FilterNodeArrayType)
-          .slice(0, -1),
+          .slice(0, -1)
       );
     }
     return newKeywordArray;

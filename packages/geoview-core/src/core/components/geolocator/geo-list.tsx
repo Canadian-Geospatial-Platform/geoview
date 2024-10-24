@@ -95,7 +95,7 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
                     {transformListTitle(
                       geoListItem.name,
                       searchValue,
-                      !!geoListItem.province && geoListItem.province !== 'null' ? `, ${geoListItem.province}` : '',
+                      !!geoListItem.province && geoListItem.province !== 'null' ? `, ${geoListItem.province}` : ''
                     )}
                   </Typography>
                 </Grid>

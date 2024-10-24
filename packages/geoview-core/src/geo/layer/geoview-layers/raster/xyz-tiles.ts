@@ -114,7 +114,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo;
     const fieldIndex = getLocalizedValue(
       Cast<TypeLocalizedString>(fieldDefinitions.outfields),
-      AppEventProcessor.getDisplayLanguage(this.mapId),
+      AppEventProcessor.getDisplayLanguage(this.mapId)
     )
       ?.split(',')
       .indexOf(fieldName);
@@ -169,7 +169,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       }
 
       throw new Error(
-        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
       );
     });
   }
@@ -263,7 +263,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
     if (this.metadata) {
       const metadataLayerConfigFound = Cast<XYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
-        (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId,
+        (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
       );
       // metadataLayerConfigFound can not be undefined because we have already validated the config exist
       this.setLayerMetadata(layerConfig.layerPath, toJsonObject(metadataLayerConfigFound));

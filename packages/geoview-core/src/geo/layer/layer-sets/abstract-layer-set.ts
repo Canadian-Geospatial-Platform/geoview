@@ -346,7 +346,7 @@ export abstract class AbstractLayerSet {
         // Call the overridable function to process a layer name change
         this.onProcessNameChanged(
           layerNameEvent.layerPath,
-          getLocalizedValue(layerNameEvent.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId()))!,
+          getLocalizedValue(layerNameEvent.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId()))!
         );
 
         // Propagate to the store
@@ -374,7 +374,7 @@ export abstract class AbstractLayerSet {
     // (depending on how this translates in the new layers process, might not need this anymore)
     this.resultSet[layerConfig.layerPath].layerName = getLocalizedValue(
       layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
-      AppEventProcessor.getDisplayLanguage(this.getMapId()),
+      AppEventProcessor.getDisplayLanguage(this.getMapId())
     )!;
   }
 
@@ -409,7 +409,7 @@ export abstract class AbstractLayerSet {
     data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry,
     geoviewLayer: AbstractGeoViewLayer | AbstractGVLayer,
     queryType: QueryType,
-    location: TypeLocation,
+    location: TypeLocation
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Get Feature Info
     return geoviewLayer.getFeatureInfo(queryType, data.layerPath, location);

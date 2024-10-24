@@ -31,7 +31,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
         // Also propagate in the geochart arrays
         GeochartEventProcessor.#propagateArrayDataToStore(store.getState().mapId, cur);
-      },
+      }
     );
 
     // Checks for updated layers in geochart layer data array and update the batched array consequently
@@ -46,10 +46,10 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
           // Log
           logger.logPromiseFailed(
             'propagateFeatureInfoToStoreBatch in layerDataArrayUpdateBatch subscribe in geochart-event-processor',
-            error,
+            error
           );
         });
-      },
+      }
     );
 
     return [layerDataArrayUpdate, layerDataArrayUpdateBatch];
@@ -91,7 +91,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    */
   static getSingleGeochartState(
     mapId: string,
-    state: 'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath',
+    state: 'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'
   ): string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | undefined {
     if (this.getGeochartState(mapId)) return this.getGeochartState(mapId)![state];
     return undefined;
@@ -230,7 +230,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
       geochartState.setterActions.setLayerDataArrayBatch,
       'geochart-processor',
       geochartState.layerDataArrayBatchLayerPathBypass,
-      geochartState.setterActions.setLayerDataArrayBatchLayerPathBypass,
+      geochartState.setterActions.setLayerDataArrayBatchLayerPathBypass
     );
   }
 
