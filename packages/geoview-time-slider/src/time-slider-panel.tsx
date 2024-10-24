@@ -66,7 +66,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       const { values } = timeSliderLayerInfo;
       const [datePattern, timePattern] = [...timeSliderLayerInfo.displayPattern];
       return timeSliderLayerInfo.values.length === 1
-        ? DateMgt.formatDatePattern(values[0], datePattern, timePattern)
+        ? DateMgt.formatDatePattern(values[0], 'day', timePattern)
         : `${DateMgt.formatDatePattern(values[0], datePattern, timePattern)} / ${DateMgt.formatDatePattern(
             values[1],
             datePattern,

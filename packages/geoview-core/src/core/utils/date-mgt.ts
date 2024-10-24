@@ -257,19 +257,19 @@ export abstract class DateMgt {
     // Check if range occurs in a single day or year
     // TODO: we should check date pattern before and see if it should be only YYYY for example... use extractDateFormat
     const delta: [DatePrecision | undefined, TimePrecision | undefined][] = [];
-    if (dates.length === 1) {
+    if (validDates.length === 1) {
       delta.push(['day', 'minute']);
     } else if (onlyMinMax) {
       const timeDelta = validDates[validDates.length - 1] - validDates[0];
-      delta.push(timeDelta > 86400000 ? ['day', undefined] : ['day', 'minute']);
+      delta.push(timeDelta > 86400000 ? ['day', undefined] : [undefined, 'minute']);
     } else {
       for (let i = 0; i < validDates.length - 1; i++) {
         const timeDelta = validDates[i + 1] - validDates[i];
-        delta.push(timeDelta > 86400000 ? ['day', undefined] : ['day', 'minute']);
+        delta.push(timeDelta > 86400000 ? ['day', undefined] : [undefined, 'minute']);
       }
     }
 
-    return delta.some((item) => Array.isArray(item) && item[0] === 'day' && item[1] === 'minute') ? ['day', 'minute'] : ['day', undefined];
+    return delta[0];
   }
 
   /**
