@@ -1,4 +1,4 @@
-import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode, useCallback } from 'react';
+import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode, useCallback, useRef } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider } from '@mui/material';
@@ -56,6 +56,7 @@ export function Slider(props: SliderProps): JSX.Element {
     value: parentValue,
     min,
     max,
+    marks,
     valueLabelDisplay,
     onChange,
     onChangeCommitted,
@@ -65,6 +66,8 @@ export function Slider(props: SliderProps): JSX.Element {
   } = props;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   const containerId = `${properties.mapId}-${properties?.sliderId ?? generateId()}` || '';
   const valueLabelDisplayOption = valueLabelDisplay === undefined ? 'on' : 'auto';
@@ -84,6 +87,7 @@ export function Slider(props: SliderProps): JSX.Element {
     // Update the internal state
     setActiveThumb(newActiveThumb);
     setValue(newValue);
+    event.preventDefault();
 
     // Callback
     onChange?.(newValue, activeThumb);
@@ -95,6 +99,36 @@ export function Slider(props: SliderProps): JSX.Element {
     onChangeCommitted?.(newValue);
   };
 
+  const focusSlider = useCallback(() => {
+    if (sliderRef.current) {
+      // Find the hidden input element and focus it
+      const input = sliderRef.current.querySelectorAll('input[type="range"]');
+      if (input[0]) {
+        (input[0] as HTMLElement).focus();
+      }
+    }
+  }, []);
+
+  // GV There is a bug with focus on slider element. When the arrow key is pressed, the event trigger value change
+  // GV for the slider then the slider value is updated. This causes the slider to lose focus.
+  // GV The solution is to manually focus the slider element when the arrow key is pressed.
+  // GV This is a workaround until the issue is fixed in the Material UI library.
+  // GV When there is 2 handles, the focus on the second handle is lost and the focus is back to first handle
+  // TODO: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2560
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+        focusSlider();
+      }
+    },
+    [focusSlider]
+  );
+
+  useEffect(() => {
+    // Focus the slider when the component mounts
+    focusSlider();
+  }, [focusSlider]);
+
   /**
    * Checks if two HTML elements overlap, considering the slider's orientation and adding padding.
    *
@@ -103,16 +137,15 @@ export function Slider(props: SliderProps): JSX.Element {
    * @param {string} [orientation='horizontal'] - The orientation of the slider ('horizontal' or 'vertical').
    * @returns {boolean} True if the elements overlap, false otherwise.
    */
-  const checkOverlap = useCallback((el1: HTMLElement, el2: HTMLElement, orientation: string | undefined = 'horizontal'): boolean => {
+  const checkOverlap = useCallback((el1: HTMLElement, el2: HTMLElement, orientation: string): boolean => {
     if (!el1 || !el2) return false;
     const rect1 = el1.getBoundingClientRect();
     const rect2 = el2.getBoundingClientRect();
-    const padding = 10;
+    const padding = 50;
 
-    if (orientation === 'vertical') {
-      return !(rect1.bottom + padding < rect2.top || rect1.top > rect2.bottom + padding);
-    }
-    return !(rect1.right + padding < rect2.left || rect1.left > rect2.right + padding);
+    return orientation === 'vertical'
+      ? !(rect1.bottom + padding < rect2.top || rect1.top > rect2.bottom + padding)
+      : !(rect1.right + padding < rect2.left || rect1.left > rect2.right + padding);
   }, []);
 
   /**
@@ -178,14 +211,16 @@ export function Slider(props: SliderProps): JSX.Element {
     }
 
     // Handle middle element if odd number of markers
+    // TODO: there is still issue when previous to middle interfere with lst in Ontario ring of fire (time slider config- small screen)
     if (left === right) {
-      if (
-        !checkOverlap(markerArray[lastVisibleLeft], markerArray[left], orientation) &&
-        !checkOverlap(markerArray[left], markerArray[lastVisibleRight], orientation)
-      ) {
+      const middleElement = markerArray[left];
+      const overlapWithLeft = checkOverlap(markerArray[lastVisibleLeft], middleElement, orientation);
+      const overlapWithRight = checkOverlap(middleElement, markerArray[lastVisibleRight], orientation);
+
+      if (!overlapWithLeft && !overlapWithRight) {
         lastVisibleLeft = left;
       } else {
-        markerArray[left].classList.add('MuiSlider-markLabel-overlap');
+        middleElement.classList.add('MuiSlider-markLabel-overlap');
       }
     }
   }, [checkOverlap, containerId]);
@@ -198,23 +233,35 @@ export function Slider(props: SliderProps): JSX.Element {
     setValue(parentValue);
   }, [parentValue]);
 
-  useLayoutEffect(() => {
-    // remove overlaping labels
-    removeLabelOverlap();
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('UI.SLIDER - window resize');
 
-    window.addEventListener('resize', () => removeLabelOverlap);
-    return () => window.removeEventListener('resize', () => removeLabelOverlap);
+    window.addEventListener('resize', removeLabelOverlap);
+
+    return () => {
+      window.removeEventListener('resize', removeLabelOverlap);
+    };
   }, [removeLabelOverlap]);
 
-  // TODO: better implement WCAG on slider
+  // Add this new effect to handle slider value changes
+  useLayoutEffect(() => {
+    // Log
+    logger.logTraceUseEffect('UI.SLIDER - remove overlap on value change');
+
+    removeLabelOverlap();
+  }, [value, removeLabelOverlap]);
+
   return (
     <MaterialSlider
       {...properties}
       id={containerId}
       sx={sxClasses.slider}
+      ref={sliderRef}
       value={value}
       min={min}
       max={max}
+      marks={marks}
       disableSwap
       valueLabelDisplay={valueLabelDisplayOption}
       valueLabelFormat={onValueLabelFormat}
@@ -222,6 +269,7 @@ export function Slider(props: SliderProps): JSX.Element {
       getAriaValueText={onValueDisplayAriaLabel}
       onChange={handleChange}
       onChangeCommitted={handleChangeCommitted}
+      onKeyDown={handleKeyDown}
     />
   );
 }

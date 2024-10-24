@@ -287,16 +287,6 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       }
     }
 
-    // } else if (filtering) {
-    //   filter = `${field} >= date '${DateMgt.formatDateToISO(values[0])}'`;
-    //   if (values.length > 1) {
-    //     filter += ` and ${field} <= date '${DateMgt.formatDateToISO(values[1])}'`;
-    //   }
-    // } else {
-    //   filter = `${field} >= date '${DateMgt.formatDateToISO(minAndMax[0])}'`;
-    //   if (values.length > 1) {
-    //     filter += `and ${field} <= date '${DateMgt.formatDateToISO(minAndMax[1])}'`;
-
     this.getTimesliderState(mapId)?.setterActions.setFiltering(layerPath, filtering);
     this.getTimesliderState(mapId)?.setterActions.setValues(layerPath, values);
     this.addOrUpdateSliderFilter(mapId, layerPath, filter);

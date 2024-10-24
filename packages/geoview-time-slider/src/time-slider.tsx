@@ -11,6 +11,7 @@ import { getLocalizedValue, getLocalizedMessage } from 'geoview-core/src/core/ut
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
+import { DateMgt } from 'geoview-core/src/core/utils/date-mgt';
 import { getSxClasses } from './time-slider-style';
 import { ConfigProps } from './time-slider-types';
 
@@ -84,13 +85,152 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     delay,
     locked,
     reversed,
+    displayPattern,
   } = useTimeSliderLayers()[layerPath];
 
   // Get name from legend layers
   const legendLayers = useLayerLegendLayers();
   const name = LegendEventProcessor.findLayerByPath(legendLayers, layerPath).layerName;
 
-  // slider config
+  const timeStampRange = range.map((entry: string | number | Date) =>
+    typeof entry !== 'number' ? DateMgt.convertToMilliseconds(entry) : entry
+  );
+
+  // // Check if range occurs in a single day or year
+  // const timeDelta = minAndMax[1] - minAndMax[0];
+  // const dayDelta = new Date(minAndMax[1]).getDate() - new Date(minAndMax[0]).getDate();
+  // const yearDelta = new Date(minAndMax[1]).getFullYear() - new Date(minAndMax[0]).getFullYear();
+  // let timeframe: string | undefined;
+  // if (dayDelta === 0 && timeDelta < 86400000) timeframe = 'day';
+  // else if (yearDelta === 0) timeframe = 'year';
+
+  let timeMarks: number[] = [];
+  if (range.length < 4 && discreteValues) {
+    const interval = (DateMgt.convertToMilliseconds(range[range.length - 1]) - DateMgt.convertToMilliseconds(range[0])) / 4;
+    timeMarks = [minAndMax[0], minAndMax[0] + interval, minAndMax[0] + interval * 2, minAndMax[0] + interval * 3, minAndMax[1]];
+  } else if (range.length < 6 || singleHandle) timeMarks = timeStampRange;
+  else {
+    timeMarks = [
+      minAndMax[0],
+      DateMgt.convertToMilliseconds(range[Math.round(range.length / 4)]),
+      DateMgt.convertToMilliseconds(range[Math.round(range.length / 2)]),
+      DateMgt.convertToMilliseconds(range[Math.round((3 * range.length) / 4)]),
+      minAndMax[1],
+    ];
+  }
+
+  const sliderMarks = [];
+  for (let i = 0; i < timeMarks.length; i++) {
+    sliderMarks.push({
+      value: timeMarks[i],
+      // If timeframe is a single day, use time. If it is a single year, drop year from dates.
+      label:
+        displayPattern[1] !== undefined
+          ? DateMgt.formatDatePattern(timeMarks[i], undefined, displayPattern[1])
+          : DateMgt.formatDatePattern(timeMarks[i], displayPattern[0], displayPattern[1]),
+    });
+
+    // If timeframe is a single day, use time. If it is a single year, drop year from dates.
+    //  label: displayPattern[1] !== undefined ? DateMgt.formatDatePattern(timeMarks[i], undefined, displayPattern[1])
+    //  ? `${timeframe === 'day' ? new Date(timeMarks[i]).toTimeString().split(' ')[0] : new Date(timeMarks[i]).toISOString().slice(5, 10)}`
+    //  : new Date(timeMarks[i]).toISOString().slice(0, 10),
+  }
+
+  /**
+   * Moves the slider handles based on the specified direction.
+   * @param direction - The direction to move the slider ('back' or 'forward').
+   */
+  function moveSlider(direction: 'back' | 'forward'): void {
+    const isForward = direction === 'forward';
+    const stepMove = isForward ? 1 : -1;
+
+    // Handle single handle case with no discrete values
+    if (singleHandle && !discreteValues) {
+      const currentIndex = timeStampRange.indexOf(values[0]);
+      const newIndex =
+        // eslint-disable-next-line no-nested-ternary
+        currentIndex === (isForward ? timeStampRange.length - 1 : 0)
+          ? isForward
+            ? 0
+            : timeStampRange.length - 1
+          : currentIndex + stepMove;
+      setValues(layerPath, [timeStampRange[newIndex]]);
+      return;
+    }
+
+    // Handle single handle case with discrete values
+    if (singleHandle) {
+      const interval = (minAndMax[1] - minAndMax[0]) / 20;
+      const newPosition = values[0] + interval * stepMove;
+      // eslint-disable-next-line no-nested-ternary
+      setValues(layerPath, [newPosition > minAndMax[1] ? minAndMax[0] : newPosition < minAndMax[0] ? minAndMax[1] : newPosition]);
+      return;
+    }
+
+    // Handle multi-handle case
+    let [leftHandle, rightHandle] = values;
+
+    // If handles are at the extremes, reset the delta
+    if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
+      sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
+      setValues(
+        layerPath,
+        isForward ? [leftHandle, leftHandle + sliderDeltaRef.current] : [rightHandle - sliderDeltaRef.current, rightHandle]
+      );
+      return;
+    }
+
+    // Calculate the delta if not already set
+    if (!sliderDeltaRef.current) {
+      sliderDeltaRef.current = rightHandle - leftHandle;
+    }
+
+    const delta = sliderDeltaRef.current * stepMove;
+
+    // Handle locked and reversed case
+    if (locked && reversed) {
+      leftHandle += delta;
+      if ((isForward && leftHandle >= rightHandle) || (!isForward && leftHandle < minAndMax[0])) {
+        [leftHandle] = minAndMax;
+      }
+    }
+    // Handle locked case
+    else if (locked) {
+      if (isForward && rightHandle === minAndMax[1]) rightHandle = leftHandle;
+      rightHandle += delta;
+      if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
+      else if (!isForward && rightHandle < leftHandle) rightHandle = leftHandle;
+      if (!isForward && rightHandle === leftHandle) [, rightHandle] = minAndMax;
+    }
+    // Handle unlocked case
+    else if (isForward) {
+      if (leftHandle < sliderValueRef.current! && rightHandle === sliderValueRef.current) leftHandle = sliderValueRef.current;
+      else leftHandle += delta;
+      if (leftHandle >= minAndMax[1]) [leftHandle] = minAndMax;
+      rightHandle = leftHandle + sliderDeltaRef.current!;
+      if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
+      if (rightHandle > sliderValueRef.current! && leftHandle < sliderValueRef.current!) rightHandle = sliderValueRef.current as number;
+    } else {
+      if (rightHandle > sliderValueRef.current! && leftHandle === sliderValueRef.current) rightHandle = sliderValueRef.current;
+      else rightHandle += delta;
+      if (rightHandle <= minAndMax[0]) [, rightHandle] = minAndMax;
+      leftHandle = rightHandle - sliderDeltaRef.current!;
+      if (leftHandle < minAndMax[0]) [leftHandle] = minAndMax;
+      if (leftHandle < sliderValueRef.current! && rightHandle > sliderValueRef.current!) leftHandle = sliderValueRef.current as number;
+    }
+
+    setValues(layerPath, [leftHandle, rightHandle]);
+  }
+
+  function moveBack(): void {
+    moveSlider('back');
+  }
+
+  function moveForward(): void {
+    moveSlider('forward');
+  }
+
+  // #region USE EFFECT
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('TIME-SLIDER - mount');
@@ -114,149 +254,18 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       // update values based on slider's default value
       const defaultValueIsArray = Array.isArray(sliderConfig?.defaultValue);
       if (defaultValueIsArray) {
-        setValues(layerPath, [new Date(sliderConfig?.defaultValue[0]).getTime(), new Date(sliderConfig?.defaultValue[1]).getTime()]);
+        setValues(layerPath, [
+          DateMgt.convertToMilliseconds(sliderConfig?.defaultValue[0]),
+          DateMgt.convertToMilliseconds(sliderConfig?.defaultValue[1]),
+        ]);
       } else if (range.includes(sliderConfig?.defaultValue)) {
-        setValues(layerPath, [new Date(sliderConfig?.defaultValue).getTime()]);
+        setValues(layerPath, [DateMgt.convertToMilliseconds(sliderConfig?.defaultValue)]);
       } else {
-        setValues(layerPath, [new Date(range[0]).getTime()]);
+        setValues(layerPath, [DateMgt.convertToMilliseconds(range[0])]);
       }
     }
   }, [config, layerPath, range, setFiltering, setValues]);
 
-  const timeStampRange = range.map((entry: string | number | Date) => new Date(entry).getTime());
-
-  // Check if range occurs in a single day or year
-  const timeDelta = minAndMax[1] - minAndMax[0];
-  const dayDelta = new Date(minAndMax[1]).getDate() - new Date(minAndMax[0]).getDate();
-  const yearDelta = new Date(minAndMax[1]).getFullYear() - new Date(minAndMax[0]).getFullYear();
-  let timeframe: string | undefined;
-  if (dayDelta === 0 && timeDelta < 86400000) timeframe = 'day';
-  else if (yearDelta === 0) timeframe = 'year';
-
-  let timeMarks: number[] = [];
-  if (range.length < 4 && discreteValues) {
-    const interval = (new Date(range[range.length - 1]).getTime() - new Date(range[0]).getTime()) / 4;
-    timeMarks = [minAndMax[0], minAndMax[0] + interval, minAndMax[0] + interval * 2, minAndMax[0] + interval * 3, minAndMax[1]];
-  } else if (range.length < 6 || singleHandle) timeMarks = timeStampRange;
-  else {
-    timeMarks = [
-      minAndMax[0],
-      new Date(range[Math.round(range.length / 4)]).getTime(),
-      new Date(range[Math.round(range.length / 2)]).getTime(),
-      new Date(range[Math.round((3 * range.length) / 4)]).getTime(),
-      minAndMax[1],
-    ];
-  }
-
-  const sliderMarks = [];
-  for (let i = 0; i < timeMarks.length; i++) {
-    sliderMarks.push({
-      value: timeMarks[i],
-      // If timeframe is a single day, use time. If it is a single year, drop year from dates.
-      label: timeframe
-        ? `${timeframe === 'day' ? new Date(timeMarks[i]).toTimeString().split(' ')[0] : new Date(timeMarks[i]).toISOString().slice(5, 10)}`
-        : new Date(timeMarks[i]).toISOString().slice(0, 10),
-    });
-  }
-
-  /**
-   * Moves the slider handle(s) back one increment
-   */
-  // TODO: move forward and move back share common behaviour, see how we can minimize code duplication
-  function moveBack(): void {
-    if (singleHandle && !discreteValues) {
-      const currentIndex = timeStampRange.indexOf(values[0]);
-      let newIndex: number;
-      if (timeStampRange[currentIndex] === minAndMax[0]) newIndex = timeStampRange.length - 1;
-      else newIndex = currentIndex - 1;
-      setValues(layerPath, [timeStampRange[newIndex]]);
-    } else if (singleHandle) {
-      const interval = (minAndMax[1] - minAndMax[0]) / 20;
-      const newPosition = values[0] - interval < minAndMax[0] ? minAndMax[1] : values[0] - interval;
-      setValues(layerPath, [newPosition]);
-    } else {
-      let [leftHandle, rightHandle] = values;
-
-      // If there is no interval set, use 1/10 of min max interval so when user use buttons it will work.
-      if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
-        sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
-        setValues(layerPath, [rightHandle - sliderDeltaRef.current, rightHandle]);
-        return;
-      }
-      if (!sliderDeltaRef.current) {
-        sliderDeltaRef.current = rightHandle - leftHandle;
-      }
-
-      // Check for edge cases and then set new slider values
-      if (locked && reversed) {
-        if (leftHandle === minAndMax[0]) leftHandle = rightHandle;
-        leftHandle -= sliderDeltaRef.current;
-        if (leftHandle < minAndMax[0]) [leftHandle] = minAndMax;
-      } else if (locked) {
-        rightHandle -= sliderDeltaRef.current!;
-        if (rightHandle < leftHandle) rightHandle = leftHandle;
-        if (rightHandle === leftHandle) [, rightHandle] = minAndMax;
-      } else {
-        if (rightHandle > sliderValueRef.current! && leftHandle === sliderValueRef.current) rightHandle = sliderValueRef.current;
-        else rightHandle -= sliderDeltaRef.current!;
-        if (rightHandle <= minAndMax[0]) [, rightHandle] = minAndMax;
-        leftHandle = rightHandle - sliderDeltaRef.current!;
-        if (leftHandle < minAndMax[0]) [leftHandle] = minAndMax;
-        if (leftHandle < sliderValueRef.current! && rightHandle > sliderValueRef.current!) leftHandle = sliderValueRef.current as number;
-      }
-      setValues(layerPath, [leftHandle, rightHandle]);
-    }
-  }
-
-  /**
-   * Moves the slider handle(s) forward one increment
-   */
-  // TODO: move forward and move back share common behaviour, see how we can minimize code duplication
-  function moveForward(): void {
-    if (singleHandle && !discreteValues) {
-      const currentIndex = timeStampRange.indexOf(values[0]);
-      let newIndex: number;
-      if (timeStampRange[currentIndex] === minAndMax[1]) newIndex = 0;
-      else newIndex = currentIndex + 1;
-      setValues(layerPath, [timeStampRange[newIndex]]);
-    } else if (singleHandle) {
-      const interval = (minAndMax[1] - minAndMax[0]) / 20;
-      const newPosition = values[0] + interval > minAndMax[1] ? minAndMax[0] : values[0] + interval;
-      setValues(layerPath, [newPosition]);
-    } else {
-      let [leftHandle, rightHandle] = values;
-
-      // If there is no interval set, use 1/10 of min max interval so when user use buttons it will work.
-      if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
-        sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
-        setValues(layerPath, [leftHandle, leftHandle + sliderDeltaRef.current]);
-        return;
-      }
-      if (!sliderDeltaRef.current) {
-        sliderDeltaRef.current = rightHandle - leftHandle;
-      }
-
-      // Check for edge cases and then set new slider values
-      if (locked && reversed) {
-        leftHandle += sliderDeltaRef.current!;
-        if (leftHandle >= rightHandle) [leftHandle] = minAndMax;
-      } else if (locked) {
-        if (rightHandle === minAndMax[1]) rightHandle = leftHandle;
-        rightHandle += sliderDeltaRef.current!;
-        if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
-      } else {
-        if (leftHandle < sliderValueRef.current! && rightHandle === sliderValueRef.current) leftHandle = sliderValueRef.current;
-        else leftHandle += sliderDeltaRef.current!;
-        if (leftHandle >= minAndMax[1]) [leftHandle] = minAndMax;
-        rightHandle = leftHandle + sliderDeltaRef.current!;
-        if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
-        if (rightHandle > sliderValueRef.current! && leftHandle < sliderValueRef.current!) rightHandle = sliderValueRef.current as number;
-      }
-      setValues(layerPath, [leftHandle, rightHandle]);
-    }
-  }
-
-  // #region USE EFFECT
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('TIME-SLIDER - values filtering', values, filtering);
@@ -324,20 +333,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       setIsPlaying(false);
     }
   }
-  // #endregion
-
-  function returnLockTooltip(): string {
-    if (reversed) {
-      const text = locked
-        ? getLocalizedMessage('timeSlider.slider.unlockRight', displayLanguage)
-        : getLocalizedMessage('timeSlider.slider.lockRight', displayLanguage);
-      return text;
-    }
-    const text = locked
-      ? getLocalizedMessage('timeSlider.slider.unlockLeft', displayLanguage)
-      : getLocalizedMessage('timeSlider.slider.lockLeft', displayLanguage);
-    return text;
-  }
 
   const handleSliderChange = useCallback(
     (newValues: number | number[]): void => {
@@ -361,15 +356,29 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const handleLabelFormat = useCallback(
     (theValue: number): string => {
       // Log
-      logger.logTraceUseCallback('TIME-SLIDER - handleLabelFormat', timeframe);
+      logger.logTraceUseCallback('TIME-SLIDER - handleLabelFormat', displayPattern);
 
       // If timeframe is a single day, use time. If it is a single year, drop year from dates.
-      if (timeframe === 'day') return new Date(theValue).toTimeString().split(' ')[0].replace(/^0/, '');
-      if (timeframe === 'year') return new Date(theValue).toISOString().slice(5, 10);
-      return new Date(theValue).toISOString().slice(0, 10);
+      DateMgt.formatDatePattern(values[0], displayPattern[0], displayPattern[1]);
+
+      return DateMgt.formatDatePattern(theValue, displayPattern[0], displayPattern[1]);
     },
-    [timeframe]
+    [displayPattern, values]
   );
+  // #endregion
+
+  function returnLockTooltip(): string {
+    if (reversed) {
+      const text = locked
+        ? getLocalizedMessage('timeSlider.slider.unlockRight', displayLanguage)
+        : getLocalizedMessage('timeSlider.slider.lockRight', displayLanguage);
+      return text;
+    }
+    const text = locked
+      ? getLocalizedMessage('timeSlider.slider.unlockLeft', displayLanguage)
+      : getLocalizedMessage('timeSlider.slider.lockLeft', displayLanguage);
+    return text;
+  }
 
   return (
     <Grid>
@@ -378,8 +387,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           <Grid item xs={9}>
             <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
               {`${title || name}`}
-              {timeframe !== undefined &&
-                ` (${timeframe === 'day' ? new Date(defaultValue).toLocaleDateString() : new Date(defaultValue).getFullYear()})`}
+              {displayPattern[0] === undefined && ` (${DateMgt.formatDate(defaultValue, 'YYYY-MM-DD')})`}
             </Typography>
           </Grid>
           <Grid item xs={3}>
