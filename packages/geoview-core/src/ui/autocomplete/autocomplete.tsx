@@ -8,7 +8,7 @@ export interface TypeAutocompleteProps<
   T,
   Multiple extends boolean | undefined = undefined,
   DisableClearable extends boolean | undefined = undefined,
-  FreeSolo extends boolean | undefined = undefined
+  FreeSolo extends boolean | undefined = undefined,
 > extends AutocompleteProps<T, Multiple, DisableClearable, FreeSolo> {
   fullWidth: boolean;
 }
@@ -23,7 +23,7 @@ function MUIAutocomplete<
   T,
   Multiple extends boolean | undefined = undefined,
   DisableClearable extends boolean | undefined = undefined,
-  FreeSolo extends boolean | undefined = undefined
+  FreeSolo extends boolean | undefined = undefined,
 >(props: TypeAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>, ref: Ref<HTMLElement>): JSX.Element {
   const { fullWidth, ...autoCompleteProps } = props;
 

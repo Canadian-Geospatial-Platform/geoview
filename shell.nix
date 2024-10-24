@@ -6,6 +6,7 @@ pkgs.mkShell {
   buildInputs = [
     pkgs.nodejs
     pkgs.nodePackages.rush
+    pkgs.npm-check-updates
   ];
 
   shellHook = ''

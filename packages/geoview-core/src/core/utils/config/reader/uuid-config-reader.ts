@@ -42,7 +42,7 @@ export type GeoChartConfig = TypeJsonObject & {
   layers: [
     {
       layerId: string;
-    }
+    },
   ];
 }; // TypeJsonObject, because the definition is in the external package
 

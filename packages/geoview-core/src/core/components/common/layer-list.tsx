@@ -123,7 +123,7 @@ const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onLis
         e.preventDefault();
       }
     },
-    [isDisabled, onListItemClick]
+    [isDisabled, onListItemClick],
   );
 
   const AnimatedPaper = animated(Paper);

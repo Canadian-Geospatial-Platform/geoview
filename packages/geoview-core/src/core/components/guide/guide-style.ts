@@ -38,4 +38,4 @@ export const getSxClasses = (theme: Theme) =>
       marginTop: '30px',
       marginBottom: '12px',
     },
-  } as const);
+  }) as const;

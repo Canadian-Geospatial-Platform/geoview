@@ -268,7 +268,8 @@ export class ConsoleLogger {
 
       // Check if changed
       let hasChanged = false;
-      if (callbackCheck) hasChanged = callbackCheck(object, newObject); // Use callback to know
+      if (callbackCheck)
+        hasChanged = callbackCheck(object, newObject); // Use callback to know
       else hasChanged = newObject !== object; // Use straight equality comparator
 
       // If has changed

@@ -147,7 +147,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             layerFeatures: getNumFeaturesLabel(layer!),
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
             layerUniqueId: `${mapId}-${TABS.GEO_CHART}-${layer.layerPath}`,
-          } as LayerListEntry)
+          }) as LayerListEntry
       );
   }, [visibleLayers, storeArrayOfLayerData, configObj, getNumFeaturesLabel, mapId]);
 

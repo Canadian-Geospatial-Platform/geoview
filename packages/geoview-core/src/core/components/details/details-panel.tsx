@@ -135,7 +135,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
             layerFeatures: getNumFeaturesLabel(layer!),
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
             layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath ?? ''}`,
-          } as LayerListEntry)
+          }) as LayerListEntry
       );
     return layerListEntries;
   }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel, mapId]);

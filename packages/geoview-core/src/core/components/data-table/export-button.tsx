@@ -91,10 +91,13 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
 
     // format the rows for csv.
     const csvRows = rows.map((row) => {
-      const mappedRow = Object.keys(row).reduce((acc, curr) => {
-        acc[curr] = row[curr]?.value ?? '';
-        return acc;
-      }, {} as Record<string, unknown>);
+      const mappedRow = Object.keys(row).reduce(
+        (acc, curr) => {
+          acc[curr] = row[curr]?.value ?? '';
+          return acc;
+        },
+        {} as Record<string, unknown>
+      );
       return mappedRow;
     });
     const csvExporter = new ExportToCsv(getCsvOptions());
