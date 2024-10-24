@@ -75,7 +75,7 @@ export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLa
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsOgcFeature = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig,
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is OgcFeatureLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
@@ -196,7 +196,7 @@ export class OgcFeature extends AbstractGeoViewVector {
           const latlonExtent = Projection.transformExtent(
             foundCollection.extent.spatial.bbox[0] as number[],
             Projection.getProjection(foundCollection.extent.spatial.crs as string)!,
-            Projection.PROJECTION_NAMES.LNGLAT,
+            Projection.PROJECTION_NAMES.LNGLAT
           );
           layerConfig.initialSettings.bounds = latlonExtent;
         }
@@ -299,7 +299,7 @@ export class OgcFeature extends AbstractGeoViewVector {
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {},
+    readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
     sourceOptions.url = layerConfig.source!.dataAccessPath!;

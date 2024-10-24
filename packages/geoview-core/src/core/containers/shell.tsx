@@ -115,7 +115,7 @@ export function Shell(props: ShellProps): JSX.Element {
         ...tempComponents,
       }));
     },
-    [components],
+    [components]
   );
 
   /**
@@ -127,7 +127,7 @@ export function Shell(props: ShellProps): JSX.Element {
       setModalProps(mapViewer.modal.modals[event.modalId]);
       setModalOpen(true);
     },
-    [mapViewer],
+    [mapViewer]
   );
 
   /**
@@ -193,7 +193,7 @@ export function Shell(props: ShellProps): JSX.Element {
         };
         return acc;
       },
-      {} as Record<number, ShellContainerCssProperties>,
+      {} as Record<number, ShellContainerCssProperties>
     );
   }, [footerPanelResizeValue, footerPanelResizeValues]);
 

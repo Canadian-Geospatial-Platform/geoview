@@ -136,7 +136,7 @@ export function OverviewMap(props: OverwiewMapProps): JSX.Element {
         <ThemeProvider theme={cgpvTheme}>
           <OverviewMapToggle overviewMap={overviewMapControl} />
         </ThemeProvider>
-      </I18nextProvider>,
+      </I18nextProvider>
     );
 
     // link the root to the the map so we can unmount

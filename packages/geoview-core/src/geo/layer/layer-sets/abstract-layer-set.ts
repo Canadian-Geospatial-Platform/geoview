@@ -402,7 +402,7 @@ export abstract class AbstractLayerSet {
     data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry,
     geoviewLayer: AbstractGeoViewLayer | AbstractGVLayer,
     queryType: QueryType,
-    location: TypeLocation,
+    location: TypeLocation
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Get Feature Info
     return geoviewLayer.getFeatureInfo(queryType, data.layerPath, location);

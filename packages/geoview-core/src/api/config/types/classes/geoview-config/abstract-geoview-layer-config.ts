@@ -187,7 +187,7 @@ export abstract class AbstractGeoviewLayerConfig {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass,
+    parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass | undefined;
 
   /**
@@ -207,7 +207,7 @@ export abstract class AbstractGeoviewLayerConfig {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass,
+    parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass | undefined;
 
   /**
@@ -449,7 +449,7 @@ export abstract class AbstractGeoviewLayerConfig {
   applyUserConfig(userGeoviewLayerConfig?: TypeJsonObject): void {
     if (userGeoviewLayerConfig && !isvalidComparedToInputSchema(this.getGeoviewLayerSchema(), userGeoviewLayerConfig)) {
       logger.logError(
-        `GeoView configuration ${userGeoviewLayerConfig.geoviewLayerId} passed to applyUserConfig is invalid compared to the schema specification and has been ignored.`,
+        `GeoView configuration ${userGeoviewLayerConfig.geoviewLayerId} passed to applyUserConfig is invalid compared to the schema specification and has been ignored.`
       );
       return;
     }
@@ -481,7 +481,7 @@ export abstract class AbstractGeoviewLayerConfig {
 
     if (!isvalidComparedToInternalSchema(this.getGeoviewLayerSchema(), this, true)) {
       throw new GeoviewLayerConfigError(
-        `GeoView internal configuration ${this.geoviewLayerId} is invalid compared to the internal schema specification.`,
+        `GeoView internal configuration ${this.geoviewLayerId} is invalid compared to the internal schema specification.`
       );
     }
   }

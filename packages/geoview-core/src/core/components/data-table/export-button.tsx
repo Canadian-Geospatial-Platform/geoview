@@ -96,7 +96,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
           acc[curr] = row[curr]?.value ?? '';
           return acc;
         },
-        {} as Record<string, unknown>,
+        {} as Record<string, unknown>
       );
       return mappedRow;
     });

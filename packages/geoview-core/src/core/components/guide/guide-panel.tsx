@@ -93,7 +93,7 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
       setGuideItemIndex(index);
       setSelectedLayerPath(layer.layerPath);
     },
-    [layersList],
+    [layersList]
   );
 
   return (

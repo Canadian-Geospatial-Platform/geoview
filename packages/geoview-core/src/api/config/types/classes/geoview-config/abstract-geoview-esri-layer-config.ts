@@ -153,7 +153,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
             layerName: serviceMetadata.name!,
           }),
           this.getLanguage(),
-          this,
+          this
         )!,
       ];
     }
@@ -173,7 +173,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
             geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layers[0].geometryType as string),
           }),
           this.getLanguage(),
-          this,
+          this
         )!,
       ];
 
@@ -219,7 +219,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
               layerId: layer.id.toString(),
               layerName: layer.name,
               geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layer.geometryType as string),
-            }),
+            })
           );
         }
       }

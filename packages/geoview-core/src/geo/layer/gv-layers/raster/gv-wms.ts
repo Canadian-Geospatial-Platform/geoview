@@ -288,7 +288,7 @@ export class GVWMS extends AbstractGVRaster {
    */
   #getLayerMetadataEntry(
     layerId: string,
-    layer: TypeJsonObject | undefined = this.getLayerConfig().getServiceMetadata()?.Capability?.Layer,
+    layer: TypeJsonObject | undefined = this.getLayerConfig().getServiceMetadata()?.Capability?.Layer
   ): TypeJsonObject | null {
     if (!layer) return null;
     if ('Name' in layer && (layer.Name as string) === layerId) return layer;
@@ -520,7 +520,7 @@ export class GVWMS extends AbstractGVRaster {
           const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
           const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.getExternalFragmentsOrder(), reverseTimeZone);
           filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
-            dateFound.index! + dateFound[0].length + 2,
+            dateFound.index! + dateFound[0].length + 2
           )}`;
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });

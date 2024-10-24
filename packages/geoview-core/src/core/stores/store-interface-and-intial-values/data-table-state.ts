@@ -83,7 +83,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           get().mapId,
           layerPath,
           filterStrings,
-          !!get()?.dataTableState?.layersDataTableSetting[layerPath]?.mapFilteredRecord,
+          !!get()?.dataTableState?.layersDataTableSetting[layerPath]?.mapFilteredRecord
         );
       },
       setActiveLayersData: (activeLayerData: TypeLayerData[]) => {

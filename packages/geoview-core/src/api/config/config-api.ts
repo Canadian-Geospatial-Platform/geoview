@@ -235,7 +235,7 @@ export class ConfigApi {
           const listOfGeoviewLayerConfig = await UUIDmapConfigReader.getGVConfigFromUUIDs(
             CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl,
             displayLanguage,
-            urlParams.keys.toString().split(','),
+            urlParams.keys.toString().split(',')
           );
 
           // The listOfGeoviewLayerConfig returned by the previous call appended 'rcs.' at the beginning and
@@ -301,7 +301,7 @@ export class ConfigApi {
     language: TypeDisplayLanguage,
     config: TypeJsonArray | TypeJsonObject,
     geocoreUrl?: string,
-    filterUndefinedValues = true,
+    filterUndefinedValues = true
   ): Promise<TypeJsonArray | TypeJsonObject | undefined> {
     // convert the JSON object to a JSON array. We want to process a single type.
     const listOfGeoviewLayerConfig = Array.isArray(config) ? config : [config];
@@ -328,7 +328,7 @@ export class ConfigApi {
         let newListOfGeoviewLayerConfig = listOfGeoviewLayerConfig.map((layerConfig) => {
           if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
             const jsonConfigFound = arrayOfJsonConfig.find(
-              (jsonConfig) => jsonConfig.geoviewLayerId === `rcs.${layerConfig.geoviewLayerId}.${language}`,
+              (jsonConfig) => jsonConfig.geoviewLayerId === `rcs.${layerConfig.geoviewLayerId}.${language}`
             );
             if (jsonConfigFound) {
               jsonConfigFound.geoviewLayerId = layerConfig.geoviewLayerId;
@@ -436,7 +436,7 @@ export class ConfigApi {
       providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(
         language,
         providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray,
-        providedMapFeatureConfig?.serviceUrls?.geocoreUrl as string,
+        providedMapFeatureConfig?.serviceUrls?.geocoreUrl as string
       )) as TypeJsonObject;
       const errorDetected = inputLength !== providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
 
@@ -474,7 +474,7 @@ export class ConfigApi {
     serviceAccessString: string,
     layerType: TypeGeoviewLayerType | typeof CV_CONFIG_GEOCORE_TYPE,
     listOfLayerId: TypeJsonArray = [],
-    language: TypeDisplayLanguage = 'en',
+    language: TypeDisplayLanguage = 'en'
   ): Promise<AbstractGeoviewLayerConfig | undefined> {
     let geoviewLayerConfig: TypeJsonObject | undefined;
 
@@ -524,7 +524,7 @@ export class ConfigApi {
     serviceAccessString: string,
     layerType: TypeGeoviewLayerType,
     listOfLayerId: TypeJsonArray = [],
-    language: TypeDisplayLanguage = 'en',
+    language: TypeDisplayLanguage = 'en'
   ): Promise<EntryConfigBaseClass[]> {
     // GV: TEMPORARY SECTION TO BE DELETED WHEN ALL LAYER TYPES ARE IMPLEMENTED
     // GV: THE CODE IN THIS SECTION IS NOT PERMANANT BECAUSE THE CORRESPONDING
@@ -577,8 +577,8 @@ export class ConfigApi {
         Cast<EntryConfigBaseClass[]>(
           listOfLayerId.map((layerId) => {
             return { layerId };
-          }),
-        ),
+          })
+        )
       );
 
       await geoviewLayerConfig.fetchServiceMetadata();

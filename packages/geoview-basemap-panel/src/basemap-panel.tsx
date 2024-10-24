@@ -57,7 +57,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   function getThumbnailUrl(
     basemapTypes: string[],
     projection: TypeValidMapProjectionCodes,
-    displayLanguage: TypeDisplayLanguage,
+    displayLanguage: TypeDisplayLanguage
   ): string[] {
     const thumbnailUrls: string[] = [];
 
@@ -70,7 +70,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
             (myMap.basemap.basemapsList[projection].transport?.url as string)
               .replace('{z}', thumbnailZoom)
               .replace('{y}', projection === 3978 ? thumbnailYX[3978][0] : thumbnailYX[3857][0])
-              .replace('{x}', projection === 3978 ? thumbnailYX[3978][1] : thumbnailYX[3857][1]),
+              .replace('{x}', projection === 3978 ? thumbnailYX[3978][1] : thumbnailYX[3857][1])
           );
         }
       }
@@ -82,7 +82,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
             (myMap.basemap.basemapsList[projection].simple.url as string)
               .replace('{z}', thumbnailZoom)
               .replace('{y}', thumbnailYX[3978][0])
-              .replace('{x}', thumbnailYX[3978][1]),
+              .replace('{x}', thumbnailYX[3978][1])
           );
         }
       }
@@ -94,7 +94,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
             (myMap.basemap.basemapsList[projection].shaded.url as string)
               .replace('{z}', thumbnailZoom)
               .replace('{y}', thumbnailYX[3978][0])
-              .replace('{x}', thumbnailYX[3978][1]),
+              .replace('{x}', thumbnailYX[3978][1])
           );
         }
       }
@@ -106,7 +106,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
               .replaceAll('xxxx', displayLanguage === 'en' ? 'CBMT' : 'CBCT')
               .replace('{z}', thumbnailZoom)
               .replace('{y}', projection === 3978 ? thumbnailYX[3978][0] : thumbnailYX[3857][0])
-              .replace('{x}', projection === 3978 ? thumbnailYX[3978][1] : thumbnailYX[3857][1]),
+              .replace('{x}', projection === 3978 ? thumbnailYX[3978][1] : thumbnailYX[3857][1])
           );
         }
       }
@@ -121,7 +121,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
             (myMap.basemap.basemapsList[projection].imagery?.url as string)
               .replace('{z}', thumbnailZoom)
               .replace('{y}', projection === 3978 ? thumbnailYX[3978][0] : thumbnailYX[3857][0])
-              .replace('{x}', projection === 3978 ? thumbnailYX[3978][1] : thumbnailYX[3857][1]),
+              .replace('{x}', projection === 3978 ? thumbnailYX[3978][1] : thumbnailYX[3857][1])
           );
         }
       }
@@ -183,7 +183,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
    */
   const createBasemapArray = async (projection: TypeValidMapProjectionCodes): Promise<void> => {
     const basemapsArray = toJsonObject(
-      (config.supportedProjections as Array<TypeJsonObject>).find((obj: TypeJsonObject) => obj.projectionCode === projection),
+      (config.supportedProjections as Array<TypeJsonObject>).find((obj: TypeJsonObject) => obj.projectionCode === projection)
     );
 
     let isInit = false;

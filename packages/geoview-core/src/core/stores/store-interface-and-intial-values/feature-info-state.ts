@@ -106,7 +106,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
                 ? []
                 : get().detailsState.checkedFeatures.filter(
                     (featureInfoEntry: TypeFeatureInfoEntry) =>
-                      (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid,
+                      (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
                   ),
           },
         });

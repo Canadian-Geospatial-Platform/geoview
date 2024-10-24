@@ -105,7 +105,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
         ...newGroupDetails,
       });
     },
-    [buttonPanelGroups],
+    [buttonPanelGroups]
   );
 
   const handleNavApiRemoveButtonPanel = useCallback(
@@ -120,7 +120,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
         return state;
       });
     },
-    [setButtonPanelGroups],
+    [setButtonPanelGroups]
   );
 
   useEffect(() => {

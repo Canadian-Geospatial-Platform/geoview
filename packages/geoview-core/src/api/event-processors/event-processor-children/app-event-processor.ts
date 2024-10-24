@@ -63,7 +63,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
     const curNotifications = appState.notifications;
     // if the notification already exist, we increment the count
     const existingNotif = curNotifications.find(
-      (item) => item.message === notif.message && item.notificationType === notif.notificationType,
+      (item) => item.message === notif.message && item.notificationType === notif.notificationType
     );
 
     if (!existingNotif) {

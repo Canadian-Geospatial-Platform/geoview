@@ -92,7 +92,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
         removeCheckedFeature(feature);
       }
     },
-    [addCheckedFeature, checked, feature, removeCheckedFeature],
+    [addCheckedFeature, checked, feature, removeCheckedFeature]
   );
 
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
@@ -130,7 +130,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
     setChecked(
       checkedFeatures.some((checkedFeature) => {
         return (checkedFeature.geometry as TypeGeometry)?.ol_uid === featureUid;
-      }),
+      })
     );
   }, [checkedFeatures, featureUid]);
 

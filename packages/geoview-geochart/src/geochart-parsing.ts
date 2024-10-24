@@ -15,7 +15,7 @@ import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer
  */
 const findLayerConfig = (
   config: PluginGeoChartConfig<ChartType>,
-  layerId: string,
+  layerId: string
 ): [GeoViewGeoChartConfig<ChartType> | undefined, GeoViewGeoChartConfigLayer | undefined] => {
   // Find the chart plugin layer config that works with layer that contains found data
   // For each chart plugin config that works with a layer config
@@ -78,7 +78,7 @@ const simplifyTypeFeatureInfoEntries = (entries: TypeFeatureInfoEntryPartial[]):
 export const findLayerDataAndConfigFromQueryResults = (
   config: PluginGeoChartConfig<ChartType>,
   layerApi: LayerApi,
-  layerDataArray: TypeGeochartResultSetEntry[],
+  layerDataArray: TypeGeochartResultSetEntry[]
 ): [
   GeoViewGeoChartConfig<ChartType> | undefined,
   GeoViewGeoChartConfigLayer | undefined,
@@ -127,7 +127,7 @@ export const findLayerDataAndConfigFromQueryResults = (
 export const loadDatasources = (
   configChart: GeoViewGeoChartConfig<ChartType>,
   configChartLayer: GeoViewGeoChartConfigLayer,
-  layerData: TypeFeatureInfoEntryPartial[],
+  layerData: TypeFeatureInfoEntryPartial[]
 ): GeoViewGeoChartConfig<ChartType> => {
   // The new Plugin input to be returned
   // Cloning it in the process to make sure we're detaching ourselves from the configuration plugin object

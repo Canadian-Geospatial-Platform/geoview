@@ -55,7 +55,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
 
       return builtGeometry;
     },
-    [transformPoints],
+    [transformPoints]
   );
 
   /**

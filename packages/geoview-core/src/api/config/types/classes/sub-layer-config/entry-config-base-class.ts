@@ -97,7 +97,7 @@ export abstract class EntryConfigBaseClass {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewLayerConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass,
+    parentNode?: EntryConfigBaseClass
   ) {
     this.validateLayerConfig(layerConfig);
     this.#language = language;
@@ -344,14 +344,14 @@ export abstract class EntryConfigBaseClass {
         toJsonObject(cloneOfTheNode),
         this.#language,
         this.#geoviewLayerConfig,
-        parentNode,
+        parentNode
       )!;
     else
       cloneOfTheNode = this.#geoviewLayerConfig.createLeafNode(
         toJsonObject(cloneOfTheNode),
         this.#language,
         this.#geoviewLayerConfig,
-        parentNode,
+        parentNode
       )!;
     // Restore the layerName and the private properties.
     cloneOfTheNode.layerName = this.layerName;
@@ -376,7 +376,7 @@ export abstract class EntryConfigBaseClass {
       let nodeFound: EntryConfigBaseClass | undefined;
       for (let i = 1; i < pathItems.length; i++) {
         nodeFound = (listOfLayerEntryConfig as EntryConfigBaseClass[]).find(
-          (layerEntryConfig) => layerEntryConfig.layerId === pathItems[i],
+          (layerEntryConfig) => layerEntryConfig.layerId === pathItems[i]
         );
         if (!nodeFound) break;
         listOfLayerEntryConfig = layerEntryIsGroupLayer(nodeFound) ? nodeFound.listOfLayerEntryConfig : [];

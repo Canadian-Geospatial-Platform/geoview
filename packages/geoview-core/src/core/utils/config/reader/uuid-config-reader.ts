@@ -119,7 +119,7 @@ export class UUIDmapConfigReader {
               // Overwrite default from geocore custom config
               const mergedConfig = deepMergeObjects(
                 originalConfig as unknown as TypeJsonObject,
-                customGeocoreLayerConfig as unknown as TypeJsonObject,
+                customGeocoreLayerConfig as unknown as TypeJsonObject
               );
               const esriDynamicLayerEntryConfig = new EsriDynamicLayerEntryConfig(mergedConfig as unknown as EsriDynamicLayerEntryConfig);
 
@@ -201,7 +201,7 @@ export class UUIDmapConfigReader {
               // Overwrite default from geocore custom config
               const mergedConfig = deepMergeObjects(
                 originalConfig as unknown as TypeJsonObject,
-                customGeocoreLayerConfig as unknown as TypeJsonObject,
+                customGeocoreLayerConfig as unknown as TypeJsonObject
               );
               const wmsLayerEntryConfig = new OgcWmsLayerEntryConfig(mergedConfig as unknown as OgcWmsLayerEntryConfig);
 

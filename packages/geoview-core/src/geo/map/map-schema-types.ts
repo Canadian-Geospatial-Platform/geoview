@@ -703,7 +703,7 @@ export type TypeBaseStyleConfig = {
  * @returns {boolean} true if the type ascention is valid.
  */
 export const isSimpleStyleConfig = (
-  verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings,
+  verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings
 ): verifyIfConfig is TypeSimpleStyleConfig => {
   return (verifyIfConfig as TypeStyleSettings)?.styleType === 'simple';
 };
@@ -745,7 +745,7 @@ export type TypeUniqueValueStyleInfo = {
  * @returns {boolean} true if the type ascention is valid.
  */
 export const isUniqueValueStyleConfig = (
-  verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings,
+  verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings
 ): verifyIfConfig is TypeUniqueValueStyleConfig => {
   return (verifyIfConfig as TypeStyleSettings)?.styleType === 'uniqueValue';
 };
@@ -796,7 +796,7 @@ export type TypeClassBreakStyleInfo = {
  * @returns {boolean} true if the type ascention is valid.
  */
 export const isClassBreakStyleConfig = (
-  verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings,
+  verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings
 ): verifyIfConfig is TypeClassBreakStyleConfig => {
   return (verifyIfConfig as TypeStyleSettings)?.styleType === 'classBreaks';
 };

@@ -98,7 +98,7 @@ export abstract class AbstractEventProcessor {
     onSetLayerDataArray: (layerDataArray: T[]) => void,
     traceProcessorIndication?: string,
     layerPathBypass?: string,
-    onResetBypass?: (layerPath: string) => void,
+    onResetBypass?: (layerPath: string) => void
   ): Promise<void> {
     // Log
     logger.logTraceDetailed('propagateArrayStoreBatch', mapId, traceProcessorIndication);

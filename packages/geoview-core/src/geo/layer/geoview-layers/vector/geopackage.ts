@@ -96,7 +96,7 @@ export const geoviewLayerIsGeoPackage = (verifyIfGeoViewLayer: AbstractGeoViewLa
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsGeoPackage = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig,
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is GeoPackageLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
 };
@@ -168,7 +168,7 @@ export class GeoPackage extends AbstractGeoViewVector {
   // TODO: Question - Is this function still used or should it be removed in favor of the mother class implementation?
   override processListOfLayerEntryConfig(
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
-    layerGroup?: LayerGroup,
+    layerGroup?: LayerGroup
   ): Promise<BaseLayer | undefined> {
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | undefined>((resolve) => {
       // Single group layer handled recursively
@@ -197,7 +197,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         if (!layerGroup)
           layerGroup = this.createLayerGroup(
             listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
-            listOfLayerEntryConfig[0].initialSettings!,
+            listOfLayerEntryConfig[0].initialSettings!
           );
 
         listOfLayerEntryConfig.forEach((layerConfig) => {
@@ -275,7 +275,7 @@ export class GeoPackage extends AbstractGeoViewVector {
   protected extractGeopackageData(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {},
+    readOptions: ReadOptions = {}
   ): Promise<[LayerData[], SldsInterface]> {
     const promisedGeopackageData = new Promise<[LayerData[], SldsInterface]>((resolve) => {
       const url = layerConfig.source!.dataAccessPath!;
@@ -536,7 +536,7 @@ export class GeoPackage extends AbstractGeoViewVector {
   protected processOneGeopackageLayer(
     layerConfig: AbstractBaseLayerEntryConfig,
     layerInfo: LayerData,
-    sld?: SldsInterface,
+    sld?: SldsInterface
   ): Promise<BaseLayer | undefined> {
     // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
     this.getMapViewer().layer.registerLayerConfigInit(layerConfig);
@@ -569,7 +569,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    */
   protected override async processOneLayerEntry(
     layerConfig: AbstractBaseLayerEntryConfig,
-    layerGroup?: LayerGroup,
+    layerGroup?: LayerGroup
   ): Promise<BaseLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.

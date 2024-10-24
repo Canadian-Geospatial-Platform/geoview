@@ -79,7 +79,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       ctx.closePath();
       ctx.clip();
     },
-    [orientation],
+    [orientation]
   );
 
   /**
@@ -201,7 +201,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
         logger.logError('SWIPER - Failed to attach layer events', viewer.layer?.geoviewLayers, layerPath, error);
       }
     },
-    [viewer, prerender],
+    [viewer, prerender]
   );
 
   useEffect(() => {

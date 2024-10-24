@@ -116,7 +116,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass,
+    parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
     return new WmsLayerEntryConfig(layerConfig, language, geoviewConfig, parentNode);
   }
@@ -137,7 +137,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass,
+    parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
     return new WmsGroupLayerConfig(layerConfig, language, geoviewConfig, parentNode);
   }
@@ -416,7 +416,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
           this.#addLayerToMetadataInstance(
             metadataLayerPathToAdd,
             this.getServiceMetadata().Capability.Layer,
-            arrayOfMetadata[i]!.Capability.Layer,
+            arrayOfMetadata[i]!.Capability.Layer
           );
         }
       }
@@ -426,10 +426,9 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
       logger.logError(
-        `Error detected while reading WMS metadata for geoview layer ${this.geoviewLayerId}.\n${
-          (error as GeoviewLayerConfigError).message || ''
+        `Error detected while reading WMS metadata for geoview layer ${this.geoviewLayerId}.\n${(error as GeoviewLayerConfigError).message || ''
         }`,
-        error,
+        error
       );
     }
   }
@@ -482,20 +481,20 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
   #addLayerToMetadataInstance(
     metadataLayerPathToAdd: number[],
     metadataLayer: TypeJsonObject | undefined,
-    layerToAdd: TypeJsonObject,
+    layerToAdd: TypeJsonObject
   ): void {
     if (metadataLayerPathToAdd.length === 0 || !metadataLayer) return;
     if (metadataLayerPathToAdd[0] === -1)
       this.#addLayerToMetadataInstance(metadataLayerPathToAdd.slice(1), metadataLayer.Layer, layerToAdd.Layer);
     else {
       const metadataLayerFound = (metadataLayer as TypeJsonArray).find(
-        (layerEntry) => layerEntry.Name === layerToAdd[metadataLayerPathToAdd[0]].Name,
+        (layerEntry) => layerEntry.Name === layerToAdd[metadataLayerPathToAdd[0]].Name
       );
       if (metadataLayerFound)
         this.#addLayerToMetadataInstance(
           metadataLayerPathToAdd.slice(1),
           metadataLayerFound.Layer,
-          layerToAdd[metadataLayerPathToAdd[0]].Layer,
+          layerToAdd[metadataLayerPathToAdd[0]].Layer
         );
       else (metadataLayer as TypeJsonArray).push(layerToAdd[metadataLayerPathToAdd[0]]);
     }
@@ -510,7 +509,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    */
   #processMetadataInheritance(
     parentLayer?: TypeJsonObject,
-    layer: TypeJsonObject | undefined = this.getServiceMetadata().Capability.Layer,
+    layer: TypeJsonObject | undefined = this.getServiceMetadata().Capability.Layer
   ): void {
     if (parentLayer && layer) {
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
@@ -578,7 +577,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    */
   findLayerMetadataEntry(
     layerId: string,
-    layer: TypeJsonObject | undefined = this.getServiceMetadata().Capability.Layer,
+    layer: TypeJsonObject | undefined = this.getServiceMetadata().Capability.Layer
   ): TypeJsonObject | null {
     // return null if the metadata doesn't have a Layer property in Capability (metadata fetch failed).
     if (!layer) return null;
