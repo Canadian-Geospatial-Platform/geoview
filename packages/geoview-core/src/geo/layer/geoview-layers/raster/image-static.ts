@@ -59,7 +59,7 @@ export const geoviewLayerIsImageStatic = (verifyIfGeoViewLayer: AbstractGeoViewL
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsImageStatic = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig,
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is ImageStaticLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
@@ -120,7 +120,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
       let legendUrl: string | undefined = getLocalizedValue(
         layerConfig.source.dataAccessPath,
-        AppEventProcessor.getDisplayLanguage(this.mapId),
+        AppEventProcessor.getDisplayLanguage(this.mapId)
       );
 
       if (legendUrl) {
@@ -232,7 +232,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
       }
 
       throw new Error(
-        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
       );
     });
   }

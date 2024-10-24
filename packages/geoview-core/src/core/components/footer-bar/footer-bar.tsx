@@ -88,7 +88,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         acc[curr] = {} as Tab;
         return acc;
       },
-      {} as Record<string, Tab>,
+      {} as Record<string, Tab>
     );
   }, [footerBarTabsConfig?.tabs?.core]);
 
@@ -149,7 +149,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         acc[curr] = tabHeight;
         return acc;
       },
-      {} as Record<number, number>,
+      {} as Record<number, number>
     );
   }, [footerPanelResizeValue, footerPanelResizeValues]);
 
@@ -319,7 +319,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
             constructor,
             toJsonObject({
               mapId,
-            }),
+            })
           ).catch((error) => {
             // Log
             logger.logPromiseFailed('api.plugin.addPlugin(time-slider) in useEffect in FooterBar', error);
@@ -341,7 +341,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
             constructor,
             toJsonObject({
               mapId,
-            }),
+            })
           ).catch((error) => {
             // Log
             logger.logPromiseFailed('api.plugin.addPlugin(geochart) in useEffect in FooterBar', error);

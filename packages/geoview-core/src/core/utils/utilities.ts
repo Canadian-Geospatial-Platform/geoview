@@ -151,7 +151,7 @@ export function isJsonString(str: string): boolean {
       str,
       '- JSON Parser error:',
       (e as { message: string }).message,
-      '- See text above.',
+      '- See text above.'
     );
     return false;
   }
@@ -382,7 +382,7 @@ function _whenThisThenThat<T>(
   failCallback: (reason?: unknown) => void,
   startDate: Date,
   timeout: number,
-  checkFrequency: number,
+  checkFrequency: number
 ): void {
   // Check if we're good
   const v = checkCallback();
@@ -416,7 +416,7 @@ export function whenThisThenThat<T>(
   doCallback: (value: T) => void,
   failCallback: (reason?: unknown) => void,
   timeout = 10000,
-  checkFrequency = 100,
+  checkFrequency = 100
 ): void {
   const startDate = new Date();
   _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, timeout, checkFrequency);
@@ -476,7 +476,7 @@ function getSectionHeading(content: string): string {
 export async function createGuideObject(
   mapId: string,
   language: TypeDisplayLanguage,
-  assetsURL: string,
+  assetsURL: string
 ): Promise<TypeGuideObject | undefined> {
   try {
     const response = await fetch(`${assetsURL}/locales/${language}/guide.md`);

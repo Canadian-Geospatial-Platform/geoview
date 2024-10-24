@@ -249,7 +249,7 @@ export class ConsoleLogger {
     trackerKey: string,
     callbackObject: () => T,
     callbackCheck?: (prevObject: T, newObject: T) => boolean,
-    interval?: number,
+    interval?: number
   ): void {
     // Validate log active and existing tracker clearing
     if (!LOG_ACTIVE) return;

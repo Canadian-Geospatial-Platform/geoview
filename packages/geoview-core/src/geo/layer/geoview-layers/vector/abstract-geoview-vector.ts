@@ -101,7 +101,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo;
     const fieldIndex = getLocalizedValue(
       Cast<TypeLocalizedString>(fieldDefinitions.outfields),
-      AppEventProcessor.getDisplayLanguage(this.mapId),
+      AppEventProcessor.getDisplayLanguage(this.mapId)
     )
       ?.split(',')
       .indexOf(fieldName);
@@ -145,7 +145,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   protected createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {},
+    readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     let vectorSource: VectorSource<Feature>;
@@ -184,7 +184,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
               layerConfig.layerPath,
               url as string,
               JSON.parse(xhr.responseText).count,
-              this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount as number | undefined,
+              this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount as number | undefined
             );
 
             // Convert to features
@@ -195,7 +195,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
                   ...readOptions,
                   featureProjection: projection,
                   extent,
-                }) as Feature[]),
+                }) as Feature[])
               );
             });
           } else {
@@ -286,7 +286,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     featureCount: number,
     maxRecordCount?: number,
     featureLimit: number = 500,
-    queryLimit: number = 10,
+    queryLimit: number = 10
   ): Promise<string[]> {
     // Update url
     const baseUrl = url.replace('&where=1%3D1&returnCountOnly=true', `&outfields=*`);
@@ -367,7 +367,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             label,
             layerConfig.layerPath,
             layerConfig.filterEquation,
-            layerConfig.legendFilterIsOff,
+            layerConfig.legendFilterIsOff
           );
         },
       };
@@ -460,7 +460,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // GV Layers Refactoring - Obsolete (in layers)
   protected override getFeatureInfoAtCoordinate(
     location: Coordinate,
-    layerPath: string,
+    layerPath: string
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Redirect to getFeatureInfoAtPixel
     return this.getFeatureInfoAtPixel(this.getMapViewer().map.getPixelFromCoordinate(location), layerPath);
@@ -590,7 +590,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     //   ),
     const searchDateEntry = [
       ...filterValueToUse.matchAll(
-        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi,
+        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi
       ),
     ];
 
@@ -600,7 +600,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
       const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
       filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
-        dateFound.index! + dateFound[0].length,
+        dateFound.index! + dateFound[0].length
       )}`;
     });
 
@@ -610,8 +610,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     } catch (error) {
       throw new Error(
         `Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${this.getLayerFilter(
-          layerPath,
-        )}\ninternal filter = ${filterValueToUse}`,
+          layerPath
+        )}\ninternal filter = ${filterValueToUse}`
       );
     }
 
@@ -718,7 +718,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     headers: string[],
     firstRow: string[],
     excludedHeaders: string[],
-    layerConfig: VectorLayerEntryConfig,
+    layerConfig: VectorLayerEntryConfig
   ): void {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };

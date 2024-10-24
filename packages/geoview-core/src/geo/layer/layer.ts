@@ -373,7 +373,7 @@ export class LayerApi {
         return this.getOLLayer(layerPath)!;
       },
       timeout,
-      checkFrequency,
+      checkFrequency
     );
   }
 
@@ -810,7 +810,7 @@ export class LayerApi {
     olSource: Source,
     layerConfig: ConfigBaseClass,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    extraConfig?: any,
+    extraConfig?: any
   ): AbstractGVLayer | undefined {
     // If new mode
     let metadata;
@@ -1003,7 +1003,7 @@ export class LayerApi {
 
         // Get the number of child layers
         const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId()).filter((layerInfo) =>
-          layerInfo.layerPath.startsWith(parentLayerPath),
+          layerInfo.layerPath.startsWith(parentLayerPath)
         ).length;
 
         // If the map index of the parent hasn't been set yet
@@ -1118,7 +1118,7 @@ export class LayerApi {
   checkLayerStatus(
     status: TypeLayerStatus,
     layerEntriesToCheck: MapConfigLayerEntry[] | undefined,
-    callbackNotGood?: (geoviewLayer: AbstractGeoViewLayer) => void,
+    callbackNotGood?: (geoviewLayer: AbstractGeoViewLayer) => void
   ): [boolean, number] {
     // If no layer entries at all or there are layer entries and there are geoview layers to check
     let allGood = layerEntriesToCheck?.length === 0 || Object.keys(this.#geoviewLayers).length > 0;
@@ -1188,7 +1188,7 @@ export class LayerApi {
     // initialize these two constant now because we will delete the information used to get their values.
     const indexToDelete = this.#layerEntryConfigs[layerPath]
       ? this.#layerEntryConfigs[layerPath].parentLayerConfig?.listOfLayerEntryConfig.findIndex(
-          (layerConfig) => layerConfig === this.#layerEntryConfigs[layerPath],
+          (layerConfig) => layerConfig === this.#layerEntryConfigs[layerPath]
         )
       : undefined;
     const listOfLayerEntryConfigAffected = this.#layerEntryConfigs[layerPath]?.parentLayerConfig?.listOfLayerEntryConfig;
@@ -1220,11 +1220,11 @@ export class LayerApi {
 
         if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
           mapFeaturesConfig.map.listOfGeoviewLayerConfig = mapFeaturesConfig.map.listOfGeoviewLayerConfig.filter(
-            (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== layerPath,
+            (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== layerPath
           );
       } else if (layerPathNodes.length === 2) {
         const updatedListOfLayerEntryConfig = geoviewLayer.listOfLayerEntryConfig.filter(
-          (entryConfig) => entryConfig.layerId !== layerPathNodes[1],
+          (entryConfig) => entryConfig.layerId !== layerPathNodes[1]
         );
         geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
       } else {
@@ -1235,7 +1235,7 @@ export class LayerApi {
           if (i === layerPathNodes.length - 1 && layerEntryConfig) {
             // When we get to the top level, remove the layer entry config
             const updatedListOfLayerEntryConfig = layerEntryConfig.listOfLayerEntryConfig.filter(
-              (entryConfig) => entryConfig.layerId !== layerPathNodes[i],
+              (entryConfig) => entryConfig.layerId !== layerPathNodes[i]
             );
             geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
           } else if (layerEntryConfig) {
@@ -1478,7 +1478,7 @@ export class LayerApi {
         }
       }
       const children = curOrderedLayerInfo.filter(
-        (info: TypeOrderedLayerInfo) => info.layerPath.startsWith(parentLayerPath) && info.layerPath !== parentLayerPath,
+        (info: TypeOrderedLayerInfo) => info.layerPath.startsWith(parentLayerPath) && info.layerPath !== parentLayerPath
       );
       if (!children.some((child: TypeOrderedLayerInfo) => child.visible === true)) {
         this.setOrToggleLayerVisibility(parentLayerPath, false);
@@ -1608,7 +1608,7 @@ export class LayerApi {
       MapEventProcessor.addInitialFilter(
         this.getMapId(),
         layerConfig.layerPath,
-        (layerConfig as VectorLayerEntryConfig).layerFilter as string,
+        (layerConfig as VectorLayerEntryConfig).layerFilter as string
       );
   }
 

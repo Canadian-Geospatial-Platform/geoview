@@ -96,19 +96,19 @@ export class MapEventProcessor extends AbstractEventProcessor {
           const curFeatureUids = curFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
           const prevFeatureUids = prevFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
           const newFeatures = curFeatures.filter(
-            (feature: TypeFeatureInfoEntry) => !prevFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid),
+            (feature: TypeFeatureInfoEntry) => !prevFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
           );
           const removedFeatures = prevFeatures.filter(
-            (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid),
+            (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
           );
           for (let i = 0; i < newFeatures.length; i++)
             MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.highlightFeature(newFeatures[i]);
           for (let i = 0; i < removedFeatures.length; i++)
             MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(
-              (removedFeatures[i].geometry as TypeGeometry).ol_uid,
+              (removedFeatures[i].geometry as TypeGeometry).ol_uid
             );
         }
-      },
+      }
     );
 
     // #endregion FEATURE SELECTION
@@ -128,7 +128,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
         if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(curVisibleLayers))
           store.getState().mapState.setterActions.setVisibleLayers(curVisibleLayers as string[]);
-      },
+      }
     );
 
     // Return the array of subscriptions so they can be destroyed later
@@ -167,7 +167,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const northPoleId = `${mapId}-northpole`;
     const projectionPosition = Projection.transformFromLonLat(
       [NORTH_POLE_POSITION[1], NORTH_POLE_POSITION[0]],
-      `EPSG:${store.getState().mapState.currentProjection}`,
+      `EPSG:${store.getState().mapState.currentProjection}`
     );
 
     const northPoleMarker = new Overlay({
@@ -266,7 +266,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       await whenThisThen(
         () =>
           document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') &&
-          document.getElementById(`${mapId}-scaleControlBar`)?.querySelector('.ol-scale-text'),
+          document.getElementById(`${mapId}-scaleControlBar`)?.querySelector('.ol-scale-text')
       );
     } catch (error) {
       // Log
@@ -333,7 +333,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const projectedCoords = Projection.transformPoints(
       [marker.lnglat],
       Projection.PROJECTION_NAMES.LNGLAT,
-      `EPSG:${this.getMapStateProtected(mapId).currentProjection}`,
+      `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
     );
 
     // Redirect to processor
@@ -437,7 +437,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     degreeRotation: string,
     isNorthVisible: boolean,
     mapExtent: Extent,
-    scale: TypeScaleInfo,
+    scale: TypeScaleInfo
   ): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setMapMoveEnd(
@@ -446,7 +446,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       degreeRotation,
       isNorthVisible,
       mapExtent,
-      scale,
+      scale
     );
   }
 
@@ -576,7 +576,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           ? []
           : this.getMapStateProtected(mapId).highlightedFeatures.filter(
               (featureInfoEntry: TypeFeatureInfoEntry) =>
-                (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid,
+                (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
             );
 
       // Save in store
@@ -722,7 +722,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static replaceOrderedLayerInfo(
     mapId: string,
     geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig,
-    layerPathToReplace?: string,
+    layerPathToReplace?: string
   ): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const layerPath = (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
@@ -831,7 +831,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static zoomToExtent(
     mapId: string,
     extent: Extent,
-    options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: OL_ZOOM_MAXZOOM, duration: OL_ZOOM_DURATION },
+    options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: OL_ZOOM_MAXZOOM, duration: OL_ZOOM_DURATION }
   ): Promise<void> {
     // Validate the extent coordinates
     if (
@@ -848,7 +848,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           () => {
             resolve();
           },
-          (options.duration || OL_ZOOM_DURATION) + 150,
+          (options.duration || OL_ZOOM_DURATION) + 150
         );
       });
       // The +150 is to make sure the logic before turning these function async remains
@@ -891,7 +891,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const projectedCoords = Projection.transformPoints(
         [coords],
         Projection.PROJECTION_NAMES.LNGLAT,
-        `EPSG:${this.getMapStateProtected(mapId).currentProjection}`,
+        `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
       );
 
       const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
@@ -951,7 +951,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const projectedCoords = Projection.transformPoints(
       [coord],
       Projection.PROJECTION_NAMES.LNGLAT,
-      `EPSG:${this.getMapStateProtected(mapId).currentProjection}`,
+      `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
     );
 
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
@@ -991,7 +991,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static getInitialSettings(
     layerEntryConfig: ConfigBaseClass,
     orderedLayerInfo: TypeOrderedLayerInfo,
-    legendLayerInfo: TypeLegendLayer,
+    legendLayerInfo: TypeLegendLayer
   ): TypeLayerInitialSettings {
     return {
       states: {
@@ -1026,18 +1026,18 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const pathArray = layerPath.split('/');
     if (pathArray[0] === pathArray[1]) pathArray.splice(0, 1);
     const geoviewLayerConfig = MapEventProcessor.getGeoViewMapConfig(mapId)?.map.listOfGeoviewLayerConfig?.find(
-      (layerConfig) => layerConfig.geoviewLayerId === pathArray[0],
+      (layerConfig) => layerConfig.geoviewLayerId === pathArray[0]
     );
 
     let configLayerEntryConfig;
     if (geoviewLayerConfig) {
       configLayerEntryConfig = (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.find(
-        (nextEntryConfig: TypeLayerEntryConfig) => nextEntryConfig.layerId === pathArray[1],
+        (nextEntryConfig: TypeLayerEntryConfig) => nextEntryConfig.layerId === pathArray[1]
       );
       for (let i = 2; i < pathArray.length; i++) {
         if (configLayerEntryConfig?.listOfLayerEntryConfig)
           configLayerEntryConfig = configLayerEntryConfig.listOfLayerEntryConfig.find(
-            (nextEntryConfig: TypeLayerEntryConfig) => nextEntryConfig.layerId === pathArray[i],
+            (nextEntryConfig: TypeLayerEntryConfig) => nextEntryConfig.layerId === pathArray[i]
           );
         else configLayerEntryConfig = undefined;
       }
@@ -1047,7 +1047,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
     if (layerEntryConfig!.entryType === 'group') {
       const sublayerPaths = MapEventProcessor.getMapLayerOrder(mapId).filter(
-        (entryLayerPath) => entryLayerPath.startsWith(layerPath) && entryLayerPath.split('/').length === layerPath.split('/').length + 1,
+        (entryLayerPath) => entryLayerPath.startsWith(layerPath) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
       );
       sublayerPaths.forEach((sublayerPath) => listOfLayerEntryConfig.push(MapEventProcessor.createLayerEntryConfig(mapId, sublayerPath)));
     }
@@ -1094,7 +1094,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Check for sublayers
     const sublayerPaths = MapEventProcessor.getMapLayerOrder(mapId).filter(
       // We only want the immediate child layers, group sublayers will handle their own sublayers
-      (entryLayerPath) => entryLayerPath.startsWith(layerPath) && entryLayerPath.split('/').length === layerPath.split('/').length + 1,
+      (entryLayerPath) => entryLayerPath.startsWith(layerPath) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
     );
 
     // Build list of sublayer entry configs
@@ -1132,7 +1132,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (config) {
       // Get paths of top level layers
       const layerOrder = MapEventProcessor.getMapLayerOrder(mapId).filter(
-        (layerPath) => MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)?.parentLayerConfig === undefined,
+        (layerPath) => MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)?.parentLayerConfig === undefined
       );
 
       // Build list of geoview layer configs
@@ -1226,7 +1226,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
         (geoviewLayer as AbstractGeoViewVector | AbstractGVVector | EsriDynamic | GVEsriDynamic).applyViewFilter(
           layerPath,
-          filters.join(' and '),
+          filters.join(' and ')
         );
       }
     }

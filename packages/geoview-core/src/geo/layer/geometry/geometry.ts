@@ -112,7 +112,7 @@ export class GeometryApi {
       style?: TypeFeatureStyle;
     },
     id?: string,
-    groupId?: string,
+    groupId?: string
   ): Feature {
     const polylineOptions = options || {};
 
@@ -122,7 +122,7 @@ export class GeometryApi {
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection],
+        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -148,7 +148,7 @@ export class GeometryApi {
         new Style({
           fill,
           stroke,
-        }),
+        })
       );
     }
 
@@ -186,7 +186,7 @@ export class GeometryApi {
       style?: TypeFeatureStyle;
     },
     optionalFeatureId?: string,
-    groupId?: string,
+    groupId?: string
   ): Feature {
     const polygonOptions = options || {};
 
@@ -196,7 +196,7 @@ export class GeometryApi {
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection],
+        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -222,7 +222,7 @@ export class GeometryApi {
         new Style({
           fill,
           stroke,
-        }),
+        })
       );
     }
 
@@ -260,7 +260,7 @@ export class GeometryApi {
       style?: TypeFeatureCircleStyle;
     },
     optionalFeatureId?: string,
-    groupId?: string,
+    groupId?: string
   ): Feature {
     const circleOptions = options || {};
 
@@ -269,7 +269,7 @@ export class GeometryApi {
     const projectedCoordinates = Projection.transform(
       coordinate,
       `EPSG:${options?.projection || 4326}`,
-      Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection],
+      Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
     );
 
     // get radius, if not defined, set default
@@ -302,7 +302,7 @@ export class GeometryApi {
         new Style({
           fill,
           stroke,
-        }),
+        })
       );
     }
 
@@ -340,7 +340,7 @@ export class GeometryApi {
       style?: TypeIconStyle;
     },
     optionalFeatureId?: string,
-    groupId?: string,
+    groupId?: string
   ): Feature {
     // Read the params and set defaults when needed
     const markerOptions = options || {
@@ -360,7 +360,7 @@ export class GeometryApi {
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection],
+        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -369,7 +369,7 @@ export class GeometryApi {
         // ? unknown type cannot be use, need to escape
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         image: new Icon(markerOptions.style as any),
-      }),
+      })
     );
 
     // set a feature id and a geometry group index for this geometry
@@ -430,7 +430,7 @@ export class GeometryApi {
     options?: {
       vectorLayerOptions?: VectorLayerOptions<Feature, VectorSource>;
       vectorSourceOptions?: VectorSourceOptions<Feature>;
-    },
+    }
   ): FeatureCollection {
     const geometryGroupOptions = options || {};
 
@@ -661,7 +661,7 @@ export class GeometryApi {
    */
   static createGeometryFromType(
     geometryType: TypeStyleGeometry,
-    coordinates: Coordinate | Coordinate[] | Coordinate[][] | number[],
+    coordinates: Coordinate | Coordinate[] | Coordinate[][] | number[]
   ): OLGeometry {
     switch (geometryType) {
       case 'Point':

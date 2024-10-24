@@ -79,7 +79,7 @@ export class UUIDmapConfigReader {
                 return toJsonObject({
                   layerId: `${item.index}`,
                 });
-              },
+              }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (isFeature) {
@@ -117,7 +117,7 @@ export class UUIDmapConfigReader {
                 return toJsonObject({
                   layerId: `${item.index}`,
                 });
-              },
+              }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.WMS) {
@@ -141,11 +141,11 @@ export class UUIDmapConfigReader {
                 // Overwrite default from geocore custom config
                 const mergedConfig = deepMergeObjects(
                   originalConfig as unknown as TypeJsonObject,
-                  customGeocoreLayerConfig as unknown as TypeJsonObject,
+                  customGeocoreLayerConfig as unknown as TypeJsonObject
                 );
 
                 return mergedConfig;
-              },
+              }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.WFS) {
@@ -166,7 +166,7 @@ export class UUIDmapConfigReader {
                     strategy: 'all',
                   },
                 });
-              },
+              }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.OGC_FEATURE) {
@@ -186,7 +186,7 @@ export class UUIDmapConfigReader {
                     format: 'featureAPI',
                   },
                 });
-              },
+              }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.GEOJSON) {
@@ -206,7 +206,7 @@ export class UUIDmapConfigReader {
                     format: 'GeoJSON',
                   },
                 });
-              },
+              }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.XYZ_TILES) {
@@ -223,7 +223,7 @@ export class UUIDmapConfigReader {
                 return toJsonObject({
                   layerId: `${item.id}`,
                 });
-              },
+              }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.VECTOR_TILES) {
@@ -244,7 +244,7 @@ export class UUIDmapConfigReader {
                     dataAccessPath: createLocalizedString(url),
                   },
                 });
-              },
+              }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.GEOPACKAGE) {
@@ -264,7 +264,7 @@ export class UUIDmapConfigReader {
                     format: 'GeoPackage',
                   },
                 });
-              },
+              }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.IMAGE_STATIC) {
@@ -280,7 +280,7 @@ export class UUIDmapConfigReader {
                 return toJsonObject({
                   layerId: `${item.id}`,
                 });
-              },
+              }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.ESRI_IMAGE) {

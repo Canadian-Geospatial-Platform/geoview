@@ -166,7 +166,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
           // remove border from the map
           document.getElementById(`mapTargetElement-${mapId}`)!.style.border = sxClasses.exitFocus.border;
         },
-        { once: true },
+        { once: true }
       );
     }
   }

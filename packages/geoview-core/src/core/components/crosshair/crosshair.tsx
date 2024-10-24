@@ -55,7 +55,7 @@ export function Crosshair({ mapTargetElement }: CrosshairProps): JSX.Element {
         });
       }
     },
-    [pointerPosition, setClickCoordinates],
+    [pointerPosition, setClickCoordinates]
   );
 
   /**
@@ -73,7 +73,7 @@ export function Crosshair({ mapTargetElement }: CrosshairProps): JSX.Element {
         setMapKeyboardPanInteractions(panDelta.current);
       }
     },
-    [setMapKeyboardPanInteractions],
+    [setMapKeyboardPanInteractions]
   );
 
   useEffect(() => {
