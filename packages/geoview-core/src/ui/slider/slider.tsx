@@ -1,4 +1,4 @@
-import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode } from 'react';
+import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode, useCallback, useRef } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider } from '@mui/material';
@@ -38,6 +38,7 @@ type SliderProps = {
   track?: 'inverted' | 'normal' | false;
   ariaLabelledby?: string;
   valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
+  valueLabelDisplay?: 'auto' | 'on';
 
   // optional map id to link the slider to
   // TODO: Refactor - No mapId inside a ui component in ui folder.
@@ -51,11 +52,25 @@ type SliderProps = {
  * @returns {JSX.Element} the created Slider element
  */
 export function Slider(props: SliderProps): JSX.Element {
-  const { value: parentValue, min, max, onChange, onChangeCommitted, onValueLabelFormat, onValueDisplayAriaLabel, ...properties } = props;
+  const {
+    value: parentValue,
+    min,
+    max,
+    marks,
+    valueLabelDisplay,
+    onChange,
+    onChangeCommitted,
+    onValueLabelFormat,
+    onValueDisplayAriaLabel,
+    ...properties
+  } = props;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const sliderRef = useRef<HTMLDivElement>(null);
+
   const containerId = `${properties.mapId}-${properties?.sliderId ?? generateId()}` || '';
+  const valueLabelDisplayOption = valueLabelDisplay === undefined ? 'on' : 'auto';
 
   // internal state
   const [value, setValue] = useState<number[] | number>(parentValue);
@@ -72,6 +87,7 @@ export function Slider(props: SliderProps): JSX.Element {
     // Update the internal state
     setActiveThumb(newActiveThumb);
     setValue(newValue);
+    event.preventDefault();
 
     // Callback
     onChange?.(newValue, activeThumb);
@@ -83,92 +99,129 @@ export function Slider(props: SliderProps): JSX.Element {
     onChangeCommitted?.(newValue);
   };
 
-  const checkOverlap = (
-    prev: Element | null,
-    curr: Element,
-    next: Element | null,
-    orientation: string | undefined = 'horizontal'
-  ): boolean => {
-    const labelPadding = 10;
-    const prevDim = prev ? prev.getBoundingClientRect() : null;
-    const currDim = curr.getBoundingClientRect();
-    const nextDim = next ? next.getBoundingClientRect() : null;
-
-    let hasPrevOverlap = false;
-    let hasNextOverlap = false;
-
-    if (prevDim) {
-      hasPrevOverlap =
-        orientation === 'vertical' ? prevDim.bottom + labelPadding > currDim.top : prevDim.right + labelPadding > currDim.left;
+  // Focus on slider handle
+  const focusSlider = useCallback(() => {
+    if (sliderRef.current) {
+      // Find the hidden input element and focus it
+      const input = sliderRef.current.querySelectorAll('input[type="range"]');
+      if (input[0]) {
+        (input[0] as HTMLElement).focus();
+      }
     }
-    if (nextDim) {
-      hasNextOverlap =
-        orientation === 'vertical' ? currDim.bottom + labelPadding > nextDim.top : currDim.right + labelPadding > nextDim.left;
-    }
+  }, []);
 
-    return hasPrevOverlap || hasNextOverlap;
-  };
+  // GV There is a bug with focus on slider element. When the arrow key is pressed, the event trigger value change
+  // GV for the slider then the slider value is updated. This causes the slider to lose focus.
+  // GV The solution is to manually focus the slider element when the arrow key is pressed.
+  // GV This is a workaround until the issue is fixed in the Material UI library.
+  // GV When there is 2 handles, the focus on the second handle is lost and the focus is back to first handle
+  // TODO: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2560
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+        focusSlider();
+      }
+    },
+    [focusSlider]
+  );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const removeLabelOverlap = (): void => {
+  useEffect(() => {
+    // Focus the slider when the component mounts
+    focusSlider();
+  }, [focusSlider]);
+
+  /**
+   * Checks if two HTML elements overlap, considering the slider's orientation and adding padding.
+   *
+   * @param {HTMLElement} el1 - The first element to check for overlap.
+   * @param {HTMLElement} el2 - The second element to check for overlap.
+   * @param {string} [orientation='horizontal'] - The orientation of the slider ('horizontal' or 'vertical').
+   * @returns {boolean} True if the elements overlap, false otherwise.
+   */
+  const checkOverlap = useCallback((el1: HTMLElement, el2: HTMLElement, orientation: string): boolean => {
+    if (!el1 || !el2) return false;
+    const rect1 = el1.getBoundingClientRect();
+    const rect2 = el2.getBoundingClientRect();
+    const padding = 50;
+
+    return orientation === 'vertical'
+      ? !(rect1.bottom + padding < rect2.top || rect1.top > rect2.bottom + padding)
+      : !(rect1.right + padding < rect2.left || rect1.left > rect2.right + padding);
+  }, []);
+
+  /**
+   * Removes overlapping labels in a slider component.
+   *
+   * @description
+   * This function identifies and hides overlapping labels in a slider component.
+   * It works for both horizontal and vertical sliders, starting from both ends
+   * and moving towards the center. The function ensures that the maximum number
+   * of labels are visible without overlap.
+   *
+   * The process includes:
+   * 1. Identifying the slider container and its orientation.
+   * 2. Resetting all labels to visible state.
+   * 3. Iterating through labels from both ends, hiding those that overlap.
+   * 4. Special handling for the middle label in case of an odd number of labels.
+   *
+   * @see checkOverlap - The helper function used to determine if two labels overlap.
+   */
+  const removeLabelOverlap = useCallback((): void => {
     // Log
     logger.logTraceCore('UI.SLIDER - removeLabelOverlap');
 
+    // get slider container
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
     // get slider labels
-    const markers = containerId
-      ? document.getElementById(containerId)?.getElementsByClassName('MuiSlider-markLabel') || []
-      : document.getElementsByClassName('MuiSlider-markLabel');
+    const markers = container.getElementsByClassName('MuiSlider-markLabel');
+    const markerArray = Array.from(markers) as HTMLElement[];
 
-    for (let i = 0; i < markers.length; i++) markers[i].classList.remove('MuiSlider-markLabel-overlap');
+    // Get orientation from the container
+    const orientation = container.classList.contains('MuiSlider-vertical') ? 'vertical' : 'horizontal';
 
-    let middleIndices = markers.length % 2 === 0 ? [markers.length / 2, markers.length / 2 + 1] : [Math.floor(markers.length / 2)];
-    let lastVisibleInFirstHalf = 0;
-    let firstVisibleInSecondHalf = markers.length - 1;
+    // Reset all labels
+    markerArray.forEach((marker) => marker.classList.remove('MuiSlider-markLabel-overlap'));
 
-    // Check first half
-    for (let prevIdx = 0, currIdx = 1; currIdx < markers.length / 2; currIdx++) {
-      // if there is a collision, set classname and test with the next pips
-      if (checkOverlap(markers[prevIdx], markers[currIdx], null)) {
-        markers[currIdx].classList.add('MuiSlider-markLabel-overlap');
+    let left = 0;
+    let right = markerArray.length - 1;
+    let lastVisibleLeft = 0;
+    let lastVisibleRight = markerArray.length - 1;
+
+    while (left < right) {
+      // Check from left
+      if (left === 0 || !checkOverlap(markerArray[lastVisibleLeft], markerArray[left], orientation)) {
+        lastVisibleLeft = left;
       } else {
-        // if there is no collision and reset the startIdx to be the one before the fwdIdx
-        prevIdx = currIdx - prevIdx !== 1 ? currIdx : prevIdx + 1;
-        lastVisibleInFirstHalf = currIdx;
+        markerArray[left].classList.add('MuiSlider-markLabel-overlap');
       }
-    }
 
-    // Check second half
-    for (let nextIdx = markers.length - 1, currIdx = markers.length - 2; currIdx > markers.length / 2; currIdx--) {
-      if (checkOverlap(null, markers[currIdx], markers[nextIdx])) {
-        markers[currIdx].classList.add('MuiSlider-markLabel-overlap');
+      // Check from right
+      if (right === markerArray.length - 1 || !checkOverlap(markerArray[right], markerArray[lastVisibleRight], orientation)) {
+        lastVisibleRight = right;
       } else {
-        // if there is no collision and reset the curIndex to be the one before the testIndex
-        nextIdx = nextIdx - currIdx !== 1 ? currIdx : nextIdx - 1;
-        firstVisibleInSecondHalf = currIdx;
+        markerArray[right].classList.add('MuiSlider-markLabel-overlap');
       }
+
+      left++;
+      right--;
     }
 
-    middleIndices.push(lastVisibleInFirstHalf, firstVisibleInSecondHalf);
-    middleIndices = [...new Set(middleIndices)].sort((a, b) => a - b);
+    // Handle middle element if odd number of markers
+    // TODO: there is still issue when previous to middle interfere with lst in Ontario ring of fire (time slider config- small screen)
+    if (left === right) {
+      const middleElement = markerArray[left];
+      const overlapWithLeft = checkOverlap(markerArray[lastVisibleLeft], middleElement, orientation);
+      const overlapWithRight = checkOverlap(middleElement, markerArray[lastVisibleRight], orientation);
 
-    // If any middle elements
-    if (markers.length > 2) {
-      // Check middle elements
-      for (let testIdx = 0, currIdx = 1; currIdx < middleIndices.length; currIdx++) {
-        if (
-          checkOverlap(
-            markers[middleIndices[testIdx]],
-            markers[middleIndices[currIdx]],
-            currIdx === middleIndices.length - 1 ? null : markers[middleIndices[currIdx + 1]]
-          )
-        ) {
-          markers[middleIndices[currIdx]].classList.add('MuiSlider-markLabel-overlap');
-        } else {
-          testIdx = currIdx - testIdx !== 1 ? currIdx : testIdx + 1;
-        }
+      if (!overlapWithLeft && !overlapWithRight) {
+        lastVisibleLeft = left;
+      } else {
+        middleElement.classList.add('MuiSlider-markLabel-overlap');
       }
     }
-  };
+  }, [checkOverlap, containerId]);
 
   useEffect(() => {
     // Log
@@ -178,30 +231,43 @@ export function Slider(props: SliderProps): JSX.Element {
     setValue(parentValue);
   }, [parentValue]);
 
-  useLayoutEffect(() => {
-    // remove overlaping labels
-    removeLabelOverlap();
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('UI.SLIDER - window resize');
 
-    window.addEventListener('resize', () => removeLabelOverlap);
-    return () => window.removeEventListener('resize', () => removeLabelOverlap);
+    window.addEventListener('resize', removeLabelOverlap);
+
+    return () => {
+      window.removeEventListener('resize', removeLabelOverlap);
+    };
   }, [removeLabelOverlap]);
 
-  // TODO: better implement WCAG on slider
+  // Add this new effect to handle slider value changes
+  useLayoutEffect(() => {
+    // Log
+    logger.logTraceUseEffect('UI.SLIDER - remove overlap on value change');
+
+    removeLabelOverlap();
+  }, [value, removeLabelOverlap]);
+
   return (
     <MaterialSlider
       {...properties}
       id={containerId}
       sx={sxClasses.slider}
+      ref={sliderRef}
       value={value}
       min={min}
       max={max}
+      marks={marks}
       disableSwap
-      valueLabelDisplay="on"
+      valueLabelDisplay={valueLabelDisplayOption}
       valueLabelFormat={onValueLabelFormat}
       getAriaLabel={(): string => 'To implement with translation'}
       getAriaValueText={onValueDisplayAriaLabel}
       onChange={handleChange}
       onChangeCommitted={handleChangeCommitted}
+      onKeyDown={handleKeyDown}
     />
   );
 }

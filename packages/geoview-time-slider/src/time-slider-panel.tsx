@@ -14,6 +14,7 @@ import { logger } from 'geoview-core/src/core/utils/logger';
 import { TABS } from 'geoview-core/src/core/utils/constant';
 
 import { ReactNode } from 'react';
+import { DateMgt } from 'geoview-core/src/core/utils/date-mgt';
 import { TimeSlider } from './time-slider';
 import { ConfigProps } from './time-slider-types';
 
@@ -61,12 +62,18 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    * @param {TypeTimeSliderValuesListEntry} timeSliderLayerInfo Time slider layer info.
    */
   const getFilterInfo = (timeSliderLayerInfo: TypeTimeSliderValues): string | null => {
-    if (timeSliderLayerInfo.filtering)
+    if (timeSliderLayerInfo.filtering) {
+      const { values } = timeSliderLayerInfo;
+      const [datePattern, timePattern] = [...timeSliderLayerInfo.displayPattern];
       return timeSliderLayerInfo.values.length === 1
-        ? new Date(timeSliderLayerInfo.values[0]).toISOString().slice(0, 19)
-        : `${new Date(timeSliderLayerInfo.values[0]).toISOString().slice(0, 19)} - ${new Date(timeSliderLayerInfo.values[1])
-            .toISOString()
-            .slice(0, 19)}`;
+        ? DateMgt.formatDatePattern(values[0], 'day', timePattern)
+        : `${DateMgt.formatDatePattern(values[0], datePattern, timePattern)} / ${DateMgt.formatDatePattern(
+            values[1],
+            datePattern,
+            timePattern
+          )}`;
+    }
+
     return null;
   };
 

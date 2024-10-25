@@ -10,6 +10,7 @@ import { GitHubIcon } from '@/ui/icons';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '../../common';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { DateMgt } from '@/core/utils/date-mgt';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -136,7 +137,7 @@ export default function Version(): JSX.Element {
                   </Link>
                 </Box>
                 <Typography component="div">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</Typography>
-                <Typography component="div">{new Date(__VERSION__.timestamp).toLocaleDateString()}</Typography>
+                <Typography component="div">{DateMgt.formatDate(__VERSION__.timestamp, 'YYYY-MM-DD')}</Typography>
               </Box>
             </Paper>
           </FocusTrapContainer>
