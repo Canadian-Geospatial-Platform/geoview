@@ -226,6 +226,12 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         });
       },
       setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean = false) => {
+        // Gv Side effect with focus trap and side panel app bar open
+        // We need to check if the viewer is in keyboard navigation mode. If not, we do nt apply the focus trap.
+        // Focus trap has side effect when a app bar panel is open. It does not let user use their mouse
+        // to pan the map. Even scroll is difficult, user needs to click outside the brower then come back for
+        // the mouse wheel to work
+        const isFocusTrappedAndKeyboardNavigation = get().uiState.activeTrapGeoView ? isFocusTrapped : false;
         set({
           uiState: {
             ...get().uiState,
@@ -233,7 +239,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
               tabId,
               tabGroup,
               isOpen,
-              isFocusTrapped,
+              isFocusTrapped: isFocusTrappedAndKeyboardNavigation,
             },
           },
         });

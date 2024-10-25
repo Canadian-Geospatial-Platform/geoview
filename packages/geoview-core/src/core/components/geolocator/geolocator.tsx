@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBarUI, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
-import { useActiveAppBarTab, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
@@ -43,10 +43,10 @@ export function Geolocator(): JSX.Element {
   const displayLanguage = useAppDisplayLanguage();
   const geolocatorServiceURL = useAppGeolocatorServiceURL();
   const { setActiveAppBarTab } = useUIStoreActions();
-
   const { tabGroup, isOpen } = useActiveAppBarTab();
+  const activeTrapGeoView = useUIActiveTrapGeoView();
 
-  const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
+  const displayLanguageRef = useRef(displayLanguage);
   const geolocatorRef = useRef<HTMLDivElement>();
   const abortControllerRef = useRef<AbortController | null>(null);
   const fetchTimerRef = useRef<NodeJS.Timeout | undefined>();
@@ -92,41 +92,47 @@ export function Geolocator(): JSX.Element {
    * @param {string} searchTerm the search term entered by the user
    * @returns {Promise<void>}
    */
-  const getGeolocations = async (searchTerm: string): Promise<void> => {
-    try {
-      setIsLoading(true);
-      // Abort any pending requests
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        clearTimeout(fetchTimerRef.current);
+  const getGeolocations = useCallback(
+    async (searchTerm: string): Promise<void> => {
+      try {
+        setIsLoading(true);
+        // Abort any pending requests
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+          clearTimeout(fetchTimerRef.current);
+        }
+
+        // Create new abort controller
+        const newAbortController = new AbortController();
+        abortControllerRef.current = newAbortController;
+
+        // Use the current value from the ref
+        const currentUrl = `${geolocatorServiceURL}&lang=${displayLanguageRef.current}`;
+
+        const response = await fetch(`${currentUrl}&q=${encodeURIComponent(`${searchTerm}*`)}`, {
+          signal: abortControllerRef.current.signal,
+        });
+        if (!response.ok) {
+          throw new Error('Error');
+        }
+        const result = (await response.json()) as GeoListItem[];
+        const ddSupport = getDecimalDegreeItem(searchTerm);
+
+        if (ddSupport) {
+          // insert at the top of array.
+          result.unshift(ddSupport);
+        }
+
+        setData(result);
+        setError(null);
+        setIsLoading(false);
+        clearTimeout(fetchTimerRef?.current);
+      } catch (err) {
+        setError(err as Error);
       }
-
-      // Create new abort controller
-      const newAbortController = new AbortController();
-      abortControllerRef.current = newAbortController;
-
-      const response = await fetch(`${urlRef.current}&q=${encodeURIComponent(`${searchTerm}*`)}`, {
-        signal: abortControllerRef.current.signal,
-      });
-      if (!response.ok) {
-        throw new Error('Error');
-      }
-      const result = (await response.json()) as GeoListItem[];
-      const ddSupport = getDecimalDegreeItem(searchTerm);
-
-      if (ddSupport) {
-        // insert at the top of array.
-        result.unshift(ddSupport);
-      }
-
-      setData(result);
-      setError(null);
-      setIsLoading(false);
-      clearTimeout(fetchTimerRef?.current);
-    } catch (err) {
-      setError(err as Error);
-    }
-  };
+    },
+    [geolocatorServiceURL]
+  );
 
   /**
    * Reset loading and data state and clear fetch timer.
@@ -249,8 +255,13 @@ export function Geolocator(): JSX.Element {
     };
   }, [isLoading]);
 
+  // Update the ref whenever displayLanguage changes
+  useEffect(() => {
+    displayLanguageRef.current = displayLanguage;
+  }, [displayLanguage]);
+
   return (
-    <FocusTrapContainer open={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen} id="geolocator-focus-trap">
+    <FocusTrapContainer open={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView} id="geolocator-focus-trap">
       <Box
         sx={sxClasses.root}
         visibility={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
