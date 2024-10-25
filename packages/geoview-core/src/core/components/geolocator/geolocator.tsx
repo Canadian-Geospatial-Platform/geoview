@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBarUI, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
-import { useActiveAppBarTab, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
@@ -44,6 +44,7 @@ export function Geolocator(): JSX.Element {
   const geolocatorServiceURL = useAppGeolocatorServiceURL();
   const { setActiveAppBarTab } = useUIStoreActions();
   const { tabGroup, isOpen } = useActiveAppBarTab();
+  const activeTrapGeoView = useUIActiveTrapGeoView();
 
   const displayLanguageRef = useRef(displayLanguage);
   const geolocatorRef = useRef<HTMLDivElement>();
@@ -260,7 +261,7 @@ export function Geolocator(): JSX.Element {
   }, [displayLanguage]);
 
   return (
-    <FocusTrapContainer open={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen} id="geolocator-focus-trap">
+    <FocusTrapContainer open={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView} id="geolocator-focus-trap">
       <Box
         sx={sxClasses.root}
         visibility={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
