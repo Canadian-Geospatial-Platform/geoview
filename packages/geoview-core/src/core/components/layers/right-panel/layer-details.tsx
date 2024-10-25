@@ -171,10 +171,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <Grid container direction="row" alignItems="center" justifyItems="stretch">
             <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
             <Grid size={{ xs: 'auto' }}>
-              <Box component="span">{t('general.name')}</Box>
+              <Box component="span" sx={{ fontWeight: 'bold' }}>
+                {t('layers.toggleAllVisibility')}
+              </Box>
             </Grid>
           </Grid>
         )}
+        <Divider sx={{ marginBottom: '10px' }} variant="middle" />
         {layerDetails.items.map((item) => (
           <Grid
             container
@@ -184,8 +187,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             justifyItems="stretch"
           >
             <Grid size={{ xs: 'auto' }}>{renderItemCheckbox(item)}</Grid>
-            <Grid size={{ xs: 'auto' }}>
-              {item.icon ? <Box component="img" alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
+            <Grid size={{ xs: 'auto' }} sx={{ display: 'flex' }}>
+              {item.icon ? (
+                <Box component="img" sx={{ alignSelf: 'center' }} alt={item.name} src={item.icon} />
+              ) : (
+                <BrowserNotSupportedIcon />
+              )}
               <Box component="span" style={sxClasses.tableIconLabel}>
                 {item.name}
               </Box>
@@ -344,7 +351,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               </>
             )}
           </Box>
-          <Divider sx={{ marginTop: '50px', marginBottom: '10x' }} variant="middle" />
+          <Divider sx={{ marginTop: '50px', marginBottom: '10px' }} variant="middle" />
           {layerDetails.layerAttribution &&
             layerDetails.layerAttribution!.map((attribution) => {
               return (

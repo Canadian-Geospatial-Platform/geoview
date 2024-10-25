@@ -57,6 +57,7 @@ export const getSxClasses = (theme: Theme): any => ({
     fontSize: theme.palette.geoViewFontSize.default,
     noWrap: true,
     marginLeft: 20,
+    alignSelf: 'center',
   },
   wmsImage: {
     maxWidth: '100%',
