@@ -337,7 +337,7 @@ export class LayerApi {
     const alreadyExisting = this.#layerEntryConfigs[layerConfig.layerPath];
     if (alreadyExisting) {
       // Unregister the old one
-      this.unregisterLayerConfig(alreadyExisting);
+      this.unregisterLayerConfig(alreadyExisting, false);
     }
 
     // Register this new one
@@ -438,7 +438,7 @@ export class LayerApi {
    * @returns {Promise<void>}
    */
   loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): Promise<void> {
-    const validGeoviewLayerConfigs = this.#deleteDuplicatAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
+    const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
 
     // set order for layers to appear on the map according to config
     const promisesOfGeoCoreGeoviewLayers: Promise<TypeGeoviewLayerConfig[]>[] = [];
@@ -528,7 +528,7 @@ export class LayerApi {
    * @returns {MapConfigLayerEntry[]} The new configuration with duplicate entries eliminated.
    * @private
    */
-  #deleteDuplicatAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
+  #deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
     if (mapConfigLayerEntries && mapConfigLayerEntries.length > 0) {
       const validGeoviewLayerConfigs = mapConfigLayerEntries.filter((geoviewLayerConfigToCreate, configToCreateIndex) => {
         for (let configToTestIndex = 0; configToTestIndex < mapConfigLayerEntries.length; configToTestIndex++) {
@@ -567,6 +567,17 @@ export class LayerApi {
    * @returns {Promise<void>} A promise which resolves when done adding
    */
   async addGeoviewLayerByGeoCoreUUID(uuid: string): Promise<void> {
+    // Add a place holder to the ordered layer info array
+    const layerInfo: TypeOrderedLayerInfo = {
+      layerPath: uuid,
+      visible: true,
+      queryable: true,
+      hoverable: true,
+      legendCollapsed: false,
+    };
+    MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerInfo);
+
+    // Create geocore layer configs and add
     const geoCoreGeoviewLayerInstance = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
     const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
     layers.forEach((geoviewLayerConfig) => {
@@ -982,21 +993,21 @@ export class LayerApi {
   #registerForOrderedLayerInfo(layerConfig: TypeLayerEntryConfig): void {
     // If the map index for the given layer path hasn't been set yet
     if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), layerConfig.layerPath) === -1) {
-      // Get the sub-layer-path
-      const subLayerPath = layerConfig.layerPath.split('.')[1];
+      // Get the parent layer path
+      const parentLayerPathArray = layerConfig.layerPath.split('/');
+      parentLayerPathArray.pop();
+      const parentLayerPath = parentLayerPathArray.join('/');
 
-      // If the map index of a sub-layer-path has been set
-      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), subLayerPath) !== -1) {
-        // Replace the order layer info of the layer with the index of the sub-layer-path by calling replaceOrderedLayerInfo
-        MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, subLayerPath);
+      // If the map index of a parent layer path has been set and it is a valid UUID, the ordered layer info is a place holder
+      // registered while the geocore layer info was fetched
+      if (
+        MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath) !== -1 &&
+        api.config.isValidUUID(parentLayerPath)
+      ) {
+        // Replace the placeholder ordered layer info
+        MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerPath);
       } else if (layerConfig.parentLayerConfig) {
-        // Here the map index of a sub-layer-path hasn't been set and there's a parent layer config for the current layer config
-        // Get the sub-layer-path
-        // TODO: Refactor - Sometimes we are getting the sub-layer-path by splitting on the '.' and sometimes on the '/'.
-        // TO.DOCONT: This abstraction logic should be part of the ConfigBaseClass
-        const parentLayerPathArray = layerConfig.layerPath.split('/');
-        parentLayerPathArray.pop();
-        const parentLayerPath = parentLayerPathArray.join('/');
+        // Here the map index of a sub layer path hasn't been set and there's a parent layer config for the current layer config
 
         // Get the map index of the parent layer path
         const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
@@ -1006,21 +1017,18 @@ export class LayerApi {
           layerInfo.layerPath.startsWith(parentLayerPath)
         ).length;
 
-        // If the map index of the parent hasn't been set yet
+        // If the map index of the parent has been set
         if (parentLayerIndex !== -1) {
-          // Add the ordered layer information for the layer path based on the parent index + the number of child layers
-          // TODO: Check - This addition seems wrong? Seems like it's not going to scale well when multiple layers/groups and a single index order
-          MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerIndex + numberOfLayers);
+          // Add the ordered layer information for the sub layer path based on the parent index + the number of child layers
+          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig, parentLayerIndex + numberOfLayers);
         } else {
-          // Add the ordered layer information for the layer path based unshifting the current array by calling addOrderedLayerInfo
-          // TODO: Check - Could use more comment here, not sure what it's meant for
-          MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerConfig.parentLayerConfig!);
+          // If we get here, something went wrong and we have a sub layer being registered before the parent
+          logger.logError(`Sub layer ${layerConfig.layerPath} registered in layer order before parent layer`);
+          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig.parentLayerConfig!);
         }
       } else {
-        // Here the map index of a sub-layer-path hasn't been set and there's no parent layer config for the current layer config
-        // Add the ordered layer information for the layer path based unshifting the current array by calling addOrderedLayerInfo
-        // TODO: Check - Could use more comment here, not sure what it's meant for
-        MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerConfig);
+        // Add the orderedLayerInfo for layer that hasn't been set and has no parent layer or geocore placeholder
+        MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig);
       }
     }
   }
@@ -1051,10 +1059,11 @@ export class LayerApi {
   /**
    * Unregisters the layer in the LayerApi to stop managing it.
    * @param {ConfigBaseClass} layerConfig - The layer entry config to unregister
+   * @param {boolean} unregisterOrderedLayerInfo - Should it be unregistered from orderedLayerInfo
    */
-  unregisterLayerConfig(layerConfig: ConfigBaseClass): void {
+  unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayerInfo: boolean = true): void {
     // Unregister from ordered layer info
-    this.#unregisterFromOrderedLayerInfo(layerConfig);
+    if (unregisterOrderedLayerInfo) this.#unregisterFromOrderedLayerInfo(layerConfig);
 
     // Unregister from TimeSlider
     this.#unregisterFromTimeSlider(layerConfig);

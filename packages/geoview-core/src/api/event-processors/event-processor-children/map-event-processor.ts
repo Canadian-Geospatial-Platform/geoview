@@ -738,17 +738,36 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Add a new layer to the front of the orderedLayerInfo array.
+   * Add a new layer to the orderedLayerInfo array using a layer config.
    *
    * @param {string} mapId The ID of the map to add the layer to.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The config of the layer to add.
    * @return {void}
    */
-  static addOrderedLayerInfo(mapId: string, geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void {
+  static addOrderedLayerInfoByConfig(
+    mapId: string,
+    geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig,
+    index?: number
+  ): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     if (!index) orderedLayerInfo.unshift(...newOrderedLayerInfo);
     else orderedLayerInfo.splice(index, 0, ...newOrderedLayerInfo);
+
+    // Redirect
+    this.setMapOrderedLayerInfo(mapId, orderedLayerInfo);
+  }
+
+  /**
+   * Add new layer info to the orderedLayerInfo array.
+   *
+   * @param {string} mapId The ID of the map to add the layer to.
+   * @param {TypeOrderedLayerInfo} layerInfo The ordered layer info to add.
+   */
+  static addOrderedLayerInfo(mapId: string, layerInfo: TypeOrderedLayerInfo, index?: number): void {
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
+    if (!index) orderedLayerInfo.unshift(layerInfo);
+    else orderedLayerInfo.splice(index, 0, layerInfo);
 
     // Redirect
     this.setMapOrderedLayerInfo(mapId, orderedLayerInfo);
