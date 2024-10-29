@@ -57,6 +57,7 @@ export function Attribution(): JSX.Element {
           },
           width: '30px',
           height: '30px',
+          my: '1rem',
         }}
       >
         <MoreHorizIcon />
@@ -71,7 +72,7 @@ export function Attribution(): JSX.Element {
         }}
         transformOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'right',
         }}
         onClose={handleClosePopover}
       >

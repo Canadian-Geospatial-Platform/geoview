@@ -1,8 +1,6 @@
+import { useTheme } from '@mui/material/styles';
 import { useRef } from 'react';
-
-import { useTheme } from '@mui/material';
 import { ArrowUpIcon, IconButton } from '@/ui';
-import { getSxClasses } from './map-info-style';
 import { useMapRotation, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
@@ -12,8 +10,6 @@ import { useMapRotation, useMapStoreActions } from '@/core/stores/store-interfac
  */
 export function MapInfoRotationButton(): JSX.Element {
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
-
   // internal state
   const iconRef = useRef(null);
 
@@ -23,13 +19,13 @@ export function MapInfoRotationButton(): JSX.Element {
 
   return (
     <IconButton
-      sx={sxClasses.rotationButton.rotationButton}
       tooltipPlacement="top"
       tooltip="mapctrl.rotation.resetRotation"
       aria-label="mapctrl.rotation.resetRotation"
       onClick={() => setRotation(0)}
+      sx={{ color: theme.palette.geoViewColor.bgColor.light[800] }}
     >
-      <ArrowUpIcon ref={iconRef} sx={sxClasses.rotationButton.rotationIcon} style={{ transform: `rotate(${mapRotation}rad)` }} />
+      <ArrowUpIcon ref={iconRef} style={{ transform: `rotate(${mapRotation}rad)` }} />
     </IconButton>
   );
 }
