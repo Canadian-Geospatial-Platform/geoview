@@ -7,11 +7,11 @@ export type TypeDateFragments = [number[], number[], string[]];
 /** ******************************************************************************************************************************
  * Type used to define the date precision pattern to use.
  */
-type DatePrecision = 'year' | 'month' | 'day';
+export type DatePrecision = 'year' | 'month' | 'day' | undefined;
 /** ******************************************************************************************************************************
  * Type used to define the time precision pattern to use.
  */
-type TimePrecision = 'hour' | 'minute' | 'second';
+export type TimePrecision = 'hour' | 'minute' | 'second' | undefined;
 /** ******************************************************************************************************************************
  * Type used to define the range values for an OGC time dimension.
  */
@@ -29,6 +29,7 @@ export type TimeDimension = {
     range: RangeItems;
     nearestValues: 'discrete' | 'absolute';
     singleHandle: boolean;
+    displayPattern: [DatePrecision | undefined, TimePrecision | undefined];
 };
 /** ******************************************************************************************************************************
  * Type used to validate the ESRI time dimension.
@@ -54,6 +55,12 @@ export declare abstract class DateMgt {
      */
     static convertToLocal(date: Date | string): string;
     /**
+     * Convert a date local to a UTC date
+     * @param {Date | string} date date to use
+     * @returns {string} UTC date or empty string if invalid date (when field value is null)
+     */
+    static convertToUTC(date: Date | string): string;
+    /**
      * Format a date to specific format like 'YYYY-MM-DD'
      * @param {Date | string} date date to use
      * @param {string} format format of the date.
@@ -61,19 +68,31 @@ export declare abstract class DateMgt {
      */
     static formatDate(date: Date | string, format: string): string;
     /**
-     * Convert a date local to a UTC date
-     * @param {Date | string} date date to use
-     * @returns {string} UTC date or empty string if invalid date (when field value is null)
-     */
-    static convertToUTC(date: Date | string): string;
-    /**
      * Format a date to a pattern
      * @param {Date | string} date date to use
      * @param {DatePrecision} datePattern the date precision pattern to use
      * @param {TimePrecision}timePattern the time precision pattern to use
      * @returns {string} formatted date
      */
-    static format(date: Date | string, datePattern: DatePrecision, timePattern?: TimePrecision): string;
+    static formatDatePattern(date: Date | number | string, datePattern: DatePrecision, timePattern?: TimePrecision): string;
+    /**
+     * Converts a Date object to an ISO 8601 formatted string in the local time zone.
+     * The resulting string will be in the format: YYYY-MM-DDTHH:mm:ss.sss
+     *
+     * @param {Date | number | string} date - The Date object to be formatted.
+     * @returns {string} The formatted date string in ISO 8601 format.
+     *
+     * @throws {TypeError} If the input is not a valid Date object.
+     */
+    static formatDateToISO(date: Date | number | string): string;
+    /**
+     * Attempts to guess the display pattern for a given date based on the provided format string.
+     *
+     * @param {(Date | number | string)[]} dates - An array of dates to analyze. Can be Date objects, timestamps (numbers), or date strings.
+     * @param {boolean} [onlyMinMax=true] - If true, only considers the minimum and maximum dates in the array.
+     * @returns {[DatePrecision | undefined, TimePrecision | undefined]} A tuple containing the guessed date and time precision.
+     */
+    static guessDisplayPattern(dates: Date[] | number[] | string[], onlyMinMax?: boolean): [DatePrecision | undefined, TimePrecision | undefined];
     /**
      * Convert a date to milliseconds
      * @param {Date | string} date date to use
