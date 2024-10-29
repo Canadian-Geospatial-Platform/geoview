@@ -22,6 +22,7 @@ type SliderProps = {
     track?: 'inverted' | 'normal' | false;
     ariaLabelledby?: string;
     valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
+    valueLabelDisplay?: 'auto' | 'on';
     mapId?: string;
 };
 /**

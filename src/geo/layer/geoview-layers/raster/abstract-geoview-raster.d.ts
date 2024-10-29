@@ -38,5 +38,5 @@ export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer
      * Gets the metadata extent, if any.
      * @returns {Extent | undefined} The OpenLayer projection
      */
-    getMetadataExtent(): Extent | undefined;
+    getMetadataExtent(layerPath: string): Extent | undefined;
 }

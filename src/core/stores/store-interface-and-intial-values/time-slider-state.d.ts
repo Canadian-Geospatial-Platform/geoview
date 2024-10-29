@@ -1,4 +1,5 @@
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import { DatePrecision, TimePrecision } from '@/core/utils/date-mgt';
 type TimeSliderActions = ITimeSliderState['actions'];
 export interface ITimeSliderState {
     timeSliderLayers: TimeSliderLayerSet;
@@ -15,6 +16,7 @@ export interface ITimeSliderState {
         setSelectedLayerPath: (layerPath: string) => void;
         setDefaultValue: (layerPath: string, defaultValue: string) => void;
         setValues: (layerPath: string, values: number[]) => void;
+        setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
     };
     setterActions: {
         addTimeSliderLayer: (newLayer: TimeSliderLayerSet) => void;
@@ -29,6 +31,7 @@ export interface ITimeSliderState {
         setSliderFilters: (newSliderFilters: Record<string, string>) => void;
         setDefaultValue: (layerPath: string, defaultValue: string) => void;
         setValues: (layerPath: string, values: number[]) => void;
+        setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
     };
 }
 /**
@@ -57,6 +60,7 @@ export interface TypeTimeSliderValues {
     singleHandle: boolean;
     title?: string;
     values: number[];
+    displayPattern: [DatePrecision, TimePrecision];
 }
 export declare const useTimeSliderLayers: () => TimeSliderLayerSet;
 export declare const useTimeSliderSelectedLayerPath: () => string;
