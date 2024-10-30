@@ -7,67 +7,25 @@
   "additionalProperties": false,
   "definitions": {
     "basemapNameNode": {
-      "type": "object",
-      "properties": {
-        "en": {
-          "type": "string"
-        },
-        "fr": {
-          "type": "string"
-        }
-      },
+      "type": "string",
       "description": "The display name of the layer."
     },
     "basemapDescriptionNode": {
-      "type": "object",
-      "properties": {
-        "en": {
-          "type": "string"
-        },
-        "fr": {
-          "type": "string"
-        }
-      },
+      "type": "string",
       "description": "Basemap description."
     },
     "thumbnailUrlNode": {
-      "type": "object",
-      "properties": {
-        "en": {
-          "type": "array",
-          "uniqueItems": true,
-          "items": { "type": "string" }
-        },
-        "fr": {
-          "type": "array",
-          "uniqueItems": true,
-          "items": { "type": "string" }
-        }
-      },
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string" },
       "description": "Basemap thumbnail urls."
     },
     "basemapLayerUrlNode": {
-      "type": "object",
-      "properties": {
-        "en": {
-          "type": "string"
-        },
-        "fr": {
-          "type": "string"
-        }
-      },
+      "type": "string",
       "description": "The service endpoint of the basemap layer."
     },
     "basemapAttributionNode": {
-      "type": "object",
-      "properties": {
-        "en": {
-          "type": "string"
-        },
-        "fr": {
-          "type": "string"
-        }
-      },
+      "type": "string",
       "description": "Basemap attribution text."
     },
     "basemapLayersNode": {

@@ -12,7 +12,7 @@ import {
 } from '@config/types/map-schema-types';
 import { MapConfigError } from '@config/types/classes/config-exceptions';
 
-import { createLocalizedString, generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
+import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';
 
 /**
@@ -494,9 +494,9 @@ export class ConfigApi {
       // Create a GeoView Json configuration object.
       geoviewLayerConfig = toJsonObject({
         geoviewLayerId: generateId(),
-        geoviewLayerName: { en: 'unknown', fr: 'inconnu' },
+        geoviewLayerName: language === 'en' ? 'unknown' : 'inconnue',
         geoviewLayerType: layerType,
-        metadataAccessPath: createLocalizedString(serviceAccessString),
+        metadataAccessPath: serviceAccessString,
         listOfLayerEntryConfig: listOfLayerId.map((layerId) => {
           return { layerId };
         }),

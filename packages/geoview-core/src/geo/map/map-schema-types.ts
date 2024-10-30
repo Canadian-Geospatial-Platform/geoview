@@ -13,7 +13,6 @@ import {
   TypeOverlayObjects,
   TypeValidMapProjectionCodes,
   TypeDisplayTheme,
-  TypeLocalizedString,
   TypeLayerStates,
   TypeLayerControls,
   TypePostSettings,
@@ -84,7 +83,7 @@ export type TypeFeatureInfoLayerConfig = {
 
 export type TypeBaseSourceVectorInitialConfig = {
   /** Path used to access the data. */
-  dataAccessPath?: TypeLocalizedString;
+  dataAccessPath?: string;
   /** Settings to use when loading a GeoJSON layer using a POST instead of a GET */
   postSettings?: TypePostSettings;
   /** The feature format used by the XHR feature loader when url is set. */
@@ -290,7 +289,7 @@ export type TypeBaseSourceImageInitialConfig = {
    * The service endpoint of the layer (English/French). If not specified, the metadataAccessPath of the GeoView parent
    * layer is used
    */
-  dataAccessPath?: TypeLocalizedString;
+  dataAccessPath?: string;
   /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
@@ -377,9 +376,9 @@ export type TypeGeoviewLayerConfig = {
    * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
    * information.
    */
-  geoviewLayerName?: TypeLocalizedString;
+  geoviewLayerName?: string;
   /** The GeoView layer access path (English/French). */
-  metadataAccessPath?: TypeLocalizedString;
+  metadataAccessPath?: string;
   /** Type of GeoView layer. */
   geoviewLayerType: TypeGeoviewLayerType;
   /** Date format used by the service endpoint. */
@@ -413,7 +412,7 @@ export type GeoCoreLayerConfig = {
   // TO.DOCONT: I think it is working with other type of layer. Now having geocore not a layer type anymore, we should be able to overrides.
   // TO.DOCONT: For this we will need a little trick because when we create the config the setting are set at the root level and in our config it will take it from the layerID.
   // TO.DOCONT: There is refactor to do to make this work for all layer type. Global setting should be cascade to child of the root layer.
-  geoviewLayerName: TypeLocalizedString;
+  geoviewLayerName: string;
 };
 
 /**

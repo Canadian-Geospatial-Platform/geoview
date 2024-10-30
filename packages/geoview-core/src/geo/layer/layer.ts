@@ -13,7 +13,7 @@ import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { ConfigValidation } from '@/core/utils/config/config-validation';
-import { createLocalizedString, generateId, whenThisThen } from '@/core/utils/utilities';
+import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer, LayerCreationEvent, LayerRequestingEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -1514,7 +1514,7 @@ export class LayerApi {
     // If found
     if (layer) {
       // Set the layer name on the layer
-      layer.setLayerName(layerPath, createLocalizedString(name));
+      layer.setLayerName(layerPath, name);
     } else {
       logger.logError(`Unable to find layer ${layerPath}`);
     }

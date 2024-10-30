@@ -11,7 +11,7 @@ import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
-import { createLocalizedString, xmlToJson } from '@/core/utils/utilities';
+import { xmlToJson } from '@/core/utils/utilities';
 
 export type TypeWmsLayerNode = WmsGroupLayerConfig | WmsLayerEntryConfig;
 
@@ -191,7 +191,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     // Create a single layer using the metadata
     const layerConfig = toJsonObject({
       layerId: metadataLayer.Name,
-      layerName: createLocalizedString(metadataLayer.Name),
+      layerName: metadataLayer.Name,
     });
     return [this.createLeafNode(layerConfig, this.getLanguage(), this)!];
   }
@@ -222,7 +222,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     // Create the layer using the metadata
     const layerConfig = toJsonObject({
       layerId,
-      layerName: createLocalizedString(layerFound.Title),
+      layerName: layerFound.Title,
     });
     return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
   }
@@ -247,7 +247,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
         accumulator.push(
           toJsonObject({
             layerId: layer.Name,
-            layerName: createLocalizedString(layer.Name),
+            layerName: layer.Name,
           })
         );
       }
@@ -256,7 +256,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
 
     return toJsonObject({
       layerId: groupId,
-      layerName: createLocalizedString(groupId),
+      layerName: groupId,
       isLayerGroup: true,
       listOfLayerEntryConfig,
     });
@@ -265,7 +265,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
   /** ***************************************************************************************************************************
    * This method reads the service metadata from a XML metadataAccessPath.
    *
-   * @param {string} metadataUrl The localized value of the metadataAccessPath
+   * @param {string} metadataUrl The metadataAccessPath
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private @async

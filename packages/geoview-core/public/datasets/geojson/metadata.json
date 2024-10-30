@@ -4,7 +4,7 @@
   "listOfLayerEntryConfig": [
     {
       "layerId": "polygons.json",
-      "layerName": { "en": "Polygons" },
+      "layerName": "Polygons",
       "source": {
         "featureInfo": {
           "queryable": true,
@@ -73,7 +73,7 @@
     },
     {
       "layerId": "multipolygons.geojson",
-      "layerName": { "en": "MultiPolygons" },
+      "layerName": "MultiPolygons",
       "source": {
         "featureInfo": {
           "queryable": true,
@@ -107,7 +107,7 @@
     },
     {
       "layerId": "lines.json",
-      "layerName": { "en": "Lines" },
+      "layerName": "Lines",
       "source": {
         "featureInfo": {
           "queryable": false,
@@ -134,7 +134,7 @@
     },
     {
       "layerId": "icon_points.json",
-      "layerName": { "en": "Icons" },
+      "layerName": "Icons",
       "source": {
         "featureInfo": {
           "queryable": true,
@@ -161,7 +161,7 @@
     },
     {
       "layerId": "points.json",
-      "layerName": { "en": "Points" },
+      "layerName": "Points",
       "source": {
         "featureInfo": {
           "queryable": false,
@@ -189,7 +189,7 @@
     },
     {
       "layerId": "points_1.json",
-      "layerName": { "en": "Points_1" },
+      "layerName": "Points_1",
       "source": {
         "featureInfo": {
           "queryable": true,
@@ -217,7 +217,7 @@
     },
     {
       "layerId": "points_2.json",
-      "layerName": { "en": "Points_1" },
+      "layerName": "Points_1",
       "source": {
         "featureInfo": {
           "queryable": true,
@@ -245,7 +245,7 @@
     },
     {
       "layerId": "points_3.json",
-      "layerName": { "en": "Points_1" },
+      "layerName": "Points_1",
       "source": {
         "featureInfo": {
           "queryable": false,

@@ -2,6 +2,7 @@ import { Vector as VectorSource } from 'ol/source';
 import { TypeJsonArray } from '@/core/types/global-types';
 import { AbstractGVVector } from './abstract-gv-vector';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**
  * Manages a WFS layer.
@@ -34,9 +35,9 @@ export class GVWFS extends AbstractGVVector {
   /**
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string): TypeOutfieldsType {
     const fieldDefinitions = this.getLayerConfig().getLayerMetadata() as TypeJsonArray;
     const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';

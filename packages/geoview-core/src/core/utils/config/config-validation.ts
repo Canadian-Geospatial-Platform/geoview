@@ -7,8 +7,7 @@ import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { TypeDisplayLanguage, TypeLocalizedString } from '@config/types/map-schema-types';
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+import { TypeDisplayLanguage } from '@config/types/map-schema-types';
 
 import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
@@ -28,7 +27,7 @@ import {
   mapConfigLayerEntryIsGeoCore,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { Cast, toJsonObject, TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
@@ -191,7 +190,6 @@ export class ConfigValidation {
       }
     }
 
-    ConfigValidation.#processLocalizedString([this.displayLanguage], listOfGeoviewLayerConfig);
     ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
 
     return listOfGeoviewLayerConfig;
@@ -203,9 +201,6 @@ export class ConfigValidation {
    * validate.
    */
   static validateListOfGeoviewLayerConfig(language: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeGeoviewLayerConfig[]): void {
-    // TODO: refactor - We will only support these 3 bilingual fields: geoviewLayerName, metadataAccessPath and layerName after the refactor.
-    // TODO: New config validation classes should already support this.
-    ConfigValidation.#processLocalizedString([language], listOfGeoviewLayerConfig);
     ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
   }
 
@@ -358,81 +353,5 @@ export class ConfigValidation {
           layerConfig as GroupLayerEntryConfig
         );
     });
-  }
-
-  /** ***************************************************************************************************************************
-   * Synchronize the English and French strings.
-   * @param {TypeLocalizedString} localizedString - The localized string to synchronize the en and fr string.
-   * @param {TypeDisplayLanguage} sourceKey - The source's key.
-   * @param {TypeDisplayLanguage} destinationKey - The destination's key.
-   * @private
-   */
-  static #synchronizeLocalizedString(
-    localizedString: TypeLocalizedString,
-    sourceKey: TypeDisplayLanguage,
-    destinationKey: TypeDisplayLanguage
-  ): void {
-    localizedString[destinationKey] = localizedString[sourceKey];
-  }
-
-  /** ***************************************************************************************************************************
-   * Adjust the map features configuration localized strings according to the supported languages array content.
-   * @param {TypeListOfLocalizedLanguages} suportedLanguages - The list of supported languages.
-   * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry - The list of Map Config Layer Entry configuration to adjust according
-   * to the supported languages array content.
-   * @private
-   */
-  static #processLocalizedString(suportedLanguages: TypeDisplayLanguage[], listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
-    if (suportedLanguages.includes('en') && suportedLanguages.includes('fr') && listOfMapConfigLayerEntry) {
-      const validateLocalizedString = (config: TypeJsonObject): void => {
-        if (typeof config === 'object') {
-          Object.keys(config).forEach((key) => {
-            if (!key.startsWith('_') && config[key] !== null && typeof config[key] === 'object') {
-              if (config?.[key]?.en || config?.[key]?.fr) {
-                // delete empty localized strings
-                if (!config[key].en && !config[key].fr) delete config[key];
-                else if (!config[key].en || !config[key].fr) {
-                  throw new Error('When you support both languages, you must set all en and fr properties of localized strings.');
-                }
-              }
-              // Avoid the 'geoviewLayerConfig' and 'parentLayerConfig' properties because they loop on themself and cause a
-              // stack overflow error.
-              else if (!['geoviewLayerConfig', 'parentLayerConfig'].includes(key)) validateLocalizedString(config[key]);
-            }
-          });
-        }
-      };
-      listOfMapConfigLayerEntry.forEach((geoviewLayerConfig) => validateLocalizedString(toJsonObject(geoviewLayerConfig)));
-      return;
-    }
-
-    let sourceKey: TypeDisplayLanguage;
-    let destinationKey: TypeDisplayLanguage;
-    if (suportedLanguages.includes('en')) {
-      sourceKey = 'en';
-      destinationKey = 'fr';
-    } else {
-      sourceKey = 'fr';
-      destinationKey = 'en';
-    }
-
-    if (listOfMapConfigLayerEntry) {
-      const propagateLocalizedString = (config: TypeJsonObject): void => {
-        if (typeof config === 'object') {
-          Object.keys(config).forEach((key) => {
-            if (!key.startsWith('_') && config[key] !== null && typeof config[key] === 'object') {
-              // Leaving the commented line here in case a developer needs to quickly uncomment it again to troubleshoot
-              // logger.logDebug(`Key=${key}`, config[key]);
-              if (config?.[key]?.en || config?.[key]?.fr)
-                ConfigValidation.#synchronizeLocalizedString(Cast<TypeLocalizedString>(config[key]), sourceKey, destinationKey);
-              // Avoid the 'geoviewLayerConfig' and 'parentLayerConfig' properties because they loop on themself and cause a
-              // stack overflow error.
-              else if (!['geoviewLayerConfig', 'parentLayerConfig'].includes(key)) propagateLocalizedString(config[key]);
-            }
-          });
-        }
-      };
-      listOfMapConfigLayerEntry.forEach((geoviewLayerConfig) => propagateLocalizedString(toJsonObject(geoviewLayerConfig)));
-    }
   }
 }

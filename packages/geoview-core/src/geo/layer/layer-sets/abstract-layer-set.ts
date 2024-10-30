@@ -12,10 +12,9 @@ import {
 import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { AbstractGeoViewLayer, LayerNameChangedEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { generateId, getLocalizedValue, whenThisThen } from '@/core/utils/utilities';
+import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { LayerApi } from '@/geo/layer/layer';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriDynamic } from '../geoview-layers/raster/esri-dynamic';
@@ -183,7 +182,7 @@ export abstract class AbstractLayerSet {
     this.resultSet[layerConfig.layerPath] = {
       layerPath: layerConfig.layerPath,
       layerStatus: layerConfig.layerStatus,
-      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId()))!,
+      layerName: layerConfig.layerName!,
     };
 
     // Register the layer status changed handler
@@ -247,7 +246,7 @@ export abstract class AbstractLayerSet {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
 
     // Get layer name
-    const layerName = getLocalizedValue(layer.getLayerName(layerPath), AppEventProcessor.getDisplayLanguage(this.getMapId()))!;
+    const layerName = layer.getLayerName(layerPath)!;
 
     // If not there (wasn't pre-registered via a config-registration)
     if (!(layerPath in this.resultSet)) {
@@ -344,10 +343,7 @@ export abstract class AbstractLayerSet {
       // If the layer path exists for the layer name that changed
       if (this.resultSet[layerNameEvent.layerPath]) {
         // Call the overridable function to process a layer name change
-        this.onProcessNameChanged(
-          layerNameEvent.layerPath,
-          getLocalizedValue(layerNameEvent.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId()))!
-        );
+        this.onProcessNameChanged(layerNameEvent.layerPath, layerNameEvent.layerName!);
 
         // Propagate to the store
         this.onPropagateToStore(this.resultSet[layerNameEvent.layerPath], 'layerName');
@@ -372,10 +368,7 @@ export abstract class AbstractLayerSet {
 
     // Update the name with a possibly updated layerName during layer status progression
     // (depending on how this translates in the new layers process, might not need this anymore)
-    this.resultSet[layerConfig.layerPath].layerName = getLocalizedValue(
-      layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
-      AppEventProcessor.getDisplayLanguage(this.getMapId())
-    )!;
+    this.resultSet[layerConfig.layerPath].layerName = layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName!;
   }
 
   /**

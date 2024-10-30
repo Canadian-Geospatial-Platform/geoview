@@ -8,7 +8,7 @@ import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/ent
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
-import { createLocalizedString, findPropertyNameByRegex, getXMLHttpRequest, xmlToJson } from '@/core/utils/utilities';
+import { findPropertyNameByRegex, getXMLHttpRequest, xmlToJson } from '@/core/utils/utilities';
 
 export type TypeWfsLayerNode = WfsGroupLayerConfig | WfsLayerEntryConfig;
 
@@ -137,12 +137,12 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     if (featureType.length > 1) {
       const groupConfig = toJsonObject({
         layerId: this.geoviewLayerId,
-        layerName: { en: 'Layer Group', fr: 'Groupe de couches' },
+        layerName: this.getLanguage() === 'en' ? 'Layer Group' : 'Groupe de couches',
         isLayerGroup: true,
         listOfLayerEntryConfig: featureType.map((layerMetadata) => {
           return toJsonObject({
             layerId: layerMetadata.Name['#text'],
-            layerName: createLocalizedString(layerMetadata.Title['#text']),
+            layerName: layerMetadata.Title['#text'],
           });
         }),
       });
@@ -152,7 +152,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     // Create a single layer using the metadata.
     const layerConfig = toJsonObject({
       layerId: featureType[0].Name['#text'],
-      layerName: createLocalizedString(featureType[0].Title['#text']),
+      layerName: featureType[0].Title['#text'],
     });
     return [this.createLeafNode(layerConfig, this.getLanguage(), this)!];
   }
@@ -177,7 +177,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     // Create the layer using the metadata. WFS metadata has no layer group definition.
     const layerConfig = toJsonObject({
       layerId,
-      layerName: createLocalizedString(layerFound.Title['#text']),
+      layerName: layerFound.Title['#text'],
     });
     return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
   }

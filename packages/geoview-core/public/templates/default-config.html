@@ -122,11 +122,12 @@
           'components': ['overview-map', 'nav-bar'],
           'corePackages': [],
           'theme': 'geo.ca'
-        }"></div>
-  <p>This map will load with bad configuration replaced with default.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="CONF3CS" class="panel"></pre>
-  <hr />
+        }"
+    ></div>
+    <p>This map will load with bad configuration replaced with default.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="CONF3CS" class="panel"></pre>
+    <hr />
 
     <div class="map-title-holder">
       <h4 id="HLCONF4">4. Load layers with bad config values</h4>
@@ -152,14 +153,9 @@
           'listOfGeoviewLayerConfig': [
             {
               'geoviewLayerId': 'wmsLYR1',
-              'geoviewLayerName': {
-                'en': 'earthquakes',
-                'fr': 'earthquakes'
-              },
-              'metadataAccessPath': {
-                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
-                'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
-              },
+              'geoviewLayerName': 'earthquakes',
+
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
               'geoviewLayerType': 'esriDynamic',
               'listOfLayerEntryConfig': [
                 {
@@ -172,11 +168,12 @@
         'components': ['overview-map'],
         'corePackages': [],
         'theme': 'geo.ca'
-      }"></div>
-  <p>This map will not load layers with bad configuration and inform the user.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="CONF4CS" class="panel"></pre>
-  <hr />
+      }"
+    ></div>
+    <p>This map will not load layers with bad configuration and inform the user.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="CONF4CS" class="panel"></pre>
+    <hr />
 
     <div class="map-title-holder">
       <h4 id="HLCONF5A">5.A. Load config from URL params</h4>
@@ -214,14 +211,16 @@
       },
       'components': ['overview-map'],
       'corePackages': []
-    }" data-lang="en" data-geocore-keys="12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9"
-    data-geocore-endpoint="https://geocore.api.geo.ca"></div>
-  <p>
-    This map loads it's configurations from the div parameters by providing a <strong>data-geocore-keys</strong> and
-    optionally a
-    <strong>data-geocore-endpoint</strong>.
-  </p>
-  <hr />
+    }"
+      data-lang="en"
+      data-geocore-keys="12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9"
+      data-geocore-endpoint="https://geocore.api.geo.ca"
+    ></div>
+    <p>
+      This map loads it's configurations from the div parameters by providing a <strong>data-geocore-keys</strong> and optionally a
+      <strong>data-geocore-endpoint</strong>.
+    </p>
+    <hr />
 
     <div class="map-title-holder">
       <h4 id="HLCONF6">6. Load config from file</h4>
@@ -261,14 +260,8 @@
                 },
                 'listOfGeoviewLayerConfig': [{
                   'geoviewLayerId': 'wmsLYR1',
-                  'geoviewLayerName': {
-                    'en': 'earthquakes',
-                    'fr': 'earthquakes'
-                  },
-                  'metadataAccessPath': {
-                    'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
-                    'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
-                  },
+                  'geoviewLayerName': 'earthquakes',
+                  'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
                   'geoviewLayerType': 'esriDynamic',
                   'listOfLayerEntryConfig': [
                     {

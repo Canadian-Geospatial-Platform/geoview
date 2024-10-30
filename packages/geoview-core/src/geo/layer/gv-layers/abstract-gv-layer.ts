@@ -32,6 +32,7 @@ import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/laye
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from './abstract-base-layer';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -387,9 +388,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Overridable function to return the type of the specified field from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
    *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected getFieldType(fieldName: string): 'string' | 'date' | 'number' {
+  protected getFieldType(fieldName: string): TypeOutfieldsType {
     // Log
     logger.logWarning(`getFieldType is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
     return 'string';
@@ -479,10 +480,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * since the base date. Vector feature dates must be in ISO format.
    * @param {Feature} features - The features that hold the field values.
    * @param {string} fieldName - The field name.
-   * @param {'number' | 'string' | 'date'} fieldType - The field type.
+   * @param {TypeOutfieldsType} fieldType - The field type.
    * @returns {string | number | Date} The formatted value of the field.
    */
-  protected getFieldValue(feature: Feature, fieldName: string, fieldType: 'number' | 'string' | 'date'): string | number | Date {
+  protected getFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType): string | number | Date {
     const fieldValue = feature.get(fieldName);
     let returnValue: string | number | Date;
     if (fieldType === 'date') {
@@ -567,7 +568,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // Hold a dictionary built on the fly for the field domains
       const dictFieldDomains: { [fieldName: string]: codedValueType | rangeDomainType | null } = {};
       // Hold a dictionary build on the fly for the field types
-      const dictFieldTypes: { [fieldName: string]: 'string' | 'number' | 'date' } = {};
+      const dictFieldTypes: { [fieldName: string]: TypeOutfieldsType } = {};
 
       // Loop on the promised feature infos
       let featureKeyCounter = 0;

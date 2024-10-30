@@ -3,12 +3,12 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import { Cast, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { TypeGeoviewLayerType, TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema, normalizeLocalizedString } from '@config/utils';
+import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@config/utils';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
 import { ConfigError, GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
 
-import { createLocalizedString, generateId } from '@/core/utils/utilities';
+import { generateId } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 // ========================
@@ -105,9 +105,9 @@ export abstract class AbstractGeoviewLayerConfig {
     // GV: GeoCore layers are processed by the configApi. GeoView layer instances do not recognize them as a valid geoView layer Type.
     // GV: However, whe have the isGeocore flag to keep track of geocore layers that were converted to geoview layers.
     this.isGeocore = (userGeoviewLayerConfig.isGeocore as boolean) || false;
-    if (this.isGeocore) this.geoviewLayerName = userGeoviewLayerConfig.geoviewLayerName[this.#language] as string;
+    if (this.isGeocore) this.geoviewLayerName = userGeoviewLayerConfig.geoviewLayerName as string;
     this.geoviewLayerId = (userGeoviewLayerConfig.geoviewLayerId || generateId()) as string;
-    this.metadataAccessPath = normalizeLocalizedString(userGeoviewLayerConfig.metadataAccessPath)![this.#language]!;
+    this.metadataAccessPath = userGeoviewLayerConfig.metadataAccessPath as string;
 
     // Validate the structure of the sublayer list and correct it if needed.
     switch ((this.#userGeoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)?.length) {
@@ -123,7 +123,7 @@ export abstract class AbstractGeoviewLayerConfig {
         (this.#userGeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray) = [
           Cast<TypeJsonObject>({
             layerId: this.#userGeoviewLayerConfig.geoviewLayerId,
-            layerName: { ...(this.#userGeoviewLayerConfig.geoviewLayerName as object) },
+            layerName: this.#userGeoviewLayerConfig.geoviewLayerName,
             isLayerGroup: true,
             listOfLayerEntryConfig: this.#userGeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray,
           }),
@@ -290,7 +290,7 @@ export abstract class AbstractGeoviewLayerConfig {
           layerTreeFilter = [
             Cast<EntryConfigBaseClass>({
               layerId: this.geoviewLayerId,
-              layerName: createLocalizedString(this.geoviewLayerName),
+              layerName: this.geoviewLayerName,
               isLayerGroup: true,
               listOfLayerEntryConfig: layerTreeFilter,
             }),
@@ -458,19 +458,17 @@ export abstract class AbstractGeoviewLayerConfig {
     // configuration because we're modifying it and don't want it to leak back to the original object.
     const geoviewLayerConfig = cloneDeep(userGeoviewLayerConfig || this.#userGeoviewLayerConfig);
 
-    if (geoviewLayerConfig.geoviewLayerName) this.geoviewLayerName = geoviewLayerConfig.geoviewLayerName[this.#language] as string;
+    if (geoviewLayerConfig.geoviewLayerName) this.geoviewLayerName = geoviewLayerConfig.geoviewLayerName as string;
     if (geoviewLayerConfig.serviceDateFormat) this.serviceDateFormat = geoviewLayerConfig.serviceDateFormat as string;
     if (geoviewLayerConfig.externalDateFormat) this.externalDateFormat = geoviewLayerConfig.externalDateFormat as string;
 
     const convertUserConfigToInternalConfig = (listOfLayerEntryConfig: TypeJsonArray): TypeJsonArray => {
       return listOfLayerEntryConfig.map((sublayer): TypeJsonObject => {
-        // We disable the eslint no-param-reassign because we want to keep the modifications made to the object passed as parameter.
-        // eslint-disable-next-line no-param-reassign
-        if (sublayer.layerName) sublayer.layerName = sublayer.layerName[this.#language];
         if (sublayer.isLayerGroup) convertUserConfigToInternalConfig(sublayer.listOfLayerEntryConfig as TypeJsonArray);
         return sublayer;
       });
     };
+
     const internalConfig = convertUserConfigToInternalConfig(geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray);
     this.listOfLayerEntryConfig = mergeWith(this.listOfLayerEntryConfig, internalConfig, (target, newValue, key) => {
       // Keep the listOfLayerEntryConfig as it is. Do not replace it with the user' array. Only the internal properties will be replaced.

@@ -157,8 +157,8 @@ Add the TypeSourceImageStaticInitialConfig section. This the expected configurat
   "type": "object",
   "properties": {
     "dataAccessPath": {
-      "$ref": "#/definitions/TypeLocalizedString",
-      "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne to it."
+      "type": "string",
+      "description": "The path to reach the data to display. If not specified, metadatAccessPath will be assigne to it."
     },
     "crossOrigin": {
       "type": "string",
@@ -242,19 +242,14 @@ Now that everything is put in place I can create my configuration to add to one 
 ```
 {
   'geoviewLayerId': 'staticLYR10',
-  'geoviewLayerName': {
-    'en': 'Static Image'
-  },
+  'geoviewLayerName': 'Static Image',
   'geoviewLayerType': 'imageStatic',
   'listOfLayerEntryConfig': [
     {
       'layerId': 'thumbnail',
-      'layerName': { 'en': 'DataCube' },
+      'layerName': 'DataCube',
       'source': {
-        'dataAccessPath': {
-          'en': 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png',
-          'fr': 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png'
-        },
+        'dataAccessPath': 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png',,
         'extent': [-87.77486341686723,
           51.62285357468582,
           -84.57727128084842,

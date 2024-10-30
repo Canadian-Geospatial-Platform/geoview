@@ -12,12 +12,8 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "esriFeatureLYR4",
-        "geoviewLayerName": {
-          "en": "Water quality at monitoring sites"
-        },
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer"
-        },
+        "geoviewLayerName": "Water quality at monitoring sites",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {

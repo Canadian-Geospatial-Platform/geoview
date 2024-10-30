@@ -18,11 +18,9 @@ import {
   TypeBaseSourceVectorInitialConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview config section
@@ -173,7 +171,7 @@ export class CSV extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
-    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
+    sourceOptions.url = layerConfig.source!.dataAccessPath;
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
     return vectorSource;

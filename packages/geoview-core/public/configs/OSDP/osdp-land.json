@@ -3,7 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
-        "zoomAndCenter": [9, [-113.376, 57.860]]
+        "zoomAndCenter": [9, [-113.376, 57.86]]
       },
       "projection": 3978
     },
@@ -15,10 +15,8 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "LYR1",
-        "geoviewLayerName": { "en": "2010 Land Cover of Canada" },
-        "metadataAccessPath": {
-          "en": "https://datacube.services.geo.ca/web/landcover.xml"
-        },
+        "geoviewLayerName": "2010 Land Cover of Canada",
+        "metadataAccessPath": "https://datacube.services.geo.ca/web/landcover.xml",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -28,10 +26,8 @@
       },
       {
         "geoviewLayerId": "LYR2",
-        "geoviewLayerName": { "en": "2015 Land Cover of Canada" },
-        "metadataAccessPath": {
-          "en": "https://datacube.services.geo.ca/web/landcover.xml"
-        },
+        "geoviewLayerName": "2015 Land Cover of Canada",
+        "metadataAccessPath": "https://datacube.services.geo.ca/web/landcover.xml",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -43,16 +39,16 @@
   },
   "components": ["north-arrow", "overview-map"],
   "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
-        "appBar": {
-          "tabs": {
-            "core": ["geolocator", "export"]
-          }
-        },
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "export"]
+    }
+  },
   "footerBar": {
     "tabs": {
       "core": ["legend", "layers", "details", "data-table"]
     }
   },
-  "corePackages": [ "swiper"],
+  "corePackages": ["swiper"],
   "theme": "geo.ca"
-  }
+}

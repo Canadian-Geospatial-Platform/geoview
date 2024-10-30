@@ -12,25 +12,25 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "geojsonLYR1",
-        "geoviewLayerName": { "en": "GeoJSON Sample" },
-        "metadataAccessPath": { "en": "./datasets/geojson/metadata1.json" },
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata1.json",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
             "layerId": "projects.json",
-            "layerName": { "en": "Projects" }
+            "layerName": "Projects"
           }
         ]
       },
       {
         "geoviewLayerId": "geojsonLYR2",
-        "geoviewLayerName": { "en": "MultiPolygon Sample" },
-        "metadataAccessPath": { "en": "./datasets/geojson/metadata.json" },
+        "geoviewLayerName": "MultiPolygon Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.json",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
             "layerId": "multipolygons.geojson",
-            "layerName": { "en": "MultiPolygon" }
+            "layerName": "MultiPolygon"
           }
         ]
       }
@@ -45,4 +45,4 @@
   },
   "corePackages": [],
   "theme": "geo.ca"
-  }
+}

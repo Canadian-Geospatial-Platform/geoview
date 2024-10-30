@@ -4,6 +4,7 @@ import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVVector } from './abstract-gv-vector';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**
  * Manages an Esri Feature layer.
@@ -34,9 +35,9 @@ export class GVEsriFeature extends AbstractGVVector {
   /**
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return esriGetFieldType(this.getLayerConfig(), fieldName);
   }

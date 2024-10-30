@@ -105,7 +105,7 @@ export abstract class EntryConfigBaseClass {
     this.#parentNode = parentNode;
 
     this.layerId = layerConfig.layerId as string;
-    this.layerName = (layerConfig?.layerName?.[this.#language] as string) || 'undefined';
+    this.layerName = (layerConfig?.layerName as string) || 'undefined';
     this.entryType = this.getEntryType();
     this.isLayerGroup = (layerConfig.isLayerGroup as boolean) || false;
 

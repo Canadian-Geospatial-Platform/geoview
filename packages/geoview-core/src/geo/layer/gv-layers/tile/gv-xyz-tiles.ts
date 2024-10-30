@@ -3,11 +3,11 @@ import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ from 'ol/source/XYZ';
 import { Extent } from 'ol/extent';
 
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from './abstract-gv-tile';
 import { featureInfoGetFieldType } from '../utils';
 import { validateExtent } from '@/geo/utils/utilities';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**
  * Manages a Tile<XYZ> layer.
@@ -65,11 +65,11 @@ export class GVXYZTiles extends AbstractGVTile {
   /**
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
-    return featureInfoGetFieldType(this.getLayerConfig(), fieldName, AppEventProcessor.getDisplayLanguage(this.getMapId()));
+    return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
 
   /**

@@ -1,7 +1,6 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageWmsInitialConfig } from '@/geo/map/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { createLocalizedString } from '@/core/utils/utilities';
 
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
@@ -34,13 +33,11 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       // set to '' and will be filled in the fetchServiceMetadata method of the class WMS. So, we begin with the assumption
       // that both en and fr end with ".xml". Be aware that in metadataAccessPath, one language can ends with ".xml" and the
       // other not.
-      this.source.dataAccessPath = createLocalizedString('');
+      this.source.dataAccessPath = '';
       // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set
       // to the same value of the corresponding metadataAccessPath.
-      if (this.geoviewLayerConfig.metadataAccessPath!.en!.slice(-4).toLowerCase() !== '.xml')
-        this.source.dataAccessPath.en = this.geoviewLayerConfig.metadataAccessPath!.en;
-      if (this.geoviewLayerConfig.metadataAccessPath!.fr!.slice(-4).toLowerCase() !== '.xml')
-        this.source.dataAccessPath.fr = this.geoviewLayerConfig.metadataAccessPath!.fr;
+      if (this.geoviewLayerConfig.metadataAccessPath!.slice(-4).toLowerCase() !== '.xml')
+        this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
     }
     // Default value for layerConfig.source.serverType is 'mapserver'.
     if (!this.source.serverType) this.source.serverType = 'mapserver';

@@ -27,6 +27,6 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     Object.assign(this, layerConfig);
     // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
     if (!this.source) this.source = {};
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath! };
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
   }
 }

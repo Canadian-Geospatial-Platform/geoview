@@ -26,8 +26,6 @@ import { logger } from '@/core/utils/logger';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { getLocalizedValue } from '@/core/utils/utilities';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { TypeOutfields } from '@/api/config/types/map-schema-types';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
@@ -132,7 +130,7 @@ export class OgcFeature extends AbstractGeoViewVector {
   // GV Layers Refactoring - Obsolete (in config?)
   protected override fetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
+      const metadataUrl = this.metadataAccessPath;
       if (metadataUrl) {
         const queryUrl = metadataUrl.endsWith('/') ? `${metadataUrl}collections?f=json` : `${metadataUrl}/collections?f=json`;
         axios
@@ -190,11 +188,7 @@ export class OgcFeature extends AbstractGeoViewVector {
           return;
         }
 
-        if (foundCollection.description)
-          layerConfig.layerName = {
-            en: foundCollection.description as string,
-            fr: foundCollection.description as string,
-          };
+        if (foundCollection.description) layerConfig.layerName = foundCollection.description as string;
 
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
@@ -228,7 +222,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     try {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
+      const metadataUrl = this.metadataAccessPath;
       if (metadataUrl) {
         const queryUrl = metadataUrl.endsWith('/')
           ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
@@ -308,7 +302,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
-    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
+    sourceOptions.url = layerConfig.source!.dataAccessPath!;
     sourceOptions.url = `${sourceOptions.url}/collections/${layerConfig.layerId}/items?f=json`;
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);

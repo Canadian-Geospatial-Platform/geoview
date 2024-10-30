@@ -11,9 +11,9 @@ import Feature from 'ol/Feature';
 import Source from 'ol/source/Source';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
 
-import { TypeLocalizedString, TypeOutfieldsType } from '@config/types/map-schema-types';
+import { TypeOutfieldsType } from '@config/types/map-schema-types';
 
-import { generateId, getXMLHttpRequest, createLocalizedString, getLocalizedValue, whenThisThen } from '@/core/utils/utilities';
+import { generateId, getXMLHttpRequest, whenThisThen } from '@/core/utils/utilities';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -24,7 +24,6 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import {
@@ -96,10 +95,10 @@ export abstract class AbstractGeoViewLayer {
   /** The GeoView layer name. The value of this attribute is extracted from the mapLayerConfig parameter. If its value is
    * undefined, a default value is generated.
    */
-  geoviewLayerName: TypeLocalizedString = createLocalizedString('');
+  geoviewLayerName: string = '';
 
   /** The GeoView layer metadataAccessPath. The name attribute is optional */
-  metadataAccessPath: TypeLocalizedString = createLocalizedString('');
+  metadataAccessPath: string = '';
 
   /**
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
@@ -120,7 +119,7 @@ export abstract class AbstractGeoViewLayer {
   metadata: TypeJsonObject | null = null;
 
   /** Layer name */
-  #layerName: Record<string, TypeLocalizedString | undefined> = {};
+  #layerName: Record<string, string | undefined> = {};
 
   /** Layer metadata */
   #layerMetadata: Record<string, TypeJsonObject> = {};
@@ -187,14 +186,8 @@ export abstract class AbstractGeoViewLayer {
     this.mapId = mapId;
     this.type = type;
     this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId('');
-    this.geoviewLayerName.en = geoviewLayerConfig?.geoviewLayerName?.en
-      ? geoviewLayerConfig.geoviewLayerName.en
-      : DEFAULT_LAYER_NAMES[type];
-    this.geoviewLayerName.fr = geoviewLayerConfig?.geoviewLayerName?.fr
-      ? geoviewLayerConfig.geoviewLayerName.fr
-      : DEFAULT_LAYER_NAMES[type];
-    if (geoviewLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = geoviewLayerConfig.metadataAccessPath.en.trim();
-    if (geoviewLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = geoviewLayerConfig.metadataAccessPath.fr.trim();
+    this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName ? geoviewLayerConfig.geoviewLayerName : DEFAULT_LAYER_NAMES[type];
+    if (geoviewLayerConfig.metadataAccessPath) this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath.trim();
     this.initialSettings = geoviewLayerConfig.initialSettings;
     this.serverDateFragmentsOrder = geoviewLayerConfig.serviceDateFormat
       ? DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat)
@@ -275,9 +268,9 @@ export abstract class AbstractGeoViewLayer {
 
   /** ***************************************************************************************************************************
    * Gets the Geoview layer name.
-   * @returns {TypeLocalizedString | undefined} The geoview layer name
+   * @returns {string | undefined} The geoview layer name
    */
-  getGeoviewLayerName(): TypeLocalizedString | undefined {
+  getGeoviewLayerName(): string | undefined {
     return this.geoviewLayerName;
   }
 
@@ -292,9 +285,9 @@ export abstract class AbstractGeoViewLayer {
 
   /** ***************************************************************************************************************************
    * Gets the layer name.
-   * @returns {TypeLocalizedString | undefined} The geoview layer name
+   * @returns {string | undefined} The geoview layer name
    */
-  getLayerName(layerPath: string): TypeLocalizedString | undefined {
+  getLayerName(layerPath: string): string | undefined {
     // If a new layer name is set
     if (this.#layerName[layerPath]) return this.#layerName[layerPath];
     // TODO: Refactor - Temporary patch until configs refactoring is done, the style should have been set already
@@ -305,9 +298,9 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Sets the layer name.
    * @param {string} layerPath The layer path.
-   * @param {TypeLocalizedString} name The layer name.
+   * @param {string} name The layer name.
    */
-  setLayerName(layerPath: string, name: TypeLocalizedString | undefined): void {
+  setLayerName(layerPath: string, name: string | undefined): void {
     this.#layerName[layerPath] = name;
     this.#emitLayerNameChanged({ layerPath, layerName: name });
   }
@@ -492,10 +485,9 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async fetchServiceMetadata(): Promise<void> {
-    const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
-    if (metadataUrl) {
+    if (this.metadataAccessPath) {
       try {
-        const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
+        const metadataString = await getXMLHttpRequest(`${this.metadataAccessPath}?f=json`);
         if (metadataString === '{}') this.metadata = null;
         else {
           this.metadata = toJsonObject(JSON.parse(metadataString));
@@ -1074,11 +1066,11 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} fieldName field name for which we want to get the type.
    * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
     // Log
     logger.logWarning(`getFieldType is not implemented for ${fieldName} - ${layerConfig}`);
     return 'string';
@@ -2005,7 +1997,7 @@ type LayerNameChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerNam
  */
 export type LayerNameChangedEvent = {
   // The new layer name.
-  layerName?: TypeLocalizedString;
+  layerName?: string;
   // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
   // The layer path.
   layerPath: string;

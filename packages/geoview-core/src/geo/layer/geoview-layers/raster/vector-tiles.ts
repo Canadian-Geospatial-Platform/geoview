@@ -9,7 +9,6 @@ import { Extent } from 'ol/extent';
 import { applyStyle } from 'ol-mapbox-style';
 
 import { MVT } from 'ol/format';
-import { TypeLocalizedString } from '@config/types/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
@@ -18,15 +17,15 @@ import {
   TypeGeoviewLayerConfig,
   TypeTileGrid,
   layerEntryIsGroupLayer,
+  TypeFeatureInfoLayerConfig,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue } from '@/core/utils/utilities';
-import { Cast, TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { api } from '@/app';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -115,20 +114,14 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {string} fieldName field name for which we want to get the type.
    * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
   // GV Layers Refactoring - Obsolete (in layers)
   // TODO refactor - this looks like it will not work, investigate further
-  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo;
-    const fieldIndex = getLocalizedValue(
-      Cast<TypeLocalizedString>(fieldDefinitions.outfields),
-      AppEventProcessor.getDisplayLanguage(this.mapId)
-    )
-      ?.split(',')
-      .indexOf(fieldName);
-    if (!fieldIndex || fieldIndex === -1) return 'string';
-    return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
+  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
+    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo as unknown as TypeFeatureInfoLayerConfig;
+    const outFieldEntry = fieldDefinitions.outfields?.find((fieldDefinition) => fieldDefinition.name === fieldName);
+    return outFieldEntry?.type || 'string';
   }
 
   /** ***************************************************************************************************************************
@@ -176,7 +169,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     const sourceOptions: SourceOptions = {
-      url: getLocalizedValue(layerConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId)),
+      url: layerConfig.source.dataAccessPath,
     };
 
     if (
@@ -252,13 +245,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const resolutions = sourceOptions.tileGrid.getResolutions();
 
     if (this.metadata?.defaultStyles)
-      applyStyle(
-        olLayer,
-        `${getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId))}${
-          this.metadata.defaultStyles
-        }/root.json`,
-        { resolutions: resolutions?.length ? resolutions : [] }
-      ).catch((error) => {
+      applyStyle(olLayer, `${this.metadataAccessPath}${this.metadata.defaultStyles}/root.json`, {
+        resolutions: resolutions?.length ? resolutions : [],
+      }).catch((error) => {
         // Log
         logger.logPromiseFailed('applyStyle in processOneLayerEntry in VectorTiles', error);
       });

@@ -17,7 +17,7 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
     // Value for this.source.format can only be WFS.
     if (!this.source) this.source = { format: 'WFS' };
     if (!this.source.format) this.source.format = 'WFS';
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath! };
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
     if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LNGLAT;
   }
 }

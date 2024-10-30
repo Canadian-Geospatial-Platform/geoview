@@ -2,10 +2,10 @@ import VectorTileLayer from 'ol/layer/VectorTile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import { VectorTile } from 'ol/source';
 
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { featureInfoGetFieldType } from '../utils';
 import { AbstractGVVectorTile } from './abstract-gv-vector-tile';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**
  * Manages a Vector Tiles layer.
@@ -45,10 +45,10 @@ export class GVVectorTiles extends AbstractGVVectorTile {
   /**
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
-    return featureInfoGetFieldType(this.getLayerConfig(), fieldName, AppEventProcessor.getDisplayLanguage(this.getMapId()));
+    return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
 }
