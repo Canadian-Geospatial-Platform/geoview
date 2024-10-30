@@ -5,7 +5,7 @@ import { EsriGroupLayerConfig } from '@config/types/classes/sub-layer-config/gro
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
-import { createLocalizedString, getXMLHttpRequest } from '@/core/utils/utilities';
+import { getXMLHttpRequest } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 // ========================
@@ -110,7 +110,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
       if (layerId !== (serviceMetadata.name as string)) throw new GeoviewLayerInvalidParameterError('LayerIdNotFound', [layerId]);
       const layerConfig = toJsonObject({
         layerId,
-        layerName: createLocalizedString(layerId),
+        layerName: layerId,
       });
       return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
     }
@@ -124,7 +124,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
     if (layerFound && layerFound.type !== 'Group Layer') {
       const layerConfig = toJsonObject({
         layerId: layerFound.id.toString(),
-        layerName: createLocalizedString(layerFound.name),
+        layerName: layerFound.name,
         geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layerFound.geometryType as string),
       });
       return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
@@ -150,7 +150,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         this.createLeafNode(
           toJsonObject({
             layerId: serviceMetadata.name,
-            layerName: createLocalizedString(serviceMetadata.name)!,
+            layerName: serviceMetadata.name!,
           }),
           this.getLanguage(),
           this
@@ -169,7 +169,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         this.createLeafNode(
           toJsonObject({
             layerId: layers[0].id.toString(),
-            layerName: createLocalizedString(layers[0].name)!,
+            layerName: layers[0].name!,
             geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layers[0].geometryType as string),
           }),
           this.getLanguage(),
@@ -217,7 +217,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
           accumulator.push(
             toJsonObject({
               layerId: layer.id.toString(),
-              layerName: createLocalizedString(layer.name),
+              layerName: layer.name,
               geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layer.geometryType as string),
             })
           );
@@ -228,7 +228,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
 
     return toJsonObject({
       layerId: parentId === -1 ? groupName : `${parentId}`,
-      layerName: createLocalizedString(groupName),
+      layerName: groupName,
       isLayerGroup: true,
       listOfLayerEntryConfig,
     });

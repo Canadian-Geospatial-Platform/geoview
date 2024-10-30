@@ -13,23 +13,14 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "LYR1",
-        "geoviewLayerName": {
-          "en": "Temporal Test Bed",
-          "fr": "Banc d\\'essai temporel"
-        },
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/",
-          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/"
-        },
+        "geoviewLayerName": "Temporal Test Bed",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
             "geometryType": "point",
-            "layerName": {
-              "en": "stations-Temporal",
-              "fr": "stations-Temporal"
-            },
+            "layerName": "stations-Temporal",
             "initialSettings": {
               "controls": {
                 "query": false
@@ -78,10 +69,7 @@
                     },
                     "size": 2.668,
                     "symbol": "square",
-                    "offset": [
-                      0,
-                      0
-                    ]
+                    "offset": [0, 0]
                   }
                 }
               ]

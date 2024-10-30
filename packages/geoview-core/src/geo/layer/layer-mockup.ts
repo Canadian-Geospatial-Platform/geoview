@@ -35,8 +35,8 @@ export abstract class LayerMockup {
     return {
       geoviewLayerId: 'esriTop100',
       geoviewLayerType: 'esriFeature',
-      geoviewLayerName: { en: 'My custom default label for creation' },
-      metadataAccessPath: { en: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer' },
+      geoviewLayerName: 'My custom default label for creation',
+      metadataAccessPath: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer',
       serviceDateFormat: 'DD/MM/YYYY HH:MM:SSZ',
       externalDateFormat: 'DD/MM/YYYY HH:MM:SSZ',
       listOfLayerEntryConfig: [
@@ -979,7 +979,7 @@ export abstract class LayerMockup {
   static configPolygonsMetadata(): TypeJsonObject {
     return {
       layerId: 'polygons.json',
-      layerName: { en: 'Polygons' },
+      layerName: 'Polygons',
       source: {
         featureInfo: {
           queryable: true,
@@ -1066,7 +1066,7 @@ export abstract class LayerMockup {
   static configLinesMetadata(): TypeJsonObject {
     return {
       layerId: 'lines.json',
-      layerName: { en: 'Lines' },
+      layerName: 'Lines',
       source: {
         featureInfo: {
           queryable: false,
@@ -1111,7 +1111,7 @@ export abstract class LayerMockup {
   static configIconPointsMetadata(): TypeJsonObject {
     return {
       layerId: 'icon_points.json',
-      layerName: { en: 'Icons' },
+      layerName: 'Icons',
       source: {
         featureInfo: {
           queryable: true,
@@ -1156,7 +1156,7 @@ export abstract class LayerMockup {
   static configPointsMetadata(): TypeJsonObject {
     return {
       layerId: 'points.json',
-      layerName: { en: 'Points' },
+      layerName: 'Points',
       source: {
         featureInfo: {
           queryable: false,
@@ -1217,7 +1217,7 @@ export abstract class LayerMockup {
   static configPoints1Metadata(): TypeJsonObject {
     return {
       layerId: 'points_1.json',
-      layerName: { en: 'Points_1' },
+      layerName: 'Points_1',
       source: {
         featureInfo: {
           queryable: true,
@@ -1278,7 +1278,7 @@ export abstract class LayerMockup {
   static configPoints2Metadata(): TypeJsonObject {
     return {
       layerId: 'points_2.json',
-      layerName: { en: 'Points_1' },
+      layerName: 'Points_1',
       source: {
         featureInfo: {
           queryable: true,
@@ -1339,7 +1339,7 @@ export abstract class LayerMockup {
   static configPoints3Metadata(): TypeJsonObject {
     return {
       layerId: 'points_3.json',
-      layerName: { en: 'Points_1' },
+      layerName: 'Points_1',
       source: {
         featureInfo: {
           queryable: false,

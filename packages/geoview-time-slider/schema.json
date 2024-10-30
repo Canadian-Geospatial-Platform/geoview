@@ -12,34 +12,14 @@
         "type": "object",
         "properties": {
           "title": {
-            "type": "object",
-            "properties": {
-              "en": {
-                "type": "string",
-                "default": "Time slider title",
-                "description": "The English version of the string."
-              },
-              "fr": {
-                "type": "string",
-                "default": "Titre du curseur temporel",
-                "description": "The French version of the string. "
-              }
-            }
+            "type": "string",
+            "default": "Time slider title",
+            "description": "The title to display"
           },
           "description": {
-            "type": "object",
-            "properties": {
-              "en": {
-                "type": "string",
-                "default": "Time slider description",
-                "description": "The English version of the string."
-              },
-              "fr": {
-                "type": "string",
-                "default": "Description du curseur temporel",
-                "description": "The French version of the string. "
-              }
-            }
+            "type": "string",
+            "default": "Time slider description",
+            "description": "The description to use."
           },
           "locked": {
             "type": "boolean",

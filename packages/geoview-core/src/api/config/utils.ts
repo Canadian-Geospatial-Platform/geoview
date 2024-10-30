@@ -3,10 +3,9 @@ import addErrors from 'ajv-errors';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
-import { TypeJsonObject } from '@config/types/config-types';
 import schema from '@config/types/config-validation-schema.json';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
-import { TypeGeoviewLayerType, TypeLayerEntryType, TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeLayerEntryType } from '@config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 import { logger } from '@/core/utils/logger';
@@ -109,21 +108,4 @@ export function isvalidComparedToInternalSchema(schemaPath: string, targetObject
   const targetObjectToValidate: object = cloneDeep(targetObject);
   if (useInternalSchema) Object.assign(targetObjectToValidate, { useInternalSchema });
   return isvalidComparedToInputSchema(schemaPath, targetObjectToValidate);
-}
-
-/**
- * Normalize the localized string parameter. If a language is set and the other is not, the undefined language is set to
- * the value of the other.
- * @param {TypeLocalizedString | TypeJsonObject} localizedString The localized string to normalize.
- *
- * @returns {TypeLocalizedString | undefined} A normalized localized string.
- */
-export function normalizeLocalizedString(localizedString: TypeLocalizedString | TypeJsonObject): TypeLocalizedString | undefined {
-  const returnValue = { en: localizedString?.en as string, fr: localizedString?.fr as string } as TypeLocalizedString;
-  if (localizedString && (returnValue.en || returnValue.fr)) {
-    if (!returnValue.fr) returnValue.fr = returnValue.en;
-    if (!returnValue.en) returnValue.en = returnValue.fr;
-    return returnValue;
-  }
-  return undefined;
 }

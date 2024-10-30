@@ -9,13 +9,12 @@ import { Extent } from 'ol/extent';
 
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
+import { xmlToJson } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -327,10 +326,8 @@ export class GVWMS extends AbstractGVRaster {
       const legendUrlFromCapabilities = this.#getLegendUrlFromCapabilities(layerConfig, chosenStyle);
       if (legendUrlFromCapabilities) queryUrl = legendUrlFromCapabilities.OnlineResource as string;
       else if (Object.keys(this.getLayerConfig().getServiceMetadata()?.Capability?.Request || {}).includes('GetLegendGraphic'))
-        queryUrl = `${getLocalizedValue(
-          this.getLayerConfig().geoviewLayerConfig.metadataAccessPath,
-          AppEventProcessor.getDisplayLanguage(this.getMapId())
-        )!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
+        queryUrl = `${this.getLayerConfig().geoviewLayerConfig
+          .metadataAccessPath!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
 
       if (queryUrl) {
         queryUrl = queryUrl.toLowerCase().startsWith('http:') ? `https${queryUrl.slice(4)}` : queryUrl;

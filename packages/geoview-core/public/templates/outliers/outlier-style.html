@@ -73,34 +73,32 @@
           'listOfGeoviewLayerConfig': [
             {
               'geoviewLayerId': 'geojsonlyr2',
-              'geoviewLayerName': { 'en': 'Point and Polygon Layer' },
+              'geoviewLayerName': 'Point and Polygon Layer',
               'geoviewLayerType': 'GeoJSON',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'pointPolygon',
-                  'layerName': { 'en': 'Point and Polygon Layer' },
+                  'layerName': 'Point and Polygon Layer',
                   'initialSettings': {
                     'states': {
                       'visible': false
                     }
                   },
                   'source': {
-                    'dataAccessPath': {
-                      'en': './datasets/geojson/projects.json'
-                    }
+                    'dataAccessPath': './datasets/geojson/projects.json'
                   }
                 }
               ]
             },
             {
               'geoviewLayerId': 'HRDEM-dsm-hillshade',
-              'geoviewLayerName': { 'en': 'DSM Hillshade' },
-              'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/elevation' },
+              'geoviewLayerName': 'DSM Hillshade',
+              'metadataAccessPath': 'https://datacube.services.geo.ca/ows/elevation',
               'geoviewLayerType': 'ogcWms',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'dsm-hillshade',
-                  'layerName': { 'en': 'DSM-Hillshade' },
+                  'layerName': 'DSM-Hillshade',
                   'initialSettings': {
                     'states': {
                       'visible': false
@@ -111,15 +109,13 @@
             },
             {
               'geoviewLayerId': 'cesi',
-              'geoviewLayerName': { 'en': 'CESI' },
-              'metadataAccessPath': {
-                'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/'
-              },
+              'geoviewLayerName': 'CESI',
+              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
               'geoviewLayerType': 'esriDynamic',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '32',
-                  'layerName': { 'en': 'CESI' },
+                  'layerName': 'CESI',
                   'initialSettings': {
                     'states': {
                       'visible': false
@@ -130,24 +126,20 @@
             },
             {
               'geoviewLayerId': 'FSI',
-              'geoviewLayerName': { 'en': 'Flood susceptibility index' },
-              'metadataAccessPath': {
-                'en': 'https://datacube.services.geo.ca/web/flood-susceptibility.xml'
-              },
+              'geoviewLayerName': 'Flood susceptibility index',
+              'metadataAccessPath': 'https://datacube.services.geo.ca/web/flood-susceptibility.xml',
               'geoviewLayerType': 'ogcWms',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'FS-national-2015-index',
-                  'layerName': { 'en': 'Flood susceptibility index' }
+                  'layerName': 'Flood susceptibility index'
                 }
               ]
             },
             {
               'geoviewLayerId': 'Canadian Disasters, by Event Type***38633a35',
-              'geoviewLayerName': { 'en': 'Canadian Disasters, by Event Type' },
-              'metadataAccessPath': {
-                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/PS/canadian_disasters_en/MapServer'
-              },
+              'geoviewLayerName': 'Canadian Disasters, by Event Type',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/PS/canadian_disasters_en/MapServer',
               'geoviewLayerType': 'esriFeature',
               'listOfLayerEntryConfig': [
                 {

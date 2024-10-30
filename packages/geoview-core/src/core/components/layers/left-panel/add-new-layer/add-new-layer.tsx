@@ -24,7 +24,6 @@ import { TypeWFSLayerConfig, WFS as WfsGeoviewClass } from '@/geo/layer/geoview-
 import { TypeCSVLayerConfig, CSV as CsvGeoviewClass } from '@/geo/layer/geoview-layers/vector/csv';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { createLocalizedString } from '@/core/utils/utilities';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
@@ -215,7 +214,7 @@ export function AddNewLayer(): JSX.Element {
       const wmsGeoviewLayerConfig = {
         geoviewLayerType: WMS,
         listOfLayerEntryConfig: [] as OgcWmsLayerEntryConfig[],
-        metadataAccessPath: createLocalizedString(accessPath),
+        metadataAccessPath: accessPath,
       } as TypeWMSLayerConfig;
       const wmsGeoviewLayerInstance = new WmsGeoviewClass(mapId, wmsGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
@@ -248,7 +247,7 @@ export function AddNewLayer(): JSX.Element {
                 new OgcWmsLayerEntryConfig({
                   geoviewLayerConfig: wmsGeoviewLayerConfig,
                   layerId: childLayer.Name as string,
-                  layerName: createLocalizedString(childLayer.Title as string),
+                  layerName: childLayer.Title as string,
                 } as OgcWmsLayerEntryConfig)
               );
             }
@@ -263,7 +262,7 @@ export function AddNewLayer(): JSX.Element {
       }
 
       if (layers.length === 1) {
-        setLayerName(layers[0].layerName!.en!);
+        setLayerName(layers[0].layerName!);
         setLayerEntries([layers[0]]);
       } else {
         setLayerList(layers);
@@ -291,7 +290,7 @@ export function AddNewLayer(): JSX.Element {
       const wfsGeoviewLayerConfig = {
         geoviewLayerType: WFS,
         listOfLayerEntryConfig: [] as WfsLayerEntryConfig[],
-        metadataAccessPath: createLocalizedString(layerURL),
+        metadataAccessPath: layerURL,
       } as TypeWFSLayerConfig;
       const wfsGeoviewLayerInstance = new WfsGeoviewClass(mapId, wfsGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
@@ -306,12 +305,12 @@ export function AddNewLayer(): JSX.Element {
           new WfsLayerEntryConfig({
             geoviewLayerConfig: wfsGeoviewLayerConfig,
             layerId: (aFeatureType.Name['#text'] as string).split(':')[1] as string,
-            layerName: createLocalizedString(aFeatureType.Title['#text'] as string),
+            layerName: aFeatureType.Title['#text'] as string,
           } as WfsLayerEntryConfig)
       );
 
       if (layers.length === 1) {
-        setLayerName(layers[0].layerName!.en! as string);
+        setLayerName(layers[0].layerName as string);
         setLayerEntries([layers[0]]);
       } else {
         setLayerList(layers);
@@ -334,7 +333,7 @@ export function AddNewLayer(): JSX.Element {
       const ogcFeatureGeoviewLayerConfig = {
         geoviewLayerType: OGC_FEATURE,
         listOfLayerEntryConfig: [] as OgcFeatureLayerEntryConfig[],
-        metadataAccessPath: createLocalizedString(layerURL.split('collections')[0]),
+        metadataAccessPath: layerURL.split('collections')[0],
       } as TypeOgcFeatureLayerConfig;
       const ogcFeatureInstance = new OgcFeature(mapId, ogcFeatureGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
@@ -359,7 +358,7 @@ export function AddNewLayer(): JSX.Element {
         setLayerEntries([
           new TypeOgcFeatureLayerEntryConfig({
             layerId: ogcFeatureMetadata.id as string,
-            layerName: createLocalizedString(ogcFeatureMetadata.title as string),
+            layerName: ogcFeatureMetadata.title as string,
           } as TypeOgcFeatureLayerEntryConfig),
         ]);
         setLayerName(ogcFeatureMetadata.title as string);
@@ -380,7 +379,7 @@ export function AddNewLayer(): JSX.Element {
               new OgcFeatureLayerEntryConfig({
                 geoviewLayerConfig: ogcFeatureGeoviewLayerConfig,
                 layerId: aFeatureType.id as string,
-                layerName: createLocalizedString(aFeatureType.title as string),
+                layerName: aFeatureType.title as string,
               } as OgcFeatureLayerEntryConfig)
             );
           }
@@ -394,13 +393,13 @@ export function AddNewLayer(): JSX.Element {
             new OgcFeatureLayerEntryConfig({
               geoviewLayerConfig: ogcFeatureGeoviewLayerConfig,
               layerId: aFeatureType.id as string,
-              layerName: createLocalizedString(aFeatureType.title as string),
+              layerName: aFeatureType.title as string,
             } as OgcFeatureLayerEntryConfig)
         );
       }
 
       if (layers.length === 1) {
-        setLayerName(layers[0].layerName!.en! as string);
+        setLayerName(layers[0].layerName!);
         setLayerEntries([layers[0]]);
       } else {
         setLayerList(layers);
@@ -426,7 +425,7 @@ export function AddNewLayer(): JSX.Element {
       const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(layerURL);
       if (layers.length === 1) {
         if (layers.length === 1) {
-          setLayerName(layers[0].geoviewLayerName!.en! as string);
+          setLayerName(layers[0].geoviewLayerName!);
           setLayerEntries(layers);
         } else {
           setLayerList(layers);
@@ -453,12 +452,12 @@ export function AddNewLayer(): JSX.Element {
           ? ({
               geoviewLayerType: type,
               listOfLayerEntryConfig: [] as EsriDynamicLayerEntryConfig[],
-              metadataAccessPath: createLocalizedString(layerURL),
+              metadataAccessPath: layerURL,
             } as TypeEsriDynamicLayerConfig)
           : ({
               geoviewLayerType: type,
               listOfLayerEntryConfig: [] as EsriFeatureLayerEntryConfig[],
-              metadataAccessPath: createLocalizedString(layerURL.substring(0, layerURL.lastIndexOf('/'))),
+              metadataAccessPath: layerURL.substring(0, layerURL.lastIndexOf('/')),
             } as TypeEsriFeatureLayerConfig);
       const esriGeoviewLayerInstance =
         type === ESRI_DYNAMIC
@@ -481,7 +480,7 @@ export function AddNewLayer(): JSX.Element {
                 new EsriDynamicLayerEntryConfig({
                   geoviewLayerConfig: esriGeoviewLayerConfig,
                   layerId: aLayer.id as string,
-                  layerName: createLocalizedString(aLayer.name as string),
+                  layerName: aLayer.name as string,
                 } as EsriDynamicLayerEntryConfig)
               )
             );
@@ -490,13 +489,13 @@ export function AddNewLayer(): JSX.Element {
               new EsriFeatureLayerEntryConfig({
                 geoviewLayerConfig: esriGeoviewLayerConfig,
                 layerId: esriMetadata.layers[0].id as string,
-                layerName: createLocalizedString(esriMetadata.layers[0].name as string),
+                layerName: esriMetadata.layers[0].name as string,
               } as EsriFeatureLayerEntryConfig)
             );
           }
 
           if (layers.length === 1) {
-            setLayerName(layers[0].layerName!.en!);
+            setLayerName(layers[0].layerName);
             setLayerEntries([layers[0]]);
           } else {
             setLayerList(layers);
@@ -522,7 +521,7 @@ export function AddNewLayer(): JSX.Element {
       const esriImageGeoviewLayerConfig = {
         geoviewLayerType: ESRI_IMAGE,
         listOfLayerEntryConfig: [] as EsriImageLayerEntryConfig[],
-        metadataAccessPath: createLocalizedString(layerURL),
+        metadataAccessPath: layerURL,
       } as TypeEsriImageLayerConfig;
       const esriImageGeoviewLayerInstance = new EsriImage(mapId, esriImageGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
@@ -533,15 +532,13 @@ export function AddNewLayer(): JSX.Element {
         new EsriImageLayerEntryConfig({
           geoviewLayerConfig: esriImageGeoviewLayerConfig,
           layerId: esriImageGeoviewLayerConfig.geoviewLayerId,
-          layerName: createLocalizedString(
-            typeof esriImageGeoviewLayerInstance.metadata?.name === 'string' ? esriImageGeoviewLayerInstance.metadata?.name : ''
-          ),
+          layerName: typeof esriImageGeoviewLayerInstance.metadata?.name === 'string' ? esriImageGeoviewLayerInstance.metadata?.name : '',
           source: {
-            dataAccessPath: createLocalizedString(layerURL),
+            dataAccessPath: layerURL,
           },
         } as EsriImageLayerEntryConfig),
       ];
-      setLayerName(layers[0].layerName!.en!);
+      setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
     } catch (err) {
       emitErrorServer('ESRI Image');
@@ -578,13 +575,13 @@ export function AddNewLayer(): JSX.Element {
         new XYZTilesLayerEntryConfig({
           geoviewLayerConfig: xyzGeoviewLayerConfig,
           layerId: xyzGeoviewLayerConfig.geoviewLayerId,
-          layerName: createLocalizedString(''),
+          layerName: '',
           source: {
-            dataAccessPath: createLocalizedString(layerURL),
+            dataAccessPath: layerURL,
           },
         } as XYZTilesLayerEntryConfig),
       ];
-      setLayerName(layers[0].layerName!.en!);
+      setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
     } catch (err) {
       emitErrorServer('XYZ Tile');
@@ -615,14 +612,14 @@ export function AddNewLayer(): JSX.Element {
         new CsvLayerEntryConfig({
           geoviewLayerConfig: csvGeoviewLayerConfig,
           layerId: csvGeoviewLayerConfig.geoviewLayerId,
-          layerName: createLocalizedString(''),
+          layerName: '',
           schemaTag: CONST_LAYER_TYPES.CSV,
           source: {
-            dataAccessPath: createLocalizedString(layerURL),
+            dataAccessPath: layerURL,
           },
         } as CsvLayerEntryConfig),
       ];
-      setLayerName(layers[0].layerName!.en!);
+      setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
     } catch (err) {
       emitErrorServer('CSV');
@@ -645,7 +642,7 @@ export function AddNewLayer(): JSX.Element {
         const geojsonGeoviewLayerConfig = {
           geoviewLayerType: GEOJSON,
           listOfLayerEntryConfig: [] as GeoJSONLayerEntryConfig[],
-          metadataAccessPath: createLocalizedString(layerURL),
+          metadataAccessPath: layerURL,
         } as TypeGeoJSONLayerConfig;
         const geojsonGeoviewLayerInstance = new GeoJSON(mapId, geojsonGeoviewLayerConfig);
         // Synchronize the geoviewLayerId.
@@ -660,7 +657,7 @@ export function AddNewLayer(): JSX.Element {
         ConfigValidation.validateListOfGeoviewLayerConfig(api.maps[mapId].getDisplayLanguage(), [geojsonGeoviewLayerConfig]);
         const layers = geojsonGeoviewLayerConfig.listOfLayerEntryConfig;
         if (layers.length === 1) {
-          setLayerName(layers[0].layerName!.en! as string);
+          setLayerName(layers[0].layerName as string);
           setLayerEntries([Cast<GeoJSONLayerEntryConfig>(layers[0])]);
         } else {
           setLayerList(Cast<GeoJSONLayerEntryConfig[]>(layers));
@@ -681,13 +678,13 @@ export function AddNewLayer(): JSX.Element {
           new GeoJSONLayerEntryConfig({
             geoviewLayerConfig: geojsonGeoviewLayerConfig,
             layerId: geojsonGeoviewLayerConfig.geoviewLayerId,
-            layerName: createLocalizedString(''),
+            layerName: '',
             source: {
-              dataAccessPath: createLocalizedString(layerURL),
+              dataAccessPath: layerURL,
             },
           } as GeoJSONLayerEntryConfig),
         ];
-        setLayerName(layers[0].layerName!.en!);
+        setLayerName(layers[0].layerName!);
         setLayerEntries([layers[0]]);
       }
     } catch (err) {
@@ -718,13 +715,13 @@ export function AddNewLayer(): JSX.Element {
         new GeoPackageLayerEntryConfig({
           geoviewLayerConfig: geoPackageGeoviewLayerConfig,
           layerId: geoPackageGeoviewLayerConfig.geoviewLayerId,
-          layerName: createLocalizedString(''),
+          layerName: '',
           source: {
-            dataAccessPath: createLocalizedString(layerURL),
+            dataAccessPath: layerURL,
           },
         } as GeoPackageLayerEntryConfig),
       ];
-      setLayerName(layers[0].layerName!.en!);
+      setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
     } catch (err) {
       emitErrorServer('GeoPackage');
@@ -894,8 +891,8 @@ export function AddNewLayer(): JSX.Element {
       geoviewLayerConfig.listOfLayerEntryConfig = layerEntries as TypeLayerEntryConfig[];
 
       // TODO: Bug - Fix this layer naming not working, wasn't working before the refactor either, leaving it as-is
-      geoviewLayerConfig.geoviewLayerName = createLocalizedString(layerName);
-      if (layerType === XYZ_TILES) (layerEntries[0] as TypeLayerEntryConfig).layerName = createLocalizedString(layerName);
+      geoviewLayerConfig.geoviewLayerName = layerName;
+      if (layerType === XYZ_TILES) (layerEntries[0] as TypeLayerEntryConfig).layerName = layerName;
       if (geoviewLayerConfig.listOfLayerEntryConfig.length === 1)
         geoviewLayerConfig.listOfLayerEntryConfig[0].layerName = geoviewLayerConfig.geoviewLayerName;
 
@@ -992,13 +989,13 @@ export function AddNewLayer(): JSX.Element {
     if (isMultiple()) {
       if (!((newValue as TypeLayerEntryConfig[]).length === 0)) {
         setLayerEntries(newValue as TypeLayerEntryConfig[]);
-        setLayerName((newValue as TypeLayerEntryConfig[]).map((layerConfig) => layerConfig.layerName!.en).join(', '));
+        setLayerName((newValue as TypeLayerEntryConfig[]).map((layerConfig) => layerConfig.layerName).join(', '));
 
         setStepButtonDisable(false);
       }
     } else {
       setLayerEntries([newValue as TypeLayerEntryConfig]);
-      setLayerName((newValue as TypeLayerEntryConfig).layerName!.en!);
+      setLayerName((newValue as TypeLayerEntryConfig).layerName!);
 
       setStepButtonDisable(false);
     }
@@ -1288,12 +1285,12 @@ export function AddNewLayer(): JSX.Element {
                       id="service-layer-label"
                       options={layerList as TypeLayerEntryConfig[]}
                       getOptionLabel={(option) =>
-                        `${(option as TypeLayerEntryConfig).layerName!.en} (${(option as TypeLayerEntryConfig).layerId})`
+                        `${(option as TypeLayerEntryConfig).layerName} (${(option as TypeLayerEntryConfig).layerId})`
                       }
                       renderOption={(props, option, { selected }) => (
-                        <li {...props} key={(option as TypeLayerEntryConfig).layerName!.en}>
+                        <li {...props} key={(option as TypeLayerEntryConfig).layerName}>
                           <Checkbox icon={uncheckedIcon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
-                          {(option as TypeLayerEntryConfig).layerName!.en}
+                          {(option as TypeLayerEntryConfig).layerName}
                         </li>
                       )}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1310,13 +1307,13 @@ export function AddNewLayer(): JSX.Element {
                       id="service-layer-label"
                       options={layerList as TypeGeoviewLayerConfig[]}
                       getOptionLabel={(option) =>
-                        `${(option as TypeGeoviewLayerConfig).geoviewLayerName!.en} (${(option as TypeGeoviewLayerConfig).geoviewLayerId})`
+                        `${(option as TypeGeoviewLayerConfig).geoviewLayerName} (${(option as TypeGeoviewLayerConfig).geoviewLayerId})`
                       }
                       disableCloseOnSelect
                       renderOption={(props, option, { selected }) => (
-                        <li {...props} key={(option as TypeGeoviewLayerConfig).geoviewLayerName!.en}>
+                        <li {...props} key={(option as TypeGeoviewLayerConfig).geoviewLayerName}>
                           <Checkbox icon={uncheckedIcon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
-                          {(option as TypeGeoviewLayerConfig).geoviewLayerName!.en}
+                          {(option as TypeGeoviewLayerConfig).geoviewLayerName}
                         </li>
                       )}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any

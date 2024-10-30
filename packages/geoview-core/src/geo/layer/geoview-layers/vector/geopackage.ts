@@ -26,12 +26,10 @@ import {
   CONST_LAYER_ENTRY_TYPES,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { TypeOutfields } from '@/api/config/types/map-schema-types';
 
@@ -280,7 +278,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): Promise<[LayerData[], SldsInterface]> {
     const promisedGeopackageData = new Promise<[LayerData[], SldsInterface]>((resolve) => {
-      const url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
+      const url = layerConfig.source!.dataAccessPath!;
       const attributions = this.getAttributions();
       if (attributions.length > 0) sourceOptions.attributions = attributions;
       const layersInfo: LayerData[] = [];
@@ -607,7 +605,7 @@ export class GeoPackage extends AbstractGeoViewVector {
               // "Clone" the config, patch until that layer type logic is rebuilt
               const newLayerEntryConfig = new GeoPackageLayerEntryConfig(layerConfig as GeoPackageLayerEntryConfig);
               newLayerEntryConfig.layerId = layers[i].name;
-              newLayerEntryConfig.layerName = createLocalizedString(layers[i].name);
+              newLayerEntryConfig.layerName = layers[i].name;
               newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
               newLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
 

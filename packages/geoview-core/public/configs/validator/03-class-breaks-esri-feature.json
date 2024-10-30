@@ -13,21 +13,16 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "LYR1",
-        "geoviewLayerName": {
-          "en": "ClassBreaks",
-          "fr": "ClassBreaks"
-        },
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/"
-        },
+        "geoviewLayerName": "ClassBreaks",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
             "layerId": "11",
-            "layerName": {
-              "en": "2021 Combined sewer overflow : total volume discharged - Watewater"
-            },
-            "attributions": ["Environment and Climate Change Canada and ministère de l\\'Environnement et de la Lutte contre les changements climatiques du Québec"]
+            "layerName": "2021 Combined sewer overflow : total volume discharged - Watewater",
+            "attributions": [
+              "Environment and Climate Change Canada and ministère de l\\'Environnement et de la Lutte contre les changements climatiques du Québec"
+            ]
           }
         ]
       }

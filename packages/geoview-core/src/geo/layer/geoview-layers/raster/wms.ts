@@ -30,7 +30,7 @@ import {
   layerEntryIsGroupLayer,
   TypeFeatureInfoEntry,
 } from '@/geo/map/map-schema-types';
-import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
+import { xmlToJson } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getExtentIntersection, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { api } from '@/app';
@@ -40,7 +40,6 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -117,7 +116,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   // GV Layers Refactoring - Obsolete (in config)
   protected override async fetchServiceMetadata(): Promise<void> {
-    const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
+    const metadataUrl = this.metadataAccessPath;
     if (metadataUrl) {
       const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
       if (metadataAccessPathIsXmlFile) {
@@ -210,7 +209,7 @@ export class WMS extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * This method reads the service metadata from a XML metadataAccessPath.
    *
-   * @param {string} metadataUrl The localized value of the metadataAccessPath
+   * @param {string} metadataUrl The metadataAccessPath
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
@@ -225,15 +224,13 @@ export class WMS extends AbstractGeoViewRaster {
       if (this.metadata) {
         this.#processMetadataInheritance();
         const metadataAccessPath = this.metadata?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
-        this.metadataAccessPath.en = metadataAccessPath;
-        this.metadataAccessPath.fr = metadataAccessPath;
+        this.metadataAccessPath = metadataAccessPath;
         const dataAccessPath = this.metadata?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
         const setDataAccessPath = (listOfLayerEntryConfig: TypeLayerEntryConfig[]): void => {
           listOfLayerEntryConfig.forEach((layerConfig) => {
             if (layerEntryIsGroupLayer(layerConfig)) setDataAccessPath(layerConfig.listOfLayerEntryConfig);
             else {
-              layerConfig.source!.dataAccessPath!.en = dataAccessPath;
-              layerConfig.source!.dataAccessPath!.fr = dataAccessPath;
+              layerConfig.source!.dataAccessPath = dataAccessPath;
             }
           });
         };
@@ -420,11 +417,7 @@ export class WMS extends AbstractGeoViewRaster {
           return;
         }
 
-        if (!layerConfig.layerName)
-          layerConfig.layerName = {
-            en: layerFound.Title as string,
-            fr: layerFound.Title as string,
-          };
+        if (!layerConfig.layerName) layerConfig.layerName = layerFound.Title as string;
       }
     });
   }
@@ -450,10 +443,7 @@ export class WMS extends AbstractGeoViewRaster {
       const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
       subLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
       subLayerEntryConfig.layerId = subLayer.Name as string;
-      subLayerEntryConfig.layerName = {
-        en: subLayer.Title as string,
-        fr: subLayer.Title as string,
-      };
+      subLayerEntryConfig.layerName = subLayer.Title as string;
       newListOfLayerEntryConfig.push(subLayerEntryConfig);
 
       // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
@@ -462,10 +452,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     const switchToGroupLayer = Cast<GroupLayerEntryConfig>(layerConfig);
     switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
-    switchToGroupLayer.layerName = {
-      en: layer.Title as string,
-      fr: layer.Title as string,
-    };
+    switchToGroupLayer.layerName = layer.Title as string;
     switchToGroupLayer.isMetadataLayerGroup = true;
     switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
     this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
@@ -517,7 +504,7 @@ export class WMS extends AbstractGeoViewRaster {
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
       if (layerCapabilities) {
-        const dataAccessPath = getLocalizedValue(layerConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId))!;
+        const dataAccessPath = layerConfig.source.dataAccessPath!;
 
         let styleToUse = '';
         if (Array.isArray(layerConfig.source?.style) && layerConfig.source?.style) {
@@ -852,10 +839,7 @@ export class WMS extends AbstractGeoViewRaster {
       const legendUrlFromCapabilities = this.#getLegendUrlFromCapabilities(layerConfig, chosenStyle);
       if (legendUrlFromCapabilities) queryUrl = legendUrlFromCapabilities.OnlineResource as string;
       else if (Object.keys(this.metadata?.Capability.Request || {}).includes('GetLegendGraphic'))
-        queryUrl = `${getLocalizedValue(
-          this.metadataAccessPath,
-          AppEventProcessor.getDisplayLanguage(this.mapId)
-        )!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
+        queryUrl = `${this.metadataAccessPath}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
 
       if (queryUrl) {
         queryUrl = queryUrl.toLowerCase().startsWith('http:') ? `https${queryUrl.slice(4)}` : queryUrl;

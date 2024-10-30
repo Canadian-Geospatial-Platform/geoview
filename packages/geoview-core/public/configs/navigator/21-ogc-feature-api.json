@@ -13,12 +13,8 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "ogcFeatureLYR1",
-        "geoviewLayerName": {
-          "en": "Large Lakes"
-        },
-        "metadataAccessPath": {
-          "en": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev"
-        },
+        "geoviewLayerName": "Large Lakes",
+        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
         "geoviewLayerType": "ogcFeature",
         "listOfLayerEntryConfig": [
           {

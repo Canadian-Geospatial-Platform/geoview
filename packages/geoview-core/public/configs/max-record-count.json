@@ -15,13 +15,9 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "advanced-polling-district-boundaries-2019",
-        "geoviewLayerName": {
-          "en": "Advance Polling District Boundaries of 2019"
-        },
+        "geoviewLayerName": "Advance Polling District Boundaries of 2019",
         "geoviewLayerType": "esriFeature",
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/ELECTIONS/elections_canada_2019_en/mapserver"
-        },
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/ELECTIONS/elections_canada_2019_en/mapserver",
         "listOfLayerEntryConfig": [
           {
             "layerId": "1"
@@ -30,13 +26,9 @@
       },
       {
         "geoviewLayerId": "completed",
-        "geoviewLayerName": {
-          "en": "Completed"
-        },
+        "geoviewLayerName": "Completed",
         "geoviewLayerType": "esriDynamic",
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_en/MapServer"
-        },
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_en/MapServer",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0"

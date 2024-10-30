@@ -13,7 +13,6 @@ import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { validateExtent, getMinOrMaxExtents } from '@/geo/utils/utilities';
@@ -46,8 +45,8 @@ import {
   commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -187,10 +186,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} fieldName field name for which we want to get the type.
    * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
    *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
     return commonGetFieldType(this, fieldName, layerConfig);
   }
 
@@ -271,7 +270,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata?.copyrightText ? this.metadata?.copyrightText : '') as string];
-    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
+    sourceOptions.url = layerConfig.source.dataAccessPath!;
     sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
     if (layerConfig.source.transparent) sourceOptions.params.transparent = layerConfig.source.transparent!;
     if (layerConfig.source.format) sourceOptions.params.format = layerConfig.source.format!;
@@ -342,7 +341,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const [geometryType] = layerConfig.getTypeGeometries();
 
       // Fetch the features
-      let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath![AppEventProcessor.getDisplayLanguage(this.mapId)]!;
+      let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath!;
       if (!urlRoot.endsWith('/')) urlRoot += '/';
       // TODO: we put false so on heavy geometry, dynamic layer can load datatable. If not the fetch fails.
       const url = `${urlRoot}${layerConfig.layerId}/query?where=1=1&outFields=*&f=json&returnGeometry=false`;
@@ -505,7 +504,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       // If not queryable
       if (!layerConfig.source?.featureInfo?.queryable) return [];
 
-      let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
+      let identifyUrl = layerConfig.source?.dataAccessPath;
       if (!identifyUrl) return [];
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
@@ -1013,7 +1012,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   override async getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
-    let baseUrl = getLocalizedValue(layerEntryConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
+    let baseUrl = layerEntryConfig.source.dataAccessPath;
 
     const idString = objectIds.join('%2C');
     if (baseUrl) {

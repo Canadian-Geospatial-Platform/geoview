@@ -17,20 +17,22 @@ import { ProjectionLike } from 'ol/proj';
 import { Point } from 'ol/geom';
 import { getUid } from 'ol/util';
 
-import { TypeLocalizedString, TypeOutfields } from '@config/types/map-schema-types';
+import { TypeOutfields, TypeOutfieldsType } from '@config/types/map-schema-types';
 
 import { api } from '@/app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeBaseSourceVectorInitialConfig, TypeFeatureInfoEntry, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
-import { getLocalizedValue } from '@/core/utils/utilities';
+import {
+  TypeBaseSourceVectorInitialConfig,
+  TypeFeatureInfoEntry,
+  TypeFeatureInfoLayerConfig,
+  TypeLayerEntryConfig,
+} from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { VECTOR_LAYER } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { Cast } from '@/core/types/global-types';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { analyzeLayerFilter } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVVector } from '../../gv-layers/vector/abstract-gv-vector';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -94,19 +96,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string} fieldName field name for which we want to get the type.
    * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
    *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo;
-    const fieldIndex = getLocalizedValue(
-      Cast<TypeLocalizedString>(fieldDefinitions.outfields),
-      AppEventProcessor.getDisplayLanguage(this.mapId)
-    )
-      ?.split(',')
-      .indexOf(fieldName);
-    if (!fieldIndex || fieldIndex === -1) return 'string';
-    return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
+  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
+    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo as unknown as TypeFeatureInfoLayerConfig;
+    const outFieldEntry = fieldDefinitions.outfields?.find((fieldDefinition) => fieldDefinition.name === fieldName);
+    return outFieldEntry?.type || 'string';
   }
 
   /** ***************************************************************************************************************************
@@ -337,11 +333,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // GV Layers Refactoring - Obsolete (this is bridging between config and layers, okay)
   protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource): VectorLayer<Feature> {
-    // TODO: remove link to language, layer should be created in one language and recreated if needed to change
-    const language = AppEventProcessor.getDisplayLanguage(this.mapId);
-
     // Get the style label
-    const label = getLocalizedValue(layerConfig.layerName, language) || layerConfig.layerId;
+    const label = layerConfig.layerName || layerConfig.layerId;
 
     // GV Time to request an OpenLayers layer!
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source: vectorSource });

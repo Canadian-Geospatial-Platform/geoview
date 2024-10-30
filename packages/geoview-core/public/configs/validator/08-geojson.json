@@ -12,34 +12,34 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "geojsonLYR1",
-        "geoviewLayerName": { "en": "GeoJSON Sample" },
-        "metadataAccessPath": { "en": "./datasets/geojson/metadata-new.meta" },
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata-new.meta",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
-            "layerName": { "en": "Polygons" },
+            "layerName": "Polygons",
             "layerFilter": "creationDate >= date \\'2020/02/15\\'"
           },
           {
             "layerId": "lines.json",
-            "layerName": { "en": "Lines" },
+            "layerName": "Lines",
             "layerFilter": "creationDate >= date \\'2020-05-28T12:00:00-05:00\\'"
           },
           {
             "isLayerGroup": true,
             "layerId": "point-feature-group",
-            "layerName": { "en": "point-feature-group" },
+            "layerName": "point-feature-group",
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
-                "layerName": { "en": "Icons" },
-                "initialSettings": { "states": {"visible" : false} },
+                "layerName": "Icons",
+                "initialSettings": { "states": { "visible": false } },
                 "layerFilter": "creationDate >= date \\'2020-01-14T12:00:01-05:00\\'"
               },
               {
                 "layerId": "points.json",
-                "layerName": { "en": "Points" },
+                "layerName": "Points",
                 "layerFilter": "creationDate >= date \\'2019-02-15T22:00:00Z\\'"
               }
             ]
@@ -49,7 +49,7 @@
     ]
   },
   "components": ["overview-map"],
-  "overviewMap": {"hideOnZoom": 7},
+  "overviewMap": { "hideOnZoom": 7 },
   "corePackages": [],
   "theme": "geo.ca"
 }

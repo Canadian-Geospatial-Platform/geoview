@@ -10,6 +10,7 @@ There are multiple ways to load maps on your projects
 To see different load configurations, go to our [Default Configuration](https://canadian-geospatial-platform.github.io/geoview/public/default-config.html?p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true&i=dynamic&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9#HLCONF7) demo page.
 
 To load a map you need to have a script tag that access a live build of the viewer. This repository expose a develop build (_below_) for anyone to test but we really reccomand to download one of our relese and install the js files on your web server.
+
 ```js
 <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script>
 ```
@@ -96,14 +97,8 @@ An example of this:
             },
             'listOfGeoviewLayerConfig': [{
               'geoviewLayerId': 'wmsLYR1',
-              'geoviewLayerName': {
-                'en': 'earthquakes',
-                'fr': 'earthquakes'
-              },
-              'metadataAccessPath': {
-                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
-                'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/'
-              },
+              'geoviewLayerName': 'earthquakes',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
               'geoviewLayerType': 'esriDynamic',
               'listOfLayerEntryConfig': [
                 {

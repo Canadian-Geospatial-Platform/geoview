@@ -17,23 +17,14 @@
       },
       {
         "geoviewLayerId": "LYR1",
-        "geoviewLayerName": {
-          "en": "Temporal Test Bed",
-          "fr": "Banc d\\'essai temporel"
-        },
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/",
-          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/"
-        },
+        "geoviewLayerName": "Temporal Test Bed",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
             "geometryType": "point",
-            "layerName": {
-              "en": "stations-Temporal",
-              "fr": "stations-Temporal"
-            },
+            "layerName": "stations-Temporal",
             "initialSettings": {
               "controls": {
                 "query": true
@@ -55,24 +46,16 @@
     "extraOptions": {}
   },
   "theme": "geo.ca",
-  "navBar": [
-    "zoom",
-    "fullscreen",
-    "home"
-  ],
+  "navBar": ["zoom", "fullscreen", "home"],
   "appBar": {
     "tabs": {
-      "core": [
-        "geolocator"
-      ]
+      "core": ["geolocator"]
     }
   },
   "overviewMap": {
     "hideOnZoom": 0
   },
-  "components": [
-    "overview-map"
-  ],
+  "components": ["overview-map"],
   "corePackages": [],
   "externalPackages": [],
   "schemaVersionUsed": "1.0"

@@ -13,22 +13,13 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "LYR1",
-        "geoviewLayerName": {
-          "en": "Earthquakes",
-          "fr": "Tremblements de terre"
-        },
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
-          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_fr/MapServer/"
-        },
+        "geoviewLayerName": "Earthquakes",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": {
-              "en": "Earthquakes 1980-1990",
-              "fr": "Tremblements de terre 1980-1990"
-            },
+            "layerName": "Earthquakes 1980-1990",
             "initialSettings": {
               "controls": {
                 "query": true
@@ -37,15 +28,16 @@
                 "queryable": true
               }
             },
-            "attributions": ["Ressources naturelles Canada, Secteur des terres et des minéraux, Commission Géologique du Canada, Service canadien d\\'information sur les risques"]
+            "attributions": [
+              "Ressources naturelles Canada, Secteur des terres et des minéraux, Commission Géologique du Canada, Service canadien d\\'information sur les risques"
+            ]
           },
           {
             "layerId": "1",
-            "layerName": {
-              "en": "Earthquakes 1990-2000",
-              "fr": " Tremblements de terre 1990-2000"
-            },
-            "attributions": ["Ressources naturelles Canada, Secteur des terres et des minéraux, Commission Géologique du Canada, Service canadien d\\'information sur les risques"]
+            "layerName": "Earthquakes 1990-2000",
+            "attributions": [
+              "Ressources naturelles Canada, Secteur des terres et des minéraux, Commission Géologique du Canada, Service canadien d\\'information sur les risques"
+            ]
           }
         ]
       }

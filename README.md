@@ -69,7 +69,7 @@ $ cd geoview
 $ npm install -g @microsoft/rush
 ```
 
-* Note: you can also use the included `shell.nix` to setup your dev environment if you are on Mac/Linux/WSL.
+- Note: you can also use the included `shell.nix` to setup your dev environment if you are on Mac/Linux/WSL.
 
 ### Install dependencies
 
@@ -189,14 +189,8 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
         'listOfGeoviewLayerConfig': [
           {
             'geoviewLayerId': 'esriDynamicLYR2',
-            'geoviewLayerName': {
-              'en': 'Energy',
-              'fr': 'Energy'
-            },
-            'metadataAccessPath': {
-              'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
-              'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
-            },
+            'geoviewLayerName': 'Energy',
+            'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
             'geoviewLayerType': 'esriDynamic',
             'listOfLayerEntryConfig': [{ 'layerId': '0' }, { 'layerId': '6' }]
           }

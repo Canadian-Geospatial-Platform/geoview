@@ -365,34 +365,16 @@
           "type": "boolean"
         },
         "geoviewLayerName": {
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information.",
-          "oneOf": [
-            {
-              "description": "Used by the input schema.",
-              "$ref": "#/definitions/TypeLocalizedString"
-            },
-            {
-              "description": "Used by the internal schema.",
-              "type": "string"
-            }
-          ]
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
         },
         "isGeocore": {
           "description": "A flag used to indicate that the layer is a GeoCore layer.",
           "type": "boolean"
         },
         "metadataAccessPath": {
-          "description": "The GeoView layer service access path (English/French).",
-          "oneOf": [
-            {
-              "description": "Used by the input schema.",
-              "$ref": "#/definitions/TypeLocalizedString"
-            },
-            {
-              "description": "Used by the internal schema.",
-              "type": "string"
-            }
-          ]
+          "type": "string",
+          "description": "The GeoView layer service access path."
         },
         "geoviewLayerType": {
           "description": "Type of GeoView layer.",
@@ -435,7 +417,7 @@
             "type": "string"
           },
           "metadataAccessPath": {
-            "description": "The GeoView layer service access path (English/French).",
+            "description": "The GeoView layer service access path.",
             "type": "string"
           }
         }
@@ -444,12 +426,12 @@
         "description": "Use Input Schema",
         "properties": {
           "geoviewLayerName": {
-            "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information.",
-            "$ref": "#/definitions/TypeLocalizedString"
+            "type": "string",
+            "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
           },
           "metadataAccessPath": {
-            "description": "The GeoView layer service access path (English/French).",
-            "$ref": "#/definitions/TypeLocalizedString"
+            "type": "string",
+            "description": "The GeoView layer service access path."
           }
         }
       },
@@ -571,21 +553,6 @@
     "TypeDisplayLanguage": {
       "description": "Display languages supported.",
       "enum": ["en", "fr"]
-    },
-    "TypeLocalizedString": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "type": "object",
-      "properties": {
-        "en": {
-          "description": "The English version of the string.",
-          "type": "string"
-        },
-        "fr": {
-          "description": "The French version of the string.",
-          "type": "string"
-        }
-      }
     },
     "TypeGeoviewLayerType": {
       "description": "Type of GeoView layer.",
@@ -914,17 +881,8 @@
           "type": "boolean"
         },
         "layerName": {
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information.",
-          "oneOf": [
-            {
-              "description": "Used by the input schema.",
-              "$ref": "#/definitions/TypeLocalizedString"
-            },
-            {
-              "description": "Used by the internal schema.",
-              "type": "string"
-            }
-          ]
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information.",
+          "type": "string"
         },
         "attributions": {
           "type": "array",
@@ -986,8 +944,8 @@
         "description": "Use Input Schema",
         "properties": {
           "layerName": {
-            "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information.",
-            "$ref": "#/definitions/TypeLocalizedString"
+            "type": "string",
+            "description": "Used by the input schema. The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
           },
           "entryType": {
             "description": "Input schema does not allow the user to specify the entryType property.",
@@ -1597,7 +1555,7 @@
           "type": "string"
         },
         "range": {
-          "type":"array",
+          "type": "array",
           "minItems": 2,
           "maxItems": 2,
           "items": {

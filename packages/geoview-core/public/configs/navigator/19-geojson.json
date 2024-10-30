@@ -12,31 +12,31 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "geojsonLYR1",
-        "geoviewLayerName": { "en": "GeoJSON Sample" },
-        "metadataAccessPath": { "en": "./datasets/geojson/metadata.json" },
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.json",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
-            "layerName": { "en": "Polygons" }
+            "layerName": "Polygons"
           },
           {
             "layerId": "lines.json",
-            "layerName": { "en": "Lines" }
+            "layerName": "Lines"
           },
           {
             "entryType": "group",
             "layerId": "point-feature-group",
-            "layerName": { "en": "point-feature-group" },
+            "layerName": "point-feature-group",
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
-                "layerName": { "en": "Icons" },
+                "layerName": "Icons",
                 "initialSettings": { "states": { "visible": false } }
               },
               {
                 "layerId": "points.json",
-                "layerName": { "en": "Points" }
+                "layerName": "Points"
               }
             ]
           }
@@ -53,4 +53,4 @@
   },
   "corePackages": [],
   "theme": "geo.ca"
-  }
+}

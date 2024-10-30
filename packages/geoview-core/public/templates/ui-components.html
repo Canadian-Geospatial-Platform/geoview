@@ -66,10 +66,8 @@
             'listOfGeoviewLayerConfig': [
               {
                 'geoviewLayerId': 'historical-flood',
-                'geoviewLayerName': { 'en': 'Historical Flood Events (HFE)' },
-                'metadataAccessPath': {
-                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer'
-                },
+                'geoviewLayerName': 'Historical Flood Events (HFE)',
+                'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
                   {
@@ -81,11 +79,12 @@
           },
           'theme': 'geo.ca',
           'corePackages': []
-        }"></div>
-  <p></p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="UI1CS" class="panel"></pre>
-  <hr />
+        }"
+    ></div>
+    <p></p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="UI1CS" class="panel"></pre>
+    <hr />
 
     <!-- SLIDER SECTION START -->
     <h4 style="padding-top: 10px; width: 90%; padding-left: 10%">
@@ -173,7 +172,9 @@
               ],
               track: 'normal',
               onChange: (dates) => {
-                const field = cgpv.api.maps.UI1.layer.getGeoviewLayerHybrid('historical-flood/0').getTemporalDimension('historical-flood/0').field;
+                const field = cgpv.api.maps.UI1.layer
+                  .getGeoviewLayerHybrid('historical-flood/0')
+                  .getTemporalDimension('historical-flood/0').field;
                 cgpv.api.maps.UI1.layer
                   .getGeoviewLayerHybrid('historical-flood/0')
                   .applyViewFilter('historical-flood/0', `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);

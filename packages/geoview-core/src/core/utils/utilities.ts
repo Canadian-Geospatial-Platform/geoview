@@ -4,33 +4,11 @@ import i18n from 'i18next';
 
 import sanitizeHtml from 'sanitize-html';
 
-import { TypeDisplayLanguage, TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@config/types/map-schema-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { TypeGuideObject } from '../stores/store-interface-and-intial-values/app-state';
-
-/**
- * Create a localized string and set its "en" and "fr" properties to the same value.
- * @param {string | TypeJsonObject} value The value to assign to the en and fr properties.
- *
- * @returns {TypeLocalizedString} The localized (en/fr) object
- */
-export function createLocalizedString(value: string | TypeJsonObject): TypeLocalizedString {
-  return { en: value as string, fr: value as string };
-}
-
-/**
- * Get the string associated to the current display language for localized object type.
- *
- * @param {TypeLocalizedString} localizedString the localized string to process.
- *
- * @returns {string} The string value according to the map display language,
- */
-export function getLocalizedValue(localizedString: TypeLocalizedString | undefined, language: TypeDisplayLanguage): string | undefined {
-  if (localizedString) return localizedString[language];
-  return undefined;
-}
 
 /**
  * Return proper language Geoview localized values from map i18n instance

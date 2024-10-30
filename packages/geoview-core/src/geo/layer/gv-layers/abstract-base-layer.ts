@@ -1,6 +1,6 @@
 import BaseLayer from 'ol/layer/Base';
 
-import { Extent, TypeLocalizedString } from '@/api/config/types/map-schema-types';
+import { Extent } from '@/api/config/types/map-schema-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
@@ -20,7 +20,7 @@ export abstract class AbstractBaseLayer {
   protected olLayer!: BaseLayer;
 
   // The layer name
-  #layerName: TypeLocalizedString | undefined;
+  #layerName: string | undefined;
 
   // Keep all callback delegates references
   #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
@@ -90,9 +90,9 @@ export abstract class AbstractBaseLayer {
 
   /**
    * Gets the geoview layer name.
-   * @returns {TypeLocalizedString | undefined} The layer name
+   * @returns {string | undefined} The layer name
    */
-  getGeoviewLayerName(): TypeLocalizedString | undefined {
+  getGeoviewLayerName(): string | undefined {
     return this.#layerConfig.geoviewLayerConfig.geoviewLayerName;
   }
 
@@ -112,16 +112,16 @@ export abstract class AbstractBaseLayer {
    * @returns The layer name
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getLayerName(layerPath: string): TypeLocalizedString | undefined {
+  getLayerName(layerPath: string): string | undefined {
     // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
     return this.#layerName;
   }
 
   /**
    * Sets the layer name
-   * @param {TypeLocalizedString | undefined} name - The layer name
+   * @param {string | undefined} name - The layer name
    */
-  setLayerName(layerPath: string, name: TypeLocalizedString | undefined): void {
+  setLayerName(layerPath: string, name: string | undefined): void {
     // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
     this.#layerName = name;
     this.#emitLayerNameChanged({ layerPath, layerName: name });
@@ -316,7 +316,7 @@ export abstract class AbstractBaseLayer {
  */
 export type LayerNameChangedEvent = {
   // The new layer name.
-  layerName?: TypeLocalizedString;
+  layerName?: string;
   // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
   // The layer path.
   layerPath: string;

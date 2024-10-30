@@ -4,7 +4,6 @@ import { EsriJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import Feature from 'ol/Feature';
 
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -28,7 +27,7 @@ import {
   commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -148,10 +147,10 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string} fieldName field name for which we want to get the type.
    * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
     return commonGetFieldType(this, fieldName, layerConfig);
   }
 
@@ -233,7 +232,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     // eslint-disable-next-line no-var
     var vectorSource: VectorSource<Feature>;
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
+    sourceOptions.url = layerConfig.source!.dataAccessPath!;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.url = `${sourceOptions.url}/${layerConfig.layerId}/query?f=json&where=1%3D1&returnCountOnly=true`;
     // eslint-disable-next-line no-param-reassign

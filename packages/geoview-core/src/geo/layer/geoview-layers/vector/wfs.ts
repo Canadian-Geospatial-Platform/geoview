@@ -20,12 +20,11 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 
-import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
+import { getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { TypeOutfields } from '@/api/config/types/map-schema-types';
 
@@ -127,7 +126,7 @@ export class WFS extends AbstractGeoViewVector {
   // GV Layers Refactoring - Obsolete (in config?)
   protected override fetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      let metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId)) as string;
+      let metadataUrl = this.metadataAccessPath;
 
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       const getCapabilitiesUrl =
@@ -153,7 +152,7 @@ export class WFS extends AbstractGeoViewVector {
           })
           .catch((reason) => {
             this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-            logger.logError('Unableto fetch metadata', this.metadataAccessPath, reason);
+            logger.logError('Unable to fetch metadata', this.metadataAccessPath, reason);
             resolve();
           });
       } else {
@@ -239,7 +238,7 @@ export class WFS extends AbstractGeoViewVector {
     if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     try {
-      let queryUrl = getLocalizedValue(layerConfig.source!.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
+      let queryUrl = layerConfig.source!.dataAccessPath;
 
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       queryUrl = queryUrl!.indexOf('?') > -1 ? queryUrl!.substring(0, queryUrl!.indexOf('?')) : queryUrl;
@@ -359,7 +358,7 @@ export class WFS extends AbstractGeoViewVector {
 
     sourceOptions.url = (extent): string => {
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
-      let sourceUrl = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
+      let sourceUrl = layerConfig.source!.dataAccessPath!;
       sourceUrl = sourceUrl!.indexOf('?') > -1 ? sourceUrl!.substring(0, sourceUrl!.indexOf('?')) : sourceUrl;
       // GV: Use processUrlParameters('GetFeature') method of GeoView layer config to get the sourceUrl and append &typeName= to it.
       sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.#version}`;

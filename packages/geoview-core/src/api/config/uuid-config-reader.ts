@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 
 import { TypeJsonObject, TypeJsonArray, toJsonObject } from '@config/types/config-types';
 import { CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
-import { createLocalizedString, deepMergeObjects } from '@/core/utils/utilities';
+import { deepMergeObjects } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 // The GeoChart Json object coming out of the GeoCore response
@@ -68,8 +68,8 @@ export class UUIDmapConfigReader {
           if (layerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerName: name,
+              metadataAccessPath: url,
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_DYNAMIC,
               isGeocore: true,
               isTimeAware,
@@ -91,8 +91,8 @@ export class UUIDmapConfigReader {
 
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(serviceUrl),
+              geoviewLayerName: name,
+              metadataAccessPath: serviceUrl,
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
               isGeocore: true,
               isTimeAware,
@@ -106,8 +106,8 @@ export class UUIDmapConfigReader {
           } else if (layerType === CV_CONST_LAYER_TYPES.ESRI_FEATURE) {
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerName: name,
+              metadataAccessPath: url,
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
               isGeocore: true,
               isTimeAware,
@@ -123,8 +123,8 @@ export class UUIDmapConfigReader {
           } else if (layerType === CV_CONST_LAYER_TYPES.WMS) {
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerName: name,
+              metadataAccessPath: url,
               geoviewLayerType: CV_CONST_LAYER_TYPES.WMS,
               isGeocore: true,
               isTimeAware,
@@ -151,8 +151,8 @@ export class UUIDmapConfigReader {
           } else if (layerType === CV_CONST_LAYER_TYPES.WFS) {
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerName: name,
+              metadataAccessPath: url,
               geoviewLayerType: CV_CONST_LAYER_TYPES.WFS,
               isGeocore: true,
               isTimeAware,
@@ -172,8 +172,8 @@ export class UUIDmapConfigReader {
           } else if (layerType === CV_CONST_LAYER_TYPES.OGC_FEATURE) {
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerName: name,
+              metadataAccessPath: url,
               geoviewLayerType: CV_CONST_LAYER_TYPES.OGC_FEATURE,
               isGeocore: true,
               isTimeAware,
@@ -192,8 +192,8 @@ export class UUIDmapConfigReader {
           } else if (layerType === CV_CONST_LAYER_TYPES.GEOJSON) {
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerName: name,
+              metadataAccessPath: url,
               geoviewLayerType: CV_CONST_LAYER_TYPES.GEOJSON,
               isGeocore: true,
               isTimeAware,
@@ -212,8 +212,8 @@ export class UUIDmapConfigReader {
           } else if (layerType === CV_CONST_LAYER_TYPES.XYZ_TILES) {
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerName: name,
+              metadataAccessPath: url,
               geoviewLayerType: CV_CONST_LAYER_TYPES.XYZ_TILES,
               isGeocore: true,
               isTimeAware,
@@ -229,8 +229,8 @@ export class UUIDmapConfigReader {
           } else if (layerType === CV_CONST_LAYER_TYPES.VECTOR_TILES) {
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerName: name,
+              metadataAccessPath: url,
               geoviewLayerType: CV_CONST_LAYER_TYPES.VECTOR_TILES,
               isGeocore: true,
               isTimeAware,
@@ -241,7 +241,7 @@ export class UUIDmapConfigReader {
                   layerId: `${item.id}`,
                   tileGrid: item.tileGrid,
                   source: {
-                    dataAccessPath: createLocalizedString(url),
+                    dataAccessPath: url,
                   },
                 });
               }
@@ -250,8 +250,8 @@ export class UUIDmapConfigReader {
           } else if (layerType === CV_CONST_LAYER_TYPES.GEOPACKAGE) {
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerName: name,
+              metadataAccessPath: url,
               geoviewLayerType: CV_CONST_LAYER_TYPES.GEOPACKAGE,
               isGeocore: true,
               isTimeAware,
@@ -270,8 +270,8 @@ export class UUIDmapConfigReader {
           } else if (layerType === CV_CONST_LAYER_TYPES.IMAGE_STATIC) {
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerName: name,
+              metadataAccessPath: url,
               geoviewLayerType: CV_CONST_LAYER_TYPES.IMAGE_STATIC,
               isTimeAware,
             });
@@ -289,8 +289,8 @@ export class UUIDmapConfigReader {
             // GV: but we need to create a layerEntryConfig in the list for the layer to be displayed.
             const geoviewLayerConfig = toJsonObject({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name),
-              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerName: name,
+              metadataAccessPath: url,
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_IMAGE,
               isGeocore: true,
               isTimeAware,

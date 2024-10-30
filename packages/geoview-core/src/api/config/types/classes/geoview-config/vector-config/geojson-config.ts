@@ -10,7 +10,6 @@ import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@con
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { mergeWith } from 'lodash';
 import { logger } from '@/core/utils/logger';
-import { createLocalizedString } from '@/core/utils/utilities';
 import { Cast } from '@/app';
 
 export type TypeGeoJsonLayerNode = GeoJsonGroupLayerConfig | GeoJsonLayerEntryConfig;
@@ -56,7 +55,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
         logger.logError('When a GeoJson metadataAccessPath ends with a layer file name, the listOfLayerEntryConfig must be  empty.');
       }
       this.listOfLayerEntryConfig = [
-        this.createLeafNode(toJsonObject({ layerId: lastPathItem, layerName: createLocalizedString(lastPathItem) }), language, this)!,
+        this.createLeafNode(toJsonObject({ layerId: lastPathItem, layerName: lastPathItem }), language, this)!,
       ];
     }
   }
@@ -163,12 +162,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
   protected override createLayerEntryNode(layerId: string, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass {
     // GV: To determine if service metadata exists, we must verify that the object is not empty.
     if (Object.keys(this.getServiceMetadata()).length === 0)
-      return this.createLeafNode(
-        toJsonObject({ layerId, layerName: createLocalizedString(layerId) }),
-        this.getLanguage(),
-        this,
-        parentNode
-      )!;
+      return this.createLeafNode(toJsonObject({ layerId, layerName: layerId }), this.getLanguage(), this, parentNode)!;
 
     // If we cannot find the layerId in the layer definitions, throw an error.
     const layerFound = this.findLayerMetadataEntry(layerId);
@@ -177,7 +171,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
     }
 
     const layerConfig = mergeWith({}, layerFound, (destValue, sourceValue, key) => {
-      if (key === 'layerName') return createLocalizedString(sourceValue);
+      if (key === 'layerName') return sourceValue;
       return undefined;
     });
 
@@ -203,7 +197,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
       });
 
     const layerConfig = mergeWith({}, layerTree, (destValue, sourceValue, key) => {
-      if (key === 'layerName') return createLocalizedString(sourceValue);
+      if (key === 'layerName') return sourceValue;
       return undefined;
     }) as TypeJsonObject;
 
