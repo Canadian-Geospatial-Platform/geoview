@@ -20,7 +20,7 @@ import { serializeTypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 
 export type TypeSetStore = (
   partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>),
-  replace?: boolean | undefined
+  replace?: boolean | undefined,
 ) => void;
 export type TypeGetStore = () => IGeoviewState;
 

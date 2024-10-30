@@ -61,7 +61,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewEsriLayerConfig {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass
+    parentNode?: EntryConfigBaseClass,
   ): EntryConfigBaseClass {
     return new EsriFeatureLayerEntryConfig(layerConfig, language, geoviewConfig, parentNode);
   }
@@ -82,7 +82,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewEsriLayerConfig {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass
+    parentNode?: EntryConfigBaseClass,
   ): EntryConfigBaseClass {
     return new EsriGroupLayerConfig(layerConfig, language, geoviewConfig, parentNode);
   }

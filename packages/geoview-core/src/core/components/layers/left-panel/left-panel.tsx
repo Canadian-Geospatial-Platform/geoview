@@ -32,7 +32,7 @@ export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanel
 
   useEffect(() => {
     const sortedLayers = legendLayers.sort((a, b) =>
-      getIndexFromOrderedLayerInfo(a.layerPath) > getIndexFromOrderedLayerInfo(b.layerPath) ? 1 : -1
+      getIndexFromOrderedLayerInfo(a.layerPath) > getIndexFromOrderedLayerInfo(b.layerPath) ? 1 : -1,
     );
     setOrderedLegendLayers(sortedLayers);
   }, [orderedLayerInfo, legendLayers, getIndexFromOrderedLayerInfo]);

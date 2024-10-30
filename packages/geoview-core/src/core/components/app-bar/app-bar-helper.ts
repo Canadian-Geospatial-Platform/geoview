@@ -21,7 +21,7 @@ export const helpOpenClosePanelByIdState = (
   groupName: string | undefined,
   setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>,
   status: boolean,
-  isFocusTrapped: boolean = false
+  isFocusTrapped: boolean = false,
 ): void => {
   // Read the group name
   const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
@@ -55,7 +55,7 @@ export const helpOpenPanelById = (
   buttonId: string,
   groupName: string | undefined,
   setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>,
-  isFocusTrapped?: boolean
+  isFocusTrapped?: boolean,
 ): void => {
   // Read the group name
   const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
@@ -70,7 +70,7 @@ export const helpClosePanelById = (
   buttonId: string,
   groupName: string | undefined,
   setterCallback: Dispatch<SetStateAction<Record<string, Record<string, TypeButtonPanel>>>>,
-  focusWhenNoElementCallback?: () => void
+  focusWhenNoElementCallback?: () => void,
 ): void => {
   // Read the group name
   const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
@@ -90,7 +90,7 @@ export const helpClosePanelById = (
 
 export const helpCloseAll = (
   buttonPanelGroups: ButtonPanelGroupType,
-  setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>
+  setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>,
 ): void => {
   const panelGroups = {} as ButtonPanelGroupType;
   Object.entries(buttonPanelGroups).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {

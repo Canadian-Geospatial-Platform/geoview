@@ -331,7 +331,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       sliderDeltaRef.current = undefined;
       setValues(layerPath, newValues as number[]);
     },
-    [layerPath, setValues]
+    [layerPath, setValues],
   );
 
   /**

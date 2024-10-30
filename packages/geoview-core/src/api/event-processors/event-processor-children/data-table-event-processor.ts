@@ -129,7 +129,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   static #deleteFromArray<T extends TypeResultSetEntry>(
     layerArray: T[],
     layerPath: string,
-    onDeleteCallback: (layerArray: T[]) => void
+    onDeleteCallback: (layerArray: T[]) => void,
   ): void {
     // TODO: Refactor - Move this function in Abstract class (along with other duplicate function in FeatureInfoEventProcessor)
     // Find the layer data info to delete from the array

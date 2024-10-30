@@ -34,7 +34,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       debounce((mapViewer, payload) => {
         // Query all layers which can be queried
         this.queryLayers(payload.pixel);
-      }, 750).bind(this)
+      }, 750).bind(this),
     );
   }
 

@@ -34,7 +34,7 @@ export class StateApi {
    * @returns {string | boolean | null | undefined} The requested state
    */
   getLayerPanelState(
-    state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'
+    state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress',
   ): string | boolean | null | undefined {
     return LegendEventProcessor.getLayerPanelState(this.mapId, state);
   }
@@ -66,13 +66,13 @@ export class StateApi {
    */
   getPluginState(
     pluginId: 'geochart' | 'swiper' | 'time-slider',
-    state: string
+    state: string,
   ): string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | TimeSliderLayerSet | string[] | undefined {
     if (pluginId === 'geochart') {
       if (['geochartChartsConfig', 'layerDataArray', 'layerDataArrayBatchLayerPathBypass', 'selectedLayerPath'].includes(state))
         return GeochartEventProcessor.getSingleGeochartState(
           this.mapId,
-          state as 'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'
+          state as 'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath',
         );
       logger.logError(`${state} not available from geochart`);
     }

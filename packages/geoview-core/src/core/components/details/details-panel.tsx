@@ -78,7 +78,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
         return (checkedFeature.geometry as TypeGeometry)?.ol_uid === (feature.geometry as TypeGeometry)?.ol_uid;
       });
     },
-    [checkedFeatures]
+    [checkedFeatures],
   );
 
   /**
@@ -95,7 +95,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
         if (!isFeatureInCheckedFeatures(feature)) removeHighlightedFeature(feature);
       });
     },
-    [isFeatureInCheckedFeatures, removeHighlightedFeature]
+    [isFeatureInCheckedFeatures, removeHighlightedFeature],
   );
 
   /**
@@ -110,7 +110,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
       const numOfFeatures = layer.features?.length ?? 0;
       return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
     },
-    [t]
+    [t],
   );
 
   /**
@@ -135,7 +135,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
             layerFeatures: getNumFeaturesLabel(layer!),
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
             layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath ?? ''}`,
-          } as LayerListEntry)
+          }) as LayerListEntry,
       );
     return layerListEntries;
   }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel, mapId]);
@@ -196,7 +196,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
       // Update the current feature index
       setCurrentFeatureIndex(newIndex);
     },
-    [memoSelectedLayerData, isFeatureInCheckedFeatures, removeHighlightedFeature, addHighlightedFeature]
+    [memoSelectedLayerData, isFeatureInCheckedFeatures, removeHighlightedFeature, addHighlightedFeature],
   );
 
   /**
@@ -331,7 +331,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
       // Update current index
       updateFeatureSelected(currentFeatureIndex + change, memoSelectedLayerData!);
     },
-    [currentFeatureIndex, memoSelectedLayerData, updateFeatureSelected]
+    [currentFeatureIndex, memoSelectedLayerData, updateFeatureSelected],
   );
 
   /**
@@ -346,7 +346,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
       setSelectedLayerPath(layerEntry.layerPath);
     },
-    [setSelectedLayerPath]
+    [setSelectedLayerPath],
   );
 
   // #endregion
@@ -396,7 +396,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
         setSelectedLayerPath('');
       }
     },
-    [setSelectedLayerPath]
+    [setSelectedLayerPath],
   );
 
   /**

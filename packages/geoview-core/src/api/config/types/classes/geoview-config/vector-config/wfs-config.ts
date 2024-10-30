@@ -67,7 +67,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass
+    parentNode?: EntryConfigBaseClass,
   ): EntryConfigBaseClass {
     return new WfsLayerEntryConfig(layerConfig, language, geoviewConfig, parentNode);
   }
@@ -88,7 +88,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass
+    parentNode?: EntryConfigBaseClass,
   ): EntryConfigBaseClass {
     return new WfsGroupLayerConfig(layerConfig, language, geoviewConfig, parentNode);
   }

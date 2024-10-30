@@ -57,7 +57,7 @@ export class WmsGroupLayerConfig extends GroupLayerEntryConfig {
 
     if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
       throw new GeoviewLayerConfigError(
-        `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`
+        `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`,
       );
     }
   }

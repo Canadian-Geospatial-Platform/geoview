@@ -55,7 +55,7 @@ export class GeoJsonGroupLayerConfig extends GroupLayerEntryConfig {
 
     if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
       throw new GeoviewLayerConfigError(
-        `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`
+        `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`,
       );
     }
   }
@@ -78,7 +78,7 @@ export class GeoJsonGroupLayerConfig extends GroupLayerEntryConfig {
       this.initialSettings.extent = validateExtentWhenDefined(layerMetadata.initialSettings.extent as Extent);
       if (this?.initialSettings?.extent?.find?.((value, i) => value !== layerMetadata.initialSettings.extent[i]))
         logger.logWarning(
-          `The extent specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`
+          `The extent specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`,
         );
     }
 
@@ -86,7 +86,7 @@ export class GeoJsonGroupLayerConfig extends GroupLayerEntryConfig {
       this.bounds = validateExtentWhenDefined(layerMetadata.bounds as Extent);
       if (this?.bounds?.find?.((value, i) => value !== layerMetadata.bounds[i]))
         logger.logWarning(
-          `The bounds specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`
+          `The bounds specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`,
         );
     }
   }

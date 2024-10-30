@@ -25,7 +25,7 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
   const { getIndexFromOrderedLayerInfo } = useMapStoreActions();
 
   const sortedLayers = layersList.sort((a, b) =>
-    getIndexFromOrderedLayerInfo(a.layerPath) > getIndexFromOrderedLayerInfo(b.layerPath) ? 1 : -1
+    getIndexFromOrderedLayerInfo(a.layerPath) > getIndexFromOrderedLayerInfo(b.layerPath) ? 1 : -1,
   );
 
   const textToSlug = (text: string): string => {

@@ -144,7 +144,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Redirect to helper
       helpClosePanelById(mapId, buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, focusWhenNoElementCallback);
     },
-    [buttonPanelGroups, geoviewElement, mapId]
+    [buttonPanelGroups, geoviewElement, mapId],
   );
 
   const openPanelById = useCallback(
@@ -154,7 +154,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Redirect to helper
       helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, isFocusTrapped);
     },
-    [buttonPanelGroups, isFocusTrapped]
+    [buttonPanelGroups, isFocusTrapped],
   );
 
   const handleButtonClicked = useCallback(
@@ -166,7 +166,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       const buttonPanel = buttonPanelGroups[groupName][buttonId];
       setActiveAppBarTab(buttonId, groupName, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
-    [buttonPanelGroups, setActiveAppBarTab]
+    [buttonPanelGroups, setActiveAppBarTab],
   );
 
   const handleGeneralCloseClicked = useCallback(
@@ -176,7 +176,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
       setActiveAppBarTab(buttonId, groupName, false, false);
     },
-    [setActiveAppBarTab]
+    [setActiveAppBarTab],
   );
 
   const handleAddButtonPanel = useCallback(
@@ -198,7 +198,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     },
     // Don't want to update every time active tab changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [buttonPanelGroups]
+    [buttonPanelGroups],
   );
 
   const handleRemoveButtonPanel = useCallback(
@@ -216,7 +216,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         return state;
       });
     },
-    [setButtonPanelGroups]
+    [setButtonPanelGroups],
   );
 
   /**
@@ -234,7 +234,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       }
       return width;
     },
-    [geoviewElement, isMapFullScreen]
+    [geoviewElement, isMapFullScreen],
   );
 
   useEffect(() => {
@@ -286,7 +286,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
               constructor,
               toJsonObject({
                 mapId,
-              })
+              }),
             ).catch((error) => {
               // Log
               logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in app-bar for ${pluginName}`, error);
