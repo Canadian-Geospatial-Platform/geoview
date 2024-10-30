@@ -89,7 +89,7 @@ export abstract class AbstractEventProcessor {
    * @returns {Promise<void>} Promise upon completion
    */
   protected static async helperPropagateArrayStoreBatch<
-    T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry
+    T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry,
   >(
     mapId: string,
     layerDataArray: T[],
@@ -98,7 +98,7 @@ export abstract class AbstractEventProcessor {
     onSetLayerDataArray: (layerDataArray: T[]) => void,
     traceProcessorIndication?: string,
     layerPathBypass?: string,
-    onResetBypass?: (layerPath: string) => void
+    onResetBypass?: (layerPath: string) => void,
   ): Promise<void> {
     // Log
     logger.logTraceDetailed('propagateArrayStoreBatch', mapId, traceProcessorIndication);

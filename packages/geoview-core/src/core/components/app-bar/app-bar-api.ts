@@ -111,7 +111,7 @@ export class AppBarApi {
   createAppbarPanel(
     buttonProps: TypeIconButtonProps,
     panelProps: TypePanelProps,
-    groupName?: string | null | undefined
+    groupName?: string | null | undefined,
   ): TypeButtonPanel | null {
     if (buttonProps && panelProps) {
       const buttonPanelId = `${this.mapId}${generateId(buttonProps.id)}`;

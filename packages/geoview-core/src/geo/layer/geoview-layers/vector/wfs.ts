@@ -352,7 +352,7 @@ export class WFS extends AbstractGeoViewVector {
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {}
+    readOptions: ReadOptions = {},
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
 

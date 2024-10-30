@@ -49,7 +49,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
           label,
           layerConfig.layerPath,
           layerConfig.filterEquation,
-          layerConfig.legendFilterIsOff
+          layerConfig.legendFilterIsOff,
         );
       },
     };
@@ -210,7 +210,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     //   ),
     const searchDateEntry = [
       ...filterValueToUse.matchAll(
-        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi
+        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi,
       ),
     ];
 
@@ -220,7 +220,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
       const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.getExternalFragmentsOrder(), reverseTimeZone);
       filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
-        dateFound.index! + dateFound[0].length
+        dateFound.index! + dateFound[0].length,
       )}`;
     });
 
@@ -230,8 +230,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     } catch (error) {
       throw new Error(
         `Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${this.getLayerFilter(
-          layerPath
-        )}\ninternal filter = ${filterValueToUse}`
+          layerPath,
+        )}\ninternal filter = ${filterValueToUse}`,
       );
     }
 
@@ -320,7 +320,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     label: string,
     layerPath: string,
     filterEquation?: FilterNodeArrayType,
-    legendFilterIsOff?: boolean
+    legendFilterIsOff?: boolean,
   ): Style | undefined {
     // TODO: Refactor - After layers refactoring, remove the layerPath parameter here.
     // Get the style

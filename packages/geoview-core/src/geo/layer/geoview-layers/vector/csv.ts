@@ -135,7 +135,7 @@ export class CSV extends AbstractGeoViewVector {
       if (!this.metadata) return;
 
       throw new Error(
-        `Invalid CSV metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
+        `Invalid CSV metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       );
     });
   }
@@ -168,7 +168,7 @@ export class CSV extends AbstractGeoViewVector {
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {}
+    readOptions: ReadOptions = {},
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
     sourceOptions.url = layerConfig.source!.dataAccessPath;

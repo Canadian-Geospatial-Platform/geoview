@@ -130,7 +130,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
         const foundEntry = this.#recursiveSearch(
           `${layerConfig.layerId}${layerConfig.layerIdExtension ? `.${layerConfig.layerIdExtension}` : ''}`,
-          Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
+          Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig),
         );
         if (!foundEntry) {
           this.layerLoadError.push({
@@ -144,7 +144,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       }
 
       throw new Error(
-        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
+        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
       );
     });
   }
@@ -186,7 +186,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     if (this.metadata) {
       const layerMetadataFound = this.#recursiveSearch(
         `${layerConfig.layerId}${layerConfig.layerIdExtension ? `.${layerConfig.layerIdExtension}` : ''}`,
-        Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
+        Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig),
       ) as VectorLayerEntryConfig;
       if (layerMetadataFound) {
         layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
@@ -230,7 +230,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {}
+    readOptions: ReadOptions = {},
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
     sourceOptions.url = layerConfig.source!.dataAccessPath!;

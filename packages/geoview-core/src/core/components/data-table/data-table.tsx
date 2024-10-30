@@ -152,7 +152,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
         cellValue
       );
     },
-    [initLightBox, t]
+    [initLightBox, t],
   );
 
   /**
@@ -178,7 +178,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
         </Box>
       );
     },
-    [createLightBoxButton, density, sxClasses.tableCell]
+    [createLightBoxButton, density, sxClasses.tableCell],
   );
 
   /**
@@ -336,7 +336,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
       highlightBBox,
       removeHighlightedFeature,
       addHighlightedFeature,
-    ]
+    ],
   );
 
   /**
@@ -595,7 +595,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   const debouncedColumnFilters = useCallback(
     (filters: MRTColumnFiltersState) => filterMap(filters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [datatableSettings[layerPath]?.mapFilteredRecord]
+    [datatableSettings[layerPath]?.mapFilteredRecord],
   );
 
   // update map when column filters change

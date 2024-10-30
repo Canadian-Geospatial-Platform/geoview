@@ -108,7 +108,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       return `${numOfFeatures} ${getLocalizedMessage('geochart.panel.chart', displayLanguage)}${numOfFeatures > 1 ? 's' : ''}`;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mapId]
+    [mapId],
   );
 
   /**
@@ -124,7 +124,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
       setSelectedLayerPath(layer.layerPath);
     },
-    [setSelectedLayerPath]
+    [setSelectedLayerPath],
   );
 
   // Reacts when the array of layer data updates
@@ -147,7 +147,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             layerFeatures: getNumFeaturesLabel(layer!),
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
             layerUniqueId: `${mapId}-${TABS.GEO_CHART}-${layer.layerPath}`,
-          } as LayerListEntry)
+          }) as LayerListEntry,
       );
   }, [visibleLayers, storeArrayOfLayerData, configObj, getNumFeaturesLabel, mapId]);
 
@@ -269,7 +269,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
         setSelectedLayerPath('');
       }
     },
-    [setSelectedLayerPath]
+    [setSelectedLayerPath],
   );
 
   /**

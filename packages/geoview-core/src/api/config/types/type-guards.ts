@@ -39,7 +39,7 @@ export const layerEntryIsGroupLayer = (verifyIfLayer: EntryConfigBaseClass | Typ
  * @returns {boolean} true if the type assertion is valid.
  */
 export const layerEntryIsAbstractBaseLayerEntryConfig = (
-  verifyIfLayer: EntryConfigBaseClass | TypeJsonObject
+  verifyIfLayer: EntryConfigBaseClass | TypeJsonObject,
 ): verifyIfLayer is AbstractBaseLayerEntryConfig => {
   return (verifyIfLayer?.isLayerGroup as boolean) === false;
 };
@@ -219,7 +219,7 @@ export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorGeomet
  * @returns {boolean} true if the type assertion is valid.
  */
 export const isSimpleSymbolVectorConfig = (
-  verifyIfConfig: TypeBaseVectorGeometryConfig
+  verifyIfConfig: TypeBaseVectorGeometryConfig,
 ): verifyIfConfig is TypeSimpleSymbolVectorConfig => {
   return verifyIfConfig?.type === 'simpleSymbol';
 };

@@ -214,7 +214,7 @@ export class GVEsriImage extends AbstractGVRaster {
           const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
           const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.getExternalFragmentsOrder(), reverseTimeZone);
           filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
-            dateFound.index! + dateFound[0].length + 2
+            dateFound.index! + dateFound[0].length + 2,
           )}`;
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });

@@ -105,7 +105,7 @@ export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewL
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsEsriDynamic = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
+  verifyIfGeoViewEntry: TypeLayerEntryConfig,
 ): verifyIfGeoViewEntry is EsriDynamicLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
@@ -420,7 +420,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     layerConfig: AbstractBaseLayerEntryConfig,
     url: string,
     maxRecordCount: number,
-    resultOffset?: number
+    resultOffset?: number,
   ): Promise<unknown[]> {
     const responseArray: unknown[] = [];
     // Add resultOffset to layer query
@@ -437,8 +437,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
             layerConfig,
             url,
             maxRecordCount,
-            resultOffset ? resultOffset + maxRecordCount : 2 * maxRecordCount
-          ))
+            resultOffset ? resultOffset + maxRecordCount : 2 * maxRecordCount,
+          )),
         );
     } catch (error) {
       logger.logError(`Error loading additional features for ${layerConfig.layerPath} from ${nextUrl}`, error);
@@ -471,7 +471,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (in layers)
   protected override getFeatureInfoAtCoordinate(
     location: Coordinate,
-    layerPath: string
+    layerPath: string,
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Transform coordinate from map project to lntlat
     const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
@@ -491,7 +491,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (in layers)
   protected override async getFeatureInfoAtLongLat(
     lnglat: Coordinate,
-    layerPath: string
+    layerPath: string,
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // If invisible
@@ -538,7 +538,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       }
       const features = new EsriJSON().readFeatures(
         { features: jsonResponse.results },
-        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: mapViewer.getProjection().getCode() }
+        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: mapViewer.getProjection().getCode() },
       ) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
       return arrayOfFeatureInfoEntries;
@@ -576,7 +576,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         }
         return counter;
       },
-      styleSettings.fields.map<TypeFieldOfTheSameValue[]>(() => [])
+      styleSettings.fields.map<TypeFieldOfTheSameValue[]>(() => []),
     );
   }
 
@@ -644,7 +644,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   static #getQueryTree(
     styleSettings: TypeUniqueValueStyleConfig,
     fieldOfTheSameValue: TypeFieldOfTheSameValue[][],
-    fieldOrder: number[]
+    fieldOrder: number[],
   ): TypeQueryTree {
     const queryTree: TypeQueryTree = [];
     styleSettings.uniqueValueStyleInfo.forEach((styleEntry) => {
@@ -710,7 +710,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     level: number,
     fieldOrder: number[],
     styleSettings: TypeUniqueValueStyleConfig,
-    sourceFeatureInfo: TypeFeatureInfoLayerConfig
+    sourceFeatureInfo: TypeFeatureInfoLayerConfig,
   ): string {
     let queryString = styleSettings.defaultVisible !== false && !level ? 'not (' : '(';
     for (let i = 0; i < queryTree.length; i++) {
@@ -725,7 +725,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           level + 1,
           fieldOrder,
           styleSettings,
-          sourceFeatureInfo
+          sourceFeatureInfo,
         )}`;
       } else {
         // We have reached the last field and i = 0 (false) we concatenate 'fieldName in (value' else we concatenate ', value'
@@ -804,16 +804,16 @@ export class EsriDynamic extends AbstractGeoViewRaster {
                   `${styleSettings.field} >= ${EsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[0].minValue!,
-                    layerConfig.source.featureInfo!
-                  )}`
+                    layerConfig.source.featureInfo!,
+                  )}`,
                 );
               else if (styleSettings.classBreakStyleInfo[0].visible === false && styleSettings.defaultVisible !== false) {
                 filterArray.push(
                   `${styleSettings.field} < ${EsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[0].minValue!,
-                    layerConfig.source.featureInfo!
-                  )}`
+                    layerConfig.source.featureInfo!,
+                  )}`,
                 );
                 visibleWhenGreatherThisIndex = i;
               }
@@ -822,24 +822,24 @@ export class EsriDynamic extends AbstractGeoViewRaster {
                 `${styleSettings.field} > ${EsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].minValue!,
-                  layerConfig.source.featureInfo!
-                )}`
+                  layerConfig.source.featureInfo!,
+                )}`,
               );
               if (i + 1 === styleSettings.classBreakStyleInfo.length)
                 filterArray.push(
                   `${styleSettings.field} <= ${EsriDynamic.#formatFieldValue(
                     styleSettings.field,
                     styleSettings.classBreakStyleInfo[i].maxValue!,
-                    layerConfig.source.featureInfo!
-                  )}`
+                    layerConfig.source.featureInfo!,
+                  )}`,
                 );
             } else if (styleSettings.classBreakStyleInfo[i].visible === false && styleSettings.defaultVisible !== false) {
               filterArray.push(
                 `${styleSettings.field} <= ${EsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].minValue!,
-                  layerConfig.source.featureInfo!
-                )}`
+                  layerConfig.source.featureInfo!,
+                )}`,
               );
               visibleWhenGreatherThisIndex = i;
             }
@@ -849,16 +849,16 @@ export class EsriDynamic extends AbstractGeoViewRaster {
                 `${styleSettings.field} <= ${EsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i - 1].maxValue!,
-                  layerConfig.source.featureInfo!
-                )}`
+                  layerConfig.source.featureInfo!,
+                )}`,
               );
             } else if (i + 1 === styleSettings.classBreakStyleInfo.length) {
               filterArray.push(
                 `${styleSettings.field} <= ${EsriDynamic.#formatFieldValue(
                   styleSettings.field,
                   styleSettings.classBreakStyleInfo[i].maxValue!,
-                  layerConfig.source.featureInfo!
-                )}`
+                  layerConfig.source.featureInfo!,
+                )}`,
               );
             }
           } else if (styleSettings.classBreakStyleInfo[i].visible !== false) {
@@ -866,8 +866,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
               `${styleSettings.field} > ${EsriDynamic.#formatFieldValue(
                 styleSettings.field,
                 styleSettings.classBreakStyleInfo[i - 1].maxValue!,
-                layerConfig.source.featureInfo!
-              )}`
+                layerConfig.source.featureInfo!,
+              )}`,
             );
             visibleWhenGreatherThisIndex = -1;
           } else {
@@ -879,8 +879,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
             `${styleSettings.field} > ${EsriDynamic.#formatFieldValue(
               styleSettings.field,
               styleSettings.classBreakStyleInfo[visibleWhenGreatherThisIndex].maxValue!,
-              layerConfig.source.featureInfo!
-            )}`
+              layerConfig.source.featureInfo!,
+            )}`,
           );
 
         if (styleSettings.defaultVisible !== false) {
@@ -949,7 +949,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     //   ),
     const searchDateEntry = [
       ...filterValueToUse.matchAll(
-        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi
+        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi,
       ),
     ];
 
@@ -963,7 +963,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       reformattedDate = reformattedDate.slice(0, reformattedDate.length === 20 ? -1 : -6); // drop time zone.
       reformattedDate = reformattedDate.replace('T', ' ');
       filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
-        dateFound.index! + dateFound[0].length
+        dateFound.index! + dateFound[0].length,
       )}`;
     });
 
@@ -1030,7 +1030,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           {
             dataProjection: `EPSG:${responseJson.spatialReference.wkid}`,
             featureProjection: this.getMapViewer().getProjection().getCode(),
-          }
+          },
         );
 
         // Determine max extent from features

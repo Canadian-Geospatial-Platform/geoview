@@ -616,7 +616,7 @@ export abstract class AbstractGeoViewLayer {
    */
   async processListOfLayerEntryConfig(
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
-    layerGroup?: LayerGroup
+    layerGroup?: LayerGroup,
   ): Promise<BaseLayer | undefined> {
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - processListOfLayerEntryConfig', listOfLayerEntryConfig);
@@ -663,7 +663,7 @@ export abstract class AbstractGeoViewLayer {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
         layerGroup = this.createLayerGroup(
           (listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig).parentLayerConfig as TypeLayerEntryConfig,
-          listOfLayerEntryConfig[0].initialSettings!
+          listOfLayerEntryConfig[0].initialSettings!,
         );
       }
       const promiseOfLayerCreated: Promise<BaseLayer | undefined>[] = [];
@@ -746,7 +746,7 @@ export abstract class AbstractGeoViewLayer {
   async getFeatureInfo(
     queryType: QueryType,
     layerPath: string,
-    location: TypeLocation = null
+    location: TypeLocation = null,
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // TODO: Refactor - Remove the layerPath parameter once hybrid work is done
@@ -1266,7 +1266,7 @@ export abstract class AbstractGeoViewLayer {
    */
   protected async formatFeatureInfoResult(
     features: Feature[],
-    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig
+    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig,
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       if (!features.length) return [];
@@ -1308,7 +1308,7 @@ export abstract class AbstractGeoViewLayer {
               layerConfig.filterEquation,
               layerConfig.legendFilterIsOff,
               true,
-              callbackToFetchDataUrl
+              callbackToFetchDataUrl,
             )
               .then((canvas) => {
                 resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
@@ -1317,10 +1317,10 @@ export abstract class AbstractGeoViewLayer {
                 // Log
                 logger.logPromiseFailed(
                   'getFeatureCanvas in featureNeedingItsCanvas loop in formatFeatureInfoResult in AbstractGeoViewLayer',
-                  error
+                  error,
                 );
               });
-          })
+          }),
         );
       });
 
@@ -1489,7 +1489,7 @@ export abstract class AbstractGeoViewLayer {
         return this.allLayerStatusAreGreaterThanOrEqualTo('processed');
       },
       timeout,
-      checkFrequency
+      checkFrequency,
     );
 
     // Resolve successfully, otherwise an exception has been thrown already

@@ -43,7 +43,7 @@ export function esriGetFieldType(
   if (esriFieldType === 'esriFieldTypeDate') return 'date';
   if (
     ['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger', 'esriFieldTypeOID'].includes(
-      esriFieldType
+      esriFieldType,
     )
   )
     return 'number';
@@ -60,7 +60,7 @@ export function esriGetFieldType(
 // TODO.CONT: call a method getFieldDomain that use config.source.featureInfo.outfields to find a field domain.
 export function esriGetFieldDomain(
   layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
-  fieldName: string
+  fieldName: string,
 ): codedValueType | rangeDomainType | null {
   const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);

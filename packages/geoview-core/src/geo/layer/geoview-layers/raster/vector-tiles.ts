@@ -82,7 +82,7 @@ export const geoviewLayerIsVectorTiles = (verifyIfGeoViewLayer: AbstractGeoViewL
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsVectorTiles = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
+  verifyIfGeoViewEntry: TypeLayerEntryConfig,
 ): verifyIfGeoViewEntry is VectorTilesLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
 };
@@ -178,7 +178,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     ) {
       // TODO: find a more centralized way to trap error and display message
       api.maps[this.mapId].notifications.showError(
-        `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`
+        `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`,
       );
       logger.logError(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
       // eslint-disable-next-line no-param-reassign

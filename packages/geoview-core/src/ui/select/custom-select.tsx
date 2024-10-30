@@ -100,8 +100,8 @@ export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
     ? selectItems.some((item: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) => item.default)
     : selectItems.some((item: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) =>
         (item.items as unknown as Record<string, TypeSelectItems>[] | Record<string, TypeItemProps>[]).some(
-          (selectItem: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) => selectItem.default
-        )
+          (selectItem: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) => selectItem.default,
+        ),
       );
 
   if (isGrouped) {
@@ -110,7 +110,7 @@ export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
         (selectItem: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) => {
           if (value) return;
           if (selectItem.default) setValue(selectItem.value as unknown as string);
-        }
+        },
       );
     });
   } else {

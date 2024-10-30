@@ -123,7 +123,7 @@ export class Notifications {
     type: SnackbarType,
     message: string,
     params: TypeJsonValue[] | TypeJsonArray | string[],
-    button?: ISnackbarButton
+    button?: ISnackbarButton,
   ): void {
     const snackbar: SnackBarOpenEvent = {
       snackbarType: type,

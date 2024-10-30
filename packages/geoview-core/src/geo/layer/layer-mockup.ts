@@ -16,7 +16,7 @@ export abstract class LayerMockup {
       'esriFeature',
       'Top 100 Expl. Pro. (ignored)',
       'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer',
-      [this.#getTop100FeatureLayerEntry()]
+      [this.#getTop100FeatureLayerEntry()],
     );
   }
 
@@ -27,7 +27,7 @@ export abstract class LayerMockup {
       'esriDynamic',
       'Top 100 Expl. Pro. (ignored)',
       'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer',
-      [this.#getTop100DynamicLayerEntry()]
+      [this.#getTop100DynamicLayerEntry()],
     );
   }
 
@@ -98,7 +98,7 @@ export abstract class LayerMockup {
     type: string,
     layerName: string,
     metadataAccessPath: string,
-    listOfLayerEntry: TypeLayerEntryConfig[]
+    listOfLayerEntry: TypeLayerEntryConfig[],
   ): TypeGeoviewLayerConfig {
     return {
       geoviewLayerId: id,
@@ -3621,7 +3621,7 @@ export abstract class LayerMockup {
     entryType: TypeLayerEntryType,
     metadata: unknown,
     source: unknown,
-    style: unknown
+    style: unknown,
   ): TypeLayerEntryConfig {
     return {
       layerId,

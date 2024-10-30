@@ -56,7 +56,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    */
   static getLayerPanelState(
     mapId: string,
-    state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'
+    state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress',
   ): string | boolean | null | undefined {
     return this.getLayerState(mapId)[state];
   }
@@ -558,7 +558,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     curLayers: TypeLegendLayer[],
     layerPath: string,
     opacity: number,
-    isChild = false
+    isChild = false,
   ): void {
     const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath);
     if (layer) {
