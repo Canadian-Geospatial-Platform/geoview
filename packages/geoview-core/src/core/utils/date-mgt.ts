@@ -718,7 +718,8 @@ export abstract class DateMgt {
    * @returns {string} The date format.
    */
   static deduceDateFormat(dateString: string): string {
-    let dateFormat = dateString !== null ? dateString.toUpperCase().replaceAll('/', '-').replaceAll(' ', 'T') : 'YYYY-MM-DD';
+    let dateFormat =
+      dateString !== null && dateString !== undefined ? dateString.toUpperCase().replaceAll('/', '-').replaceAll(' ', 'T') : 'YYYY-MM-DD';
     dateFormat = dateFormat
       .replace(/\d{4}/, 'YYYY')
       .replace(/^\d{1,2}(?=-\d{1,2}-YYYY)|((?<=^YYYY-\d-)|(?<=^YYYY-\d\d-))\d{1,2}/, 'DD')

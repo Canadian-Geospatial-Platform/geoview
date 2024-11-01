@@ -103,23 +103,25 @@ export default function DataTableModal(): JSX.Element {
     const columnList = [] as MRTColumnDef<ColumnsType>[];
 
     entries.forEach(([key, value]) => {
-      columnList.push({
-        id: key,
-        accessorFn: (row) => {
-          // check if row is valid react element.
-          if (isValidElement(row[key])) {
-            return row[key];
-          }
-          if (typeof row[key]?.value === 'string' || typeof row[key]?.value === 'number') {
-            return row[key]?.value ?? '';
-          }
-          return '';
-        },
-        header: value?.alias ?? '',
-        Cell: ({ cell }) => getCellValue(cell.getValue() as string),
-        Header: ({ column }) => getTableHeader(column.columnDef.header),
-        maxSize: 120,
-      });
+      // Do not show internal geoviewID field
+      if (value?.alias !== 'geoviewID')
+        columnList.push({
+          id: key,
+          accessorFn: (row) => {
+            // check if row is valid react element.
+            if (isValidElement(row[key])) {
+              return row[key];
+            }
+            if (typeof row[key]?.value === 'string' || typeof row[key]?.value === 'number') {
+              return row[key]?.value ?? '';
+            }
+            return '';
+          },
+          header: value?.alias ?? '',
+          Cell: ({ cell }) => getCellValue(cell.getValue() as string),
+          Header: ({ column }) => getTableHeader(column.columnDef.header),
+          maxSize: 120,
+        });
     });
 
     return columnList;

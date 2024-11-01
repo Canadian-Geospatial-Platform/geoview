@@ -86,6 +86,16 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     }
   };
 
+  // Make sure there is no pending state on unmount. If not, it cant stay in progress forever
+  // if user switch panel when action is in progress
+  useEffect(() => {
+    return () => {
+      setInUndoState(false);
+      setLayerDeleteInProgress(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (progress === 100) {
       deleteLayer(layer.layerPath);

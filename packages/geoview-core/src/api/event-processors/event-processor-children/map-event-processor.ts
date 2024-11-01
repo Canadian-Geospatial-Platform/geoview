@@ -298,7 +298,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static getBasemapOptions(mapId: string): TypeBasemapOptions {
-    return this.getMapStateProtected(mapId).basemapOptions;
+    return this.getMapStateProtected(mapId).currentBasemapOptions || this.getMapStateProtected(mapId).basemapOptions;
   }
 
   static getCurrentBasemapOptions(mapId: string): TypeBasemapOptions {
