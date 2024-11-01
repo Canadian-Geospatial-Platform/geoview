@@ -160,7 +160,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <IconButton
         color="primary"
-        tooltip="layers.toggleAllVisibility"
         onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked())}
       >
         {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
