@@ -8,6 +8,8 @@ export const getSxClasses = (theme: Theme): any => ({
     alignItems: 'center',
     gap: '15px',
     padding: '8px 20px 7px 15px',
+    marginLeft: 'auto',
+    width: '235px',
     backgroundColor: theme.palette.geoViewColor.bgColor.main,
     borderRadius: '10px',
     '& .MuiSlider-mark': {

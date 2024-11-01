@@ -113,6 +113,7 @@
     "reloadLayer": "Recharger la couche",
     "visibilityIsAlways": "La visibilité est toujours activée",
     "toggleVisibility": "Basculer la visibilité",
+    "toggleAllVisibility": "Basculer toute les visibilités",
     "toggleCollapse": "Basculer la fermeture",
     "querying": "Requête en cours",
     "layerAdded": "Couche __param__  ajoutée",

@@ -113,6 +113,7 @@
     "reloadLayer": "Reload layer",
     "visibilityIsAlways": "Visibility is always enabled",
     "toggleVisibility": "Toggle visibility",
+    "toggleAllVisibility": "Toggle all visibility",
     "toggleCollapse": "Toggle collapse",
     "querying": "Querying",
     "layerAdded": "Layer __param__ added",

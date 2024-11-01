@@ -142,7 +142,7 @@ export default function BasemapSelect(): JSX.Element {
   };
 
   const panel: TypePanelProps = {
-    title: 'Select a basemap',
+    title: 'basemaps.select',
     icon: createElement(MapIcon),
     content: renderButtons(),
     width: 'flex',

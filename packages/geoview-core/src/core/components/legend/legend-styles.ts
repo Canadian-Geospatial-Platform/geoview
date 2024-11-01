@@ -71,15 +71,18 @@ export const getSxClasses = (theme: Theme): any => ({
         padding: 0,
       },
       '& li': {
-        borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[200]}`,
         paddingLeft: '6px',
         marginBottom: '3px',
         fontWeight: '400',
 
         '&.unchecked': {
-          borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[600]}`,
+          borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[200]}`,
           fontStyle: 'italic',
           color: theme.palette.geoViewColor.textColor.light[600],
+        },
+
+        '&.checked': {
+          borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[600]}`,
         },
       },
     },

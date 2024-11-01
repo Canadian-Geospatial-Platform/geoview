@@ -167,14 +167,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderItems(): JSX.Element {
     return (
       <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
-        {layerDetails.items.length > 1 && (
-          <Grid container direction="row" alignItems="center" justifyItems="stretch">
-            <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
-            <Grid size={{ xs: 'auto' }}>
-              <Box component="span">{t('general.name')}</Box>
-            </Grid>
-          </Grid>
-        )}
         {layerDetails.items.map((item) => (
           <Grid
             container
@@ -184,8 +176,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             justifyItems="stretch"
           >
             <Grid size={{ xs: 'auto' }}>{renderItemCheckbox(item)}</Grid>
-            <Grid size={{ xs: 'auto' }}>
-              {item.icon ? <Box component="img" alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
+            <Grid size={{ xs: 'auto' }} sx={{ display: 'flex' }}>
+              {item.icon ? (
+                <Box component="img" sx={{ alignSelf: 'center' }} alt={item.name} src={item.icon} />
+              ) : (
+                <BrowserNotSupportedIcon />
+              )}
               <Box component="span" style={sxClasses.tableIconLabel}>
                 {item.name}
               </Box>
@@ -262,7 +258,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   function renderLayerButtons(): JSX.Element {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
         {isDataTableVisible && datatableSettings[layerDetails.layerPath] && renderDetailsButton()}
         <IconButton tooltip="legend.refreshLayer" className="buttonOutline" onClick={handleRefreshLayer}>
           <RestartAltIcon />
@@ -317,6 +313,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               justifyContent: 'space-between',
               width: '100%',
               alignItems: 'center',
+              paddingTop: '10px',
             }}
           >
             <Box sx={{ textAlign: 'left', maxWidth: '70%', [theme.breakpoints.down('md')]: { display: 'none' } }}>
@@ -327,15 +324,22 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             </Box>
             {renderLayerButtons()}
           </Box>
-          {layerDetails.controls?.opacity !== false && (
-            <Box sx={sxClasses.layerOpacityControlContainer}>
-              <Box id="layerOpacity">
-                <LayerOpacityControl layerDetails={layerDetails} />
-              </Box>
-            </Box>
-          )}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap-reverse' }}>
+            {layerDetails.items.length > 1 && (
+              <Grid container direction="row" alignItems="center" justifyItems="stretch">
+                <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
+                <Grid size={{ xs: 'auto' }}>
+                  <Box component="span" sx={{ fontWeight: 'bold' }}>
+                    {t('layers.toggleAllVisibility')}
+                  </Box>
+                </Grid>
+              </Grid>
+            )}
+            {layerDetails.controls?.opacity !== false && <LayerOpacityControl layerDetails={layerDetails} />}
+          </Box>
+          <Divider sx={{ marginTop: '10px', marginBottom: '20px' }} variant="middle" />
           {renderWMSImage()}
-          <Box sx={{ marginTop: '20px' }}>
+          <Box>
             {layerDetails.items?.length > 0 && renderItems()}
             {layerDetails.children.length > 0 && (
               <>
@@ -344,7 +348,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               </>
             )}
           </Box>
-          <Divider sx={{ marginTop: '50px', marginBottom: '10x' }} variant="middle" />
+          <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} variant="middle" />
           {layerDetails.layerAttribution &&
             layerDetails.layerAttribution!.map((attribution) => {
               return (

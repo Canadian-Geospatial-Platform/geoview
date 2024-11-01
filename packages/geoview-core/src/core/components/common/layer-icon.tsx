@@ -50,7 +50,7 @@ function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackPr
     }
     if (numOfIcons && numOfIcons > 0) {
       return (
-        <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)} aria-hidden="true">
+        <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyDown={(e) => onStackIconClick?.(e)} aria-hidden="true">
           <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1} aria-hidden="true">
             <Box sx={sxClasses.legendIconTransparent}>
               {iconImageStacked && <Box component="img" alt="icon" src={iconImageStacked} sx={sxClasses.maxIconImg} />}
@@ -64,7 +64,7 @@ function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackPr
     }
     if (layerPath !== '' && iconData.length === 0 && layerPath.charAt(0) !== '!') {
       return (
-        <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)} aria-hidden="true">
+        <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyDown={(e) => onStackIconClick?.(e)} aria-hidden="true">
           <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1} aria-hidden="true">
             <Box sx={sxClasses.legendIconTransparent}>
               <BrowserNotSupportedIcon />
