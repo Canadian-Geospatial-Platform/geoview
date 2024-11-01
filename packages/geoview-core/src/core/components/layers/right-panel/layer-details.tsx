@@ -158,10 +158,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     }
 
     return (
-      <IconButton
-        color="primary"
-        onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked())}
-      >
+      <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked())}>
         {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
