@@ -8,11 +8,19 @@ import { Extent } from 'ol/extent';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import { TypeResultSet, TypeResultSetEntry, TypeStyleConfig } from '@/geo/map/map-schema-types';
+import {
+  layerEntryIsEsriDynamic,
+  TypeFeatureInfoEntryPartial,
+  TypeResultSet,
+  TypeResultSetEntry,
+  TypeStyleConfig,
+} from '@/geo/map/map-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 
 // #region INTERFACES & TYPES
 
@@ -30,6 +38,7 @@ export interface ILayerState {
   actions: {
     deleteLayer: (layerPath: string) => void;
     getExtentFromFeatures: (layerPath: string, featureIds: string[]) => Promise<Extent | undefined>;
+    queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
     getLayerDeleteInProgress: () => boolean;
@@ -83,6 +92,37 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       getExtentFromFeatures: (layerPath: string, featureIds: string[]) => {
         // Redirect to event processor
         return LegendEventProcessor.getExtentFromFeatures(get().mapId, layerPath, featureIds);
+      },
+
+      /**
+       * Queries the EsriDynamic layer at the given layer path for a specific set of object ids
+       * @param {string} layerPath - The layer path of the layer to query
+       * @param {number[]} objectIDs - The object ids to filter the query on
+       * @returns A Promise of results of type TypeFeatureInfoEntryPartial
+       */
+      queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]): Promise<TypeFeatureInfoEntryPartial[]> => {
+        // Get the layer config
+        const layerConfig = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getLayerEntryConfig(
+          layerPath
+        ) as AbstractBaseLayerEntryConfig;
+
+        // Get the geometry type
+        const [geometryType] = layerConfig.getTypeGeometries();
+
+        // Check if EsriDynamic config
+        if (layerConfig && layerEntryIsEsriDynamic(layerConfig)) {
+          // Query for the specific object ids
+          return esriQueryRecordsByUrlObjectIds(
+            `${layerConfig.source?.dataAccessPath}${layerConfig.layerId}`,
+            geometryType,
+            objectIDs,
+            'OBJECTID',
+            true
+          );
+        }
+
+        // Not an EsriDynamic layer
+        return Promise.reject(new Error('Not an EsriDynamic layer'));
       },
 
       /**

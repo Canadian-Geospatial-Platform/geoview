@@ -1,7 +1,7 @@
 import VectorLayer from 'ol/layer/Vector';
 import Feature from 'ol/Feature';
 import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
-import { Geometry as OLGeometry, Circle, LineString, Point, Polygon } from 'ol/geom';
+import { Geometry as OLGeometry, Circle, LineString, MultiLineString, Point, Polygon, MultiPolygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
 import { Fill, Stroke, Style, Icon } from 'ol/style';
 import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
@@ -659,27 +659,98 @@ export class GeometryApi {
    * @param coordinates - The coordinates to use to create the geometry
    * @returns The OpenLayers Geometry
    */
-  static createGeometryFromType(
-    geometryType: TypeStyleGeometry,
-    coordinates: Coordinate | Coordinate[] | Coordinate[][] | number[]
-  ): OLGeometry {
+  static createGeometryFromType(geometryType: TypeStyleGeometry, coordinates: Coordinate | Coordinate[] | Coordinate[][]): OLGeometry {
     switch (geometryType) {
       case 'Point':
-        // Create a point geometry
+        // Create a Point geometry
         return new Point(coordinates as Coordinate);
 
       case 'LineString':
-        // Create a line geometry
-        return new LineString(coordinates as Coordinate[] | number[]);
+        // If it's actually a MultiLineString
+        if (GeometryApi.isArrayOfArrayOfCoordinates(coordinates)) {
+          // Create a MultiLine geometry
+          return new MultiLineString(coordinates);
+        }
+
+        // Create a Line geometry
+        return new LineString(coordinates as Coordinate[]);
+
+      case 'MultiLineString':
+        // Create a MultiLine geometry
+        return new MultiLineString(coordinates as Coordinate[][]);
 
       case 'Polygon':
-        // Create a polygon geometry
-        return new Polygon(coordinates as Coordinate[][] | number[]);
+        // If it's actually a MultiPolygon
+        if (GeometryApi.isArrayOfArrayOfArrayOfCoordinates(coordinates)) {
+          // Create a MultiPolygon geometry
+          return new MultiPolygon(coordinates);
+        }
+
+        // Create a Polygon geometry
+        return new Polygon(coordinates as Coordinate[][]);
 
       // Add support for other geometry types as needed
       default:
         throw new Error(`Unsupported geometry type: ${geometryType}`);
     }
+  }
+
+  /**
+   * Typeguards when a list of coordinates should actually be a single coordinate, such as a Point.
+   * @param {Coordinate | Coordinate[] | Coordinate[][]} coordinates - The coordinates to check
+   * @returns {Coordinate} when the coordinates represent a Point
+   */
+  static isCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][]): coordinates is Coordinate {
+    return Array.isArray(coordinates) && coordinates.length > 0 && !Array.isArray(coordinates[0]);
+  }
+
+  /**
+   * Typeguards when a list of coordinates should actually be a single coordinate, such as a LineString.
+   * @param {Coordinate | Coordinate[] | Coordinate[][]} coordinates - The coordinates to check
+   * @returns {Coordinate[]} when the coordinates represent a LineString
+   */
+  static isArrayOfCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][]): coordinates is Coordinate[] {
+    return (
+      Array.isArray(coordinates) &&
+      coordinates.length > 0 &&
+      Array.isArray(coordinates[0]) &&
+      coordinates[0].length > 0 &&
+      !Array.isArray(coordinates[0][0])
+    );
+  }
+
+  /**
+   * Typeguards when a list of coordinates should actually be a single coordinate, such as a MultiLineString or Polygon.
+   * @param {Coordinate | Coordinate[] | Coordinate[][]} coordinates - The coordinates to check
+   * @returns {Coordinate[][]} when the coordinates represent a MultiLineString or Polygon
+   */
+  static isArrayOfArrayOfCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][]): coordinates is Coordinate[][] {
+    return (
+      Array.isArray(coordinates) &&
+      coordinates.length > 0 &&
+      Array.isArray(coordinates[0]) &&
+      coordinates[0].length > 0 &&
+      Array.isArray(coordinates[0][0])
+    );
+  }
+
+  /**
+   * Typeguards when a list of coordinates should actually be a single coordinate, such as a MultiPolygon.
+   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to check
+   * @returns {Coordinate[][]} when the coordinates represent a MultiPolygon
+   */
+  static isArrayOfArrayOfArrayOfCoordinates(
+    coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]
+  ): coordinates is Coordinate[][][] {
+    return (
+      Array.isArray(coordinates) &&
+      coordinates.length > 0 &&
+      Array.isArray(coordinates[0]) &&
+      coordinates[0].length > 0 &&
+      Array.isArray(coordinates[0][0]) &&
+      coordinates[0][0].length > 0 &&
+      Array.isArray(coordinates[0][0][0])
+    );
   }
 }
 
