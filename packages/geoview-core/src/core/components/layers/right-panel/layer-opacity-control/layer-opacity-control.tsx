@@ -42,19 +42,17 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
   };
 
   return (
-    <Box style={{ padding: '16px 17px 16px 23px' }}>
-      <Box sx={sxClasses.layerOpacityControl}>
-        <Typography sx={{ fontWeight: 'bold' }}>{t('layers.opacity')}</Typography>
-        <Slider
-          min={0}
-          max={100}
-          step={1}
-          value={(layerDetails.opacity ? layerDetails.opacity : 1) * 100}
-          onChange={handleSetOpacity}
-          marks={marks}
-          valueLabelDisplay="auto"
-        />
-      </Box>
+    <Box sx={sxClasses.layerOpacityControl}>
+      <Typography sx={{ fontWeight: 'bold' }}>{t('layers.opacity')}</Typography>
+      <Slider
+        min={0}
+        max={100}
+        step={1}
+        value={(layerDetails.opacity ? layerDetails.opacity : 1) * 100}
+        onChange={handleSetOpacity}
+        marks={marks}
+        valueLabelDisplay="auto"
+      />
     </Box>
   );
 }

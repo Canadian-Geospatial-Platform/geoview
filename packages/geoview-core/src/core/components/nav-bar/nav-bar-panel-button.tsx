@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ClickAwayListener } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { useTranslation } from 'react-i18next';
 import { getSxClasses } from './nav-bar-style';
 import { Popper, IconButton, DialogTitle, DialogContent, Paper, Box } from '@/ui';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -22,6 +23,8 @@ interface NavbarPanelButtonType {
 export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/nav-bar-panel-button');
+
+  const { t } = useTranslation<string>();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -76,7 +79,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >
           <Paper sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
-            <DialogTitle sx={sxClasses.popoverTitle}>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
+            <DialogTitle sx={sxClasses.popoverTitle}>{t(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
             <DialogContent>
               {buttonPanel.panel?.convertHtmlContent ? (
                 <HtmlToReact htmlContent={buttonPanel.panel?.content as string} />
