@@ -20,6 +20,6 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     // Value for this.source.format can only be EsriJSON.
     if (!this.source) this.source = { format: 'EsriJSON' };
     if (!this.source.format) this.source.format = 'EsriJSON';
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath! };
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
   }
 }

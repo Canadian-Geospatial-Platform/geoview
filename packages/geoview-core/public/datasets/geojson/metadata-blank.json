@@ -4,7 +4,7 @@
   "listOfLayerEntryConfig": [
     {
       "layerId": "blank.json",
-      "layerName": { "en": "Blank" },
+      "layerName": "Blank",
       "source": {
         "featureInfo": {
           "queryable": true,

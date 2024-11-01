@@ -7,8 +7,6 @@ import { Extent } from 'ol/extent';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { TypeLocalizedString } from '@config/types/map-schema-types';
-
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
@@ -16,13 +14,13 @@ import {
   TypeSourceTileInitialConfig,
   TypeGeoviewLayerConfig,
   layerEntryIsGroupLayer,
+  TypeFeatureInfoLayerConfig,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -107,19 +105,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {string} fieldName field name for which we want to get the type.
    * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo;
-    const fieldIndex = getLocalizedValue(
-      Cast<TypeLocalizedString>(fieldDefinitions.outfields),
-      AppEventProcessor.getDisplayLanguage(this.mapId)
-    )
-      ?.split(',')
-      .indexOf(fieldName);
-    if (!fieldIndex || fieldIndex === -1) return 'string';
-    return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
+  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
+    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo as unknown as TypeFeatureInfoLayerConfig;
+    const outFieldEntry = fieldDefinitions.outfields?.find((fieldDefinition) => fieldDefinition.name === fieldName);
+    return outFieldEntry?.type || 'string';
   }
 
   /** ***************************************************************************************************************************
@@ -191,7 +183,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     const sourceOptions: SourceOptions = {
-      url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, AppEventProcessor.getDisplayLanguage(this.mapId)),
+      url: layerConfig.source.dataAccessPath,
     };
     if (layerConfig.source.crossOrigin) {
       sourceOptions.crossOrigin = layerConfig.source.crossOrigin;

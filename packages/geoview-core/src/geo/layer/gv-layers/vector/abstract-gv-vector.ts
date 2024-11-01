@@ -12,7 +12,6 @@ import { ProjectionLike } from 'ol/proj';
 
 import { DateMgt } from '@/core/utils/date-mgt';
 import { FilterNodeArrayType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
@@ -20,8 +19,8 @@ import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/render
 import { featureInfoGetFieldType } from '../utils';
 import { AbstractGVLayer } from '../abstract-gv-layer';
 import { AbstractGeoViewLayer } from '../../geoview-layers/abstract-geoview-layers';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -36,11 +35,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   protected constructor(mapId: string, olSource: VectorSource, layerConfig: VectorLayerEntryConfig) {
     super(mapId, olSource, layerConfig);
 
-    // TODO: remove link to language, layer should be created in one language and recreated if needed to change
-    const language = AppEventProcessor.getDisplayLanguage(mapId);
-
     // Get the style label in case we need it later
-    const label = getLocalizedValue(layerConfig.layerName, language) || layerConfig.layerId;
+    const label = layerConfig.layerName || layerConfig.layerId;
 
     // Create the vector layer options.
     const layerOptions: VectorLayerOptions<Feature, VectorSource> = {
@@ -99,12 +95,11 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
-    return featureInfoGetFieldType(this.getLayerConfig(), fieldName, AppEventProcessor.getDisplayLanguage(this.getMapId()));
+    return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
 
   /**

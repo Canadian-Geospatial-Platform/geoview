@@ -21,21 +21,17 @@ export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
     if (!this.source) this.source = { format: 'GeoPackage' };
     if (!this.source.format) this.source.format = 'GeoPackage';
     if (!this.source.dataAccessPath) {
-      let { en, fr } = this.geoviewLayerConfig.metadataAccessPath!;
-      en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
-      fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
-      this.source.dataAccessPath = { en, fr };
+      let accessPath = this.geoviewLayerConfig.metadataAccessPath!;
+      accessPath = accessPath!.split('/').length > 1 ? accessPath!.split('/').slice(0, -1).join('/') : './';
+      this.source.dataAccessPath = accessPath;
     }
     if (
-      !(this.source.dataAccessPath!.en?.startsWith('blob') && !this.source.dataAccessPath!.en?.endsWith('/')) &&
-      !this.source.dataAccessPath!.en?.toLowerCase().endsWith('.gpkg')
+      !(this.source.dataAccessPath!.startsWith('blob') && !this.source.dataAccessPath!.endsWith('/')) &&
+      !this.source.dataAccessPath!.toLowerCase().endsWith('.gpkg')
     ) {
-      this.source.dataAccessPath!.en = this.source.dataAccessPath!.en!.endsWith('/')
-        ? `${this.source.dataAccessPath!.en}${this.layerId}`
-        : `${this.source.dataAccessPath!.en}/${this.layerId}`;
-      this.source.dataAccessPath!.fr = this.source.dataAccessPath!.fr!.endsWith('/')
-        ? `${this.source.dataAccessPath!.fr}${this.layerId}`
-        : `${this.source.dataAccessPath!.fr}/${this.layerId}`;
+      this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
+        ? `${this.source.dataAccessPath!}${this.layerId}`
+        : `${this.source.dataAccessPath!}/${this.layerId}`;
     }
     if (!this?.source?.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LNGLAT;
   }

@@ -10,7 +10,6 @@ import {
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 
 import {
@@ -20,7 +19,6 @@ import {
   isUniqueValueStyleConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -272,9 +270,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
       // Interpret the layer name the best we can
       const layerName =
-        getLocalizedValue(layer?.getLayerName(entryLayerPath), AppEventProcessor.getDisplayLanguage(mapId)) ||
-        getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
-        getLocalizedValue(layerConfig.geoviewLayerConfig.geoviewLayerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
+        layer?.getLayerName(entryLayerPath) ||
+        layerConfig.layerName ||
+        layerConfig.geoviewLayerConfig.geoviewLayerName ||
         layerConfig.layerPath;
 
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);

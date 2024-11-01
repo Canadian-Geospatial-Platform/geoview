@@ -12,14 +12,8 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "airborne_radioactivity",
-        "geoviewLayerName": {
-          "en": "Airborne Radioactivity",
-          "fr": "Radioactivité aérienne"
-        },
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer",
-          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_fr/MapServer"
-        },
+        "geoviewLayerName": "Airborne Radioactivity",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
@@ -29,14 +23,8 @@
       },
       {
         "geoviewLayerId": "tritium_agol",
-        "geoviewLayerName": {
-          "en": "Tritium Radioactivity agol",
-          "fr": "Radioactivité tritium agol"
-        },
-        "metadataAccessPath": {
-          "en": "https://services1.arcgis.com/HsjBaDykC1mjhXz9/ArcGIS/rest/services/CRMN___Tritium_in_Atmospheric_Water_Vapour_WFL1/FeatureServer",
-          "fr": "https://services1.arcgis.com/HsjBaDykC1mjhXz9/ArcGIS/rest/services/CRMN___Tritium_in_Atmospheric_Water_Vapour_WFL1/FeatureServer"
-        },
+        "geoviewLayerName": "Tritium Radioactivity agol",
+        "metadataAccessPath": "https://services1.arcgis.com/HsjBaDykC1mjhXz9/ArcGIS/rest/services/CRMN___Tritium_in_Atmospheric_Water_Vapour_WFL1/FeatureServer",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
@@ -46,14 +34,8 @@
       },
       {
         "geoviewLayerId": "shellfish_sites",
-        "geoviewLayerName": {
-          "en": "Shellfish Sites",
-          "fr": "Sites de Mollusques"
-        },
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/Shellfish_Sites_Samples_Mollusques_Echantillons/MapServer",
-          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/Shellfish_Sites_Samples_Mollusques_Echantillons/MapServer"
-        },
+        "geoviewLayerName": "Shellfish Sites",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/Shellfish_Sites_Samples_Mollusques_Echantillons/MapServer",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
@@ -63,14 +45,8 @@
       },
       {
         "geoviewLayerId": "ogcFeatureLakes",
-        "geoviewLayerName": {
-          "en": "Large Lakes",
-          "fr": "Grands lacs"
-        },
-        "metadataAccessPath": {
-          "en": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
-          "fr": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev"
-        },
+        "geoviewLayerName": "Large Lakes",
+        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
         "geoviewLayerType": "ogcFeature",
         "listOfLayerEntryConfig": [
           {
@@ -81,14 +57,8 @@
       },
       {
         "geoviewLayerId": "cesi",
-        "geoviewLayerName": {
-          "en": "CESI",
-          "fr": "CESI"
-        },
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
-          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
-        },
+        "geoviewLayerName": "CESI",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
@@ -99,51 +69,30 @@
       },
       {
         "geoviewLayerId": "geojsonLYR5",
-        "geoviewLayerName": {
-          "en": "GeoJSON Sample",
-          "fr": "Échantillon GeoJSON"
-        },
-        "metadataAccessPath": {
-          "en": "./datasets/geojson/metadata.json",
-          "fr": "./datasets/geojson/metadata.json"
-        },
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.json",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
-            "layerName": {
-              "en": "Polygons",
-              "fr": "Polygones"
-            }
+            "layerName": "Polygons"
           },
           {
             "layerId": "lines.json",
-            "layerName": {
-              "en": "Lines",
-              "fr": "Lignes"
-            }
+            "layerName": "Lines"
           },
           {
             "entryType": "group",
             "layerId": "point-feature-group",
-            "layerName": {
-              "en": "Points",
-              "fr": "Points"
-            },
+            "layerName": "Points",
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
-                "layerName": {
-                  "en": "Icons",
-                  "fr": "Icones"
-                }
+                "layerName": "Icons"
               },
               {
                 "layerId": "points.json",
-                "layerName": {
-                  "en": "Points",
-                  "fr": "Points"
-                }
+                "layerName": "Points"
               }
             ]
           }

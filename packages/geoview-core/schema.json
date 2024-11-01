@@ -7,21 +7,6 @@
   "comments": "Configuration for GeoView core packages, each packages manages it own schema. It correspond to the TypeMapFeaturesInstance type.",
   "additionalProperties": false,
   "definitions": {
-    "TypeLocalizedString": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "type": "object",
-      "properties": {
-        "en": {
-          "type": "string",
-          "description": "The English version of the string."
-        },
-        "fr": {
-          "type": "string",
-          "description": "The French version of the string. "
-        }
-      }
-    },
     "TypeFeatureInfoLayerConfig": {
       "additionalProperties": false,
       "type": "object",
@@ -574,8 +559,8 @@
       "type": "object",
       "properties": {
         "dataAccessPath": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The path (English/French) to reach the data to display. If not specified, metadataAccessPath will be assigned to it."
+          "type": "string",
+          "description": "The path to reach the data to display. If not specified, metadataAccessPath will be assigned to it."
         },
         "postSettings": {
           "type": "object",
@@ -614,7 +599,7 @@
       "type": "object",
       "properties": {
         "dataAccessPath": {
-          "$ref": "#/definitions/TypeLocalizedString",
+          "type": "string",
           "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
         },
         "crossOrigin": {
@@ -658,7 +643,7 @@
       "type": "object",
       "properties": {
         "dataAccessPath": {
-          "$ref": "#/definitions/TypeLocalizedString",
+          "type": "string",
           "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
         },
         "crossOrigin": {
@@ -688,7 +673,7 @@
       "type": "object",
       "properties": {
         "dataAccessPath": {
-          "$ref": "#/definitions/TypeLocalizedString",
+          "type": "string",
           "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
         },
         "crossOrigin": {
@@ -721,7 +706,7 @@
       "additionalProperties": false,
       "properties": {
         "dataAccessPath": {
-          "$ref": "#/definitions/TypeLocalizedString",
+          "type": "string",
           "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
         },
         "crossOrigin": {
@@ -804,8 +789,8 @@
           "description": "The id of the layer to display on the map."
         },
         "layerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
         },
         "layerFilter": {
           "type": "string",
@@ -850,8 +835,8 @@
           "description": "The id of the layer to display on the map."
         },
         "layerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
         },
         "layerFilter": {
           "type": "string",
@@ -883,7 +868,7 @@
       "description": "Layer sources providing vector data divided into a tile grid.",
       "properties": {
         "dataAccessPath": {
-          "$ref": "#/definitions/TypeLocalizedString",
+          "type": "string",
           "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
         },
         "format": {
@@ -921,8 +906,8 @@
           "description": "The ending element of the layer configuration path."
         },
         "layerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
         },
         "layerFilter": {
           "type": "string",
@@ -966,8 +951,8 @@
           "description": "The ending element of the layer configuration path."
         },
         "layerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
         },
         "layerFilter": {
           "type": "string",
@@ -1011,8 +996,8 @@
           "description": "The ending element of the layer configuration path."
         },
         "layerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
         },
         "layerFilter": {
           "type": "string",
@@ -1056,8 +1041,8 @@
           "description": "The ending element of the layer configuration path."
         },
         "layerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
         },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
@@ -1094,8 +1079,8 @@
           "description": "The id of the layer to display on the map."
         },
         "layerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
         },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
@@ -1136,8 +1121,8 @@
           }
         },
         "layerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer group (English/French)."
+          "type": "string",
+          "description": "The display name of the layer group."
         },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
@@ -1497,12 +1482,12 @@
           "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
         },
         "geoviewLayerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
         },
         "metadataAccessPath": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The GeoView layer access path (English/French)."
+          "type": "string",
+          "description": "The GeoView layer access path."
         },
         "geoviewLayerType": {
           "$ref": "#/definitions/TypeGeoviewLayerType",
@@ -1544,8 +1529,8 @@
           "description": "Type of GeoCore layer."
         },
         "geoviewLayerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
         },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",

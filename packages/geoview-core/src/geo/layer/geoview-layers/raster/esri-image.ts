@@ -5,7 +5,6 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
@@ -32,10 +31,10 @@ import {
   commonProcessLayerMetadata,
   commonProcessTemporalDimension,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { validateExtent } from '@/geo/utils/utilities';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -137,10 +136,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     try {
       const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
-      const legendUrl = `${getLocalizedValue(
-        layerConfig.geoviewLayerConfig.metadataAccessPath,
-        AppEventProcessor.getDisplayLanguage(this.mapId)
-      )}/legend?f=json`;
+      const legendUrl = `${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`;
       const response = await fetch(legendUrl);
       const legendJson: TypeEsriImageLayerLegend = await response.json();
       let legendInfo;
@@ -231,10 +227,10 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} fieldName field name for which we want to get the type.
    * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
     // TODO: Refactor - Layers refactoring. Is this function really valid for an esri-image? Remove?
     return commonGetFieldType(this, fieldName, layerConfig);
   }
@@ -316,7 +312,7 @@ export class EsriImage extends AbstractGeoViewRaster {
 
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
-    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
+    sourceOptions.url = layerConfig.source.dataAccessPath!;
     sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
     if (layerConfig.source.transparent) sourceOptions.params.transparent = layerConfig.source.transparent!;
     if (layerConfig.source.format) sourceOptions.params.format = layerConfig.source.format!;

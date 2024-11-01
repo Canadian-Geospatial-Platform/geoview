@@ -7,7 +7,7 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
+import { getXMLHttpRequest } from '@/core/utils/utilities';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
@@ -31,9 +31,8 @@ import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 import { EsriImage } from './raster/esri-image';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeOutfields } from '@/api/config/types/map-schema-types';
+import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -43,7 +42,7 @@ import { TypeOutfields } from '@/api/config/types/map-schema-types';
  * @returns {Promise<void>} A promise that the execution is completed.
  */
 export async function commonfetchServiceMetadata(layer: EsriDynamic | EsriFeature): Promise<void> {
-  const metadataUrl = getLocalizedValue(layer.metadataAccessPath, AppEventProcessor.getDisplayLanguage(layer.mapId));
+  const metadataUrl = layer.metadataAccessPath;
   if (metadataUrl) {
     try {
       const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
@@ -127,15 +126,8 @@ export function commonValidateListOfLayerEntryConfig(
       switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
 
       // Only switch the layer name by the metadata if there were none pre-set (config wins over metadata rule?)
-      if (!switchToGroupLayer.layerName) {
-        switchToGroupLayer.layerName = {
-          en: layer.metadata!.layers[esriIndex].name as string,
-          fr: layer.metadata!.layers[esriIndex].name as string,
-        };
-      } else {
-        if (!switchToGroupLayer.layerName.en) switchToGroupLayer.layerName.en = layer.metadata!.layers[esriIndex].name as string;
-        if (!switchToGroupLayer.layerName.fr) switchToGroupLayer.layerName.fr = layer.metadata!.layers[esriIndex].name as string;
-      }
+      if (!switchToGroupLayer.layerName) switchToGroupLayer.layerName = layer.metadata!.layers[esriIndex].name as string;
+
       switchToGroupLayer.isMetadataLayerGroup = true;
       switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
 
@@ -162,10 +154,7 @@ export function commonValidateListOfLayerEntryConfig(
         // TO.DOCONT: with the correct values directly? Especially now that we copy the config to prevent leaking.
         subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
         subLayerEntryConfig.layerId = `${layerId}`;
-        subLayerEntryConfig.layerName = {
-          en: (layer.metadata!.layers as TypeJsonArray).filter((item) => item.id === layerId)[0].name as string,
-          fr: (layer.metadata!.layers as TypeJsonArray).filter((item) => item.id === layerId)[0].name as string,
-        };
+        subLayerEntryConfig.layerName = (layer.metadata!.layers as TypeJsonArray).filter((item) => item.id === layerId)[0].name as string;
         newListOfLayerEntryConfig.push(subLayerEntryConfig);
 
         // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
@@ -182,11 +171,7 @@ export function commonValidateListOfLayerEntryConfig(
       return;
     }
 
-    if (!layerConfig.layerName)
-      layerConfig.layerName = {
-        en: layer.metadata!.layers[esriIndex].name as string,
-        fr: layer.metadata!.layers[esriIndex].name as string,
-      };
+    if (!layerConfig.layerName) layerConfig.layerName = layer.metadata!.layers[esriIndex].name as string;
   });
 }
 
@@ -197,13 +182,13 @@ export function commonValidateListOfLayerEntryConfig(
  * @param {string} fieldName field name for which we want to get the domain.
  * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
  *
- * @returns {'string' | 'date' | 'number'} The type of the field.
+ * @returns {TypeOutfieldsType} The type of the field.
  */
 export function commonGetFieldType(
   layer: EsriDynamic | EsriFeature | EsriImage,
   fieldName: string,
   layerConfig: AbstractBaseLayerEntryConfig
-): 'string' | 'date' | 'number' {
+): TypeOutfieldsType {
   const esriFieldDefinitions = layer.getLayerMetadata(layerConfig.layerPath).fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
   if (!fieldDefinition) return 'string';
@@ -375,7 +360,7 @@ export async function commonProcessLayerMetadata<
   if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return layerConfig;
   const { layerPath } = layerConfig;
 
-  let queryUrl = getLocalizedValue(layer.metadataAccessPath, AppEventProcessor.getDisplayLanguage(layer.mapId));
+  let queryUrl = layer.metadataAccessPath;
   if (queryUrl) {
     if (layerConfig.geoviewLayerConfig.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_IMAGE)
       queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;

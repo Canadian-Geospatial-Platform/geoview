@@ -1,4 +1,3 @@
-import { TypeLocalizedString } from '@config/types/map-schema-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
@@ -35,7 +34,7 @@ export abstract class ConfigBaseClass {
   layerIdExtension?: string;
 
   /** The display name of the layer (English/French). */
-  layerName?: TypeLocalizedString;
+  layerName?: string;
 
   /** Tag used to link the entry to a specific schema. This element is part of the schema. */
   schemaTag?: TypeGeoviewLayerType;

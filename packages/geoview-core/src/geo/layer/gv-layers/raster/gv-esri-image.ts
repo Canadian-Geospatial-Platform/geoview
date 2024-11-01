@@ -3,7 +3,6 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
@@ -16,11 +15,11 @@ import {
   rangeDomainType,
 } from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { validateExtent } from '@/geo/utils/utilities';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**
  * Manages an Esri Image layer.
@@ -81,9 +80,9 @@ export class GVEsriImage extends AbstractGVRaster {
   /**
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string): TypeOutfieldsType {
     // TODO: Refactor - Layers refactoring. Is this function really valid for an esri-image? Remove?
     // Redirect
     return esriGetFieldType(this.getLayerConfig(), fieldName);
@@ -107,10 +106,7 @@ export class GVEsriImage extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
     try {
       if (!layerConfig) return null;
-      const legendUrl = `${getLocalizedValue(
-        layerConfig.geoviewLayerConfig.metadataAccessPath,
-        AppEventProcessor.getDisplayLanguage(this.getMapId())
-      )}/legend?f=json`;
+      const legendUrl = `${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`;
       const response = await fetch(legendUrl);
       const legendJson: TypeEsriImageLayerLegend = await response.json();
       let legendInfo;

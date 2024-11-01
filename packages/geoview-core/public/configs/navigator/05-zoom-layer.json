@@ -16,44 +16,26 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "geojsonLYR1",
-        "geoviewLayerName": {
-          "en": "GeoJSON Sample",
-          "fr": "GeoJSON Échantillon"
-        },
-        "metadataAccessPath": {
-          "en": "./datasets/geojson/metadata.json",
-          "fr": "./datasets/geojson/metadata.json"
-        },
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.json",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
-            "layerName": {
-              "en": "Polygons",
-              "fr": "Polygones"
-            }
+            "layerName": "Polygons"
           },
           {
             "layerId": "lines.json",
-            "layerName": {
-              "en": "Lines",
-              "fr": "Lignes"
-            }
+            "layerName": "Lines"
           },
           {
             "entryType": "group",
             "layerId": "point-feature-group",
-            "layerName": {
-              "en": "point-feature-group",
-              "fr": "point-feature-group"
-            },
+            "layerName": "point-feature-group",
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
-                "layerName": {
-                  "en": "Icons",
-                  "fr": "Icones"
-                },
+                "layerName": "Icons",
                 "initialSettings": {
                   "controls": {
                     "visibility": false
@@ -62,31 +44,19 @@
               },
               {
                 "layerId": "points.json",
-                "layerName": {
-                  "en": "Points",
-                  "fr": "Points"
-                }
+                "layerName": "Points"
               },
               {
                 "layerId": "points_1.json",
-                "layerName": {
-                  "en": "Points 1",
-                  "fr": "Points 1"
-                }
+                "layerName": "Points 1"
               },
               {
                 "layerId": "points_2.json",
-                "layerName": {
-                  "en": "Points 2",
-                  "fr": "Points 2"
-                }
+                "layerName": "Points 2"
               },
               {
                 "layerId": "points_3.json",
-                "layerName": {
-                  "en": "Points 3",
-                  "fr": "Points 3"
-                }
+                "layerName": "Points 3"
               }
             ]
           }

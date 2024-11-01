@@ -7,7 +7,7 @@ import {
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useLayerLegendLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/layer-state';
 import { LegendEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/legend-event-processor';
-import { getLocalizedValue, getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
+import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
@@ -224,8 +224,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
     // TODO: add mechanism to initialize these values during store onInitialize
     const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
-    if (title === undefined) setTitle(layerPath, getLocalizedValue(sliderConfig?.title, displayLanguage) || '');
-    if (description === undefined) setDescription(layerPath, getLocalizedValue(sliderConfig?.description, displayLanguage) || '');
+    if (title === undefined) setTitle(layerPath, sliderConfig?.title || '');
+    if (description === undefined) setDescription(layerPath, sliderConfig?.description || '');
     if (locked === undefined) setLocked(layerPath, sliderConfig?.locked !== undefined ? sliderConfig?.locked : false);
     if (reversed === undefined) setReversed(layerPath, sliderConfig?.reversed !== undefined ? sliderConfig?.reversed : false);
     if (defaultValue === undefined) setDefaultValue(layerPath, sliderConfig?.defaultValue || '');

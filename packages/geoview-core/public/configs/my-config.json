@@ -12,14 +12,8 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "wmsLYR1",
-        "geoviewLayerName": {
-          "en": "Première Nation / First Nation",
-          "fr": "Première Nation / First Nation"
-        },
-        "metadataAccessPath": {
-          "en": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer",
-          "fr": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer"
-        },
+        "geoviewLayerName": "Première Nation / First Nation",
+        "metadataAccessPath": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -29,14 +23,8 @@
       },
       {
         "geoviewLayerId": "geojsonLYR4",
-        "geoviewLayerName": {
-          "en": "GeoJSON Line",
-          "fr": "GeoJSON Line"
-        },
-        "metadataAccessPath": {
-          "en": "./datasets/geojson/metadata.json",
-          "fr": "./datasets/geojson/metadata.json"
-        },
+        "geoviewLayerName": "GeoJSON Line",
+        "metadataAccessPath": "./datasets/geojson/metadata.json",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
@@ -52,14 +40,8 @@
       },
       {
         "geoviewLayerId": "wmsLYR7",
-        "geoviewLayerName": {
-          "en": "Geomet",
-          "fr": "Geomet"
-        },
-        "metadataAccessPath": {
-          "en": "https://geo.weather.gc.ca/geomet",
-          "fr": "https://geo.weather.gc.ca/geomet"
-        },
+        "geoviewLayerName": "Geomet",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {

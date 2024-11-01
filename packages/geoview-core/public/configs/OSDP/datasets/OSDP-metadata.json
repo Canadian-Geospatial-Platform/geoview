@@ -4,7 +4,7 @@
   "listOfLayerEntryConfig": [
     {
       "layerId": "BC-MPI-1-2521_fr.json",
-      "layerName": { "en": "BC-MPI-1-2521_fr - Metadata" },
+      "layerName": "BC-MPI-1-2521_fr - Metadata",
       "source": {
         "featureInfo": {
           "queryable": true,

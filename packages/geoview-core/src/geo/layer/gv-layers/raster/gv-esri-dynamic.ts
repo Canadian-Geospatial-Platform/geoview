@@ -9,10 +9,8 @@ import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { validateExtent, getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -29,6 +27,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -98,9 +97,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return esriGetFieldType(this.getLayerConfig(), fieldName);
   }
@@ -129,7 +128,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const [geometryType] = layerConfig.getTypeGeometries();
 
       // Fetch the features
-      let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath![AppEventProcessor.getDisplayLanguage(this.getMapId())]!;
+      let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath!;
       if (!urlRoot.endsWith('/')) urlRoot += '/';
       // TODO: we put false so on heavy geometry, dynamic layer can load datatable. If not the featch fails.
       const url = `${urlRoot}${layerConfig.layerId}/query?where=1=1&outFields=*&f=json&returnGeometry=false`;
@@ -275,7 +274,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // If not queryable
       if (!layerConfig.source?.featureInfo?.queryable) return [];
 
-      let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.getMapId()));
+      let identifyUrl = layerConfig.source?.dataAccessPath;
       if (!identifyUrl) return [];
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
@@ -757,7 +756,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   override async getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig();
-    let baseUrl = getLocalizedValue(layerEntryConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.getMapId()));
+    let baseUrl = layerEntryConfig.source.dataAccessPath;
 
     const idString = objectIds.join('%2C');
     if (baseUrl) {

@@ -6,10 +6,8 @@ import axios from 'axios';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -73,7 +71,7 @@ export class GVImageStatic extends AbstractGVRaster {
    * @returns {blob} A promise of an image blob
    * @private
    */
-  #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
+  static #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
         // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -84,10 +82,7 @@ export class GVImageStatic extends AbstractGVRaster {
           reader.readAsDataURL(blob);
         });
 
-      let legendUrl: string | undefined = getLocalizedValue(
-        layerConfig.source.dataAccessPath,
-        AppEventProcessor.getDisplayLanguage(this.getMapId())
-      );
+      let legendUrl: string | undefined = layerConfig.source.dataAccessPath;
 
       if (legendUrl) {
         legendUrl = legendUrl.toLowerCase().startsWith('http:') ? `https${legendUrl.slice(4)}` : legendUrl;
@@ -110,7 +105,7 @@ export class GVImageStatic extends AbstractGVRaster {
   override async getLegend(): Promise<TypeLegend | null> {
     const layerConfig = this.getLayerConfig();
     try {
-      const legendImage = await this.#getLegendImage(layerConfig!);
+      const legendImage = await GVImageStatic.#getLegendImage(layerConfig!);
       if (!legendImage) {
         const legend: TypeLegend = {
           type: CONST_LAYER_TYPES.IMAGE_STATIC,

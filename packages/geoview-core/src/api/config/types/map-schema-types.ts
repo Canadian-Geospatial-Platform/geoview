@@ -11,17 +11,6 @@ export type Extent = Array<number>;
 /** ISO 639-1 language code prefix. */
 export type TypeDisplayLanguage = 'en' | 'fr';
 
-export type TypeLocalizedString = TypeLocalizedStringEnAndFr | TypeLocalizedStringFr | TypeLocalizedStringEn;
-
-/** Definition of a bilingual string, only English provided. */
-export type TypeLocalizedStringEn = Pick<TypeLocalizedStringEnAndFr, 'en'> & Partial<Pick<TypeLocalizedStringEnAndFr, 'fr'>>;
-
-/** Definition of a bilingual string, only French provided. */
-export type TypeLocalizedStringFr = Pick<TypeLocalizedStringEnAndFr, 'fr'> & Partial<Pick<TypeLocalizedStringEnAndFr, 'en'>>;
-
-/** Definition of a bilingual string, both English and French provided. */
-export type TypeLocalizedStringEnAndFr = Required<Record<TypeDisplayLanguage, string>>;
-
 /** Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET. */
 export type TypePostSettings = { header?: Record<string, string>; data: unknown };
 

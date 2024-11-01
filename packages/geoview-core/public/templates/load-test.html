@@ -149,8 +149,9 @@
         'components': [],
         'corePackages': [],
         'theme': 'geo.ca'
-      }"></div>
-  <hr />
+      }"
+    ></div>
+    <hr />
 
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
@@ -240,16 +241,10 @@
           for (j = 0; j < parseInt(document.getElementById('layerCount').value); j++) {
             cgpv.api.maps['mapWM'].layer.addGeoviewLayer({
               geoviewLayerId: new Date().getTime().toString(),
-              geoviewLayerName: {
-                en: 'test',
-                fr: 'test',
-              },
+              geoviewLayerName: 'test',
               geoviewLayerType: type,
               listOfLayerEntryConfig,
-              metadaAccessPath: {
-                en: document.getElementById('url').value,
-                fr: document.getElementById('url').value,
-              },
+              metadaAccessPath: document.getElementById('url').value,
             });
           }
 

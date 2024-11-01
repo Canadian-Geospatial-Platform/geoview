@@ -10,10 +10,9 @@ import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
-import { getLocalizedValue } from '@/core/utils/utilities';
+
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -107,7 +106,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @private
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
+  static #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
         // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -118,10 +117,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
           reader.readAsDataURL(blob);
         });
 
-      let legendUrl: string | undefined = getLocalizedValue(
-        layerConfig.source.dataAccessPath,
-        AppEventProcessor.getDisplayLanguage(this.mapId)
-      );
+      let legendUrl: string | undefined = layerConfig.source.dataAccessPath;
 
       if (legendUrl) {
         legendUrl = legendUrl.toLowerCase().startsWith('http:') ? `https${legendUrl.slice(4)}` : legendUrl;
@@ -151,7 +147,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
       const layerConfig = this.getLayerConfig(layerPath) as ImageStaticLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
 
-      const legendImage = await this.#getLegendImage(layerConfig!);
+      const legendImage = await ImageStatic.#getLegendImage(layerConfig!);
       if (!legendImage) {
         const legend: TypeLegend = {
           type: CONST_LAYER_TYPES.IMAGE_STATIC,
@@ -253,7 +249,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
     if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
     const sourceOptions: SourceOptions = {
-      url: getLocalizedValue(layerConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId)) || '',
+      url: layerConfig.source.dataAccessPath || '',
       imageExtent: layerConfig.source.extent,
     };
 

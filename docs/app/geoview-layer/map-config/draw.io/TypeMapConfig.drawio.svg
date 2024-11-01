@@ -483,14 +483,14 @@
                         <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: left; max-height: 16px; overflow: hidden;">
                             <div style="display: inline-block; font-size: 14px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
                                 <span style="font-size: 11px;">
-                                    + geoviewLayerName?: TypeLocalizedString
+                                    + geoviewLayerName?: string
                                 </span>
                             </div>
                         </div>
                     </div>
                 </foreignObject>
                 <text x="437" y="375" fill="#000000" font-family="Helvetica" font-size="14px">
-                    + geoviewLayerName?: TypeLocalizedString
+                    + geoviewLayerName?:string
                 </text>
             </switch>
         </g>
@@ -502,14 +502,14 @@
                         <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: left; max-height: 16px; overflow: hidden;">
                             <div style="display: inline-block; font-size: 14px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
                                 <span style="font-size: 11px;">
-                                    + metadataAccessPath?: TypeLocalizedString
+                                    + metadataAccessPath?: string
                                 </span>
                             </div>
                         </div>
                     </div>
                 </foreignObject>
                 <text x="437" y="395" fill="#000000" font-family="Helvetica" font-size="14px">
-                    + metadataAccessPath?: TypeLocalizedString
+                    + metadataAccessPath?: string
                 </text>
             </switch>
         </g>
@@ -1298,7 +1298,7 @@
                             <div style="display: inline-block; font-size: 14px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: none; white-space: normal; overflow-wrap: normal;">
                                 <div style="">
                                     <font style="font-size: 11px;">
-                                        + layerName?: TypeLocalizedString
+                                        + layerName?: string
                                     </font>
                                 </div>
                             </div>
@@ -1306,7 +1306,7 @@
                     </div>
                 </foreignObject>
                 <text x="437" y="705" fill="#000000" font-family="Helvetica" font-size="14px">
-                    + layerName?: TypeLocalizedString
+                    + layerName?: string
                 </text>
             </switch>
         </g>

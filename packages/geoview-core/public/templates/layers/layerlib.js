@@ -1,8 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// cgpv is not define, it is part of window object, we escape the no-undef globally...
-// Many functions name needs the eslint escape no-unused-vars.
-// It is an utilities file for demo purpose. It is the reason why we keep it global...
 // ==========================================================================================================================
 function listenToLegendLayerSetChanges(elementId, handlerName) {
   const mapId = handlerName.split('/')[0];
@@ -213,11 +208,11 @@ const createTableOfFilter = (mapId) => {
           tableElement.appendChild(mapButtonsDiv);
 
           const geoviewLayerH1 = document.createElement('h1');
-          geoviewLayerH1.innerText = geoviewLayer.getGeoviewLayerName().en;
+          geoviewLayerH1.innerText = geoviewLayer.getGeoviewLayerName();
           mapButtonsDiv.appendChild(geoviewLayerH1);
 
           const layerConfigH2 = document.createElement('h2');
-          layerConfigH2.innerText = `${layerConfig?.layerName?.en}`;
+          layerConfigH2.innerText = `${layerConfig?.layerName}`;
           layerConfigH2.style.height = '15px';
           mapButtonsDiv.appendChild(layerConfigH2);
 
