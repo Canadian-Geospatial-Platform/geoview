@@ -40,7 +40,7 @@ export default function FeatureDetailModal(): JSX.Element {
     const nameFieldValueTmp = feature.fieldInfo[feature.nameField !== null ? feature.nameField : 0];
     setNameFieldValue(nameFieldValueTmp !== undefined ? (nameFieldValueTmp.value as string) : '');
 
-    return Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
+    const featureInfo = Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
       return {
         fieldKey: feature.fieldInfo[fieldName]!.fieldKey,
         value: feature.fieldInfo[fieldName]!.value,
@@ -49,6 +49,11 @@ export default function FeatureDetailModal(): JSX.Element {
         domain: null,
       };
     });
+
+    // Remove last item who is the geoviewID
+    featureInfo.pop();
+
+    return featureInfo;
   }, [feature]);
 
   return (

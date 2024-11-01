@@ -55,11 +55,20 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
     logger.logTraceUseMemo('DETAILS PANEL - Feature Info new - featureInfoList');
 
     const featureInfo = Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
+      // We have few service WMS from BC where fields name are extremely long and separated by .
+      // for WMS and WFS we should only keep the last item. If we see this with other type of services,
+      // we may need to remove the check and apply all the time.
+      // TODO: should we do this at the root when sourceinfo is define?
+      const alias =
+        feature.geoviewLayerType !== 'ogcWms' && feature.geoviewLayerType !== 'ogcWfs'
+          ? feature.fieldInfo[fieldName]?.alias || fieldName
+          : (feature.fieldInfo[fieldName]?.alias || fieldName).split('.').pop() || '';
+
       return {
         fieldKey: feature.fieldInfo[fieldName]!.fieldKey,
         value: feature.fieldInfo[fieldName]!.value,
         dataType: feature.fieldInfo[fieldName]!.dataType,
-        alias: feature.fieldInfo[fieldName]!.alias ? feature.fieldInfo[fieldName]!.alias : fieldName,
+        alias,
         domain: null,
       };
     });
