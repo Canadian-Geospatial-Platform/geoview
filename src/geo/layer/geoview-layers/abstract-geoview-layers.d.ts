@@ -5,7 +5,7 @@ import { Extent } from 'ol/extent';
 import LayerGroup from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 import Source from 'ol/source/Source';
-import { TypeLocalizedString, TypeOutfieldsType } from '@config/types/map-schema-types';
+import { TypeOutfieldsType } from '@config/types/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -39,9 +39,9 @@ export declare abstract class AbstractGeoViewLayer {
     /** The GeoView layer name. The value of this attribute is extracted from the mapLayerConfig parameter. If its value is
      * undefined, a default value is generated.
      */
-    geoviewLayerName: TypeLocalizedString;
+    geoviewLayerName: string;
     /** The GeoView layer metadataAccessPath. The name attribute is optional */
-    metadataAccessPath: TypeLocalizedString;
+    metadataAccessPath: string;
     /**
      * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
      * configuration does not provide a value, we use an empty array instead of an undefined attribute.
@@ -98,9 +98,9 @@ export declare abstract class AbstractGeoViewLayer {
     getGeoviewLayerId(): string;
     /** ***************************************************************************************************************************
      * Gets the Geoview layer name.
-     * @returns {TypeLocalizedString | undefined} The geoview layer name
+     * @returns {string | undefined} The geoview layer name
      */
-    getGeoviewLayerName(): TypeLocalizedString | undefined;
+    getGeoviewLayerName(): string | undefined;
     /**
      * Gets the layer status
      * @returns The layer status
@@ -108,15 +108,15 @@ export declare abstract class AbstractGeoViewLayer {
     getLayerStatus(layerPath: string): TypeLayerStatus;
     /** ***************************************************************************************************************************
      * Gets the layer name.
-     * @returns {TypeLocalizedString | undefined} The geoview layer name
+     * @returns {string | undefined} The geoview layer name
      */
-    getLayerName(layerPath: string): TypeLocalizedString | undefined;
+    getLayerName(layerPath: string): string | undefined;
     /** ***************************************************************************************************************************
      * Sets the layer name.
      * @param {string} layerPath The layer path.
-     * @param {TypeLocalizedString} name The layer name.
+     * @param {string} name The layer name.
      */
-    setLayerName(layerPath: string, name: TypeLocalizedString | undefined): void;
+    setLayerName(layerPath: string, name: string | undefined): void;
     /**
      * Gets the layer style
      * @returns The layer style
@@ -359,9 +359,9 @@ export declare abstract class AbstractGeoViewLayer {
      * @param {string} fieldName field name for which we want to get the type.
      * @param {TypeLayerEntryConfig} layerConfig layer configuration.
      *
-     * @returns {'string' | 'date' | 'number'} The type of the field.
+     * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
     /** ***************************************************************************************************************************
      * Return the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
      * numbers representing an extent: [minx, miny, maxx, maxy]. This routine return undefined when the layer path can't be found.
@@ -756,7 +756,7 @@ type LayerNameChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerNam
  * Define an event for the delegate.
  */
 export type LayerNameChangedEvent = {
-    layerName?: TypeLocalizedString;
+    layerName?: string;
     layerPath: string;
 };
 /**

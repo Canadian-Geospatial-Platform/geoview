@@ -164,13 +164,20 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      */
     static replaceOrderedLayerInfo(mapId: string, geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, layerPathToReplace?: string): void;
     /**
-     * Add a new layer to the front of the orderedLayerInfo array.
+     * Add a new layer to the orderedLayerInfo array using a layer config.
      *
      * @param {string} mapId The ID of the map to add the layer to.
      * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The config of the layer to add.
      * @return {void}
      */
-    static addOrderedLayerInfo(mapId: string, geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void;
+    static addOrderedLayerInfoByConfig(mapId: string, geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void;
+    /**
+     * Add new layer info to the orderedLayerInfo array.
+     *
+     * @param {string} mapId The ID of the map to add the layer to.
+     * @param {TypeOrderedLayerInfo} layerInfo The ordered layer info to add.
+     */
+    static addOrderedLayerInfo(mapId: string, layerInfo: TypeOrderedLayerInfo, index?: number): void;
     /**
      * Remove a layer from the orderedLayerInfo array.
      *

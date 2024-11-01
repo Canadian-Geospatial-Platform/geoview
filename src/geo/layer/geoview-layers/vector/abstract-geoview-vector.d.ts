@@ -8,6 +8,7 @@ import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
+import { TypeOutfieldsType } from '@config/types/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeFeatureInfoEntry, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -50,9 +51,9 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param {string} fieldName field name for which we want to get the type.
      * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
      *
-     * @returns {'string' | 'date' | 'number'} The type of the field.
+     * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
     /** ***************************************************************************************************************************
      * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
      *

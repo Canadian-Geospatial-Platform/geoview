@@ -1,5 +1,5 @@
 import BaseLayer from 'ol/layer/Base';
-import { Extent, TypeLocalizedString } from '@/api/config/types/map-schema-types';
+import { Extent } from '@/api/config/types/map-schema-types';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
@@ -47,9 +47,9 @@ export declare abstract class AbstractBaseLayer {
     getGeoviewLayerId(): string;
     /**
      * Gets the geoview layer name.
-     * @returns {TypeLocalizedString | undefined} The layer name
+     * @returns {string | undefined} The layer name
      */
-    getGeoviewLayerName(): TypeLocalizedString | undefined;
+    getGeoviewLayerName(): string | undefined;
     /**
      * Gets the layer status
      * @returns The layer status
@@ -59,12 +59,12 @@ export declare abstract class AbstractBaseLayer {
      * Gets the layer name
      * @returns The layer name
      */
-    getLayerName(layerPath: string): TypeLocalizedString | undefined;
+    getLayerName(layerPath: string): string | undefined;
     /**
      * Sets the layer name
-     * @param {TypeLocalizedString | undefined} name - The layer name
+     * @param {string | undefined} name - The layer name
      */
-    setLayerName(layerPath: string, name: TypeLocalizedString | undefined): void;
+    setLayerName(layerPath: string, name: string | undefined): void;
     /**
      * Returns the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
      * numbers representing an extent: [minx, miny, maxx, maxy].
@@ -160,7 +160,7 @@ export declare abstract class AbstractBaseLayer {
  * Define an event for the delegate.
  */
 export type LayerNameChangedEvent = {
-    layerName?: TypeLocalizedString;
+    layerName?: string;
     layerPath: string;
 };
 /**

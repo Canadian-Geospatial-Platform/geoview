@@ -4,7 +4,7 @@ import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
-import { TypeBasemapOptions, TypeViewSettings, TypeInteraction, TypeHighlightColors, TypeOverlayObjects, TypeValidMapProjectionCodes, TypeDisplayTheme, TypeLocalizedString, TypeLayerStates, TypeLayerControls, TypePostSettings, TypeServiceUrls, TypeNavBarProps, TypeAppBarProps, TypeFooterBarProps, TypeOverviewMapProps, TypeMapComponents, TypeMapCorePackages, TypeExternalPackages, TypeGlobalSettings, TypeOutfields, TypeOutfieldsType } from '@config/types/map-schema-types';
+import { TypeBasemapOptions, TypeViewSettings, TypeInteraction, TypeHighlightColors, TypeOverlayObjects, TypeValidMapProjectionCodes, TypeDisplayTheme, TypeLayerStates, TypeLayerControls, TypePostSettings, TypeServiceUrls, TypeNavBarProps, TypeAppBarProps, TypeFooterBarProps, TypeOverviewMapProps, TypeMapComponents, TypeMapCorePackages, TypeExternalPackages, TypeGlobalSettings, TypeOutfields, TypeOutfieldsType } from '@config/types/map-schema-types';
 import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -46,7 +46,7 @@ export type TypeFeatureInfoLayerConfig = {
 };
 export type TypeBaseSourceVectorInitialConfig = {
     /** Path used to access the data. */
-    dataAccessPath?: TypeLocalizedString;
+    dataAccessPath?: string;
     /** Settings to use when loading a GeoJSON layer using a POST instead of a GET */
     postSettings?: TypePostSettings;
     /** The feature format used by the XHR feature loader when url is set. */
@@ -155,7 +155,7 @@ export type TypeBaseSourceImageInitialConfig = {
      * The service endpoint of the layer (English/French). If not specified, the metadataAccessPath of the GeoView parent
      * layer is used
      */
-    dataAccessPath?: TypeLocalizedString;
+    dataAccessPath?: string;
     /**
      * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
      * with the Canvas renderer.
@@ -237,9 +237,9 @@ export type TypeGeoviewLayerConfig = {
      * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
      * information.
      */
-    geoviewLayerName?: TypeLocalizedString;
+    geoviewLayerName?: string;
     /** The GeoView layer access path (English/French). */
-    metadataAccessPath?: TypeLocalizedString;
+    metadataAccessPath?: string;
     /** Type of GeoView layer. */
     geoviewLayerType: TypeGeoviewLayerType;
     /** Date format used by the service endpoint. */
@@ -264,7 +264,7 @@ export type GeoCoreLayerConfig = {
     /**
      * The display name of the layer (English/French). This overrides the default name coming from the GeoCore API.
      */
-    geoviewLayerName: TypeLocalizedString;
+    geoviewLayerName: string;
 };
 /**
  * This type indicates the Layer entry possibilities. They can be either a regular GeoviewLayerConfig or a GeoCoreLayerConfig.

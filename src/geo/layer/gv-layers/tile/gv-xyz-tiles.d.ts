@@ -3,6 +3,7 @@ import XYZ from 'ol/source/XYZ';
 import { Extent } from 'ol/extent';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from './abstract-gv-tile';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /**
  * Manages a Tile<XYZ> layer.
  *
@@ -35,9 +36,9 @@ export declare class GVXYZTiles extends AbstractGVTile {
     /**
      * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
      * @param {string} fieldName - The field name for which we want to get the type.
-     * @returns {'string' | 'date' | 'number'} The type of the field.
+     * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Gets the bounds of the layer and returns updated bounds.
      * @returns {Extent | undefined} The layer bounding box.

@@ -1,4 +1,3 @@
-import { TypeLocalizedString } from '@config/types/map-schema-types';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeGeoviewLayerConfig, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus } from '@/geo/map/map-schema-types';
@@ -18,7 +17,7 @@ export declare abstract class ConfigBaseClass {
     /** The ending extension (element) of the layer identifier. This element is part of the schema. */
     layerIdExtension?: string;
     /** The display name of the layer (English/French). */
-    layerName?: TypeLocalizedString;
+    layerName?: string;
     /** Tag used to link the entry to a specific schema. This element is part of the schema. */
     schemaTag?: TypeGeoviewLayerType;
     /** Layer entry data type. This element is part of the schema. */
