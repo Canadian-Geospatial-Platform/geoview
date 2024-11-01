@@ -86,8 +86,8 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     }
   };
 
-  // Make sure there is no pending state on unmount. If not, it cant stay in progress forever
-  // if user switch panel when action is in progress
+  // Make sure there is no pending state on unmount. If not, it can stay in progress forever...
+  // If user switch panel when action is in progress
   useEffect(() => {
     return () => {
       setInUndoState(false);
