@@ -13,6 +13,8 @@ import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 import { getSxClasses } from './panel-style';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { FocusTrapContainer } from '@/core/components/common';
 
 /**
@@ -43,6 +45,9 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const { status: open = false, isFocusTrapped = false, panelStyles, panelGroupName } = panel;
 
   const { t } = useTranslation<string>();
+
+  const mapId = useGeoViewMapId();
+  const mapInfoExpanded = useUIMapInfoExpanded();
 
   // Get the theme
   const theme = useTheme();
@@ -106,6 +111,17 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       panelContainerRef.current?.removeAttribute('style');
     }
   }, [mapSize, panelGroupName, open]);
+
+  /**
+   * Update the height of the panel when the mapInfo is expanded
+   */
+  useEffect(() => {
+    const mapInfo = document.getElementById(`${mapId}-mapInfo`);
+    if (panelContainerRef.current && open && mapInfo) {
+      const mapInfoHeight = mapInfo.getBoundingClientRect().height;
+      panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight}px)`;
+    }
+  }, [mapInfoExpanded, mapSize, open, mapId]);
 
   return (
     <Box sx={panelContainerStyles} ref={panelContainerRef}>

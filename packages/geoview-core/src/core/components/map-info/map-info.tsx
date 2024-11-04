@@ -12,6 +12,7 @@ import { MapInfoFixNorthSwitch } from './map-info-fixnorth-switch';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Create a map information element that contains attribtuion, mouse position and scale
@@ -21,6 +22,8 @@ import { logger } from '@/core/utils/logger';
 export function MapInfo(): JSX.Element {
   // Log
   logger.logTraceRender('components/map-info/map-info');
+
+  const mapId = useGeoViewMapId();
 
   const theme = useTheme();
 
@@ -33,6 +36,7 @@ export function MapInfo(): JSX.Element {
 
   return (
     <Box
+      id={`${mapId}-mapInfo`}
       sx={{
         display: 'flex',
         height: expanded ? '6rem' : '3rem',
