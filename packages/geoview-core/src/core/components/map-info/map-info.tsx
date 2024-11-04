@@ -53,11 +53,16 @@ export function MapInfo(): JSX.Element {
         <>
           <div style={{ flexGrow: 1 }} />
           <MousePosition />
-          <MapInfoRotationButton />
-          <MapInfoFixNorthSwitch />
         </>
       )}
       <Scale />
+      <div style={{ flexGrow: 1 }} />
+      {interaction === 'dynamic' && (
+        <>
+          <MapInfoFixNorthSwitch />
+          <MapInfoRotationButton />
+        </>
+      )}
     </Box>
   );
 }

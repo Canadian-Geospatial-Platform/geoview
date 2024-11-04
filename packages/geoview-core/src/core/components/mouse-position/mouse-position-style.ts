@@ -6,7 +6,7 @@ export const getSxClasses = (theme: Theme): any => ({
   mousePosition: {
     display: 'flex',
     minWidth: 'fit-content',
-    padding: theme.spacing(0, 4),
+    paddingRight: '1rem',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
