@@ -122,7 +122,7 @@ export function Slider(props: SliderProps): JSX.Element {
         focusSlider();
       }
     },
-    [focusSlider],
+    [focusSlider]
   );
 
   useEffect(() => {

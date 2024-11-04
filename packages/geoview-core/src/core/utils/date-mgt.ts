@@ -262,7 +262,7 @@ export abstract class DateMgt {
    */
   static guessDisplayPattern(
     dates: Date[] | number[] | string[],
-    onlyMinMax = true,
+    onlyMinMax = true
   ): [DatePrecision | undefined, TimePrecision | undefined] {
     // check if it is a valid dates array
     const validDates = dates.map((date) => {

@@ -34,7 +34,7 @@ export function featureInfoGetFieldType(layerConfig: AbstractBaseLayerEntryConfi
  */
 export function esriGetFieldType(
   layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
-  fieldName: string,
+  fieldName: string
 ): TypeOutfieldsType {
   const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);

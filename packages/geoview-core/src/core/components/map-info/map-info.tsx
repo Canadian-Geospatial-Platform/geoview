@@ -35,7 +35,7 @@ export function MapInfo(): JSX.Element {
     <Box
       sx={{
         display: 'flex',
-        height: expanded ? '10rem' : '3rem',
+        height: expanded ? '6rem' : '3rem',
         alignItems: 'center',
         transition: 'width 0.5s, height 0.5s',
         background: theme.palette.geoViewColor.bgColor.dark[800],
@@ -47,9 +47,10 @@ export function MapInfo(): JSX.Element {
         px: '1rem',
       }}
     >
+      <MapInfoExpandButton />
+      <Attribution />
       {interaction === 'dynamic' && (
         <>
-          <MapInfoExpandButton />
           <div style={{ flexGrow: 1 }} />
           <MousePosition />
           <MapInfoRotationButton />
@@ -57,7 +58,6 @@ export function MapInfo(): JSX.Element {
         </>
       )}
       <Scale />
-      <Attribution />
     </Box>
   );
 }

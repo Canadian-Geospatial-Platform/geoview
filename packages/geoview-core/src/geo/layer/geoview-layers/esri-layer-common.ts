@@ -187,7 +187,7 @@ export function commonValidateListOfLayerEntryConfig(
 export function commonGetFieldType(
   layer: EsriDynamic | EsriFeature | EsriImage,
   fieldName: string,
-  layerConfig: AbstractBaseLayerEntryConfig,
+  layerConfig: AbstractBaseLayerEntryConfig
 ): TypeOutfieldsType {
   const esriFieldDefinitions = layer.getLayerMetadata(layerConfig.layerPath).fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);

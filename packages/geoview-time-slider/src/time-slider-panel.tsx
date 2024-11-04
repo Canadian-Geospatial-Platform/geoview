@@ -70,7 +70,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         : `${DateMgt.formatDatePattern(values[0], datePattern, timePattern)} / ${DateMgt.formatDatePattern(
             values[1],
             datePattern,
-            timePattern,
+            timePattern
           )}`;
     }
 

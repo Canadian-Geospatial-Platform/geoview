@@ -747,7 +747,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static addOrderedLayerInfoByConfig(
     mapId: string,
     geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig,
-    index?: number,
+    index?: number
   ): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
