@@ -8,6 +8,7 @@ import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'EsriJSON';
 }
@@ -87,9 +88,9 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * @param {string} fieldName field name for which we want to get the type.
      * @param {TypeLayerEntryConfig} layerConfig layer configuration.
      *
-     * @returns {'string' | 'date' | 'number'} The type of the field.
+     * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
     /** ***************************************************************************************************************************
      * Return the domain of the specified field.
      *

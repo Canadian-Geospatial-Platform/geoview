@@ -7,6 +7,7 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
     listOfLayerEntryConfig: EsriImageLayerEntryConfig[];
@@ -79,9 +80,9 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * @param {string} fieldName field name for which we want to get the type.
      * @param {TypeLayerEntryConfig} layerConfig layer configuration.
      *
-     * @returns {'string' | 'date' | 'number'} The type of the field.
+     * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
     /** ***************************************************************************************************************************
      * Return the domain of the specified field.
      *

@@ -188,8 +188,9 @@ export declare class LayerApi {
     /**
      * Unregisters the layer in the LayerApi to stop managing it.
      * @param {ConfigBaseClass} layerConfig - The layer entry config to unregister
+     * @param {boolean} unregisterOrderedLayerInfo - Should it be unregistered from orderedLayerInfo
      */
-    unregisterLayerConfig(layerConfig: ConfigBaseClass): void;
+    unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayerInfo?: boolean): void;
     /**
      * Checks if the layer results sets are all greater than or equal to the provided status
      */

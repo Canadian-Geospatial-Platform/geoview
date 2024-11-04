@@ -1,5 +1,4 @@
-import { TypeJsonObject } from '@config/types/config-types';
-import { TypeGeoviewLayerType, TypeLayerEntryType, TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeLayerEntryType } from '@config/types/map-schema-types';
 type NewType = TypeGeoviewLayerType;
 /**
  * Definition of the GeoView layer entry types for each type of Geoview layer
@@ -33,12 +32,4 @@ export declare function isvalidComparedToInputSchema(schemaPath: string, targetO
  * @returns {boolean} A boolean indicating that the schema section is valid (true) or invalide (false).
  */
 export declare function isvalidComparedToInternalSchema(schemaPath: string, targetObject: object, useInternalSchema?: boolean): boolean;
-/**
- * Normalize the localized string parameter. If a language is set and the other is not, the undefined language is set to
- * the value of the other.
- * @param {TypeLocalizedString | TypeJsonObject} localizedString The localized string to normalize.
- *
- * @returns {TypeLocalizedString | undefined} A normalized localized string.
- */
-export declare function normalizeLocalizedString(localizedString: TypeLocalizedString | TypeJsonObject): TypeLocalizedString | undefined;
 export {};

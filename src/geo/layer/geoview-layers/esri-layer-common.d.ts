@@ -7,6 +7,7 @@ import { EsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature } from './vector/esri-feature';
 import { EsriImage } from './raster/esri-image';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
  *
@@ -30,9 +31,9 @@ export declare function commonValidateListOfLayerEntryConfig(layer: EsriDynamic 
  * @param {string} fieldName field name for which we want to get the domain.
  * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
  *
- * @returns {'string' | 'date' | 'number'} The type of the field.
+ * @returns {TypeOutfieldsType} The type of the field.
  */
-export declare function commonGetFieldType(layer: EsriDynamic | EsriFeature | EsriImage, fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number';
+export declare function commonGetFieldType(layer: EsriDynamic | EsriFeature | EsriImage, fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
 /** ***************************************************************************************************************************
  * Return the type of the specified field.
  *

@@ -10,6 +10,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { AbstractGVLayer } from '../abstract-gv-layer';
 import { AbstractGeoViewLayer } from '../../geoview-layers/abstract-geoview-layers';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
  */
@@ -39,10 +40,9 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     /**
      * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
      * @param {string} fieldName - The field name for which we want to get the type.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
-     * @returns {'string' | 'date' | 'number'} The type of the field.
+     * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Overrides the get all feature information for all the features stored in the layer.
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].

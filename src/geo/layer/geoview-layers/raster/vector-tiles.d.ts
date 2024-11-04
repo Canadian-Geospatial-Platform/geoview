@@ -5,6 +5,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.VECTOR_TILES;
@@ -61,9 +62,9 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
      * @param {string} fieldName field name for which we want to get the type.
      * @param {TypeLayerEntryConfig} layerConfig layer configuration.
      *
-     * @returns {'string' | 'date' | 'number'} The type of the field.
+     * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
     /** ***************************************************************************************************************************
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.

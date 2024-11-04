@@ -5,6 +5,7 @@ import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classe
 import { codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /**
  * Manages an Esri Image layer.
  *
@@ -37,9 +38,9 @@ export declare class GVEsriImage extends AbstractGVRaster {
     /**
      * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
      * @param {string} fieldName - The field name for which we want to get the type.
-     * @returns {'string' | 'date' | 'number'} The type of the field.
+     * @returns {TypeOutfieldsType} The type of the field.
      */
-    protected getFieldType(fieldName: string): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Overrides the return of the domain of the specified field.
      * @param {string} fieldName - The field name for which we want to get the domain.
