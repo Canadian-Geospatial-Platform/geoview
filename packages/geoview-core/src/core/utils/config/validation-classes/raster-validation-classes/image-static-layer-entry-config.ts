@@ -26,10 +26,20 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
-    if (!this.source.dataAccessPath) {
+    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
       throw new Error(
-        `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`
+        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} when the metadataAccessPath is undefined.`
       );
     }
+
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
+    if (
+      !this.source.dataAccessPath!.toLowerCase().endsWith('.png') &&
+      !this.source.dataAccessPath!.toLowerCase().endsWith('.jpg') &&
+      !this.source.dataAccessPath!.toLowerCase().endsWith('.jpeg')
+    )
+      this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
+        ? `${this.source.dataAccessPath}${this.layerId}`
+        : `${this.source.dataAccessPath}/${this.layerId}`;
   }
 }

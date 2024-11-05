@@ -25,8 +25,16 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: EsriDynamicLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
-    // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
+
+    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
+      throw new Error(
+        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} when the metadataAccessPath is undefined.`
+      );
+    }
+
+    // If layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
     if (!this.source) this.source = {};
     if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
+    if (!this.source.dataAccessPath!.endsWith('/')) this.source.dataAccessPath += '/';
   }
 }
