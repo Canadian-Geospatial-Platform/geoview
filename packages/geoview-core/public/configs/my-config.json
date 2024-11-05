@@ -24,7 +24,7 @@
       {
         "geoviewLayerId": "geojsonLYR4",
         "geoviewLayerName": "GeoJSON Line",
-        "metadataAccessPath": "./datasets/geojson/metadata.json",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {

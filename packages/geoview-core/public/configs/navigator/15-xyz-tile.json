@@ -13,15 +13,13 @@
       {
         "geoviewLayerId": "xyzTilesLYR1",
         "geoviewLayerName": "World_Topo_Map",
+        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/",
         "geoviewLayerType": "xyzTiles",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "topo",
+            "layerId": "0",
             "layerName": "World Topo Map",
-            "initialSettings": { "minZoom": 3, "maxZoom": 8 },
-            "source": {
-              "dataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
-            }
+            "initialSettings": { "minZoom": 3, "maxZoom": 8 }
           }
         ]
       }

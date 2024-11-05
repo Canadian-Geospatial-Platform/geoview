@@ -25,7 +25,7 @@
       {
         "geoviewLayerId": "geojsonLYR2",
         "geoviewLayerName": "MultiPolygon Sample",
-        "metadataAccessPath": "./datasets/geojson/metadata.json",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {

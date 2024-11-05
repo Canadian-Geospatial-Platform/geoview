@@ -533,9 +533,6 @@ export function AddNewLayer(): JSX.Element {
           geoviewLayerConfig: esriImageGeoviewLayerConfig,
           layerId: esriImageGeoviewLayerConfig.geoviewLayerId,
           layerName: typeof esriImageGeoviewLayerInstance.metadata?.name === 'string' ? esriImageGeoviewLayerInstance.metadata?.name : '',
-          source: {
-            dataAccessPath: layerURL,
-          },
         } as EsriImageLayerEntryConfig),
       ];
       setLayerName(layers[0].layerName!);

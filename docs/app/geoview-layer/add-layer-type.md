@@ -156,10 +156,6 @@ Add the TypeSourceImageStaticInitialConfig section. This the expected configurat
   "additionalProperties": false,
   "type": "object",
   "properties": {
-    "dataAccessPath": {
-      "type": "string",
-      "description": "The path to reach the data to display. If not specified, metadatAccessPath will be assigne to it."
-    },
     "crossOrigin": {
       "type": "string",
       "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."

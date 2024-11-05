@@ -42,10 +42,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "Cities",
-            "source": {
-              "dataAccessPath": "https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer"
-            }
+            "layerName": "Cities"
           },
           {
             "layerId": "1",

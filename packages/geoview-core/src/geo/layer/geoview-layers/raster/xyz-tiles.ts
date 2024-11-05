@@ -143,7 +143,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
 
-      // Note that XYZ metadata as we defined it does not contains metadata layer group. If you need geogson layer group,
+      // TODO: Update to properly use metadata from map server
+      // Note that XYZ metadata as we defined it does not contain metadata layer group. If you need geojson layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
         const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);

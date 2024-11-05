@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -63,14 +63,12 @@
             {
               'geoviewLayerId': 'HMS',
               'geoviewLayerName': 'Hydrometric Monitoring Stations',
+              'metadataAccessPath': 'https://api.weather.gc.ca/collections/hydrometric-stations/',
               'geoviewLayerType': 'GeoJSON',
               'listOfLayerEntryConfig': [
                 {
-                  'layerId': 'hydrometric-stations',
-                  'layerName': 'Hydrometric Stations',
-                  'source': {
-                    'dataAccessPath': 'https://api.weather.gc.ca/collections/hydrometric-stations/items?f=json'
-                  }
+                  'layerId': 'items',
+                  'layerName': 'Hydrometric Stations'
                 }
               ]
             },
