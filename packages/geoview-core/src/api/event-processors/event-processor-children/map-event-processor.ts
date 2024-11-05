@@ -471,7 +471,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const currentProjection = currentView.getProjection().getCode();
       const centerLatLng = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LNGLAT)[0] as [
         number,
-        number
+        number,
       ];
       const newProjection = projectionCode as TypeValidMapProjectionCodes;
 
@@ -863,9 +863,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // Use a Promise and resolve it when the duration expired
       return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, (options.duration || OL_ZOOM_DURATION) + 150);
+        setTimeout(
+          () => {
+            resolve();
+          },
+          (options.duration || OL_ZOOM_DURATION) + 150
+        );
       });
       // The +150 is to make sure the logic before turning these function async remains
       // TODO: Refactor - Check the +150 relevancy and try to remove it by clarifying the reason for its existance
@@ -1161,7 +1164,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const currentProjection = currentView.getProjection().getCode();
       const centerLatLng = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LNGLAT)[0] as [
         number,
-        number
+        number,
       ];
 
       // Set view settings

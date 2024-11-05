@@ -11,10 +11,10 @@ import { logger } from '@/core/utils/logger';
 
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 import { getSxClasses } from './panel-style';
-import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { FocusTrapContainer } from '@/core/components/common';
 
 /**
@@ -46,13 +46,14 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
+  const mapId = useGeoViewMapId();
+  const mapInfoExpanded = useUIMapInfoExpanded();
+
   // Get the theme
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const mapId = useGeoViewMapId();
   const mapSize = useMapSize();
-  const mapInfoExpanded = useUIMapInfoExpanded();
 
   // internal state
   const panelContainerRef = useRef<HTMLDivElement>(null);
@@ -68,7 +69,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       width: 'calc(100% - 64px)',
       maxWidth: 'calc(100% - 64px)',
     },
-    transition: `width ${theme.transitions.duration.standard}ms ease`,
+    transition: `${theme.transitions.duration.standard}ms ease`,
     position: 'absolute',
     left: '64px',
   };
@@ -116,10 +117,17 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
    */
   useEffect(() => {
     const mapInfo = document.getElementById(`${mapId}-mapInfo`);
-    if (panelContainerRef.current && open && mapInfo) {
-      const mapInfoHeight = mapInfo.getBoundingClientRect().height;
-      panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight}px)`;
-    }
+
+    // Set a timeout for the duration of the CSS animation
+    setTimeout(() => {
+      // Animation completed, run additional logic here
+      console.log('Animation completed!');
+
+      if (panelContainerRef.current && open && mapInfo) {
+        const mapInfoHeight = mapInfo.getBoundingClientRect().height;
+        panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight}px)`;
+      }
+    }, 500);
   }, [mapInfoExpanded, mapSize, open, mapId]);
 
   return (

@@ -80,4 +80,4 @@ export const getSxClasses = (theme: Theme) =>
       overflowY: 'auto',
       color: theme.palette.geoViewColor.textColor.main,
     },
-  } as const);
+  }) as const;

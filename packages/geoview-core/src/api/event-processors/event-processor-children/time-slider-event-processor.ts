@@ -157,8 +157,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const values = singleHandle
       ? [DateMgt.convertToMilliseconds(temporalDimensionInfo.default)]
       : defaultValueIsArray
-      ? [DateMgt.convertToMilliseconds(temporalDimensionInfo.default[0]), DateMgt.convertToMilliseconds(temporalDimensionInfo.default[1])]
-      : [...minAndMax];
+        ? [DateMgt.convertToMilliseconds(temporalDimensionInfo.default[0]), DateMgt.convertToMilliseconds(temporalDimensionInfo.default[1])]
+        : [...minAndMax];
 
     // If using discrete axis
     let step: number | undefined;

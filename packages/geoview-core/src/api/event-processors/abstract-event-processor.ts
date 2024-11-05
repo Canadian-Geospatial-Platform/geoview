@@ -89,7 +89,7 @@ export abstract class AbstractEventProcessor {
    * @returns {Promise<void>} Promise upon completion
    */
   protected static async helperPropagateArrayStoreBatch<
-    T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry
+    T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry,
   >(
     mapId: string,
     layerDataArray: T[],

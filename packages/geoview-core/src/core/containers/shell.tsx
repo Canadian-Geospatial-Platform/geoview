@@ -179,19 +179,22 @@ export function Shell(props: ShellProps): JSX.Element {
     // Log
     logger.logTraceUseMemo('SHELL - memoMapResizeValues', footerPanelResizeValue, footerPanelResizeValues);
 
-    return footerPanelResizeValues.reduce((acc, curr) => {
-      const windowHeight = window.screen.height;
-      let values: [string, number] = ['visible', windowHeight - (windowHeight * footerPanelResizeValue) / 100];
-      if (curr === footerPanelResizeValues[footerPanelResizeValues.length - 1]) {
-        values = ['hidden', 0];
-      }
+    return footerPanelResizeValues.reduce(
+      (acc, curr) => {
+        const windowHeight = window.screen.height;
+        let values: [string, number] = ['visible', windowHeight - (windowHeight * footerPanelResizeValue) / 100];
+        if (curr === footerPanelResizeValues[footerPanelResizeValues.length - 1]) {
+          values = ['hidden', 0];
+        }
 
-      acc[curr] = {
-        mapVisibility: values[0],
-        mapHeight: values[1],
-      };
-      return acc;
-    }, {} as Record<number, ShellContainerCssProperties>);
+        acc[curr] = {
+          mapVisibility: values[0],
+          mapHeight: values[1],
+        };
+        return acc;
+      },
+      {} as Record<number, ShellContainerCssProperties>
+    );
   }, [footerPanelResizeValue, footerPanelResizeValues]);
 
   /**

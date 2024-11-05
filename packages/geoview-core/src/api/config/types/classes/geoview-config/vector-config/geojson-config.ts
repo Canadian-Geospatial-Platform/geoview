@@ -220,19 +220,22 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
     listOfLayerEntryConfig = this.getServiceMetadata()?.listOfLayerEntryConfig as TypeJsonArray
   ): TypeJsonObject | null {
     if (listOfLayerEntryConfig === undefined) return null;
-    return listOfLayerEntryConfig.reduce((layerFound, layerEntry) => {
-      if (layerFound) return layerFound;
+    return listOfLayerEntryConfig.reduce(
+      (layerFound, layerEntry) => {
+        if (layerFound) return layerFound;
 
-      if (layerEntry.layerId === layerId) {
-        return layerEntry;
-      }
+        if (layerEntry.layerId === layerId) {
+          return layerEntry;
+        }
 
-      if (layerEntry.isLayerGroup || layerEntry.entryType === CV_CONST_SUB_LAYER_TYPES.GROUP) {
-        return this.findLayerMetadataEntry(layerId, layerEntry.listOfLayerEntryConfig as TypeJsonArray);
-      }
+        if (layerEntry.isLayerGroup || layerEntry.entryType === CV_CONST_SUB_LAYER_TYPES.GROUP) {
+          return this.findLayerMetadataEntry(layerId, layerEntry.listOfLayerEntryConfig as TypeJsonArray);
+        }
 
-      return null;
-    }, null as TypeJsonObject | null);
+        return null;
+      },
+      null as TypeJsonObject | null
+    );
   }
 
   // #endregion PUBLIC

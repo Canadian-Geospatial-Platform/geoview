@@ -426,7 +426,10 @@ export class Basemap {
         basemapOptions: coreBasemapOptions,
         attribution:
           coreBasemapOptions.basemapId === 'osm'
-            ? ['© OpenStreetMap', getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId))]
+            ? [
+                '© OpenStreetMap',
+                getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId)),
+              ]
             : [getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId))],
         zoomLevels: {
           min: minZoom,
