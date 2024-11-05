@@ -69,7 +69,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       width: 'calc(100% - 64px)',
       maxWidth: 'calc(100% - 64px)',
     },
-    transition: `width ${theme.transitions.duration.standard}ms ease`,
+    transition: `${theme.transitions.duration.standard}ms ease`,
     position: 'absolute',
     left: '64px',
   };
@@ -127,7 +127,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
         const mapInfoHeight = mapInfo.getBoundingClientRect().height;
         panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight}px)`;
       }
-    }, 500); // Duration in milliseconds (1s)
+    }, 500);
   }, [mapInfoExpanded, mapSize, open, mapId]);
 
   return (

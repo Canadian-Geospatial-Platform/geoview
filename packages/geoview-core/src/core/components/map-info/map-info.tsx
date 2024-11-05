@@ -49,7 +49,7 @@ export function MapInfo(): JSX.Element {
         left: 0,
         right: 0,
         px: '1rem',
-        zIndex: 200
+        zIndex: 200,
       }}
     >
       <MapInfoExpandButton />
