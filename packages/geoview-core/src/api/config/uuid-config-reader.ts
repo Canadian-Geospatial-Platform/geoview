@@ -241,9 +241,6 @@ export class UUIDmapConfigReader {
                 return toJsonObject({
                   layerId: `${item.id}`,
                   tileGrid: item.tileGrid,
-                  source: {
-                    dataAccessPath: url,
-                  },
                 });
               }
             );

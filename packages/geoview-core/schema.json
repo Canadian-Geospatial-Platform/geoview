@@ -558,10 +558,6 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "dataAccessPath": {
-          "type": "string",
-          "description": "The path to reach the data to display. If not specified, metadataAccessPath will be assigned to it."
-        },
         "postSettings": {
           "type": "object",
           "properties": {
@@ -598,10 +594,6 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "dataAccessPath": {
-          "type": "string",
-          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
-        },
         "crossOrigin": {
           "type": "string",
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
@@ -642,10 +634,6 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "dataAccessPath": {
-          "type": "string",
-          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
-        },
         "crossOrigin": {
           "type": "string",
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
@@ -672,10 +660,6 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "dataAccessPath": {
-          "type": "string",
-          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
-        },
         "crossOrigin": {
           "type": "string",
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
@@ -705,10 +689,6 @@
     "TypeSourceTileInitialConfig": {
       "additionalProperties": false,
       "properties": {
-        "dataAccessPath": {
-          "type": "string",
-          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
-        },
         "crossOrigin": {
           "type": "string",
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
@@ -867,10 +847,6 @@
       "type": "object",
       "description": "Layer sources providing vector data divided into a tile grid.",
       "properties": {
-        "dataAccessPath": {
-          "type": "string",
-          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
-        },
         "format": {
           "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "MVT", "featureAPI"],
           "description": "The feature format used by the XHR feature loader when access path is set."
@@ -1514,7 +1490,7 @@
           "description": "The layer entries to use from the GeoView layer."
         }
       },
-      "required": ["geoviewLayerType", "listOfLayerEntryConfig"]
+      "required": ["geoviewLayerType", "metadataAccessPath", "listOfLayerEntryConfig"]
     },
     "TypeGeoCoreLayerConfig": {
       "additionalProperties": false,
