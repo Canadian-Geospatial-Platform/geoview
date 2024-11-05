@@ -111,9 +111,6 @@ export class UUIDmapConfigReader {
                 schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
                 entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
                 layerId: `${item.index}`,
-                source: {
-                  dataAccessPath: url,
-                },
               };
 
               // Overwrite default from geocore custom config
@@ -149,7 +146,6 @@ export class UUIDmapConfigReader {
                 layerId,
                 source: {
                   format: 'EsriJSON',
-                  dataAccessPath: serviceUrl,
                 },
               } as EsriFeatureLayerEntryConfig),
             ];
@@ -171,7 +167,6 @@ export class UUIDmapConfigReader {
                 layerId: `${item.index}`,
                 source: {
                   format: 'EsriJSON',
-                  dataAccessPath: url as string,
                 },
               } as EsriFeatureLayerEntryConfig);
               return esriFeatureLayerEntryConfig;
@@ -193,7 +188,6 @@ export class UUIDmapConfigReader {
                 entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
                 layerId: `${item.id}`,
                 source: {
-                  dataAccessPath: url,
                   serverType: (serverType === undefined ? 'mapserver' : serverType) as TypeOfServer,
                 },
               };
@@ -226,7 +220,6 @@ export class UUIDmapConfigReader {
                 source: {
                   format: 'WFS',
                   strategy: 'all',
-                  dataAccessPath: url as string,
                 },
               } as WfsLayerEntryConfig);
               return wfsLayerEntryConfig;
@@ -249,7 +242,6 @@ export class UUIDmapConfigReader {
                 layerId: `${item.id}`,
                 source: {
                   format: 'featureAPI',
-                  dataAccessPath: url as string,
                 },
               } as OgcFeatureLayerEntryConfig);
               return ogcFeatureLayerEntryConfig;
@@ -272,7 +264,6 @@ export class UUIDmapConfigReader {
                 layerId: `${item.id}`,
                 source: {
                   format: 'GeoJSON',
-                  dataAccessPath: url as string,
                 },
               } as GeoJSONLayerEntryConfig);
               return geoJSONLayerEntryConfig;
@@ -293,9 +284,6 @@ export class UUIDmapConfigReader {
                 schemaTag: CONST_LAYER_TYPES.XYZ_TILES,
                 entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
                 layerId: `${item.id}`,
-                source: {
-                  dataAccessPath: url as string,
-                },
               } as XYZTilesLayerEntryConfig);
               return xyzTilesLayerEntryConfig;
             });
@@ -315,9 +303,6 @@ export class UUIDmapConfigReader {
                 entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
                 layerId: `${item.id}`,
                 tileGrid: item.tileGrid as unknown as TypeTileGrid,
-                source: {
-                  dataAccessPath: url as string,
-                },
               } as VectorTilesLayerEntryConfig);
               return vectorTilesLayerEntryConfig;
             });
@@ -327,6 +312,7 @@ export class UUIDmapConfigReader {
               geoviewLayerId: `${idClean}`,
               geoviewLayerName: name as string,
               geoviewLayerType: CONST_LAYER_TYPES.GEOPACKAGE,
+              metadataAccessPath: url as string,
               isTimeAware: isTimeAware as boolean,
               listOfLayerEntryConfig: [],
             };
@@ -338,7 +324,6 @@ export class UUIDmapConfigReader {
                 layerId: `${item.id}`,
                 source: {
                   format: 'GeoPackage',
-                  dataAccessPath: url as string,
                 },
               } as GeoPackageLayerEntryConfig);
               return geoPackageLayerEntryConfig;
@@ -359,9 +344,6 @@ export class UUIDmapConfigReader {
                 schemaTag: CONST_LAYER_TYPES.IMAGE_STATIC,
                 entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
                 layerId: `${item.id}`,
-                source: {
-                  dataAccessPath: url as string,
-                },
               } as ImageStaticLayerEntryConfig);
               return imageStaticLayerEntryConfig;
             });

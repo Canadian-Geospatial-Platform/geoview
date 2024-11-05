@@ -32,7 +32,7 @@
     "serve": "npm run format && npm run fix && webpack serve --progress --color --config webpack.dev.js",
     "build": "npm run format && npm run fix && npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
     "doc": "typedoc src/app.tsx --logLevel Error --out public/docs",
-    "deploy": "gh-pages -d dist",
+    "deploy": "gh-pages -d dist -verbose",
     "test": "jest",
     "update_test": "jest --updateSnapshot",
     "format": "npm run format --prefix ../",

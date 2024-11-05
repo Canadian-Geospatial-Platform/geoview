@@ -15,11 +15,13 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     if (Number.isNaN(this.layerId)) {
       throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
     }
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
-    // and place the layerId at the end of it.
+
     // Value for this.source.format can only be EsriJSON.
     if (!this.source) this.source = { format: 'EsriJSON' };
     if (!this.source.format) this.source.format = 'EsriJSON';
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
+
+    // We assign the metadataAccessPath of the GeoView layer to the dataAccessPath.
+    this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
+    if (!this.source.dataAccessPath.endsWith('/')) this.source.dataAccessPath += '/';
   }
 }

@@ -72,7 +72,7 @@
             {
               'geoviewLayerId': 'geojsonLYR1',
               'geoviewLayerName': 'GeoJSON Sample',
-              'metadataAccessPath': './datasets/geojson/metadata.json',
+              'metadataAccessPath': './datasets/geojson/metadata.meta',
               'geoviewLayerType': 'GeoJSON',
               'listOfLayerEntryConfig': [
                 {
@@ -169,13 +169,13 @@
         {
           geoviewLayerId: 'geoJsonSample',
           geoviewLayerName: 'Historical Flood',
+          metadataAccessPath: './datasets/geojson/',
           geoviewLayerType: 'GeoJSON',
           listOfLayerEntryConfig: [
             {
               layerId: 'historical_flood_0.geojson',
               layerName: 'Map',
               source: {
-                dataAccessPath: './datasets/geojson/',
                 featureInfo: {
                   queryable: true,
                   nameField: 'comment_en',

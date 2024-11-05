@@ -38,7 +38,7 @@
       {
         "geoviewLayerId": "swipe4",
         "geoviewLayerName": "GeoJSON Sample",
-        "metadataAccessPath": "./datasets/geojson/metadata.json",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
@@ -75,16 +75,14 @@
       {
         "geoviewLayerId": "swipe0",
         "geoviewLayerName": "statmen toner",
+        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/",
         "geoviewLayerType": "xyzTiles",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "toner",
+            "layerId": "0",
             "initialSettings": {
               "minZoom": 3,
               "maxZoom": 8
-            },
-            "source": {
-              "dataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
             }
           }
         ]
