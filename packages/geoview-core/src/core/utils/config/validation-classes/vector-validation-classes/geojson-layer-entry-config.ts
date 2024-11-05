@@ -14,24 +14,21 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
-    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
-      throw new Error(
-        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type GeoJSON when the metadataAccessPath is undefined.`
-      );
-    }
     // Default value for this.entryType is vector
     if (this.entryType === undefined) this.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
     // Value for this.source.format can only be GeoJSON.
     if (!this.source) this.source = { format: 'GeoJSON' };
     if (!this.source.format) this.source.format = 'GeoJSON';
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
-    // and place the layerId at the end of it.
+
+    // If undefined, we assign the metadataAccessPath of the GeoView layer to dataAccessPath and place the layerId at the end of it.
     if (!this.source.dataAccessPath) {
       let accessPath = this.geoviewLayerConfig.metadataAccessPath!;
       // Remove the metadata file name and keep only the path to the directory where the metadata resides
-      accessPath = accessPath!.split('/').length > 1 ? accessPath!.split('/').slice(0, -1).join('/') : './';
+      if (accessPath.toLowerCase().endsWith('.meta'))
+        accessPath = accessPath!.split('/').length > 1 ? accessPath!.split('/').slice(0, -1).join('/') : './';
       this.source.dataAccessPath = accessPath;
     }
+
     if (
       !(this.source.dataAccessPath!.startsWith('blob') && !this.source.dataAccessPath!.endsWith('/')) &&
       !this.source.dataAccessPath!.toUpperCase().endsWith('.JSON') &&
@@ -42,6 +39,7 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
         ? `${this.source.dataAccessPath!}${this.layerId}`
         : `${this.source.dataAccessPath!}/${this.layerId}`;
     }
+
     if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LNGLAT;
   }
 }

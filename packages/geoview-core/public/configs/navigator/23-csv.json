@@ -13,13 +13,13 @@
       {
         "geoviewLayerId": "csvLYR1",
         "geoviewLayerName": "NPRI",
+        "metadataAccessPath": "./datasets/csv-files/",
         "geoviewLayerType": "CSV",
         "listOfLayerEntryConfig": [
           {
             "layerId": "NPRI-INRP_WaterEau_MediaGroupMilieu_2022",
             "layerName": "NPRI Water Media Group 2022",
             "source": {
-              "dataAccessPath": "./datasets/csv-files/NPRI-INRP_WaterEau_MediaGroupMilieu_2022.csv",
               "separator": ","
             }
           }

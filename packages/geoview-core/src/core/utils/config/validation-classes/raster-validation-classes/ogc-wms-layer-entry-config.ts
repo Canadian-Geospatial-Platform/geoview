@@ -28,17 +28,15 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // if layerConfig.source.dataAccessPath is undefined, the metadataAccessPath defined on the root is used.
     if (!this.source) this.source = {};
-    if (!this.source.dataAccessPath) {
-      // When the dataAccessPath is undefined and the metadataAccessPath ends with ".xml", the dataAccessPath is temporarilly
-      // set to '' and will be filled in the fetchServiceMetadata method of the class WMS. So, we begin with the assumption
-      // that both en and fr end with ".xml". Be aware that in metadataAccessPath, one language can ends with ".xml" and the
-      // other not.
-      this.source.dataAccessPath = '';
-      // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set
-      // to the same value of the corresponding metadataAccessPath.
-      if (this.geoviewLayerConfig.metadataAccessPath!.slice(-4).toLowerCase() !== '.xml')
-        this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
-    }
+
+    // When the dataAccessPath is undefined and the metadataAccessPath ends with ".xml", the dataAccessPath is temporarilly
+    // set to '' and will be filled in the fetchServiceMetadata method of the class WMS.
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = '';
+    // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set
+    // to the same value of the corresponding metadataAccessPath.
+    if (this.geoviewLayerConfig.metadataAccessPath!.slice(-4).toLowerCase() !== '.xml')
+      this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
+
     // Default value for layerConfig.source.serverType is 'mapserver'.
     if (!this.source.serverType) this.source.serverType = 'mapserver';
   }

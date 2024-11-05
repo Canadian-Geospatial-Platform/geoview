@@ -15,11 +15,11 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
-    /** layerConfig.source.dataAccessPath is mandatory. */
-    if (!layerConfig.source!.dataAccessPath) {
-      throw new Error(
-        `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`
-      );
-    }
+    if (!this.source) this.source = {};
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
+    if (!this.source.dataAccessPath!.toLowerCase().endsWith('.pbf'))
+      this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
+        ? `${this.source.dataAccessPath}${this.layerId}`
+        : `${this.source.dataAccessPath}/${this.layerId}`;
   }
 }

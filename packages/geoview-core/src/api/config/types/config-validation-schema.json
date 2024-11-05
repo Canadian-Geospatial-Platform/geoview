@@ -1162,6 +1162,10 @@
       "description": "Base type from which we derive the source properties for all the leaf nodes in the layer tree.",
       "type": "object",
       "properties": {
+        "dataAccessPath": {
+          "type": "string",
+          "description": "The path to reach the data to display. If not specified, metadatAccessPath will be assigned to it."
+        },
         "projection": {
           "$ref": "#/definitions/TypeValidSourceProjectionCodes"
         },

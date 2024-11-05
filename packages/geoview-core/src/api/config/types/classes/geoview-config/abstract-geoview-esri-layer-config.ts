@@ -58,7 +58,10 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
    */
   override async fetchServiceMetadata(): Promise<void> {
     try {
-      const metadataString = await getXMLHttpRequest(`${this.metadataAccessPath}?f=json`);
+      const metadataUrl = this.metadataAccessPath.endsWith('/')
+        ? `${this.metadataAccessPath}?f=json`
+        : `${this.metadataAccessPath}/?f=json`;
+      const metadataString = await getXMLHttpRequest(metadataUrl);
       if (metadataString && metadataString !== '{}') {
         let jsonMetadata: TypeJsonObject;
         try {
