@@ -13,13 +13,13 @@
       {
         "geoviewLayerId": "csvLYR1",
         "geoviewLayerName": "NPRI",
+        "metadataAccessPath": "./datasets/csv-files/",
         "geoviewLayerType": "CSV",
         "listOfLayerEntryConfig": [
           {
             "layerId": "NPRI-INRP_WaterEau_MediaGroupMilieu_2022",
             "layerName": "NPRI Water Media Group 2022",
             "source": {
-              "dataAccessPath": "./datasets/csv-files/NPRI-INRP_WaterEau_MediaGroupMilieu_2022.csv",
               "separator": ","
             }
           }
@@ -28,14 +28,12 @@
       {
         "geoviewLayerId": "csvLYR2",
         "geoviewLayerName": "Station List MELCC",
+        "metadataAccessPath": "./datasets/csv-files/",
         "geoviewLayerType": "CSV",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "Station_List_Minus_HQ-MELCC",
-            "layerName": "Station List",
-            "source": {
-              "dataAccessPath": "./datasets/csv-files/Station_List_Minus_HQ-MELCC.csv"
-            }
+            "layerId": "Station_List_Minus_HQ-MELCC.csv",
+            "layerName": "Station List"
           }
         ]
       }

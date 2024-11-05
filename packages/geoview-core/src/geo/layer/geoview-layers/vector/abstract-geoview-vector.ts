@@ -100,7 +100,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
-    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo as unknown as TypeFeatureInfoLayerConfig;
+    const fieldDefinitions =
+      (this.getLayerMetadata(layerConfig.layerPath)?.source.featureInfo as unknown as TypeFeatureInfoLayerConfig) ||
+      layerConfig.source?.featureInfo;
     const outFieldEntry = fieldDefinitions.outfields?.find((fieldDefinition) => fieldDefinition.name === fieldName);
     return outFieldEntry?.type || 'string';
   }
