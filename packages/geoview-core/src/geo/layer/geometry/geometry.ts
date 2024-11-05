@@ -655,11 +655,14 @@ export class GeometryApi {
 
   /**
    * Creates a Geometry given a geometry type and coordinates expected in any logical format.
-   * @param geometryType - The geometry type to create
-   * @param coordinates - The coordinates to use to create the geometry
+   * @param {TypeStyleGeometry} geometryType - The geometry type to create
+   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to use to create the geometry
    * @returns The OpenLayers Geometry
    */
-  static createGeometryFromType(geometryType: TypeStyleGeometry, coordinates: Coordinate | Coordinate[] | Coordinate[][]): OLGeometry {
+  static createGeometryFromType(
+    geometryType: TypeStyleGeometry,
+    coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]
+  ): OLGeometry {
     switch (geometryType) {
       case 'Point':
         // Create a Point geometry
@@ -689,6 +692,10 @@ export class GeometryApi {
         // Create a Polygon geometry
         return new Polygon(coordinates as Coordinate[][]);
 
+      case 'MultiPolygon':
+        // Create a MultiPolygon geometry
+        return new MultiPolygon(coordinates as Coordinate[][][]);
+
       // Add support for other geometry types as needed
       default:
         throw new Error(`Unsupported geometry type: ${geometryType}`);
@@ -697,19 +704,19 @@ export class GeometryApi {
 
   /**
    * Typeguards when a list of coordinates should actually be a single coordinate, such as a Point.
-   * @param {Coordinate | Coordinate[] | Coordinate[][]} coordinates - The coordinates to check
+   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to check
    * @returns {Coordinate} when the coordinates represent a Point
    */
-  static isCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][]): coordinates is Coordinate {
+  static isCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]): coordinates is Coordinate {
     return Array.isArray(coordinates) && coordinates.length > 0 && !Array.isArray(coordinates[0]);
   }
 
   /**
    * Typeguards when a list of coordinates should actually be a single coordinate, such as a LineString.
-   * @param {Coordinate | Coordinate[] | Coordinate[][]} coordinates - The coordinates to check
+   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to check
    * @returns {Coordinate[]} when the coordinates represent a LineString
    */
-  static isArrayOfCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][]): coordinates is Coordinate[] {
+  static isArrayOfCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]): coordinates is Coordinate[] {
     return (
       Array.isArray(coordinates) &&
       coordinates.length > 0 &&
@@ -721,10 +728,12 @@ export class GeometryApi {
 
   /**
    * Typeguards when a list of coordinates should actually be a single coordinate, such as a MultiLineString or Polygon.
-   * @param {Coordinate | Coordinate[] | Coordinate[][]} coordinates - The coordinates to check
+   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to check
    * @returns {Coordinate[][]} when the coordinates represent a MultiLineString or Polygon
    */
-  static isArrayOfArrayOfCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][]): coordinates is Coordinate[][] {
+  static isArrayOfArrayOfCoordinates(
+    coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]
+  ): coordinates is Coordinate[][] {
     return (
       Array.isArray(coordinates) &&
       coordinates.length > 0 &&
@@ -737,7 +746,7 @@ export class GeometryApi {
   /**
    * Typeguards when a list of coordinates should actually be a single coordinate, such as a MultiPolygon.
    * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to check
-   * @returns {Coordinate[][]} when the coordinates represent a MultiPolygon
+   * @returns {Coordinate[][][]} when the coordinates represent a MultiPolygon
    */
   static isArrayOfArrayOfArrayOfCoordinates(
     coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]

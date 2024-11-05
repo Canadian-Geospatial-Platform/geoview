@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 
-import { Geometry, Point, Polygon, LineString, MultiPoint, MultiLineString } from 'ol/geom';
+import { Geometry, Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon } from 'ol/geom';
 
 import { MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
@@ -46,6 +46,16 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
           type: 'Polygon',
           coordinates: geometry.getCoordinates().map((coords) => {
             return coords.map((coord) => transformPoints([coord], 4326)[0]);
+          }),
+        };
+      } else if (geometry instanceof MultiPolygon) {
+        // coordinates are in the form of Coordinate[][][]
+        builtGeometry = {
+          type: 'MultiPolygon',
+          coordinates: geometry.getCoordinates().map((coords1) => {
+            return coords1.map((coords2) => {
+              return coords2.map((coord) => transformPoints([coord], 4326)[0]);
+            });
           }),
         };
       } else if (geometry instanceof LineString) {
