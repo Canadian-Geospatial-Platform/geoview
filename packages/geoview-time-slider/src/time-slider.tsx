@@ -64,7 +64,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   // Get actions and states from store
   // TODO: evaluate best option to set value by layer path.... trough a getter?
-  const { setTitle, setDefaultValue, setDescription, setValues, setLocked, setReversed, setDelay, setFiltering } =
+  const { setTitle, setDefaultValue, setDescription, setValues, setLocked, setReversed, setDelay, setStep, setFiltering } =
     useTimeSliderStoreActions();
   const displayLanguage = useAppDisplayLanguage();
 
@@ -147,7 +147,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
     // Handle single handle case with discrete values
     if (singleHandle) {
-      const interval = (minAndMax[1] - minAndMax[0]) / 20;
+      const interval = step || (minAndMax[1] - minAndMax[0]) / 20;
       const newPosition = values[0] + interval * stepMove;
       // eslint-disable-next-line no-nested-ternary
       setValues(layerPath, [newPosition > minAndMax[1] ? minAndMax[0] : newPosition < minAndMax[0] ? minAndMax[1] : newPosition]);
@@ -313,6 +313,10 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     setDelay(layerPath, event.target.value as unknown as number);
   }
 
+  function handleStepChange(event: React.ChangeEvent<HTMLSelectElement>): void {
+    setStep(layerPath, Number(event.target.value));
+  }
+
   function handleCheckbox(newValue: boolean): void {
     setFiltering(layerPath, newValue);
     if (!newValue) {
@@ -472,7 +476,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             </IconButton>
 
             <Box component="span" sx={{ paddingLeft: '10px' }}>
-              <FormControl sx={{ width: '150px' }}>
+              <FormControl sx={{ width: '100px' }}>
                 <InputLabel variant="standard">{getLocalizedMessage('timeSlider.slider.timeDelay', displayLanguage)}</InputLabel>
                 <NativeSelect
                   defaultValue={delay}
@@ -491,6 +495,26 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                 </NativeSelect>
               </FormControl>
             </Box>
+            {singleHandle && discreteValues && (
+              <Box component="span" sx={{ paddingLeft: '10px' }}>
+                <FormControl sx={{ width: '100px' }}>
+                  <InputLabel variant="standard">{getLocalizedMessage('timeSlider.slider.stepValue', displayLanguage)}</InputLabel>
+                  <NativeSelect
+                    defaultValue={step}
+                    inputProps={{
+                      name: 'timeStep',
+                      onChange: (event) => handleStepChange(event),
+                    }}
+                  >
+                    <option value={3600000}>{getLocalizedMessage('timeSlider.slider.hour', displayLanguage)}</option>
+                    <option value={86400000}>{getLocalizedMessage('timeSlider.slider.day', displayLanguage)}</option>
+                    <option value={604800000}>{getLocalizedMessage('timeSlider.slider.week', displayLanguage)}</option>
+                    <option value={2592000000}>{getLocalizedMessage('timeSlider.slider.month', displayLanguage)}</option>
+                    <option value={31536000000}>{getLocalizedMessage('timeSlider.slider.year', displayLanguage)}</option>
+                  </NativeSelect>
+                </FormControl>
+              </Box>
+            )}
           </Box>
         </Grid>
         {description && (

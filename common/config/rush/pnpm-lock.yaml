@@ -380,7 +380,7 @@ importers:
         specifier: ^6.2.0
         version: 6.2.0
       glob:
-        specifier: ^7.2.0
+        specifier: ^7.2.3
         version: 7.2.3
       html-loader:
         specifier: ~5.1.0

@@ -11,6 +11,10 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "7f835844-3774-4323-b20e-a898c9f20136",
+        "geoviewLayerType": "geoCore"
+      },
+      {
         "geoviewLayerId": "napl",
         "geoviewLayerName": "NAPL",
         "metadataAccessPath": "https://datacube.services.geo.ca/web/napl-ontario-ring-of-fire.xml",
