@@ -8,6 +8,7 @@ import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-type
 import { logger } from '@/core/utils/logger';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/config/types/config-constants';
+import { SnackbarType } from '@/core/utils/notifications';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with AppEventProcessor vs AppState
 
@@ -30,6 +31,7 @@ export interface IAppState {
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
+    addMessage: (type: SnackbarType, message: string) => void;
     addNotification: (notif: NotificationDetailsType) => void;
     setCrosshairActive: (active: boolean) => void;
     setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<[void, void]>;
@@ -90,6 +92,16 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     // #region ACTIONS
 
     actions: {
+      /**
+       * Adds a snackbar message.
+       * @param {SnackbarType} type - The type of message.
+       * @param {string} message - The message.
+       */
+      addMessage: (type: SnackbarType, message: string): void => {
+        // Redirect to processor
+        AppEventProcessor.addMessage(get().mapId, type, message);
+      },
+
       /**
        * Adds a notification.
        * @param {NotificationDetailsType} notif - The notification to add.

@@ -1053,10 +1053,10 @@ export abstract class AbstractGeoViewLayer {
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   protected getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType {
     // Log
-    logger.logWarning(`getFieldDomain is not implemented for ${fieldName} - ${layerConfig}`);
+    // logger.logWarning(`getFieldDomain is not implemented for ${fieldName} - ${layerConfig}`);
     return null;
   }
 

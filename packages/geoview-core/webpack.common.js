@@ -94,6 +94,7 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    worker: './src/core/components/data-table/worker.ts',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

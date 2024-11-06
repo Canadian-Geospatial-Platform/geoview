@@ -6,7 +6,9 @@ import { TypeHTMLElement } from '@/core/types/global-types';
 import { createGuideObject } from '@/core/utils/utilities';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { MapEventProcessor } from './map-event-processor';
+import { SnackbarType } from '@/core/utils/notifications';
 import { logger } from '@/core/utils/logger';
+import { api } from '@/app';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -54,6 +56,10 @@ export class AppEventProcessor extends AbstractEventProcessor {
    */
   static getDisplayTheme(mapId: string): TypeDisplayTheme {
     return this.getAppState(mapId).displayTheme;
+  }
+
+  static addMessage(mapId: string, type: SnackbarType, message: string): void {
+    api.maps[mapId].notifications.showMessage(message, undefined, false);
   }
 
   static async addNotification(mapId: string, notif: NotificationDetailsType): Promise<void> {

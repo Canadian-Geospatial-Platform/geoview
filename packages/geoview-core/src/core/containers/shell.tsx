@@ -321,6 +321,14 @@ export function Shell(props: ShellProps): JSX.Element {
               <MapInfo />
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
+            <Snackbar
+              snackBarId={mapViewer.mapId}
+              message={snackbarMessage}
+              open={snackbarOpen}
+              type={snackbarType}
+              button={snackbarButton}
+              onClose={handleSnackBarClose}
+            />
           </Box>
           {geoviewConfig!.footerBar !== undefined && mapLoaded && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
@@ -342,14 +350,6 @@ export function Shell(props: ShellProps): JSX.Element {
           {Object.keys(components).map((key: string) => {
             return <Fragment key={key}>{components[key]}</Fragment>;
           })}
-          <Snackbar
-            snackBarId={mapViewer.mapId}
-            message={snackbarMessage}
-            open={snackbarOpen}
-            type={snackbarType}
-            button={snackbarButton}
-            onClose={handleSnackBarClose}
-          />
         </Box>
       </FocusTrap>
       <Link id={`bottomlink-${mapViewer.mapId}`} href={`#toplink-${mapViewer.mapId}`} tabIndex={0} sx={[sxClasses.skip, { bottom: '0px' }]}>
