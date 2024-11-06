@@ -39,7 +39,7 @@ function transformGeometry(geometry: any) {
 
   const { type, coordinates } = geometry;
 
-console.log(type, coordinates);
+  console.log(type, coordinates);
   switch (type) {
     case 'Point':
       return {
@@ -59,22 +59,28 @@ console.log(type, coordinates);
     case 'Polygon':
       return {
         type,
-        coordinates: coordinates.map((coords) => {
-          return coords.map((coord) => transformPoint([coord])[0]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        coordinates: coordinates.map((coords: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return coords.map((coord: any) => transformPoint([coord])[0]);
         }),
       };
     case 'MultiLineString':
       return {
         type,
-        coordinates: coordinates.map((coords) => {
-          return coords.map((coord) => transformPoint([coord])[0]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        coordinates: coordinates.map((coords: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return coords.map((coord: any) => transformPoint([coord])[0]);
         }),
       };
     case 'MultiPolygon':
       return {
         type,
-        coordinates: coordinates[0].map((coords) => {
-          return coords.map((coord) => transformPoint([coord])[0]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        coordinates: coordinates[0].map((coords: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return coords.map((coord: any) => transformPoint([coord])[0]);
         }),
       };
     default:
