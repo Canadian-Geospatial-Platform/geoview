@@ -3,7 +3,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import Feature from 'ol/Feature';
-import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon } from 'ol/geom';
+import { Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon } from 'ol/geom';
 import { Extent, getCenter } from 'ol/extent';
 import { fromExtent } from 'ol/geom/Polygon';
 import { Coordinate } from 'ol/coordinate';

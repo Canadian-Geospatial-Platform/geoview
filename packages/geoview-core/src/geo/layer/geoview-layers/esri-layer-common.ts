@@ -19,7 +19,6 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
 import {
   CONST_LAYER_ENTRY_TYPES,
   TypeFeatureInfoEntryPartial,
-  TypeFieldEntry,
   TypeLayerEntryConfig,
   TypeStyleGeometry,
   codedValueType,
@@ -27,6 +26,12 @@ import {
   rangeDomainType,
 } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import {
+  esriConvertEsriGeometryTypeToOLGeometryType,
+  esriParseFeatureInfoEntries,
+  esriQueryRecordsByUrl,
+  esriQueryRelatedRecordsByUrl,
+} from '@/geo/layer/gv-layers/utils';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
@@ -407,21 +412,8 @@ export async function commonProcessLayerMetadata<
  * @returns TypeFeatureInfoEntryPartial[] an array of relared records of type TypeFeatureInfoEntryPartial
  */
 export function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureInfoEntryPartial[] {
-  // Loop on the Esri results
-  return records.map((rec: TypeJsonObject) => {
-    // Prep the TypeFeatureInfoEntryPartial
-    const featInfo: TypeFeatureInfoEntryPartial = {
-      fieldInfo: {},
-    };
-
-    // Loop on the Esri attributes
-    Object.entries(rec.attributes).forEach((tupleAttrValue: [string, unknown]) => {
-      featInfo.fieldInfo[tupleAttrValue[0]] = { value: tupleAttrValue[1] } as TypeFieldEntry;
-    });
-
-    // Return the TypeFeatureInfoEntryPartial
-    return featInfo;
-  });
+  // Redirect
+  return esriParseFeatureInfoEntries(records);
 }
 
 /**
@@ -429,26 +421,9 @@ export function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureI
  * @param {string} url An Esri url indicating a feature layer to query
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
-export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]> {
-  // TODO: Refactor - Suggestion to rework this function and the one in EsriDynamic.getFeatureInfoAtLongLat(), making
-  // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this
-  // TO.DO.CONT: one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
-  // Query the data
-  try {
-    const response = await fetch(url);
-    const respJson = await response.json();
-    if (respJson.error) {
-      logger.logInfo('There is a problem with this query: ', url);
-      throw new Error(`Error code = ${respJson.error.code} ${respJson.error.message}` || '');
-    }
-
-    // Return the array of TypeFeatureInfoEntryPartial
-    return parseFeatureInfoEntries(respJson.features);
-  } catch (error) {
-    // Log
-    logger.logError('esri-layer-common.queryRecordsByUrl()\n', error);
-    throw error;
-  }
+export function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]> {
+  // Redirect
+  return esriQueryRecordsByUrl(url);
 }
 
 /**
@@ -457,26 +432,9 @@ export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEnt
  * @param {recordGroupIndex} number The group index of the relationship layer on which to read the related records
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
-export async function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
-  // Query the data
-  try {
-    const response = await fetch(url);
-    const respJson = await response.json();
-    if (respJson.error) {
-      logger.logInfo('There is a problem with this query: ', url);
-      throw new Error(`Error code = ${respJson.error.code} ${respJson.error.message}` || '');
-    }
-
-    // If any related record groups found
-    if (respJson.relatedRecordGroups.length > 0)
-      // Return the array of TypeFeatureInfoEntryPartial
-      return parseFeatureInfoEntries(respJson.relatedRecordGroups[recordGroupIndex].relatedRecords);
-    return Promise.resolve([]);
-  } catch (error) {
-    // Log
-    logger.logError('esri-layer-common.queryRelatedRecordsByUrl()\n', error);
-    throw error;
-  }
+export function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
+  // Redirect
+  return esriQueryRelatedRecordsByUrl(url, recordGroupIndex);
 }
 
 /**
@@ -485,19 +443,6 @@ export async function queryRelatedRecordsByUrl(url: string, recordGroupIndex: nu
  * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
  */
 export function convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
-  switch (esriGeometryType) {
-    case 'esriGeometryPoint':
-    case 'esriGeometryMultipoint':
-      return 'Point';
-
-    case 'esriGeometryPolyline':
-      return 'LineString';
-
-    case 'esriGeometryPolygon':
-    case 'esriGeometryMultiPolygon':
-      return 'Polygon';
-
-    default:
-      throw new Error(`Unsupported geometry type: ${esriGeometryType}`);
-  }
+  // Redirect
+  return esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType);
 }

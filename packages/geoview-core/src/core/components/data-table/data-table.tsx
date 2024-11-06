@@ -298,7 +298,6 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     async (feature: TypeFeatureInfoEntry) => {
       let { extent } = feature;
 
-      // TODO This will require updating after the query optimization
       // If there is no extent, the layer is ESRI Dynamic, get the feature extent using its OBJECTID
       if (!extent) extent = await getExtentFromFeatures(layerPath, [feature.fieldInfo.OBJECTID!.value as string]);
 

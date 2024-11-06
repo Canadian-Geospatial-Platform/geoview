@@ -1507,17 +1507,23 @@ const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyl
   simple: {
     Point: processSimplePoint,
     LineString: processSimpleLineString,
+    MultiLineString: processSimpleLineString,
     Polygon: processSimplePolygon,
+    MultiPolygon: processSimplePolygon,
   },
   uniqueValue: {
     Point: processUniqueValuePoint,
     LineString: processUniqueLineString,
+    MultiLineString: processUniqueLineString,
     Polygon: processUniquePolygon,
+    MultiPolygon: processUniquePolygon,
   },
   classBreaks: {
     Point: processClassBreaksPoint,
     LineString: processClassBreaksLineString,
+    MultiLineString: processClassBreaksLineString,
     Polygon: processClassBreaksPolygon,
+    MultiPolygon: processClassBreaksPolygon,
   },
 };
 
