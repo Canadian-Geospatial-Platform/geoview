@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { ToolbarProps } from '@mui/material';
 /**
  * Create a toollbar component

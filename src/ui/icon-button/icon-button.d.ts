@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TypeIconButtonProps } from './icon-button-types';
 /**
  * Create a customized Material UI Icon Button

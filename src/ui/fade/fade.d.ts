@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { FadeProps } from '@mui/material';
 /**
  * Create a customized Material UI Fade

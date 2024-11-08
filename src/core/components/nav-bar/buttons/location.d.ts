@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Create a location button to zoom to user location
  *

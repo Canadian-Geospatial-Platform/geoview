@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { NavBarApi } from '@/core/components';
 type NavBarProps = {
     api: NavBarApi;

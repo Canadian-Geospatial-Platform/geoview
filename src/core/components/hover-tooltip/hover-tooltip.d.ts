@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Hover tooltip component to show name field information on hover
  *

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { StepperProps, StepLabelProps, StepContentProps, StepProps } from '@mui/material';
 /**
  * Custom MUI Stepper Props

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Create a cross hair icon
  */

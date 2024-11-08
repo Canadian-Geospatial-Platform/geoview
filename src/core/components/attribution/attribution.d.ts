@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Create an Attribution component that will display an attribution box
  * with the attribution text

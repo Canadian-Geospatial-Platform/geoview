@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TypeLegendLayer } from '@/core/components/layers/types';
 interface SingleLayerProps {
     layer: TypeLegendLayer;

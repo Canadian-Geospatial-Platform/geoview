@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { CircularProgressProps } from '@mui/material';
 /**
  * Create a customized Material UI Circular Progress

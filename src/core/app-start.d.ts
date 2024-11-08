@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import './translation/i18n';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';

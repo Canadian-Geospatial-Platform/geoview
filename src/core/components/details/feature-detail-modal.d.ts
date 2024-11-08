@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Open lighweight version (no function) of feature detail in modal.
  *

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Popover to resize the map container and footer panel.
  * @returns

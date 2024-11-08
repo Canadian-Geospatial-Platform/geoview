@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { AppBarApi } from '@/core/components';
 type AppBarProps = {

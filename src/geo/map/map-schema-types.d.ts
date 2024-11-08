@@ -143,7 +143,7 @@ export type TypeFieldEntry = {
  * Purposely linking this simpler type to the main TypeFeatureInfoEntry type here, in case, for future we want
  * to add more information on one or the other and keep things loosely linked together.
  */
-export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'>;
+export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo' | 'geometry'>;
 /** The simplified layer statuses */
 export type TypeLayerStatusSimplified = 'loading' | 'loaded' | 'error';
 export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
@@ -557,7 +557,7 @@ export type TypeStyleSettings = TypeBaseStyleConfig | TypeSimpleStyleConfig | Ty
 /** ******************************************************************************************************************************
  * Valid keys for the TypeStyleConfig object.
  */
-export type TypeStyleGeometry = 'Point' | 'LineString' | 'Polygon';
+export type TypeStyleGeometry = 'Point' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
 /** ******************************************************************************************************************************
  * Type of Style to apply to the GeoView vector layer based on geometry types.
  */

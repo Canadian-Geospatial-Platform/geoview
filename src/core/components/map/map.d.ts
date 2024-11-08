@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { MapViewer } from '@/geo/map/map-viewer';
 type MapProps = {
     viewer: MapViewer;

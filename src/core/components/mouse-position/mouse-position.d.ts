@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Create the mouse position
  * @returns {JSX.Element} the mouse position component

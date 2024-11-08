@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TabsProps, TabProps, BoxProps } from '@mui/material';
 import { TypeContainerBox } from '@/core/types/global-types';
 /**

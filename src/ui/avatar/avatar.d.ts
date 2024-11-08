@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { AvatarProps } from '@mui/material';
 /**
  * Create a customized Material UI Avatar

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { PopoverProps } from '@mui/material';
 /**
  * Create a popover component

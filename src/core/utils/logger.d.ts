@@ -1,4 +1,3 @@
-/// <reference types="node" />
 export declare const LOG_TRACE_DETAILED = 1;
 export declare const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
 export declare const LOG_TRACE_RENDER = 3;

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { GeoListItem } from './geolocator';
 type GeoListProps = {
     geoListItems: GeoListItem[];

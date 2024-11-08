@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { Root } from 'react-dom/client';
 import { i18n } from 'i18next';
 import OLMap from 'ol/Map';

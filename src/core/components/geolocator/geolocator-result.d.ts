@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { GeoListItem } from './geolocator';
 interface GeolocatorFiltersType {
     geoLocationData: GeoListItem[];

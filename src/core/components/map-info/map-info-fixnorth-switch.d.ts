@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Map Information Fix North Switch component
  *

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 interface GuidePanelType {
     fullWidth?: boolean;
 }

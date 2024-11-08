@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { CollapseProps } from '@mui/material';
 /**
  * Create a customized Material UI Collapse

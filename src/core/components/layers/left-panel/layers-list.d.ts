@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TypeLegendLayer } from '@/core/components/layers/types';
 interface LayerListProps {
     depth: number;

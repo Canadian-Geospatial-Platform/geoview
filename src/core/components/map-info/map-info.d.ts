@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Create a map information element that contains attribtuion, mouse position and scale
  *

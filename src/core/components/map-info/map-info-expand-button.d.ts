@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Map Information Expand Button component
  *

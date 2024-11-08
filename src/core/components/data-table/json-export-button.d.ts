@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 interface JSONExportButtonProps {
     rows: unknown[];

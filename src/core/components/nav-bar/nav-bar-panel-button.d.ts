@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 interface NavbarPanelButtonType {
     buttonPanel: TypeButtonPanel;

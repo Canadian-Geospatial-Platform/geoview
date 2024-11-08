@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { Root } from 'react-dom/client';
 import { TypeDisplayLanguage } from '@config/types/map-schema-types';
 import { TypeJsonArray, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { LayerListEntry } from '.';
 export interface TypeIconStackProps {

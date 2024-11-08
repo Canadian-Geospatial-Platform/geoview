@@ -14,6 +14,7 @@ export interface ITimeSliderState {
         setLocked: (layerPath: string, locked: boolean) => void;
         setReversed: (layerPath: string, locked: boolean) => void;
         setSelectedLayerPath: (layerPath: string) => void;
+        setStep: (layerPath: string, step: number) => void;
         setDefaultValue: (layerPath: string, defaultValue: string) => void;
         setValues: (layerPath: string, values: number[]) => void;
         setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
@@ -29,6 +30,7 @@ export interface ITimeSliderState {
         setReversed: (layerPath: string, locked: boolean) => void;
         setSelectedLayerPath: (layerPath: string) => void;
         setSliderFilters: (newSliderFilters: Record<string, string>) => void;
+        setStep: (layerPath: string, step: number) => void;
         setDefaultValue: (layerPath: string, defaultValue: string) => void;
         setValues: (layerPath: string, values: number[]) => void;
         setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;

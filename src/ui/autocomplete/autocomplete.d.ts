@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { AutocompleteProps } from '@mui/material';
 /**
  * Customized Material UI Autocomplete properties

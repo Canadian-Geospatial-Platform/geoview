@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { DividerProps } from '@mui/material';
 /**
  * Properties for the Divider

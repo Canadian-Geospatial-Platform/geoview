@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Create a toggle button to toggle between fullscreen
  *

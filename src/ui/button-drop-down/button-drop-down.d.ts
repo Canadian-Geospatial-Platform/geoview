@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { ButtonGroupProps } from '@mui/material';
 /**
  * The ButtonDropDown props

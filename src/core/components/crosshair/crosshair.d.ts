@@ -1,4 +1,3 @@
-/// <reference types="react" />
 type CrosshairProps = {
     mapTargetElement: HTMLElement;
 };

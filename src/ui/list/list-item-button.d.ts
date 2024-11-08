@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { ListItemButtonProps } from '@mui/material';
 /**
  * Create a customized Material UI List Item

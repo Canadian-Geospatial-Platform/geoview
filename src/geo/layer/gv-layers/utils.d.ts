@@ -35,13 +35,24 @@ export declare function esriGetFieldDomain(layerConfig: EsriDynamicLayerEntryCon
  *
  * @returns TypeFeatureInfoEntryPartial[] an array of relared records of type TypeFeatureInfoEntryPartial
  */
-export declare function esriParseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureInfoEntryPartial[];
+export declare function esriParseFeatureInfoEntries(records: TypeJsonObject[], geometryType?: TypeStyleGeometry): TypeFeatureInfoEntryPartial[];
 /**
  * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
- * @param {url} string An Esri url indicating a feature layer to query
+ * @param {string} url - An Esri url indicating a feature layer to query
+ * @param {TypeStyleGeometry?} geometryType - The geometry type for the geometries in the layer being queried (used when geometries are returned)
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
-export declare function esriQueryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]>;
+export declare function esriQueryRecordsByUrl(url: string, geometryType?: TypeStyleGeometry): Promise<TypeFeatureInfoEntryPartial[]>;
+/**
+ * Asynchronously queries an Esri feature layer given the url and object ids and returns an array of `TypeFeatureInfoEntryPartial` records.
+ * @param {string} layerUrl - An Esri url indicating a feature layer to query
+ * @param {TypeStyleGeometry} geometryType - The geometry type for the geometries in the layer being queried (used when returnGeometry is true)
+ * @param {number[]} objectIds - The list of objectids to filter the query on
+ * @param {string} fields - The list of field names to include in the output
+ * @param {boolean} geometry - True to return the geometries in the output
+ * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+ */
+export declare function esriQueryRecordsByUrlObjectIds(layerUrl: string, geometryType: TypeStyleGeometry, objectIds: number[], fields: string, geometry: boolean): Promise<TypeFeatureInfoEntryPartial[]>;
 /**
  * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
  * @param {url} string An Esri url indicating a relationship table to query

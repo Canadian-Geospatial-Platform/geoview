@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Properties for the Accordion element
  */

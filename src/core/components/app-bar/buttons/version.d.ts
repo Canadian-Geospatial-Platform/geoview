@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * An object containing version information.
  *

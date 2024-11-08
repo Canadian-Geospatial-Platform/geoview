@@ -1,4 +1,3 @@
-/// <reference types="react" />
 interface FilterMapProps {
     layerPath: string;
     isGlobalFilterOn: boolean;

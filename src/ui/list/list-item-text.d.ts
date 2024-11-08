@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { ListItemTextProps } from '@mui/material';
 /**
  * Create a customized Material UI List Item Text
