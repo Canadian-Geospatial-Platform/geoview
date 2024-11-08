@@ -20,6 +20,8 @@ export const LOG_TRACE_CORE_STORE_SUBSCRIPTION = 8;
 export const LOG_TRACE_CORE_API_EVENT = 9;
 // For tracing core functions. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_CORE = 10;
+// For tracing worker functions. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
+export const LOG_TRACE_WORKER = 15;
 // Default. For debugging and development. Enabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_DEBUG = 20;
 // Tracks the general flow of the app. Enabled by default. Shows all the time.
@@ -177,6 +179,18 @@ export class ConsoleLogger {
     if (!LOG_ACTIVE) return;
     // Redirect
     this.#logLevel(LOG_TRACE_CORE, 'TRACE', 'dodgerblue', ...messages);
+  }
+
+  /**
+   * Logs tracing calls workers.
+   * Only shows if LOG_ACTIVE is true.
+   * @param {unknown[]} messages - The messages to log
+   */
+  logTraceWorker(...messages: unknown[]): void {
+    // Validate log active
+    if (!LOG_ACTIVE) return;
+    // Redirect
+    this.#logLevel(LOG_TRACE_WORKER, 'WORKER', 'pink', ...messages); // Not a typo, 5 characters for alignment
   }
 
   /**
@@ -427,6 +441,7 @@ type ColorCode = {
   yellowgreen: string;
   goldenrod: string;
   green: string;
+  pink: string;
 };
 
 /**
@@ -457,6 +472,7 @@ logger.logInfo('Logger initialized');
 // logger.logTraceCoreStoreSubscription('trace store subscription');
 // logger.logTraceCoreAPIEvent('trace api event');
 // logger.logTraceCore('trace core');
+// logger.logTraceCore('trace worker');
 // logger.logDebug('debug');
 // logger.logMarkerStart('test time marker');
 // logger.logMarkerCheck('test time marker');

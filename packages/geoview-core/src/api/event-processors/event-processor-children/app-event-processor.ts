@@ -58,8 +58,29 @@ export class AppEventProcessor extends AbstractEventProcessor {
     return this.getAppState(mapId).displayTheme;
   }
 
-  static addMessage(mapId: string, type: SnackbarType, message: string): void {
-    api.maps[mapId].notifications.showMessage(message, undefined, false);
+  /**
+   * Adds a snackbar message.
+   * @param {SnackbarType} type - The type of message.
+   * @param {string} message - The message.
+   * @param {string} param - Optional param to replace in the string if it is a key
+   */
+  static addMessage(mapId: string, type: SnackbarType, message: string, param?: string[]): void {
+    switch (type) {
+      case 'info':
+        api.maps[mapId].notifications.showMessage(message, param, false);
+        break;
+      case 'success':
+        api.maps[mapId].notifications.showSuccess(message, param, false);
+        break;
+      case 'warning':
+        api.maps[mapId].notifications.showWarning(message, param, false);
+        break;
+      case 'error':
+        api.maps[mapId].notifications.showError(message, param, false);
+        break;
+      default:
+        break;
+    }
   }
 
   static async addNotification(mapId: string, notif: NotificationDetailsType): Promise<void> {

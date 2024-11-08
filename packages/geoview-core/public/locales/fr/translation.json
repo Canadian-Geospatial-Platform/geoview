@@ -12,7 +12,8 @@
     "closeFullscreen": "Fermer le plein écran",
     "openGuide": "Ouvrir le guide",
     "guide": "Guide",
-    "fullScreen": "Plein écran"
+    "fullScreen": "Plein écran",
+    "processing": "Traitement de __param__ element(s) sur __param__"
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",

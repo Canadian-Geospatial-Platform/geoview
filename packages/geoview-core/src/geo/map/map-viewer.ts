@@ -1194,6 +1194,7 @@ export class MapViewer {
     // Remove all layers
     try {
       this.layer.removeAllGeoviewLayers();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       // Failed to remove layers, eat the exception and continue to remove the map
     }
@@ -1454,6 +1455,7 @@ export class MapViewer {
 
       // return angle (180 is pointing north)
       return ((bearing + 360) % 360).toFixed(1);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       return '180.0';
     }

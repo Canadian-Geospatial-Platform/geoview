@@ -159,6 +159,9 @@ importers:
       axios:
         specifier: ^1.7.7
         version: 1.7.7
+      comlink:
+        specifier: 4.4.2
+        version: 4.4.2
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -4704,6 +4707,10 @@ packages:
     engines: {node: '>= 0.8'}
     dependencies:
       delayed-stream: 1.0.0
+    dev: false
+
+  /comlink@4.4.2:
+    resolution: {integrity: sha512-OxGdvBmJuNKSCMO4NTl1L47VRp6xn2wG4F/2hYzB6tiCb709otOxtEYCSvK80PtjODfXXZu8ds+Nw5kVCjqd2g==}
     dev: false
 
   /comma-separated-tokens@2.0.3:

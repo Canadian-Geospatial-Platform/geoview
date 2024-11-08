@@ -20,7 +20,7 @@
     "noImplicitThis": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost", "webworker"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],

@@ -82,17 +82,6 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
     [transformPoints]
   );
 
-  // Helper function to serialize geometry
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const serializeGeometry = (geometry: any) => {
-    if (!geometry) return null;
-    return {
-      type: geometry.getType(),
-      coordinates: geometry.getCoordinates(),
-      // Add any other properties that might be needed
-    };
-  };
-
   /**
    * Builds the JSON features section of the file
    * @returns {string} Json file content as string
