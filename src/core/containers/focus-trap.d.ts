@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Interface for the focus trap properties
  */

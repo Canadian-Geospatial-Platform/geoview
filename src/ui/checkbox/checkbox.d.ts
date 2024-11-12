@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { CheckboxProps } from '@mui/material';
 /**
  * Create a Material UI Checkbox component

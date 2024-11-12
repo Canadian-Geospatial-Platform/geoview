@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Interface used for export button properties
  */

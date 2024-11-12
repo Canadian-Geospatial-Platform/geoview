@@ -8,7 +8,7 @@ import { IGeochartState } from './store-interface-and-intial-values/geochart-sta
 import { ISwiperState } from './store-interface-and-intial-values/swiper-state';
 import { IUIState } from './store-interface-and-intial-values/ui-state';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-export type TypeSetStore = (partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>), replace?: boolean | undefined) => void;
+export type TypeSetStore = (partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>), replace?: false | undefined) => void;
 export type TypeGetStore = () => IGeoviewState;
 export interface IGeoviewState {
     mapConfig: TypeMapFeaturesConfig | undefined;
@@ -25,13 +25,13 @@ export interface IGeoviewState {
     swiperState: ISwiperState;
 }
 export declare const geoviewStoreDefinition: (set: TypeSetStore, get: TypeGetStore) => IGeoviewState;
-export declare const geoviewStoreDefinitionWithSubscribeSelector: import("zustand").StateCreator<IGeoviewState, [], [["zustand/subscribeWithSelector", never]], IGeoviewState>;
+export declare const geoviewStoreDefinitionWithSubscribeSelector: import("zustand").StateCreator<IGeoviewState, [], [["zustand/subscribeWithSelector", never]]>;
 declare const fakeStore: import("zustand").UseBoundStore<Omit<import("zustand").StoreApi<IGeoviewState>, "subscribe"> & {
     subscribe: {
         (listener: (selectedState: IGeoviewState, previousSelectedState: IGeoviewState) => void): () => void;
         <U>(selector: (state: IGeoviewState) => U, listener: (selectedState: U, previousSelectedState: U) => void, options?: {
             equalityFn?: ((a: U, b: U) => boolean) | undefined;
-            fireImmediately?: boolean | undefined;
+            fireImmediately?: boolean;
         } | undefined): () => void;
     };
 }>;

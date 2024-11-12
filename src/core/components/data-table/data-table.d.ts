@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { DataTableProps } from './data-table-types';
 /**
  * Build Data table from map.

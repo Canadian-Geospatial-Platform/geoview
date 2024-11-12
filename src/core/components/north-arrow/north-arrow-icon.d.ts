@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * interface for north arrow icon properties
  */

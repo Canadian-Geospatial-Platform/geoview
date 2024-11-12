@@ -1,5 +1,4 @@
-/// <reference types="react" />
-import { Theme } from '@mui/material';
+import { Input, Theme } from '@mui/material';
 export declare const sxClasses: {
     root: {
         position: string;
@@ -85,6 +84,4 @@ export declare const sxClassesList: {
         };
     };
 };
-export declare const StyledInputField: ((props: import("@mui/material").InputProps) => import("react").JSX.Element) & {
-    muiName: string;
-};
+export declare const StyledInputField: typeof Input;

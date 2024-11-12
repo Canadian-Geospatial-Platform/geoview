@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 /**
  * Properties for the overview map toggle

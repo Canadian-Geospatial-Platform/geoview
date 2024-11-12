@@ -1,4 +1,3 @@
-/// <reference types="react" />
 export type NotificationDetailsType = {
     key: string;
     notificationType: NotificationType;

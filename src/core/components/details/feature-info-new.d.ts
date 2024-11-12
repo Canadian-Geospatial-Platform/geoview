@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 export interface TypeFeatureInfoProps {
     features: TypeFeatureInfoEntry[] | undefined | null;

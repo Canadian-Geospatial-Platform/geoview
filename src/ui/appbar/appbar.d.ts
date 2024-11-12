@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { AppBarProps } from '@mui/material';
 /**
  * Create a AppBar component

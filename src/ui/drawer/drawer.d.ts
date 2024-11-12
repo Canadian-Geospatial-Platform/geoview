@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { DrawerProps } from '@mui/material';
 /**
  * Drawer Properties

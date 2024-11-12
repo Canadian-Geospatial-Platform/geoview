@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import 'yet-another-react-lightbox/styles.css';
 /**
  * Interface used for lightbox properties and slides

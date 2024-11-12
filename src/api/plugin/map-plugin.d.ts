@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { AbstractPlugin } from './abstract-plugin';
 /** ******************************************************************************************************************************
  * Map Plugin abstract class.

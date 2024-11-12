@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Create an element that displays the scale
  *

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { SnackbarType } from '@/core/utils/notifications';
 /**
  * Snackbar properties interface

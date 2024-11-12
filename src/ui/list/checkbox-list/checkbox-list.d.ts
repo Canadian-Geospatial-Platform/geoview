@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * CheckboxList main Props
  */

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 interface LegendType {
     fullWidth?: boolean;
     containerType?: 'appBar' | 'footerBar';

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { CardMediaProps } from '@mui/material';
 /**
  * Properties for the Card Media

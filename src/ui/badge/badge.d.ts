@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { BadgeProps } from '@mui/material';
 /**
  * Create a badge component

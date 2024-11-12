@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { FooterBarApi } from '@/core/components';
 type FooterBarProps = {
     api: FooterBarApi;

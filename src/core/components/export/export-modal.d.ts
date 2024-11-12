@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Export modal window component to export the viewer information in a PNG file
  *

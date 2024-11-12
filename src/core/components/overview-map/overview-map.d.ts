@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import OLMap from 'ol/Map';
 type OverwiewMapProps = {
     olMap: OLMap;

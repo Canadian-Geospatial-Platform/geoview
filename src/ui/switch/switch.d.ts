@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { SwitchProps } from '@mui/material';
 /**
  * Create a Material UI Swich component

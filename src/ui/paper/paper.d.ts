@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { PaperProps } from '@mui/material';
 /**
  * Create a paper component

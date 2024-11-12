@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { MRT_TableOptions as MRTTableOptions, type MRT_RowData as MRTRowData } from 'material-react-table';
 /**
  * Create a material react table

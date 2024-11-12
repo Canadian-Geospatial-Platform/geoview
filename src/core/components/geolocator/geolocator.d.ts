@@ -1,4 +1,3 @@
-/// <reference types="react" />
 export interface GeoListItem {
     key: string;
     name: string;

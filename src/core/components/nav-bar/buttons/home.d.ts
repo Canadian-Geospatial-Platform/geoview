@@ -1,4 +1,3 @@
-/// <reference types="react" />
 /**
  * Create a home button to return the user to the map center
  *

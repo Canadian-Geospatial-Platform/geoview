@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TypeButtonProps } from '@/ui/panel/panel-types';
 export type ButtonProps = {
     makeResponsive?: boolean;

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TypeFieldEntry } from '@/geo/map/map-schema-types';
 interface FeatureInfoTableProps {
     featureInfoList: TypeFieldEntry[];

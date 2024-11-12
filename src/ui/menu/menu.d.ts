@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { MenuProps } from '@mui/material';
 /**
  * Create a customized Material UI Menu
