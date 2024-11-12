@@ -30,7 +30,7 @@ export abstract class AbstractWorker<T> {
 
   /**
    * Creates an instance of AbstractWorker.
-   * @param {string} name - The Web Worker name for logging..
+   * @param {string} name - The Web Worker name for logging.
    * @param {Worker} worker - The Web Worker instance to wrap.
    */
   constructor(name: string, worker: Worker) {
@@ -43,11 +43,16 @@ export abstract class AbstractWorker<T> {
   }
 
   /**
-   * Sets up logging for messages from the worker.
+   * Sets up logging configuration for the worker instance.
+   * This private method initializes and configures the logging system
+   * to handle worker-specific logging requirements.
    * @private
    */
   #setupLogging(): void {
     this.worker.onmessage = (event) => {
+      // Configures logging settings for the worker process
+      // Ensures worker-specific log entries can be properly tracked and identified
+      // Establishes logging context for debugging and monitoring worker operations
       if (event.data && event.data.type === 'log') {
         const { level, message } = event.data;
         switch (level as WorkerLogLevel) {

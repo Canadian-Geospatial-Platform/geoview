@@ -50,7 +50,7 @@ register(proj4);
  * @param {number[][]} points - Array of points to transform.
  * @returns {number[][]} Array of transformed points.
  */
-function transformPoint(points: number[][]): number[][] {
+function transformPoints(points: number[][]): number[][] {
   const converted: Array<Array<number>> = [];
 
   if (Array.isArray(points) && points.length > 0) {
@@ -68,44 +68,50 @@ function transformPoint(points: number[][]): number[][] {
 /**
  * Transforms the geometry of a GeoJSON feature.
  * @param {any} geometry - The geometry to transform.
- * @returns {any} The transformed geometry.
+ * @returns {TypeJsonObject} The transformed geometry.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function transformGeometry(geometry: any): any {
-  if (!geometry) return null;
-
+function transformGeometry(geometry: any): TypeJsonObject {
   const { type, coordinates } = geometry;
 
-  switch (type) {
-    case 'Point':
-      return {
-        type,
-        coordinates: transformPoint(coordinates)[0],
-      };
-    case 'LineString':
-    case 'MultiPoint':
-      return {
-        type,
-        coordinates: coordinates.map(transformPoint),
-      };
-    case 'Polygon':
-    case 'MultiLineString':
-      return {
-        type,
-        coordinates: coordinates.map((coords: Coordinate[]) => {
-          return coords.map((coord: Coordinate) => transformPoint([coord])[0]);
-        }),
-      };
-    case 'MultiPolygon':
-      return {
-        type,
-        coordinates: coordinates[0].map((coords: Coordinate[]) => {
-          return coords.map((coord: Coordinate) => transformPoint([coord])[0]);
-        }),
-      };
-    default:
-      return geometry;
+  let transformedGeometry = {};
+  if (type === 'Polygon') {
+    // coordinates are in the form of Coordinate[][]
+    transformedGeometry = {
+      type: 'Polygon',
+      coordinates: coordinates.map((coords: Coordinate[]) => {
+        return coords.map((coord: Coordinate) => transformPoints([coord])[0]);
+      }),
+    };
+  } else if (type === 'MultiPolygon') {
+    // coordinates are in the form of Coordinate[][][]
+    transformedGeometry = {
+      type: 'MultiPolygon',
+      coordinates: coordinates.map((coords1: Coordinate[][]) => {
+        return coords1.map((coords2: Coordinate[]) => {
+          return coords2.map((coord: Coordinate) => transformPoints([coord])[0]);
+        });
+      }),
+    };
+  } else if (type === 'LineString') {
+    // coordinates are in the form of Coordinate[]
+    transformedGeometry = { type: 'LineString', coordinates: coordinates.map((coord: Coordinate) => transformPoints([coord])[0]) };
+  } else if (type === 'MultiLineString') {
+    // coordinates are in the form of Coordinate[][]
+    transformedGeometry = {
+      type: 'MultiLineString',
+      coordinates: coordinates.map((coords: Coordinate[]) => {
+        return coords.map((coord: Coordinate) => transformPoints([coord])[0]);
+      }),
+    };
+  } else if (type === 'Point') {
+    // coordinates are in the form of Coordinate
+    transformedGeometry = { type: 'Point', coordinates: transformPoints([coordinates])[0] };
+  } else if (type === 'MultiPoint') {
+    // coordinates are in the form of Coordinate[]
+    transformedGeometry = { type: 'MultiPoint', coordinates: coordinates.map((coord: Coordinate) => transformPoints([coord])[0]) };
   }
+
+  return transformedGeometry
 }
 
 /**

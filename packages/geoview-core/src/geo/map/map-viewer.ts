@@ -1194,9 +1194,9 @@ export class MapViewer {
     // Remove all layers
     try {
       this.layer.removeAllGeoviewLayers();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       // Failed to remove layers, eat the exception and continue to remove the map
+      logger.logError('Failed to remove layers', err);
     }
 
     // Delete store and event processor

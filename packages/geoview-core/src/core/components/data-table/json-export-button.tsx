@@ -28,7 +28,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   const { t } = useTranslation<string>();
 
   // get store action and map projection
-  const { getLayer } = useLayerStoreActions();
+  const { getLayer, queryLayerEsriDynamic } = useLayerStoreActions();
   const { addMessage } = useAppStoreActions();
   const mapProjection = useMapProjection();
 
@@ -61,6 +61,46 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
     return builtGeometry;
   };
 
+  const fetchESRI = useCallback(
+    (chunk: TypeFeatureInfoEntry[]): Promise<TypeFeatureInfoEntry[]> => {
+      try {
+        // Create a new promise that will resolved when features have been updated with their geometries
+        return new Promise<TypeFeatureInfoEntry[]>((resolve, reject) => {
+          // Get the ids
+          const objectids = chunk.map((record) => {
+            return record.geometry?.get('OBJECTID') as number;
+          });
+
+          // Query
+          queryLayerEsriDynamic(layerPath, objectids)
+            .then((results) => {
+              // For each result
+              results.forEach((result) => {
+                // Filter
+                const recFound = chunk.filter((record) => record.geometry?.get('OBJECTID') === result.fieldInfo?.OBJECTID?.value);
+
+                // If found it
+                if (recFound && recFound.length === 1) {
+                  // Officially attribute the geometry to that particular record
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (recFound[0].geometry as any).setGeometry(result.geometry);
+                }
+              });
+
+              // Only now, resolve the promise
+              resolve(chunk);
+            })
+            .catch(reject);
+        });
+      } catch (err) {
+        // Handle error
+        logger.logError('Failed to query the features to get their geometries. The output will not have the geometries.', err);
+        return Promise.resolve(chunk); // Return the original chunk if there's an error
+      }
+    },
+    [layerPath, queryLayerEsriDynamic]
+  );
+
   /**
    * Callback function to get JSON data for export.
    * This function is memoized using useCallback to optimize performance.
@@ -70,10 +110,11 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
    */
   const getJson = useCallback(
     // eslint-disable-next-line func-names
-    async function* (): AsyncGenerator<string> {
-      // create a set with the geoviewID available for download
+    async function* (fetchGeometriesDuringProcess: boolean): AsyncGenerator<string> {
+      // create a set with the geoviewID available for download and filteres the features
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rowsIDSet = new Set(rows.map((row: any) => row?.geoviewID?.value).filter(Boolean));
+      const filteredFeatures = features.filter((feature) => rowsIDSet.has(feature.fieldInfo.geoviewID?.value));
 
       // create the worker
       const worker = new JsonExportWorker();
@@ -87,10 +128,16 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
         });
 
         // Loop the chunk and get the JSON
-        for (let i = 0; i < features.length; i += chunkSize) {
-          const chunk = features.slice(i, i + chunkSize);
+        for (let i = 0; i < filteredFeatures.length; i += chunkSize) {
+          let chunk = filteredFeatures.slice(i, i + chunkSize);
 
-          // Use rowsIDSet to get features that needs to be ecxported, then serialize geometry
+          // If must fetch the geometries during the process
+          if (fetchGeometriesDuringProcess) {
+            // eslint-disable-next-line no-await-in-loop
+            chunk = await fetchESRI(chunk);
+          }
+
+          // Use rowsIDSet to get features that needs to be exported, then serialize geometry
           const serializedChunk = chunk
             .filter((feature) => rowsIDSet.has(feature.fieldInfo.geoviewID?.value))
             .map((feature) => ({
@@ -118,7 +165,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
         worker.terminate();
       }
     },
-    [features, mapProjection, rows]
+    [features, fetchESRI, mapProjection, rows]
   );
 
   /**
@@ -141,7 +188,10 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   const handleExportData = useCallback(async () => {
     setIsExporting(true);
     try {
-      const jsonGenerator = getJson();
+      const layer = getLayer(layerPath);
+      const layerIsEsriDynamic = layer?.type === 'esriDynamic';
+
+      const jsonGenerator = getJson(layerIsEsriDynamic);
       const chunks = [];
       let i = 0;
 

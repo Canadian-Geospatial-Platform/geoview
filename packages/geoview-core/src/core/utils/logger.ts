@@ -190,7 +190,7 @@ export class ConsoleLogger {
     // Validate log active
     if (!LOG_ACTIVE) return;
     // Redirect
-    this.#logLevel(LOG_TRACE_WORKER, 'WORKER', 'pink', ...messages); // Not a typo, 5 characters for alignment
+    this.#logLevel(LOG_TRACE_WORKER, 'WORKR', 'pink', ...messages); // Not a typo, 5 characters for alignment
   }
 
   /**
@@ -472,7 +472,7 @@ logger.logInfo('Logger initialized');
 // logger.logTraceCoreStoreSubscription('trace store subscription');
 // logger.logTraceCoreAPIEvent('trace api event');
 // logger.logTraceCore('trace core');
-// logger.logTraceCore('trace worker');
+// logger.logTraceWorker('trace worker');
 // logger.logDebug('debug');
 // logger.logMarkerStart('test time marker');
 // logger.logMarkerCheck('test time marker');

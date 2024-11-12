@@ -380,7 +380,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
   protected getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
-    // Log
+    // Log - REMOVED as it is trigger for every row of data table, just enable for debuggin purpose
     // logger.logWarning(`getFieldDomain is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
     return null;
   }

@@ -1220,8 +1220,8 @@ export async function getLegendStyles(styleConfig: TypeStyleConfig | undefined):
       legendStyles.Polygon = layerStyles.Polygon;
     }
     return legendStyles;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
+    logger.logError('Error getLegendStyles', error);
     return {};
   }
 }
