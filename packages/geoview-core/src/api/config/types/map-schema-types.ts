@@ -342,7 +342,7 @@ export { GeoJsonLayerEntryConfig } from '@config/types/classes/sub-layer-config/
 /** Valid keys for the geometryType property. */
 // TODO: Refactor - Layers/Config refactoring. The values here have been renamed to lower case, make sure to lower here and adjust everywhere as part of config migration.
 // TODO.CONT: What is the fastest option... change config or all code, see what is the fastest
-export type TypeStyleGeometry = 'point' | 'linestring' | 'multilineString' | 'polygon' | 'multipolygon';
+export type TypeStyleGeometry = 'point' | 'linestring' | 'multilinestring' | 'polygon' | 'multipolygon';
 
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
 export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group';

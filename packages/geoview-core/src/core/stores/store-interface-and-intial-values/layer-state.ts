@@ -112,12 +112,17 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // Check if EsriDynamic config
         if (layerConfig && layerEntryIsEsriDynamic(layerConfig)) {
           // Query for the specific object ids
+          // TODO: Make sure / is append at the end of metadataAccessPath/dataAccessPath when we read config
+          // TODO: Put the server original projection in the config metadata (add a new optional param in source for esri)
+          // TODO.CONT: When we get the projection we can get the projection in original server (will solve error trying to reproject https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7 in 3857)
+          // TODO.CONT: Then we need to modify the DownloadGeoJSON to use mapProjection for vector and original projection for dynamic.
           return esriQueryRecordsByUrlObjectIds(
-            `${layerConfig.source?.dataAccessPath}${layerConfig.layerId}`,
+            `${layerConfig.source?.dataAccessPath}/${layerConfig.layerId}`,
             geometryType,
             objectIDs,
             'OBJECTID',
-            true
+            true,
+            MapEventProcessor.getMapState(get().mapId).currentProjection
           );
         }
 

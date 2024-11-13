@@ -234,7 +234,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       });
   }, [exportBlob, getJson, getLayer, layerPath]);
 
-  return <MenuItem onClick={handleExportData}>{t('dataTable.jsonExportBtn')}</MenuItem>;
+  return <MenuItem onClick={handleExportData}>{t('dataTable.downloadAsGeoJSON')}</MenuItem>;
 }
 
 export default JSONExportButton;

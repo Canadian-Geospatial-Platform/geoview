@@ -44,6 +44,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   const serializeGeometry = (geometry: Geometry): TypeJsonObject => {
     let builtGeometry = {};
 
+    // TODO: There is no proper support for esriDynamic MultiPoint issue 2589
     if (geometry instanceof Polygon) {
       builtGeometry = { type: 'Polygon', coordinates: geometry.getCoordinates() };
     } else if (geometry instanceof MultiPolygon) {
@@ -199,6 +200,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       const chunks = [];
       let i = 0;
 
+      addMessage('info', `${t('dataTable.downloadAsGeoJSON')} ${t('general.started')}...`);
       for await (const chunk of jsonGenerator) {
         chunks.push(chunk);
         i++;
@@ -212,7 +214,8 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       const blob = new Blob([fullJson], { type: 'application/json' });
       exportBlob(blob, `table-${getLayer(layerPath)?.layerName.replaceAll(' ', '-')}.json`);
     } catch (error) {
-      logger.logError('Export failed:', error);
+      addMessage('error', `${t('dataTable.downloadAsGeoJSON')} ${t('general.failed')}`);
+      logger.logError('Download GeoJSON failed:', error);
     } finally {
       setIsExporting(false);
     }
@@ -222,7 +225,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   return (
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <MenuItem onClick={handleExportData} disabled={isExporting}>
-      {t('dataTable.jsonExportBtn')}
+      {t('dataTable.downloadAsGeoJSON')}
     </MenuItem>
   );
 }
