@@ -39,7 +39,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
    * Helper function to serialize a json geometry to pass to the worker
    *
    * @param {Geometry} geometry - The geometry
-   * @returns {TypeJsonObject} The serialize geometry json
+   * @returns {TypeJsonObject} The serialized geometry json
    */
   const serializeGeometry = (geometry: Geometry): TypeJsonObject => {
     let builtGeometry = {};
@@ -109,6 +109,10 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
    * @returns {Promise<string>} A promise that resolves to the JSON string to be exported.
    */
   const getJson = useCallback(
+    // The function* is crucial here because this is a generator function, specifically an async generator function.
+    //  - The * (asterisk) indicates that this is a generator function that can yield multiple values over time
+    //  - async function* is the syntax for declaring an async generator function
+    //  - The combination allows you to use both await and yield in the function body
     // eslint-disable-next-line func-names
     async function* (fetchGeometriesDuringProcess: boolean): AsyncGenerator<string> {
       // create a set with the geoviewID available for download and filteres the features
