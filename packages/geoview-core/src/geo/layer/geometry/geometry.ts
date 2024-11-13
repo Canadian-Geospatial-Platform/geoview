@@ -665,10 +665,15 @@ export class GeometryApi {
   ): OLGeometry {
     switch (geometryType) {
       case 'Point':
+        // If it's actually a MultiPoint
+        if (GeometryApi.isArrayOfCoordinates(coordinates)) {
+          // Create a MultiLine geometry
+          return new MultiPoint(coordinates as Coordinate[]);
+        }
         // Create a Point geometry
         return new Point(coordinates as Coordinate);
       case 'MultiPoint':
-        // Create a Point geometry
+        // Create a MultiPoint geometry
         return new MultiPoint(coordinates as Coordinate[]);
 
       case 'LineString':
