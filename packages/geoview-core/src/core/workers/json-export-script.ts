@@ -18,6 +18,11 @@ import { TypeJsonObject } from '@/api/config/types/config-types';
  * definition for the EPSG:3978 projection.
  */
 
+type TypeWorkerExportGeometry = {
+  type: string;
+  coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][];
+};
+
 // Type related to the worker
 export type TypeWorkerExportChunk = {
   geometry: TypeJsonObject;
@@ -47,10 +52,10 @@ register(proj4);
 
 /**
  * Transforms an array of points from the source CRS to the target CRS.
- * @param {number[][]} points - Array of points to transform.
- * @returns {number[][]} Array of transformed points.
+ * @param {Coordinate[]} points - Array of points coordinates to transform.
+ * @returns {Coordinate[]} Array of transformed points coordinates.
  */
-function transformPoints(points: number[][]): number[][] {
+function transformPoints(points: Coordinate[]): Coordinate[] {
   const converted: Array<Array<number>> = [];
 
   if (Array.isArray(points) && points.length > 0) {
@@ -67,10 +72,10 @@ function transformPoints(points: number[][]): number[][] {
 
 /**
  * Transforms the geometry of a GeoJSON feature.
- * @param {any} geometry - The geometry to transform.
+ * @param {TypeWorkerExportGeometry} geometry - The geometry to transform.
  * @returns {TypeJsonObject} The transformed geometry.
  */
-function transformGeometry(geometry: any): TypeJsonObject {
+function transformGeometry(geometry: TypeWorkerExportGeometry): TypeJsonObject {
   const { type, coordinates } = geometry;
 
   let transformedGeometry = {};
@@ -78,7 +83,7 @@ function transformGeometry(geometry: any): TypeJsonObject {
     // coordinates are in the form of Coordinate[][]
     transformedGeometry = {
       type: 'Polygon',
-      coordinates: coordinates.map((coords: Coordinate[]) => {
+      coordinates: (coordinates as Coordinate[][]).map((coords: Coordinate[]) => {
         return coords.map((coord: Coordinate) => transformPoints([coord])[0]);
       }),
     };
@@ -86,7 +91,7 @@ function transformGeometry(geometry: any): TypeJsonObject {
     // coordinates are in the form of Coordinate[][][]
     transformedGeometry = {
       type: 'MultiPolygon',
-      coordinates: coordinates.map((coords1: Coordinate[][]) => {
+      coordinates: (coordinates as Coordinate[][][]).map((coords1: Coordinate[][]) => {
         return coords1.map((coords2: Coordinate[]) => {
           return coords2.map((coord: Coordinate) => transformPoints([coord])[0]);
         });
@@ -94,24 +99,30 @@ function transformGeometry(geometry: any): TypeJsonObject {
     };
   } else if (type === 'LineString') {
     // coordinates are in the form of Coordinate[]
-    transformedGeometry = { type: 'LineString', coordinates: coordinates.map((coord: Coordinate) => transformPoints([coord])[0]) };
+    transformedGeometry = {
+      type: 'LineString',
+      coordinates: (coordinates as Coordinate[]).map((coord: Coordinate) => transformPoints([coord])[0]),
+    };
   } else if (type === 'MultiLineString') {
     // coordinates are in the form of Coordinate[][]
     transformedGeometry = {
       type: 'MultiLineString',
-      coordinates: coordinates.map((coords: Coordinate[]) => {
+      coordinates: (coordinates as Coordinate[][]).map((coords: Coordinate[]) => {
         return coords.map((coord: Coordinate) => transformPoints([coord])[0]);
       }),
     };
   } else if (type === 'Point') {
     // coordinates are in the form of Coordinate
-    transformedGeometry = { type: 'Point', coordinates: transformPoints([coordinates])[0] };
+    transformedGeometry = { type: 'Point', coordinates: transformPoints([coordinates as Coordinate])[0] };
   } else if (type === 'MultiPoint') {
     // coordinates are in the form of Coordinate[]
-    transformedGeometry = { type: 'MultiPoint', coordinates: coordinates.map((coord: Coordinate) => transformPoints([coord])[0]) };
+    transformedGeometry = {
+      type: 'MultiPoint',
+      coordinates: (coordinates as Coordinate[]).map((coord: Coordinate) => transformPoints([coord])[0]),
+    };
   }
 
-  return transformedGeometry
+  return transformedGeometry;
 }
 
 /**
@@ -150,7 +161,7 @@ const worker = {
 
       const processedChunk = chunk.map((feature: TypeWorkerExportChunk) => {
         const { geometry, properties } = feature;
-        const transformedGeometry = transformGeometry(geometry);
+        const transformedGeometry = transformGeometry(geometry as unknown as TypeWorkerExportGeometry);
         return JSON.stringify({
           type: 'Feature',
           geometry: transformedGeometry,
