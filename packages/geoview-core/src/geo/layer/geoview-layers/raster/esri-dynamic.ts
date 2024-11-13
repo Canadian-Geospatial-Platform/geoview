@@ -337,13 +337,17 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const layerConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
 
       // Guess the geometry type by taking the first style key
-      // TODO: Refactor - Layers migration. Johann: This will be modified with new schema, there is no more geometry on style
       const [geometryType] = layerConfig.getTypeGeometries();
 
       // Fetch the features
       let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath!;
       if (!urlRoot.endsWith('/')) urlRoot += '/';
-      // TODO: we put false so on heavy geometry, dynamic layer can load datatable. If not the fetch fails.
+      // GV: we put false so on heavy geometry, dynamic layer can load datatable. If not the fetch fails.
+      // TODO: Because we do not query the geometry anymore, the section below to create geometry is useless
+      // TODO.CONT: This also have an effect on the style as it use the geometry to define wich one to use
+      // TODO.CONT: The formatFeatureInfoResult (abstact-geoview-layer) / getFeatureCanvas (geoview-renderer)
+      // TODO.CONT: needs to be modified to use default style pass to the function....
+      // TODO.CONT: We need a refactor to this in background, maybe with workers
       const url = `${urlRoot}${layerConfig.layerId}/query?where=1=1&outFields=*&f=json&returnGeometry=false`;
 
       const response = await fetch(url);

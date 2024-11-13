@@ -517,26 +517,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     try {
       if (!features.length) return [];
 
-      // Will hold the generic icon to use in formatting
-      let genericLegendInfo: string | null | undefined;
-      // We only want 1 task to fetch the generic legend (when we have to)
-      const semaphore = new AsyncSemaphore(1);
-
-      // Will be executed when we have to use a default canvas for a particular feature
-      const callbackToFetchDataUrl = (): Promise<string | null> => {
-        // Make sure one task at a time in this
-        return semaphore.withLock(async () => {
-          // Only execute this once in the callback. After this, once the semaphore is unlocked, it's either a string or null for as long as we're formatting
-          if (genericLegendInfo === undefined) {
-            genericLegendInfo = null; // Turn it to null, we are actively trying to find something (not undefined anymore)
-            const legend = await this.queryLegend();
-            const legendIcons = LegendEventProcessor.getLayerIconImage(legend);
-            if (legendIcons) genericLegendInfo = legendIcons![0].iconImage || null;
-          }
-          return genericLegendInfo;
-        });
-      };
-
       const outfields = layerConfig?.source?.featureInfo?.outfields;
 
       // Loop on the features to build the array holding the promises for their canvas
@@ -549,8 +529,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
               this.getStyle(layerConfig.layerPath)!,
               layerConfig.filterEquation,
               layerConfig.legendFilterIsOff,
-              true,
-              callbackToFetchDataUrl
+              true
             )
               .then((canvas) => {
                 resolveCanvas({ feature: featureNeedingItsCanvas, canvas });

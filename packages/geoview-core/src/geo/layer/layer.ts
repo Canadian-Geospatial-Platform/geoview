@@ -169,7 +169,7 @@ export class LayerApi {
   // ************************************************************
   // INDICATES IF USING HYBRID MODE WITH THE NEW GVLAYERS CLASSES
   // ************************************************************
-  static LAYERS_HYBRID_MODE = false;
+  static LAYERS_HYBRID_MODE = true;
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
