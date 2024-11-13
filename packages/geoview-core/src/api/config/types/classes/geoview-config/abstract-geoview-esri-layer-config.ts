@@ -244,6 +244,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
    * @static
    */
   static convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
+    // TODO: Update with style refactor PR (function esriConvertEsriGeometryTypeToOLGeometryType gv-layer/util)
     switch (esriGeometryType) {
       case 'esriGeometryPoint':
       case 'esriGeometryMultipoint':

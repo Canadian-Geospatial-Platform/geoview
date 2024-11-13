@@ -191,15 +191,17 @@ export async function esriQueryRelatedRecordsByUrl(url: string, recordGroupIndex
 export function esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
   switch (esriGeometryType) {
     case 'esriGeometryPoint':
-    case 'esriGeometryMultipoint':
       return 'Point';
-
+    case 'esriGeometryMultipoint':
+      return 'MultiPoint';
     case 'esriGeometryPolyline':
       return 'LineString';
-
+    case 'esriGeometryMultiPolyline':
+      return 'MultiLineString';
     case 'esriGeometryPolygon':
-    case 'esriGeometryMultiPolygon':
       return 'Polygon';
+    case 'esriGeometryMultiPolygon':
+      return 'MultiPolygon';
 
     default:
       throw new Error(`Unsupported geometry type: ${esriGeometryType}`);

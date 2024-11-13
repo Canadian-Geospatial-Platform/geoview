@@ -44,7 +44,6 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   const serializeGeometry = (geometry: Geometry): TypeJsonObject => {
     let builtGeometry = {};
 
-    // TODO: There is no proper support for esriDynamic MultiPoint issue 2589
     if (geometry instanceof Polygon) {
       builtGeometry = { type: 'Polygon', coordinates: geometry.getCoordinates() };
     } else if (geometry instanceof MultiPolygon) {
@@ -54,7 +53,12 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
     } else if (geometry instanceof MultiLineString) {
       builtGeometry = { type: 'MultiLineString', coordinates: geometry.getCoordinates() };
     } else if (geometry instanceof Point) {
-      builtGeometry = { type: 'Point', coordinates: geometry.getCoordinates() };
+      // TODO: There is no proper support for esriDynamic MultiPoint issue 2589... this is a workaround
+      if (Array.isArray(geometry.getCoordinates())) {
+        builtGeometry = { type: 'MultiPoint', coordinates: geometry.getCoordinates() };
+      } else {
+        builtGeometry = { type: 'Point', coordinates: geometry.getCoordinates() };
+      }
     } else if (geometry instanceof MultiPoint) {
       builtGeometry = { type: 'MultiPoint', coordinates: geometry.getCoordinates() };
     }
