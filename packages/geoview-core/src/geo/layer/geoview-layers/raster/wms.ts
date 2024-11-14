@@ -132,7 +132,7 @@ export class WMS extends AbstractGeoViewRaster {
             this.#processMetadataInheritance();
           } catch (error) {
             // Log
-            logger.logError(`Unable to read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`);
+            logger.logError(`Unable to read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`, error);
           }
         } else {
           // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
@@ -174,6 +174,7 @@ export class WMS extends AbstractGeoViewRaster {
               }
             }
             this.#processMetadataInheritance();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (error) {
             this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
           }
@@ -200,6 +201,7 @@ export class WMS extends AbstractGeoViewRaster {
       const parser = new WMSCapabilities();
       const metadata: TypeJsonObject = parser.read(capabilitiesString);
       return metadata;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       return null;
@@ -238,6 +240,7 @@ export class WMS extends AbstractGeoViewRaster {
       } else {
         this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
     }
@@ -898,6 +901,8 @@ export class WMS extends AbstractGeoViewRaster {
         name: wmsStyle,
         legend: null,
       } as TypeWmsLegendStyle;
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       return {
         name: wmsStyle,

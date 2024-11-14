@@ -1049,6 +1049,7 @@ export class LayerApi {
         // Check and add time slider layer when needed
         TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layerConfig);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Layer failed to load, abandon it for the TimeSlider registration, too bad.
       // The error itself, regarding the loaded failure, is already being taken care of elsewhere.

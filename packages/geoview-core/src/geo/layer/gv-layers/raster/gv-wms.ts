@@ -384,6 +384,7 @@ export class GVWMS extends AbstractGVRaster {
         legend: null,
       } as TypeWmsLegendStyle;
     } catch (error) {
+      logger.logError('gv-wms.#getStyleLegend()\n', error);
       return {
         name: wmsStyle,
         legend: null,

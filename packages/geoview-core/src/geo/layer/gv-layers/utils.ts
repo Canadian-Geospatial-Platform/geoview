@@ -136,6 +136,7 @@ export async function esriQueryRecordsByUrl(url: string, geometryType?: TypeStyl
  * @param {number[]} objectIds - The list of objectids to filter the query on
  * @param {string} fields - The list of field names to include in the output
  * @param {boolean} geometry - True to return the geometries in the output
+ * @param {number} outSR - The spatial reference of the output geometries from the query
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
 export function esriQueryRecordsByUrlObjectIds(
@@ -143,11 +144,12 @@ export function esriQueryRecordsByUrlObjectIds(
   geometryType: TypeStyleGeometry,
   objectIds: number[],
   fields: string,
-  geometry: boolean
+  geometry: boolean,
+  outSR?: number
 ): Promise<TypeFeatureInfoEntryPartial[]> {
   // Query
   const oids = objectIds.join(',');
-  const url = `${layerUrl}/query?where=&objectIds=${oids}&outFields=${fields}&returnGeometry=${geometry}&f=json`;
+  const url = `${layerUrl}/query?where=&objectIds=${oids}&outFields=${fields}&returnGeometry=${geometry}&outSR=${outSR}&f=json`;
 
   // Redirect
   return esriQueryRecordsByUrl(url, geometryType);
@@ -189,15 +191,17 @@ export async function esriQueryRelatedRecordsByUrl(url: string, recordGroupIndex
 export function esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
   switch (esriGeometryType) {
     case 'esriGeometryPoint':
-    case 'esriGeometryMultipoint':
       return 'Point';
-
+    case 'esriGeometryMultipoint':
+      return 'MultiPoint';
     case 'esriGeometryPolyline':
       return 'LineString';
-
+    case 'esriGeometryMultiPolyline':
+      return 'MultiLineString';
     case 'esriGeometryPolygon':
-    case 'esriGeometryMultiPolygon':
       return 'Polygon';
+    case 'esriGeometryMultiPolygon':
+      return 'MultiPolygon';
 
     default:
       throw new Error(`Unsupported geometry type: ${esriGeometryType}`);

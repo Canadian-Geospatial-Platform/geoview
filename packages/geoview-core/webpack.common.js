@@ -8,11 +8,11 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const LodashWebpackPlugin = require('lodash-webpack-plugin');
 const glob = require('glob');
 const childProcess = require('child_process');
-const package = require('./package.json');
+const packageJSON = require('./package.json');
 
 // get date, version numbers and the hash of the current commit
 const date = new Date().toISOString();
-const [major, minor, patch] = package.version.split('.');
+const [major, minor, patch] = packageJSON.version.split('.');
 const hash = JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString().trim());
 
 // eslint-disable-next-line no-console

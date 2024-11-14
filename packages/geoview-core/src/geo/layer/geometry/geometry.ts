@@ -1,7 +1,7 @@
 import VectorLayer from 'ol/layer/Vector';
 import Feature from 'ol/Feature';
 import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
-import { Geometry as OLGeometry, Circle, LineString, MultiLineString, Point, Polygon, MultiPolygon } from 'ol/geom';
+import { Geometry as OLGeometry, Circle, LineString, MultiLineString, Point, Polygon, MultiPolygon, MultiPoint } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
 import { Fill, Stroke, Style, Icon } from 'ol/style';
 import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
@@ -665,8 +665,16 @@ export class GeometryApi {
   ): OLGeometry {
     switch (geometryType) {
       case 'Point':
+        // If it's actually a MultiPoint
+        if (GeometryApi.isArrayOfCoordinates(coordinates)) {
+          // Create a MultiLine geometry
+          return new MultiPoint(coordinates as Coordinate[]);
+        }
         // Create a Point geometry
         return new Point(coordinates as Coordinate);
+      case 'MultiPoint':
+        // Create a MultiPoint geometry
+        return new MultiPoint(coordinates as Coordinate[]);
 
       case 'LineString':
         // If it's actually a MultiLineString
@@ -674,7 +682,6 @@ export class GeometryApi {
           // Create a MultiLine geometry
           return new MultiLineString(coordinates);
         }
-
         // Create a Line geometry
         return new LineString(coordinates as Coordinate[]);
 
@@ -688,7 +695,6 @@ export class GeometryApi {
           // Create a MultiPolygon geometry
           return new MultiPolygon(coordinates);
         }
-
         // Create a Polygon geometry
         return new Polygon(coordinates as Coordinate[][]);
 

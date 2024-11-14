@@ -1221,6 +1221,7 @@ export async function getLegendStyles(styleConfig: TypeStyleConfig | undefined):
     }
     return legendStyles;
   } catch (error) {
+    logger.logError('Error getLegendStyles', error);
     return {};
   }
 }
@@ -1506,6 +1507,7 @@ function processClassBreaksPolygon(
 const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyleProcessor>> = {
   simple: {
     Point: processSimplePoint,
+    MultiPoint: processSimplePoint,
     LineString: processSimpleLineString,
     MultiLineString: processSimpleLineString,
     Polygon: processSimplePolygon,
@@ -1513,6 +1515,7 @@ const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyl
   },
   uniqueValue: {
     Point: processUniqueValuePoint,
+    MultiPoint: processUniqueValuePoint,
     LineString: processUniqueLineString,
     MultiLineString: processUniqueLineString,
     Polygon: processUniquePolygon,
@@ -1520,6 +1523,7 @@ const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyl
   },
   classBreaks: {
     Point: processClassBreaksPoint,
+    MultiPoint: processClassBreaksPoint,
     LineString: processClassBreaksLineString,
     MultiLineString: processClassBreaksLineString,
     Polygon: processClassBreaksPolygon,

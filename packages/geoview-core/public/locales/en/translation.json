@@ -8,11 +8,14 @@
     "open": "Open",
     "remove": "Remove",
     "view": "View",
+    "failed": "failed",
+    "started": "started",
     "openFullscreen": "Open in fullscreen",
     "closeFullscreen": "Close fullscreen",
     "openGuide": "Open guide",
     "guide": "Guide",
-    "fullScreen": "Full screen"
+    "fullScreen": "Full screen",
+    "processing": "Processing __param__ element(s) of __param__"
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -197,7 +200,7 @@
     "zoom": "ZOOM",
     "details": "DETAILS",
     "exportBtn": "Download",
-    "jsonExportBtn": "Download GeoJSON",
+    "downloadAsGeoJSON": "Download GeoJSON",
     "downloadAsCSV": "Download CSV",
     "filterMap": "Filter map",
     "stopFilterMap": "Stop filter map",

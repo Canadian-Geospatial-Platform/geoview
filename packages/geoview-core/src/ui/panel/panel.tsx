@@ -121,8 +121,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     // Set a timeout for the duration of the CSS animation
     setTimeout(() => {
       // Animation completed, run additional logic here
-      console.log('Animation completed!');
-
       if (panelContainerRef.current && open && mapInfo) {
         const mapInfoHeight = mapInfo.getBoundingClientRect().height;
         panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight}px)`;

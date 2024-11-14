@@ -111,6 +111,14 @@
           }
         ]
       }
+    },
+    {
+      "files": ["webpack.*.js"],
+      "parser": "@babel/eslint-parser",
+      "parserOptions": {
+        "requireConfigFile": false,
+        "ecmaVersion": 2018
+      }
     }
   ]
 }
