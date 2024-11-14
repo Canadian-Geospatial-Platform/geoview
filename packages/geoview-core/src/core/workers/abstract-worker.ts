@@ -49,10 +49,10 @@ export abstract class AbstractWorker<T> {
    * @private
    */
   #setupLogging(): void {
+    // Configures logging settings for the worker process
+    // Ensures worker-specific log entries can be properly tracked and identified - event.data.type === 'log'
+    // Establishes logging context for debugging and monitoring worker operations
     this.worker.onmessage = (event) => {
-      // Configures logging settings for the worker process
-      // Ensures worker-specific log entries can be properly tracked and identified
-      // Establishes logging context for debugging and monitoring worker operations
       if (event.data && event.data.type === 'log') {
         const { level, message } = event.data;
         switch (level as WorkerLogLevel) {

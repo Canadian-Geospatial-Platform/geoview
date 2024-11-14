@@ -8,7 +8,7 @@ export * from './crosshair/crosshair-icon';
 export * from './crosshair/crosshair';
 export * from './data-table/export-button';
 export * from './data-table/filter-map';
-export * from './data-table/json-export-button-ori';
+export * from './data-table/json-export-button';
 export * from './data-table/data-table';
 export * from './data-table/data-panel';
 export * from './details/details-panel';
