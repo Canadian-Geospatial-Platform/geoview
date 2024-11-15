@@ -270,7 +270,7 @@ export { WmsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf
 export { WfsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
 export { GeoJsonLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
 /** Valid keys for the geometryType property. */
-export type TypeStyleGeometry = 'point' | 'linestring' | 'polygon';
+export type TypeStyleGeometry = 'point' | 'linestring' | 'multilinestring' | 'polygon' | 'multipolygon';
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
 export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group';
 /** Temporal dimension associated to the layer. */

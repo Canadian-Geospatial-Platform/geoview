@@ -7,6 +7,7 @@ export declare const LOG_TRACE_USE_EFFECT = 6;
 export declare const LOG_TRACE_CORE_STORE_SUBSCRIPTION = 8;
 export declare const LOG_TRACE_CORE_API_EVENT = 9;
 export declare const LOG_TRACE_CORE = 10;
+export declare const LOG_TRACE_WORKER = 15;
 export declare const LOG_DEBUG = 20;
 export declare const LOG_INFO = 30;
 export declare const LOG_WARNING = 40;
@@ -86,6 +87,12 @@ export declare class ConsoleLogger {
      * @param {unknown[]} messages - The messages to log
      */
     logTraceCore(...messages: unknown[]): void;
+    /**
+     * Logs tracing calls workers.
+     * Only shows if LOG_ACTIVE is true.
+     * @param {unknown[]} messages - The messages to log
+     */
+    logTraceWorker(...messages: unknown[]): void;
     /**
      * Logs debug information.
      * Only shows if LOG_ACTIVE is true.

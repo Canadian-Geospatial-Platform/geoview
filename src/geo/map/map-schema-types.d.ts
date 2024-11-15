@@ -557,7 +557,7 @@ export type TypeStyleSettings = TypeBaseStyleConfig | TypeSimpleStyleConfig | Ty
 /** ******************************************************************************************************************************
  * Valid keys for the TypeStyleConfig object.
  */
-export type TypeStyleGeometry = 'Point' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
+export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
 /** ******************************************************************************************************************************
  * Type of Style to apply to the GeoView vector layer based on geometry types.
  */
