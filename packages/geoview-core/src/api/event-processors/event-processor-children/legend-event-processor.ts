@@ -11,9 +11,11 @@ import {
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import {
   TypeStyleGeometry,
+  TypeUniqueValueStyleConfig,
+  TypeUniqueValueStyleInfo,
   isClassBreakStyleConfig,
   isSimpleStyleConfig,
   isUniqueValueStyleConfig,
@@ -587,5 +589,47 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: any[]): any[] {
+    // Get the layer config
+    const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(
+      layerPath
+    ) as unknown as AbstractBaseLayerEntryConfig;
+
+    // Get the geometry type
+    const [geometryType] = layerConfig.getTypeGeometries();
+
+    // Get the style
+    const layerStyle = layerConfig.style![geometryType];
+    const styleTypeIsUniqueValue = layerStyle?.styleType === 'uniqueValue';
+
+    // If style type is unique value info, check if class item are visible or not
+    if (styleTypeIsUniqueValue) {
+      const styleUnique = (layerStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo as TypeUniqueValueStyleInfo[];
+      const visibleArray = [];
+      const unvisibleArray = [];
+
+      // Create an array for class that shuld be visible and not visible
+      for (let i = 0; i < styleUnique.length; i++) {
+        if (styleUnique[i].visible) {
+          visibleArray.push(styleUnique[i].values[0]);
+        } else unvisibleArray.push(styleUnique[i].values[0]);
+      }
+
+      const newFeatures = [];
+      for (let i = 0; i < features.length; i++) {
+        const val = features[i].fieldInfo[(layerStyle as TypeUniqueValueStyleConfig).fields[0]].value;
+        if (
+          visibleArray.includes(val.toString()) ||
+          ((layerStyle as TypeUniqueValueStyleConfig).defaultVisible && !unvisibleArray.includes(val.toString()))
+        ) {
+          newFeatures.push(features[i]);
+        }
+      }
+      return newFeatures;
+    }
+    return features;
   }
 }

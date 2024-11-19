@@ -9,13 +9,11 @@ import { shared as iconImageCache } from 'ol/style/IconImageCache';
 
 import { TimeDimension, DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { AsyncSemaphore } from '@/core/utils/async-semaphore';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import {
   TypeStyleConfig,
   TypeFeatureInfoEntry,
@@ -524,13 +522,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       features.forEach((featureNeedingItsCanvas) => {
         promisedAllCanvasFound.push(
           new Promise((resolveCanvas) => {
-            getFeatureCanvas(
-              featureNeedingItsCanvas,
-              this.getStyle(layerConfig.layerPath)!,
-              layerConfig.filterEquation,
-              layerConfig.legendFilterIsOff,
-              true
-            )
+            // GV: Call the function with layerConfig.legendFilterIsOff = true to force the feature to get is canvas
+            // GV: If we don't, it will create canvas only for visible elements and because tables are stored feature will never get its canvas
+            getFeatureCanvas(featureNeedingItsCanvas, this.getStyle(layerConfig.layerPath)!, layerConfig.filterEquation, true, true)
               .then((canvas) => {
                 resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
               })
