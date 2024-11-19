@@ -285,7 +285,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     queryLimit: number = 10
   ): Promise<string[]> {
     // Update url
-    const baseUrl = url.replace('&where=1%3D1&returnCountOnly=true', `&outfields=*`);
+    const baseUrl = url.replace('&where=1%3D1&returnCountOnly=true', `&outfields=*&geometryPrecision=1`);
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
 
     // Create array of url's to call

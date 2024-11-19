@@ -1588,7 +1588,6 @@ const CANVAS_RECYCLING: { [styleAsJsonString: string]: HTMLCanvasElement } = {};
  * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  * @param {boolean} useRecycling - Special parameter to optimize canvas creation time when functions is called multiple times.
- * @param {() => Promise<string | null>} callbackForDataUrl - An optional callback to execute when struggling to build a canvas and have to use a data url to make one
  * @returns {Promise<HTMLCanvasElement>} The canvas icon associated to the feature or a default empty canvas.
  */
 export async function getFeatureCanvas(
@@ -1596,8 +1595,7 @@ export async function getFeatureCanvas(
   style: TypeStyleConfig,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  useRecycling?: boolean,
-  callbackForDataUrl?: () => Promise<string | null>
+  useRecycling?: boolean
 ): Promise<HTMLCanvasElement> {
   // The canvas that will be returned (if calculated successfully)
   let canvas: HTMLCanvasElement | undefined;
@@ -1652,20 +1650,6 @@ export async function getFeatureCanvas(
 
   // If set, all good
   if (canvas) return canvas;
-
-  // Here, it's still not set
-
-  // Callback to get the data url to use
-  const dataUrl = await callbackForDataUrl?.();
-
-  // If any data url can be used
-  if (dataUrl) {
-    // Build a canvas with it
-    canvas = (await createIconCanvasFromImageSource(dataUrl)) || undefined;
-
-    // If set, all good
-    if (canvas) return canvas;
-  }
 
   // Here, nothing could be done, use the no_legend template
   return (await createIconCanvasFromImageSource(FORMATTING_NO_LEGEND))!;

@@ -10,6 +10,7 @@ import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-v
 import { TypeJsonObject } from '@/core/types/global-types';
 import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 interface JSONExportButtonProps {
   rows: unknown[];
@@ -54,7 +55,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       builtGeometry = { type: 'MultiLineString', coordinates: geometry.getCoordinates() };
     } else if (geometry instanceof Point) {
       // TODO: There is no proper support for esriDynamic MultiPoint issue 2589... this is a workaround
-      if (Array.isArray(geometry.getCoordinates())) {
+      if (GeometryApi.isArrayOfCoordinates(geometry.getCoordinates())) {
         builtGeometry = { type: 'MultiPoint', coordinates: geometry.getCoordinates() };
       } else {
         builtGeometry = { type: 'Point', coordinates: geometry.getCoordinates() };

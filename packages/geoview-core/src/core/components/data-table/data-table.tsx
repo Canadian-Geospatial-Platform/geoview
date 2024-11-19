@@ -36,6 +36,7 @@ import {
   InfoOutlinedIcon,
 } from '@/ui';
 
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -346,7 +347,11 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   const rows = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
-    return (data?.features ?? []).map((feature) => {
+
+    const filterArray = LegendEventProcessor.getFeatureVisibleFromClassVibility('sandboxMap', data.layerPath, data?.features ?? []);
+
+    // return (data?.features ?? []).map((feature) => {
+    return (filterArray ?? []).map((feature) => {
       const featureInfo = {
         ICON: (
           <Box
