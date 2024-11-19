@@ -2,6 +2,7 @@ import { TypeDisplayLanguage, TypeDisplayTheme } from '@config/types/map-schema-
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { SnackbarType } from '@/core/utils/notifications';
 type AppActions = IAppState['actions'];
 export interface IAppState {
     displayLanguage: TypeDisplayLanguage;
@@ -16,6 +17,7 @@ export interface IAppState {
     notifications: Array<NotificationDetailsType>;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
+        addMessage: (type: SnackbarType, message: string, param?: string[]) => void;
         addNotification: (notif: NotificationDetailsType) => void;
         setCrosshairActive: (active: boolean) => void;
         setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<[void, void]>;

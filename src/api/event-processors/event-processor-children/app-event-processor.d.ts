@@ -3,6 +3,7 @@ import { IAppState } from '@/core/stores/store-interface-and-intial-values/app-s
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { NotificationDetailsType } from '@/core/components';
 import { TypeHTMLElement } from '@/core/types/global-types';
+import { SnackbarType } from '@/core/utils/notifications';
 export declare class AppEventProcessor extends AbstractEventProcessor {
     /**
      * Shortcut to get the App state for a given map id
@@ -28,6 +29,13 @@ export declare class AppEventProcessor extends AbstractEventProcessor {
      * @returns {TypeDisplayTheme} The display theme.
      */
     static getDisplayTheme(mapId: string): TypeDisplayTheme;
+    /**
+     * Adds a snackbar message.
+     * @param {SnackbarType} type - The type of message.
+     * @param {string} message - The message.
+     * @param {string} param - Optional param to replace in the string if it is a key
+     */
+    static addMessage(mapId: string, type: SnackbarType, message: string, param?: string[]): void;
     static addNotification(mapId: string, notif: NotificationDetailsType): Promise<void>;
     static removeNotification(mapId: string, key: string): void;
     static removeAllNotifications(mapId: string): void;
