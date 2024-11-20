@@ -925,12 +925,49 @@ export class MapViewer {
    * @returns {Promise<[void, void]>}
    */
   setLanguage(displayLanguage: TypeDisplayLanguage, resetLayer?: boolean | false): Promise<[void, void]> {
+    // If the language hasn't changed don't do anything
+    if (AppEventProcessor.getDisplayLanguage(this.mapId) === displayLanguage) return Promise.resolve([undefined, undefined]);
     if (VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
       const promise = AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
 
       // if flag is true, check if config support the layers change and apply
       if (resetLayer) {
-        logger.logInfo('reset layers not implemented yet');
+        const re = /[\w\d]{8}-[\w\d]{4}-[\w\d]{4}-[\w\d]{4}-[\w\d]{12}/g;
+
+        const configs = this.layer.getLayerEntryConfigs();
+        const originalMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.mapId);
+        // Need to wait for all refreshed GeoCore layers to be settles before trying to update
+        // the ordered layer info. Otherwise, the map doesn't update correctly
+        Promise.allSettled(
+          configs
+            .filter((config) => {
+              // Filter to just Geocore layers and not child layers
+              if (re.test(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
+                return config;
+              }
+              return false;
+            })
+            .map((config) => {
+              // Remove and add back in GeoCore Layers and return their promises
+              const uuid = config.geoviewLayerConfig.geoviewLayerId.match(re)![0];
+              this.layer.removeLayerUsingPath(config.layerPath);
+              return this.layer.addGeoviewLayerByGeoCoreUUID(uuid);
+            })
+        )
+          .then(() => {
+            // Can use the setMapOrderedLayerInfo to update the maps states, BUT
+            // still need to remove any children layers first that weren't in the original.
+            const newMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.mapId);
+            const originalLayerPaths = originalMapOrderedLayerInfo.map((layer) => layer.layerPath);
+            const childLayersToRemove = newMapOrderedLayerInfo
+              .map((layer) => layer.layerPath)
+              .filter((path) => !originalLayerPaths.includes(path));
+            childLayersToRemove.forEach((childPath) => {
+              this.layer.removeLayerUsingPath(childPath);
+            });
+            MapEventProcessor.setMapOrderedLayerInfo(this.mapId, originalMapOrderedLayerInfo);
+          })
+          .catch((err) => logger.logError(err));
       }
 
       // Emit language changed event
