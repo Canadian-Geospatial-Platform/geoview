@@ -1,7 +1,7 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { Cast } from '@config/types/config-types';
 import {
-  TypeStyleConfig,
+  TypeLayerStyleConfig,
   TypeLayerEntryType,
   TypeSourceEsriDynamicInitialConfig,
   TypeEsriFormatParameter,
@@ -23,7 +23,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   declare source: TypeSourceEsriDynamicInitialConfig;
 
   /** Style to apply to the raster layer. */
-  style?: TypeStyleConfig;
+  layerStyle?: TypeLayerStyleConfig;
   // #endregion PROPERTIES
 
   // ===============
@@ -74,7 +74,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
     };
 
     const renderer = Cast<EsriBaseRenderer>(layerMetadata.drawingInfo?.renderer);
-    if (renderer) this.style = createStyleUsingEsriRenderer(renderer);
+    if (renderer) this.layerStyle = createStyleUsingEsriRenderer(renderer);
 
     this.processTemporalDimension(layerMetadata.timeInfo);
   }

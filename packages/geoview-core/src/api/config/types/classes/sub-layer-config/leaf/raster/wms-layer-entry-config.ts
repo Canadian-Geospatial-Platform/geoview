@@ -1,6 +1,12 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
-import { TypeStyleConfig, TypeLayerEntryType, TypeSourceWmsInitialConfig, Extent, WmsLayerConfig } from '@config/types/map-schema-types';
+import {
+  TypeLayerStyleConfig,
+  TypeLayerEntryType,
+  TypeSourceWmsInitialConfig,
+  Extent,
+  WmsLayerConfig,
+} from '@config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 import { isvalidComparedToInternalSchema } from '@config/utils';
 import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
@@ -21,7 +27,7 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   declare source: TypeSourceWmsInitialConfig;
 
   /** Style to apply to the raster layer. */
-  style?: TypeStyleConfig;
+  layerStyle?: TypeLayerStyleConfig;
   // #endregion PROPERTIES
 
   // ===============

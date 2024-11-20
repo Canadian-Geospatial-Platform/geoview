@@ -47,7 +47,7 @@ const ResponsiveGridLayout = forwardRef(
       hideEnlargeBtn = false,
       containerType,
     }: ResponsiveGridLayoutProps,
-    ref: Ref<ResponsiveGridLayoutExposedMethods>,
+    ref: Ref<ResponsiveGridLayoutExposedMethods>
   ) => {
     const theme = useTheme();
     const sxClasses = getSxClasses(theme);
@@ -108,7 +108,7 @@ const ResponsiveGridLayout = forwardRef(
 
     const handleKeyDown = useCallback(
       (event: KeyboardEvent): void => handleEscapeKey(event.key, selectedFooterLayerListItemId, true, handleEscapeKeyCallback),
-      [handleEscapeKeyCallback, selectedFooterLayerListItemId],
+      [handleEscapeKeyCallback, selectedFooterLayerListItemId]
     );
 
     // return back the focus to layeritem for which right panel was opened.
@@ -137,7 +137,7 @@ const ResponsiveGridLayout = forwardRef(
         // Callback
         onIsEnlargeClicked?.(isEnlarge);
       },
-      [onIsEnlargeClicked],
+      [onIsEnlargeClicked]
     );
 
     const handleOpenGuide = useCallback((): void => {
@@ -373,7 +373,7 @@ const ResponsiveGridLayout = forwardRef(
         </ResponsiveGrid.Root>
       </Box>
     );
-  },
+  }
 );
 
 ResponsiveGridLayout.displayName = 'ResponsiveGridLayout';

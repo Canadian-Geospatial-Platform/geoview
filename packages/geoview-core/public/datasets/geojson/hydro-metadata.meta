@@ -263,18 +263,26 @@
       "initialSettings": {
         "extent": [-177.29275972275843, 34.301384132573055, -9.977229778239453, 84.400481529465]
       },
-      "style": {
+      "layerStyle": {
         "LineString": {
-          "styleType": "simple",
-          "label": "Downstream Analysis",
-          "settings": {
-            "type": "lineString",
-            "stroke": {
-              "color": "rgba(230,123,38,1)",
-              "lineStyle": "shortDash-dot-dot",
-              "width": 2
+          "type": "simple",
+          "hasDefault": false,
+          "fields": [],
+          "info": [
+            {
+              "label": "Downstream Analysis",
+              "visible": true,
+              "values": [],
+              "settings": {
+                "type": "lineString",
+                "stroke": {
+                  "color": "rgba(230,123,38,1)",
+                  "lineStyle": "shortDash-dot-dot",
+                  "width": 2
+                }
+              }
             }
-          }
+          ]
         }
       }
     }

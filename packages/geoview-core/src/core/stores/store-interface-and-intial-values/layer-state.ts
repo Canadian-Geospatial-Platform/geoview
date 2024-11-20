@@ -11,9 +11,9 @@ import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import {
   layerEntryIsEsriDynamic,
   TypeFeatureInfoEntryPartial,
+  TypeLayerStyleConfig,
   TypeResultSet,
   TypeResultSetEntry,
-  TypeStyleConfig,
 } from '@/geo/map/map-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -345,7 +345,7 @@ export type LegendQueryStatus = 'init' | 'querying' | 'queried';
 
 export type TypeLegend = {
   type: TypeGeoviewLayerType;
-  styleConfig?: TypeStyleConfig | null;
+  styleConfig?: TypeLayerStyleConfig | null;
   // Layers other than vector layers use the HTMLCanvasElement type for their legend.
   legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
 };

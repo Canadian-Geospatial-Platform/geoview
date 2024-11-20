@@ -65,7 +65,7 @@ const ResponsiveGridLeftPanel = forwardRef(
       fullWidth = false,
       ...rest
     }: ResponsiveGridPanelProps,
-    ref,
+    ref
   ) => {
     const theme = useTheme();
     return (
@@ -84,7 +84,7 @@ const ResponsiveGridLeftPanel = forwardRef(
         {children}
       </Grid>
     );
-  },
+  }
 );
 ResponsiveGridLeftPanel.displayName = 'ResponsiveGridLeftPanel';
 
@@ -127,7 +127,7 @@ const ResponsiveGridRightPanel = forwardRef(
       fullWidth = false,
       ...rest
     }: ResponsiveGridPanelProps,
-    ref,
+    ref
   ) => {
     const theme = useTheme();
     return (
@@ -148,7 +148,7 @@ const ResponsiveGridRightPanel = forwardRef(
         {children}
       </Grid>
     );
-  },
+  }
 );
 ResponsiveGridRightPanel.displayName = 'ResponsiveGridRightPanel';
 
