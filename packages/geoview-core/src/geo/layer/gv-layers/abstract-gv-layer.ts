@@ -522,6 +522,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       features.forEach((featureNeedingItsCanvas) => {
         promisedAllCanvasFound.push(
           new Promise((resolveCanvas) => {
+            // GV: Callback function was added by PR #1997 and removed by #2590
+            // The PR added an AsyncSemaphore with a callback on geoview renderer to be able to fetch an image with a dataurl from the kernel function geoview-renderer.getFeatureCanvas()
+
             // GV: Call the function with layerConfig.legendFilterIsOff = true to force the feature to get is canvas
             // GV: If we don't, it will create canvas only for visible elements and because tables are stored feature will never get its canvas
             getFeatureCanvas(featureNeedingItsCanvas, this.getStyle(layerConfig.layerPath)!, layerConfig.filterEquation, true, true)

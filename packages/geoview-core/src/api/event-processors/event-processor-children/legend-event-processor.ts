@@ -619,9 +619,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Get the style
     const layerStyle = layerConfig.style?.[geometryType];
     let filteredFeatures = features;
-    if (layerStyle!.styleType === 'uniqueValue') {
+    if (layerStyle !== undefined && layerStyle!.styleType === 'uniqueValue') {
       filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle as TypeUniqueValueStyleConfig, features);
-    } else if (layerStyle!.styleType === 'classBreaks') {
+    } else if (layerStyle !== undefined && layerStyle!.styleType === 'classBreaks') {
       filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle as TypeClassBreakStyleConfig, features);
     }
 
@@ -693,8 +693,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const classBreaks = classBreakStyle.classBreakStyleInfo as TypeClassBreakStyleInfo[];
 
     // Sort class breaks by minValue for binary search
-    // GV: Vlaues can be number, date, string, null or undefined. Should it be only Date or Number
-    // GV: undefine or null should not be allowed in class break style
+    // GV: Values can be number, date, string, null or undefined. Should it be only Date or Number
+    // GV: undefined or null should not be allowed in class break style
     const sortedBreaks = [...classBreaks].sort((a, b) => (a.minValue as number) - (b.minValue as number));
 
     // Create an optimized lookup structure

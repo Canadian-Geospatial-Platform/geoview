@@ -1600,7 +1600,7 @@ export async function getFeatureCanvas(
   // The canvas that will be returned (if calculated successfully)
   let canvas: HTMLCanvasElement | undefined;
 
-  // GV: Some time, the feature will have no geometry e.g. esriDynamic has we fetch geometry only when needed
+  // GV: Sometimes, the feature will have no geometry e.g. esriDynamic as we fetch geometry only when needed
   // GV: We need to extract geometry from style instead. For esriDynamic there is only one geometry at a time
   // If the feature has a geometry or Style has a geometry
   if (feature.getGeometry() || Object.keys(style)[0]) {
