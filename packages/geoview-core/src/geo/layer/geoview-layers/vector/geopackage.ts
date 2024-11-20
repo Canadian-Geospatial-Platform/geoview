@@ -396,12 +396,12 @@ export class GeoPackage extends AbstractGeoViewVector {
   protected static processGeopackageStyle(layerConfig: AbstractBaseLayerEntryConfig, sld: string | number | Uint8Array): void {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
-    if ((layerConfig as VectorLayerEntryConfig).style === undefined) (layerConfig as VectorLayerEntryConfig).style = {};
+    if ((layerConfig as VectorLayerEntryConfig).layerStyle === undefined) (layerConfig as VectorLayerEntryConfig).layerStyle = {};
 
     for (let i = 0; i < rules.length; i++) {
       Object.keys(rules[i]).forEach((key) => {
         // Polygon style
-        if (key.toLowerCase() === 'polygonsymbolizer' && !(layerConfig as VectorLayerEntryConfig).style!.Polygon) {
+        if (key.toLowerCase() === 'polygonsymbolizer' && !(layerConfig as VectorLayerEntryConfig).layerStyle!.Polygon) {
           const polyStyles = rules[i].polygonsymbolizer[0];
           let color: string | undefined;
           let graphicSize: number | undefined;
@@ -465,9 +465,14 @@ export class GeoPackage extends AbstractGeoViewVector {
             paternWidth: patternWidth || 1,
             fillStyle: fillStyle || 'solid',
           };
-          (layerConfig as VectorLayerEntryConfig).style!.Polygon = { styleType: 'simple', settings: styles };
+          layerConfig.layerStyle!.Polygon = {
+            type: 'simple',
+            fields: [],
+            hasDefault: false,
+            info: [{ visible: true, label: '', values: [], settings: styles }],
+          };
           // LineString style
-        } else if (key.toLowerCase() === 'linesymbolizer' && !(layerConfig as VectorLayerEntryConfig).style!.LineString) {
+        } else if (key.toLowerCase() === 'linesymbolizer' && !(layerConfig as VectorLayerEntryConfig).layerStyle!.LineString) {
           const lineStyles = rules[i].linesymbolizer[0];
 
           const stroke: TypeStrokeSymbolConfig = {};
@@ -477,9 +482,14 @@ export class GeoPackage extends AbstractGeoViewVector {
           }
 
           const styles: TypeLineStringVectorConfig = { type: 'lineString', stroke };
-          (layerConfig as VectorLayerEntryConfig).style!.LineString = { styleType: 'simple', settings: styles };
+          (layerConfig as VectorLayerEntryConfig).layerStyle!.LineString = {
+            type: 'simple',
+            fields: [],
+            hasDefault: false,
+            info: [{ visible: true, label: '', values: [], settings: styles }],
+          };
           // Point style
-        } else if (key.toLowerCase() === 'pointsymbolizer' && !(layerConfig as VectorLayerEntryConfig).style!.Point) {
+        } else if (key.toLowerCase() === 'pointsymbolizer' && !(layerConfig as VectorLayerEntryConfig).layerStyle!.Point) {
           const { graphic } = rules[i].pointsymbolizer[0];
 
           let offset: [number, number] | null = null;
@@ -517,7 +527,12 @@ export class GeoPackage extends AbstractGeoViewVector {
                 if (graphic.mark.stroke.styling?.strokeWidth) stroke.width = graphic.mark.stroke.styling.strokeWidth;
               }
 
-              (layerConfig as VectorLayerEntryConfig).style!.Point = { styleType: 'simple', settings: styles };
+              (layerConfig as VectorLayerEntryConfig).layerStyle!.Point = {
+                type: 'simple',
+                fields: [],
+                hasDefault: false,
+                info: [{ visible: true, label: '', values: [], settings: styles }],
+              };
             }
           }
         }

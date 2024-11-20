@@ -8,11 +8,11 @@ import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
-  TypeUniqueValueStyleConfig,
-  TypeUniqueValueStyleInfo,
-  TypeStyleConfig,
+  TypeLayerStyleConfig,
+  TypeLayerStyleConfigInfo,
   codedValueType,
   rangeDomainType,
+  TypeLayerStyleSettings,
 } from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { validateExtent } from '@/geo/utils/utilities';
@@ -124,10 +124,11 @@ export class GVEsriImage extends AbstractGVRaster {
         };
         return legend;
       }
-      const uniqueValueStyleInfo: TypeUniqueValueStyleInfo[] = [];
+      const uniqueValueStyleInfo: TypeLayerStyleConfigInfo[] = [];
       legendInfo.forEach((info) => {
-        const styleInfo: TypeUniqueValueStyleInfo = {
+        const styleInfo: TypeLayerStyleConfigInfo = {
           label: info.label,
+          visible: true,
           values: info.label.split(','),
           settings: {
             type: 'iconSymbol',
@@ -139,12 +140,13 @@ export class GVEsriImage extends AbstractGVRaster {
         };
         uniqueValueStyleInfo.push(styleInfo);
       });
-      const styleSettings: TypeUniqueValueStyleConfig = {
-        styleType: 'uniqueValue',
+      const styleSettings: TypeLayerStyleSettings = {
+        type: 'uniqueValue',
         fields: ['default'],
-        uniqueValueStyleInfo,
+        hasDefault: false,
+        info: uniqueValueStyleInfo,
       };
-      const styleConfig: TypeStyleConfig = {
+      const styleConfig: TypeLayerStyleConfig = {
         Point: styleSettings,
       };
 

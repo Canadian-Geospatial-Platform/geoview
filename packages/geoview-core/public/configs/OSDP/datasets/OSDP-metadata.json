@@ -19,21 +19,29 @@
           ]
         }
       },
-      "style": {
+      "layerStyle": {
         "Polygon": {
-          "styleType": "simple",
-          "label": "LineString label",
-          "settings": {
-            "type": "filledPolygon",
-            "color": "rgba(0,0,255,0.5)",
-            "paternSize": 10,
-            "paternWidth": 2,
-            "fillStyle": "diagonalCross",
-            "stroke": {
-              "color": "rgba(128,0,0,1)",
-              "lineStyle": "dot"
+          "type": "simple",
+          "fields": [],
+          "hasDefault": false,
+          "info": [
+            {
+              "visible": true,
+              "label": "Polygon label",
+              "values": [],
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(0,0,255,0.5)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "diagonalCross",
+                "stroke": {
+                  "color": "rgba(128,0,0,1)",
+                  "lineStyle": "dot"
+                }
+              }
             }
-          }
+          ]
         }
       }
     }

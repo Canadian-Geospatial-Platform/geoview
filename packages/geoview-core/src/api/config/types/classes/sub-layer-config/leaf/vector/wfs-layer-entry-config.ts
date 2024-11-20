@@ -1,7 +1,7 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import {
-  TypeStyleConfig,
+  TypeLayerStyleConfig,
   TypeLayerEntryType,
   TypeSourceWfsInitialConfig,
   Extent,
@@ -30,7 +30,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   declare source: TypeSourceWfsInitialConfig;
 
   /** Style to apply to the raster layer. */
-  style?: TypeStyleConfig;
+  layerStyle?: TypeLayerStyleConfig;
   // #endregion PROPERTIES
 
   // ===============

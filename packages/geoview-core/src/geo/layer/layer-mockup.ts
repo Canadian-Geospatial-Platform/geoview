@@ -3,7 +3,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerEntryType,
-  TypeStyleConfig,
+  TypeLayerStyleConfig,
   TypeVectorSourceFormats,
 } from '../map/map-schema-types';
 import { TimeDimension } from '@/core/utils/date-mgt';
@@ -336,19 +336,27 @@ export abstract class LayerMockup {
     } as unknown as TypeJsonObject;
   }
 
-  static configTop100Style(): TypeStyleConfig {
+  static configTop100Style(): TypeLayerStyleConfig {
     return {
       Point: {
-        styleType: 'simple',
-        label: '',
-        settings: {
-          type: 'iconSymbol',
-          mimeType: 'image/png',
-          src: 'iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAstJREFUOI2101tIFFEYB/D/mV13z657cU3LFWLTHhQMQ7zkBYroJhU9VEQPgRQkpFFLVBgSUgZJSVCZRm+WJUhhdqGwfLGiCO1KlOmDlLGQ1111Z2bXna+XUkd3ZVT64Lycy2++Oef79PhPodeySZJ8K6GwJDA4wKhfUajLbLZ7FgQTDRtlSV9KQLEi+lMU7whIkiCYoyHELiFJGu0gosucW+8wxkgTLIq+dFlizcHenmTpaTOC7TXAxNDkOrNlMkPhgWy+YVuD7GCH/X7fbrPZ9mtOWBRH8xGaaB1vboyWm0rC/42vE3JTJwL3z8Hsrs81ZuW9laSxAs4tvWFhv9+bAKJ74w3XowOPT0W6pakPBDwYv7AZ5H6UyPPXPfT5fDk2m02cBQuCUCm9bk/QgqoSurIL+hXvV0UlLncDOK+C/X5vgiJL+8X6qnmhAABFhnj3JqxHyk8QeaoZcwYnYYEJO+TurzoafKE6Y7/WM8sJDfzGWEW+ai74sgqhohKHjNj1AFqnroIhe6Ln+yxEF79Mc+ITP3sh2B1ZapiQQEP9mpFwQT4vGMgJTH88BgkGTY0YOfRRIGBGVRD6hLjERbmCIxaMoU8FE9AWlZLmlhaIMu6C3pUEImpTwYGA8tzoSurXrS6OD328MXlgaI9VE2zYWQ7BwD9xk/WLCrbb7ZIojp4x7yutGf1cDyiy5mwF5xaYNm0Hgcr+zalei3NLnexK3m4+1lLory7UhDJbJiwnL0GIttZyk/VJWJgxpojiyF6eU/BAOPtm7XjdaZDnWURUl3EIloPHoYtbetvILUenr82qL5Mpxkvk2UipaZUxFxvd8ocOY7DzFULd70CDXWDODOjT82DIyEVUatowE1gF59arM52whcuYMwigTBTHavmagiKeU7AVQDKAGAADAL6BUQtAtzi3DYcz5uwIk8nyA0Dl3zGvWGSrRY4/rRIKxL8NeuEAAAAASUVORK5CYII=',
-          rotation: 0,
-          opacity: 1,
-          offset: [0, 0],
-        },
+        type: 'simple',
+        fields: [],
+        hasDefault: false,
+        info: [
+          {
+            label: '',
+            visible: true,
+            settings: {
+              type: 'iconSymbol',
+              mimeType: 'image/png',
+              src: 'iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAstJREFUOI2101tIFFEYB/D/mV13z657cU3LFWLTHhQMQ7zkBYroJhU9VEQPgRQkpFFLVBgSUgZJSVCZRm+WJUhhdqGwfLGiCO1KlOmDlLGQ1111Z2bXna+XUkd3ZVT64Lycy2++Oef79PhPodeySZJ8K6GwJDA4wKhfUajLbLZ7FgQTDRtlSV9KQLEi+lMU7whIkiCYoyHELiFJGu0gosucW+8wxkgTLIq+dFlizcHenmTpaTOC7TXAxNDkOrNlMkPhgWy+YVuD7GCH/X7fbrPZ9mtOWBRH8xGaaB1vboyWm0rC/42vE3JTJwL3z8Hsrs81ZuW9laSxAs4tvWFhv9+bAKJ74w3XowOPT0W6pakPBDwYv7AZ5H6UyPPXPfT5fDk2m02cBQuCUCm9bk/QgqoSurIL+hXvV0UlLncDOK+C/X5vgiJL+8X6qnmhAABFhnj3JqxHyk8QeaoZcwYnYYEJO+TurzoafKE6Y7/WM8sJDfzGWEW+ai74sgqhohKHjNj1AFqnroIhe6Ln+yxEF79Mc+ITP3sh2B1ZapiQQEP9mpFwQT4vGMgJTH88BgkGTY0YOfRRIGBGVRD6hLjERbmCIxaMoU8FE9AWlZLmlhaIMu6C3pUEImpTwYGA8tzoSurXrS6OD328MXlgaI9VE2zYWQ7BwD9xk/WLCrbb7ZIojp4x7yutGf1cDyiy5mwF5xaYNm0Hgcr+zalei3NLnexK3m4+1lLory7UhDJbJiwnL0GIttZyk/VJWJgxpojiyF6eU/BAOPtm7XjdaZDnWURUl3EIloPHoYtbetvILUenr82qL5Mpxkvk2UipaZUxFxvd8ocOY7DzFULd70CDXWDODOjT82DIyEVUatowE1gF59arM52whcuYMwigTBTHavmagiKeU7AVQDKAGAADAL6BUQtAtzi3DYcz5uwIk8nyA0Dl3zGvWGSrRY4/rRIKxL8NeuEAAAAASUVORK5CYII=',
+              rotation: 0,
+              opacity: 1,
+              offset: [0, 0],
+            },
+            values: [],
+          },
+        ],
       },
     };
   }
@@ -1006,25 +1014,12 @@ export abstract class LayerMockup {
           ],
         },
       },
-      style: {
+      layerStyle: {
         Polygon: {
-          styleId: 'uniqueValueId',
-          defaultLabel: 'Other provinces',
           styleType: 'uniqueValue',
-          defaultSettings: {
-            type: 'filledPolygon',
-            color: 'rgba(0,0,255,0.5)',
-            paternSize: 10,
-            paternWidth: 2,
-            fillStyle: 'diagonalCross',
-            stroke: {
-              color: 'rgba(128,0,0,1)',
-              lineStyle: 'dot',
-            },
-          },
-          defaultVisible: true,
+          hasDefault: true,
           fields: ['Province'],
-          uniqueValueStyleInfo: [
+          info: [
             {
               label: 'Quebec',
               settings: {
@@ -1056,6 +1051,22 @@ export abstract class LayerMockup {
               },
               values: ['Alberta'],
               visible: false,
+            },
+            {
+              label: 'Other provinces',
+              settings: {
+                type: 'filledPolygon',
+                color: 'rgba(255,0,255,0.5)',
+                paternSize: 10,
+                paternWidth: 2,
+                fillStyle: 'diagonalCross',
+                stroke: {
+                  color: 'rgba(128,0,128,1)',
+                  lineStyle: 'dot',
+                },
+              },
+              values: [],
+              visible: true,
             },
           ],
         },
@@ -1095,14 +1106,22 @@ export abstract class LayerMockup {
       },
       style: {
         LineString: {
-          styleType: 'simple',
-          label: 'LineString label',
-          settings: {
-            type: 'lineString',
-            stroke: {
-              lineStyle: 'shortDash-dot-dot',
+          type: 'simple',
+          hasDefault: false,
+          fields: [],
+          info: [
+            {
+              label: 'LineString label',
+              visible: true,
+              values: [],
+              settings: {
+                type: 'lineString',
+                stroke: {
+                  lineStyle: 'shortDash-dot-dot',
+                },
+              },
             },
-          },
+          ],
         },
       },
     } as unknown as TypeJsonObject;
@@ -1139,15 +1158,23 @@ export abstract class LayerMockup {
         },
       },
       style: {
-        Point: {
-          styleType: 'simple',
-          label: 'Icon point label',
-          settings: {
-            type: 'iconSymbol',
-            mimeType: 'image/png',
-            src: 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAcNJREFUKJFjYSATsCBz/v//z/Tp8+fwO/cf273/+FmckZHxn6iQwBMVJbldXJyc27Bq/P//v8jVm3cmtUxf7rX+3nN+ZEVJ+srhd+8/3KikIFfMyMj4Fa7x////zBeu3JjuXDM55Ou//xjOmnfxrsS+8t7Uze1FLAwMDClwjU+fv0irmLzYH5smGHjw/TdTz7yVIe/ef9wiJMi/gYWBgYHhxp2HXgeev2dFVtjhb8Pw7dtPhqbdp+FiCy894E+4cz+IgYEBovHDp88qyJpmxngwxIf5wfnImt+9f68Ed+rff3/ZkTVycnDA2dxcHMhSDH/+/WeHa+Tm5HzJwMCgCJMsW7SZgYmZkeHHj18M5RsPo2jk4eJ+DdcoKSZyQoeX0+LK5+8MDAwMDC9+/WWImbkeI4D85MUZJMWED8A1qirKVjUlBvgETVqugqEa5mQmRoacKO9zWurKPXCNfHx8389evha5Njd8bfPCLXIXPn1F0eQgLshQGut7XUREOJCRkfEfXCMDAwODsa7WmQOnT+t150VMevn6ne33bz+kGBgZ/3FzcTyUEBXZxcb4p0RbTek3TD1KWnUwNf3IwMAQj8u5yAAAupehfivnXOEAAAAASUVORK5CYII=',
-            opacity: 0.5,
-          },
+        point: {
+          type: 'simple',
+          hasDefault: false,
+          fields: [],
+          info: [
+            {
+              label: 'Icon point label',
+              visible: true,
+              settings: {
+                type: 'iconSymbol',
+                mimeType: 'image/png',
+                src: 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAcNJREFUKJFjYSATsCBz/v//z/Tp8+fwO/cf273/+FmckZHxn6iQwBMVJbldXJyc27Bq/P//v8jVm3cmtUxf7rX+3nN+ZEVJ+srhd+8/3KikIFfMyMj4Fa7x////zBeu3JjuXDM55Ou//xjOmnfxrsS+8t7Uze1FLAwMDClwjU+fv0irmLzYH5smGHjw/TdTz7yVIe/ef9wiJMi/gYWBgYHhxp2HXgeev2dFVtjhb8Pw7dtPhqbdp+FiCy894E+4cz+IgYEBovHDp88qyJpmxngwxIf5wfnImt+9f68Ed+rff3/ZkTVycnDA2dxcHMhSDH/+/WeHa+Tm5HzJwMCgCJMsW7SZgYmZkeHHj18M5RsPo2jk4eJ+DdcoKSZyQoeX0+LK5+8MDAwMDC9+/WWImbkeI4D85MUZJMWED8A1qirKVjUlBvgETVqugqEa5mQmRoacKO9zWurKPXCNfHx8389evha5Njd8bfPCLXIXPn1F0eQgLshQGut7XUREOJCRkfEfXCMDAwODsa7WmQOnT+t150VMevn6ne33bz+kGBgZ/3FzcTyUEBXZxcb4p0RbTek3TD1KWnUwNf3IwMAQj8u5yAAAupehfivnXOEAAAAASUVORK5CYII=',
+                opacity: 0.5,
+              },
+              values: [],
+            },
+          ],
         },
       },
     } as unknown as TypeJsonObject;
@@ -1203,12 +1230,20 @@ export abstract class LayerMockup {
       },
       style: {
         Point: {
-          styleType: 'simple',
-          label: 'Point label',
-          settings: {
-            type: 'simpleSymbol',
-            symbol: 'star',
-          },
+          type: 'simple',
+          fields: [],
+          hasDefault: false,
+          info: [
+            {
+              visible: true,
+              label: 'Point label',
+              settings: {
+                type: 'simpleSymbol',
+                symbol: 'star',
+              },
+              values: [],
+            },
+          ],
         },
       },
     } as unknown as TypeJsonObject;

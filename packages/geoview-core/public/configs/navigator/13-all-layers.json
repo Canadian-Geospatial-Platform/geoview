@@ -145,7 +145,7 @@
             "layerId": "msi-94-or-more",
             "layerName": "Permanent Snow",
             "source": {
-              "style": "msi-binary",
+              "wmsStyle": "msi-binary",
               "featureInfo": {
                 "queryable": true,
                 "nameField": "band-0-pixel-value",

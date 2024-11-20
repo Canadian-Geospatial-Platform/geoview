@@ -331,7 +331,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       // A new style has been created
       logger.logDebug('A new style has been created on-the-fly', geometryType, layer);
       // Update the layer style
-      layer.setStyle(layerPath, { ...style, ...{ [geometryType]: theStyle } });
+      layer.setStyle(layerPath, {
+        ...style,
+        ...{ [geometryType]: { type: 'simple', hasDefault: false, fields: [], info: [theStyle] } },
+      });
     });
   }
 }

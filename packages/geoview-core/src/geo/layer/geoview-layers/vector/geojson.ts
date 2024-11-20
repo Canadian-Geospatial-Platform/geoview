@@ -192,7 +192,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
         layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
         layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
-        layerConfig.style = defaultsDeep(layerConfig.style, layerMetadataFound.style);
+        layerConfig.layerStyle = defaultsDeep(layerConfig.layerStyle, layerMetadataFound.layerStyle);
         // When the dataAccessPath stored in the layerConfig.source object is equal to the root of the metadataAccessPath with a
         // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
         // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the

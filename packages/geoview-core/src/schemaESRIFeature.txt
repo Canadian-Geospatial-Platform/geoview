@@ -86,25 +86,27 @@
           ]
         }
       },
-      "style": {
-        "type": "uniqueValue", // uniqueValue, classBreak, simple ... they share the same structure.  No more style by geometry - one layer = one geometry
-        "fields": ["flood_cause"], // list of field to use to symbolize
-        "hasDefault": true, 
-        "info" [ // always an array and last item is always default if true (for simple one item is default???)
-          {
-            "label": "freshet",
-            "value": ["freshet"],
-            "visible": true,
-            "settings": {
-              "type": "image/png",
-              "offset": [0, 0], // x, y
-              "size": [9 , 15], // width height
-              "rotation": 0,
-              "opacity": 1,
-              "image": "KGgoAAAANSUhEUgAAAAwAAAAUC..."
-            }
-          } ...
-        ]
+      "layerStyle": {
+        "Point": {
+          "type": "uniqueValue", // uniqueValue, classBreak, simple ... they share the same structure.
+          "fields": ["flood_cause"], // list of field to use to symbolize
+          "hasDefault": true, 
+          "info" [ // always an array and last item is always default if true (for simple one item is default???)
+            {
+              "label": "freshet",
+              "value": ["freshet"],
+              "visible": true,
+              "settings": {
+                "type": "image/png",
+                "offset": [0, 0], // x, y
+                "size": [9 , 15], // width height
+                "rotation": 0,
+                "opacity": 1,
+                "image": "KGgoAAAANSUhEUgAAAAwAAAAUC..."
+              }
+            } ...
+          ]
+        }
       }
     }
   ]
@@ -344,25 +346,27 @@
           ]
         }
       },
-      "style": {
-        "type": "simple",
-        "fields": [],
-        "hasDefault": false, 
-        "info" [
-          {
-            "label": "",
-            "value": [],
-            "visible": true,
-            "settings": {
-              "type": "image/png",
-              "offset": [0, 0], // x, y
-              "size": [9 , 15], // width height
-              "rotation": 0,
-              "opacity": 1,
-              "image": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAstJREFUOI2101tIFFEYB/D/mV13z657cU3LFWLTHhQMQ7zkBYroJhU9VEQPgRQkpFFLVBgSUgZJSVCZRm+WJUhhdqGwfLGiCO1KlOmDlLGQ1111Z2bXna+XUkd3ZVT64Lycy2++Oef79PhPodeySZJ8K6GwJDA4wKhfUajLbLZ7FgQTDRtlSV9KQLEi+lMU7whIkiCYoyHELiFJGu0gosucW+8wxkgTLIq+dFlizcHenmTpaTOC7TXAxNDkOrNlMkPhgWy+YVuD7GCH/X7fbrPZ9mtOWBRH8xGaaB1vboyWm0rC/42vE3JTJwL3z8Hsrs81ZuW9laSxAs4tvWFhv9+bAKJ74w3XowOPT0W6pakPBDwYv7AZ5H6UyPPXPfT5fDk2m02cBQuCUCm9bk/QgqoSurIL+hXvV0UlLncDOK+C/X5vgiJL+8X6qnmhAABFhnj3JqxHyk8QeaoZcwYnYYEJO+TurzoafKE6Y7/WM8sJDfzGWEW+ai74sgqhohKHjNj1AFqnroIhe6Ln+yxEF79Mc+ITP3sh2B1ZapiQQEP9mpFwQT4vGMgJTH88BgkGTY0YOfRRIGBGVRD6hLjERbmCIxaMoU8FE9AWlZLmlhaIMu6C3pUEImpTwYGA8tzoSurXrS6OD328MXlgaI9VE2zYWQ7BwD9xk/WLCrbb7ZIojp4x7yutGf1cDyiy5mwF5xaYNm0Hgcr+zalei3NLnexK3m4+1lLory7UhDJbJiwnL0GIttZyk/VJWJgxpojiyF6eU/BAOPtm7XjdaZDnWURUl3EIloPHoYtbetvILUenr82qL5Mpxkvk2UipaZUxFxvd8ocOY7DzFULd70CDXWDODOjT82DIyEVUatowE1gF59arM52whcuYMwigTBTHavmagiKeU7AVQDKAGAADAL6BUQtAtzi3DYcz5uwIk8nyA0Dl3zGvWGSrRY4/rRIKxL8NeuEAAAAASUVORK5CYII="
+      "layerStyle": {
+        "Point": {
+          "type": "simple",
+          "fields": [],
+          "hasDefault": false, 
+          "info" [
+            {
+              "label": "",
+              "value": [],
+              "visible": true,
+              "settings": {
+                "type": "image/png",
+                "offset": [0, 0], // x, y
+                "size": [9 , 15], // width height
+                "rotation": 0,
+                "opacity": 1,
+                "image": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAstJREFUOI2101tIFFEYB/D/mV13z657cU3LFWLTHhQMQ7zkBYroJhU9VEQPgRQkpFFLVBgSUgZJSVCZRm+WJUhhdqGwfLGiCO1KlOmDlLGQ1111Z2bXna+XUkd3ZVT64Lycy2++Oef79PhPodeySZJ8K6GwJDA4wKhfUajLbLZ7FgQTDRtlSV9KQLEi+lMU7whIkiCYoyHELiFJGu0gosucW+8wxkgTLIq+dFlizcHenmTpaTOC7TXAxNDkOrNlMkPhgWy+YVuD7GCH/X7fbrPZ9mtOWBRH8xGaaB1vboyWm0rC/42vE3JTJwL3z8Hsrs81ZuW9laSxAs4tvWFhv9+bAKJ74w3XowOPT0W6pakPBDwYv7AZ5H6UyPPXPfT5fDk2m02cBQuCUCm9bk/QgqoSurIL+hXvV0UlLncDOK+C/X5vgiJL+8X6qnmhAABFhnj3JqxHyk8QeaoZcwYnYYEJO+TurzoafKE6Y7/WM8sJDfzGWEW+ai74sgqhohKHjNj1AFqnroIhe6Ln+yxEF79Mc+ITP3sh2B1ZapiQQEP9mpFwQT4vGMgJTH88BgkGTY0YOfRRIGBGVRD6hLjERbmCIxaMoU8FE9AWlZLmlhaIMu6C3pUEImpTwYGA8tzoSurXrS6OD328MXlgaI9VE2zYWQ7BwD9xk/WLCrbb7ZIojp4x7yutGf1cDyiy5mwF5xaYNm0Hgcr+zalei3NLnexK3m4+1lLory7UhDJbJiwnL0GIttZyk/VJWJgxpojiyF6eU/BAOPtm7XjdaZDnWURUl3EIloPHoYtbetvILUenr82qL5Mpxkvk2UipaZUxFxvd8ocOY7DzFULd70CDXWDODOjT82DIyEVUatowE1gF59arM52whcuYMwigTBTHavmagiKeU7AVQDKAGAADAL6BUQtAtzi3DYcz5uwIk8nyA0Dl3zGvWGSrRY4/rRIKxL8NeuEAAAAASUVORK5CYII="
+              }
             }
-          }
-        ]
+          ]
+        }
       }
     }
   ]
@@ -614,25 +618,27 @@
               ]
             }
           },
-          "style": {
-            "type": "simple",
-            "fields": [],
-            "hasDefault": false, 
-            "info" [
-              {
-                "label": "",
-                "value": "",
-                "visible": true,
-                "settings": {
-                  "type": "image/png",
-                  "offset": [0, 0], // x, y
-                  "size": [9 , 15], // width height
-                  "rotation": 0,
-                  "opacity": 1,
-                  "image": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAstJREFUOI2101tIFFEYB/D/mV13z657cU3LFWLTHhQMQ7zkBYroJhU9VEQPgRQkpFFLVBgSUgZJSVCZRm+WJUhhdqGwfLGiCO1KlOmDlLGQ1111Z2bXna+XUkd3ZVT64Lycy2++Oef79PhPodeySZJ8K6GwJDA4wKhfUajLbLZ7FgQTDRtlSV9KQLEi+lMU7whIkiCYoyHELiFJGu0gosucW+8wxkgTLIq+dFlizcHenmTpaTOC7TXAxNDkOrNlMkPhgWy+YVuD7GCH/X7fbrPZ9mtOWBRH8xGaaB1vboyWm0rC/42vE3JTJwL3z8Hsrs81ZuW9laSxAs4tvWFhv9+bAKJ74w3XowOPT0W6pakPBDwYv7AZ5H6UyPPXPfT5fDk2m02cBQuCUCm9bk/QgqoSurIL+hXvV0UlLncDOK+C/X5vgiJL+8X6qnmhAABFhnj3JqxHyk8QeaoZcwYnYYEJO+TurzoafKE6Y7/WM8sJDfzGWEW+ai74sgqhohKHjNj1AFqnroIhe6Ln+yxEF79Mc+ITP3sh2B1ZapiQQEP9mpFwQT4vGMgJTH88BgkGTY0YOfRRIGBGVRD6hLjERbmCIxaMoU8FE9AWlZLmlhaIMu6C3pUEImpTwYGA8tzoSurXrS6OD328MXlgaI9VE2zYWQ7BwD9xk/WLCrbb7ZIojp4x7yutGf1cDyiy5mwF5xaYNm0Hgcr+zalei3NLnexK3m4+1lLory7UhDJbJiwnL0GIttZyk/VJWJgxpojiyF6eU/BAOPtm7XjdaZDnWURUl3EIloPHoYtbetvILUenr82qL5Mpxkvk2UipaZUxFxvd8ocOY7DzFULd70CDXWDODOjT82DIyEVUatowE1gF59arM52whcuYMwigTBTHavmagiKeU7AVQDKAGAADAL6BUQtAtzi3DYcz5uwIk8nyA0Dl3zGvWGSrRY4/rRIKxL8NeuEAAAAASUVORK5CYII="
+          "layerStyle": {
+            "Point": {
+              "type": "simple",
+              "fields": [],
+              "hasDefault": false, 
+              "info" [
+                {
+                  "label": "",
+                  "value": "",
+                  "visible": true,
+                  "settings": {
+                    "type": "image/png",
+                    "offset": [0, 0], // x, y
+                    "size": [9 , 15], // width height
+                    "rotation": 0,
+                    "opacity": 1,
+                    "image": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAstJREFUOI2101tIFFEYB/D/mV13z657cU3LFWLTHhQMQ7zkBYroJhU9VEQPgRQkpFFLVBgSUgZJSVCZRm+WJUhhdqGwfLGiCO1KlOmDlLGQ1111Z2bXna+XUkd3ZVT64Lycy2++Oef79PhPodeySZJ8K6GwJDA4wKhfUajLbLZ7FgQTDRtlSV9KQLEi+lMU7whIkiCYoyHELiFJGu0gosucW+8wxkgTLIq+dFlizcHenmTpaTOC7TXAxNDkOrNlMkPhgWy+YVuD7GCH/X7fbrPZ9mtOWBRH8xGaaB1vboyWm0rC/42vE3JTJwL3z8Hsrs81ZuW9laSxAs4tvWFhv9+bAKJ74w3XowOPT0W6pakPBDwYv7AZ5H6UyPPXPfT5fDk2m02cBQuCUCm9bk/QgqoSurIL+hXvV0UlLncDOK+C/X5vgiJL+8X6qnmhAABFhnj3JqxHyk8QeaoZcwYnYYEJO+TurzoafKE6Y7/WM8sJDfzGWEW+ai74sgqhohKHjNj1AFqnroIhe6Ln+yxEF79Mc+ITP3sh2B1ZapiQQEP9mpFwQT4vGMgJTH88BgkGTY0YOfRRIGBGVRD6hLjERbmCIxaMoU8FE9AWlZLmlhaIMu6C3pUEImpTwYGA8tzoSurXrS6OD328MXlgaI9VE2zYWQ7BwD9xk/WLCrbb7ZIojp4x7yutGf1cDyiy5mwF5xaYNm0Hgcr+zalei3NLnexK3m4+1lLory7UhDJbJiwnL0GIttZyk/VJWJgxpojiyF6eU/BAOPtm7XjdaZDnWURUl3EIloPHoYtbetvILUenr82qL5Mpxkvk2UipaZUxFxvd8ocOY7DzFULd70CDXWDODOjT82DIyEVUatowE1gF59arM52whcuYMwigTBTHavmagiKeU7AVQDKAGAADAL6BUQtAtzi3DYcz5uwIk8nyA0Dl3zGvWGSrRY4/rRIKxL8NeuEAAAAASUVORK5CYII="
+                  }
                 }
-              }
-            ]
+              ]
+            }
           }
         },
         {
@@ -875,38 +881,40 @@
               ]
             }
           },
-          "style": {
-            "type": "uniqueValue",
-            "fields": ["commodity_group_en_spelt"],
-            "hasDefault": false, 
-            "info" [
-              {
-                "label": "Industrial minerals",
-                "value": ["Industrial minerals"],
-                "visible": true,
-                "settings": {
-                  "type": "image/png",
-                  "offset": [0, 0],
-                  "size": [15 , 15],
-                  "rotation": 0,
-                  "opacity": 1,
-                  "image": "iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA8dJREFUSInN1ktMXFUYwPH/uVxmzoV5tBWGBe+SGqn4imIs1ADqwsRE48a4tEQaH7Q+6sKkCopuXOiqSbVAfaxNunDTNrQDtqlFEhMtFI2VaXm0PGZoywxzDwNzj4uhIB0YoDbGb3dzvvv9zj3fOSfX5D8K838BKTVTAeIztM48ISF+kdLbdkeQUrPlaCcIFIPI6KB5QdnRrdLyvrMpSKlY2S1kvP84kd+/W9PIcgcoqzuI9OW/reyoIS3vWxuCbDtWgtZBoHR84ASRwY6MH2NaAULdbZTXf4j0BfYrOyqk5d2fEbLtaLFAB4Gy8YsniFxsTw0IA7STrggXRY83oZPzjPYdpai6EekL7FP2jJCWb9+qUDw+UyggCGyfGOwiMpBCdjzXQbblYy4aYeLCMWJXTy6/rRMMnXqfsro2ynY3c+XsIQof24P0FzQvYs0rIK2vZc8pEQQqJgZPEe7/cqlWtuVDCAPpy6ek5lUmB8sIDxxZtpI2yfk4hhmgsLqRUPenlNcdRPoL3lR2dFpa3pYlyLb9bkMkd8Qmhwj3H16xOnMzU0h/QWqlhMGCfXN55QxJUW0LptvDHz80s+3el/AV1RHq+YTK5w8B+sFVe5RMJtLaMH7hGKW1exHCQGuH5Ly9hBTvbiHb2kIo+BHOfITwwGE8hc/iJKbT6qx7M8xe62JioJRkIo5OJiiqfpkRZ4FtFU+mkO6PcRKTS/mxseMgXJuHACKDncsPwqC0Zg9zsWmGTrfizI1vpMTm7jphSPwljzI3e50sl8Tt2449dbch4Ur1xO1hqOsDcvIepnhXE8PnHFT4/F2ChElxbSum27vY+DCxqycZ+3mBkl17GT6nUZHefwkJk6KaVrKll8vdqd11K2bHTzPau0DxE02M/OSgpvsyQ47jOEYWTu49JYZry0Mkbvy6lCC3PoLpsgj1tKLnr6cViE/+yEhvgvz7X2TkTArK2/nK4iTF/ArI4/HElYo2mq6co+V17xqhni+WMDXdx+Xg2jMFUOHzjJxJ9Smv6jUKKp8BdAiM91ZAAFJ6v1UqKkxXbmcK+5zEjd8yArdHXtXrFFQ+DTCkMRos6RlOgxaxb5axA2IzWH7VGwQqnwL4S0ODZXlG/jmethmk9H6t7KhhunLbN4rlP9BM4L56gEspxDt6e86qu05a3k5lzwjTlXukvO6AmJ26siaSle3GE6gAuORoXZ+T4xtbLW/N7S0tX8ci9pW/cOc6Pw386WjdsBaSEVrE2pW6+b0QWVmZ8pRKxvx+v8qUs+6BldKffnjuIP4GhRKFGHM5YJsAAAAASUVORK5CYII="
-                 }
-              },
-              {
-                "label": "Diamonds",
-                "value": ["Diamonds"],
-                "visible": true,
-                "settings": {
-                  "type": "image/png",
-                  "offset": [0, 0],
-                  "size": [15 , 15],
-                  "rotation": 0,
-                  "opacity": 1,
-                  "image": "iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA+xJREFUSInN1m9MVWUcwPHvc4B7z7ncc/+4Cm5NMeDiehEgodBaS6ZOHLpe0CrL1rKlbfknldlamyu3aK3NzY221OzPqvVGh3pxc0mDrYVcEcStF/JHXGWCoKgc4DzIvef0gttVunC5lms9b3+/8/uc5/ye57eTzn+00v8XkJQjeSA+xraTv5AQHaqq7/lHkJRjj2JbTcB8EEkdbJ6VpuFXNX37PUFSji78C6lv72JHx8VZjRKXg0+rysj26W9L01BUTd+WEmSaowuw7SYg52hHF+vO9ibdTI7LyaZQmP1ry8j26VulaQhV07cmhUzTmC+wm4CFxzq6eLFtCnEKwYRtJyABRbCrophI1OKT5vPULCsi4NO3SHNEqJpny4zQ+PjIIwKagNyGc928EEOurK/A59IYvDXKd20XeK9vMP5wv2VTXd/C92vL+KByCe+fPMvOZx4n4PdsjmGbp0G23Z8xIUUTkHeis4fnzvTEi/lcGooQZPt0tq8oJdjZw/N3xa9EoozdniSQobNzWSFvhsJ8tmYpAb/nLWkaw6qm745Dpul1KiIa7O6/RnW4e9rnuXrTIOD3AKAIwfCYvNOfNEH96lI8qoNV3zayozCX6twsNjaECb2yErALZ+zRRCSa0Idv2i5Qs3IJihBYts3oZGQa4s/UeO34aVpkhJYz3XyUn8UvcjKhzpyTYfelIYIdXRhykgnLYuPTRUQsm1WPLcDvUnkj1Eqzeafwu71XCSiJ9y6lEbTu7J17pADblpdwbWSMDcdOc2r8diol7m3W5aQJnsp7mOvGOC6ng2K/m1Pjw/cXCiixxmtO1tf/zMqAn10rSoj+0M7e/hv3B5onBA2Vpfg0J68eb+UnOUlz3yAT0fNTWGM7+/pv/jtonhCcrHwCr8vB+lArLTISj+35dYhIUyfvLF9MtPEcdQOzY+kAlmVZShpW7kN+ZdODOvuHjHjCS1leMp0ZvBwKE56IJBSovXwd+WMnG0qD1DW0AbCvNH8qKET8OKYDuN3ucSmNDZlOxxe1VeUKJ1rjWN3ATeqOnk666739N9gbQw4vDbJmcQFgXwKlZhoEoKr611IaItPpOPRhVblin2jlwF07S2UdKSugqjgI0GejVGiq+7cEKIZ9JaUh3E7HodqqcsE9YPXli1hdlA9w0YYKTXP/fnc84TCoqv6lNA3F7XQcTBU7+uQiKgvzAXqnEP3y33NmPHWqph+S5ohwOx0HaqvKxesD12dFNEcGBYEHAHot217mcnn+mClv1uOtap7PY9j+opzAHD8N9Fi2XTEbkhSKYQelvHVYiLS0ZHlSRke9Xq9MljPnhVVV79zzJYX1J6OwghYLe2y4AAAAAElFTkSuQmCC"
+          "layerStyle": {
+            "Point": {
+              "type": "uniqueValue",
+              "fields": ["commodity_group_en_spelt"],
+              "hasDefault": false, 
+              "info" [
+                {
+                  "label": "Industrial minerals",
+                  "value": ["Industrial minerals"],
+                  "visible": true,
+                  "settings": {
+                    "type": "image/png",
+                    "offset": [0, 0],
+                    "size": [15 , 15],
+                    "rotation": 0,
+                    "opacity": 1,
+                    "image": "iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA8dJREFUSInN1ktMXFUYwPH/uVxmzoV5tBWGBe+SGqn4imIs1ADqwsRE48a4tEQaH7Q+6sKkCopuXOiqSbVAfaxNunDTNrQDtqlFEhMtFI2VaXm0PGZoywxzDwNzj4uhIB0YoDbGb3dzvvv9zj3fOSfX5D8K838BKTVTAeIztM48ISF+kdLbdkeQUrPlaCcIFIPI6KB5QdnRrdLyvrMpSKlY2S1kvP84kd+/W9PIcgcoqzuI9OW/reyoIS3vWxuCbDtWgtZBoHR84ASRwY6MH2NaAULdbZTXf4j0BfYrOyqk5d2fEbLtaLFAB4Gy8YsniFxsTw0IA7STrggXRY83oZPzjPYdpai6EekL7FP2jJCWb9+qUDw+UyggCGyfGOwiMpBCdjzXQbblYy4aYeLCMWJXTy6/rRMMnXqfsro2ynY3c+XsIQof24P0FzQvYs0rIK2vZc8pEQQqJgZPEe7/cqlWtuVDCAPpy6ek5lUmB8sIDxxZtpI2yfk4hhmgsLqRUPenlNcdRPoL3lR2dFpa3pYlyLb9bkMkd8Qmhwj3H16xOnMzU0h/QWqlhMGCfXN55QxJUW0LptvDHz80s+3el/AV1RHq+YTK5w8B+sFVe5RMJtLaMH7hGKW1exHCQGuH5Ly9hBTvbiHb2kIo+BHOfITwwGE8hc/iJKbT6qx7M8xe62JioJRkIo5OJiiqfpkRZ4FtFU+mkO6PcRKTS/mxseMgXJuHACKDncsPwqC0Zg9zsWmGTrfizI1vpMTm7jphSPwljzI3e50sl8Tt2449dbch4Ur1xO1hqOsDcvIepnhXE8PnHFT4/F2ChElxbSum27vY+DCxqycZ+3mBkl17GT6nUZHefwkJk6KaVrKll8vdqd11K2bHTzPau0DxE02M/OSgpvsyQ47jOEYWTu49JYZry0Mkbvy6lCC3PoLpsgj1tKLnr6cViE/+yEhvgvz7X2TkTArK2/nK4iTF/ArI4/HElYo2mq6co+V17xqhni+WMDXdx+Xg2jMFUOHzjJxJ9Smv6jUKKp8BdAiM91ZAAFJ6v1UqKkxXbmcK+5zEjd8yArdHXtXrFFQ+DTCkMRos6RlOgxaxb5axA2IzWH7VGwQqnwL4S0ODZXlG/jmethmk9H6t7KhhunLbN4rlP9BM4L56gEspxDt6e86qu05a3k5lzwjTlXukvO6AmJ26siaSle3GE6gAuORoXZ+T4xtbLW/N7S0tX8ci9pW/cOc6Pw386WjdsBaSEVrE2pW6+b0QWVmZ8pRKxvx+v8qUs+6BldKffnjuIP4GhRKFGHM5YJsAAAAASUVORK5CYII="
+                  }
+                },
+                {
+                  "label": "Diamonds",
+                  "value": ["Diamonds"],
+                  "visible": true,
+                  "settings": {
+                    "type": "image/png",
+                    "offset": [0, 0],
+                    "size": [15 , 15],
+                    "rotation": 0,
+                    "opacity": 1,
+                    "image": "iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA+xJREFUSInN1m9MVWUcwPHvc4B7z7ncc/+4Cm5NMeDiehEgodBaS6ZOHLpe0CrL1rKlbfknldlamyu3aK3NzY221OzPqvVGh3pxc0mDrYVcEcStF/JHXGWCoKgc4DzIvef0gttVunC5lms9b3+/8/uc5/ye57eTzn+00v8XkJQjeSA+xraTv5AQHaqq7/lHkJRjj2JbTcB8EEkdbJ6VpuFXNX37PUFSji78C6lv72JHx8VZjRKXg0+rysj26W9L01BUTd+WEmSaowuw7SYg52hHF+vO9ibdTI7LyaZQmP1ry8j26VulaQhV07cmhUzTmC+wm4CFxzq6eLFtCnEKwYRtJyABRbCrophI1OKT5vPULCsi4NO3SHNEqJpny4zQ+PjIIwKagNyGc928EEOurK/A59IYvDXKd20XeK9vMP5wv2VTXd/C92vL+KByCe+fPMvOZx4n4PdsjmGbp0G23Z8xIUUTkHeis4fnzvTEi/lcGooQZPt0tq8oJdjZw/N3xa9EoozdniSQobNzWSFvhsJ8tmYpAb/nLWkaw6qm745Dpul1KiIa7O6/RnW4e9rnuXrTIOD3AKAIwfCYvNOfNEH96lI8qoNV3zayozCX6twsNjaECb2yErALZ+zRRCSa0Idv2i5Qs3IJihBYts3oZGQa4s/UeO34aVpkhJYz3XyUn8UvcjKhzpyTYfelIYIdXRhykgnLYuPTRUQsm1WPLcDvUnkj1Eqzeafwu71XCSiJ9y6lEbTu7J17pADblpdwbWSMDcdOc2r8diol7m3W5aQJnsp7mOvGOC6ng2K/m1Pjw/cXCiixxmtO1tf/zMqAn10rSoj+0M7e/hv3B5onBA2Vpfg0J68eb+UnOUlz3yAT0fNTWGM7+/pv/jtonhCcrHwCr8vB+lArLTISj+35dYhIUyfvLF9MtPEcdQOzY+kAlmVZShpW7kN+ZdODOvuHjHjCS1leMp0ZvBwKE56IJBSovXwd+WMnG0qD1DW0AbCvNH8qKET8OKYDuN3ucSmNDZlOxxe1VeUKJ1rjWN3ATeqOnk666739N9gbQw4vDbJmcQFgXwKlZhoEoKr611IaItPpOPRhVblin2jlwF07S2UdKSugqjgI0GejVGiq+7cEKIZ9JaUh3E7HodqqcsE9YPXli1hdlA9w0YYKTXP/fnc84TCoqv6lNA3F7XQcTBU7+uQiKgvzAXqnEP3y33NmPHWqph+S5ohwOx0HaqvKxesD12dFNEcGBYEHAHot217mcnn+mClv1uOtap7PY9j+opzAHD8N9Fi2XTEbkhSKYQelvHVYiLS0ZHlSRke9Xq9MljPnhVVV79zzJYX1J6OwghYLe2y4AAAAAElFTkSuQmCC"
+                  }
                 }
-              }
-            ]
+              ]
+            }
           }
         }
       ]
