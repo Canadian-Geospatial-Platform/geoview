@@ -149,7 +149,7 @@ export function esriQueryRecordsByUrlObjectIds(
 ): Promise<TypeFeatureInfoEntryPartial[]> {
   // Query
   const oids = objectIds.join(',');
-  const url = `${layerUrl}/query?where=&objectIds=${oids}&outFields=${fields}&returnGeometry=${geometry}&outSR=${outSR}&f=json`;
+  const url = `${layerUrl}/query?where=&objectIds=${oids}&outFields=${fields}&returnGeometry=${geometry}&outSR=${outSR}&geometryPrecision=1&f=json`;
 
   // Redirect
   return esriQueryRecordsByUrl(url, geometryType);

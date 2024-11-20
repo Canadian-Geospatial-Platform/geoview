@@ -11,9 +11,14 @@ import {
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import {
+  TypeClassBreakStyleConfig,
+  TypeClassBreakStyleInfo,
+  TypeFeatureInfoEntry,
   TypeStyleGeometry,
+  TypeUniqueValueStyleConfig,
+  TypeUniqueValueStyleInfo,
   isClassBreakStyleConfig,
   isSimpleStyleConfig,
   isUniqueValueStyleConfig,
@@ -587,5 +592,168 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
+  }
+
+  /**
+   * Filters features based on their visibility settings defined in the layer's unique value or class break style configuration.
+   *
+   * @static
+   * @param {string} mapId - The unique identifier of the map instance
+   * @param {string} layerPath - The path to the layer in the map configuration
+   * @param {any[]} features - Array of features to filter
+   *
+   * @returns {any[]} Filtered array of features based on their visibility settings
+   *
+   * @description
+   * This function processes features based on the layer's unique value style configuration:
+   * - If the layer doesn't use unique value or class break styling, returns all features unchanged
+   * - Features matching visible styles are included
+   * - Features matching invisible styles are excluded
+   * - Features with no matching style follow the defaultVisible setting
+   */
+  static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] {
+    // Get the layer config and geometry type
+    const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath) as AbstractBaseLayerEntryConfig;
+    const [geometryType] = layerConfig.getTypeGeometries();
+
+    // Get the style
+    const layerStyle = layerConfig.style?.[geometryType];
+    let filteredFeatures = features;
+    if (layerStyle !== undefined && layerStyle!.styleType === 'uniqueValue') {
+      filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle as TypeUniqueValueStyleConfig, features);
+    } else if (layerStyle !== undefined && layerStyle!.styleType === 'classBreaks') {
+      filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle as TypeClassBreakStyleConfig, features);
+    }
+
+    return filteredFeatures!;
+  }
+
+  /**
+   * Processes features based on unique value style configuration to determine their visibility.
+   *
+   * @param {TypeUniqueValueStyleConfig} uniqueValueStyle - The unique value style configuration
+   * @param {TypeFeatureInfoEntry[]} features - Array of features to process
+   * @returns {TypeFeatureInfoEntry[]} Filtered array of features based on visibility rules
+   *
+   * @description
+   * This function filters features based on their field values and the unique value style configuration:
+   * - Creates sets of visible and invisible values for efficient lookup
+   * - Combines multiple field values using semicolon separator
+   * - Determines feature visibility based on:
+   *   - Explicit visibility rules in the style configuration
+   *   - Default visibility for values not matching any style rule
+   *
+   * @static
+   * @private
+   */
+  static #processClassVisibilityUniqueValue(
+    uniqueValueStyle: TypeUniqueValueStyleConfig,
+    features: TypeFeatureInfoEntry[]
+  ): TypeFeatureInfoEntry[] {
+    const styleUnique = uniqueValueStyle.uniqueValueStyleInfo as TypeUniqueValueStyleInfo[];
+
+    // Create sets for visible and invisible values for faster lookup
+    const visibleValues = new Set(styleUnique.filter((style) => style.visible).map((style) => style.values.join(';')));
+    const unvisibleValues = new Set(styleUnique.filter((style) => !style.visible).map((style) => style.values.join(';')));
+
+    // Filter features based on visibility
+    return features.filter((feature) => {
+      const fieldValues = uniqueValueStyle.fields.map((field) => feature.fieldInfo[field]!.value).join(';');
+
+      return visibleValues.has(fieldValues.toString()) || (uniqueValueStyle.defaultVisible && !unvisibleValues.has(fieldValues.toString()));
+    });
+  }
+
+  /**
+   * Processes features based on class break style configuration to determine their visibility.
+   *
+   * @private
+   *
+   * @param {TypeClassBreakStyleConfig} classBreakStyle - The class break style configuration
+   * @param {TypeFeatureInfoEntry[]} features - Array of features to process
+   * @returns {TypeFeatureInfoEntry[]} Filtered array of features based on class break visibility rules
+   *
+   * @description
+   * This function filters features based on numeric values falling within defined class breaks:
+   * - Sorts class breaks by minimum value for efficient binary search
+   * - Creates optimized lookup structure for break points
+   * - Uses binary search to find the appropriate class break for each feature
+   * - Determines feature visibility based on:
+   *   - Whether the feature's value falls within a class break range
+   *   - The visibility setting of the matching class break
+   *   - Default visibility for values not matching any class break
+   *
+   * @static
+   * @private
+   */
+  static #processClassVisibilityClassBreak(
+    classBreakStyle: TypeClassBreakStyleConfig,
+    features: TypeFeatureInfoEntry[]
+  ): TypeFeatureInfoEntry[] {
+    const classBreaks = classBreakStyle.classBreakStyleInfo as TypeClassBreakStyleInfo[];
+
+    // Sort class breaks by minValue for binary search
+    // GV: Values can be number, date, string, null or undefined. Should it be only Date or Number
+    // GV: undefined or null should not be allowed in class break style
+    const sortedBreaks = [...classBreaks].sort((a, b) => (a.minValue as number) - (b.minValue as number));
+
+    // Create an optimized lookup structure
+    interface ClassBreakPoint {
+      minValue: number;
+      maxValue: number;
+      visible: boolean;
+    }
+    const breakPoints = sortedBreaks.map(
+      (brk): ClassBreakPoint => ({
+        minValue: brk.minValue as number,
+        maxValue: brk.maxValue as number,
+        visible: brk.visible as boolean,
+      })
+    );
+
+    // Binary search function to find the appropriate class break
+    const findClassBreak = (value: number): ClassBreakPoint | null => {
+      let left = 0;
+      let right = breakPoints.length - 1;
+
+      // Binary search through sorted break points to find matching class break
+      while (left <= right) {
+        // Calculate middle index to divide search space
+        const mid = Math.floor((left + right) / 2);
+        const breakPoint = breakPoints[mid];
+
+        // Check if value falls within current break point's range
+        if (value >= breakPoint!.minValue && value <= breakPoint!.maxValue) {
+          // Found matching break point, return it
+          return breakPoint;
+        }
+
+        // If value is less than current break point's minimum,
+        // search in lower half of remaining range
+        if (value < breakPoint.minValue) {
+          right = mid - 1;
+        } else {
+          // If value is greater than current break point's maximum,
+          // search in upper half of remaining range
+          left = mid + 1;
+        }
+      }
+
+      return null;
+    };
+
+    // Filter features using binary search
+    return features.filter((feature) => {
+      const val = feature.fieldInfo[String(classBreakStyle.field)]?.value;
+      const fieldValue = val != null ? parseFloat(String(val)) : 0;
+
+      // eslint-disable-next-line no-restricted-globals
+      if (isNaN(fieldValue)) {
+        return classBreakStyle.defaultVisible;
+      }
+
+      const matchingBreak = findClassBreak(fieldValue);
+      return matchingBreak ? matchingBreak.visible : classBreakStyle.defaultVisible;
+    });
   }
 }

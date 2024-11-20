@@ -1409,7 +1409,6 @@ export class LayerApi {
     if (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer) {
       // Assign value to registered layer. This is use by applyFilter function to set visibility
       // TODO: check if we need to refactor to centralize attribute setting....
-      // TODO: know issue when we toggle a default visibility item https://github.com/Canadian-Geospatial-Platform/geoview/issues/1564
       if (layer?.getStyle(layerPath)?.[item.geometryType]?.styleType === 'classBreaks') {
         const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType] as TypeClassBreakStyleConfig;
         const classBreakStyleInfo = geometryStyleConfig.classBreakStyleInfo.find((styleInfo) => styleInfo.label === item.name);

@@ -3,6 +3,7 @@ import { DataTableEventProcessor } from '@/api/event-processors/event-processor-
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with DataTableEventProcessor vs DataTaleState
 
@@ -22,6 +23,7 @@ export interface IDataTableState {
   actions: {
     addOrUpdateTableFilter(layerPath: string, filter: string): void;
     applyMapFilters: (filterStrings: string) => void;
+    getFilteredDataFromLegendVisibility: (layerPath: string, features: TypeFeatureInfoEntry[]) => TypeFeatureInfoEntry[];
     setActiveLayersData: (layers: TypeLayerData[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
     setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
@@ -85,6 +87,9 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           filterStrings,
           !!get()?.dataTableState?.layersDataTableSetting[layerPath]?.mapFilteredRecord
         );
+      },
+      getFilteredDataFromLegendVisibility: (layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] => {
+        return LegendEventProcessor.getFeatureVisibleFromClassVibility(get().mapId, layerPath, features);
       },
       setActiveLayersData: (activeLayerData: TypeLayerData[]) => {
         // Redirect to setter

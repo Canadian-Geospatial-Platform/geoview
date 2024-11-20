@@ -74,7 +74,8 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   // get store actions and values
   const { zoomToExtent, highlightBBox, transformPoints, showClickMarker, addHighlightedFeature, removeHighlightedFeature } =
     useMapStoreActions();
-  const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility } = useDataTableStoreActions();
+  const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility, getFilteredDataFromLegendVisibility } =
+    useDataTableStoreActions();
   const { getExtentFromFeatures } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
@@ -346,7 +347,11 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   const rows = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
-    return (data?.features ?? []).map((feature) => {
+
+    // get filtered feature for unique value info style so non visible class is not in the table
+    const filterArray = getFilteredDataFromLegendVisibility(data.layerPath, data?.features ?? []);
+
+    return (filterArray ?? []).map((feature) => {
       const featureInfo = {
         ICON: (
           <Box

@@ -12,7 +12,6 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 
-import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { validateExtent, getMinOrMaxExtents } from '@/geo/utils/utilities';
@@ -336,14 +335,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
 
-      // Guess the geometry type by taking the first style key
-      // TODO: Refactor - Layers migration. Johann: This will be modified with new schema, there is no more geometry on style
-      const [geometryType] = layerConfig.getTypeGeometries();
-
       // Fetch the features
       let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath!;
       if (!urlRoot.endsWith('/')) urlRoot += '/';
-      // TODO: we put false so on heavy geometry, dynamic layer can load datatable. If not the fetch fails.
+      // GV: we put returnGeometry=false so on heavy geometry, dynamic layer can load datatable. If not the fetch fails.
       const url = `${urlRoot}${layerConfig.layerId}/query?where=1=1&outFields=*&f=json&returnGeometry=false`;
 
       const response = await fetch(url);
@@ -354,17 +349,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         // Parse the JSON response and create features
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const features = jsonResponse.features.map((featureData: any) => {
-          let geometry;
-
-          if (featureData.geometry) {
-            const coordinates = featureData.geometry.points ||
-              featureData.geometry.paths ||
-              featureData.geometry.rings || [featureData.geometry.x, featureData.geometry.y]; // MultiPoint or Line or Polygon or Point schema
-            geometry = GeometryApi.createGeometryFromType(geometryType, coordinates);
-          }
-
+          // We do not query the geometry anymore (set as undefine). It will query if needed by later
           const properties = featureData.attributes;
-          return new Feature({ ...properties, geometry });
+          return new Feature({ ...properties, undefined });
         });
 
         // Check if there are additional features and get them
@@ -376,17 +363,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           getAdditionalFeaturesArray.forEach((responseJson) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const additionalFeatures: Feature[] = (responseJson as any).features.map((featureData: any) => {
-              let geometry;
-
-              if (featureData.geometry) {
-                const coordinates = featureData.geometry.points ||
-                  featureData.geometry.paths ||
-                  featureData.geometry.rings || [featureData.geometry.x, featureData.geometry.y]; // MultiPoint or Line or Polygon or Point schema
-                geometry = GeometryApi.createGeometryFromType(geometryType, coordinates);
-              }
-
+              // We do not query the geometry anymore (set as undefine). It will query if needed by later
               const properties = featureData.attributes;
-              return new Feature({ ...properties, geometry });
+              return new Feature({ ...properties, undefined });
             });
 
             features.push(...additionalFeatures);
@@ -394,6 +373,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         }
 
         // Format and return the result
+        // Not having geometry have an effect on the style as it use the geometry to define wich one to use
+        // The formatFeatureInfoResult (abstact-geoview-layer) / getFeatureCanvas (geoview-renderer) use geometry stored in style
         return this.formatFeatureInfoResult(features, layerConfig);
       }
 
@@ -1016,7 +997,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (baseUrl) {
       // Construct query
       if (!baseUrl.endsWith('/')) baseUrl += '/';
-      const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=&objectIds=${idString}&returnGeometry=true`;
+      const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=&objectIds=${idString}&&geometryPrecision=1&returnGeometry=true`;
 
       try {
         const response = await fetch(queryUrl);

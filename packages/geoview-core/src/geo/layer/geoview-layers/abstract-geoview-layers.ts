@@ -17,14 +17,12 @@ import { generateId, getXMLHttpRequest, isJsonString, whenThisThen } from '@/cor
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { AsyncSemaphore } from '@/core/utils/async-semaphore';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import {
   TypeGeoviewLayerConfig,
@@ -1271,30 +1269,6 @@ export abstract class AbstractGeoViewLayer {
     try {
       if (!features.length) return [];
 
-      // Will hold the generic icon to use in formatting
-      let genericLegendInfo: string | null | undefined;
-      // We only want 1 task to fetch the generic legend (when we have to)
-      const semaphore = new AsyncSemaphore(1);
-
-      // Will be executed when we have to use a default canvas for a particular feature
-      const callbackToFetchDataUrl = (): Promise<string | null> => {
-        // TODO: Fix - Don't take 'iconImage' below, it's always the same image...
-        // TO.DOCONT: Use this.style.fields and this.style.[Geom].fields and this.style.[Geom].uniqueValueStyleInfo with a combination of the 'featureNeedingItsCanvas' to determine the style image
-        // TO.DOCONT: Also, get rid of 'genericLegendInfo' and 'semaphore' variables once code is rewritten to use the 'featureNeedingItsCanvas'
-
-        // Make sure one task at a time in this
-        return semaphore.withLock(async () => {
-          // Only execute this once in the callback. After this, once the semaphore is unlocked, it's either a string or null for as long as we're formatting
-          if (genericLegendInfo === undefined) {
-            genericLegendInfo = null; // Turn it to null, we are actively trying to find something (not undefined anymore)
-            const legend = await this.queryLegend(layerConfig.layerPath);
-            const legendIcons = LegendEventProcessor.getLayerIconImage(legend);
-            if (legendIcons) genericLegendInfo = legendIcons![0].iconImage || null;
-          }
-          return genericLegendInfo;
-        });
-      };
-
       const featureInfo = layerConfig?.source?.featureInfo;
 
       // Loop on the features to build the array holding the promises for their canvas
@@ -1302,14 +1276,9 @@ export abstract class AbstractGeoViewLayer {
       features.forEach((featureNeedingItsCanvas) => {
         promisedAllCanvasFound.push(
           new Promise((resolveCanvas) => {
-            getFeatureCanvas(
-              featureNeedingItsCanvas,
-              this.getStyle(layerConfig.layerPath)!,
-              layerConfig.filterEquation,
-              layerConfig.legendFilterIsOff,
-              true,
-              callbackToFetchDataUrl
-            )
+            // GV: Call the function with layerConfig.legendFilterIsOff = true to force the feature to get is canvas
+            // GV: If we don't, it will create canvas only for visible elements and because tables are stored feature will never get its canvas
+            getFeatureCanvas(featureNeedingItsCanvas, this.getStyle(layerConfig.layerPath)!, layerConfig.filterEquation, true, true)
               .then((canvas) => {
                 resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
               })
