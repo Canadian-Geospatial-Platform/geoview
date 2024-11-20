@@ -118,14 +118,10 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   useEffect(() => {
     const mapInfo = document.getElementById(`${mapId}-mapInfo`);
 
-    // Set a timeout for the duration of the CSS animation
-    setTimeout(() => {
-      // Animation completed, run additional logic here
-      if (panelContainerRef.current && open && mapInfo) {
-        const mapInfoHeight = mapInfo.getBoundingClientRect().height;
-        panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight}px)`;
-      }
-    }, 500);
+    if (panelContainerRef.current && open && mapInfo) {
+      const mapInfoHeight = mapInfoExpanded ? '6rem' : '3rem';
+      panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight})`;
+    }
   }, [mapInfoExpanded, mapSize, open, mapId]);
 
   return (

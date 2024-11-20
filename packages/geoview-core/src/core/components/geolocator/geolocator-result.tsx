@@ -198,7 +198,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         </Box>
       )}
       <Divider />
-      <Box sx={{ maxHeight: mapSize![1] - 160, overflowY: 'auto' }}>
+      <Box sx={{ maxHeight: mapSize![1] - 240, overflowY: 'auto' }}>
         {!!data.length && <GeoList geoListItems={data} searchValue={searchValue} />}
         {(!data.length || error) && (
           <Box sx={{ p: 10 }}>
