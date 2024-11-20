@@ -435,7 +435,7 @@
           }
         }
       },
-      "required": ["geoviewLayerType", "metadataAccessPath", "listOfLayerEntryConfig"]
+      "required": ["geoviewLayerType", "listOfLayerEntryConfig"]
     },
     "TypeListOfLayerEntryConfig": {
       "description": "The list of layer configurations. The AbstractGeoviewLayerConfig validation ends here. The only thing we need to verify for the moment is it must be an array of at least one element.",
@@ -1032,8 +1032,8 @@
             "source": {
               "$ref": "#/definitions/TypeSourceEsriDynamicInitialConfig"
             },
-            "style": {
-              "$ref": "#/definitions/TypeStyleConfig"
+            "layerStyle": {
+              "$ref": "#/definitions/TypeLayerStyleConfig"
             }
           }
         }
@@ -1056,8 +1056,8 @@
             "source": {
               "$ref": "#/definitions/TypeSourceEsriImageInitialConfig"
             },
-            "style": {
-              "$ref": "#/definitions/TypeStyleConfig"
+            "layerStyle": {
+              "$ref": "#/definitions/TypeLayerStyleConfig"
             }
           }
         }
@@ -1084,8 +1084,8 @@
             "source": {
               "$ref": "#/definitions/TypeSourceEsriFeatureInitialConfig"
             },
-            "style": {
-              "$ref": "#/definitions/TypeStyleConfig"
+            "layerStyle": {
+              "$ref": "#/definitions/TypeLayerStyleConfig"
             }
           }
         }
@@ -1105,8 +1105,8 @@
             "source": {
               "$ref": "#/definitions/TypeBaseVectorSourceInitialConfig"
             },
-            "style": {
-              "$ref": "#/definitions/TypeStyleConfig"
+            "layerStyle": {
+              "$ref": "#/definitions/TypeLayerStyleConfig"
             }
           }
         }
@@ -1126,8 +1126,8 @@
             "source": {
               "$ref": "#/definitions/TypeSourceWmsInitialConfig"
             },
-            "style": {
-              "$ref": "#/definitions/TypeStyleConfig"
+            "layerStyle": {
+              "$ref": "#/definitions/TypeLayerStyleConfig"
             }
           }
         }
@@ -1147,8 +1147,8 @@
             "source": {
               "$ref": "#/definitions/TypeSourceWfsInitialConfig"
             },
-            "style": {
-              "$ref": "#/definitions/TypeStyleConfig"
+            "layerStyle": {
+              "$ref": "#/definitions/TypeLayerStyleConfig"
             }
           }
         }
@@ -1156,7 +1156,7 @@
     },
     "TypeStyleGeometry": {
       "description": "Valid keys for the geometryType property.",
-      "enum": ["point", "linestring", "polygon"]
+      "enum": ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]
     },
     "TypeBaseSourceInitialConfig": {
       "description": "Base type from which we derive the source properties for all the leaf nodes in the layer tree.",
@@ -1614,12 +1614,37 @@
         }
       }
     },
-    "TypeStyleConfig": {
+    "TypeLayerStyleConfig": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "type": "object",
+      "properties": {
+        "Point": {
+          "$ref": "#/definitions/TypeLayerStyleSettings"
+        },
+        "MultiPoint": {
+          "$ref": "#/definitions/TypeLayerStyleSettings"
+        },
+        "LineString": {
+          "$ref": "#/definitions/TypeLayerStyleSettings"
+        },
+        "MultiLineString": {
+          "$ref": "#/definitions/TypeLayerStyleSettings"
+        },
+        "Polygon": {
+          "$ref": "#/definitions/TypeLayerStyleSettings"
+        },
+        "MultiPolygon": {
+          "$ref": "#/definitions/TypeLayerStyleSettings"
+        }
+      }
+    },
+    "TypeLayerStyleSettings": {
       "type": "object",
       "properties": {
         "type": {
           "description": "The type of style used by the layer.",
-          "$ref": "#/definitions/TypeStyleConfigType"
+          "$ref": "#/definitions/TypeLayerStyleConfigType"
         },
         "fields": {
           "type": "array",
@@ -1635,16 +1660,16 @@
           "description": "Array of style information.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/TypeStyleConfigInfo"
+            "$ref": "#/definitions/TypeLayerStyleConfigInfo"
           }
         }
       }
     },
-    "TypeStyleConfigType": {
+    "TypeLayerStyleConfigType": {
       "description": "Valid keys for the type property of style configurations.",
       "enum": ["simple", "uniqueValue", "classBreaks"]
     },
-    "TypeStyleConfigInfo": {
+    "TypeLayerStyleConfigInfo": {
       "type": "object",
       "properties": {
         "visible": {

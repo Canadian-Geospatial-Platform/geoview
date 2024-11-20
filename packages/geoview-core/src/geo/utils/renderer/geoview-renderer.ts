@@ -18,26 +18,18 @@ import {
   isLineStringVectorConfig,
   isSimpleSymbolVectorConfig,
   TypeBaseStyleType,
-  TypeClassBreakStyleInfo,
   TypeFillStyle,
   TypePolygonVectorConfig,
   TypeIconSymbolVectorConfig,
   TypeLineStyle,
   TypeLineStringVectorConfig,
-  TypeSimpleStyleConfig,
   TypeSimpleSymbolVectorConfig,
-  TypeStyleGeometry,
-  TypeStyleSettings,
   TypeSymbol,
-  TypeUniqueValueStyleInfo,
-  TypeStyleConfig,
   TypeKindOfVectorSettings,
-  isSimpleStyleConfig,
-  isUniqueValueStyleConfig,
-  isClassBreakStyleConfig,
-  TypeUniqueValueStyleConfig,
-  TypeClassBreakStyleConfig,
-  TypeBaseStyleConfig,
+  TypeStyleGeometry,
+  TypeLayerStyleSettings,
+  TypeLayerStyleConfig,
+  TypeLayerStyleConfigInfo,
 } from '@/geo/map/map-schema-types';
 import {
   binaryKeywors,
@@ -55,7 +47,7 @@ import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geovi
 import { logger } from '@/core/utils/logger';
 
 type TypeStyleProcessor = (
-  styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+  styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean
@@ -71,7 +63,7 @@ let colorCount = 0;
  *
  * @returns {string} The current default color string.
  */
-// TODO: create a mechanisim to have one counter by map if needed with a small class who reuse the static function
+// TODO: create a mechanism to have one counter by map if needed with a small class who reuse the static function
 function getDefaultColor(alpha: number, increment = false): string {
   // get color then increment if needed
   const color = asString(setAlphaColor(asArray(defaultColor[colorCount]), alpha));
@@ -794,21 +786,21 @@ const processSymbol: Record<TypeSymbol, (settings: TypeSimpleSymbolVectorConfig)
 /** ***************************************************************************************************************************
  * Process a simple point symbol using the settings. Simple point symbol may be an icon or a vector symbol.
  *
- * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
+ * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
  * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
  * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processSimplePoint(
-  styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+  styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
-  const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeKindOfVectorSettings;
+  const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
   if (isSimpleSymbolVectorConfig(settings)) {
     const { symbol } = settings;
     return processSymbol[symbol].call('', settings);
@@ -827,14 +819,14 @@ function processSimplePoint(
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processSimpleLineString(
-  styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+  styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
-  const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeKindOfVectorSettings;
+  const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
   let geometry;
   if (feature) {
     geometry = feature.getGeometry() as Geometry;
@@ -1018,14 +1010,14 @@ const processFillStyle: Record<TypeFillStyle, (settings: TypePolygonVectorConfig
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processSimplePolygon(
-  styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+  styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
-  const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeKindOfVectorSettings;
+  const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
   let geometry;
   if (feature) {
     geometry = feature.getGeometry() as Geometry;
@@ -1046,8 +1038,7 @@ function processSimplePolygon(
  * This method is used to process the array of point styles as described in the pointStyleConfig.
  *
  * @param {TypeVectorLayerStyles} layerStyle - Object that will receive the created canvas.
- * @param {TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]} arrayOfPointStyleConfig - Array of point style
- * configuration.
+ * @param {TypeLayerStyleConfigInfo[]} arrayOfPointStyleConfig - Array of point style configuration.
  * @param {(value: TypeVectorLayerStyles | PromiseLike<TypeVectorLayerStyles>) => void} resolve - Function that will resolve the promise
  * of the calling methode.
  *
@@ -1055,7 +1046,7 @@ function processSimplePolygon(
  */
 async function processArrayOfPointStyleConfig(
   layerStyles: TypeVectorLayerStyles,
-  arrayOfPointStyleConfig: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]
+  arrayOfPointStyleConfig: TypeLayerStyleConfigInfo[]
 ): Promise<TypeVectorLayerStyles> {
   try {
     // UniqueValue or ClassBreak point style configuration ============================================================
@@ -1090,7 +1081,7 @@ async function processArrayOfPointStyleConfig(
  *
  * @param {TypeKindOfVectorSettings | undefined} defaultSettings - Settings associated to simple styles or default style of
  * unique value and class break styles. When this parameter is undefined, no defaultCanvas is created.
- * @param {TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[] | undefined} arrayOfPointStyleConfig - Array of point style
+ * @param {TypeLayerStyleConfigInfo[] | undefined} arrayOfPointStyleConfig - Array of point style
  * configuration associated to unique value and class break styles. When this parameter is undefined, no arrayOfCanvas is
  * created.
  *
@@ -1098,7 +1089,7 @@ async function processArrayOfPointStyleConfig(
  */
 async function getPointStyleSubRoutine(
   defaultSettings?: TypeKindOfVectorSettings,
-  arrayOfPointStyleConfig?: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]
+  arrayOfPointStyleConfig?: TypeLayerStyleConfigInfo[]
 ): Promise<TypeVectorLayerStyles> {
   try {
     const layerStyles: TypeVectorLayerStyles = { Point: {} };
@@ -1109,7 +1100,9 @@ async function getPointStyleSubRoutine(
         layerStyles.Point!.defaultCanvas = canvas;
         if (arrayOfPointStyleConfig) {
           layerStyles.Point!.arrayOfCanvas = [];
-          return await processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig);
+          const processedStyles = await processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig);
+          processedStyles.Point?.arrayOfCanvas?.pop();
+          return processedStyles;
         }
         return layerStyles;
       }
@@ -1118,7 +1111,9 @@ async function getPointStyleSubRoutine(
       layerStyles.Point!.defaultCanvas = createPointCanvas(processSimplePoint(defaultSettings));
       if (arrayOfPointStyleConfig) {
         layerStyles.Point!.arrayOfCanvas = [];
-        return await processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig);
+        const processedStyles = await processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig);
+        processedStyles.Point?.arrayOfCanvas?.pop();
+        return processedStyles;
       }
       return layerStyles;
     }
@@ -1138,7 +1133,7 @@ async function getPointStyleSubRoutine(
  *
  * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
  */
-export async function getLegendStyles(styleConfig: TypeStyleConfig | undefined): Promise<TypeVectorLayerStyles> {
+export async function getLegendStyles(styleConfig: TypeLayerStyleConfig | undefined): Promise<TypeVectorLayerStyles> {
   try {
     if (!styleConfig) return {};
 
@@ -1146,24 +1141,14 @@ export async function getLegendStyles(styleConfig: TypeStyleConfig | undefined):
     if (styleConfig.Point) {
       // ======================================================================================================================
       // Point style configuration ============================================================================================
-      if (isSimpleStyleConfig(styleConfig.Point)) {
-        const layerStyles = await getPointStyleSubRoutine(styleConfig.Point.settings);
+      if (styleConfig.Point.type === 'simple') {
+        const layerStyles = await getPointStyleSubRoutine(styleConfig.Point.info[0].settings);
         legendStyles.Point = layerStyles.Point;
-      }
-
-      if (isUniqueValueStyleConfig(styleConfig.Point)) {
-        const layerStyles = await getPointStyleSubRoutine(
-          styleConfig.Point.defaultSettings,
-          (styleConfig.Point as TypeUniqueValueStyleConfig).uniqueValueStyleInfo
-        );
-        legendStyles.Point = layerStyles.Point;
-      }
-
-      if (isClassBreakStyleConfig(styleConfig.Point)) {
-        const layerStyles = await getPointStyleSubRoutine(
-          styleConfig.Point.defaultSettings,
-          (styleConfig.Point as TypeClassBreakStyleConfig).classBreakStyleInfo
-        );
+      } else {
+        const defaultSettings = styleConfig.Point.hasDefault
+          ? styleConfig.Point.info[styleConfig.Point.info.length - 1].settings
+          : undefined;
+        const layerStyles = await getPointStyleSubRoutine(defaultSettings, styleConfig.Point.info);
         legendStyles.Point = layerStyles.Point;
       }
     }
@@ -1172,23 +1157,18 @@ export async function getLegendStyles(styleConfig: TypeStyleConfig | undefined):
       // ======================================================================================================================
       // LineString style configuration =======================================================================================
       const layerStyles: TypeVectorLayerStyles = { LineString: {} };
-      if (isSimpleStyleConfig(styleConfig.LineString)) {
+      if (styleConfig.LineString.type === 'simple') {
         layerStyles.LineString!.defaultCanvas = createLineStringCanvas(processSimpleLineString(styleConfig.LineString));
-      } else if (isUniqueValueStyleConfig(styleConfig.LineString)) {
-        if (styleConfig.LineString.defaultSettings)
-          layerStyles.LineString!.defaultCanvas = createLineStringCanvas(processSimpleLineString(styleConfig.LineString.defaultSettings));
+      } else {
+        if (styleConfig.LineString.hasDefault)
+          layerStyles.LineString!.defaultCanvas = createLineStringCanvas(
+            processSimpleLineString(styleConfig.LineString.info[styleConfig.LineString.info.length - 1].settings)
+          );
         const styleArray: HTMLCanvasElement[] = [];
-        styleConfig.LineString.uniqueValueStyleInfo.forEach((styleInfo) => {
+        styleConfig.LineString.info.forEach((styleInfo) => {
           styleArray.push(createLineStringCanvas(processSimpleLineString(styleInfo.settings)));
         });
-        layerStyles.LineString!.arrayOfCanvas = styleArray;
-      } else if (isClassBreakStyleConfig(styleConfig.LineString)) {
-        if (styleConfig.LineString.defaultSettings)
-          layerStyles.LineString!.defaultCanvas = createLineStringCanvas(processSimpleLineString(styleConfig.LineString.defaultSettings));
-        const styleArray: HTMLCanvasElement[] = [];
-        styleConfig.LineString.classBreakStyleInfo.forEach((styleInfo) => {
-          styleArray.push(createLineStringCanvas(processSimpleLineString(styleInfo.settings)));
-        });
+        if (styleConfig.LineString.hasDefault) styleArray.pop();
         layerStyles.LineString!.arrayOfCanvas = styleArray;
       }
       legendStyles.LineString = layerStyles.LineString;
@@ -1198,25 +1178,22 @@ export async function getLegendStyles(styleConfig: TypeStyleConfig | undefined):
       // ======================================================================================================================
       // Polygon style configuration ==========================================================================================
       const layerStyles: TypeVectorLayerStyles = { Polygon: {} };
-      if (isSimpleStyleConfig(styleConfig.Polygon)) {
-        layerStyles.Polygon!.defaultCanvas = createPolygonCanvas(processSimplePolygon(styleConfig.Polygon));
-      } else if (isUniqueValueStyleConfig(styleConfig.Polygon)) {
-        if (styleConfig.Polygon.defaultSettings)
-          layerStyles.Polygon!.defaultCanvas = createPolygonCanvas(processSimplePolygon(styleConfig.Polygon.defaultSettings));
+      if (styleConfig.Polygon.type === 'simple') {
+        layerStyles.Polygon!.defaultCanvas = createPolygonCanvas(processSimplePolygon(styleConfig.Polygon.info[0].settings));
+      } else {
+        if (styleConfig.Polygon.hasDefault)
+          layerStyles.Polygon!.defaultCanvas = createPolygonCanvas(
+            processSimplePolygon(styleConfig.Polygon.info[styleConfig.Polygon.info.length - 1].settings)
+          );
+
         const styleArray: HTMLCanvasElement[] = [];
-        styleConfig.Polygon.uniqueValueStyleInfo.forEach((styleInfo) => {
+        styleConfig.Polygon.info.forEach((styleInfo) => {
           styleArray.push(createPolygonCanvas(processSimplePolygon(styleInfo.settings)));
         });
-        layerStyles.Polygon!.arrayOfCanvas = styleArray;
-      } else if (isClassBreakStyleConfig(styleConfig.Polygon)) {
-        if (styleConfig.Polygon.defaultSettings)
-          layerStyles.Polygon!.defaultCanvas = createPolygonCanvas(processSimplePolygon(styleConfig.Polygon.defaultSettings));
-        const styleArray: HTMLCanvasElement[] = [];
-        styleConfig.Polygon.classBreakStyleInfo.forEach((styleInfo) => {
-          styleArray.push(createPolygonCanvas(processSimplePolygon(styleInfo.settings)));
-        });
+        if (styleConfig.Polygon.hasDefault) styleArray.pop();
         layerStyles.Polygon!.arrayOfCanvas = styleArray;
       }
+
       legendStyles.Polygon = layerStyles.Polygon;
     }
     return legendStyles;
@@ -1230,11 +1207,11 @@ export async function getLegendStyles(styleConfig: TypeStyleConfig | undefined):
  * Create a default style to use with a vector feature that has no style configuration.
  *
  * @param {TypeStyleGeometry} geometryType - Type of geometry (Point, LineString, Polygon).
- * @param {TypeDisplayLanguage} language - Language for the style
+ * @param {string} label - Label for the style.
  *
- * @returns {TypeSimpleStyleConfig | undefined} The Style configuration created. Undefined if unable to create it.
+ * @returns {TypeLayerStyleConfigInfo | undefined} The Style configuration created. Undefined if unable to create it.
  */
-function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): TypeSimpleStyleConfig | undefined {
+function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): TypeLayerStyleSettings | undefined {
   if (geometryType === 'Point') {
     const settings: TypeSimpleSymbolVectorConfig = {
       type: 'simpleSymbol',
@@ -1246,14 +1223,14 @@ function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): Typ
       },
       symbol: 'circle',
     };
-    return { styleType: 'simple', label, settings };
+    return { type: 'simple', hasDefault: false, fields: [], info: [{ visible: true, label, settings, values: [] }] };
   }
   if (geometryType === 'LineString') {
     const settings: TypeLineStringVectorConfig = {
       type: 'lineString',
       stroke: { color: getDefaultColor(1, true) },
     };
-    return { styleType: 'simple', label, settings };
+    return { type: 'simple', hasDefault: false, fields: [], info: [{ visible: true, label, settings, values: [] }] };
   }
   if (geometryType === 'Polygon') {
     const settings: TypePolygonVectorConfig = {
@@ -1262,7 +1239,7 @@ function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): Typ
       stroke: { color: getDefaultColor(1, true) },
       fillStyle: 'solid',
     };
-    return { styleType: 'simple', label, settings };
+    return { type: 'simple', hasDefault: false, fields: [], info: [{ visible: true, label, settings, values: [] }] };
   }
   logger.logError(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);
   return undefined;
@@ -1272,12 +1249,12 @@ function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): Typ
  * Search the unique value entry using the field values stored in the feature.
  *
  * @param {string[]} fields - Fields involved in the unique value definition.
- * @param {TypeUniqueValueStyleInfo[]} uniqueValueStyleInfo - Unique value configuration.
+ * @param {TypeLayerStyleConfigInfo[]} uniqueValueStyleInfo - Unique value configuration.
  * @param {Feature} feature - Feature used to test the unique value conditions.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
-function searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeUniqueValueStyleInfo[], feature: Feature): number | undefined {
+function searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeLayerStyleConfigInfo[], feature: Feature): number | undefined {
   for (let i = 0; i < uniqueValueStyleInfo.length; i++) {
     for (let j = 0, isEqual = true; j < fields.length && isEqual; j++) {
       // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
@@ -1307,7 +1284,7 @@ function searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeUniq
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processUniqueValuePoint(
-  styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+  styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean
@@ -1315,13 +1292,12 @@ function processUniqueValuePoint(
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
-  if (isUniqueValueStyleConfig(styleSettings)) {
-    const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
-    const i = searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature!);
-    if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible !== false))
-      return processSimplePoint(uniqueValueStyleInfo[i].settings);
-    if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
-      return processSimplePoint(defaultSettings);
+  if (styleSettings.type === 'uniqueValue') {
+    const { hasDefault, fields, info } = styleSettings;
+    const i = searchUniqueValueEntry(fields, info, feature!);
+    if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePoint(info[i].settings);
+    if (i === undefined && hasDefault && (legendFilterIsOff || styleSettings.info[styleSettings.info.length - 1].visible !== false))
+      return processSimplePoint(styleSettings.info[styleSettings.info.length - 1].settings);
   }
   return undefined;
 }
@@ -1329,7 +1305,7 @@ function processUniqueValuePoint(
 /** ***************************************************************************************************************************
  * Process the unique value settings using a lineString feature to get its Style.
  *
- * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
+ * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
  * @param {Feature} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
@@ -1337,7 +1313,7 @@ function processUniqueValuePoint(
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processUniqueLineString(
-  styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+  styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean
@@ -1345,13 +1321,12 @@ function processUniqueLineString(
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
-  if (isUniqueValueStyleConfig(styleSettings)) {
-    const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
-    const i = searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature!);
-    if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible !== false))
-      return processSimpleLineString(uniqueValueStyleInfo[i].settings, feature);
-    if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
-      return processSimpleLineString(defaultSettings, feature);
+  if (styleSettings.type === 'uniqueValue') {
+    const { hasDefault, fields, info } = styleSettings;
+    const i = searchUniqueValueEntry(fields, info, feature!);
+    if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimpleLineString(info[i].settings, feature);
+    if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
+      return processSimpleLineString(info[info.length - 1].settings, feature);
   }
   return undefined;
 }
@@ -1359,7 +1334,7 @@ function processUniqueLineString(
 /** ***************************************************************************************************************************
  * Process the unique value settings using a polygon feature to get its Style.
  *
- * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
+ * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
  * @param {Feature} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
@@ -1367,7 +1342,7 @@ function processUniqueLineString(
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processUniquePolygon(
-  styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+  styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean
@@ -1375,13 +1350,12 @@ function processUniquePolygon(
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
-  if (isUniqueValueStyleConfig(styleSettings)) {
-    const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
-    const i = searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature!);
-    if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible !== false))
-      return processSimplePolygon(uniqueValueStyleInfo[i].settings, feature);
-    if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
-      return processSimplePolygon(defaultSettings, feature);
+  if (styleSettings.type === 'uniqueValue') {
+    const { hasDefault, fields, info } = styleSettings;
+    const i = searchUniqueValueEntry(fields, info, feature!);
+    if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePolygon(info[i].settings, feature);
+    if (i === undefined && hasDefault !== undefined && (legendFilterIsOff || info[info.length - 1].visible !== false))
+      return processSimplePolygon(info[info.length - 1].settings, feature);
   }
   return undefined;
 }
@@ -1389,13 +1363,13 @@ function processUniquePolygon(
 /** ***************************************************************************************************************************
  * Search the class breakentry using the field value stored in the feature.
  *
- * @param {string[]} field - Field involved in the class break definition.
- * @param {TypeClassBreakStyleInfo[]} classBreakStyleInfo - Class break configuration.
+ * @param {string} field - Field involved in the class break definition.
+ * @param {TypeLayerStyleConfigInfo[]} classBreakStyleInfo - Class break configuration.
  * @param {Feature} feature - Feature used to test the class break conditions.
  *
- * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+ * @returns {number | undefined} The index of the entry. Undefined if unable to find it.
  */
-function searchClassBreakEntry(field: string, classBreakStyleInfo: TypeClassBreakStyleInfo[], feature: Feature): number | undefined {
+function searchClassBreakEntry(field: string, classBreakStyleInfo: TypeLayerStyleConfigInfo[], feature: Feature): number | undefined {
   // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
   // class break definition.
   const featureKey = (feature as Feature).getKeys().filter((key) => {
@@ -1405,10 +1379,10 @@ function searchClassBreakEntry(field: string, classBreakStyleInfo: TypeClassBrea
 
   const fieldValue = feature.get(featureKey[0]) as number | string;
 
-  if (fieldValue >= classBreakStyleInfo[0].minValue! && fieldValue <= classBreakStyleInfo[0].maxValue) return 0;
+  if (fieldValue >= classBreakStyleInfo[0].values[0] && fieldValue <= classBreakStyleInfo[0].values[1]) return 0;
 
   for (let i = 1; i < classBreakStyleInfo.length; i++) {
-    if (fieldValue > classBreakStyleInfo[i].minValue! && fieldValue <= classBreakStyleInfo[i].maxValue) return i;
+    if (fieldValue > classBreakStyleInfo[i].values[0] && fieldValue <= classBreakStyleInfo[i].values[1]) return i;
   }
   return undefined;
 }
@@ -1416,7 +1390,7 @@ function searchClassBreakEntry(field: string, classBreakStyleInfo: TypeClassBrea
 /** ***************************************************************************************************************************
  * Process the class break settings using a Point feature to get its Style.
  *
- * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
+ * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
  * @param {Feature} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
@@ -1424,7 +1398,7 @@ function searchClassBreakEntry(field: string, classBreakStyleInfo: TypeClassBrea
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processClassBreaksPoint(
-  styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+  styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean
@@ -1432,13 +1406,12 @@ function processClassBreaksPoint(
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
-  if (isClassBreakStyleConfig(styleSettings)) {
-    const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
-    const i = searchClassBreakEntry(field, classBreakStyleInfo, feature!);
-    if (i !== undefined && (legendFilterIsOff || classBreakStyleInfo[i].visible !== false))
-      return processSimplePoint(classBreakStyleInfo[i].settings);
-    if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
-      return processSimplePoint(defaultSettings);
+  if (styleSettings.type === 'classBreaks') {
+    const { hasDefault, fields, info } = styleSettings;
+    const i = searchClassBreakEntry(fields[0], info, feature!);
+    if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePoint(info[i].settings);
+    if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
+      return processSimplePoint(info[info.length - 1].settings);
   }
   return undefined;
 }
@@ -1454,7 +1427,7 @@ function processClassBreaksPoint(
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processClassBreaksLineString(
-  styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+  styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean
@@ -1462,13 +1435,12 @@ function processClassBreaksLineString(
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
-  if (isClassBreakStyleConfig(styleSettings)) {
-    const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
-    const i = searchClassBreakEntry(field, classBreakStyleInfo, feature!);
-    if (i !== undefined && (legendFilterIsOff || classBreakStyleInfo[i].visible !== false))
-      return processSimpleLineString(classBreakStyleInfo[i].settings, feature);
-    if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
-      return processSimpleLineString(defaultSettings, feature);
+  if (styleSettings.type === 'classBreaks') {
+    const { hasDefault, fields, info } = styleSettings;
+    const i = searchClassBreakEntry(fields[0], info, feature!);
+    if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimpleLineString(info[i].settings, feature);
+    if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
+      return processSimpleLineString(info[info.length - 1].settings, feature);
   }
   return undefined;
 }
@@ -1476,7 +1448,7 @@ function processClassBreaksLineString(
 /** ***************************************************************************************************************************
  * Process the class break settings using a Polygon feature to get its Style.
  *
- * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
+ * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
  * @param {Feature} feature - Feature used to test the unique value conditions.
  * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
@@ -1484,7 +1456,7 @@ function processClassBreaksLineString(
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processClassBreaksPolygon(
-  styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+  styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean
@@ -1492,13 +1464,12 @@ function processClassBreaksPolygon(
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
-  if (isClassBreakStyleConfig(styleSettings)) {
-    const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
-    const i = searchClassBreakEntry(field, classBreakStyleInfo, feature!);
-    if (i !== undefined && (legendFilterIsOff || classBreakStyleInfo[i].visible !== false))
-      return processSimplePolygon(classBreakStyleInfo[i].settings, feature);
-    if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
-      return processSimplePolygon(defaultSettings, feature);
+  if (styleSettings.type === 'classBreaks') {
+    const { hasDefault, fields, info } = styleSettings;
+    const i = searchClassBreakEntry(fields[0], info, feature!);
+    if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePolygon(info[i].settings, feature);
+    if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
+      return processSimplePolygon(info[info.length - 1].settings, feature);
   }
   return undefined;
 }
@@ -1544,11 +1515,11 @@ const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyl
  */
 export function getAndCreateFeatureStyle(
   feature: FeatureLike,
-  style: TypeStyleConfig,
+  style: TypeLayerStyleConfig,
   label: string,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeBaseStyleConfig) => void
+  callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
 ): Style | undefined {
   // Get the geometry type
   const geometryType = getGeometryType(feature);
@@ -1565,16 +1536,16 @@ export function getAndCreateFeatureStyle(
     if (styleConfig) {
       if (style) styleWorkOn[geometryType] = styleConfig;
       else styleWorkOn = { [geometryType]: styleConfig };
-      callbackWhenCreatingStyle?.(geometryType, styleConfig);
+      callbackWhenCreatingStyle?.(geometryType, styleConfig.info[0]);
     }
   }
 
   // Get the style accordingly to its type and geometry.
   if (styleWorkOn![geometryType]) {
     const styleSettings = style![geometryType]!;
-    const { styleType } = styleSettings;
+    const { type } = styleSettings;
     // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
-    return processStyle[styleType][geometryType].call('', styleSettings, feature as Feature, filterEquation, legendFilterIsOff);
+    return processStyle[type][geometryType].call('', styleSettings, feature as Feature, filterEquation, legendFilterIsOff);
   }
   return undefined;
 }
@@ -1592,7 +1563,7 @@ const CANVAS_RECYCLING: { [styleAsJsonString: string]: HTMLCanvasElement } = {};
  */
 export async function getFeatureCanvas(
   feature: Feature,
-  style: TypeStyleConfig,
+  style: TypeLayerStyleConfig,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
   useRecycling?: boolean
@@ -1609,16 +1580,14 @@ export async function getFeatureCanvas(
     // Get the style accordingly to its type and geometry.
     if (style[geometryType]) {
       const styleSettings = style[geometryType]!;
-      const { styleType } = styleSettings;
-      const featureStyle = processStyle[styleType][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
+      const { type } = styleSettings;
+      const featureStyle = processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
       if (featureStyle) {
         if (geometryType === 'Point') {
           if (
-            (isSimpleStyleConfig(styleSettings) && isSimpleSymbolVectorConfig((styleSettings as TypeSimpleStyleConfig).settings)) ||
-            (isUniqueValueStyleConfig(styleSettings) &&
-              isSimpleSymbolVectorConfig((styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[0].settings)) ||
-            (isClassBreakStyleConfig(styleSettings) &&
-              isSimpleSymbolVectorConfig((styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo[0].settings))
+            (styleSettings.type === 'simple' && styleSettings.info[0].settings.type === 'simpleSymbol') ||
+            (styleSettings.type === 'uniqueValue' && styleSettings.info[0].settings.type === 'simpleSymbol') ||
+            (styleSettings.type === 'classBreaks' && isSimpleSymbolVectorConfig(styleSettings.info[0].settings))
           ) {
             canvas = createPointCanvas(featureStyle);
           } else {

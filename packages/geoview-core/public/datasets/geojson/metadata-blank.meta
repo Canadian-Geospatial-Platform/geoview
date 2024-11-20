@@ -19,14 +19,22 @@
           ]
         }
       },
-      "style": {
+      "layerStyle": {
         "Point": {
-          "styleType": "simple",
-          "label": "Point label",
-          "settings": {
-            "type": "simpleSymbol",
-            "symbol": "star"
-          }
+          "type": "simple",
+          "hasDefault": false,
+          "fields": [],
+          "info": [
+            {
+              "label": "Point label",
+              "visible": true,
+              "values": [],
+              "settings": {
+                "type": "simpleSymbol",
+                "symbol": "star"
+              }
+            }
+          ]
         }
       }
     }

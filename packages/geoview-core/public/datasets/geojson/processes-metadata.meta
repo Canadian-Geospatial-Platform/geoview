@@ -40,19 +40,27 @@
           ]
         }
       },
-      "style": {
+      "layerStyle": {
         "Point": {
-          "styleType": "simple",
-          "label": "Raster Drill process",
-          "settings": {
-            "color": "rgba(128,0,0,0.25)",
-            "type": "simpleSymbol",
-            "symbol": "star",
-            "stroke": {
-              "color": "rgba(128,0,0,1)",
-              "lineStyle": "solid"
+          "type": "simple",
+          "hasDefault": false,
+          "fields": [],
+          "info": [
+            {
+              "visible": true,
+              "label": "Raster Drill process",
+              "values": [],
+              "settings": {
+                "color": "rgba(128,0,0,0.25)",
+                "type": "simpleSymbol",
+                "symbol": "star",
+                "stroke": {
+                  "color": "rgba(128,0,0,1)",
+                  "lineStyle": "solid"
+                }
+              }
             }
-          }
+          ]
         }
       }
     }

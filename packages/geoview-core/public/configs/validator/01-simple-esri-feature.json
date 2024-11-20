@@ -19,7 +19,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "geometryType": "point",
             "layerName": "stations-Temporal",
             "initialSettings": {
               "controls": {
@@ -50,29 +49,32 @@
             "source": {
               "layerFilter": "Province = \\'Alberta\\' or Province = \\'Manitoba\\'"
             },
-            "style": {
-              "type": "simple",
-              "hasDefault": false,
-              "info": [
-                {
-                  "visible": true,
-                  "label": "",
-                  "values": [],
-                  "settings": {
-                    "type": "simpleSymbol",
-                    "rotation": 0,
-                    "color": "rgba(156,0,130,1)",
-                    "stroke": {
-                      "color": "rgba(0,0,0,1)",
-                      "lineStyle": "solid",
-                      "width": 1
-                    },
-                    "size": 2.668,
-                    "symbol": "square",
-                    "offset": [0, 0]
+            "layerStyle": {
+              "Point": {
+                "type": "simple",
+                "hasDefault": false,
+                "fields": [],
+                "info": [
+                  {
+                    "visible": true,
+                    "label": "",
+                    "values": [],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(156,0,130,1)",
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 1
+                      },
+                      "size": 2.668,
+                      "symbol": "square",
+                      "offset": [0, 0]
+                    }
                   }
-                }
-              ]
+                ]
+              }
             }
           }
         ]

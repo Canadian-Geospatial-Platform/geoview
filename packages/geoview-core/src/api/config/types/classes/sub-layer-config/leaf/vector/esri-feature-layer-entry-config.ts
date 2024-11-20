@@ -2,7 +2,7 @@ import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@conf
 import { Cast } from '@config/types/config-types';
 import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
 import {
-  TypeStyleConfig,
+  TypeLayerStyleConfig,
   TypeLayerEntryType,
   TypeSourceEsriFeatureInitialConfig,
   TypeVectorSourceFormats,
@@ -22,7 +22,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   declare source: TypeSourceEsriFeatureInitialConfig;
 
   /** Style to apply to the feature layer. */
-  style?: TypeStyleConfig;
+  layerStyle?: TypeLayerStyleConfig;
   // #endregion PUBLIC PROPERTIES
 
   // ===============
@@ -73,7 +73,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
     };
 
     const renderer = Cast<EsriBaseRenderer>(layerMetadata.drawingInfo?.renderer);
-    if (renderer) this.style = createStyleUsingEsriRenderer(renderer);
+    if (renderer) this.layerStyle = createStyleUsingEsriRenderer(renderer);
 
     this.processTemporalDimension(layerMetadata.timeInfo);
   }
