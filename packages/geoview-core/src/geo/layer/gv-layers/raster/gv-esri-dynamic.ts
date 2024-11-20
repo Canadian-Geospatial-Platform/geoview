@@ -163,7 +163,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
         // Format and return the result
         // Not having geometry have an effect on the style as it use the geometry to define wich one to use
-        // The formatFeatureInfoResult (abstact-geoview-layer) / getFeatureCanvas (geoview-renderer) use geometry stored in style 
+        // The formatFeatureInfoResult (abstact-geoview-layer) / getFeatureCanvas (geoview-renderer) use geometry stored in style
         return this.formatFeatureInfoResult(features, layerConfig);
       }
 
