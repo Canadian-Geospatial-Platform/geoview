@@ -122,9 +122,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
 
-      // Guess the geometry type by taking the first style key
-      // const [geometryType] = layerConfig.getTypeGeometries();
-
       // Fetch the features
       let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath!;
       if (!urlRoot.endsWith('/')) urlRoot += '/';

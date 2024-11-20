@@ -335,9 +335,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
 
-      // Guess the geometry type by taking the first style key
-      // const [geometryType] = layerConfig.getTypeGeometries();
-
       // Fetch the features
       let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath!;
       if (!urlRoot.endsWith('/')) urlRoot += '/';

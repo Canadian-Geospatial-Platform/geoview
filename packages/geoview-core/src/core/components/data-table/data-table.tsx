@@ -348,9 +348,9 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     // Log
     logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
 
+    // get filtered feature for unique value info style so non visible class is not in the table
     const filterArray = getFilteredDataFromLegendVisibility(data.layerPath, data?.features ?? []);
 
-    // return (data?.features ?? []).map((feature) => {
     return (filterArray ?? []).map((feature) => {
       const featureInfo = {
         ICON: (
