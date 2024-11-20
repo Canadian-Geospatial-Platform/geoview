@@ -36,7 +36,6 @@ import {
   InfoOutlinedIcon,
 } from '@/ui';
 
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -75,7 +74,8 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   // get store actions and values
   const { zoomToExtent, highlightBBox, transformPoints, showClickMarker, addHighlightedFeature, removeHighlightedFeature } =
     useMapStoreActions();
-  const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility } = useDataTableStoreActions();
+  const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility, getFilteredDataFromLegendVisibility } =
+    useDataTableStoreActions();
   const { getExtentFromFeatures } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
@@ -348,7 +348,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     // Log
     logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
 
-    const filterArray = LegendEventProcessor.getFeatureVisibleFromClassVibility('sandboxMap', data.layerPath, data?.features ?? []);
+    const filterArray = getFilteredDataFromLegendVisibility(data.layerPath, data?.features ?? []);
 
     // return (data?.features ?? []).map((feature) => {
     return (filterArray ?? []).map((feature) => {

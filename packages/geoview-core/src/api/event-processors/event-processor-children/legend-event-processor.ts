@@ -13,6 +13,7 @@ import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import {
+  TypeFeatureInfoEntry,
   TypeStyleGeometry,
   TypeUniqueValueStyleConfig,
   TypeUniqueValueStyleInfo,
@@ -591,45 +592,47 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: any[]): any[] {
-    // Get the layer config
-    const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(
-      layerPath
-    ) as unknown as AbstractBaseLayerEntryConfig;
-
-    // Get the geometry type
+  /**
+   * Filters features based on their visibility settings defined in the layer's unique value style configuration.
+   *
+   * @static
+   * @param {string} mapId - The unique identifier of the map instance
+   * @param {string} layerPath - The path to the layer in the map configuration
+   * @param {any[]} features - Array of features to filter
+   *
+   * @returns {any[]} Filtered array of features based on their visibility settings
+   *
+   * @description
+   * This function processes features based on the layer's unique value style configuration:
+   * - If the layer doesn't use unique value styling, returns all features unchanged
+   * - For unique value styling, filters features based on the style's visibility rules
+   * - Features matching visible styles are included
+   * - Features matching invisible styles are excluded
+   * - Features with no matching style follow the defaultVisible setting
+   */
+  static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] {
+    // Get the layer config and geometry type
+    const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath) as AbstractBaseLayerEntryConfig;
     const [geometryType] = layerConfig.getTypeGeometries();
 
     // Get the style
-    const layerStyle = layerConfig.style![geometryType];
-    const styleTypeIsUniqueValue = layerStyle?.styleType === 'uniqueValue';
-
-    // If style type is unique value info, check if class item are visible or not
-    if (styleTypeIsUniqueValue) {
-      const styleUnique = (layerStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo as TypeUniqueValueStyleInfo[];
-      const visibleArray = [];
-      const unvisibleArray = [];
-
-      // Create an array for class that shuld be visible and not visible
-      for (let i = 0; i < styleUnique.length; i++) {
-        if (styleUnique[i].visible) {
-          visibleArray.push(styleUnique[i].values[0]);
-        } else unvisibleArray.push(styleUnique[i].values[0]);
-      }
-
-      const newFeatures = [];
-      for (let i = 0; i < features.length; i++) {
-        const val = features[i].fieldInfo[(layerStyle as TypeUniqueValueStyleConfig).fields[0]].value;
-        if (
-          visibleArray.includes(val.toString()) ||
-          ((layerStyle as TypeUniqueValueStyleConfig).defaultVisible && !unvisibleArray.includes(val.toString()))
-        ) {
-          newFeatures.push(features[i]);
-        }
-      }
-      return newFeatures;
+    const layerStyle = layerConfig.style?.[geometryType];
+    if (!layerStyle?.styleType || layerStyle.styleType !== 'uniqueValue') {
+      return features;
     }
-    return features;
+
+    const uniqueValueStyle = layerStyle as TypeUniqueValueStyleConfig;
+    const styleUnique = uniqueValueStyle.uniqueValueStyleInfo as TypeUniqueValueStyleInfo[];
+
+    // Create sets for visible and invisible values for faster lookup
+    const visibleValues = new Set(styleUnique.filter((style) => style.visible).map((style) => style.values.join(';')));
+    const unvisibleValues = new Set(styleUnique.filter((style) => !style.visible).map((style) => style.values.join(';')));
+
+    // Filter features based on visibility
+    return features.filter((feature) => {
+      const fieldValues = uniqueValueStyle.fields.map((field) => feature.fieldInfo[field]!.value).join(';');
+
+      return visibleValues.has(fieldValues.toString()) || (uniqueValueStyle.defaultVisible && !unvisibleValues.has(fieldValues.toString()));
+    });
   }
 }
