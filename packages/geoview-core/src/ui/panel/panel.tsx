@@ -116,15 +116,12 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
    * Update the height of the panel when the mapInfo is expanded
    */
   useEffect(() => {
-    // setTimeout prevents a bug that would cause the panel to flicker.
-    setTimeout(() => {
-      const mapInfo = document.getElementById(`${mapId}-mapInfo`);
+    const mapInfo = document.getElementById(`${mapId}-mapInfo`);
 
-      if (panelContainerRef.current && open && mapInfo) {
-        const mapInfoHeight = mapInfoExpanded ? '6rem' : '3rem';
-        panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight})`;
-      }
-    }, 1);
+    if (panelContainerRef.current && open && mapInfo) {
+      const mapInfoHeight = mapInfoExpanded ? '6rem' : '3rem';
+      panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight})`;
+    }
   }, [mapInfoExpanded, mapSize, open, mapId]);
 
   return (
