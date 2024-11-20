@@ -1,7 +1,7 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { Cast } from '@config/types/config-types';
 import {
-  TypeStyleConfig,
+  TypeLayerStyleConfig,
   TypeLayerEntryType,
   TypeSourceGeoJsonInitialConfig,
   TypeFeatureInfoLayerConfig,
@@ -32,7 +32,7 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   declare source: TypeSourceGeoJsonInitialConfig;
 
   /** Style to apply to the raster layer. */
-  style?: TypeStyleConfig;
+  layerStyle?: TypeLayerStyleConfig;
   // #endregion PROPERTIES
 
   // ===============
@@ -149,7 +149,7 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     this.initialSettings = Cast<TypeLayerInitialSettings>(merge(this.initialSettings, layerMetadata.initialSettings));
     this.source.featureInfo = Cast<TypeFeatureInfoLayerConfig>(merge(this.source.featureInfo, layerMetadata.source.featureInfo));
-    this.style = Cast<TypeStyleConfig>(merge(this.style, layerMetadata.style));
+    this.layerStyle = Cast<TypeLayerStyleConfig>(merge(this.layerStyle, layerMetadata.style));
     this.temporalDimension = Cast<TimeDimension>(merge(this.temporalDimension, layerMetadata.temporalDimension));
 
     if (layerMetadata?.initialSettings?.extent) {

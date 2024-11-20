@@ -12,18 +12,7 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import {
-  TypeClassBreakStyleConfig,
-  TypeClassBreakStyleInfo,
-  TypeFeatureInfoEntry,
-  TypeStyleGeometry,
-  TypeUniqueValueStyleConfig,
-  TypeUniqueValueStyleInfo,
-  isClassBreakStyleConfig,
-  isSimpleStyleConfig,
-  isUniqueValueStyleConfig,
-  layerEntryIsGroupLayer,
-} from '@/geo/map/map-schema-types';
+import { TypeLayerStyleSettings, TypeFeatureInfoEntry, TypeStyleGeometry, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from './map-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -163,10 +152,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           const iconDetailsEntry: TypeLegendLayerItem = {};
           iconDetailsEntry.geometryType = geometryType;
 
-          if (isSimpleStyleConfig(styleSettings)) {
+          if (styleSettings.type === 'simple') {
             iconDetailsEntry.iconType = 'simple';
             iconDetailsEntry.iconImage = (styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL();
-            iconDetailsEntry.name = styleSettings.label;
+            iconDetailsEntry.name = styleSettings.info[0].label;
 
             // TODO Adding icons list, to be verified by backend devs
             const legendLayerListItem: TypeLegendItem = {
@@ -179,44 +168,23 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             iconDetails.push(iconDetailsEntry);
           } else {
             iconDetailsEntry.iconType = 'list';
-            if (isClassBreakStyleConfig(styleSettings)) {
-              iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
-                const legendLayerListItem: TypeLegendItem = {
-                  geometryType,
-                  icon: canvas ? canvas.toDataURL() : null,
-                  name: styleSettings.classBreakStyleInfo[i].label,
-                  isVisible: styleSettings.classBreakStyleInfo[i].visible!,
-                };
-                return legendLayerListItem;
-              });
-              if (styleRepresentation.defaultCanvas) {
-                const legendLayerListItem: TypeLegendItem = {
-                  geometryType,
-                  icon: styleRepresentation.defaultCanvas.toDataURL(),
-                  name: styleSettings.defaultLabel!,
-                  isVisible: styleSettings.defaultVisible!,
-                };
-                iconDetailsEntry.iconList.push(legendLayerListItem);
-              }
-            } else if (isUniqueValueStyleConfig(styleSettings)) {
-              iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
-                const legendLayerListItem: TypeLegendItem = {
-                  geometryType,
-                  icon: canvas ? canvas.toDataURL() : null,
-                  name: styleSettings.uniqueValueStyleInfo[i].label,
-                  isVisible: styleSettings.uniqueValueStyleInfo[i].visible !== false,
-                };
-                return legendLayerListItem;
-              });
-              if (styleRepresentation.defaultCanvas) {
-                const legendLayerListItem: TypeLegendItem = {
-                  geometryType,
-                  icon: styleRepresentation.defaultCanvas.toDataURL(),
-                  name: styleSettings.defaultLabel!,
-                  isVisible: styleSettings.defaultVisible!,
-                };
-                iconDetailsEntry.iconList.push(legendLayerListItem);
-              }
+            iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
+              const legendLayerListItem: TypeLegendItem = {
+                geometryType,
+                icon: canvas ? canvas.toDataURL() : null,
+                name: styleSettings.info[i].label,
+                isVisible: styleSettings.info[i].visible !== false,
+              };
+              return legendLayerListItem;
+            });
+            if (styleRepresentation.defaultCanvas) {
+              const legendLayerListItem: TypeLegendItem = {
+                geometryType,
+                icon: styleRepresentation.defaultCanvas.toDataURL(),
+                name: styleSettings.info[styleSettings.info.length - 1].label,
+                isVisible: styleSettings.info[styleSettings.info.length - 1].visible !== false,
+              };
+              iconDetailsEntry.iconList.push(legendLayerListItem);
             }
             if (iconDetailsEntry.iconList?.length) iconDetailsEntry.iconImage = iconDetailsEntry.iconList[0].icon;
             if (iconDetailsEntry.iconList && iconDetailsEntry.iconList.length > 1)
@@ -617,12 +585,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const [geometryType] = layerConfig.getTypeGeometries();
 
     // Get the style
-    const layerStyle = layerConfig.style?.[geometryType];
+    const layerStyle = layerConfig.layerStyle?.[geometryType];
     let filteredFeatures = features;
-    if (layerStyle !== undefined && layerStyle!.styleType === 'uniqueValue') {
-      filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle as TypeUniqueValueStyleConfig, features);
-    } else if (layerStyle !== undefined && layerStyle!.styleType === 'classBreaks') {
-      filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle as TypeClassBreakStyleConfig, features);
+    if (layerStyle !== undefined && layerStyle!.type === 'uniqueValue') {
+      filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle, features);
+    } else if (layerStyle !== undefined && layerStyle!.type === 'classBreaks') {
+      filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle, features);
     }
 
     return filteredFeatures!;
@@ -647,10 +615,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @private
    */
   static #processClassVisibilityUniqueValue(
-    uniqueValueStyle: TypeUniqueValueStyleConfig,
+    uniqueValueStyle: TypeLayerStyleSettings,
     features: TypeFeatureInfoEntry[]
   ): TypeFeatureInfoEntry[] {
-    const styleUnique = uniqueValueStyle.uniqueValueStyleInfo as TypeUniqueValueStyleInfo[];
+    const styleUnique = uniqueValueStyle.info;
 
     // Create sets for visible and invisible values for faster lookup
     const visibleValues = new Set(styleUnique.filter((style) => style.visible).map((style) => style.values.join(';')));
@@ -660,7 +628,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return features.filter((feature) => {
       const fieldValues = uniqueValueStyle.fields.map((field) => feature.fieldInfo[field]!.value).join(';');
 
-      return visibleValues.has(fieldValues.toString()) || (uniqueValueStyle.defaultVisible && !unvisibleValues.has(fieldValues.toString()));
+      return (
+        visibleValues.has(fieldValues.toString()) ||
+        (uniqueValueStyle.info[uniqueValueStyle.info.length - 1].visible && !unvisibleValues.has(fieldValues.toString()))
+      );
     });
   }
 
@@ -687,15 +658,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @private
    */
   static #processClassVisibilityClassBreak(
-    classBreakStyle: TypeClassBreakStyleConfig,
+    classBreakStyle: TypeLayerStyleSettings,
     features: TypeFeatureInfoEntry[]
   ): TypeFeatureInfoEntry[] {
-    const classBreaks = classBreakStyle.classBreakStyleInfo as TypeClassBreakStyleInfo[];
+    const classBreaks = classBreakStyle.info;
 
     // Sort class breaks by minValue for binary search
     // GV: Values can be number, date, string, null or undefined. Should it be only Date or Number
     // GV: undefined or null should not be allowed in class break style
-    const sortedBreaks = [...classBreaks].sort((a, b) => (a.minValue as number) - (b.minValue as number));
+    const sortedBreaks = [...classBreaks].sort((a, b) => (a.values[0] as number) - (b.values[0] as number));
 
     // Create an optimized lookup structure
     interface ClassBreakPoint {
@@ -705,8 +676,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     }
     const breakPoints = sortedBreaks.map(
       (brk): ClassBreakPoint => ({
-        minValue: brk.minValue as number,
-        maxValue: brk.maxValue as number,
+        minValue: brk.values[0] as number,
+        maxValue: brk.values[1] as number,
         visible: brk.visible as boolean,
       })
     );
@@ -744,16 +715,16 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // Filter features using binary search
     return features.filter((feature) => {
-      const val = feature.fieldInfo[String(classBreakStyle.field)]?.value;
+      const val = feature.fieldInfo[String(classBreakStyle.fields[0])]?.value;
       const fieldValue = val != null ? parseFloat(String(val)) : 0;
 
       // eslint-disable-next-line no-restricted-globals
       if (isNaN(fieldValue)) {
-        return classBreakStyle.defaultVisible;
+        return classBreakStyle.info[classBreakStyle.info.length - 1].visible;
       }
 
       const matchingBreak = findClassBreak(fieldValue);
-      return matchingBreak ? matchingBreak.visible : classBreakStyle.defaultVisible;
+      return matchingBreak ? matchingBreak.visible : classBreakStyle.info[classBreakStyle.info.length - 1].visible;
     });
   }
 }

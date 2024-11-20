@@ -59,7 +59,7 @@
           {
             "layerId": "msi-94-or-more",
             "source": {
-              "style": "msi-binary"
+              "wmsStyle": "msi-binary"
             }
           }
         ]

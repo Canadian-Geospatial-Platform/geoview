@@ -125,9 +125,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderItemCheckbox(item: TypeLegendItem): JSX.Element | null {
     // no checkbox for simple style layers
     if (
-      layerDetails.styleConfig?.LineString?.styleType === 'simple' ||
-      layerDetails.styleConfig?.Point?.styleType === 'simple' ||
-      layerDetails.styleConfig?.Polygon?.styleType === 'simple'
+      layerDetails.styleConfig?.LineString?.type === 'simple' ||
+      layerDetails.styleConfig?.MultiLineString?.type === 'simple' ||
+      layerDetails.styleConfig?.Point?.type === 'simple' ||
+      layerDetails.styleConfig?.MultiPoint?.type === 'simple' ||
+      layerDetails.styleConfig?.Polygon?.type === 'simple' ||
+      layerDetails.styleConfig?.MultiPolygon?.type === 'simple'
     ) {
       return null;
     }

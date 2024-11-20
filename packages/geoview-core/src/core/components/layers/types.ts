@@ -1,6 +1,6 @@
 import { Extent } from 'ol/extent';
 import { TypeLayerControls } from '@config/types/map-schema-types';
-import { TypeLayerStatus, TypeStyleConfig, TypeStyleGeometry } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus, TypeLayerStyleConfig, TypeStyleGeometry } from '@/geo/map/map-schema-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
@@ -30,7 +30,7 @@ export interface TypeLegendLayer {
   layerName: string;
   legendQueryStatus: string;
   type?: TypeGeoviewLayerType;
-  styleConfig?: TypeStyleConfig | null;
+  styleConfig?: TypeLayerStyleConfig | null;
   layerStatus?: TypeLayerStatus;
   querySent?: boolean;
   canToggle?: boolean; // can sublayer visibility be toggled
