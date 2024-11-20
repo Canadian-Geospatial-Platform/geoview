@@ -251,14 +251,14 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
     switch (esriGeometryType) {
       case 'esriGeometryPoint':
       case 'esriGeometryMultipoint':
-        return 'point';
+        return 'Point';
 
       case 'esriGeometryPolyline':
-        return 'linestring';
+        return 'LineString';
 
       case 'esriGeometryPolygon':
       case 'esriGeometryMultiPolygon':
-        return 'polygon';
+        return 'Polygon';
 
       default:
         throw new Error(`Unsupported geometry type: ${esriGeometryType}`);

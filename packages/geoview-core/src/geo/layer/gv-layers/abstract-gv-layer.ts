@@ -15,14 +15,12 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
-  TypeStyleConfig,
+  TypeLayerStyleConfig,
   TypeFeatureInfoEntry,
   codedValueType,
   rangeDomainType,
   TypeLocation,
   QueryType,
-  TypeClassBreakStyleConfig,
-  TypeUniqueValueStyleConfig,
   TypeStyleGeometry,
 } from '@/geo/map/map-schema-types';
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
@@ -46,7 +44,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   #olSource: Source;
 
   /** Style to apply to the vector layer. */
-  #style?: TypeStyleConfig;
+  #layerStyle?: TypeLayerStyleConfig;
 
   /** Layer temporal dimension */
   #layerTemporalDimension?: TimeDimension;
@@ -154,18 +152,18 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns The layer style
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getStyle(layerPath: string): TypeStyleConfig | undefined {
+  getStyle(layerPath: string): TypeLayerStyleConfig | undefined {
     // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
-    return this.#style;
+    return this.#layerStyle;
   }
 
   /**
    * Sets the layer style
    * @param {TypeStyleConfig | undefined} style - The layer style
    */
-  setStyle(layerPath: string, style: TypeStyleConfig): void {
+  setStyle(layerPath: string, style: TypeLayerStyleConfig): void {
     // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
-    this.#style = style;
+    this.#layerStyle = style;
     this.#emitLayerStyleChanged({ style, layerPath });
   }
 
@@ -438,13 +436,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       Object.keys(legend.styleConfig).forEach((geometry) => {
         if (
           legend.styleConfig &&
-          (legend.styleConfig[geometry as TypeStyleGeometry]?.styleType === 'uniqueValue' ||
-            legend.styleConfig[geometry as TypeStyleGeometry]?.styleType === 'classBreaks')
+          (legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'uniqueValue' ||
+            legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'classBreaks')
         ) {
-          if ((legend.styleConfig[geometry as TypeStyleGeometry] as TypeUniqueValueStyleConfig)!.uniqueValueStyleInfo?.length)
-            styleCount += (legend.styleConfig[geometry as TypeStyleGeometry] as TypeUniqueValueStyleConfig)!.uniqueValueStyleInfo.length;
-          if ((legend.styleConfig[geometry as TypeStyleGeometry] as TypeClassBreakStyleConfig)!.classBreakStyleInfo?.length)
-            styleCount += (legend.styleConfig[geometry as TypeStyleGeometry] as TypeClassBreakStyleConfig)!.classBreakStyleInfo.length;
+          if (legend.styleConfig[geometry as TypeStyleGeometry]!.info?.length)
+            styleCount += legend.styleConfig[geometry as TypeStyleGeometry]!.info.length;
         }
       });
     // Set the openlayers icon image cache
@@ -801,7 +797,7 @@ type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleCh
  */
 export type LayerStyleChangedEvent = {
   // The style
-  style: TypeStyleConfig;
+  style: TypeLayerStyleConfig;
 
   // TODO: Refactor - After layers refactoring, remove the layerPath parameter here
   layerPath: string;

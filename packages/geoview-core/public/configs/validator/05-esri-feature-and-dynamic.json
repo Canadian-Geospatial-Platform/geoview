@@ -19,7 +19,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "geometryType": "point",
             "layerName": "stations-Temporal",
             "initialSettings": {
               "controls": {
@@ -50,21 +49,25 @@
             "source": {
               "layerFilter": "Province = \\'Alberta\\' or Province = \\'Manitoba\\'"
             },
-            "style": {
-              "type": "simple",
-              "hasDefault": false,
-              "info": [
-                {
-                  "label": "",
-                  "visible": false,
-                  "settings": {
-                    "symbol": "square",
-                    "stroke": {
-                      "color": "rgba(128,128,128,1)"
+            "layerStyle": {
+              "Point": {
+                "type": "simple",
+                "hasDefault": false,
+                "fields": [],
+                "info": [
+                  {
+                    "label": "",
+                    "visible": false,
+                    "values": [],
+                    "settings": {
+                      "symbol": "square",
+                      "stroke": {
+                        "color": "rgba(128,128,128,1)"
+                      }
                     }
                   }
-                }
-              ]
+                ]
+              }
             }
           }
         ]

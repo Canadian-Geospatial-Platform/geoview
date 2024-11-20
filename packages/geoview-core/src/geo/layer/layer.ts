@@ -24,8 +24,6 @@ import {
   mapConfigLayerEntryIsGeoCore,
   layerEntryIsGroupLayer,
   TypeLayerStatus,
-  TypeClassBreakStyleConfig,
-  TypeUniqueValueStyleConfig,
 } from '@/geo/map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -1409,17 +1407,10 @@ export class LayerApi {
     if (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer) {
       // Assign value to registered layer. This is use by applyFilter function to set visibility
       // TODO: check if we need to refactor to centralize attribute setting....
-      if (layer?.getStyle(layerPath)?.[item.geometryType]?.styleType === 'classBreaks') {
-        const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType] as TypeClassBreakStyleConfig;
-        const classBreakStyleInfo = geometryStyleConfig.classBreakStyleInfo.find((styleInfo) => styleInfo.label === item.name);
-        if (classBreakStyleInfo) classBreakStyleInfo.visible = visibility;
-        else geometryStyleConfig.defaultVisible = visibility;
-      } else if (layer?.getStyle(layerPath)?.[item.geometryType]?.styleType === 'uniqueValue') {
-        const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType] as TypeUniqueValueStyleConfig;
-        const uniqueStyleInfo = geometryStyleConfig.uniqueValueStyleInfo.find((styleInfo) => styleInfo.label === item.name);
-        if (uniqueStyleInfo) uniqueStyleInfo.visible = visibility;
-        else geometryStyleConfig.defaultVisible = visibility;
-      }
+      // TODO: know issue when we toggle a default visibility item https://github.com/Canadian-Geospatial-Platform/geoview/issues/1564
+      const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType];
+      const toggledStyleInfo = geometryStyleConfig?.info.find((styleInfo) => styleInfo.label === item.name);
+      if (toggledStyleInfo) toggledStyleInfo.visible = visibility;
     }
 
     // Update the legend layers if necessary

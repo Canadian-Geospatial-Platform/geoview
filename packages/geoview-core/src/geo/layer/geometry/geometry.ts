@@ -672,6 +672,7 @@ export class GeometryApi {
         }
         // Create a Point geometry
         return new Point(coordinates as Coordinate);
+
       case 'MultiPoint':
         // Create a MultiPoint geometry
         return new MultiPoint(coordinates as Coordinate[]);

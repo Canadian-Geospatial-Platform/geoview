@@ -44,20 +44,22 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    */
   constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
     super(geoviewLayerConfig, language);
-    const metadataAccessPathItems = this.metadataAccessPath.split('/');
-    const pathItemLength = metadataAccessPathItems.length;
-    const lastPathItem = metadataAccessPathItems[pathItemLength - 1];
-    if (lastPathItem.toLowerCase().endsWith('.json') || lastPathItem.toLowerCase().endsWith('.geojson')) {
-      // The metadataAccessPath ends with a layer reference. It is therefore a path to a data layer rather than a path to service metadata.
-      // We therefore need to correct the configuration by separating the layer index and the path to the service metadata.
-      this.metadataAccessPath = metadataAccessPathItems.slice(0, -1).join('/');
-      if (this.listOfLayerEntryConfig.length) {
-        this.setErrorDetectedFlag();
-        logger.logError('When a GeoJson metadataAccessPath ends with a layer file name, the listOfLayerEntryConfig must be  empty.');
+    if (this.metadataAccessPath) {
+      const metadataAccessPathItems = this.metadataAccessPath.split('/');
+      const pathItemLength = metadataAccessPathItems.length;
+      const lastPathItem = metadataAccessPathItems[pathItemLength - 1];
+      if (lastPathItem.toLowerCase().endsWith('.json') || lastPathItem.toLowerCase().endsWith('.geojson')) {
+        // The metadataAccessPath ends with a layer reference. It is therefore a path to a data layer rather than a path to service metadata.
+        // We therefore need to correct the configuration by separating the layer index and the path to the service metadata.
+        this.metadataAccessPath = metadataAccessPathItems.slice(0, -1).join('/');
+        if (this.listOfLayerEntryConfig.length) {
+          this.setErrorDetectedFlag();
+          logger.logError('When a GeoJson metadataAccessPath ends with a layer file name, the listOfLayerEntryConfig must be empty.');
+        }
+        this.listOfLayerEntryConfig = [
+          this.createLeafNode(toJsonObject({ layerId: lastPathItem, layerName: lastPathItem }), language, this)!,
+        ];
       }
-      this.listOfLayerEntryConfig = [
-        this.createLeafNode(toJsonObject({ layerId: lastPathItem, layerName: lastPathItem }), language, this)!,
-      ];
     }
   }
   // #endregion CONSTRUCTOR

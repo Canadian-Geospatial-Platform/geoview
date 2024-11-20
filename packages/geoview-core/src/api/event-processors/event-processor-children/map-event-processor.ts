@@ -1082,7 +1082,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         ? (configLayerEntryConfig as VectorLayerEntryConfig).layerFilter
         : undefined,
       initialSettings,
-      style: legendLayerInfo!.styleConfig ? legendLayerInfo!.styleConfig : undefined,
+      layerStyle: legendLayerInfo!.styleConfig ? legendLayerInfo!.styleConfig : undefined,
       source: (layerEntryConfig! as VectorLayerEntryConfig).source
         ? cloneDeep((layerEntryConfig! as VectorLayerEntryConfig).source)
         : undefined,

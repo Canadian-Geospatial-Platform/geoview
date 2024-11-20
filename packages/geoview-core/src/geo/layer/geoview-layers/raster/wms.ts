@@ -510,16 +510,16 @@ export class WMS extends AbstractGeoViewRaster {
         const dataAccessPath = layerConfig.source.dataAccessPath!;
 
         let styleToUse = '';
-        if (Array.isArray(layerConfig.source?.style) && layerConfig.source?.style) {
-          styleToUse = layerConfig.source?.style[0];
-        } else if (layerConfig.source.style) {
-          styleToUse = layerConfig.source?.style as string;
+        if (Array.isArray(layerConfig.source?.wmsStyle) && layerConfig.source?.wmsStyle) {
+          styleToUse = layerConfig.source?.wmsStyle[0];
+        } else if (layerConfig.source.wmsStyle) {
+          styleToUse = layerConfig.source?.wmsStyle as string;
         } else if (layerCapabilities.Style) {
           styleToUse = layerCapabilities.Style[0].Name as string;
         }
 
-        if (Array.isArray(layerConfig.source?.style)) {
-          this.WMSStyles = layerConfig.source.style;
+        if (Array.isArray(layerConfig.source?.wmsStyle)) {
+          this.WMSStyles = layerConfig.source.wmsStyle;
         } else if (layerCapabilities.Style && (layerCapabilities.Style.length as number) > 1) {
           this.WMSStyles = [];
           for (let i = 0; i < (layerCapabilities.Style.length as number); i++) {
@@ -800,7 +800,8 @@ export class WMS extends AbstractGeoViewRaster {
         });
       } else {
         legendStyle = layerCapabilities?.Style.find((style) => {
-          if (layerConfig?.source?.style && !Array.isArray(layerConfig?.source?.style)) return layerConfig.source.style === style.Name;
+          if (layerConfig?.source?.wmsStyle && !Array.isArray(layerConfig?.source?.wmsStyle))
+            return layerConfig.source.wmsStyle === style.Name;
 
           // no style found, if default apply, if not use the available style
           return isDefaultStyle ? style.Name === 'default' : style.Name;

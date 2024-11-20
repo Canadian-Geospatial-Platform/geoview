@@ -261,7 +261,8 @@ export class GVWMS extends AbstractGVRaster {
         });
       } else {
         legendStyle = layerCapabilities?.Style.find((style) => {
-          if (layerConfig?.source?.style && !Array.isArray(layerConfig?.source?.style)) return layerConfig.source.style === style.Name;
+          if (layerConfig?.source?.wmsStyle && !Array.isArray(layerConfig?.source?.wmsStyle))
+            return layerConfig.source.wmsStyle === style.Name;
 
           // no style found, if default apply, if not use the available style
           return isDefaultStyle ? style.Name === 'default' : style.Name;
