@@ -13,7 +13,7 @@ import { shared as iconImageCache } from 'ol/style/IconImageCache';
 
 import { TypeOutfieldsType } from '@config/types/map-schema-types';
 
-import { generateId, getXMLHttpRequest, whenThisThen } from '@/core/utils/utilities';
+import { generateId, getXMLHttpRequest, isJsonString, whenThisThen } from '@/core/utils/utilities';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -488,7 +488,7 @@ export abstract class AbstractGeoViewLayer {
     if (this.metadataAccessPath) {
       try {
         const metadataString = await getXMLHttpRequest(`${this.metadataAccessPath}?f=json`);
-        if (metadataString === '{}') this.metadata = null;
+        if (metadataString === '{}' || !isJsonString(metadataString)) this.metadata = null;
         else {
           this.metadata = toJsonObject(JSON.parse(metadataString));
           const copyrightText = this.metadata.copyrightText as string;

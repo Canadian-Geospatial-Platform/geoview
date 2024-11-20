@@ -9,6 +9,7 @@ import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@con
 
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { mergeWith } from 'lodash';
+import { isJsonString } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { Cast } from '@/app';
 
@@ -128,11 +129,26 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    * @override @async
    */
   override async fetchServiceMetadata(): Promise<void> {
+    let metadataUrl = this.metadataAccessPath;
+    if (
+      !metadataUrl.toLowerCase().endsWith('.json') &&
+      !metadataUrl.toLowerCase().endsWith('f=json') &&
+      !metadataUrl.toLowerCase().endsWith('.geojson') &&
+      !metadataUrl.toLowerCase().endsWith('.meta')
+    )
+      metadataUrl = this.metadataAccessPath.endsWith('/') ? `${this.metadataAccessPath}?f=json` : `${this.metadataAccessPath}/?f=json`;
     try {
-      if (this.metadataAccessPath.toLowerCase().endsWith('.meta')) {
-        const fetchResponse = await fetch(this.metadataAccessPath);
+      if (metadataUrl.toLowerCase().endsWith('.meta') || metadataUrl.toLowerCase().endsWith('f=json')) {
+        const fetchResponse = await fetch(metadataUrl);
         if (fetchResponse.status === 404) throw new GeoviewLayerConfigError('The service metadata fetch returned a 404 status (Not Found)');
-        const layerMetadata = (await fetchResponse.json()) as TypeJsonObject;
+        const layerMetadataString = await fetchResponse.text();
+        let layerMetadata = null;
+        // Check if the response text is valid json. isJsonString will throw an error if it is not, and we want to catch it separately.
+        try {
+          if (isJsonString(layerMetadataString)) layerMetadata = toJsonObject(JSON.parse(layerMetadataString));
+        } catch (err) {
+          logger.logError('Response from metadataAccessPath was not JSON', err);
+        }
         if (layerMetadata) this.setServiceMetadata(layerMetadata);
         else throw new GeoviewLayerConfigError('The metadata object returned is undefined');
 
@@ -142,6 +158,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
 
       await this.createLayerTree();
     } catch (error) {
+      // GV Do we want to set layers in error if there is an error loading metadata?
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);

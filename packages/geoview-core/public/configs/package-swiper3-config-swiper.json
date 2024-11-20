@@ -2,7 +2,7 @@
   "orientation": "vertical",
   "keyboardOffset": 10,
   "layers": [
-    "swipe0/toner",
+    "swipe0/0",
     "swipe1/msi-94-or-more",
     "swipe4/polygons.json",
     "swipe5/ec-msc:CURRENT_CONDITIONS",

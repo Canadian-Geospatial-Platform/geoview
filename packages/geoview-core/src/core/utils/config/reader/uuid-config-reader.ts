@@ -149,7 +149,7 @@ export class UUIDmapConfigReader {
                 layerId,
                 source: {
                   format: 'EsriJSON',
-                  dataAccessPath: serviceUrl,
+                  dataAccessPath: url as string,
                 },
               } as EsriFeatureLayerEntryConfig),
             ];
@@ -171,7 +171,6 @@ export class UUIDmapConfigReader {
                 layerId: `${item.index}`,
                 source: {
                   format: 'EsriJSON',
-                  dataAccessPath: url as string,
                 },
               } as EsriFeatureLayerEntryConfig);
               return esriFeatureLayerEntryConfig;
@@ -193,8 +192,8 @@ export class UUIDmapConfigReader {
                 entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
                 layerId: `${item.id}`,
                 source: {
-                  dataAccessPath: url,
                   serverType: (serverType === undefined ? 'mapserver' : serverType) as TypeOfServer,
+                  dataAccessPath: url as string,
                 },
               };
 
