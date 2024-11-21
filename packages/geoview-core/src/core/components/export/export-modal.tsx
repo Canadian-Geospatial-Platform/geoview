@@ -179,9 +179,9 @@ export default function ExportModal(): JSX.Element {
           </Box>
           <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ padding: '1rem', paddingBottom: 0 }}>
             <Box>
-              {!!scale.labelGraphic.length && (
+              {!!scale.labelGraphicMetric && (
                 <Box>
-                  {scale.labelGraphic} {t('exportModal.approx')} <hr />
+                  {scale.labelGraphicMetric} {t('exportModal.approx')} <hr />
                 </Box>
               )}
             </Box>

@@ -45,28 +45,39 @@ export function Scale(): JSX.Element {
    * Switch the scale mode
    */
   const switchScale = (): void => {
-    setScaleMode((scaleMode + 1) % 2);
+    setScaleMode((scaleMode + 1) % 3);
   };
 
   // set the scales values array
   const scaleValues: TypeScale[] = [
     {
       scaleId: '0',
-      label: scale.labelGraphic,
+      label: scale.labelGraphicMetric,
       borderBottom: true,
     },
     {
       scaleId: '1',
+      label: scale.labelGraphicImperial,
+      borderBottom: true,
+    },
+    {
+      scaleId: '2',
       label: scale.labelNumeric,
       borderBottom: false,
     },
   ];
 
+  const getScaleWidth = (mode: number): string => {
+    if (mode === 0) return scale.lineWidthMetric;
+    if (mode === 1) return scale.lineWidthImperial;
+    return 'none';
+  };
+
   return (
     <Tooltip title={t('mapnav.scale')!} placement="top">
       <Box sx={{ minWidth: 120 }}>
-        <Box id={`${mapId}-scaleControlBar`} sx={sxClasses.scaleControl} />
-        <Box id={`${mapId}-scaleControlLine`} sx={sxClasses.scaleControl} />
+        <Box id={`${mapId}-scaleControlBarMetric`} sx={sxClasses.scaleControl} />
+        <Box id={`${mapId}-scaleControlBarImperial`} sx={sxClasses.scaleControl} />
         <Button
           onClick={() => switchScale()}
           type="text"
@@ -84,11 +95,11 @@ export function Scale(): JSX.Element {
                     />
                     <Box
                       component="span"
-                      className={`${index === 0 ? 'hasScaleLine' : ''}`}
+                      className={`${index === 2 ? '' : 'hasScaleLine'}`}
                       sx={{
                         ...sxClasses.scaleText,
-                        borderBottom: !value.borderBottom ? 'none' : '1px solid',
-                        width: scaleValues[scaleMode].borderBottom ? scale.lineWidth : 'none',
+                        borderBottom: value.borderBottom ? '1px solid' : 'none',
+                        width: value.borderBottom ? getScaleWidth(index) : 'none',
                       }}
                     >
                       {value.label}
@@ -103,8 +114,9 @@ export function Scale(): JSX.Element {
               className={`interaction-${interaction} ${scaleValues[scaleMode].borderBottom ? 'hasScaleLine' : ''}`}
               sx={{
                 ...sxClasses.scaleText,
-                borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',
-                width: scaleValues[scaleMode].borderBottom ? scale.lineWidth : 'none',
+                borderBottom: scaleValues[scaleMode].borderBottom ? '1px solid' : 'none',
+                // eslint-disable-next-line no-nested-ternary
+                width: scaleValues[scaleMode].borderBottom ? getScaleWidth(scaleMode) : 'none',
               }}
             >
               {scaleValues[scaleMode].label}
