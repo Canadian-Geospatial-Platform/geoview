@@ -133,7 +133,8 @@ export abstract class Plugin {
                 pluginConfigObj = result;
               }
             } catch (error) {
-              // config not found
+              // Log error
+              logger.logError(`Config not found.`, error);
             }
           }
 

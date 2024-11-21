@@ -15,7 +15,7 @@ export const getItemAsNumber = (key: string, defaultValue?: number): number | un
 
     // If set and valid: return it; else default will be returned
     if (levelValueNumber && !Number.isNaN(levelValueNumber)) return levelValueNumber;
-  } catch (e) {
+  } catch {
     // Failed to read localStorage, eat the exception and continue to set the value to the default
   }
 
@@ -49,7 +49,7 @@ export const getItemAsNumberOrNumberArray = (key: string, defaultValue?: number 
 
     // If set and valid: return it; else default will be returned
     if (levelValueNumber && !Number.isNaN(levelValueNumber)) return levelValueNumber;
-  } catch (e) {
+  } catch {
     // Failed to read localStorage, eat the exception and continue to set the value to the default
   }
 

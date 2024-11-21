@@ -242,7 +242,11 @@ export class MapViewer {
 
     let extentProjected: Extent | undefined;
     if (mapViewSettings.maxExtent)
-      extentProjected = Projection.transformExtent(mapViewSettings.maxExtent, Projection.PROJECTION_NAMES.LNGLAT, projection.getCode());
+      extentProjected = Projection.transformExtentFromProj(
+        mapViewSettings.maxExtent,
+        Projection.PROJECTION_NAMES.LNGLAT,
+        projection.getCode()
+      );
 
     const initialMap = new OLMap({
       target: mapElement,
@@ -1010,7 +1014,11 @@ export class MapViewer {
     viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
     viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
     if (mapView.maxExtent)
-      viewOptions.extent = Projection.transformExtent(mapView.maxExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${mapView.projection}`);
+      viewOptions.extent = Projection.transformExtentFromProj(
+        mapView.maxExtent,
+        Projection.PROJECTION_NAMES.LNGLAT,
+        `EPSG:${mapView.projection}`
+      );
 
     const newView = new View(viewOptions);
     this.map.setView(newView);
@@ -1084,7 +1092,7 @@ export class MapViewer {
       },
       minZoom: currentView.getMinZoom(),
       maxZoom: currentView.getMaxZoom(),
-      maxExtent: Projection.transformExtent(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection()),
+      maxExtent: Projection.transformExtentFromProj(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection()),
       projection: currentView.getProjection().getCode().split(':')[1] as unknown as TypeValidMapProjectionCodes,
     };
 
@@ -1271,7 +1279,7 @@ export class MapViewer {
    */
   zoomToLngLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void> {
     const fullExtent = extent.length === 2 ? [extent[0], extent[1], extent[0], extent[1]] : extent;
-    const projectedExtent = Projection.transformExtent(
+    const projectedExtent = Projection.transformExtentFromProj(
       fullExtent,
       Projection.PROJECTION_NAMES.LNGLAT,
       `EPSG:${this.getMapState().currentProjection}`
@@ -1294,8 +1302,8 @@ export class MapViewer {
   //   if (bounds) {
   //     const { currentProjection } = this.getMapState();
   //     mapBounds = projectionCode
-  //       ? Projection.transformExtent(bounds, `EPSG:${projectionCode}`, Projection.PROJECTIONS[currentProjection], 20)
-  //       : Projection.transformExtent(bounds, Projection.PROJECTIONS[currentProjection], Projection.PROJECTIONS[currentProjection], 25);
+  //       ? Projection.transformExtentFromProj(bounds, `EPSG:${projectionCode}`, Projection.PROJECTIONS[currentProjection], 20)
+  //       : Projection.transformExtentFromProj(bounds, Projection.PROJECTIONS[currentProjection], Projection.PROJECTIONS[currentProjection], 25);
   //   } else {
   //     this.layer.getGeoviewLayerIds().forEach((geoviewLayerId) => {
   //       // TODO Refactor - Layers refactoring. There needs to be a getMetadataBounds (new layers and new config) to complete the full layers migration.
@@ -1544,7 +1552,7 @@ export class MapViewer {
   convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike): Extent {
     // If different projections
     if (fromProj !== this.getProjection().getCode()) {
-      return Projection.transformExtent(extent, fromProj, this.getProjection());
+      return Projection.transformExtentFromProj(extent, fromProj, this.getProjection());
     }
 
     // Same projection
@@ -1560,7 +1568,7 @@ export class MapViewer {
   convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent {
     // If different projections
     if (toProj !== this.getProjection().getCode()) {
-      return Projection.transformExtent(extent, this.getProjection(), toProj);
+      return Projection.transformExtentFromProj(extent, this.getProjection(), toProj);
     }
 
     // Same projection

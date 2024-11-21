@@ -341,16 +341,20 @@ function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeLaye
       });
     }
   });
-  const styleGeometry = getStyleGeometry(uniqueValueStyleInfo[0].settings);
-  const styleSettings: TypeLayerStyleSettings = {
-    type: 'uniqueValue',
-    hasDefault: false,
-    fields,
-    info: uniqueValueStyleInfo,
-  };
-  if (styleGeometry) {
-    style[styleGeometry] = styleSettings;
-    return style;
+
+  // If any found
+  if (uniqueValueStyleInfo.length > 0) {
+    const styleGeometry = getStyleGeometry(uniqueValueStyleInfo[0].settings);
+    const styleSettings: TypeLayerStyleSettings = {
+      type: 'uniqueValue',
+      hasDefault: false,
+      fields,
+      info: uniqueValueStyleInfo,
+    };
+    if (styleGeometry) {
+      style[styleGeometry] = styleSettings;
+      return style;
+    }
   }
   return undefined;
 }
@@ -431,17 +435,20 @@ function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeLa
     });
   }
 
-  const styleGeometry = getStyleGeometry(classBreakStyleInfo[0].settings);
-  if (styleGeometry) {
-    const styleSettings: TypeLayerStyleSettings = {
-      type: 'classBreaks',
-      fields: [field],
-      hasDefault,
-      info: classBreakStyleInfo,
-    };
+  // If any found
+  if (classBreakStyleInfo.length > 0) {
+    const styleGeometry = getStyleGeometry(classBreakStyleInfo[0].settings);
+    if (styleGeometry) {
+      const styleSettings: TypeLayerStyleSettings = {
+        type: 'classBreaks',
+        fields: [field],
+        hasDefault,
+        info: classBreakStyleInfo,
+      };
 
-    style[styleGeometry] = styleSettings;
-    return style;
+      style[styleGeometry] = styleSettings;
+      return style;
+    }
   }
   return undefined;
 }

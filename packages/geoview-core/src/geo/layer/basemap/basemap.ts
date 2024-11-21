@@ -265,6 +265,8 @@ export class Basemap {
           };
         }
       } catch (error) {
+        // Log error
+        logger.logError(error);
         return null;
       }
     }

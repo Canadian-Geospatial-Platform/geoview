@@ -165,12 +165,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   // GV Layers Refactoring - Obsolete (in config?)
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
-    if (!this.metadata!.supportsDynamicLayers) {
-      this.layerLoadError.push({
-        layer: layerConfig.layerPath,
-        loggerMessage: `Layer ${layerConfig.layerPath} of map ${this.mapId} does not support dynamic layers.`,
-      });
-      return true;
+    if (this.metadata?.supportsDynamicLayers === false) {
+      // Log a warning, but continue
+      logger.logWarning(
+        `Layer ${layerConfig.layerPath} of map ${this.mapId} does not technically support dynamic layers per its metadata.`
+      );
     }
     return false;
   }

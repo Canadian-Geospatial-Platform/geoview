@@ -193,9 +193,9 @@ export class OgcFeature extends AbstractGeoViewVector {
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
-          const latlonExtent = Projection.transformExtent(
+          const latlonExtent = Projection.transformExtentFromProj(
             foundCollection.extent.spatial.bbox[0] as number[],
-            Projection.getProjection(foundCollection.extent.spatial.crs as string)!,
+            Projection.getProjectionFromProj(foundCollection.extent.spatial.crs as string)!,
             Projection.PROJECTION_NAMES.LNGLAT
           );
           layerConfig.initialSettings.bounds = latlonExtent;
