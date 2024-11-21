@@ -931,6 +931,7 @@ export class MapViewer {
       const promise = AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
 
       // if flag is true, check if config support the layers change and apply
+
       if (resetLayer) {
         const re = /[\w\d]{8}-[\w\d]{4}-[\w\d]{4}-[\w\d]{4}-[\w\d]{12}/g;
 
@@ -943,7 +944,7 @@ export class MapViewer {
             .filter((config) => {
               // Filter to just Geocore layers and not child layers
               if (re.test(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
-                return config;
+                return true;
               }
               return false;
             })
