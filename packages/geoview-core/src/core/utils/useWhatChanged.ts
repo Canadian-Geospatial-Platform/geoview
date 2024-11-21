@@ -35,7 +35,7 @@ function stringifyValue(dependencyItem: unknown): string | unknown {
       }
     }
     return dependencyItem;
-  } catch (e) {
+  } catch {
     // Failed to read as string
     return 'COMPLEX OBJECT';
   }

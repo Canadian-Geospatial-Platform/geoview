@@ -267,8 +267,10 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (err) {
-      if ((err as Error).message === 'proj') {
+    } catch (error) {
+      // Log error
+      logger.logError(error);
+      if ((error as Error).message === 'proj') {
         emitErrorProj('WMS', proj, supportedProj);
       } else {
         emitErrorServer('WMS');
@@ -315,8 +317,10 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('WFS');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -404,8 +408,10 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('OGC API Feature');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -431,8 +437,10 @@ export function AddNewLayer(): JSX.Element {
           setLayerList(layers);
         }
       }
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('GeoCore UUID');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -504,8 +512,10 @@ export function AddNewLayer(): JSX.Element {
       } else {
         throw new Error('err');
       }
-    } catch (err) {
+    } catch (error) {
       emitErrorServer(esriOptions(type).err);
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -540,8 +550,10 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('ESRI Image');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -583,8 +595,10 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('XYZ Tile');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -621,8 +635,10 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('CSV');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -687,8 +703,10 @@ export function AddNewLayer(): JSX.Element {
         setLayerName(layers[0].layerName!);
         setLayerEntries([layers[0]]);
       }
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('GeoJSON');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -723,8 +741,10 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('GeoPackage');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;

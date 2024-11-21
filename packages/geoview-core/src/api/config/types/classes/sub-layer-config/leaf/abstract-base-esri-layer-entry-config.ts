@@ -86,7 +86,11 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
     const sourceProj = layerMetadata.extent.spatialReference.wkid;
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else {
-      metadataExtent = Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT);
+      metadataExtent = Projection.transformExtentFromObj(
+        metadataExtent,
+        layerMetadata.extent.spatialReference,
+        Projection.PROJECTION_NAMES.LNGLAT
+      );
       this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     }
 

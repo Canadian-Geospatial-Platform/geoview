@@ -206,6 +206,8 @@ export function getXMLHttpRequest(url: string): Promise<string> {
       };
       jsonObj.send(null);
     } catch (error) {
+      // Log warning
+      logger.logWarning(error);
       resolve('{}');
     }
   });

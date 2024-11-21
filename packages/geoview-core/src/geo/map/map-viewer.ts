@@ -242,7 +242,11 @@ export class MapViewer {
 
     let extentProjected: Extent | undefined;
     if (mapViewSettings.maxExtent)
-      extentProjected = Projection.transformExtent(mapViewSettings.maxExtent, Projection.PROJECTION_NAMES.LNGLAT, projection.getCode());
+      extentProjected = Projection.transformExtentFromProj(
+        mapViewSettings.maxExtent,
+        Projection.PROJECTION_NAMES.LNGLAT,
+        projection.getCode()
+      );
 
     const initialMap = new OLMap({
       target: mapElement,
@@ -1010,7 +1014,11 @@ export class MapViewer {
     viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
     viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
     if (mapView.maxExtent)
-      viewOptions.extent = Projection.transformExtent(mapView.maxExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${mapView.projection}`);
+      viewOptions.extent = Projection.transformExtentFromProj(
+        mapView.maxExtent,
+        Projection.PROJECTION_NAMES.LNGLAT,
+        `EPSG:${mapView.projection}`
+      );
 
     const newView = new View(viewOptions);
     this.map.setView(newView);
@@ -1084,7 +1092,7 @@ export class MapViewer {
       },
       minZoom: currentView.getMinZoom(),
       maxZoom: currentView.getMaxZoom(),
-      maxExtent: Projection.transformExtent(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection()),
+      maxExtent: Projection.transformExtentFromProj(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection()),
       projection: currentView.getProjection().getCode().split(':')[1] as unknown as TypeValidMapProjectionCodes,
     };
 
@@ -1271,7 +1279,7 @@ export class MapViewer {
    */
   zoomToLngLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void> {
     const fullExtent = extent.length === 2 ? [extent[0], extent[1], extent[0], extent[1]] : extent;
-    const projectedExtent = Projection.transformExtent(
+    const projectedExtent = Projection.transformExtentFromProj(
       fullExtent,
       Projection.PROJECTION_NAMES.LNGLAT,
       `EPSG:${this.getMapState().currentProjection}`
@@ -1280,46 +1288,6 @@ export class MapViewer {
   }
 
   // #endregion
-
-  // TODO: Obsolete - Delete? Commenting out for now
-  // /**
-  //  * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
-  //  * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
-  //  *
-  //  * @param {Extent} bounds - Bounding box to zoom to
-  //  * @param {string | number | undefined} projectionCode - Optional projection code used by the bounds.
-  //  */
-  // fitBounds(bounds?: Extent, projectionCode: string | number | undefined = undefined): void {
-  //   let mapBounds: Extent | undefined;
-  //   if (bounds) {
-  //     const { currentProjection } = this.getMapState();
-  //     mapBounds = projectionCode
-  //       ? Projection.transformExtent(bounds, `EPSG:${projectionCode}`, Projection.PROJECTIONS[currentProjection], 20)
-  //       : Projection.transformExtent(bounds, Projection.PROJECTIONS[currentProjection], Projection.PROJECTIONS[currentProjection], 25);
-  //   } else {
-  //     this.layer.getGeoviewLayerIds().forEach((geoviewLayerId) => {
-  //       // TODO Refactor - Layers refactoring. There needs to be a getMetadataBounds (new layers and new config) to complete the full layers migration.
-  //       // TO.DOCONT: Johann: Need on both, config extract bounds from metadata and layers do it again at the end from features for vector and compound bound for group
-  //       if (!mapBounds) mapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
-  //       else {
-  //         const newMapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
-  //         if (newMapBounds) {
-  //           mapBounds = [
-  //             Math.min(newMapBounds[0], mapBounds[0]),
-  //             Math.min(newMapBounds[1], mapBounds[1]),
-  //             Math.max(newMapBounds[2], mapBounds[2]),
-  //             Math.max(newMapBounds[3], mapBounds[3]),
-  //           ];
-  //         }
-  //       }
-  //     });
-  //   }
-
-  //   if (mapBounds) {
-  //     this.getView().fit(mapBounds, { size: this.map.getSize() });
-  //     this.getView().setZoom(this.getView().getZoom()! - 0.15);
-  //   }
-  // }
 
   // #region MAP INTERACTIONS
 
@@ -1544,7 +1512,7 @@ export class MapViewer {
   convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike): Extent {
     // If different projections
     if (fromProj !== this.getProjection().getCode()) {
-      return Projection.transformExtent(extent, fromProj, this.getProjection());
+      return Projection.transformExtentFromProj(extent, fromProj, this.getProjection());
     }
 
     // Same projection
@@ -1560,7 +1528,7 @@ export class MapViewer {
   convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent {
     // If different projections
     if (toProj !== this.getProjection().getCode()) {
-      return Projection.transformExtent(extent, this.getProjection(), toProj);
+      return Projection.transformExtentFromProj(extent, this.getProjection(), toProj);
     }
 
     // Same projection

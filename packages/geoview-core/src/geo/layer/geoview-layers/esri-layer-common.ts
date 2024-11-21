@@ -339,9 +339,11 @@ export function commonProcessInitialSettings(
       layerMetadata.extent.xmax,
       layerMetadata.extent.ymax,
     ] as Extent;
-    const latlonExtent = Projection.transformExtent(
+
+    // Transform to latlon extent
+    const latlonExtent = Projection.transformExtentFromObj(
       layerExtent,
-      `EPSG:${layerMetadata.extent.spatialReference.wkid}`,
+      layerMetadata.extent.spatialReference,
       Projection.PROJECTION_NAMES.LNGLAT
     );
     layerConfig.initialSettings!.bounds = latlonExtent;

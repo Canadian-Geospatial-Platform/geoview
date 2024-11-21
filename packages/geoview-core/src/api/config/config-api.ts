@@ -487,7 +487,8 @@ export class ConfigApi {
         // we return undefined to signal that we cannot create the GeoView layer.
         if (!geoviewLayerConfig) return undefined;
       } catch (error) {
-        logger.logError(`Unable to convert GeoCore layer (Id=${serviceAccessString}).`);
+        // Log error
+        logger.logError(`Unable to convert GeoCore layer (Id=${serviceAccessString}).`, error);
         return undefined;
       }
     } else {

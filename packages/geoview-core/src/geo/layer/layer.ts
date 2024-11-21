@@ -167,7 +167,7 @@ export class LayerApi {
   // ************************************************************
   // INDICATES IF USING HYBRID MODE WITH THE NEW GVLAYERS CLASSES
   // ************************************************************
-  static LAYERS_HYBRID_MODE = false;
+  static LAYERS_HYBRID_MODE = true;
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
@@ -622,6 +622,9 @@ export class LayerApi {
       hoverable: true,
       legendCollapsed: false,
     };
+    // TODO: Check - Shouldn't we wait for the layer to actually be retrieved positively from
+    // TO.DOCONT: Geocore, before adding ordered layer information? What if the
+    // TO.DOCONT: fetch (createLayersFromUUID) fails, will there be garbage in layer info?
     MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerInfo);
 
     // Create geocore layer configs and add
