@@ -565,8 +565,8 @@ export type EventType = 'click' | 'hover' | 'all-features' | 'name';
 export type PropagationType = 'config-registration' | 'layer-registration' | 'layerStatus' | 'layerName';
 
 // TODO: Move the definition of the domain in the new schema
-// TODO.CONT: Starting here vvvv
-// TODO.CONT: Not anymore. Types were moved, below is event stuff and good here (leaving the TODO here in case it's meant as reference for migration).
+// TO.DOCONT: Starting here vvvv
+// TO.DOCONT: Not anymore. Types were moved, below is event stuff and good here (leaving the TODO here in case it's meant as reference for migration).
 
 /**
  * Define a delegate for the event handler function signature

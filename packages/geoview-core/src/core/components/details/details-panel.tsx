@@ -291,7 +291,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
         // Log
         logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
         // None found, select none
-        //  TODO:: Investigate infinte loop in AppBar for statement.
+        //  TODO: Investigate infinte loop in AppBar for statement.
         // setSelectedLayerPath('');
       }
     }

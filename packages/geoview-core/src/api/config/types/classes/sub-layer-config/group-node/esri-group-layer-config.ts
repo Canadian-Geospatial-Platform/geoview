@@ -98,7 +98,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else
       this.initialSettings.extent = validateExtentWhenDefined(
-        Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT)
+        Projection.transformExtentFromObj(metadataExtent, layerMetadata.initialExtent.spatialReference, Projection.PROJECTION_NAMES.LNGLAT)
       );
 
     if (layerMetadata.defaultVisibility !== undefined) this.initialSettings.states!.visible = layerMetadata.defaultVisibility as boolean;
@@ -133,7 +133,11 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else
       this.initialSettings.extent = validateExtentWhenDefined(
-        Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT)
+        Projection.transformExtentFromObj(
+          metadataExtent,
+          serviceMetadata.initialExtent.spatialReference,
+          Projection.PROJECTION_NAMES.LNGLAT
+        )
       );
 
     this.initialSettings.states!.queryable = (serviceMetadata?.capabilities as string)?.includes('Query') || false;

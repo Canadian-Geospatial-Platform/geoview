@@ -264,7 +264,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       olLayer.changed();
 
       // TODO: This is coupled with the processor. Maybe we should have a processor event to trigger this and
-      // TODO.CONT: keep this functio not tie with UI.
+      // TO.DOCONT: keep this functio not tie with UI.
       // Update the bounds in the store
       const bounds = this.getBounds(layerPath);
       if (bounds) {

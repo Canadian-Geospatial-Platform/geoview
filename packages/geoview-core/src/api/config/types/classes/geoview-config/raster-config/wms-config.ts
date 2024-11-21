@@ -285,7 +285,8 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
-      logger.logError(`Error detected while reading WMS metadata for geoview layer ${this.geoviewLayerId}.`);
+      // Log error
+      logger.logError(`Error detected while reading WMS metadata for geoview layer ${this.geoviewLayerId}.`, error);
     }
   }
 

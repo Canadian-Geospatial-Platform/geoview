@@ -86,7 +86,11 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
     const sourceProj = layerMetadata.extent.spatialReference.wkid;
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else {
-      metadataExtent = Projection.transformExtent(metadataExtent, `EPSG:${sourceProj}`, Projection.PROJECTION_NAMES.LNGLAT);
+      metadataExtent = Projection.transformExtentFromObj(
+        metadataExtent,
+        layerMetadata.extent.spatialReference,
+        Projection.PROJECTION_NAMES.LNGLAT
+      );
       this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     }
 
@@ -115,7 +119,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
    * @protected
    */
   // TODO: Issue #2139 - There is a bug with the temporal dimension returned by service URL:
-  // TODO.CONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
+  // TO.DOCONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
   protected processTemporalDimension(timeDimension: TypeJsonObject): void {
     if (timeDimension?.timeExtent) {
       // The singleHandle property is True for ESRI Image and false for ESRI Feature and Dynamic.
