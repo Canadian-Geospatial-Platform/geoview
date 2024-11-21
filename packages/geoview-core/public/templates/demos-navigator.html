@@ -162,6 +162,8 @@
           <option value="fr">French</option>
           <option value="unsupported">Not Supported</option>
         </select>
+        <input type="checkbox" id="resetLayer" name="resetLayer" checked>
+        <label for="resetLayer">Reset Layers</label>
       </div>
       <p>Display Theme:</p>
       <div class="selector">
@@ -272,8 +274,9 @@
 
       // ------------------ SWITCHER SECTION START -----------------------------------------
       const switchLang = document.getElementById('switchLang');
+      const resetLayer = document.getElementById('resetLayer');
       switchLang.addEventListener('change', (e) => {
-        cgpv.api.maps['sandboxMap'].setLanguage(e.target.value);
+        cgpv.api.maps['sandboxMap'].setLanguage(e.target.value, resetLayer.checked);
       });
 
       const switchThemeElem = document.getElementById('switchTheme');
