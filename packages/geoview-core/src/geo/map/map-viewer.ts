@@ -931,9 +931,8 @@ export class MapViewer {
       const promise = AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
 
       // if flag is true, check if config support the layers change and apply
-      if (resetLayer) {
-        const re = /[\w\d]{8}-[\w\d]{4}-[\w\d]{4}-[\w\d]{4}-[\w\d]{12}/g;
 
+      if (resetLayer) {
         const configs = this.layer.getLayerEntryConfigs();
         const originalMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.mapId);
         // Need to wait for all refreshed GeoCore layers to be settles before trying to update
@@ -942,14 +941,14 @@ export class MapViewer {
           configs
             .filter((config) => {
               // Filter to just Geocore layers and not child layers
-              if (re.test(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
-                return config;
+              if (api.config.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
+                return true;
               }
               return false;
             })
             .map((config) => {
               // Remove and add back in GeoCore Layers and return their promises
-              const uuid = config.geoviewLayerConfig.geoviewLayerId.match(re)![0];
+              const uuid = config.geoviewLayerConfig.geoviewLayerId;
               this.layer.removeLayerUsingPath(config.layerPath);
               return this.layer.addGeoviewLayerByGeoCoreUUID(uuid);
             })
