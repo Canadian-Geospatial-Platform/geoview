@@ -1456,10 +1456,6 @@ export class LayerApi {
     // Determine the outcome of the new visibility based on parameters
     const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
     const layerInfos = curOrderedLayerInfo.filter((info: TypeOrderedLayerInfo) => info.layerPath.startsWith(layerPath));
-    const parentLayerPathArray = layerPath.split('/');
-    parentLayerPathArray.pop();
-    const parentLayerPath = parentLayerPathArray.join('/');
-    const parentLayerInfo = curOrderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
 
     layerInfos.forEach((layerInfo: TypeOrderedLayerInfo) => {
       if (layerInfo) {
@@ -1475,7 +1471,12 @@ export class LayerApi {
       }
     });
 
-    if (parentLayerInfo !== undefined) {
+    // For each parent
+    const parentLayerPathArray = layerPath.split('/');
+    parentLayerPathArray.pop();
+    let parentLayerPath = parentLayerPathArray.join('/');
+    let parentLayerInfo = curOrderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
+    while (parentLayerInfo !== undefined) {
       const parentLayerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
       if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
         if (parentLayerInfo) {
@@ -1487,6 +1488,7 @@ export class LayerApi {
         }
       }
       const children = curOrderedLayerInfo.filter(
+        // eslint-disable-next-line no-loop-func
         (info: TypeOrderedLayerInfo) => info.layerPath.startsWith(parentLayerPath) && info.layerPath !== parentLayerPath
       );
       if (!children.some((child: TypeOrderedLayerInfo) => child.visible === true)) {
@@ -1495,6 +1497,12 @@ export class LayerApi {
         // Emit event
         this.#emitLayerVisibilityToggled({ layerPath, visibility: false });
       }
+
+      // Prepare for next parent
+      parentLayerPathArray.pop();
+      parentLayerPath = parentLayerPathArray.join('/');
+      // eslint-disable-next-line no-loop-func
+      parentLayerInfo = curOrderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
     }
 
     // Redirect to processor so we can update the store with setterActions
