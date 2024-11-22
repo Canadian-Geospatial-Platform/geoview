@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -41,75 +41,99 @@ export function Scale(): JSX.Element {
   const scale = useMapScale();
   const interaction = useMapInteraction();
 
-  /**
-   * Switch the scale mode
-   */
-  const switchScale = (): void => {
-    setScaleMode((scaleMode + 1) % 2);
-  };
+  // Memoize scale values array since it doesn't change
+  const scaleValues: TypeScale[] = useMemo(
+    () => [
+      {
+        scaleId: '0',
+        label: scale.labelGraphicMetric,
+        borderBottom: true,
+      },
+      {
+        scaleId: '1',
+        label: scale.labelGraphicImperial,
+        borderBottom: true,
+      },
+      {
+        scaleId: '2',
+        label: scale.labelNumeric,
+        borderBottom: false,
+      },
+    ],
+    [scale.labelGraphicMetric, scale.labelGraphicImperial, scale.labelNumeric]
+  );
 
-  // set the scales values array
-  const scaleValues: TypeScale[] = [
-    {
-      scaleId: '0',
-      label: scale.labelGraphic,
-      borderBottom: true,
+  // Memoize getScaleWidth function
+  const getScaleWidth = useCallback(
+    (mode: number): string => {
+      if (mode === 0) return scale.lineWidthMetric;
+      if (mode === 1) return scale.lineWidthImperial;
+      return 'none';
     },
-    {
-      scaleId: '1',
-      label: scale.labelNumeric,
-      borderBottom: false,
-    },
-  ];
+    [scale.lineWidthMetric, scale.lineWidthImperial]
+  );
+
+  // Memoize switchScale callback
+  const switchScale = useCallback((): void => {
+    setScaleMode((prev) => (prev + 1) % 3);
+  }, []);
+
+  // Memoize the expanded content
+  const expandedContent = useMemo(
+    () => (
+      <Box sx={sxClasses.scaleExpandedContainer}>
+        {scaleValues.map((value, index) => (
+          <Box sx={sxClasses.scaleExpandedCheckmarkText} key={value.scaleId}>
+            <CheckIcon
+              sx={{
+                ...sxClasses.scaleCheckmark,
+                fontSize: theme.palette.geoViewFontSize.lg,
+                opacity: scaleMode === index ? 1 : 0,
+              }}
+            />
+            <Box
+              component="span"
+              className={index === 2 ? '' : 'hasScaleLine'}
+              sx={{
+                ...sxClasses.scaleText,
+                borderBottom: value.borderBottom ? '1px solid' : 'none',
+                width: value.borderBottom ? getScaleWidth(index) : 'none',
+              }}
+            >
+              {value.label}
+            </Box>
+          </Box>
+        ))}
+      </Box>
+    ),
+    [scaleValues, scaleMode, sxClasses, theme.palette.geoViewFontSize.lg, getScaleWidth]
+  );
+
+  // Memoize the collapsed content
+  const collapsedContent = useMemo(
+    () => (
+      <Box
+        component="span"
+        className={`interaction-${interaction} ${scaleValues[scaleMode].borderBottom ? 'hasScaleLine' : ''}`}
+        sx={{
+          ...sxClasses.scaleText,
+          borderBottom: scaleValues[scaleMode].borderBottom ? '1px solid' : 'none',
+          width: scaleValues[scaleMode].borderBottom ? getScaleWidth(scaleMode) : 'none',
+        }}
+      >
+        {scaleValues[scaleMode].label}
+      </Box>
+    ),
+    [interaction, scaleValues, scaleMode, sxClasses.scaleText, getScaleWidth]
+  );
 
   return (
     <Tooltip title={t('mapnav.scale')!} placement="top">
       <Box sx={{ minWidth: 120 }}>
-        <Box id={`${mapId}-scaleControlBar`} sx={sxClasses.scaleControl} />
-        <Box id={`${mapId}-scaleControlLine`} sx={sxClasses.scaleControl} />
-        <Button
-          onClick={() => switchScale()}
-          type="text"
-          sx={sxClasses.scaleContainer}
-          disableRipple
-          className={`interaction-${interaction}`}
-        >
-          {expanded ? (
-            <Box sx={sxClasses.scaleExpandedContainer}>
-              {scaleValues.map((value, index) => {
-                return (
-                  <Box sx={sxClasses.scaleExpandedCheckmarkText} key={value.scaleId}>
-                    <CheckIcon
-                      sx={{ ...sxClasses.scaleCheckmark, fontSize: theme.palette.geoViewFontSize.lg, opacity: scaleMode === index ? 1 : 0 }}
-                    />
-                    <Box
-                      component="span"
-                      className={`${index === 0 ? 'hasScaleLine' : ''}`}
-                      sx={{
-                        ...sxClasses.scaleText,
-                        borderBottom: !value.borderBottom ? 'none' : '1px solid',
-                        width: scaleValues[scaleMode].borderBottom ? scale.lineWidth : 'none',
-                      }}
-                    >
-                      {value.label}
-                    </Box>
-                  </Box>
-                );
-              })}
-            </Box>
-          ) : (
-            <Box
-              component="span"
-              className={`interaction-${interaction} ${scaleValues[scaleMode].borderBottom ? 'hasScaleLine' : ''}`}
-              sx={{
-                ...sxClasses.scaleText,
-                borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',
-                width: scaleValues[scaleMode].borderBottom ? scale.lineWidth : 'none',
-              }}
-            >
-              {scaleValues[scaleMode].label}
-            </Box>
-          )}
+        <Box id={`${mapId}-scaleControlBarMetric`} sx={sxClasses.scaleControl} />
+        <Box id={`${mapId}-scaleControlBarImperial`} sx={sxClasses.scaleControl} />
+        <Button onClick={switchScale} type="text" sx={sxClasses.scaleContainer} disableRipple className={`interaction-${interaction}`}>
+          {expanded ? expandedContent : collapsedContent}
         </Button>
       </Box>
     </Tooltip>

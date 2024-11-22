@@ -148,19 +148,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const store = getGeoViewStore(mapId);
 
     // add map controls (scale)
-    const scaleBar = new ScaleLine({
+    const scaleBarMetric = new ScaleLine({
       units: 'metric',
-      target: document.getElementById(`${mapId}-scaleControlBar`) as HTMLElement,
+      target: document.getElementById(`${mapId}-scaleControlBarMetric`) as HTMLElement,
       bar: true,
       text: true,
     });
 
-    const scaleLine = new ScaleLine({
-      units: 'metric',
-      target: document.getElementById(`${mapId}-scaleControlLine`) as HTMLElement,
+    const scaleBarImperial = new ScaleLine({
+      units: 'imperial',
+      target: document.getElementById(`${mapId}-scaleControlBarImperial`) as HTMLElement,
+      bar: true,
+      text: true,
     });
-    map.addControl(scaleLine);
-    map.addControl(scaleBar);
+
+    map.addControl(scaleBarMetric);
+    map.addControl(scaleBarImperial);
 
     // add map overlays
     // create overlay for north pole icon
@@ -265,8 +268,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Check if the scaleControl exists and is showing information, wait for it
       await whenThisThen(
         () =>
-          document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') &&
-          document.getElementById(`${mapId}-scaleControlBar`)?.querySelector('.ol-scale-text')
+          document.getElementById(`${mapId}-scaleControlBarMetric`)?.querySelector('.ol-scale-text') &&
+          document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text')
       );
     } catch (error) {
       // Log
@@ -275,16 +278,20 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // throw error;
     }
 
-    const scaleControlLineInnerElement = document
-      .getElementById(`${mapId}-scaleControlLine`)
-      ?.querySelector('.ol-scale-line-inner') as HTMLElement;
-    const lineWidth = scaleControlLineInnerElement?.style.width;
-    const labelGraphic = scaleControlLineInnerElement?.innerHTML;
+    // Get metric values
+    const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
+    const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
+    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')!.lastChild as HTMLElement)?.innerHTML;
 
-    const scaleControlBarInnerElement = document.getElementById(`${mapId}-scaleControlBar`)?.querySelector('.ol-scale-text') as HTMLElement;
-    const labelNumeric = scaleControlBarInnerElement?.innerHTML;
+    // Get metric values
+    const scaleControlBarImperial = document.getElementById(`${mapId}-scaleControlBarImperial`);
+    const lineWidthImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
+    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')!.lastChild as HTMLElement)?.innerHTML;
 
-    return { lineWidth, labelGraphic, labelNumeric };
+    // get resolution value (same for metric and imperial)
+    const labelNumeric = (scaleControlBarMetric?.querySelector('.ol-scale-text') as HTMLElement)?.innerHTML;
+
+    return { lineWidthMetric, labelGraphicMetric, lineWidthImperial, labelGraphicImperial, labelNumeric };
   }
 
   /**

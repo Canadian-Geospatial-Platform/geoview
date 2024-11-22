@@ -157,7 +157,13 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     pointerPosition: undefined,
     pointMarkers: {},
     rotation: 0,
-    scale: { lineWidth: '', labelGraphic: '', labelNumeric: '' } as TypeScaleInfo,
+    scale: {
+      lineWidthMetric: '',
+      labelGraphicMetric: '',
+      lineWidthImperial: '',
+      labelGraphicImperial: '',
+      labelNumeric: '',
+    } as TypeScaleInfo,
     size: [0, 0] as [number, number],
     visibleLayers: [],
     zoom: 0,
@@ -844,8 +850,10 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 }
 
 export interface TypeScaleInfo {
-  lineWidth: string;
-  labelGraphic: string;
+  lineWidthMetric: string;
+  labelGraphicMetric: string;
+  lineWidthImperial: string;
+  labelGraphicImperial: string;
   labelNumeric: string;
 }
 
