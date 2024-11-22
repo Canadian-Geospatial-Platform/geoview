@@ -37,11 +37,10 @@ export type TypeFeatureInfoLayerConfig = {
     /** Allow querying. Default = false. */
     queryable: boolean;
     /**
-     * The display field (English/French) of the layer. If it is not present the viewer will make an attempt to find the first valid
-     * field.
+     * The display field of the layer. If it is not present the viewer will make an attempt to find the first valid field.
      */
     nameField?: string;
-    /** A comma separated list of attribute names (English/French) that should be requested on query (all by default). */
+    /** Array of the outfield objects. */
     outfields?: TypeOutfields[];
 };
 export type TypeBaseSourceVectorInitialConfig = {
@@ -152,8 +151,7 @@ export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig;
 export type TypeBaseSourceImageInitialConfig = {
     /**
-     * The service endpoint of the layer (English/French). If not specified, the metadataAccessPath of the GeoView parent
-     * layer is used
+     * The service endpoint of the layer. Added during creation of specific layer entry config.
      */
     dataAccessPath?: string;
     /**

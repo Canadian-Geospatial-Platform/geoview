@@ -109,8 +109,10 @@ export interface IMapState {
  */
 export declare function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapState;
 export interface TypeScaleInfo {
-    lineWidth: string;
-    labelGraphic: string;
+    lineWidthMetric: string;
+    labelGraphicMetric: string;
+    lineWidthImperial: string;
+    labelGraphicImperial: string;
     labelNumeric: string;
 }
 export interface TypeNorthArrow {
