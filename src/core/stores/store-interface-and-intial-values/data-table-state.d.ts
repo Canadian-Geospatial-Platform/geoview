@@ -12,6 +12,7 @@ export interface IDataTableState {
     actions: {
         addOrUpdateTableFilter(layerPath: string, filter: string): void;
         applyMapFilters: (filterStrings: string) => void;
+        getFilteredDataFromLegendVisibility: (layerPath: string, features: TypeFeatureInfoEntry[]) => TypeFeatureInfoEntry[];
         setActiveLayersData: (layers: TypeLayerData[]) => void;
         setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
         setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;

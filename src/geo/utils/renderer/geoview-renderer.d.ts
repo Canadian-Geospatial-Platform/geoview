@@ -47,10 +47,9 @@ export declare function getAndCreateFeatureStyle(feature: FeatureLike, style: Ty
  * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  * @param {boolean} useRecycling - Special parameter to optimize canvas creation time when functions is called multiple times.
- * @param {() => Promise<string | null>} callbackForDataUrl - An optional callback to execute when struggling to build a canvas and have to use a data url to make one
  * @returns {Promise<HTMLCanvasElement>} The canvas icon associated to the feature or a default empty canvas.
  */
-export declare function getFeatureCanvas(feature: Feature, style: TypeStyleConfig, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean, useRecycling?: boolean, callbackForDataUrl?: () => Promise<string | null>): Promise<HTMLCanvasElement>;
+export declare function getFeatureCanvas(feature: Feature, style: TypeStyleConfig, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean, useRecycling?: boolean): Promise<HTMLCanvasElement>;
 /** ***************************************************************************************************************************
  * Analyse the filter and split it in syntaxique nodes.  If a problem is detected, an error object is thrown with an
  * explanatory message.

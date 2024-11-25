@@ -2,6 +2,7 @@ import { Extent } from '@config/types/map-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 export declare class LegendEventProcessor extends AbstractEventProcessor {
     #private;
     /**
@@ -114,4 +115,22 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * @param {number} opacity - The opacity to set.
      */
     static setLayerOpacity(mapId: string, layerPath: string, opacity: number): void;
+    /**
+     * Filters features based on their visibility settings defined in the layer's unique value or class break style configuration.
+     *
+     * @static
+     * @param {string} mapId - The unique identifier of the map instance
+     * @param {string} layerPath - The path to the layer in the map configuration
+     * @param {any[]} features - Array of features to filter
+     *
+     * @returns {any[]} Filtered array of features based on their visibility settings
+     *
+     * @description
+     * This function processes features based on the layer's unique value style configuration:
+     * - If the layer doesn't use unique value or class break styling, returns all features unchanged
+     * - Features matching visible styles are included
+     * - Features matching invisible styles are excluded
+     * - Features with no matching style follow the defaultVisible setting
+     */
+    static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[];
 }
