@@ -931,42 +931,8 @@ export class MapViewer {
       const promise = AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
 
       // if flag is true, check if config support the layers change and apply
-
       if (resetLayer) {
-        const configs = this.layer.getLayerEntryConfigs();
-        const originalMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.mapId);
-        // Need to wait for all refreshed GeoCore layers to be settles before trying to update
-        // the ordered layer info. Otherwise, the map doesn't update correctly
-        Promise.allSettled(
-          configs
-            .filter((config) => {
-              // Filter to just Geocore layers and not child layers
-              if (api.config.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
-                return true;
-              }
-              return false;
-            })
-            .map((config) => {
-              // Remove and add back in GeoCore Layers and return their promises
-              const uuid = config.geoviewLayerConfig.geoviewLayerId;
-              this.layer.removeLayerUsingPath(config.layerPath);
-              return this.layer.addGeoviewLayerByGeoCoreUUID(uuid);
-            })
-        )
-          .then(() => {
-            // Can use the setMapOrderedLayerInfo to update the maps states, BUT
-            // still need to remove any children layers first that weren't in the original.
-            const newMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.mapId);
-            const originalLayerPaths = originalMapOrderedLayerInfo.map((layer) => layer.layerPath);
-            const childLayersToRemove = newMapOrderedLayerInfo
-              .map((layer) => layer.layerPath)
-              .filter((path) => !originalLayerPaths.includes(path));
-            childLayersToRemove.forEach((childPath) => {
-              this.layer.removeLayerUsingPath(childPath);
-            });
-            MapEventProcessor.setMapOrderedLayerInfo(this.mapId, originalMapOrderedLayerInfo);
-          })
-          .catch((err) => logger.logError(err));
+        this.layer.refreshGeocoreLayers().catch((error) => logger.logError(error));
       }
 
       // Emit language changed event
