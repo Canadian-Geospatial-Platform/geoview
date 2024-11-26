@@ -8,10 +8,11 @@ import {
   TypeLineStyle,
   TypeLineStringVectorConfig,
   TypeSimpleSymbolVectorConfig,
-  TypeStyleConfig,
   TypeStyleGeometry,
   TypeSymbol,
-  TypeStyleConfigInfo,
+  TypeLayerStyleConfigInfo,
+  TypeLayerStyleSettings,
+  TypeLayerStyleConfig,
 } from '@config/types/map-schema-types';
 
 import {
@@ -437,9 +438,9 @@ function convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined
  * @returns {TypeStyleGeometry | undefined} The Geoview style key or undefined if it can not be determined.
  */
 function getStyleGeometry(settings: TypeKindOfVectorSettings): TypeStyleGeometry | undefined {
-  if (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)) return 'point';
-  if (isFilledPolygonVectorConfig(settings)) return 'polygon';
-  if (isLineStringVectorConfig(settings)) return 'linestring';
+  if (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)) return 'Point';
+  if (isFilledPolygonVectorConfig(settings)) return 'Polygon';
+  if (isLineStringVectorConfig(settings)) return 'LineString';
   return undefined;
 }
 
@@ -448,14 +449,15 @@ function getStyleGeometry(settings: TypeKindOfVectorSettings): TypeStyleGeometry
  *
  * @param {EsriUniqueValueRenderer} renderer - ESRI renderer to convert.
  *
- * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+ * @returns {TypeLayerStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeStyleConfig | undefined {
+function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeLayerStyleConfig | undefined {
   const styleType = 'uniqueValue';
+  const style: TypeLayerStyleConfig = {};
   const fields = [renderer.field1];
   if (renderer.field2) fields.push(renderer.field2);
   if (renderer.field3) fields.push(renderer.field3);
-  const uniqueValueStyleInfo: TypeStyleConfigInfo[] = [];
+  const uniqueValueStyleInfo: TypeLayerStyleConfigInfo[] = [];
   renderer.uniqueValueInfos.forEach((symbolInfo) => {
     const settings = convertSymbol(symbolInfo.symbol);
     if (settings) {
@@ -487,15 +489,18 @@ function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeStyl
   }
 
   const styleGeometry = getStyleGeometry(uniqueValueStyleInfo[0].settings);
+  const styleSettings: TypeLayerStyleSettings = {
+    type: styleType,
+    fields,
+    hasDefault,
+    info: uniqueValueStyleInfo,
+  };
+
   if (styleGeometry) {
-    const style: TypeStyleConfig = {
-      type: styleType,
-      fields,
-      hasDefault,
-      info: uniqueValueStyleInfo,
-    };
+    style[styleGeometry] = styleSettings;
     return style;
   }
+
   return undefined;
 }
 
@@ -504,26 +509,29 @@ function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeStyl
  *
  * @param {EsriSimpleRenderer} renderer - ESRI renderer to convert.
  *
- * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+ * @returns {TypeLayerStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-function processSimpleRenderer(renderer: EsriSimpleRenderer): TypeStyleConfig | undefined {
+function processSimpleRenderer(renderer: EsriSimpleRenderer): TypeLayerStyleConfig | undefined {
   const { label } = renderer;
+  const style: TypeLayerStyleConfig = {};
   const settings = convertSymbol(renderer.symbol);
   if (settings) {
     if (renderer.rotationType === 'geographic' && (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)))
       settings.rotation = Math.PI / 2 - settings.rotation!;
     const styleGeometry = getStyleGeometry(settings);
-    const styleSettings: TypeStyleConfigInfo = { visible: true, label, values: [], settings };
+    const styleInfo: TypeLayerStyleConfigInfo = { visible: true, label, values: [], settings };
     if (styleGeometry) {
-      const style: TypeStyleConfig = {
+      const styleSettings: TypeLayerStyleSettings = {
         type: 'simple',
         fields: [],
         hasDefault: false,
-        info: [styleSettings],
+        info: [styleInfo],
       };
+      style[styleGeometry] = styleSettings;
       return style;
     }
   }
+
   return undefined;
 }
 
@@ -532,18 +540,18 @@ function processSimpleRenderer(renderer: EsriSimpleRenderer): TypeStyleConfig | 
  *
  * @param {EsriClassBreakRenderer} EsriRenderer - ESRI renderer to convert.
  *
- * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+ * @returns {TypeLayerStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeStyleConfig | undefined {
-  const styleType = 'classBreaks';
+function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeLayerStyleConfig | undefined {
   const { field } = EsriRenderer;
-  const classBreakStyleInfo: TypeStyleConfigInfo[] = [];
+  const style: TypeLayerStyleConfig = {};
+  const classBreakStyleInfo: TypeLayerStyleConfigInfo[] = [];
   for (let i = 0; i < EsriRenderer.classBreakInfos.length; i++) {
     const settings = convertSymbol(EsriRenderer.classBreakInfos[i].symbol);
     if (settings) {
       if (EsriRenderer.rotationType === 'geographic' && (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)))
         settings.rotation = Math.PI / 2 - settings.rotation!;
-      const geoviewClassBreakInfo: TypeStyleConfigInfo = {
+      const geoviewClassBreakInfo: TypeLayerStyleConfigInfo = {
         label: EsriRenderer.classBreakInfos[i].label,
         visible: true,
         values: [EsriRenderer.classBreakInfos[i].classMinValue as number, EsriRenderer.classBreakInfos[i].classMaxValue],
@@ -575,12 +583,14 @@ function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeSt
 
   const styleGeometry = getStyleGeometry(classBreakStyleInfo[0].settings);
   if (styleGeometry) {
-    const style: TypeStyleConfig = {
-      type: styleType,
+    const styleSettings: TypeLayerStyleSettings = {
+      type: 'classBreaks',
       fields: [field],
       hasDefault,
       info: classBreakStyleInfo,
     };
+
+    style[styleGeometry] = styleSettings;
     return style;
   }
   return undefined;
@@ -591,9 +601,9 @@ function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeSt
  *
  * @param {EsriBaseRenderer} renderer - ESRI renderer to convert.
  *
- * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+ * @returns {TypeLayerStyleSettings | undefined} The Geoview style or undefined if it can not be created.
  */
-export function createStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeStyleConfig | undefined {
+export function createStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeLayerStyleConfig | undefined {
   if (esriRendererIsUniqueValue(renderer)) return processUniqueValueRenderer(renderer);
   if (esriRendererIsSimple(renderer)) return processSimpleRenderer(renderer);
   if (esriRendererIsClassBreaks(renderer)) return processClassBreakRenderer(renderer);

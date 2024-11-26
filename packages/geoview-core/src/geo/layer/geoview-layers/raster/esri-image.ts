@@ -15,12 +15,12 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
-  TypeUniqueValueStyleConfig,
-  TypeUniqueValueStyleInfo,
-  TypeStyleConfig,
+  TypeLayerStyleSettings,
+  TypeLayerStyleConfig,
   layerEntryIsGroupLayer,
   codedValueType,
   rangeDomainType,
+  TypeLayerStyleConfigInfo,
 } from '@/geo/map/map-schema-types';
 
 import {
@@ -154,10 +154,11 @@ export class EsriImage extends AbstractGeoViewRaster {
         };
         return legend;
       }
-      const uniqueValueStyleInfo: TypeUniqueValueStyleInfo[] = [];
+      const uniqueValueStyleInfo: TypeLayerStyleConfigInfo[] = [];
       legendInfo.forEach((info) => {
-        const styleInfo: TypeUniqueValueStyleInfo = {
+        const styleInfo: TypeLayerStyleConfigInfo = {
           label: info.label,
+          visible: layerConfig.initialSettings.states?.visible || true,
           values: info.label.split(','),
           settings: {
             type: 'iconSymbol',
@@ -169,12 +170,13 @@ export class EsriImage extends AbstractGeoViewRaster {
         };
         uniqueValueStyleInfo.push(styleInfo);
       });
-      const styleSettings: TypeUniqueValueStyleConfig = {
-        styleType: 'uniqueValue',
+      const styleSettings: TypeLayerStyleSettings = {
+        type: 'uniqueValue',
         fields: ['default'],
-        uniqueValueStyleInfo,
+        hasDefault: true,
+        info: uniqueValueStyleInfo,
       };
-      const styleConfig: TypeStyleConfig = {
+      const styleConfig: TypeLayerStyleConfig = {
         Point: styleSettings,
       };
 

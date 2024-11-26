@@ -7,9 +7,9 @@ import {
   TypeSourceImageStaticInitialConfig,
   TypeSourceImageWmsInitialConfig,
   TypeSourceTileInitialConfig,
-  TypeStyleConfig,
+  TypeLayerStyleConfig,
   TypeStyleGeometry,
-  TypeStyleSettings,
+  TypeLayerStyleSettings,
   TypeVectorSourceInitialConfig,
   TypeVectorTileSourceInitialConfig,
 } from '@/geo/map/map-schema-types';
@@ -48,7 +48,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     | TypeSourceImageStaticInitialConfig;
 
   /** Style to apply to the vector layer. */
-  style?: TypeStyleConfig;
+  layerStyle?: TypeLayerStyleConfig;
 
   /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
   declare listOfLayerEntryConfig: never;
@@ -59,8 +59,8 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   protected constructor(layerConfig: AbstractBaseLayerEntryConfig) {
     super(layerConfig);
-    // Attribute 'style' must exist in layerConfig even if it is undefined
-    if (!('style' in this)) this.style = undefined;
+    // Attribute 'layerStyle' must exist in layerConfig even if it is undefined
+    if (!('layerStyle' in this)) this.layerStyle = undefined;
     Object.assign(this, layerConfig);
   }
 
@@ -103,20 +103,20 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry
    */
   getTypeGeometries(): TypeStyleGeometry[] {
-    return Object.keys(this.style || {}) as TypeStyleGeometry[];
+    return Object.keys(this.layerStyle || {}) as TypeStyleGeometry[];
   }
 
   /**
    * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
    * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
    */
-  getFirstStyleSettings(): TypeStyleSettings | undefined {
+  getFirstStyleSettings(): TypeLayerStyleSettings | undefined {
     // Get the type geometries
     const styles = this.getTypeGeometries();
 
     // If at least one, get the first one
     if (styles.length > 0) {
-      return this.style![styles[0]];
+      return this.layerStyle![styles[0]];
     }
 
     // None

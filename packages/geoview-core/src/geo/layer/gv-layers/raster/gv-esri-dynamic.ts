@@ -14,11 +14,7 @@ import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
-  isUniqueValueStyleConfig,
-  isClassBreakStyleConfig,
-  TypeUniqueValueStyleConfig,
-  TypeClassBreakStyleConfig,
-  isSimpleStyleConfig,
+  TypeLayerStyleSettings,
   TypeFeatureInfoLayerConfig,
   TypeFeatureInfoEntry,
   rangeDomainType,
@@ -302,18 +298,18 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Counts the number of times the value of a field is used by the unique value style information object. Depending on the
    * visibility of the default, we count visible or invisible settings.
-   * @param {TypeUniqueValueStyleConfig} styleSettings - The unique value style settings to evaluate.
+   * @param {TypeLayerStyleSettings} styleSettings - The unique value style settings to evaluate.
    * @returns {TypeFieldOfTheSameValue[][]} The result of the evaluation. The first index of the array correspond to the field's
    * index in the style settings and the second one to the number of different values the field may have based on visibility of
    * the feature.
    * @private
    */
-  static #countFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig): TypeFieldOfTheSameValue[][] {
-    return styleSettings.uniqueValueStyleInfo.reduce<TypeFieldOfTheSameValue[][]>(
+  static #countFieldOfTheSameValue(styleSettings: TypeLayerStyleSettings): TypeFieldOfTheSameValue[][] {
+    return styleSettings.info.reduce<TypeFieldOfTheSameValue[][]>(
       (counter, styleEntry): TypeFieldOfTheSameValue[][] => {
         if (
-          (styleEntry.visible === false && styleSettings.defaultVisible !== false) ||
-          (styleEntry.visible !== false && styleSettings.defaultVisible === false)
+          (styleEntry.visible === false && styleSettings.info[styleSettings.info.length - 1].visible !== false) ||
+          (styleEntry.visible !== false && styleSettings.info[styleSettings.info.length - 1].visible === false)
         ) {
           styleEntry.values.forEach((styleValue, i) => {
             const valueExist = counter[i].find((counterEntry) => counterEntry.value === styleValue);
@@ -340,31 +336,25 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const style = this.getStyle(layerConfig.layerPath);
 
     if (style) {
-      const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig): void => {
+      const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeLayerStyleSettings): void => {
         // default value is true for all undefined visibility flags
-        // eslint-disable-next-line no-param-reassign
-        if (styleConfig.defaultVisible === undefined) styleConfig.defaultVisible = true;
-        const settings = isUniqueValueStyleConfig(styleConfig) ? styleConfig.uniqueValueStyleInfo : styleConfig.classBreakStyleInfo;
+        const settings = styleConfig.info;
         for (let i = 0; i < settings.length; i++) if (settings[i].visible === undefined) settings[i].visible = true;
       };
 
-      const featuresAreAllVisible = (defaultVisibility: boolean, settings: { visible: boolean }[]): boolean => {
-        let allVisible = defaultVisibility !== false;
-        for (let i = 0; i < settings.length; i++) {
-          allVisible &&= settings[i].visible !== false;
-        }
-        return allVisible;
+      const featuresAreAllVisible = (settings: { visible: boolean }[]): boolean => {
+        return settings.every((setting) => setting.visible !== false);
       };
 
       // Get the first style settings.
       const styleSettings = layerConfig.getFirstStyleSettings()!;
 
-      if (isSimpleStyleConfig(styleSettings)) {
+      if (styleSettings.type === 'simple') {
         return layerFilter || '(1=1)';
       }
-      if (isUniqueValueStyleConfig(styleSettings)) {
+      if (styleSettings.type === 'uniqueValue') {
         setAllUndefinedVisibilityFlagsToYes(styleSettings);
-        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.uniqueValueStyleInfo as { visible: boolean }[]))
+        if (featuresAreAllVisible(styleSettings.info as { visible: boolean }[]))
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         // This section of code optimize the query to reduce it at it shortest expression.
@@ -376,83 +366,83 @@ export class GVEsriDynamic extends AbstractGVRaster {
         return `${query}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }
 
-      if (isClassBreakStyleConfig(styleSettings)) {
+      if (styleSettings.type === 'classBreaks') {
         setAllUndefinedVisibilityFlagsToYes(styleSettings);
-        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.classBreakStyleInfo as { visible: boolean }[]))
+        if (featuresAreAllVisible(styleSettings.info as { visible: boolean }[]))
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         const filterArray: string[] = [];
         let visibleWhenGreatherThisIndex = -1;
-        for (let i = 0; i < styleSettings.classBreakStyleInfo.length; i++) {
+        for (let i = 0; i < styleSettings.info.length; i++) {
           if (filterArray.length % 2 === 0) {
             if (i === 0) {
-              if (styleSettings.classBreakStyleInfo[0].visible !== false && styleSettings.defaultVisible === false)
+              if (styleSettings.info[0].visible !== false && styleSettings.info[styleSettings.info.length - 1].visible === false)
                 filterArray.push(
-                  `${styleSettings.field} >= ${GVEsriDynamic.#formatFieldValue(
-                    styleSettings.field,
-                    styleSettings.classBreakStyleInfo[0].minValue!,
+                  `${styleSettings.fields[0]} >= ${GVEsriDynamic.#formatFieldValue(
+                    styleSettings.fields[0],
+                    styleSettings.info[0].values[0]!,
                     layerConfig.source.featureInfo!
                   )}`
                 );
-              else if (styleSettings.classBreakStyleInfo[0].visible === false && styleSettings.defaultVisible !== false) {
+              else if (styleSettings.info[0].visible === false && styleSettings.info[styleSettings.info.length - 1].visible !== false) {
                 filterArray.push(
-                  `${styleSettings.field} < ${GVEsriDynamic.#formatFieldValue(
-                    styleSettings.field,
-                    styleSettings.classBreakStyleInfo[0].minValue!,
+                  `${styleSettings.fields[0]} < ${GVEsriDynamic.#formatFieldValue(
+                    styleSettings.fields[0],
+                    styleSettings.info[0].values[0],
                     layerConfig.source.featureInfo!
                   )}`
                 );
                 visibleWhenGreatherThisIndex = i;
               }
-            } else if (styleSettings.classBreakStyleInfo[i].visible !== false && styleSettings.defaultVisible === false) {
+            } else if (styleSettings.info[i].visible !== false && styleSettings.info[styleSettings.info.length - 1].visible === false) {
               filterArray.push(
-                `${styleSettings.field} > ${GVEsriDynamic.#formatFieldValue(
-                  styleSettings.field,
-                  styleSettings.classBreakStyleInfo[i].minValue!,
+                `${styleSettings.fields[0]} > ${GVEsriDynamic.#formatFieldValue(
+                  styleSettings.fields[0],
+                  styleSettings.info[i].values[0],
                   layerConfig.source.featureInfo!
                 )}`
               );
-              if (i + 1 === styleSettings.classBreakStyleInfo.length)
+              if (i + 1 === styleSettings.info.length)
                 filterArray.push(
-                  `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
-                    styleSettings.field,
-                    styleSettings.classBreakStyleInfo[i].maxValue!,
+                  `${styleSettings.fields[0]} <= ${GVEsriDynamic.#formatFieldValue(
+                    styleSettings.fields[0],
+                    styleSettings.info[i].values[1],
                     layerConfig.source.featureInfo!
                   )}`
                 );
-            } else if (styleSettings.classBreakStyleInfo[i].visible === false && styleSettings.defaultVisible !== false) {
+            } else if (styleSettings.info[i].visible === false && styleSettings.info[styleSettings.info.length - 1].visible !== false) {
               filterArray.push(
-                `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
-                  styleSettings.field,
-                  styleSettings.classBreakStyleInfo[i].minValue!,
+                `${styleSettings.fields[0]} <= ${GVEsriDynamic.#formatFieldValue(
+                  styleSettings.fields[0],
+                  styleSettings.info[i].values[0],
                   layerConfig.source.featureInfo!
                 )}`
               );
               visibleWhenGreatherThisIndex = i;
             }
-          } else if (styleSettings.defaultVisible === false) {
-            if (styleSettings.classBreakStyleInfo[i].visible === false) {
+          } else if (styleSettings.info[styleSettings.info.length - 1].visible === false) {
+            if (styleSettings.info[i].visible === false) {
               filterArray.push(
-                `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
-                  styleSettings.field,
-                  styleSettings.classBreakStyleInfo[i - 1].maxValue!,
+                `${styleSettings.fields[0]} <= ${GVEsriDynamic.#formatFieldValue(
+                  styleSettings.fields[0],
+                  styleSettings.info[i - 1].values[1],
                   layerConfig.source.featureInfo!
                 )}`
               );
-            } else if (i + 1 === styleSettings.classBreakStyleInfo.length) {
+            } else if (i + 1 === styleSettings.info.length) {
               filterArray.push(
-                `${styleSettings.field} <= ${GVEsriDynamic.#formatFieldValue(
-                  styleSettings.field,
-                  styleSettings.classBreakStyleInfo[i].maxValue!,
+                `${styleSettings.fields[0]} <= ${GVEsriDynamic.#formatFieldValue(
+                  styleSettings.fields[0],
+                  styleSettings.info[i].values[1],
                   layerConfig.source.featureInfo!
                 )}`
               );
             }
-          } else if (styleSettings.classBreakStyleInfo[i].visible !== false) {
+          } else if (styleSettings.info[i].visible !== false) {
             filterArray.push(
-              `${styleSettings.field} > ${GVEsriDynamic.#formatFieldValue(
-                styleSettings.field,
-                styleSettings.classBreakStyleInfo[i - 1].maxValue!,
+              `${styleSettings.fields[0]} > ${GVEsriDynamic.#formatFieldValue(
+                styleSettings.fields[0],
+                styleSettings.info[i - 1].values[1],
                 layerConfig.source.featureInfo!
               )}`
             );
@@ -463,14 +453,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
         }
         if (visibleWhenGreatherThisIndex !== -1)
           filterArray.push(
-            `${styleSettings.field} > ${GVEsriDynamic.#formatFieldValue(
-              styleSettings.field,
-              styleSettings.classBreakStyleInfo[visibleWhenGreatherThisIndex].maxValue!,
+            `${styleSettings.fields[0]} > ${GVEsriDynamic.#formatFieldValue(
+              styleSettings.fields[0],
+              styleSettings.info[visibleWhenGreatherThisIndex].values[1],
               layerConfig.source.featureInfo!
             )}`
           );
 
-        if (styleSettings.defaultVisible !== false) {
+        if (styleSettings.info[styleSettings.info.length - 1].visible !== false) {
           const filterValue = `${filterArray.slice(0, -1).reduce((previousFilterValue, filterNode, i) => {
             if (i === 0) return `(${filterNode} or `;
             if (i % 2 === 0) return `${previousFilterValue} and ${filterNode}) or `;
@@ -497,13 +487,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * Sorts the number of times the value of a field is used by the unique value style information object. Depending on the
    * visibility of the default value, we count the visible or invisible parameters. The order goes from the highest number of
    * occurrences to the lowest number of occurrences.
-   * @param {TypeUniqueValueStyleConfig} styleSettings - The unique value style settings to evaluate.
+   * @param {TypeLayerStyleSettings} styleSettings - The unique value style settings to evaluate.
    * @param {TypeFieldOfTheSameValue[][]} fieldOfTheSameValue - The count information that contains the number of occurrences
    * of a value.
    * @returns {number[]} An array that gives the field order to use to build the query tree.
    * @private
    */
-  static #sortFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig, fieldOfTheSameValue: TypeFieldOfTheSameValue[][]): number[] {
+  static #sortFieldOfTheSameValue(styleSettings: TypeLayerStyleSettings, fieldOfTheSameValue: TypeFieldOfTheSameValue[][]): number[] {
     const fieldNotUsed = styleSettings.fields.map(() => true);
     const fieldOrder: number[] = [];
     for (let entrySelected = 0; entrySelected !== -1; entrySelected = fieldNotUsed.findIndex((flag) => flag)) {
@@ -541,7 +531,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * which is equivalent to:
    * f1 = v11 and f2 = v21 and f3 = v31 or f1 = v11 and f2 = v21 and f3 = v32 or f1 = v11 and f2 = v22 and f3 = v31 ...
    *
-   * @param {TypeUniqueValueStyleConfig} styleSettings - The unique value style settings to evaluate.
+   * @param {TypeLayerStyleSettings} styleSettings - The unique value style settings to evaluate.
    * @param {TypeFieldOfTheSameValue[][]} fieldOfTheSameValue - The count information that contains the number of occurrences
    * of a value.
    * @param {number[]} fieldOrder - The field order to use when building the tree.
@@ -549,15 +539,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @private
    */
   static #getQueryTree(
-    styleSettings: TypeUniqueValueStyleConfig,
+    styleSettings: TypeLayerStyleSettings,
     fieldOfTheSameValue: TypeFieldOfTheSameValue[][],
     fieldOrder: number[]
   ): TypeQueryTree {
     const queryTree: TypeQueryTree = [];
-    styleSettings.uniqueValueStyleInfo.forEach((styleEntry) => {
+    styleSettings.info.forEach((styleEntry) => {
       if (
-        (styleEntry.visible === false && styleSettings.defaultVisible !== false) ||
-        (styleEntry.visible !== false && styleSettings.defaultVisible === false)
+        (styleEntry.visible === false && styleSettings.info[styleSettings.info.length - 1].visible !== false) ||
+        (styleEntry.visible !== false && styleSettings.info[styleSettings.info.length - 1].visible === false)
       ) {
         let levelToSearch = queryTree;
         for (let i = 0; i < fieldOrder.length; i++) {
@@ -579,7 +569,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {TypeQueryTree} queryTree - The query tree to use.
    * @param {number} level - The level to use for solving the tree.
    * @param {number[]} fieldOrder - The field order to use for solving the tree.
-   * @param {TypeUniqueValueStyleConfig} styleSettings - The unique value style settings to evaluate.
+   * @param {TypeLayerStyleSettings} styleSettings - The unique value style settings to evaluate.
    * @param {TypeFeatureInfoLayerConfig} sourceFeatureInfo - The source feature information that knows the field type.
    * @returns {string} The resulting query.
    * @private
@@ -588,10 +578,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
     queryTree: TypeQueryTree,
     level: number,
     fieldOrder: number[],
-    styleSettings: TypeUniqueValueStyleConfig,
+    styleSettings: TypeLayerStyleSettings,
     sourceFeatureInfo: TypeFeatureInfoLayerConfig
   ): string {
-    let queryString = styleSettings.defaultVisible !== false && !level ? 'not (' : '(';
+    let queryString = styleSettings.info[styleSettings.info.length - 1].visible !== false && !level ? 'not (' : '(';
     for (let i = 0; i < queryTree.length; i++) {
       const value = GVEsriDynamic.#formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, sourceFeatureInfo);
       // The nextField array is not empty, then it is is not the last field

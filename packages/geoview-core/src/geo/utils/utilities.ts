@@ -19,7 +19,7 @@ import { Projection } from '@/geo/utils/projection';
 
 import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { TypeStyleConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
 
 import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
 
@@ -226,11 +226,11 @@ export function createEmptyBasemap(): TileLayer<XYZ> {
 /** ***************************************************************************************************************************
  * This method gets the legend styles used by the the layer as specified by the style configuration.
  *
- * @param {TypeStyleConfig} styleConfig - Layer style configuration.
+ * @param {TypeLayerStyleConfig} styleConfig - Layer style configuration.
  *
  * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
  */
-export function getLegendStylesFromConfig(styleConfig: TypeStyleConfig): Promise<TypeVectorLayerStyles> {
+export function getLegendStylesFromConfig(styleConfig: TypeLayerStyleConfig): Promise<TypeVectorLayerStyles> {
   return getLegendStyles(styleConfig);
 }
 

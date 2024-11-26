@@ -49,7 +49,7 @@ export function Layout({
       // set the focus item when layer item clicked.
       setSelectedFooterLayerListItemId(`${layer.layerUniqueId}`);
     },
-    [onLayerListClicked, setSelectedFooterLayerListItemId],
+    [onLayerListClicked, setSelectedFooterLayerListItemId]
   );
 
   /**

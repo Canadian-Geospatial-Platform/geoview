@@ -23,7 +23,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "geometryType": "point",
             "layerName": "stations-Temporal",
             "initialSettings": {
               "controls": {

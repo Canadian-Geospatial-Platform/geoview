@@ -248,17 +248,18 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
    */
   static convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
     // TODO: Update with style refactor PR (function esriConvertEsriGeometryTypeToOLGeometryType gv-layer/util). Use only one function!
+    // TODO: Update to support all esri geometry types
     switch (esriGeometryType) {
       case 'esriGeometryPoint':
       case 'esriGeometryMultipoint':
-        return 'point';
+        return 'Point';
 
       case 'esriGeometryPolyline':
-        return 'linestring';
+        return 'LineString';
 
       case 'esriGeometryPolygon':
       case 'esriGeometryMultiPolygon':
-        return 'polygon';
+        return 'Polygon';
 
       default:
         throw new Error(`Unsupported geometry type: ${esriGeometryType}`);

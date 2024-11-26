@@ -379,9 +379,9 @@ export async function commonProcessLayerMetadata<
       // The following line allow the type ascention of the type guard functions on the second line below
       const EsriLayerConfig = layerConfig;
       if (geoviewEntryIsEsriDynamic(EsriLayerConfig) || geoviewEntryIsEsriFeature(EsriLayerConfig)) {
-        if (!EsriLayerConfig.style) {
+        if (!EsriLayerConfig.layerStyle) {
           const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
-          if (renderer) EsriLayerConfig.style = getStyleFromEsriRenderer(renderer);
+          if (renderer) EsriLayerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
         }
         layer.processFeatureInfoConfig(
           layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig

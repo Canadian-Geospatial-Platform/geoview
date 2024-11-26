@@ -28,7 +28,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   layerEntryIsGroupLayer,
-  TypeStyleConfig,
+  TypeLayerStyleConfig,
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeStyleGeometry,
@@ -39,8 +39,6 @@ import {
   rangeDomainType,
   TypeLocation,
   QueryType,
-  TypeUniqueValueStyleConfig,
-  TypeClassBreakStyleConfig,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
@@ -126,7 +124,7 @@ export abstract class AbstractGeoViewLayer {
   #layerTemporalDimension: Record<string, TimeDimension> = {};
 
   /** Style to apply to the layer. */
-  #style: Record<string, TypeStyleConfig> = {};
+  #layerStyle: Record<string, TypeLayerStyleConfig> = {};
 
   /** Attribution used in the OpenLayer source. */
   #attributions: string[] = [];
@@ -307,16 +305,16 @@ export abstract class AbstractGeoViewLayer {
    * Gets the layer style
    * @returns The layer style
    */
-  getStyle(layerPath: string): TypeStyleConfig | undefined {
-    return this.#style[layerPath];
+  getStyle(layerPath: string): TypeLayerStyleConfig | undefined {
+    return this.#layerStyle[layerPath];
   }
 
   /**
    * Sets the layer style
-   * @param {TypeStyleConfig | undefined} style - The layer style
+   * @param {TypeLayerStyleConfig | undefined} style - The layer style
    */
-  setStyle(layerPath: string, style: TypeStyleConfig): void {
-    this.#style[layerPath] = style;
+  setStyle(layerPath: string, style: TypeLayerStyleConfig): void {
+    this.#layerStyle[layerPath] = style;
     this.#emitLayerStyleChanged({ style, layerPath });
   }
 
@@ -545,7 +543,7 @@ export abstract class AbstractGeoViewLayer {
           // TO.DOCONT: After this point(?) the layerConfig should be full static and the system should rely on the Layer class to do stuff.
           //
           // Save the style in the layer as we're done processing style found in metadata
-          if (layerConfig instanceof AbstractBaseLayerEntryConfig) this.setStyle(layerConfig.layerPath, layerConfig.style!);
+          if (layerConfig instanceof AbstractBaseLayerEntryConfig) this.setStyle(layerConfig.layerPath, layerConfig.layerStyle!);
 
           // We need to signal to the layer sets that the 'processed' phase is done.
           // GV TODO: For the moment, be aware that the layerStatus setter is doing a lot of things behind the scene.
@@ -948,13 +946,11 @@ export abstract class AbstractGeoViewLayer {
       Object.keys(legend.styleConfig).forEach((geometry) => {
         if (
           legend.styleConfig &&
-          (legend.styleConfig[geometry as TypeStyleGeometry]?.styleType === 'uniqueValue' ||
-            legend.styleConfig[geometry as TypeStyleGeometry]?.styleType === 'classBreaks')
+          (legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'uniqueValue' ||
+            legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'classBreaks')
         ) {
-          if ((legend.styleConfig[geometry as TypeStyleGeometry] as TypeUniqueValueStyleConfig)!.uniqueValueStyleInfo?.length)
-            styleCount += (legend.styleConfig[geometry as TypeStyleGeometry] as TypeUniqueValueStyleConfig)!.uniqueValueStyleInfo.length;
-          if ((legend.styleConfig[geometry as TypeStyleGeometry] as TypeClassBreakStyleConfig)!.classBreakStyleInfo?.length)
-            styleCount += (legend.styleConfig[geometry as TypeStyleGeometry] as TypeClassBreakStyleConfig)!.classBreakStyleInfo.length;
+          if (legend.styleConfig[geometry as TypeStyleGeometry]!.info.length)
+            styleCount += legend.styleConfig[geometry as TypeStyleGeometry]!.info.length;
         }
       });
     // Set the openlayers icon image cache
@@ -1997,7 +1993,7 @@ type LayerStyleChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerSt
  */
 export type LayerStyleChangedEvent = {
   // The style
-  style: TypeStyleConfig;
+  style: TypeLayerStyleConfig;
 
   // TODO: Refactor - After layers refactoring, remove the layerPath parameter here
   layerPath: string;
