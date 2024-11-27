@@ -304,7 +304,7 @@
         });
 
         // listen to individual layer loaded event
-        cgpv.api.maps.Map1.layer.getGeoviewLayerHybrid(LYR_PATH_NON_METAL)?.onIndividualLayerLoaded((sender, payload) => {
+        cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_NON_METAL)?.onIndividualLayerLoaded((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess('Nonmetal mines has finished loading');
           console.log(sender.olRootLayer.getSource().getFeatures());
         });
@@ -331,22 +331,22 @@
         // !!
 
         // listen to layer visibility changed event (individual geoview layer)
-        cgpv.api.maps.Map1.layer.getGeoviewLayerHybrid(LYR_PATH_UNIQUE)?.onVisibleChanged((sender, payload) => {
+        cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onVisibleChanged((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${LYR_PATH_UNIQUE} visibility set to ${payload.visible} - individual`);
         });
 
         // listen to layer visibility changed event (individual geoview layer)
-        cgpv.api.maps.Map1.layer.getGeoviewLayerHybrid(LYR_PATH_GEOCORE)?.onVisibleChanged((sender, payload) => {
+        cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_GEOCORE)?.onVisibleChanged((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visible} - individual`);
         });
 
         // listen to layer opacity changed event
-        cgpv.api.maps.Map1.layer.getGeoviewLayerHybrid(LYR_PATH_UNIQUE)?.onLayerOpacityChanged((sender, payload) => {
+        cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onLayerOpacityChanged((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${payload.layerPath} opacity changed to ${payload.opacity}`);
         });
 
         // listen to layer filter applied event
-        cgpv.api.maps.Map1.layer.getGeoviewLayerHybrid(LYR_PATH_UNIQUE)?.onLayerFilterApplied((sender, payload) => {
+        cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onLayerFilterApplied((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`Filter ${payload.filter} applied to ${payload.layerPath}`);
         });
 

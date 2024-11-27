@@ -138,7 +138,7 @@ export abstract class AbstractLayerSet {
           }
 
           // Get the layer
-          const layer = this.layerApi.getGeoviewLayerHybrid(layerConfig.layerPath);
+          const layer = this.layerApi.getGeoviewLayer(layerConfig.layerPath);
 
           // If the layer could be found
           if (layer) {
@@ -228,7 +228,7 @@ export abstract class AbstractLayerSet {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     // Override this function to perform registration condition logic in the inherited classes
     // By default, a layer-set always registers layers except when they are group layers
-    if (this.layerApi.getGeoviewLayerHybrid(layerPath)?.getLayerConfig(layerPath)?.entryType === 'group') {
+    if (this.layerApi.getGeoviewLayer(layerPath)?.getLayerConfig()?.entryType === 'group') {
       // Skip groups
       return false;
     }
@@ -277,7 +277,7 @@ export abstract class AbstractLayerSet {
     this.onUnregisterLayerConfig(this.layerApi.getLayerEntryConfig(layerPath));
 
     // Call the unregistration function for the layer-set. This method is different for each child.
-    this.onUnregisterLayer(this.layerApi.getGeoviewLayerHybrid(layerPath));
+    this.onUnregisterLayer(this.layerApi.getGeoviewLayer(layerPath));
 
     // Delete from the store
     this.onDeleteFromStore(layerPath);

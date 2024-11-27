@@ -531,7 +531,10 @@ export class MapViewer {
           'registered',
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
           (geoviewLayer) => {
-            logger.logTraceDetailed('checkMapReady - 1 - waiting on layer registration...', geoviewLayer.geoviewLayerId);
+            logger.logTraceDetailed(
+              'checkMapReady - 1 - waiting on layer registration...',
+              geoviewLayer.getLayerConfig().geoviewLayerConfig.geoviewLayerId
+            );
           }
         );
 
@@ -683,7 +686,10 @@ export class MapViewer {
           'processed',
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
           (geoviewLayer) => {
-            logger.logTraceDetailed('checkMapReady - 2 - waiting on layer processed...', geoviewLayer.geoviewLayerId);
+            logger.logTraceDetailed(
+              'checkMapReady - 2 - waiting on layer processed...',
+              geoviewLayer.getLayerConfig().geoviewLayerConfig.geoviewLayerId
+            );
           }
         );
 
@@ -720,7 +726,10 @@ export class MapViewer {
           'loaded',
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
           (geoviewLayer) => {
-            logger.logTraceDetailed('checkMapReady - 3 - waiting on layer loaded/error status...', geoviewLayer.geoviewLayerId);
+            logger.logTraceDetailed(
+              'checkMapReady - 3 - waiting on layer loaded/error status...',
+              geoviewLayer.getLayerConfig().geoviewLayerConfig.geoviewLayerId
+            );
           }
         );
 

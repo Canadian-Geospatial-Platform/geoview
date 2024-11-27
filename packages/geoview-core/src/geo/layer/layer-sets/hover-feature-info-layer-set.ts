@@ -106,7 +106,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       if (!this.resultSet[layerPath].eventListenerEnabled) return;
 
       // Get the layer config and layer associated with the layer path
-      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
+      const layer = this.layerApi.getGeoviewLayer(layerPath);
 
       // If layer was found
       if (layer && (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer)) {
