@@ -30,18 +30,6 @@ const multipleHtmlPluginsSamples = glob.sync('./public/templates/*.html').map((n
   });
 });
 
-// inject all layer files
-const multipleHtmlPluginsLayers = glob.sync('./public/templates/layers/*.html').map((name) => {
-  return new HtmlWebpackPlugin({
-    template: `${name}`,
-    filename: `${name.substring(name.lastIndexOf('/') + 1, name.length)}`,
-    title: 'Canadian Geospatial Platform Viewer',
-    inject: 'head',
-    scriptLoading: 'blocking',
-    chunks: ['cgpv-main'],
-  });
-});
-
 // inject all demos files
 const multipleHtmlPluginsDemos = glob.sync('./public/templates/demos/*.html').map((name) => {
   return new HtmlWebpackPlugin({
@@ -183,7 +171,6 @@ const config = {
         { from: './public/plugins', to: 'plugins', noErrorOnMissing: true },
         { from: './public/favicon.ico' },
         { from: './public/templates/codedoc.js' },
-        { from: './public/templates/layers/layerlib.js' },
       ],
     }),
     new webpack.BannerPlugin({
@@ -202,7 +189,6 @@ const config = {
     }),
   ]
     .concat(multipleHtmlPluginsSamples)
-    .concat(multipleHtmlPluginsLayers)
     .concat(multipleHtmlPluginsDemos)
     .concat(multipleHtmlPluginsOutliers),
 };

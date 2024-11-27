@@ -35,6 +35,19 @@
             "layerName": "Current Conditions"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "wfsLYR4",
+        "geoviewLayerName": "USGS mrds bbox strategy",
+        "metadataAccessPath": "https://mrdata.usgs.gov/services/wfs/mrds?request=GetCapabilities&service=WFS&version=1.1.0",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "mrds",
+            "source": { "strategy": "bbox" },
+            "layerName": "USGS mrds"
+          }
+        ]
       }
     ]
   },

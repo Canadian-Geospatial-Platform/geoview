@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -91,6 +91,9 @@
       <option value="3978">LCC (3978)</option>
     </select>
     <button type="button" onclick="reloadMap()">Set Projection</button>
+
+    <button class="collapsible active">Layers Status</button>
+    <pre id="mapWM-state" class="panel map-title-holder"></pre>
 
     <div
       id="mapWM"
@@ -289,6 +292,8 @@
         document.getElementById('selectService').addEventListener('change', (e) => {
           initTableFields();
         });
+
+        listenToLegendLayerSetChanges('mapWM-state', 'mapWM');
       });
 
       // create snippets
