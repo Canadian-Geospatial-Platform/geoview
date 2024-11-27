@@ -4,7 +4,6 @@ import {
   TimeSliderLayerSet,
   TypeTimeSliderValues,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
@@ -123,16 +122,16 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   static getInitialTimeSliderValues(mapId: string, layerConfig: TypeLayerEntryConfig): TypeTimeSliderValues | undefined {
     // Get the layer using the map event processor, If no temporal dimension OR layerPath, return undefined
     if (!layerConfig.layerPath) return undefined;
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerConfig.layerPath)!;
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerConfig.layerPath)!;
 
     // If a group
     if (layerEntryIsGroupLayer(layerConfig)) return undefined;
 
     // Cast the layer
-    const geoviewLayerCasted = geoviewLayer as AbstractGeoViewLayer | AbstractGVLayer;
+    const geoviewLayerCasted = geoviewLayer as AbstractGVLayer | AbstractGVLayer;
 
     // Get the temporal dimension information
-    const temporalDimensionInfo = geoviewLayerCasted.getTemporalDimension(layerConfig.layerPath);
+    const temporalDimensionInfo = geoviewLayerCasted.getTemporalDimension();
 
     // If no temporal dimension information
     if (!temporalDimensionInfo || !temporalDimensionInfo.range) return undefined;
@@ -259,7 +258,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     values: number[]
   ): void {
     // Get the layer using the map event processor
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath)!;
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)!;
 
     let filter: string;
     if (geoviewLayer instanceof WMS || geoviewLayer instanceof GVWMS) {
