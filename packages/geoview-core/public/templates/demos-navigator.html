@@ -147,7 +147,9 @@
           <option value="./configs/navigator/23-csv.json">Layer - CSV -</option>
           <option value="./configs/navigator/24-vector-tile.json">Layer - Vector Tile -</option>
           <option value="./configs/navigator/25-geojson-multi.json">Layer - GeoJSON MutiPolygon -</option>
-          <option value="./configs/navigator/27-geocore-custom.json">Layer - GeoCore Custom Config -</option>
+          <option value="./configs/navigator/28-geocore.json">Layer GeoView - GeoCore -</option>
+          <option value="./configs/navigator/27-geocore-custom.json">Layer GeoView - GeoCore Custom Config -</option>
+          <option value="./configs/navigator/29-geopackages.json">Layer GeoView - GeoPackages -</option>
         </select>
       </div>
     </div>
@@ -180,6 +182,9 @@
       </div>
     </div>
     <hr />
+
+    <button type="button" class="collapsible">Layers Status</button>
+    <pre id="sandboxMap-state" class="panel map-title-holder"></pre>
 
     <div id="mapSection">
       <div id="sandboxMap"></div>
@@ -222,7 +227,8 @@
         // wait until map is removed before recreating it
         setTimeout(() => {
           // create map
-          cgpv.api.createMapFromConfig('sandboxMap', e.target.value, 800);
+          cgpv.api.createMapFromConfig('sandboxMap', e.target.value, 800)
+            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'sandboxMap'));
         }, 1500);
 
         // fetch JSON config file to show in the text are section

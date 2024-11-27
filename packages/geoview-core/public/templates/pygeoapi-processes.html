@@ -107,12 +107,6 @@
       </tr>
     </tbody>
   </table>
-  <button type="button" class="collapsible">Visibility and filters</button>
-  <pre id="layer5-buttons-pre" class="panel"></pre>
-  <button class="collapsible">Get Legend</button>
-  <pre id="geojsonLegendsId-table-pre" class="panel"></pre>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="geoJsonResultSetId-click" class="panel">Click on feature on the map</pre>
   <hr />
   <p>This map has an empty configuration. You can add a GeoJSON layer by clicking the buttons.</p>
   <button type="button" class="collapsible">Configuration Snippet</button>
@@ -123,27 +117,9 @@
   <pre id="codeSnippet" class="panel"></pre>
 
   <script src="codedoc.js"></script>
-  <script src="layerlib.js"></script>
   <script>
-    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init((mapId) => {
-      if (mapId === 'LYR5') {
-        // Wire a handle when all queries done after a map click
-        cgpv.api.maps['LYR5'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
-          const { coordinate, resultSet, eventType } = payload;
-          createInfoTable('LYR5', 'geoJsonResultSetId', resultSet, eventType);
-        });
-        cgpv.api.maps['LYR5'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
-          const { resultSet } = payload;
-          displayLegend('geojsonLegendsId', resultSet);
-        });
-      }
-    }, (mapId) => {
-      if (mapId === 'LYR5') {
-        // Layers are loaded
-        createTableOfFilter('LYR5');
-      }
-    });
+    // // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init((mapId) => {});
 
     // GeoMetButton============================================================================================================
     // find the button element by ID
@@ -153,8 +129,6 @@
     addGeoJSONButton.addEventListener('click', async () => {
       const layerPath = document.getElementById('GeoMet-New-Layer-Id-Label').innerText;
       if (layerPath) cgpv.api.maps['LYR5'].layer.removeLayerUsingPath(layerPath);
-      document.getElementById('GeoMet-New-Layer-Id-Label').innerText = '';
-      createTableOfFilter('LYR5');
 
       // adding a geojson layer requires a type of geojson and url
       const lat = document.getElementById('GeoMet-Lat-Input').value;
@@ -186,9 +160,6 @@
 
       // Wait for the full response
       await addResult.promiseLayer;
-
-      document.getElementById('GeoMet-New-Layer-Id-Label').innerText = addResult.layer.geoviewLayerId;
-      createTableOfFilter('LYR5');
     });
 
     // HydroButton============================================================================================================
@@ -199,8 +170,6 @@
     addGeoJSONButton.addEventListener('click', async () => {
       const layerPath = document.getElementById('Hydro-New-Layer-Id-Label').innerText;
       if (layerPath) cgpv.api.maps['LYR5'].layer.removeLayerUsingPath(layerPath);
-      document.getElementById('Hydro-New-Layer-Id-Label').innerText = '';
-      createTableOfFilter('LYR5');
 
       // adding a geojson layer requires a type of geojson and url
       const lat = document.getElementById('Hydro-Lat-Input').value;
@@ -232,9 +201,6 @@
 
       // Wait for the full response
       await addResult.promiseLayer;
-
-      document.getElementById('Hydro-New-Layer-Id-Label').innerText = addResult.layer.geoviewLayerId;
-      createTableOfFilter('LYR5');
     });
 
     // create snippets
@@ -244,5 +210,4 @@
     });
   </script>
 </body>
-
 </html>

@@ -172,6 +172,8 @@
       <h4 id="HLCONF1">Sanbox Map</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
+    <button type="button" class="collapsible">Layers Status</button>
+    <pre id="sandboxMap-state" class="panel map-title-holder"></pre>
     <div id="mapSection">
       <div id="sandboxMap"></div>
     </div>
@@ -182,7 +184,6 @@
     <pre id="codeSnippet" class="panel"></pre>
 
     <script src="codedoc.js"></script>
-
     <script>
       const isValid = false;
 
@@ -243,7 +244,8 @@
         // TODO: the delete has a timeout so we need to wait before trying to recreate the map...
         // TO.DOCONT: this should be cleaner
         setTimeout(() => {
-          cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value);
+          cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value)
+            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'sandboxMap'));
         }, 1500);
       });
 
@@ -352,7 +354,7 @@
               'corePackages': [],
               'theme': 'geo.ca'
         }`
-      );
+      ).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'sandboxMap'));
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
