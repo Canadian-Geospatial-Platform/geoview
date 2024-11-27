@@ -4,7 +4,6 @@ import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
-import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
@@ -34,7 +33,6 @@ import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { analyzeLayerFilter } from '@/geo/utils/renderer/geoview-renderer';
-import { AbstractGVVector } from '../../gv-layers/vector/abstract-gv-vector';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Projection } from '@/geo/utils/projection';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
@@ -335,9 +333,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // GV Layers Refactoring - Obsolete (this is bridging between config and layers, okay)
   protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource): VectorLayer<Feature> {
-    // Get the style label
-    const label = layerConfig.layerName || layerConfig.layerId;
-
     // GV Time to request an OpenLayers layer!
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source: vectorSource });
 
@@ -346,38 +341,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as VectorLayer<Feature>;
-    }
-
-    // If no olLayer was obtained
-    if (!olLayer) {
-      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
-      // Create the vector layer options.
-      const layerOptions: VectorLayerOptions<Feature, VectorSource> = {
-        properties: { layerConfig },
-        source: vectorSource,
-        style: (feature) => {
-          return AbstractGVVector.calculateStyleForFeature(
-            this,
-            feature,
-            label,
-            layerConfig.layerPath,
-            layerConfig.filterEquation,
-            layerConfig.legendFilterIsOff
-          );
-        },
-      };
-
-      if (layerConfig.initialSettings?.extent !== undefined) layerOptions.extent = layerConfig.initialSettings.extent;
-      if (layerConfig.initialSettings?.maxZoom !== undefined) layerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-      if (layerConfig.initialSettings?.minZoom !== undefined) layerOptions.minZoom = layerConfig.initialSettings.minZoom;
-      if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
-
-      // Create the OpenLayer layer
-      olLayer = new VectorLayer(layerOptions);
-
-      // Hook the loaded event
-      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'features');
-    }
+    } else throw new Error('Error on layerRequesting event');
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });

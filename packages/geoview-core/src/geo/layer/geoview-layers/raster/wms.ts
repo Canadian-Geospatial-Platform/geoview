@@ -6,7 +6,6 @@ import ImageLayer from 'ol/layer/Image';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import BaseLayer from 'ol/layer/Base';
-import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
@@ -552,31 +551,7 @@ export class WMS extends AbstractGeoViewRaster {
         if (requestResult.length > 0) {
           // Get the OpenLayer that was created
           olLayer = requestResult[0] as ImageLayer<ImageWMS>;
-        }
-
-        // If no olLayer was obtained
-        if (!olLayer) {
-          // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
-          const imageLayerOptions: ImageOptions<ImageWMS> = {
-            source,
-            properties: { layerCapabilities, layerConfig },
-          };
-          // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
-          if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
-          if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-          if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
-          if (layerConfig.initialSettings?.states?.opacity !== undefined)
-            imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
-          // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-          // GV            in the 'loading' state if the flag value is false.
-
-          // Create the OpenLayer layer
-          olLayer = new ImageLayer(imageLayerOptions);
-
-          // Hook the loaded event
-          this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
-        }
+        } else throw new Error('Error on layerRequesting event');
 
         // GV Time to emit about the layer creation!
         this.emitLayerCreation({ config: layerConfig, layer: olLayer });

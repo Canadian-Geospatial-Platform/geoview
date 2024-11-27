@@ -1,7 +1,6 @@
 import BaseLayer from 'ol/layer/Base';
 import TileLayer from 'ol/layer/Tile';
 import VectorTileLayer from 'ol/layer/VectorTile';
-import { Options as TileOptions } from 'ol/layer/BaseTile';
 import VectorTileSource, { Options as SourceOptions } from 'ol/source/VectorTile';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import { Extent } from 'ol/extent';
@@ -213,30 +212,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as VectorTileLayer<VectorTileSource>;
-    }
-
-    // If no olLayer was obtained
-    if (!olLayer) {
-      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
-      const tileLayerOptions: TileOptions<VectorTileSource> = { source };
-      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-      if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
-      if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings.extent;
-      if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-      if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
-      if (layerConfig.initialSettings?.states?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
-      // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-      // GV            in the 'loading' state if the flag value is false.
-
-      // TODO remove after demoing again
-      const declutter = this.mapId !== 'LYR2';
-
-      // Create the OpenLayer layer
-      olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
-
-      // Hook the loaded event
-      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'tile');
-    }
+    } else throw new Error('Error on layerRequesting event');
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });

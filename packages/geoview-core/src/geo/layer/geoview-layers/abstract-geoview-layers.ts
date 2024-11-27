@@ -33,7 +33,6 @@ import {
   TypeLayerStatus,
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
-  TypeLoadEndListenerType,
   TypeFeatureInfoEntry,
   codedValueType,
   rangeDomainType,
@@ -43,7 +42,6 @@ import {
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { LayerApi } from '../layer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
 
@@ -1460,49 +1458,6 @@ export abstract class AbstractGeoViewLayer {
 
     // Resolve successfully, otherwise an exception has been thrown already
     return Promise.resolve();
-  }
-
-  /**
-   * The olLayerAndLoadEndListeners setter method for the ConfigBaseClass class and its descendant classes.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration we are creating a layer for.
-   * @param {BaseLayer} olLayer - The OpenLayer we are creating
-   * @param {TypeLoadEndListenerType} listenerType - The layer listener type.
-   */
-  setLayerAndLoadEndListeners(layerConfig: AbstractBaseLayerEntryConfig, olLayer: BaseLayer, listenerType: TypeLoadEndListenerType): void {
-    // Precond:
-    if (!olLayer) throw new Error(`An OpenLayer must be provided to register listeners. Layer path ${layerConfig.layerPath}`);
-    if (!listenerType) throw new Error(`A listenerType must be provided to register listeners. Layer path ${layerConfig.layerPath}`);
-
-    // If in old LAYERS_HYBRID_MODE (in the new LAYERS_HYBRID_MODE we want the new classes to handle that)
-    if (!LayerApi.LAYERS_HYBRID_MODE) {
-      // Group layers have no listener
-      if (layerConfig.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) {
-        let loadErrorListener: () => void;
-
-        // Definition of the load end listener functions
-        const loadEndListener = (): void => {
-          // Call the overridable loaded function
-          this.onLoaded(layerConfig);
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (olLayer.get('source') as any).un(`${listenerType}loaderror`, loadErrorListener);
-        };
-
-        loadErrorListener = (): void => {
-          // Call the overridable error function
-          this.onError(layerConfig);
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (olLayer.get('source') as any).un(`${listenerType}loadend`, loadEndListener);
-        };
-
-        // Activation of the load end listeners
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (olLayer.get('source') as any).once(`${listenerType}loaderror`, loadErrorListener);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (olLayer.get('source') as any).once(`${listenerType}loadend`, loadEndListener);
-      }
-    }
   }
 
   /**

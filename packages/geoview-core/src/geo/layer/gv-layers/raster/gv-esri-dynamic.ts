@@ -309,10 +309,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   static #countFieldOfTheSameValue(styleSettings: TypeLayerStyleSettings): TypeFieldOfTheSameValue[][] {
     return styleSettings.info.reduce<TypeFieldOfTheSameValue[][]>(
       (counter, styleEntry): TypeFieldOfTheSameValue[][] => {
-        if (
-          (styleEntry.visible === false && styleSettings.info[styleSettings.info.length - 1].visible !== false) ||
-          (styleEntry.visible !== false && styleSettings.info[styleSettings.info.length - 1].visible === false)
-        ) {
+        if (styleEntry.visible !== false) {
           styleEntry.values.forEach((styleValue, i) => {
             const valueExist = counter[i].find((counterEntry) => counterEntry.value === styleValue);
             if (valueExist) valueExist.nbOccurence++;
@@ -547,10 +544,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   ): TypeQueryTree {
     const queryTree: TypeQueryTree = [];
     styleSettings.info.forEach((styleEntry) => {
-      if (
-        (styleEntry.visible === false && styleSettings.info[styleSettings.info.length - 1].visible !== false) ||
-        (styleEntry.visible !== false && styleSettings.info[styleSettings.info.length - 1].visible === false)
-      ) {
+      if (styleEntry.visible !== false) {
         let levelToSearch = queryTree;
         for (let i = 0; i < fieldOrder.length; i++) {
           if (fieldOfTheSameValue[fieldOrder[i]].find((field) => field.value === styleEntry.values[fieldOrder[i]])) {

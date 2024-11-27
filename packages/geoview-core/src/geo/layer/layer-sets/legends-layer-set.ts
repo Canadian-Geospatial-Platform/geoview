@@ -135,8 +135,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
    */
   #checkQueryLegend(layerPath: string, forced: boolean): void {
     // Get the layer
-    const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
-    const layerConfig = layer?.getLayerConfig(layerPath);
+    const layer = this.layerApi.getGeoviewLayer(layerPath);
+    const layerConfig = layer?.getLayerConfig();
 
     // If the layer legend should be queried (and not already querying).
     // GV Gotta make sure that we're not already querying, because EsriImage layers, for example, adjust the

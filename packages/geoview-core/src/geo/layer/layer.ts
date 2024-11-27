@@ -164,11 +164,6 @@ export class LayerApi {
   // Maximum time duration to wait when registering a layer for the time slider
   static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
 
-  // ************************************************************
-  // INDICATES IF USING HYBRID MODE WITH THE NEW GVLAYERS CLASSES
-  // ************************************************************
-  static LAYERS_HYBRID_MODE = true;
-
   /**
    * Initializes layer types and listen to add/remove layer events from outside
    * @param {MapViewer} mapViewer - A reference to the map viewer
@@ -195,99 +190,29 @@ export class LayerApi {
 
   /**
    * Gets the GeoView Layer Ids.
-   * Note: those are different than the layer paths.
-   * @returns {string[]} The GeoView Layer Ids
+   * @returns The ids of the new Geoview Layers
    */
   getGeoviewLayerIds(): string[] {
-    return Object.keys(this.#geoviewLayers);
+    return Object.keys(this.#gvLayers);
   }
 
   /**
    * Gets all GeoView Layers
-   * @returns {AbstractGeoViewLayer[]} The GeoView Layers
+   * @returns The list of new Geoview Layers
    */
-  getGeoviewLayers(): AbstractGeoViewLayer[] {
-    return Object.values(this.#geoviewLayers);
+  getGeoviewLayers(): AbstractBaseLayer[] {
+    return Object.values(this.#gvLayers);
   }
 
   /**
    * Returns the GeoView instance associated to the layer path.
    * The first element of the layerPath is the geoviewLayerId and this function will
    * work with either the geoViewLayerId or the layerPath.
-   * @param {string} layerPath - The layer path (or in this case the geoviewLayerId) of the layer's configuration.
-   * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
-   */
-  getGeoviewLayer(layerPath: string): AbstractGeoViewLayer | undefined {
-    // TODO: Refactor - This function will be replaced to return the new layer classes model
-    // The first element of the layerPath is the geoviewLayerId
-    return this.#geoviewLayers[layerPath.split('/')[0]];
-  }
-
-  /**
-   * Temporary new function for migration purposes, replacing getGeoviewLayerIds
-   * @returns The ids of the new Geoview Layers
-   */
-  getGeoviewLayerIdsNew(): string[] {
-    return Object.keys(this.#gvLayers);
-  }
-
-  /**
-   * Temporary new function for migration purposes, replacing getGeoviewLayers
-   * @returns The list of new Geoview Layers
-   */
-  getGeoviewLayersNew(): AbstractBaseLayer[] {
-    return Object.values(this.#gvLayers);
-  }
-
-  /**
-   * New function for migration purposes, replacing getGeoviewLayer
    * @param {string} layerPath - The layer path
    * @returns The new Geoview Layer
    */
-  getGeoviewLayerNew(layerPath: string): AbstractBaseLayer | undefined {
+  getGeoviewLayer(layerPath: string): AbstractBaseLayer | undefined {
     return this.#gvLayers[layerPath];
-  }
-
-  /**
-   * Hybrid function for migration purposes, bridging the gap between getGeoviewLayer and getGeoviewLayerNew
-   * @param {string} layerPath - The layer path
-   * @returns The new Geoview Layer
-   */
-  getGeoviewLayerIdsHybrid(): string[] {
-    // TODO: Refactor - This function will be replaced to jump to the new layer classes model
-    // If new mode
-    if (LayerApi.LAYERS_HYBRID_MODE) return this.getGeoviewLayerIdsNew();
-
-    // Old mode
-    return this.getGeoviewLayerIds();
-  }
-
-  /**
-   * Hybrid function for migration purposes, bridging the gap between getGeoviewLayer and getGeoviewLayerNew
-   * @param {string} layerPath - The layer path
-   * @returns The new Geoview Layer
-   */
-  getGeoviewLayersHybrid(): AbstractGeoViewLayer[] | AbstractBaseLayer[] {
-    // TODO: Refactor - This function will be replaced to jump to the new layer classes model
-    // If new mode
-    if (LayerApi.LAYERS_HYBRID_MODE) return this.getGeoviewLayersNew();
-
-    // Old mode
-    return this.getGeoviewLayers();
-  }
-
-  /**
-   * Hybrid function for migration purposes, bridging the gap between getGeoviewLayer and getGeoviewLayerNew
-   * @param {string} layerPath - The layer path
-   * @returns The new Geoview Layer or the old Geoview Layer
-   */
-  getGeoviewLayerHybrid(layerPath: string): AbstractGeoViewLayer | AbstractBaseLayer | undefined {
-    // TODO: Refactor - This function will be replaced to jump to the new layer classes model
-    // If new mode
-    if (LayerApi.LAYERS_HYBRID_MODE) return this.getGeoviewLayerNew(layerPath);
-
-    // Old mode
-    return this.getGeoviewLayer(layerPath);
   }
 
   /**
@@ -348,11 +273,8 @@ export class LayerApi {
    * @returns {BaseLayer} Returns the geoview instance associated to the layer path.
    */
   getOLLayer(layerPath: string): BaseLayer | undefined {
-    // If new mode, get the OpenLayer layer as part of the new GVLayer design
-    if (LayerApi.LAYERS_HYBRID_MODE) return this.getGeoviewLayerNew(layerPath)?.getOLLayer();
-
-    // Old mode, get the OpenLayer layer stored in the dictionary
-    return this.#olLayers[layerPath];
+    // Get the OpenLayer layer as part of the new GVLayer design
+    return this.getGeoviewLayer(layerPath)?.getOLLayer();
   }
 
   /**
@@ -766,24 +688,18 @@ export class LayerApi {
         // Log
         logger.logDebug(`Requesting layer for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
 
-        // If new layers mode, create the corresponding GVLayer
-        if (LayerApi.LAYERS_HYBRID_MODE) {
-          const gvLayer = this.#createGVLayer(this.getMapId(), geoviewLayer, event.source, event.config, event.extraConfig);
-
-          // If found the GV layer
-          if (gvLayer) {
-            // Register a hook when a layer is loaded on the map
+        // Create the corresponding GVLayer
+        const gvLayer = this.#createGVLayer(this.getMapId(), geoviewLayer, event.source, event.config, event.extraConfig);
+        if (gvLayer) {
+          // Register a hook when a layer is loaded on the map
             gvLayer!.onIndividualLayerLoaded((sender, payload) => {
               // Log
               logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
               this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
             });
-            return gvLayer.getOLLayer();
-          }
+          return gvLayer.getOLLayer();
         }
-
-        // Don't provide any layer, working in old mode
-        return undefined;
+        throw new Error('Error, no corresponding GV layer');
       });
 
       // Register hook when an OpenLayer layer has been created
@@ -795,13 +711,10 @@ export class LayerApi {
         // This is tempting to put in the onLayerRequesting handler, but this one here also traps the LayerGroups
         this.#olLayers[event.config.layerPath] = event.layer;
 
-        // If new layers mode, create the corresponding GVLayer
-        if (LayerApi.LAYERS_HYBRID_MODE) {
-          // If group layer was created
-          if (event.layer instanceof LayerGroup && event.config instanceof GroupLayerEntryConfig) {
-            // Create the GV Group Layer
-            this.#createGVGroupLayer(this.getMapId(), event.layer, event.config);
-          }
+        // Create the corresponding GVLayer. If group layer was created
+        if (event.layer instanceof LayerGroup && event.config instanceof GroupLayerEntryConfig) {
+          // Create the GV Group Layer
+          this.#createGVGroupLayer(this.getMapId(), event.layer, event.config);
         }
       });
 
@@ -921,63 +834,57 @@ export class LayerApi {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     extraConfig?: any
   ): AbstractGVLayer | undefined {
-    // If new mode
-    let metadata;
-    let layerMetadata;
-    let timeDimension;
-    let style;
-    if (LayerApi.LAYERS_HYBRID_MODE) {
-      // Get the metadata and the time dimension information as processed
-      metadata = geoviewLayer.metadata;
-      layerMetadata = geoviewLayer.getLayerMetadata(layerConfig.layerPath);
-      timeDimension = geoviewLayer.getTemporalDimension(layerConfig.layerPath);
-      style = geoviewLayer.getStyle(layerConfig.layerPath);
+    // Get the metadata and the time dimension information as processed
+    // GV: We use the old abstractGeoviewLayer format as the GV layer is not created yet
+    const { metadata } = geoviewLayer;
+    const layerMetadata = geoviewLayer.getLayerMetadata(layerConfig.layerPath);
+    const timeDimension = geoviewLayer.getTemporalDimension(layerConfig.layerPath);
+    const style = geoviewLayer.getStyle(layerConfig.layerPath);
 
-      // HACK: INJECT CONFIGURATION STUFF PRETENDNG THEY WERE PROCESSED
-      // GV Keep this code commented in the source base for now
-      // if (layerConfig.layerPath === 'esriFeatureLYR5/0') {
-      //   metadata = LayerMockup.configTop100Metadata();
-      // } else if (layerConfig.layerPath === 'nonmetalmines/5') {
-      //   metadata = LayerMockup.configNonMetalMetadata();
-      // } else if (layerConfig.layerPath === 'airborne_radioactivity/1') {
-      //   metadata = LayerMockup.configAirborneMetadata();
-      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/polygons.json') {
-      //   metadata = LayerMockup.configPolygonsMetadata();
-      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/lines.json') {
-      //   metadata = LayerMockup.configLinesMetadata();
-      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/icon_points.json') {
-      //   metadata = LayerMockup.configIconPointsMetadata();
-      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points.json') {
-      //   metadata = LayerMockup.configPointsMetadata();
-      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_1.json') {
-      //   metadata = LayerMockup.configPoints1Metadata();
-      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_2.json') {
-      //   metadata = LayerMockup.configPoints2Metadata();
-      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_3.json') {
-      //   metadata = LayerMockup.configPoints3Metadata();
-      // } else if (layerConfig.layerPath === 'historical-flood/0') {
-      //   metadata = LayerMockup.configHistoricalFloodMetadata();
-      //   timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-      // } else if (layerConfig.layerPath === 'uniqueValueId/1') {
-      //   metadata = LayerMockup.configCESIMetadata();
-      //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-      // } else if (layerConfig.layerPath === 'esriFeatureLYR1/0') {
-      //   metadata = LayerMockup.configTemporalTestBedMetadata();
-      //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-      // } else if (layerConfig.layerPath === 'wmsLYR1-spatiotemporel/RADAR_1KM_RSNO') {
-      //   metadata = LayerMockup.configRadarMetadata();
-      //   timeDimension = LayerMockup.configRadarTemporalDimension();
-      // } else if (layerConfig.layerPath === 'MSI/msi-94-or-more') {
-      //   metadata = LayerMockup.configMSIMetadata();
-      //   timeDimension = LayerMockup.configMSITemporalDimension();
-      // }
+    // HACK: INJECT CONFIGURATION STUFF PRETENDNG THEY WERE PROCESSED
+    // GV Keep this code commented in the source base for now
+    // if (layerConfig.layerPath === 'esriFeatureLYR5/0') {
+    //   metadata = LayerMockup.configTop100Metadata();
+    // } else if (layerConfig.layerPath === 'nonmetalmines/5') {
+    //   metadata = LayerMockup.configNonMetalMetadata();
+    // } else if (layerConfig.layerPath === 'airborne_radioactivity/1') {
+    //   metadata = LayerMockup.configAirborneMetadata();
+    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/polygons.json') {
+    //   metadata = LayerMockup.configPolygonsMetadata();
+    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/lines.json') {
+    //   metadata = LayerMockup.configLinesMetadata();
+    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/icon_points.json') {
+    //   metadata = LayerMockup.configIconPointsMetadata();
+    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points.json') {
+    //   metadata = LayerMockup.configPointsMetadata();
+    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_1.json') {
+    //   metadata = LayerMockup.configPoints1Metadata();
+    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_2.json') {
+    //   metadata = LayerMockup.configPoints2Metadata();
+    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_3.json') {
+    //   metadata = LayerMockup.configPoints3Metadata();
+    // } else if (layerConfig.layerPath === 'historical-flood/0') {
+    //   metadata = LayerMockup.configHistoricalFloodMetadata();
+    //   timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
+    // } else if (layerConfig.layerPath === 'uniqueValueId/1') {
+    //   metadata = LayerMockup.configCESIMetadata();
+    //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
+    // } else if (layerConfig.layerPath === 'esriFeatureLYR1/0') {
+    //   metadata = LayerMockup.configTemporalTestBedMetadata();
+    //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
+    // } else if (layerConfig.layerPath === 'wmsLYR1-spatiotemporel/RADAR_1KM_RSNO') {
+    //   metadata = LayerMockup.configRadarMetadata();
+    //   timeDimension = LayerMockup.configRadarTemporalDimension();
+    // } else if (layerConfig.layerPath === 'MSI/msi-94-or-more') {
+    //   metadata = LayerMockup.configMSIMetadata();
+    //   timeDimension = LayerMockup.configMSITemporalDimension();
+    // }
 
-      // If good config
-      if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
-        // If any metadata
-        if (metadata) layerConfig.setServiceMetadata(metadata);
-        if (layerMetadata) layerConfig.setLayerMetadata(layerMetadata);
-      }
+    // If good config
+    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
+      // If any metadata
+      if (metadata) layerConfig.setServiceMetadata(metadata);
+      if (layerMetadata) layerConfig.setLayerMetadata(layerMetadata);
     }
 
     // Create the right GV Layer based on the OLLayer and config type
@@ -1140,7 +1047,7 @@ export class LayerApi {
     try {
       // Wait until the layer is loaded (or processed?)
       await whenThisThen(() => layerConfig.isGreaterThanOrEqualTo('processed'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
-      const geoviewLayer = this.getGeoviewLayerHybrid(layerConfig.layerPath);
+      const geoviewLayer = this.getGeoviewLayer(layerConfig.layerPath);
 
       // If the layer is loaded AND flag is true to use time dimension, continue
       if ((geoviewLayer instanceof AbstractGeoViewLayer || geoviewLayer instanceof AbstractGVLayer) && geoviewLayer.getIsTimeAware()) {
@@ -1226,14 +1133,14 @@ export class LayerApi {
   checkLayerStatus(
     status: TypeLayerStatus,
     layerEntriesToCheck: MapConfigLayerEntry[] | undefined,
-    callbackNotGood?: (geoviewLayer: AbstractGeoViewLayer) => void
+    callbackNotGood?: (geoviewLayer: AbstractBaseLayer) => void
   ): [boolean, number] {
     // If no layer entries at all or there are layer entries and there are geoview layers to check
     let allGood = layerEntriesToCheck?.length === 0 || Object.keys(this.#geoviewLayers).length > 0;
 
     // For each registered layer entry
     this.getGeoviewLayers().forEach((geoviewLayer) => {
-      const layerIsGood = geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo(status);
+      const layerIsGood = ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo(status, [geoviewLayer.getLayerConfig()]);
       if (!layerIsGood) {
         // Callback about it
         callbackNotGood?.(geoviewLayer);
@@ -1278,7 +1185,7 @@ export class LayerApi {
     // FIX.MECONT: Therefore, this can't remove the layers that failed due to for example bad metadataUrl.
     // FIX.MECONT: To effectively remove all layers in the UI boxes, this removal process should be using the 'LayerConfigs' (and the layer paths). Not the 'Layer' classes.
     // For each Geoview layers
-    this.getGeoviewLayersHybrid().forEach((geoviewLayer) => {
+    this.getGeoviewLayers().forEach((geoviewLayer) => {
       // Remove it
       this.removeLayerUsingPath(geoviewLayer.getGeoviewLayerId());
     });
@@ -1371,28 +1278,27 @@ export class LayerApi {
    */
   highlightLayer(layerPath: string): void {
     this.removeHighlightLayer();
-    const theLayerMain = this.getGeoviewLayerHybrid(layerPath);
+    const theLayerMain = this.getGeoviewLayer(layerPath);
 
-    this.#highlightedLayer = { layerPath, originalOpacity: theLayerMain?.getOpacity(layerPath) };
-    theLayerMain?.setOpacity(1, layerPath);
+    this.#highlightedLayer = { layerPath, originalOpacity: theLayerMain?.getOpacity() };
+    theLayerMain?.setOpacity(1);
 
     // If it is a group layer, highlight sublayers
     if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath])) {
       Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
-        // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-        const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath);
+        const theLayer = this.getGeoviewLayer(registeredLayerPath)!;
         if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
-          const otherOpacity = theLayer?.getOpacity(registeredLayerPath);
-          theLayer?.setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
-        } else this.getOLLayer(registeredLayerPath)?.setZIndex(999);
+          const otherOpacity = theLayer.getOpacity();
+          theLayer.setOpacity((otherOpacity || 1) * 0.25);
+        } else this.getOLLayer(registeredLayerPath)!.setZIndex(999);
       });
     } else {
       Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
-        // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-        const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath);
+        const theLayer = this.getGeoviewLayer(registeredLayerPath)!;
+        // check for otherOlLayer is undefined. It would be undefined if a layer status is error
         if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
-          const otherOpacity = theLayer?.getOpacity(registeredLayerPath);
-          theLayer?.setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
+          const otherOpacity = theLayer.getOpacity();
+          theLayer.setOpacity((otherOpacity || 1) * 0.25);
         }
       });
       this.getOLLayer(layerPath)?.setZIndex(999);
@@ -1409,20 +1315,24 @@ export class LayerApi {
       if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath])) {
         Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-          const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath);
-          if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
-            const otherOpacity = theLayer?.getOpacity(registeredLayerPath);
-            theLayer?.setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
-          } else theLayer?.setOpacity(originalOpacity || 1, registeredLayerPath);
+          const theLayer = this.getGeoviewLayer(registeredLayerPath);
+          if (theLayer) {
+            if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
+              const otherOpacity = theLayer.getOpacity();
+              theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1);
+            } else theLayer.setOpacity(originalOpacity || 1);
+          }
         });
       } else {
         Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-          const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath);
-          if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
-            const otherOpacity = theLayer?.getOpacity(registeredLayerPath);
-            theLayer?.setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
-          } else theLayer?.setOpacity(originalOpacity || 1, registeredLayerPath);
+          const theLayer = this.getGeoviewLayer(registeredLayerPath);
+          if (theLayer) {
+            if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
+              const otherOpacity = theLayer.getOpacity();
+              theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1);
+            } else theLayer.setOpacity(originalOpacity || 1);
+          }
         });
       }
       MapEventProcessor.setLayerZIndices(this.getMapId());
@@ -1467,7 +1377,7 @@ export class LayerApi {
   refreshLayers(): void {
     // For each geoview layer
     this.getGeoviewLayers().forEach((geoviewLayer) => {
-      if (geoviewLayer.olRootLayer) this.refreshBaseLayer(geoviewLayer.olRootLayer);
+      if (geoviewLayer) this.refreshBaseLayer(geoviewLayer.getOLLayer());
     });
   }
 
@@ -1499,7 +1409,7 @@ export class LayerApi {
    */
   setItemVisibility(layerPath: string, item: TypeLegendItem, visibility: boolean, updateLegendLayers: boolean = true): void {
     // Get registered layer config
-    const layer = this.getGeoviewLayerHybrid(layerPath);
+    const layer = this.getGeoviewLayer(layerPath);
 
     if (visibility && !MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath)) {
       MapEventProcessor.setOrToggleMapLayerVisibility(this.getMapId(), layerPath, true);
@@ -1556,7 +1466,7 @@ export class LayerApi {
           // Go for it
           // eslint-disable-next-line no-param-reassign
           layerInfo.visible = newVisibility;
-          this.getGeoviewLayerHybrid(layerInfo.layerPath)?.setVisible(layerInfo.visible, layerInfo.layerPath);
+          this.getGeoviewLayer(layerInfo.layerPath)?.setVisible(layerInfo.visible);
           // Emit event
           this.#emitLayerVisibilityToggled({ layerPath: layerInfo.layerPath, visibility: layerInfo.visible });
         }
@@ -1573,7 +1483,7 @@ export class LayerApi {
       if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
         if (parentLayerInfo) {
           parentLayerInfo.visible = true;
-          this.getGeoviewLayerHybrid(parentLayerPath)?.setVisible(true, parentLayerPath);
+          this.getGeoviewLayer(parentLayerPath)?.setVisible(true);
 
           // Emit event
           this.#emitLayerVisibilityToggled({ layerPath: parentLayerPath, visibility: true });
@@ -1609,7 +1519,7 @@ export class LayerApi {
    */
   setLayerName(layerPath: string, name: string): void {
     // Get the layer
-    const layer = this.getGeoviewLayerHybrid(layerPath);
+    const layer = this.getGeoviewLayer(layerPath);
 
     // If found
     if (layer) {
@@ -1697,7 +1607,7 @@ export class LayerApi {
     // If a leaf
     if (!layerEntryIsGroupLayer(layerConfig)) {
       // Get the layer
-      const layer = this.getGeoviewLayerHybrid(layerConfig.layerPath);
+      const layer = this.getGeoviewLayer(layerConfig.layerPath) as AbstractGeoViewLayer | AbstractGVLayer;
 
       // If the layer is of right type (should be, because we checked if not a group)
       if (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer) {

@@ -30,7 +30,8 @@ export class GVVectorTiles extends AbstractGVVectorTile {
     AbstractGVVectorTile.initOptionsWithInitialSettings(tileLayerOptions, layerConfig);
 
     // Create and set the OpenLayer layer
-    this.olLayer = new VectorTileLayer({ ...tileLayerOptions });
+    const declutter = true;
+    this.olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
   }
 
   /**

@@ -1253,7 +1253,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath The path of the layer to apply filters to.
    */
   static applyLayerFilters(mapId: string, layerPath: string): void {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath);
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
     if (geoviewLayer) {
       if (
         geoviewLayer instanceof WMS ||
@@ -1282,7 +1282,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath The path for the layer to get filters from.
    */
   static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath);
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
     if (geoviewLayer) {
       const initialFilter = this.getInitialFilter(mapId, layerPath);
       const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
