@@ -285,6 +285,9 @@ export abstract class AbstractLayerSet {
     // Delete the result set for the layer path
     delete this.resultSet[layerPath];
 
+    // Remove layer path from registered layer paths
+    this.#registeredLayerLayerPaths = this.#registeredLayerLayerPaths.filter((registeredLayer) => registeredLayer !== layerPath);
+
     // Inform that the layer set has been updated
     this.onLayerSetUpdatedProcess(layerPath);
   }
