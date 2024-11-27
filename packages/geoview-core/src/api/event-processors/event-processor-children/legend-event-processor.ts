@@ -132,9 +132,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     objectIds: string[],
     outfield?: string
   ): Promise<Extent | undefined> | undefined {
-    return MapEventProcessor.getMapViewerLayerAPI(mapId)
-      .getGeoviewLayerHybrid(layerPath)
-      ?.getExtentFromFeatures(layerPath, objectIds, outfield);
+    return MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.getExtentFromFeatures(layerPath, objectIds, outfield);
   }
 
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
@@ -251,7 +249,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       if (!layerConfig) return;
 
       // Get the layer
-      const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(entryLayerPath);
+      const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(entryLayerPath);
 
       // Interpret the layer name the best we can
       const layerName =
@@ -556,7 +554,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath);
     if (layer) {
       layer.opacity = opacity;
-      MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath)?.setOpacity(opacity, layerPath);
+      MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.setOpacity(opacity);
       if (isChild) {
         layer.opacityFromParent = opacity;
       }

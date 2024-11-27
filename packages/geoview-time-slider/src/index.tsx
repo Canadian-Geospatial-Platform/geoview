@@ -139,18 +139,18 @@ class TimeSliderPlugin extends FooterPlugin {
         // TO.DOCONT: the later will override the plugin settings (can be tested by adding fake delays).
         // TO.DOCONT: If this Plugin has temporal dimension settings, for various layers, those should be set in synch with the layers
         // TO.DOCONT: using event listeners, not at Plugin creation.
-        this.mapViewer().layer.getGeoviewLayerHybrid(obj.layerPaths[0])?.setTemporalDimension(obj.layerPaths[0], timeDimension);
+        this.mapViewer().layer.getGeoviewLayer(obj.layerPaths[0])?.setTemporalDimension(timeDimension);
       }
 
       // Set override default value under time dimension if applicable
       if (obj.defaultValue) {
         const layerPath = obj.layerPaths[0];
-        const timeDimension = this.mapViewer().layer.getGeoviewLayerHybrid(layerPath)?.getTemporalDimension(layerPath);
+        const timeDimension = this.mapViewer().layer.getGeoviewLayer(layerPath)?.getTemporalDimension();
 
         if (timeDimension) {
           this.mapViewer()
             .layer.getGeoviewLayerHybrid(layerPath)
-            ?.setTemporalDimension(layerPath, {
+            ?.setTemporalDimension({
               ...timeDimension,
               default: obj.defaultValue,
             });
@@ -216,7 +216,7 @@ class TimeSliderPlugin extends FooterPlugin {
   #filterTimeSliderLayers(layerPaths: string[]): string[] {
     const filteredLayerPaths = layerPaths.filter((layerPath) => {
       // Return the temporal dimension for the layer if any
-      return this.mapViewer().layer.getGeoviewLayerHybrid(layerPath)?.getTemporalDimension(layerPath);
+      return this.mapViewer().layer.getGeoviewLayer(layerPath)?.getTemporalDimension();
     });
     return filteredLayerPaths;
   }

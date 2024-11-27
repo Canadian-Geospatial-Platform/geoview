@@ -2,7 +2,6 @@ import axios from 'axios';
 
 import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
 import BaseLayer from 'ol/layer/Base';
-import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import ImageLayer from 'ol/layer/Image';
 import { Extent } from 'ol/extent';
 
@@ -274,27 +273,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<Static>;
-    }
-
-    // If no olLayer was obtained
-    if (!olLayer) {
-      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
-      const staticImageOptions: ImageOptions<Static> = { source };
-      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-      if (layerConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerConfig.initialSettings.extent;
-      if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-      if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings.minZoom;
-      if (layerConfig.initialSettings?.states?.opacity !== undefined)
-        staticImageOptions.opacity = layerConfig.initialSettings.states.opacity;
-      // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-      // GV            in the 'loading' state if the flag value is false.
-
-      // Create the OpenLayer layer
-      olLayer = new ImageLayer(staticImageOptions);
-
-      // Hook the loaded event
-      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
-    }
+    } else throw new Error('Error on layerRequesting event');
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });
