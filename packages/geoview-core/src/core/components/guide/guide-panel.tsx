@@ -105,7 +105,7 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
         fullWidth={fullWidth}
         aria-label={t('guide.title')}
       >
-        <Box sx={sxClasses.rightPanelContainer} aria-label={t('guide.title')} className="guidebox-container">
+        <Box sx={sxClasses.rightPanelContainer} aria-label={t('guide.title') || ''} className="guidebox-container">
           <Box className="guideBox">{layersList[guideItemIndex]?.content}</Box>
         </Box>
       </Layout>

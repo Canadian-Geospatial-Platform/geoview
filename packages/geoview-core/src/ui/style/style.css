@@ -37,3 +37,9 @@ Hold viewer specific css not inside theme
 .guideBox p img {
   vertical-align: bottom;
 }
+
+/* smooth data table scrolling */
+.MuiTableContainer-root {
+  contain: paint;
+  will-change: transform;
+}
