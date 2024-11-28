@@ -563,7 +563,7 @@ export class LayerApi {
    * Refreshes GeoCore Layers
    * @returns {Promise<void>} A promise which resolves when done refreshing
    */
-  refreshGeocoreLayers(): Promise<void> {
+  reloadGeocoreLayers(): Promise<void> {
     const configs = this.getLayerEntryConfigs();
     const originalMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
     const promisesOfGeoCoreGeoviewLayers: Promise<TypeGeoviewLayerConfig[]>[] = [];
