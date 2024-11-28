@@ -586,6 +586,7 @@ export class LayerApi {
     return Promise.allSettled(promisesOfGeoCoreGeoviewLayers)
       .then((promisedLayers) => {
         promisedLayers
+          .filter((promise) => promise.status === 'fulfilled')
           .map((promise) => promise as PromiseFulfilledResult<TypeGeoviewLayerConfig[]>)
           .forEach((promise) => {
             promise.value.forEach((geoviewLayerConfig) => {
