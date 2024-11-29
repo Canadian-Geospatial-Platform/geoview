@@ -6,7 +6,6 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
-import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { MapEventProcessor } from './map-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
@@ -128,7 +127,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     if (layerEntryIsGroupLayer(layerConfig)) return undefined;
 
     // Cast the layer
-    const geoviewLayerCasted = geoviewLayer as AbstractGVLayer | AbstractGVLayer;
+    const geoviewLayerCasted = geoviewLayer as AbstractGVLayer;
 
     // Get the temporal dimension information
     const temporalDimensionInfo = geoviewLayerCasted.getTemporalDimension();
@@ -268,7 +267,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       } else {
         filter = `${field}=date '${defaultValue}'`;
       }
-    } else if (geoviewLayer instanceof EsriImage || geoviewLayer instanceof GVEsriImage) {
+    } else if (geoviewLayer instanceof GVEsriImage) {
       if (filtering) {
         filter = `time=${minAndMax[0]},${values[0]}`;
       } else {

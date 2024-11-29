@@ -11,19 +11,15 @@ import {
 } from '@/geo/map/map-schema-types';
 import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { AbstractGeoViewLayer, LayerNameChangedEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { LayerApi } from '@/geo/layer/layer';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { EsriDynamic } from '../geoview-layers/raster/esri-dynamic';
-import { AbstractGeoViewVector } from '../geoview-layers/vector/abstract-geoview-vector';
-import { WMS } from '../geoview-layers/raster/wms';
 import { GVEsriDynamic } from '../gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVVector } from '../gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '../gv-layers/raster/gv-wms';
-import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
+import { AbstractBaseLayer, LayerNameChangedEvent } from '../gv-layers/abstract-base-layer';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -56,7 +52,7 @@ export abstract class AbstractLayerSet {
   #boundHandleLayerStatusChanged: (config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) => void;
 
   // Keep a bounded reference to the handle layer status changed
-  #boundHandleLayerNameChanged: (layer: AbstractGeoViewLayer | AbstractBaseLayer, layerNameEvent: LayerNameChangedEvent) => void;
+  #boundHandleLayerNameChanged: (layer: AbstractBaseLayer, layerNameEvent: LayerNameChangedEvent) => void;
 
   /**
    * Constructs a new LayerSet instance.
@@ -142,8 +138,8 @@ export abstract class AbstractLayerSet {
 
           // If the layer could be found
           if (layer) {
-            // Register the layer itself (not the layer config) (recall the hybrid mode) automatically in the layer set
-            this.registerLayer(layer, layerConfig.layerPath).catch((error) => {
+            // Register the layer itself (not the layer config) automatically in the layer set
+            this.registerLayer(layer).catch((error) => {
               // Log
               logger.logPromiseFailed('in registerLayer in registerLayerConfig', error);
             });
@@ -191,44 +187,41 @@ export abstract class AbstractLayerSet {
 
   /**
    * Registers the layer in the layer-set.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    */
-  async registerLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): Promise<void> {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-
+  async registerLayer(layer: AbstractBaseLayer): Promise<void> {
     // Wait a maximum of 20 seconds for the layer to get to loaded state so that it can get registered, otherwise another attempt will have to be made
     // This await is important when devs call this method directly to register ad-hoc layers.
-    await whenThisThen(() => layer.getLayerStatus(layerPath) === 'loaded', 20000);
+    await whenThisThen(() => layer.getLayerStatus() === 'loaded', 20000);
 
     // If the layer is already registered, skip it, we don't register twice
-    if (this.#registeredLayerLayerPaths.includes(layerPath)) return;
+    if (this.#registeredLayerLayerPaths.includes(layer.getLayerPath())) return;
 
     // Update the registration of all layer sets
-    if (this.onRegisterLayerCheck(layer, layerPath)) {
+    if (this.onRegisterLayerCheck(layer)) {
       // Call the registration function for the layer-set. This method is different for each child.
-      this.onRegisterLayer(layer, layerPath);
+      this.onRegisterLayer(layer);
 
       // Call for propagation to the store upon registration
-      this.onPropagateToStore(this.resultSet[layerPath], 'layer-registration');
+      this.onPropagateToStore(this.resultSet[layer.getLayerPath()], 'layer-registration');
 
       // Inform that the layer set has been updated
-      this.onLayerSetUpdatedProcess(layerPath);
+      this.onLayerSetUpdatedProcess(layer.getLayerPath());
     }
   }
 
   /**
    * An overridable registration condition function for a layer-set to check if the registration
    * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    * @returns {boolean} True if the layer should be registered, false otherwise
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
-  protected onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  protected onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Override this function to perform registration condition logic in the inherited classes
     // By default, a layer-set always registers layers except when they are group layers
-    if (this.layerApi.getGeoviewLayer(layerPath)?.getLayerConfig()?.entryType === 'group') {
+    if (layer.getLayerConfig()?.entryType === 'group') {
       // Skip groups
       return false;
     }
@@ -240,24 +233,23 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable registration function for a layer-set that the registration process will use to
    * create a new entry in the layer set for a specific geoview layer and layer path.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer config
+   * @param {AbstractBaseLayer} layer - The layer config
    */
-  protected onRegisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): void {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-
+  protected onRegisterLayer(layer: AbstractBaseLayer): void {
     // Get layer name
-    const layerName = layer.getLayerName(layerPath)!;
+    const layerName = layer.getLayerName()!;
+    const layerPath = layer.getLayerPath();
 
     // If not there (wasn't pre-registered via a config-registration)
     if (!(layerPath in this.resultSet)) {
       this.resultSet[layerPath] = {
         layerPath,
-        layerStatus: layer.getLayerStatus(layerPath),
+        layerStatus: layer.getLayerStatus(),
         layerName,
       };
     } else {
       // Already there, update it
-      this.resultSet[layerPath].layerStatus = layer.getLayerStatus(layerPath);
+      this.resultSet[layerPath].layerStatus = layer.getLayerStatus();
       this.resultSet[layerPath].layerName = layerName;
     }
 
@@ -305,9 +297,9 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable unregistration function for a layer-set that the registration process will use to
    * unregister a specific geoview layer.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer | undefined} layer - The layer
+   * @param {AbstractBaseLayer | undefined} layer - The layer
    */
-  protected onUnregisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer | undefined): void {
+  protected onUnregisterLayer(layer: AbstractBaseLayer | undefined): void {
     // Unregister the layer name changed handler
     layer?.offLayerNameChanged(this.#boundHandleLayerNameChanged);
   }
@@ -338,25 +330,27 @@ export abstract class AbstractLayerSet {
 
   /**
    * Handles when a layer status changed on a layer config.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    * @param {LayerNameChangedEvent} layerNameEvent - The new layer name
    */
-  #handleLayerNameChanged(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerNameEvent: LayerNameChangedEvent): void {
+  #handleLayerNameChanged(layer: AbstractBaseLayer, layerNameEvent: LayerNameChangedEvent): void {
+    const layerPath = layer.getLayerPath();
+
     try {
       // If the layer path exists for the layer name that changed
-      if (this.resultSet[layerNameEvent.layerPath]) {
+      if (this.resultSet[layerPath]) {
         // Call the overridable function to process a layer name change
-        this.onProcessNameChanged(layerNameEvent.layerPath, layerNameEvent.layerName!);
+        this.onProcessNameChanged(layerPath, layerNameEvent.layerName!);
 
         // Propagate to the store
-        this.onPropagateToStore(this.resultSet[layerNameEvent.layerPath], 'layerName');
+        this.onPropagateToStore(this.resultSet[layerPath], 'layerName');
 
         // Inform that the layer set has been updated
-        this.onLayerSetUpdatedProcess(layerNameEvent.layerPath);
+        this.onLayerSetUpdatedProcess(layerPath);
       }
     } catch (error) {
       // Log
-      logger.logError('CAUGHT in handleLayerStatusChanged', layerNameEvent.layerPath, error);
+      logger.logError('CAUGHT in handleLayerStatusChanged', layerPath, error);
     }
   }
 
@@ -396,14 +390,14 @@ export abstract class AbstractLayerSet {
   /**
    * Processes layer data to query features on it, if the layer path can be queried.
    * @param {TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry} data - The layer data
-   * @param {AbstractGeoViewLayer | AbstractGVLayer} geoviewLayer - The geoview layer
+   * @param {AbstractGVLayer} geoviewLayer - The geoview layer
    * @param {QueryType} queryType - The query type
    * @param {TypeLocation} location - The location for the query
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise resolving to the query results
    */
   protected static queryLayerFeatures(
     data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry,
-    geoviewLayer: AbstractGeoViewLayer | AbstractGVLayer,
+    geoviewLayer: AbstractGVLayer,
     queryType: QueryType,
     location: TypeLocation
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
@@ -413,39 +407,30 @@ export abstract class AbstractLayerSet {
 
   /**
    * Checks if the layer is of queryable type based on its class definition
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    * @returns True if the layer is of queryable type
    */
-  protected static isQueryableType(layer: AbstractGeoViewLayer | AbstractBaseLayer): boolean {
-    return (
-      layer instanceof AbstractGeoViewVector ||
-      layer instanceof AbstractGVVector ||
-      layer instanceof EsriDynamic ||
-      layer instanceof GVEsriDynamic ||
-      layer instanceof WMS ||
-      layer instanceof GVWMS
-    );
+  protected static isQueryableType(layer: AbstractBaseLayer): boolean {
+    return layer instanceof AbstractGVVector || layer instanceof GVEsriDynamic || layer instanceof GVWMS;
   }
 
   /**
    * Checks if the layer config source is queryable.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    * @returns {boolean} True if the source is queryable or undefined
    */
-  protected static isSourceQueryable(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-    return !((layer.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable === false);
+  protected static isSourceQueryable(layer: AbstractBaseLayer): boolean {
+    return !((layer.getLayerConfig() as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable === false);
   }
 
   /**
    * Checks if the layer config state is queryable.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    * @returns {boolean} True if the state is queryable or undefined
    */
-  protected static isStateQueryable(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  protected static isStateQueryable(layer: AbstractBaseLayer): boolean {
     // Return false when it's clearly false, otherwise, return true
-    return !((layer.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig)?.initialSettings?.states?.queryable === false);
+    return !((layer.getLayerConfig() as AbstractBaseLayerEntryConfig)?.initialSettings?.states?.queryable === false);
   }
 
   /**

@@ -555,7 +555,7 @@ export class LayerApi {
           function setLayerVisibility(sender: LayerApi, event: LayerLoadedEvent): void {
             if (layerInfo.layerPath === event.layerPath) {
               const { visible } = originalMapOrderedLayerInfo.filter((info) => info.layerPath === event.layerPath)[0];
-              event.layer?.setVisible(visible, event.layerPath);
+              event.layer?.setVisible(visible);
               sender.offLayerLoaded(setLayerVisibility);
             }
           }
@@ -690,13 +690,15 @@ export class LayerApi {
 
         // Create the corresponding GVLayer
         const gvLayer = this.#createGVLayer(this.getMapId(), geoviewLayer, event.source, event.config, event.extraConfig);
+
+        // If found the GV layer
         if (gvLayer) {
           // Register a hook when a layer is loaded on the map
-            gvLayer!.onIndividualLayerLoaded((sender, payload) => {
-              // Log
-              logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
-              this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
-            });
+          gvLayer.onIndividualLayerLoaded((sender, payload) => {
+            // Log
+            logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
+            this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
+          });
           return gvLayer.getOLLayer();
         }
         throw new Error('Error, no corresponding GV layer');
@@ -724,16 +726,6 @@ export class LayerApi {
         layerBeingAdded!
           .createGeoViewLayers()
           .then(() => {
-            // If not HYBRID MODE
-            if (!LayerApi.LAYERS_HYBRID_MODE) {
-              // Register a hook when a layer is loaded on the map
-              layerBeingAdded!.onIndividualLayerLoaded((sender, payload) => {
-                // Log
-                logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
-                this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
-              });
-            }
-
             // Add the layer on the map
             this.#addToMap(layerBeingAdded!);
 
@@ -806,12 +798,11 @@ export class LayerApi {
    * This function may be used to start managing a layer in the UI when said layer has been created outside of the regular config->layer flow.
    * @param {AbstractGVLayer} layer - The layer to register
    */
-  registerLayerInLayerSets(layer: AbstractGVLayer, layerPath: string): void {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  registerLayerInLayerSets(layer: AbstractGVLayer): void {
     // Tell the layer sets about it
     this.#allLayerSets.forEach((layerSet) => {
       // Register the layer to the layer set
-      layerSet.registerLayer(layer, layerPath).catch((error) => {
+      layerSet.registerLayer(layer).catch((error) => {
         // Log
         logger.logPromiseFailed('in registerLayer in registerLayerUpdate', error);
       });
@@ -921,7 +912,7 @@ export class LayerApi {
       if (timeDimension) gvLayer.setTemporalDimension(timeDimension);
 
       // If any style to inject
-      if (style) gvLayer.setStyle(layerConfig.layerPath, style);
+      if (style) gvLayer.setStyle(style);
 
       // Initialize the layer, triggering the loaded/error status
       gvLayer.init();
@@ -1050,7 +1041,7 @@ export class LayerApi {
       const geoviewLayer = this.getGeoviewLayer(layerConfig.layerPath);
 
       // If the layer is loaded AND flag is true to use time dimension, continue
-      if ((geoviewLayer instanceof AbstractGeoViewLayer || geoviewLayer instanceof AbstractGVLayer) && geoviewLayer.getIsTimeAware()) {
+      if (geoviewLayer instanceof AbstractGVLayer && geoviewLayer.getIsTimeAware()) {
         // Check and add time slider layer when needed
         TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layerConfig);
       }
@@ -1286,19 +1277,24 @@ export class LayerApi {
     // If it is a group layer, highlight sublayers
     if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath])) {
       Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
-        const theLayer = this.getGeoviewLayer(registeredLayerPath)!;
-        if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
-          const otherOpacity = theLayer.getOpacity();
-          theLayer.setOpacity((otherOpacity || 1) * 0.25);
-        } else this.getOLLayer(registeredLayerPath)!.setZIndex(999);
+        // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
+        const theLayer = this.getGeoviewLayer(registeredLayerPath);
+        if (theLayer) {
+          if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
+            const otherOpacity = theLayer.getOpacity();
+            theLayer.setOpacity((otherOpacity || 1) * 0.25);
+          } else this.getOLLayer(registeredLayerPath)!.setZIndex(999);
+        }
       });
     } else {
       Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
-        const theLayer = this.getGeoviewLayer(registeredLayerPath)!;
-        // check for otherOlLayer is undefined. It would be undefined if a layer status is error
-        if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
-          const otherOpacity = theLayer.getOpacity();
-          theLayer.setOpacity((otherOpacity || 1) * 0.25);
+        // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
+        const theLayer = this.getGeoviewLayer(registeredLayerPath);
+        if (theLayer) {
+          if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
+            const otherOpacity = theLayer.getOpacity();
+            theLayer.setOpacity((otherOpacity || 1) * 0.25);
+          }
         }
       });
       this.getOLLayer(layerPath)?.setZIndex(999);
@@ -1416,10 +1412,10 @@ export class LayerApi {
     }
 
     // If the layer is a regular layer (not a group)
-    if (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer) {
+    if (layer instanceof AbstractGVLayer) {
       // Assign value to registered layer. This is use by applyFilter function to set visibility
       // TODO: check if we need to refactor to centralize attribute setting....
-      const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType];
+      const geometryStyleConfig = layer.getStyle()![item.geometryType];
       // Get all styles with the label matching the name of the clicked item and update their visibility
       const toggledStyleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
       toggledStyleInfos?.forEach((toggledStyleInfo) => {
@@ -1528,7 +1524,7 @@ export class LayerApi {
     // If found
     if (layer) {
       // Set the layer name on the layer
-      layer.setLayerName(layerPath, name);
+      layer.setLayerName(name);
     } else {
       logger.logError(`Unable to find layer ${layerPath}`);
     }
@@ -1611,14 +1607,11 @@ export class LayerApi {
     // If a leaf
     if (!layerEntryIsGroupLayer(layerConfig)) {
       // Get the layer
-      const layer = this.getGeoviewLayer(layerConfig.layerPath) as AbstractGeoViewLayer | AbstractGVLayer;
+      const layer = this.getGeoviewLayer(layerConfig.layerPath) as AbstractGVLayer;
 
-      // If the layer is of right type (should be, because we checked if not a group)
-      if (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer) {
-        // Get the bounds of the layer
-        const calculatedBounds = layer.getBounds(layerConfig.layerPath);
-        if (calculatedBounds) bounds.push(calculatedBounds);
-      }
+      // Get the bounds of the layer
+      const calculatedBounds = layer.getBounds();
+      if (calculatedBounds) bounds.push(calculatedBounds);
     } else {
       // Is a group
       layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => {
@@ -1826,7 +1819,8 @@ type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent, void>;
  */
 export type LayerAddedEvent = {
   // The added layer
-  layer: AbstractGeoViewLayer;
+  // GV: We need the AbstractGeoViewLayer because of addToMap function
+  layer: AbstractGeoViewLayer | AbstractGVLayer;
 };
 
 /**
@@ -1839,7 +1833,7 @@ type LayerLoadedDelegate = EventDelegateBase<LayerApi, LayerLoadedEvent, void>;
  */
 export type LayerLoadedEvent = {
   // The loaded layer
-  layer: AbstractGeoViewLayer | AbstractGVLayer;
+  layer: AbstractGVLayer;
 
   layerPath: string;
 };
