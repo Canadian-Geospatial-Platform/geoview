@@ -126,7 +126,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<Extent | undefined>} The extent of the feature, if available
    */
   static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[]): Promise<Extent | undefined> | undefined {
-    return MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.getExtentFromFeatures(layerPath, objectIds);
+    return MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.getExtentFromFeatures(objectIds);
   }
 
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
@@ -243,10 +243,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
       // Interpret the layer name the best we can
       const layerName =
-        layer?.getLayerName(entryLayerPath) ||
-        layerConfig.layerName ||
-        layerConfig.geoviewLayerConfig.geoviewLayerName ||
-        layerConfig.layerPath;
+        layer?.getLayerName() || layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName || layerConfig.layerPath;
 
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {

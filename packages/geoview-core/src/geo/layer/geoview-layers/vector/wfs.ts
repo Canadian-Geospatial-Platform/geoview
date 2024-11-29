@@ -26,7 +26,7 @@ import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vect
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { TypeOutfields } from '@/api/config/types/map-schema-types';
+import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -97,25 +97,6 @@ export class WFS extends AbstractGeoViewVector {
    */
   constructor(mapId: string, layerConfig: TypeWFSLayerConfig) {
     super(CONST_LAYER_TYPES.WFS, layerConfig, mapId);
-  }
-
-  /** ***************************************************************************************************************************
-   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath) as TypeJsonArray;
-    const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
-    if (!fieldDefinition) return 'string';
-    const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0] as string;
-    if (fieldEntryType === 'date') return 'date';
-    if (['int', 'number'].includes(fieldEntryType)) return 'number';
-    return 'string';
   }
 
   /** ***************************************************************************************************************************
@@ -265,7 +246,7 @@ export class WFS extends AbstractGeoViewVector {
         const layerMetadata = (await (await fetch(describeFeatureUrl)).json()) as TypeJsonObject;
         if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
           this.setLayerMetadata(layerConfig.layerPath, layerMetadata.featureTypes[0].properties);
-          this.#processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
+          WFS.#processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
         }
       } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
         const layerMetadata = (await (await fetch(describeFeatureUrl)).text()) as string;
@@ -289,7 +270,7 @@ export class WFS extends AbstractGeoViewVector {
           });
 
           this.setLayerMetadata(layerConfig.layerPath, featureTypeProperties as TypeJsonObject);
-          this.#processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
+          WFS.#processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
         }
       }
     } catch (error) {
@@ -307,7 +288,7 @@ export class WFS extends AbstractGeoViewVector {
    * @private
    */
   // GV Layers Refactoring - Obsolete (in config)
-  #processFeatureInfoConfig(fields: TypeJsonArray, layerConfig: VectorLayerEntryConfig): void {
+  static #processFeatureInfoConfig(fields: TypeJsonArray, layerConfig: VectorLayerEntryConfig): void {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
 
@@ -322,7 +303,7 @@ export class WFS extends AbstractGeoViewVector {
         const newOutfield: TypeOutfields = {
           name: fieldEntry.name as string,
           alias: fieldEntry.name as string,
-          type: this.getFieldType(fieldEntry.name as string, layerConfig),
+          type: WFS.getFieldType(fieldEntry.name as string, layerConfig),
           domain: null,
         };
 
@@ -337,6 +318,17 @@ export class WFS extends AbstractGeoViewVector {
     // INFO: WFS as geometry for first field, set name field to second value
     if (!layerConfig.source.featureInfo.nameField)
       layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[1].name;
+  }
+
+  // Patch for field type only use for WFS
+  static getFieldType(fieldName: string, layerConfig: VectorLayerEntryConfig): TypeOutfieldsType {
+    const fieldDefinitions = layerConfig.getLayerMetadata() as TypeJsonArray;
+    const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
+    if (!fieldDefinition) return 'string';
+    const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0] as string;
+    if (fieldEntryType === 'date') return 'date';
+    if (['int', 'number'].includes(fieldEntryType)) return 'number';
+    return 'string';
   }
 
   /** ***************************************************************************************************************************

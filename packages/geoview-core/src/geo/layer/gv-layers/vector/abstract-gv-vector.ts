@@ -18,7 +18,6 @@ import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { featureInfoGetFieldType } from '../utils';
 import { AbstractGVLayer } from '../abstract-gv-layer';
-import { AbstractGeoViewLayer } from '../../geoview-layers/abstract-geoview-layers';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
@@ -43,14 +42,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       properties: { layerConfig },
       source: olSource,
       style: (feature) => {
-        return AbstractGVVector.calculateStyleForFeature(
-          this,
-          feature,
-          label,
-          layerConfig.layerPath,
-          layerConfig.filterEquation,
-          layerConfig.legendFilterIsOff
-        );
+        return AbstractGVVector.calculateStyleForFeature(this, feature, label, layerConfig.filterEquation, layerConfig.legendFilterIsOff);
       },
     };
 
@@ -178,8 +170,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Call parent
     super.onLoaded();
 
-    // Apply view filter immediately (no need to provide a layer path here so '' is sent (hybrid work))
-    this.applyViewFilter('', this.getLayerConfig().layerFilter || '');
+    // Apply view filter immediately
+    this.applyViewFilter(this.getLayerConfig().layerFilter || '');
   }
 
   /**
@@ -190,10 +182,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {string} filter - A filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true): void {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done (it should be moved when calling getLayerFilter below too)
+  applyViewFilter(filter: string, combineLegendFilter = true): void {
     // Log
-    logger.logTraceCore('ABSTRACT-GV-VECTOR - applyViewFilter');
+    logger.logTraceCore('ABSTRACT-GV-VECTOR - applyViewFilter', this.getLayerPath());
 
     const layerConfig = this.getLayerConfig();
     const olLayer = this.getOLLayer();
@@ -229,9 +220,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       layerConfig.filterEquation = filterEquation;
     } catch (error) {
       throw new Error(
-        `Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${this.getLayerFilter(
-          layerPath
-        )}\ninternal filter = ${filterValueToUse}`
+        `Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${this.getLayerFilter()}\ninternal filter = ${filterValueToUse}`
       );
     }
 
@@ -239,7 +228,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     // Emit event
     this.emitLayerFilterApplied({
-      layerPath,
       filter: filterValueToUse,
     });
   }
@@ -249,8 +237,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @returns {Extent | undefined} The layer bounding box.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getBounds(layerPath: string): Extent | undefined {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  override getBounds(): Extent | undefined {
     const sourceExtent = this.getOLSource().getExtent();
 
     // Return the calculated layer bounds
@@ -259,13 +246,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Gets the extent of an array of features.
-   * @param {string} layerPath - The layer path.
    * @param {string[]} objectIds - The uids of the features to calculate the extent from.
    * @returns {Promise<Extent | undefined>} The extent of the features, if available.
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  override getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
+  override getExtentFromFeatures(objectIds: string[]): Promise<Extent | undefined> {
     // Get array of features
     const requestedFeatures = objectIds.map((id) => this.getOLLayer().getSource()?.getFeatureById(id));
 
@@ -307,7 +293,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Calculates a style for the given feature, based on the layer current style and options.
-   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer on which to work for the style.
+   * @param {AbstractGVLayer} layer - The layer on which to work for the style.
    * @param {FeatureLike} feature - Feature that need its style to be defined.
    * @param {string} label - The style label when one has to be created
    * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
@@ -315,23 +301,21 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @returns {Style} The style for the feature
    */
   static calculateStyleForFeature(
-    layer: AbstractGeoViewLayer | AbstractGVLayer,
+    layer: AbstractGVLayer,
     feature: FeatureLike,
     label: string,
-    layerPath: string,
     filterEquation?: FilterNodeArrayType,
     legendFilterIsOff?: boolean
   ): Style | undefined {
-    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here.
     // Get the style
-    const style = layer.getStyle(layerPath) || {};
+    const style = layer.getStyle() || {};
 
     // Get and create Feature style if necessary
     return getAndCreateFeatureStyle(feature, style, label, filterEquation, legendFilterIsOff, (geometryType, theStyle) => {
       // A new style has been created
       logger.logDebug('A new style has been created on-the-fly', geometryType, layer);
       // Update the layer style
-      layer.setStyle(layerPath, {
+      layer.setStyle({
         ...style,
         ...{ [geometryType]: { type: 'simple', hasDefault: false, fields: [], info: [theStyle] } },
       });

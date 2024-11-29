@@ -3,23 +3,13 @@
 // TODO: refactor eslint - we have few files with many reassing should wee if we can build better...
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
-import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
-import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
-import Feature from 'ol/Feature';
 import Source from 'ol/source/Source';
-import { shared as iconImageCache } from 'ol/style/IconImageCache';
-
-import { TypeOutfieldsType } from '@config/types/map-schema-types';
 
 import { generateId, getXMLHttpRequest, isJsonString, whenThisThen } from '@/core/utils/utilities';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
@@ -33,14 +23,8 @@ import {
   TypeLayerStatus,
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
-  TypeFeatureInfoEntry,
-  codedValueType,
-  rangeDomainType,
-  TypeLocation,
-  QueryType,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
-import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -112,9 +96,6 @@ export abstract class AbstractGeoViewLayer {
   /** The service metadata. */
   metadata: TypeJsonObject | null = null;
 
-  /** Layer name */
-  #layerName: Record<string, string | undefined> = {};
-
   /** Layer metadata */
   #layerMetadata: Record<string, TypeJsonObject> = {};
 
@@ -137,19 +118,7 @@ export abstract class AbstractGeoViewLayer {
   #isTimeAware: boolean = true;
 
   // Keep all callback delegates references
-  #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
-
-  // Keep all callback delegates references
   #onLayerStyleChangedHandlers: LayerStyleChangedDelegate[] = [];
-
-  // Keep all callback delegate references
-  #onLegendQueryingHandlers: LegendQueryingDelegate[] = [];
-
-  // Keep all callback delegate references
-  #onLegendQueriedHandlers: LegendQueriedDelegate[] = [];
-
-  // Keep all callback delegate references
-  #onVisibleChangedHandlers: VisibleChangedDelegate[] = [];
 
   // Keep all callback delegate references
   #onLayerEntryProcessedHandlers: LayerEntryProcessedDelegate[] = [];
@@ -159,12 +128,6 @@ export abstract class AbstractGeoViewLayer {
 
   // Keep all callback delegate references
   #onLayerCreationHandlers: LayerCreationDelegate[] = [];
-
-  // Keep all callback delegate references
-  #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
-
-  // Keep all callback delegate references
-  #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
 
   // Keep all callback delegates references
   #onIndividualLayerLoadedHandlers: IndividualLayerLoadedDelegate[] = [];
@@ -252,22 +215,6 @@ export abstract class AbstractGeoViewLayer {
     return this.getMapViewer().layer.getOLLayer(layerPath);
   }
 
-  /** ***************************************************************************************************************************
-   * Gets the Geoview layer id.
-   * @returns {string} The geoview layer id
-   */
-  getGeoviewLayerId(): string {
-    return this.geoviewLayerId;
-  }
-
-  /** ***************************************************************************************************************************
-   * Gets the Geoview layer name.
-   * @returns {string | undefined} The geoview layer name
-   */
-  getGeoviewLayerName(): string | undefined {
-    return this.geoviewLayerName;
-  }
-
   /**
    * Gets the layer status
    * @returns The layer status
@@ -275,28 +222,6 @@ export abstract class AbstractGeoViewLayer {
   getLayerStatus(layerPath: string): TypeLayerStatus {
     // Take the layer status from the config, temporary patch until layers refactoring is done
     return this.getLayerConfig(layerPath)!.layerStatus;
-  }
-
-  /** ***************************************************************************************************************************
-   * Gets the layer name.
-   * @returns {string | undefined} The geoview layer name
-   */
-  getLayerName(layerPath: string): string | undefined {
-    // If a new layer name is set
-    if (this.#layerName[layerPath]) return this.#layerName[layerPath];
-    // TODO: Refactor - Temporary patch until configs refactoring is done, the style should have been set already
-    // Take name from config
-    return this.getLayerConfig(layerPath)?.layerName;
-  }
-
-  /** ***************************************************************************************************************************
-   * Sets the layer name.
-   * @param {string} layerPath The layer path.
-   * @param {string} name The layer name.
-   */
-  setLayerName(layerPath: string, name: string | undefined): void {
-    this.#layerName[layerPath] = name;
-    this.#emitLayerNameChanged({ layerPath, layerName: name });
   }
 
   /**
@@ -720,244 +645,6 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for the layer specified.
-   *
-   * @param {QueryType} queryType  The type of query to perform.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   * @param {TypeLocation} location An optionsl pixel, coordinate or polygon that will be used by the query.
-   *
-   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
-   */
-  // GV Things important to know about the get feature info family of methods
-  /*
-   * There's no doubt that the layerConfig is correctly defined when we call these methods. The layerConfig object is created in
-   * the GeoView layer constructor and has all the necessary flags to inform programmers and users whether the layer referenced by
-   * a layerConfig or its layerPath is viable or not. If the layer is not visible on the map, it has probably not yet been loaded
-   * or an error has occurred. If clicked on, these layers will return an empty array, as they have no features on the map. So
-   * users can't expect anything to be returned after a click. They have to wait until they see something on the map to know where
-   * the features are so they can click on them.
-   */
-  async getFeatureInfo(
-    queryType: QueryType,
-    layerPath: string,
-    location: TypeLocation = null
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    try {
-      // TODO: Refactor - Remove the layerPath parameter once hybrid work is done
-      // Get the layer config
-      const layerConfig = this.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig;
-
-      if (!layerConfig?.source?.featureInfo?.queryable) {
-        logger.logError(`Layer at path ${layerConfig.layerPath} is not queryable`);
-        return null;
-      }
-
-      // Log
-      logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - getFeatureInfo', queryType, layerPath);
-      const logMarkerKey = `${queryType} | ${layerPath}`;
-      logger.logMarkerStart(logMarkerKey);
-
-      let promiseGetFeature: Promise<TypeFeatureInfoEntry[] | undefined | null>;
-      switch (queryType) {
-        case 'all':
-          promiseGetFeature = this.getAllFeatureInfo(layerPath);
-          break;
-        case 'at_pixel':
-          promiseGetFeature = this.getFeatureInfoAtPixel(location as Pixel, layerPath);
-          break;
-        case 'at_coordinate':
-          promiseGetFeature = this.getFeatureInfoAtCoordinate(location as Coordinate, layerPath);
-          break;
-        case 'at_long_lat':
-          promiseGetFeature = this.getFeatureInfoAtLongLat(location as Coordinate, layerPath);
-          break;
-        case 'using_a_bounding_box':
-          promiseGetFeature = this.getFeatureInfoUsingBBox(location as Coordinate[], layerPath);
-          break;
-        case 'using_a_polygon':
-          promiseGetFeature = this.getFeatureInfoUsingPolygon(location as Coordinate[], layerPath);
-          break;
-        default:
-          // Default is empty array
-          promiseGetFeature = Promise.resolve([]);
-
-          // Log
-          logger.logError(`Queries using ${queryType} are invalid.`);
-      }
-
-      // Wait for results
-      const arrayOfFeatureInfoEntries = await promiseGetFeature;
-
-      // Log
-      logger.logMarkerCheck(logMarkerKey, 'to getFeatureInfo', arrayOfFeatureInfoEntries);
-
-      // Return the result
-      return arrayOfFeatureInfoEntries;
-    } catch (error) {
-      // Log
-      logger.logError(error);
-      return null;
-    }
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features on a layer. Returns an empty array [] when the layer is
-   * not queryable.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    // Log
-    logger.logError(`getAllFeatureInfo is not implemented! for ${layerPath}`);
-    return Promise.resolve(null);
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided Pixel. Returns an empty array [] when the layer is
-   * not queryable.
-   *
-   * @param {Coordinate} location The pixel coordinate that will be used by the query.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    // Log
-    logger.logError(`getFeatureInfoAtPixel is not implemented! for ${layerPath} - ${location}`);
-    return Promise.resolve(null);
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided coordinate. Returns an empty array [] when the layer is
-   * not queryable.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    // Log
-    logger.logError(`getFeatureInfoAtCoordinate is not implemented! for ${layerPath} - ${location}`);
-    return Promise.resolve(null);
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided longitude latitude. Returns an empty array [] when the
-   * layer is not queryable.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    // Log
-    logger.logError(`getFeatureInfoAtLongLat is not implemented for ${layerPath} - ${location}!`);
-    return Promise.resolve(null);
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided bounding box. Returns an empty array [] when the layer is
-   * not queryable.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    // Log
-    logger.logError(`getFeatureInfoUsingBBox is not implemented! for ${layerPath} - ${location}`);
-    return Promise.resolve(null);
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided polygon. Returns an empty array [] when the layer is
-   * not queryable.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    // Log
-    logger.logError(`getFeatureInfoUsingPolygon is not implemented! for ${layerPath} - ${location}`);
-    return Promise.resolve(null);
-  }
-
-  /**
-   * Queries the legend.
-   * This function raises legend querying and queried events.
-   * @returns {Promise<TypeLegend | null>} The promise when the legend (or null) will be received
-   */
-  queryLegend(layerPath: string): Promise<TypeLegend | null> {
-    // Emit that the legend has been queried
-    this.#emitLegendQuerying({ layerPath });
-
-    // Get the legend
-    const promiseLegend = this.getLegend(layerPath);
-
-    // Whenever the promise resolves
-    promiseLegend
-      .then((legend) => {
-        // If legend was received
-        if (legend) {
-          // Check for possible number of icons and set icon cache size
-          this.updateIconImageCache(legend);
-          // Emit legend information once retrieved
-          this.#emitLegendQueried({ layerPath, legend });
-        }
-      })
-      .catch((error) => {
-        // Log
-        logger.logPromiseFailed('promiseLegend in queryLegend in AbstractGeoviewLayer', error);
-      });
-
-    // Return the promise
-    return promiseLegend;
-  }
-
-  /**
-   * Update the size of the icon image list based on styles.
-   * @param {TypeLegend} legend - The legend to check.
-   */
-  updateIconImageCache(legend: TypeLegend): void {
-    // GV This will need to be revised if functionality to add additional icons to a layer is added
-    let styleCount = this.getMapViewer().iconImageCacheSize;
-    if (legend.styleConfig)
-      Object.keys(legend.styleConfig).forEach((geometry) => {
-        if (
-          legend.styleConfig &&
-          (legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'uniqueValue' ||
-            legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'classBreaks')
-        ) {
-          if (legend.styleConfig[geometry as TypeStyleGeometry]!.info.length)
-            styleCount += legend.styleConfig[geometry as TypeStyleGeometry]!.info.length;
-        }
-      });
-    // Set the openlayers icon image cache
-    iconImageCache.setSize(styleCount);
-    // Update the cache size for the map viewer
-    this.getMapViewer().iconImageCacheSize = styleCount;
-  }
-
-  /** ***************************************************************************************************************************
    * Creates a layer group.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    * @param {TypeLayerInitialSettings } initialSettings Initial settings to apply to the layer.
@@ -983,392 +670,6 @@ export abstract class AbstractGeoViewLayer {
     return layerGroup;
   }
 
-  // TODO: Obsolete - Delete? Commenting out for now
-  // /** ***************************************************************************************************************************
-  //  * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. If projectionCode is
-  //  * defined, returns the bounds in the specified projection otherwise use the map projection. The bounds are different from the
-  //  * extent. They are mainly used for display purposes to show the bounding box in which the data resides and to zoom in on the
-  //  * entire layer data. It is not used by openlayer to limit the display of data on the map.
-  //  *
-  //  * @param {string} layerPath The layer path to the layer's configuration.
-  //  * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
-  //  *
-  //  * @returns {Extent} The layer bounding box.
-  //  */
-  // getMetadataBounds(layerPath: string, projectionCode: string | number | undefined = undefined): Extent | undefined {
-  //   let bounds: Extent | undefined;
-  //   const processGroupLayerBounds = (listOfLayerEntryConfig: ConfigBaseClass[]): void => {
-  //     listOfLayerEntryConfig.forEach((layerConfig) => {
-  //       if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
-  //       else if (layerConfig.initialSettings?.bounds) {
-  //         if (!bounds)
-  //           bounds = [
-  //             layerConfig.initialSettings.bounds[0],
-  //             layerConfig.initialSettings.bounds[1],
-  //             layerConfig.initialSettings.bounds[2],
-  //             layerConfig.initialSettings.bounds[3],
-  //           ];
-  //         else
-  //           bounds = [
-  //             Math.min(layerConfig.initialSettings.bounds[0], bounds[0]),
-  //             Math.min(layerConfig.initialSettings.bounds[1], bounds[1]),
-  //             Math.max(layerConfig.initialSettings.bounds[2], bounds[2]),
-  //             Math.max(layerConfig.initialSettings.bounds[3], bounds[3]),
-  //           ];
-  //       }
-  //     });
-  //   };
-  //   // GV The following code will need to be modified when the topmost layer of a GeoView
-  //   // GV layer creates dynamicaly a group out of a list of layers.
-  //   const layerConfig: ConfigBaseClass | ConfigBaseClass[] | undefined = layerPath.includes('/')
-  //     ? this.getLayerConfig(layerPath)
-  //     : this.listOfLayerEntryConfig;
-  //   if (layerConfig) {
-  //     if (Array.isArray(layerConfig)) processGroupLayerBounds(layerConfig);
-  //     else processGroupLayerBounds([layerConfig]);
-
-  //     // TODO: Check - Are the bounds initially always 4326?
-  //     if (projectionCode && bounds) {
-  //       bounds = validateExtent(bounds);
-  //       return Projection.transformExtentFromProj(bounds, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${projectionCode}`);
-  //     }
-  //   }
-  //   return bounds;
-  // }
-
-  /** ***************************************************************************************************************************
-   * Returns the domain of the specified field or null if the field has no domain.
-   *
-   * @param {string} fieldName field name for which we want to get the domain.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
-  protected getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType {
-    // Log - REMOVED as it is trigger for every row of data table, just enable for debuggin purpose
-    // logger.logWarning(`getFieldDomain is not implemented for ${fieldName} - ${layerConfig}`);
-    return null;
-  }
-
-  /** ***************************************************************************************************************************
-   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {TypeOutfieldsType} The type of the field.
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
-    // Log
-    logger.logWarning(`getFieldType is not implemented for ${fieldName} - ${layerConfig}`);
-    return 'string';
-  }
-
-  /** ***************************************************************************************************************************
-   * Return the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
-   * numbers representing an extent: [minx, miny, maxx, maxy]. This routine return undefined when the layer path can't be found.
-   * The extent is used to clip the data displayed on the map.
-   *
-   * @param {string} layerPath Layer path to the layer's configuration.
-   *
-   * @returns {Extent | undefined} The layer extent.
-   */
-  getExtent(layerPath: string): Extent | undefined {
-    const olLayer = this.getOLLayer(layerPath);
-    return olLayer?.getExtent();
-  }
-
-  /** ***************************************************************************************************************************
-   * set the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
-   * numbers representing an extent: [minx, miny, maxx, maxy]. This routine does nothing when the layerPath specified is not
-   * found.
-   *
-   * @param {Extent} layerExtent The extent to assign to the layer.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   */
-  setExtent(layerExtent: Extent, layerPath: string): void {
-    const olLayer = this.getOLLayer(layerPath);
-    if (olLayer) olLayer.setExtent(layerExtent);
-  }
-
-  /** ***************************************************************************************************************************
-   * Return the opacity of the layer (between 0 and 1). This routine return undefined when the layerPath specified is not found.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {number | undefined} The opacity of the layer.
-   */
-  getOpacity(layerPath: string): number | undefined {
-    const olLayer = this.getOLLayer(layerPath);
-    return olLayer?.getOpacity();
-  }
-
-  /** ***************************************************************************************************************************
-   * Set the opacity of the layer (between 0 and 1). This routine does nothing when the layerPath specified is not found.
-   *
-   * @param {number} layerOpacity The opacity of the layer.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   */
-  setOpacity(layerOpacity: number, layerPath: string): void {
-    const olLayer = this.getOLLayer(layerPath);
-    if (olLayer) {
-      olLayer.setOpacity(layerOpacity);
-      this.#emitLayerOpacityChanged({ layerPath, opacity: layerOpacity });
-    }
-  }
-
-  /** ***************************************************************************************************************************
-   * Return the visibility of the layer (true or false). This routine return undefined when the layerPath specified is not found.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {boolean | undefined} The visibility of the layer.
-   */
-  getVisible(layerPath: string): boolean | undefined {
-    const olLayer = this.getOLLayer(layerPath);
-    return olLayer?.getVisible();
-  }
-
-  /** ***************************************************************************************************************************
-   * Set the visibility of the layer (true or false). This routine does nothing when the layerPath specified is not found.
-   *
-   * @param {boolean} layerVisibility The visibility of the layer.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   */
-  setVisible(layerVisibility: boolean, layerPath: string): void {
-    const olLayer = this.getOLLayer(layerPath);
-    if (olLayer) {
-      const curVisible = this.getVisible(layerPath);
-      olLayer.setVisible(layerVisibility);
-      // olLayer.changed();
-      if (layerVisibility !== curVisible) this.#emitVisibleChanged({ layerPath, visible: layerVisibility });
-    }
-  }
-
-  /** ***************************************************************************************************************************
-   * Return the min zoom of the layer. This routine return undefined when the layerPath specified is not found.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {number | undefined} The min zoom of the layer.
-   */
-  getMinZoom(layerPath: string): number | undefined {
-    const olLayer = this.getOLLayer(layerPath);
-    return olLayer?.getMinZoom();
-  }
-
-  /** ***************************************************************************************************************************
-   * Set the min zoom of the layer. This routine does nothing when the layerPath specified is not found.
-   *
-   * @param {boolean} layerVisibility The min zoom of the layer.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   */
-  setMinZoom(minZoom: number, layerPath: string): void {
-    const olLayer = this.getOLLayer(layerPath);
-    if (olLayer) olLayer.setMinZoom(minZoom);
-  }
-
-  /** ***************************************************************************************************************************
-   * Return the max zoom of the layer. This routine return undefined when the layerPath specified is not found.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {number | undefined} The max zoom of the layer.
-   */
-  getMaxZoom(layerPath: string): number | undefined {
-    const olLayer = this.getOLLayer(layerPath);
-    return olLayer?.getMaxZoom();
-  }
-
-  /** ***************************************************************************************************************************
-   * Set the max zoom of the layer. This routine does nothing when the layerPath specified is not found.
-   *
-   * @param {boolean} layerVisibility The max zoom of the layer.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   */
-  setMaxZoom(maxZoom: number, layerPath: string): void {
-    const olLayer = this.getOLLayer(layerPath);
-    if (olLayer) olLayer.setMaxZoom(maxZoom);
-  }
-
-  /** ***************************************************************************************************************************
-   * Overridable function returning the legend of the layer. Returns null when the layerPath specified is not found. If the style property
-   * of the layerConfig object is undefined, the legend property of the object returned will be null.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   * @returns {Promise<TypeLegend | null>} The legend of the layer.
-   */
-  async getLegend(layerPath: string): Promise<TypeLegend | null> {
-    try {
-      // Get the legend using the layer information and layer styling
-      const legend: TypeLegend = {
-        type: this.type,
-        styleConfig: this.getStyle(layerPath),
-        legend: await getLegendStyles(this.getStyle(layerPath)),
-      };
-      return legend;
-    } catch (error) {
-      // Log
-      logger.logError(error);
-      return null;
-    }
-  }
-
-  /** ***************************************************************************************************************************
-   * Get and format the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
-   * since the base date. Vector feature dates must be in ISO format.
-   *
-   * @param {Feature} feature - The features that hold the field values.
-   * @param {string} fieldName - The field name.
-   * @param {'number' | 'string' | 'date'} fieldType - The field type.
-   *
-   * @returns {string | number | Date} The formatted value of the field.
-   */
-  protected getFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType): string | number | Date {
-    const fieldValue = feature.get(fieldName);
-    let returnValue: string | number | Date;
-    if (fieldType === 'date') {
-      if (typeof fieldValue === 'string') {
-        if (!this.serverDateFragmentsOrder)
-          this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(fieldValue));
-        returnValue = DateMgt.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
-      } else {
-        // All vector dates are kept internally in UTC.
-        returnValue = DateMgt.convertToUTC(`${DateMgt.convertMilisecondsToDate(fieldValue)}Z`);
-      }
-      const reverseTimeZone = true;
-      if (this.externalFragmentsOrder)
-        returnValue = DateMgt.applyOutputDateFormat(returnValue, this.externalFragmentsOrder, reverseTimeZone);
-      return returnValue;
-    }
-    return fieldValue;
-  }
-
-  /** ***************************************************************************************************************************
-   * Convert the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
-   *
-   * @param {Feature[]} features The array of features to convert.
-   * @param {ImageLayerEntryConfig | VectorLayerEntryConfig} layerConfig The layer configuration.
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The Array of feature information.
-   */
-  protected async formatFeatureInfoResult(
-    features: Feature[],
-    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    try {
-      if (!features.length) return [];
-
-      const featureInfo = layerConfig?.source?.featureInfo;
-
-      // Loop on the features to build the array holding the promises for their canvas
-      const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement }>[] = [];
-      features.forEach((featureNeedingItsCanvas) => {
-        promisedAllCanvasFound.push(
-          new Promise((resolveCanvas) => {
-            // GV: Call the function with layerConfig.legendFilterIsOff = true to force the feature to get is canvas
-            // GV: If we don't, it will create canvas only for visible elements and because tables are stored feature will never get its canvas
-            getFeatureCanvas(featureNeedingItsCanvas, this.getStyle(layerConfig.layerPath)!, layerConfig.filterEquation, true, true)
-              .then((canvas) => {
-                resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
-              })
-              .catch((error) => {
-                // Log
-                logger.logPromiseFailed(
-                  'getFeatureCanvas in featureNeedingItsCanvas loop in formatFeatureInfoResult in AbstractGeoViewLayer',
-                  error
-                );
-              });
-          })
-        );
-      });
-
-      // Loop on the promised feature infos
-      let featureKeyCounter = 0;
-      let fieldKeyCounter = 0;
-      const queryResult: TypeFeatureInfoEntry[] = [];
-      const arrayOfFeatureInfo = await Promise.all(promisedAllCanvasFound);
-      arrayOfFeatureInfo.forEach(({ feature, canvas }) => {
-        let extent;
-        if (feature.getGeometry()) extent = feature.getGeometry()!.getExtent();
-
-        const featureInfoEntry: TypeFeatureInfoEntry = {
-          // feature key for building the data-grid
-          featureKey: featureKeyCounter++,
-          geoviewLayerType: this.type,
-          extent,
-          geometry: feature,
-          featureIcon: canvas,
-          fieldInfo: {},
-          nameField: layerConfig?.source?.featureInfo?.nameField || null,
-        };
-
-        const featureFields = feature.getKeys();
-        featureFields.forEach((fieldName) => {
-          if (fieldName !== 'geometry') {
-            const currentOutfield = featureInfo?.outfields?.length
-              ? featureInfo.outfields.find((outfield) => outfield.name === fieldName)
-              : undefined;
-
-            // Calculate the field domain if not already calculated
-            const fieldDomain = currentOutfield?.domain || this.getFieldDomain(fieldName, layerConfig);
-
-            // Calculate the field type if not already calculated
-            const fieldType = currentOutfield?.type || this.getFieldType(fieldName, layerConfig);
-
-            featureInfoEntry.fieldInfo[fieldName] = {
-              fieldKey: fieldKeyCounter++,
-              value: this.getFieldValue(feature, fieldName, fieldType),
-              dataType: fieldType,
-              alias: currentOutfield?.alias || fieldName,
-              domain: fieldDomain,
-            };
-          }
-        });
-        queryResult.push(featureInfoEntry);
-      });
-      return queryResult;
-    } catch (error) {
-      // Log
-      logger.logError(error);
-      return [];
-    }
-  }
-
-  /** ***************************************************************************************************************************
-   * Get the layerFilter that is associated to the layer. Returns undefined when the layer config can't be found using the layer
-   * path.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {string | undefined} The filter associated to the layer or undefined.
-   */
-  getLayerFilter(layerPath: string): string | undefined {
-    const layerConfig = this.getLayerConfig(layerPath);
-    // TODO: Refactor to put the 'layerFilter' at the right place. Meanwhile, using `any` here
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (layerConfig as any)?.layerFilter;
-  }
-
-  /**
-   * Overridable function called when the layer gets in loaded status.
-   * @param layerConfig - The layer configuration
-   */
-  onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void {
-    // Set loaded
-    layerConfig.layerStatus = 'loaded';
-
-    // Emit event
-    this.#emitIndividualLayerLoaded({ layerPath: layerConfig.layerPath });
-
-    // Set visibility
-    this.setVisible(layerConfig.initialSettings?.states?.visible !== false, layerConfig.layerPath);
-  }
-
   /**
    * Overridable function called when the layer gets in error status.
    * @param layerConfig - The layer configuration
@@ -1378,28 +679,6 @@ export abstract class AbstractGeoViewLayer {
   onError(layerConfig: AbstractBaseLayerEntryConfig): void {
     // Set error
     layerConfig.layerStatus = 'error';
-  }
-
-  /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
-   *
-   * @param {string} layerPath The Layer path to the layer's configuration.
-   *
-   * @returns {Extent} The new layer bounding box.
-   */
-  abstract getBounds(layerPath: string): Extent | undefined;
-
-  /**
-   * Overridable function that gets the extent of an array of features.
-   * @param {string} layerPath - The layer path
-   * @param {string[]} objectIds - The IDs of features to get extents from.
-   * @returns {Promise<Extent | undefined>} The extent of the features, if available
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
-    logger.logError(`Feature geometry for ${objectIds} is unavailable from ${layerPath}`);
-    return Promise.resolve(undefined);
   }
 
   /** ***************************************************************************************************************************
@@ -1497,118 +776,6 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerNameChangedEvent} event - The event to emit
-   * @private
-   */
-  #emitLayerNameChanged(event: LayerNameChangedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerNameChangedHandlers, event);
-  }
-
-  /**
-   * Registers a layer name changed event handler.
-   * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onLayerNameChanged(callback: LayerNameChangedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a layer name changed event handler.
-   * @param {LayerNameChangedDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offLayerNameChanged(callback: LayerNameChangedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerNameChangedHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all handlers.
-   * @param {LegendQueryingEvent} event The event to emit
-   * @private
-   */
-  #emitLegendQuerying(event: LegendQueryingEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLegendQueryingHandlers, event);
-  }
-
-  /**
-   * Registers a legend querying event handler.
-   * @param {LegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
-   */
-  onLegendQuerying(callback: LegendQueryingDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLegendQueryingHandlers, callback);
-  }
-
-  /**
-   * Unregisters a legend querying event handler.
-   * @param {LegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
-   */
-  offLegendQuerying(callback: LegendQueryingDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLegendQueryingHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all handlers.
-   * @param {LegendQueriedEvent} event The event to emit
-   * @private
-   */
-  #emitLegendQueried(event: LegendQueriedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLegendQueriedHandlers, event);
-  }
-
-  /**
-   * Registers a legend queried event handler.
-   * @param {LegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
-   */
-  onLegendQueried(callback: LegendQueriedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLegendQueriedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a legend queried event handler.
-   * @param {LegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
-   */
-  offLegendQueried(callback: LegendQueriedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLegendQueriedHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all handlers.
-   * @param {VisibleChangedEvent} event The event to emit
-   * @private
-   */
-  #emitVisibleChanged(event: VisibleChangedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onVisibleChangedHandlers, event);
-  }
-
-  /**
-   * Registers a visible changed event handler.
-   * @param {VisibleChangedDelegate} callback The callback to be executed whenever the event is emitted
-   */
-  onVisibleChanged(callback: VisibleChangedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onVisibleChangedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a visible changed event handler.
-   * @param {VisibleChangedDelegate} callback The callback to stop being called whenever the event is emitted
-   */
-  offVisibleChanged(callback: VisibleChangedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onVisibleChangedHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all handlers.
    * @param {LayerEntryProcessedEvent} event The event to emit
    * @private
    */
@@ -1692,34 +859,6 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Emits filter applied event.
-   * @param {FilterAppliedEvent} event - The event to emit
-   * @private
-   */
-  protected emitLayerFilterApplied(event: LayerFilterAppliedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerFilterAppliedHandlers, event);
-  }
-
-  /**
-   * Registers a filter applied event handler.
-   * @param {FilterAppliedDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerFilterAppliedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a filter applied event handler.
-   * @param {FilterAppliedDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerFilterAppliedHandlers, callback);
-  }
-
-  /**
    * Emits an event to all handlers.
    * @param {LayerStyleChangedEvent} event - The event to emit
    */
@@ -1744,44 +883,6 @@ export abstract class AbstractGeoViewLayer {
   offLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
-  }
-
-  /**
-   * Emits opacity changed event.
-   * @param {LayerOpacityChangedEvent} event - The event to emit
-   * @private
-   */
-  #emitLayerOpacityChanged(event: LayerOpacityChangedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerOpacityChangedHandlers, event);
-  }
-
-  /**
-   * Registers an opacity changed event handler.
-   * @param {LayerOpacityChangedDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerOpacityChangedHandlers, callback);
-  }
-
-  /**
-   * Unregisters an opacity changed event handler.
-   * @param {LayerOpacityChangedDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerOpacityChangedHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all handlers when the layer's features have been loaded on the map.
-   * @param {IndividualLayerLoadedEvent} event - The event to emit
-   * @private
-   */
-  #emitIndividualLayerLoaded(event: IndividualLayerLoadedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onIndividualLayerLoadedHandlers, event);
   }
 
   /**
@@ -1813,11 +914,6 @@ export type LegendQueryingEvent = {
 };
 
 /**
- * Define a delegate for the event handler function signature
- */
-type LegendQueryingDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueryingEvent, void>;
-
-/**
  * Define an event for the delegate
  */
 export type LegendQueriedEvent = {
@@ -1826,22 +922,12 @@ export type LegendQueriedEvent = {
 };
 
 /**
- * Define a delegate for the event handler function signature
- */
-type LegendQueriedDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueriedEvent, void>;
-
-/**
  * Define an event for the delegate
  */
 export type VisibleChangedEvent = {
   layerPath: string;
   visible: boolean;
 };
-
-/**
- * Define a delegate for the event handler function signature
- */
-type VisibleChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, VisibleChangedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1891,52 +977,6 @@ export interface TypeWmsLegendStyle {
   name: string;
   legend: HTMLCanvasElement | null;
 }
-
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerFilterAppliedEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type LayerFilterAppliedEvent = {
-  // The layer path of the affected layer
-  layerPath: string;
-  // The filter
-  filter: string;
-};
-
-/**
- * Define a delegate for the event handler function signature.
- */
-type LayerNameChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerNameChangedEvent, void>;
-
-/**
- * Define an event for the delegate.
- */
-export type LayerNameChangedEvent = {
-  // The new layer name.
-  layerName?: string;
-  // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-  // The layer path.
-  layerPath: string;
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerOpacityChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerOpacityChangedEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type LayerOpacityChangedEvent = {
-  // The layer path of the affected layer
-  layerPath: string;
-  // The filter
-  opacity: number;
-};
 
 /**
  * Define a delegate for the event handler function signature
