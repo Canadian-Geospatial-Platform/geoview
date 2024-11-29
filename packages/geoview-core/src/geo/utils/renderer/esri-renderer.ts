@@ -324,7 +324,8 @@ function getStyleGeometry(settings: TypeKindOfVectorSettings): TypeStyleGeometry
  */
 function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeLayerStyleConfig | undefined {
   const style: TypeLayerStyleConfig = {};
-  const fields = [renderer.field1];
+  const fields = [];
+  if (renderer.field1) fields.push(renderer.field1);
   if (renderer.field2) fields.push(renderer.field2);
   if (renderer.field3) fields.push(renderer.field3);
 
