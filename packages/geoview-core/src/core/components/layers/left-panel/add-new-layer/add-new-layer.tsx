@@ -41,7 +41,7 @@ import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classe
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GeoPackage, TypeGeoPackageLayerConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { GeoCore } from '@/geo/layer/other/geocore';
-import { GeoViewLayerAddedResult } from '@/geo/layer/layer';
+import { GeoViewLayerAddedResult, LayerApi } from '@/geo/layer/layer';
 import {
   CONST_LAYER_TYPES,
   TypeGeoviewLayerTypeWithGeoCore,
@@ -216,7 +216,7 @@ export function AddNewLayer(): JSX.Element {
         listOfLayerEntryConfig: [] as OgcWmsLayerEntryConfig[],
         metadataAccessPath: accessPath,
       } as TypeWMSLayerConfig;
-      const wmsGeoviewLayerInstance = new WmsGeoviewClass(mapId, wmsGeoviewLayerConfig);
+      const wmsGeoviewLayerInstance = new WmsGeoviewClass(mapId, wmsGeoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
       // Synchronize the geoviewLayerId.
       wmsGeoviewLayerConfig.geoviewLayerId = wmsGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(wmsGeoviewLayerInstance);
@@ -248,7 +248,7 @@ export function AddNewLayer(): JSX.Element {
                   geoviewLayerConfig: wmsGeoviewLayerConfig,
                   layerId: childLayer.Name as string,
                   layerName: childLayer.Title as string,
-                } as OgcWmsLayerEntryConfig)
+                } as unknown as OgcWmsLayerEntryConfig)
               );
             }
 

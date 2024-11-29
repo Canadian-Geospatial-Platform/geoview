@@ -7,9 +7,7 @@ import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 import { Extent } from 'ol/extent';
 
-import cloneDeep from 'lodash/cloneDeep';
-
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
@@ -21,6 +19,7 @@ import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -79,14 +78,17 @@ export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
 export class WMS extends AbstractGeoViewRaster {
   WMSStyles: string[];
 
+  fullSubLayers: boolean = false;
+
   /** ***************************************************************************************************************************
    * Initialize layer
    * @param {string} mapId the id of the map
    * @param {TypeWMSLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeWMSLayerConfig) {
+  constructor(mapId: string, layerConfig: TypeWMSLayerConfig, fullSubLayers: boolean) {
     super(CONST_LAYER_TYPES.WMS, layerConfig, mapId);
     this.WMSStyles = [];
+    this.fullSubLayers = fullSubLayers;
   }
 
   /** ***************************************************************************************************************************
@@ -97,17 +99,21 @@ export class WMS extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (in config)
   protected override async fetchServiceMetadata(): Promise<void> {
     const metadataUrl = this.metadataAccessPath;
-    if (metadataUrl) {
-      const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
+    let curatedMetadataUrl = metadataUrl;
+    if (!metadataUrl.includes('request=GetCapabilities')) {
+      curatedMetadataUrl = `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
+    }
+    if (curatedMetadataUrl) {
+      const metadataAccessPathIsXmlFile = curatedMetadataUrl.slice(-4).toLowerCase() === '.xml';
       if (metadataAccessPathIsXmlFile) {
         // XML metadata is a special case that does not use GetCapabilities to get the metadata
-        await this.#fetchXmlServiceMetadata(metadataUrl);
+        await this.#fetchXmlServiceMetadata(curatedMetadataUrl);
       } else {
         const layerConfigsToQuery = this.#getLayersToQuery();
         if (layerConfigsToQuery.length === 0) {
           // Use GetCapabilities to get the metadata
           try {
-            const metadata = await this.#getServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`);
+            const metadata = await this.#getServiceMetadata(curatedMetadataUrl);
             this.metadata = metadata;
             this.#processMetadataInheritance();
           } catch (error) {
@@ -126,9 +132,7 @@ export class WMS extends AbstractGeoViewRaster {
             for (i = 0; layerConfigsToQuery[i].layerId !== layerConfig.layerId; i++);
             if (i === layerIndex)
               // This is the first time we execute this query
-              promisedArrayOfMetadata.push(
-                this.#getServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities&Layers=${layerConfig.layerId}`)
-              );
+              promisedArrayOfMetadata.push(this.#getServiceMetadata(`${curatedMetadataUrl}&Layers=${layerConfig.layerId}`));
             // query already done. Use previous returned value
             else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
           });
@@ -234,7 +238,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {string} layerName The layer name to be found
    * @param {TypeJsonObject} layerProperty The layer property from the metadata
-   * @param {number[]} pathToTheLayerProperty The path leading to the parent of the layerProperty parameter
+   * @param {number[]} pathToTheParentLayer The path leading to the parent of the layerProperty parameter
    *
    * @returns {number[]} An array containing the path to the layer or [] if not found.
    * @private
@@ -396,7 +400,7 @@ export class WMS extends AbstractGeoViewRaster {
         }
 
         if ('Layer' in layerFound) {
-          this.#createGroupLayer(layerFound, layerConfig as AbstractBaseLayerEntryConfig);
+          this.#createGroupLayer(layerFound, layerConfig as unknown as GroupLayerEntryConfig);
           return;
         }
 
@@ -409,35 +413,57 @@ export class WMS extends AbstractGeoViewRaster {
    * This method create recursively dynamic group layers from the service metadata.
    *
    * @param {TypeJsonObject} layer The dynamic group layer metadata.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
+   * @param {GroupLayerEntryConfig} layerConfig The group layer configuration associated to the dynamic group.
    * @private
    */
   // GV Layers Refactoring - Obsolete (in config)
-  #createGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig): void {
+  #createGroupLayer(layer: TypeJsonObject, layerConfig: GroupLayerEntryConfig): void {
     // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
     // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
     // TODO: The answer is no. Even if the final structure is the same, the input structure is different for each geoview layer types.
     const newListOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
     const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : ([layer.Layer] as TypeJsonArray);
 
+    // GV Special WMS group layer case situation...
+    // TODO: Bug - There was an issue with the layer configuration for a long time ('Private element not on object') which
+    // TO.DOCONT: was causing the loop below to fail before finishing the first loop (midway deep into 'registerLayerConfigInit()').
+    // TO.DOCONT: The fact that an exception was raised was actually provoking the behavior that we want with the UI display of
+    // TO.DOCONT: the WMS group layers (between Layers and Details tabs).
+    // TO.DOCONT: However, fixing the cloning issue and completing the loops as they should be, was causing an unwanted side-effect
+    // TO.DOCONT: with the UI.
+    // TO.DOCONT: Therefore, we're making it crash on purpose by raising a 'Processing cancelled' exception for now to keep
+    // TO.DOCONT: the behavior the same as before..
+
+    // Assign the layer name right away
+    layerConfig.layerName = layer.Title as string;
+
+    // Loop on the sub layers
     arrayOfLayerMetadata.forEach((subLayer) => {
       // Log for pertinent debugging purposes
       logger.logTraceCore('WMS - createGroupLayer', 'Cloning the layer config', layerConfig.layerPath);
-      const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
-      subLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
+      const subLayerEntryConfig: ConfigBaseClass = layerConfig.clone();
+      subLayerEntryConfig.parentLayerConfig = layerConfig;
       subLayerEntryConfig.layerId = subLayer.Name as string;
       subLayerEntryConfig.layerName = subLayer.Title as string;
-      newListOfLayerEntryConfig.push(subLayerEntryConfig);
+      newListOfLayerEntryConfig.push(subLayerEntryConfig as TypeLayerEntryConfig);
 
       // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
       this.getMapViewer().layer.registerLayerConfigInit(subLayerEntryConfig);
+
+      // If we don't want all sub layers (simulating the 'Private element not on object' error we had for long time)
+      if (!this.fullSubLayers) {
+        // Skip the rest on purpose (ref TODO: Bug above)
+        throw new Error('Processing cancelled');
+      }
     });
 
-    const switchToGroupLayer = Cast<GroupLayerEntryConfig>(layerConfig);
-    switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
-    switchToGroupLayer.layerName = layer.Title as string;
-    switchToGroupLayer.isMetadataLayerGroup = true;
-    switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
+    // TODO: Bug - Continuation of the TODO Bug above.. Purposely don't do this anymore (the throw will cause skipping of this)
+    // TO.DOCONT: in order to reproduce the old behavior now that the 'Private element' bug is fixed..
+    // TO.DOCONT: Leaving the code there, uncommented, so that if/when we remove the throw of the
+    // TO.DOCONT: 'Processing cancelled' this gets executed as would be expected
+    layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
+    layerConfig.isMetadataLayerGroup = true;
+    layerConfig.listOfLayerEntryConfig = newListOfLayerEntryConfig;
     this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
   }
 
