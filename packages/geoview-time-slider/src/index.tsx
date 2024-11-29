@@ -149,7 +149,7 @@ class TimeSliderPlugin extends FooterPlugin {
 
         if (timeDimension) {
           this.mapViewer()
-            .layer.getGeoviewLayerHybrid(layerPath)
+            .layer.getGeoviewLayer(layerPath)
             ?.setTemporalDimension({
               ...timeDimension,
               default: obj.defaultValue,

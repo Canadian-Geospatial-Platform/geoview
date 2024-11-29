@@ -1,9 +1,7 @@
 import BaseLayer from 'ol/layer/Base';
-import TileLayer from 'ol/layer/Tile';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import VectorTileSource, { Options as SourceOptions } from 'ol/source/VectorTile';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
-import { Extent } from 'ol/extent';
 
 import { applyStyle } from 'ol-mapbox-style';
 
@@ -16,7 +14,6 @@ import {
   TypeGeoviewLayerConfig,
   TypeTileGrid,
   layerEntryIsGroupLayer,
-  TypeFeatureInfoLayerConfig,
 } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
@@ -24,7 +21,6 @@ import { api } from '@/app';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -105,22 +101,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   constructor(mapId: string, layerConfig: TypeVectorTilesConfig) {
     super(CONST_LAYER_TYPES.VECTOR_TILES, layerConfig, mapId);
-  }
-
-  /** ***************************************************************************************************************************
-   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {TypeOutfieldsType} The type of the field.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  // TODO refactor - this looks like it will not work, investigate further
-  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
-    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo as unknown as TypeFeatureInfoLayerConfig;
-    const outFieldEntry = fieldDefinitions.outfields?.find((fieldDefinition) => fieldDefinition.name === fieldName);
-    return outFieldEntry?.type || 'string';
   }
 
   /** ***************************************************************************************************************************
@@ -259,32 +239,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
       layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
     }
     return Promise.resolve(layerConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
-   *
-   * @param {string} layerPath The Layer path to the layer's configuration.
-   *
-   * @returns {Extent | undefined} The new layer bounding box.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  override getBounds(layerPath: string): Extent | undefined {
-    // Get the layer
-    const layer = this.getOLLayer(layerPath) as TileLayer<VectorTileSource> | undefined;
-
-    // Get the source projection
-    const sourceProjection = this.getSourceProjection(layerPath);
-
-    // Get the layer bounds
-    let sourceExtent = layer?.getSource()?.getTileGrid()?.getExtent();
-    if (sourceExtent) {
-      // Make sure we're in the map projection
-      sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
-    }
-
-    // Return the calculated layer bounds
-    return sourceExtent;
   }
 
   /**
