@@ -323,7 +323,8 @@ export class WFS extends AbstractGeoViewVector {
   // Patch for field type only use for WFS
   static getFieldType(fieldName: string, layerConfig: VectorLayerEntryConfig): TypeOutfieldsType {
     const fieldDefinitions = layerConfig.getLayerMetadata() as TypeJsonArray;
-    const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
+    const fieldDefinition =
+      fieldDefinitions !== undefined ? fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName) : undefined;
     if (!fieldDefinition) return 'string';
     const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0] as string;
     if (fieldEntryType === 'date') return 'date';
