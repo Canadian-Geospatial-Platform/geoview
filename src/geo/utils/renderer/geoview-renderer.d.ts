@@ -1,6 +1,6 @@
 import { Style } from 'ol/style';
 import Feature, { FeatureLike } from 'ol/Feature';
-import { TypeStyleGeometry, TypeStyleConfig, TypeBaseStyleConfig } from '@/geo/map/map-schema-types';
+import { TypeStyleGeometry, TypeLayerStyleConfig, TypeLayerStyleConfigInfo } from '@/geo/map/map-schema-types';
 import { FilterNodeArrayType } from './geoview-renderer-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 /** ***************************************************************************************************************************
@@ -27,7 +27,7 @@ export declare function loadImage(src: string): Promise<HTMLImageElement | null>
  *
  * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
  */
-export declare function getLegendStyles(styleConfig: TypeStyleConfig | undefined): Promise<TypeVectorLayerStyles>;
+export declare function getLegendStyles(styleConfig: TypeLayerStyleConfig | undefined): Promise<TypeVectorLayerStyles>;
 /** ***************************************************************************************************************************
  * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
  * create it using the default style strategy.
@@ -39,7 +39,7 @@ export declare function getLegendStyles(styleConfig: TypeStyleConfig | undefined
  * @param {() => Promise<string | null>} callbackWhenCreatingStyle - An optional callback to execute when a new style had to be created
  * @returns {Style | undefined} The style applied to the feature or undefined if not found.
  */
-export declare function getAndCreateFeatureStyle(feature: FeatureLike, style: TypeStyleConfig, label: string, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean, callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeBaseStyleConfig) => void): Style | undefined;
+export declare function getAndCreateFeatureStyle(feature: FeatureLike, style: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean, callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
 /** ***************************************************************************************************************************
  * This method gets the canvas icon from the style of the feature using the layer entry config.
  * @param {Feature} feature - The feature that need its canvas icon to be defined.
@@ -49,7 +49,7 @@ export declare function getAndCreateFeatureStyle(feature: FeatureLike, style: Ty
  * @param {boolean} useRecycling - Special parameter to optimize canvas creation time when functions is called multiple times.
  * @returns {Promise<HTMLCanvasElement>} The canvas icon associated to the feature or a default empty canvas.
  */
-export declare function getFeatureCanvas(feature: Feature, style: TypeStyleConfig, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean, useRecycling?: boolean): Promise<HTMLCanvasElement>;
+export declare function getFeatureCanvas(feature: Feature, style: TypeLayerStyleConfig, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean, useRecycling?: boolean): Promise<HTMLCanvasElement>;
 /** ***************************************************************************************************************************
  * Analyse the filter and split it in syntaxique nodes.  If a problem is detected, an error object is thrown with an
  * explanatory message.

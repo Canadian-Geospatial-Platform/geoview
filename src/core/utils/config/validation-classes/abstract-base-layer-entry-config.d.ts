@@ -1,4 +1,4 @@
-import { TypeBaseSourceVectorInitialConfig, TypeSourceImageEsriInitialConfig, TypeSourceImageInitialConfig, TypeSourceImageStaticInitialConfig, TypeSourceImageWmsInitialConfig, TypeSourceTileInitialConfig, TypeStyleConfig, TypeStyleGeometry, TypeStyleSettings, TypeVectorSourceInitialConfig, TypeVectorTileSourceInitialConfig } from '@/geo/map/map-schema-types';
+import { TypeBaseSourceVectorInitialConfig, TypeSourceImageEsriInitialConfig, TypeSourceImageInitialConfig, TypeSourceImageStaticInitialConfig, TypeSourceImageWmsInitialConfig, TypeSourceTileInitialConfig, TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeVectorSourceInitialConfig, TypeVectorTileSourceInitialConfig } from '@/geo/map/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
@@ -16,7 +16,7 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeBaseSourceVectorInitialConfig | TypeSourceTileInitialConfig | TypeVectorSourceInitialConfig | TypeVectorTileSourceInitialConfig | TypeSourceImageInitialConfig | TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig;
     /** Style to apply to the vector layer. */
-    style?: TypeStyleConfig;
+    layerStyle?: TypeLayerStyleConfig;
     /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
     listOfLayerEntryConfig: never;
     /**
@@ -53,7 +53,7 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
      * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
      */
-    getFirstStyleSettings(): TypeStyleSettings | undefined;
+    getFirstStyleSettings(): TypeLayerStyleSettings | undefined;
     /**
      * Overrides the serialization of the mother class
      * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig

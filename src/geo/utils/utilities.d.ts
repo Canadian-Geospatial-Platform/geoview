@@ -10,7 +10,7 @@ import { Coordinate } from 'ol/coordinate';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeStyleConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
 export declare const layerTypes: Record<"CSV" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/geo/layer/geoview-layers/abstract-geoview-layers").TypeGeoviewLayerType>;
 /**
  * Fetch the json response from the ESRI map server to get REST endpoint metadata
@@ -87,11 +87,11 @@ export declare function createEmptyBasemap(): TileLayer<XYZ>;
 /** ***************************************************************************************************************************
  * This method gets the legend styles used by the the layer as specified by the style configuration.
  *
- * @param {TypeStyleConfig} styleConfig - Layer style configuration.
+ * @param {TypeLayerStyleConfig} styleConfig - Layer style configuration.
  *
  * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
  */
-export declare function getLegendStylesFromConfig(styleConfig: TypeStyleConfig): Promise<TypeVectorLayerStyles>;
+export declare function getLegendStylesFromConfig(styleConfig: TypeLayerStyleConfig): Promise<TypeVectorLayerStyles>;
 /**
  * Gets computed translate values
  * https://zellwk.com/blog/css-translate-values-in-javascript/

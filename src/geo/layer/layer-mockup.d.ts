@@ -1,5 +1,5 @@
 import { TypeJsonObject } from '@/core/types/global-types';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerEntryType, TypeStyleConfig, TypeVectorSourceFormats } from '../map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerEntryType, TypeLayerStyleConfig, TypeVectorSourceFormats } from '../map/map-schema-types';
 import { TimeDimension } from '@/core/utils/date-mgt';
 export declare abstract class LayerMockup {
     #private;
@@ -9,7 +9,7 @@ export declare abstract class LayerMockup {
     static configNonMetalMines(layerId: string, metadata: unknown, source: unknown, style: unknown): TypeLayerEntryConfig;
     static configTop100Metadata(): TypeJsonObject;
     static configTop100Source(format: TypeVectorSourceFormats | undefined): TypeJsonObject;
-    static configTop100Style(): TypeStyleConfig;
+    static configTop100Style(): TypeLayerStyleConfig;
     static configNonMetalMetadata(): TypeJsonObject;
     static configNonMetalSource(): TypeJsonObject;
     static configNonMetalStyle(): TypeJsonObject;

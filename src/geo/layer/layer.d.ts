@@ -156,6 +156,11 @@ export declare class LayerApi {
      */
     loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): Promise<void>;
     /**
+     * Refreshes GeoCore Layers
+     * @returns {Promise<void>} A promise which resolves when done refreshing
+     */
+    reloadGeocoreLayers(): Promise<void>;
+    /**
      * Adds a Geoview Layer by GeoCore UUID.
      * @param {string} uuid - The GeoCore UUID to add to the map
      * @returns {Promise<void>} A promise which resolves when done adding
