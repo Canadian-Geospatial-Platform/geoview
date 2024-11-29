@@ -180,9 +180,12 @@ export class GVWMS extends AbstractGVRaster {
               }
             }
           }
-        } else if (infoFormat === 'text/html') {
-          featureMember = { html: response.data };
-        } else featureMember = { plain_text: { '#text': response.data } };
+        } else if (response.data && response.data.length > 0) {
+          // The response has any data to show
+          if (infoFormat === 'text/html') {
+            featureMember = { html: response.data };
+          } else featureMember = { plain_text: { '#text': response.data } };
+        }
 
         if (featureMember) {
           const featureInfoResult = GVWMS.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
@@ -202,7 +205,7 @@ export class GVWMS extends AbstractGVRaster {
    * Overrides the fetching of the legend for a WMS layer.
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
-  override async getLegend(): Promise<TypeLegend | null> {
+  override async onFetchLegend(): Promise<TypeLegend | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
@@ -214,7 +217,7 @@ export class GVWMS extends AbstractGVRaster {
       // If more than 1
       if (this.WMSStyles.length > 1) {
         for (let i = 0; i < this.WMSStyles.length; i++) {
-          // TODO: refactor - does this await in a loop may haev an impact on performance?
+          // TODO: refactor - does this await in a loop may have an impact on performance?
           // TO.DOCONT: In this case here, when glancing at the code, the only reason to await would be if the order that the styleLegend
           // TO.DOCONT: get added to the styleLegends array MUST be the same order as they are in the WMSStyles array (as in they are 2 arrays with same indexes pointers).
           // TO.DOCONT: Without the await, WMSStyles[2] stuff could be associated with something in styleLegends[1] position for example (1<>2).
@@ -251,7 +254,7 @@ export class GVWMS extends AbstractGVRaster {
       return legend;
     } catch (error) {
       // Log
-      logger.logError('gv-wms.getLegend()\n', error);
+      logger.logError('gv-wms.onFetchLegend()\n', error);
       return null;
     }
   }

@@ -29,6 +29,7 @@ export abstract class Projection {
     3578: 'EPSG:3578',
     LCC: 'EPSG:3978',
     3979: 'EPSG:3979',
+    42101: 'EPSG:42101',
     102100: 'EPSG:102100', // TODO: Minor - The official name of this projection is ESRI:102100 (not EPSG:102100). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     102184: 'EPSG:102184', // TODO: Minor - The official name of this projection is ESRI:102184 (not EPSG:102184). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     102190: 'EPSG:102190', // TODO: Minor - The official name of this projection is ESRI:102190 (not EPSG:102190). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
@@ -415,6 +416,21 @@ function init4269Projection(): void {
 }
 
 /**
+ * Initializes the EPSG:42101 projection
+ */
+function init42101Projection(): void {
+  proj4.defs(
+    Projection.PROJECTION_NAMES[42101],
+    '+proj=lcc +lat_0=0 +lon_0=-95 +lat_1=49 +lat_2=77 +x_0=0 +y_0=-8000000 +datum=WGS84 +units=m +no_defs +type=crs'
+  );
+  register(proj4);
+
+  const projection = olGetProjection(Projection.PROJECTION_NAMES[42101]);
+
+  if (projection) Projection.PROJECTIONS['42101'] = projection;
+}
+
+/**
  * Initializes the EPSG:3979 projection
  */
 function init3979Projection(): void {
@@ -499,6 +515,7 @@ initCSRS98Projection();
 init3578Projection();
 init3979Projection();
 init4269Projection();
+init42101Projection();
 init102100Projection();
 init102184Projection();
 init102190Projection();

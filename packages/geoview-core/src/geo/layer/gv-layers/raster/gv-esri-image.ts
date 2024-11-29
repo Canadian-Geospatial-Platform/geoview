@@ -102,7 +102,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * Overrides the fetching of the legend for an Esri image layer.
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
-  override async getLegend(): Promise<TypeLegend | null> {
+  override async onFetchLegend(): Promise<TypeLegend | null> {
     const layerConfig = this.getLayerConfig();
     try {
       if (!layerConfig) return null;

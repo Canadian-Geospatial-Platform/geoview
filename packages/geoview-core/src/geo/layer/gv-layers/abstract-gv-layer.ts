@@ -393,15 +393,15 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Queries the legend.
-   * This function raises legend querying and queried events. It calls the overridable getLegend() function.
+   * This function raises legend querying and queried events. It calls the overridable onFetchLegend() function.
    * @returns {Promise<TypeLegend | null>} The promise when the legend (or null) will be received
    */
   queryLegend(): Promise<TypeLegend | null> {
     // Emit that the legend has been queried
     this.#emitLegendQuerying();
 
-    // Get the legend
-    const promiseLegend = this.getLegend();
+    // Fetch the legend by calling the overridable function
+    const promiseLegend = this.onFetchLegend();
 
     // Whenever the promise resolves
     promiseLegend
@@ -452,8 +452,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * of the layerConfig object is undefined, the legend property of the object returned will be null.
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  async getLegend(): Promise<TypeLegend | null> {
-    // TODO: Refactor - Layers refactoring. Rename this function to onFetchLegend() once the layers refactoring is done
+  async onFetchLegend(): Promise<TypeLegend | null> {
     try {
       const legend: TypeLegend = {
         type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
