@@ -94,11 +94,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Gets the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds.
+   * Gets the bounds of the layer.
    * @returns {Extent} The layer bounding box.
    */
-  // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-  abstract getBounds(layerPath: string): Extent | undefined;
+  abstract getBounds(): Extent | undefined;
 
   /**
    * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
@@ -152,8 +151,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns The layer style
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getStyle(layerPath: string): TypeLayerStyleConfig | undefined {
-    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
+  getStyle(): TypeLayerStyleConfig | undefined {
     return this.#layerStyle;
   }
 
@@ -161,10 +159,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Sets the layer style
    * @param {TypeStyleConfig | undefined} style - The layer style
    */
-  setStyle(layerPath: string, style: TypeLayerStyleConfig): void {
-    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
+  setStyle(style: TypeLayerStyleConfig): void {
     this.#layerStyle = style;
-    this.#emitLayerStyleChanged({ style, layerPath });
+    this.#emitLayerStyleChanged({ style });
   }
 
   /**
@@ -459,8 +456,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     try {
       const legend: TypeLegend = {
         type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
-        styleConfig: this.getStyle(this.getLayerPath()),
-        legend: await getLegendStyles(this.getStyle(this.getLayerPath())),
+        styleConfig: this.getStyle(),
+        legend: await getLegendStyles(this.getStyle()),
       };
       return legend;
     } catch (error) {
@@ -523,7 +520,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
             // GV: Call the function with layerConfig.legendFilterIsOff = true to force the feature to get is canvas
             // GV: If we don't, it will create canvas only for visible elements and because tables are stored feature will never get its canvas
-            getFeatureCanvas(featureNeedingItsCanvas, this.getStyle(layerConfig.layerPath)!, layerConfig.filterEquation, true, true)
+            getFeatureCanvas(featureNeedingItsCanvas, this.getStyle()!, layerConfig.filterEquation, true, true)
               .then((canvas) => {
                 resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
               })
@@ -617,8 +614,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {string | undefined} The filter associated to the layer or undefined.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getLayerFilter(layerPath: string): string | undefined {
-    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
+  getLayerFilter(): string | undefined {
     const layerConfig = this.getLayerConfig();
     // TODO: Refactor to put the 'layerFilter' at the right place. Meanwhile, using `any` here
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -798,9 +794,6 @@ type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleCh
 export type LayerStyleChangedEvent = {
   // The style
   style: TypeLayerStyleConfig;
-
-  // TODO: Refactor - After layers refactoring, remove the layerPath parameter here
-  layerPath: string;
 };
 
 /**
@@ -834,8 +827,6 @@ type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilter
  * Define an event for the delegate
  */
 export type LayerFilterAppliedEvent = {
-  // The layer path of the affected layer
-  layerPath: string;
   // The filter
   filter: string;
 };

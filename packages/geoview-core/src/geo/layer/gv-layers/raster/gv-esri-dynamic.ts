@@ -323,14 +323,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Gets the layer view filter. The filter is derived from the uniqueValue or the classBreak visibility flags and a layerFilter
    * associated to the layer.
-   * @returns {string} The filter associated to the layerPath
+   * @returns {string} The filter associated to the layer
    */
   getViewFilter(): string {
     const layerConfig = this.getLayerConfig();
     const { layerFilter } = layerConfig;
 
     // Get the style
-    const style = this.getStyle(layerConfig.layerPath);
+    const style = this.getStyle();
 
     if (style) {
       const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeLayerStyleSettings): void => {
@@ -628,8 +628,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Call parent
     super.onLoaded();
 
-    // Apply view filter immediately (no need to provide a layer path here so '' is sent (hybrid work))
-    this.applyViewFilter('', this.getLayerConfig().layerFilter || '');
+    // Apply view filter immediately
+    this.applyViewFilter(this.getLayerConfig().layerFilter || '');
   }
 
   /**
@@ -640,10 +640,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true): void {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  applyViewFilter(filter: string, combineLegendFilter = true): void {
     // Log
-    logger.logTraceCore('GV-ESRI-DYNAMIC - applyViewFilter');
+    logger.logTraceCore('GV-ESRI-DYNAMIC - applyViewFilter', this.getLayerPath());
 
     const layerConfig = this.getLayerConfig();
     const olLayer = this.getOLLayer() as ImageLayer<ImageArcGISRest>;
@@ -684,7 +683,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Emit event
     this.emitLayerFilterApplied({
-      layerPath,
       filter: filterValueToUse,
     });
   }
@@ -694,8 +692,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {Extent | undefined} The layer bounding box.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getBounds(layerPath: string): Extent | undefined {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  override getBounds(): Extent | undefined {
     // Get the metadata extent
     const metadataExtent = this.getMetadataExtent();
 
@@ -714,11 +711,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Sends a query to get ESRI Dynamic feature geometries and calculates an extent from them.
-   * @param {string} layerPath - The layer path.
    * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
    * @returns {Promise<Extent | undefined>} The extent of the features, if available.
    */
-  override async getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
+  override async getExtentFromFeatures(objectIds: string[]): Promise<Extent | undefined> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig();
     let baseUrl = layerEntryConfig.source.dataAccessPath;

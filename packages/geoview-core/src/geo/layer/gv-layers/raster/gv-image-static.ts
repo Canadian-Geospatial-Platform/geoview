@@ -142,8 +142,7 @@ export class GVImageStatic extends AbstractGVRaster {
    * @returns {Extent | undefined} The layer bounding box.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getBounds(layerPath: string): Extent | undefined {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  override getBounds(): Extent | undefined {
     // Get the source projection
     const sourceProjection = this.getOLSource().getProjection() || undefined;
 

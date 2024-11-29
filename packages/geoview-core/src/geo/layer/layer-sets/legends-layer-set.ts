@@ -4,8 +4,7 @@ import { logger } from '@/core/utils/logger';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { AbstractGeoViewLayer, LayerStyleChangedEvent } from '../geoview-layers/abstract-geoview-layers';
-import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
+import { AbstractGVLayer, LayerStyleChangedEvent } from '../gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
 import { LayerApi } from '../layer';
 
@@ -20,7 +19,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
   declare resultSet: TypeLegendResultSet;
 
   // Keep a bounded reference to the handle layer status changed
-  #boundHandleLayerStyleChanged: (layer: AbstractGeoViewLayer | AbstractGVLayer, layerStyleEvent: LayerStyleChangedEvent) => void;
+  #boundHandleLayerStyleChanged: (layer: AbstractGVLayer, layerStyleEvent: LayerStyleChangedEvent) => void;
 
   /**
    * Constructs a Legends LayerSet to manage layers legends.
@@ -44,12 +43,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    * @param {string} layerPath - The layer path
    * @returns {boolean} True when the layer should be registered to this legends-layer-set
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean {
+  protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Always register layers for the legends-layer-set, because we want 'the box' in the UI to show the layer status progression
     return true;
   }
@@ -71,15 +70,14 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    */
-  protected override onRegisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): void {
-    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here
+  protected override onRegisterLayer(layer: AbstractBaseLayer): void {
     // Call parent
-    super.onRegisterLayer(layer, layerPath);
+    super.onRegisterLayer(layer);
 
     // If regular layer
-    if (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer) {
+    if (layer instanceof AbstractGVLayer) {
       // Register handler on layer style change
       layer.onLayerStyleChanged(this.#boundHandleLayerStyleChanged);
     }
@@ -144,7 +142,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
     if (
       layer &&
       layerConfig &&
-      (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer) &&
+      layer instanceof AbstractGVLayer &&
       this.resultSet[layerPath].legendQueryStatus !== 'querying' &&
       (this.#legendShouldBeQueried(layerConfig) || forced)
     ) {
@@ -155,7 +153,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
       this.#propagateToStore(this.resultSet[layerPath]);
 
       // Query the legend
-      const legendPromise = layer.queryLegend(layerPath);
+      const legendPromise = layer.queryLegend();
 
       // Whenever the legend response comes in
       legendPromise
@@ -193,12 +191,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Handles when a layer style changes on a registered layer
-   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer which changed its styles
+   * @param {AbstractGVLayer} layer - The layer which changed its styles
    * @param {LayerStyleChangedEvent} event - The layer style changed event
    */
-  #handleLayerStyleChanged(layer: AbstractGeoViewLayer | AbstractGVLayer, event: LayerStyleChangedEvent): void {
-    // TODO: Refactor - Layers refactoring. Replace event.layerPath by something like AbstractGVLayer.getLayerPath()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  #handleLayerStyleChanged(layer: AbstractGVLayer, event: LayerStyleChangedEvent): void {
     // Force query the legend as we have a new style
-    this.#checkQueryLegend(event.layerPath, true);
+    this.#checkQueryLegend(layer.getLayerPath(), true);
   }
 }

@@ -54,13 +54,9 @@ import { TypeLegendLayer } from '@/core/components/layers/types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
-import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
-import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
@@ -1238,22 +1234,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static applyLayerFilters(mapId: string, layerPath: string): void {
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
     if (geoviewLayer) {
-      if (
-        geoviewLayer instanceof WMS ||
-        geoviewLayer instanceof GVWMS ||
-        geoviewLayer instanceof EsriImage ||
-        geoviewLayer instanceof GVEsriImage
-      ) {
+      if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
         const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
-        if (filter) geoviewLayer.applyViewFilter(layerPath, filter);
+        if (filter) geoviewLayer.applyViewFilter(filter);
       } else {
         const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
 
         // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
-        (geoviewLayer as AbstractGeoViewVector | AbstractGVVector | EsriDynamic | GVEsriDynamic).applyViewFilter(
-          layerPath,
-          filters.join(' and ')
-        );
+        (geoviewLayer as AbstractGVVector | GVEsriDynamic).applyViewFilter(filters.join(' and '));
       }
     }
   }

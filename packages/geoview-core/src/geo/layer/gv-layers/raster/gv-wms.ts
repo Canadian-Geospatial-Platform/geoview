@@ -465,8 +465,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {string} wmsStyleId - The style identifier that will be used.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  setWmsStyle(wmsStyleId: string, layerPath: string): void {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done (it should be moved when calling getLayerFilter below too)
+  setWmsStyle(wmsStyleId: string): void {
     // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
     this.getOLSource()?.updateParams({ STYLES: wmsStyleId });
   }
@@ -478,8 +477,8 @@ export class GVWMS extends AbstractGVRaster {
     // Call parent
     super.onLoaded();
 
-    // Apply view filter immediately (no need to provide a layer path here so '' is sent (hybrid work))
-    this.applyViewFilter('', this.getLayerConfig().layerFilter || '');
+    // Apply view filter immediately
+    this.applyViewFilter(this.getLayerConfig().layerFilter || '');
   }
 
   /**
@@ -491,13 +490,12 @@ export class GVWMS extends AbstractGVRaster {
    * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true): void {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done (it should be moved when calling getLayerFilter below too)
+  applyViewFilter(filter: string, combineLegendFilter = true): void {
     const layerConfig = this.getLayerConfig();
     const olLayer = this.getOLLayer();
 
     // Log
-    logger.logTraceCore('GVWMS - applyViewFilter', layerPath);
+    logger.logTraceCore('GVWMS - applyViewFilter', this.getLayerPath());
 
     // Get source
     const source = olLayer.getSource();
@@ -530,7 +528,6 @@ export class GVWMS extends AbstractGVRaster {
 
         // Emit event
         this.emitLayerFilterApplied({
-          layerPath,
           filter: filterValueToUse,
         });
       }
@@ -542,8 +539,7 @@ export class GVWMS extends AbstractGVRaster {
    * @returns {Extent | undefined} The layer bounding box.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getBounds(layerPath: string): Extent | undefined {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  override getBounds(): Extent | undefined {
     const layerConfig = this.getLayerConfig();
 
     // Get the source projection
