@@ -1,5 +1,6 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageWmsInitialConfig } from '@/geo/map/map-schema-types';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -39,5 +40,14 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // Default value for layerConfig.source.serverType is 'mapserver'.
     if (!this.source.serverType) this.source.serverType = 'mapserver';
+  }
+
+  /**
+   * Clones an instance of a OgcWmsLayerEntryConfig.
+   *
+   * @returns {ConfigBaseClass} The cloned OgcWmsLayerEntryConfig instance
+   */
+  protected override onClone(): ConfigBaseClass {
+    return new OgcWmsLayerEntryConfig(this);
   }
 }

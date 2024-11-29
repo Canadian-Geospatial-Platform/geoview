@@ -1202,12 +1202,19 @@ export class LayerApi {
     // Remove layer info from registered layers
     this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
       if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
-        // Remove ol layer
+        // Remove actual OL layer from the map
         if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
-        // Unregister layer
+
+        // Unregister layer config from the application
         this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath)!);
-        // Remove from registered layers
+
+        // Remove from registered layer configs
         delete this.#layerEntryConfigs[registeredLayerPath];
+        delete this.#geoviewLayers[registeredLayerPath];
+
+        // Remove from registered layers
+        delete this.#gvLayers[registeredLayerPath];
+        delete this.#olLayers[registeredLayerPath];
       }
     });
 
