@@ -561,59 +561,81 @@ export class LayerApi {
 
   /**
    * Refreshes GeoCore Layers
-   * @returns {Promise<void>} A promise which resolves when done refreshing
+   * @returns void} A promise which resolves when done refreshing
    */
-  reloadGeocoreLayers(): Promise<void> {
+  reloadGeocoreLayers(): void {
     const configs = this.getLayerEntryConfigs();
     const originalMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
-    const promisesOfGeoCoreGeoviewLayers: Promise<TypeGeoviewLayerConfig[]>[] = [];
 
-    configs
-      .filter((config) => {
-        // Filter to just Geocore layers and not child layers
-        if (api.config.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
-          return true;
-        }
-        return false;
-      })
-      .forEach((config) => {
-        // Remove and add back in GeoCore Layers and return their promises
-        this.removeLayerUsingPath(config.layerPath);
-        const geoCore = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
-        promisesOfGeoCoreGeoviewLayers.push(geoCore.createLayersFromUUID(config.geoviewLayerConfig.geoviewLayerId));
-      });
+    // Have to do the Promise allSettled so the new MapOrderedLayerInfo has all the children layerPaths
+    Promise.allSettled(
+      configs
+        .filter((config) => {
+          // Filter to just Geocore layers and not child layers
+          if (api.config.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
+            return true;
+          }
+          return false;
+        })
+        .map((config) => {
+          // Remove and add back in GeoCore Layers and return their promises
+          this.removeLayerUsingPath(config.layerPath);
+          return this.addGeoviewLayerByGeoCoreUUID(config.geoviewLayerConfig.geoviewLayerId);
+        })
+    )
+      .then(() => {
+        const originalLayerPaths = originalMapOrderedLayerInfo.map((info) => info.layerPath);
+        const newLayerPaths = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId()).map((info) => info.layerPath);
 
-    return Promise.allSettled(promisesOfGeoCoreGeoviewLayers)
-      .then((promisedLayers) => {
-        promisedLayers
-          .filter((promise) => promise.status === 'fulfilled')
-          .map((promise) => promise as PromiseFulfilledResult<TypeGeoviewLayerConfig[]>)
-          .forEach((promise) => {
-            promise.value.forEach((geoviewLayerConfig) => {
-              this.addGeoviewLayer(geoviewLayerConfig);
-            });
-          });
-        const newMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
-        const originalLayerPaths = originalMapOrderedLayerInfo.map((layer) => layer.layerPath);
-        const childLayersToRemove = newMapOrderedLayerInfo
-          .map((layer) => layer.layerPath)
-          .filter((path) => !originalLayerPaths.includes(path));
-        if (childLayersToRemove) {
-          childLayersToRemove.forEach((childPath) => {
-            this.removeLayerUsingPath(childPath);
-          });
-        }
+        // re remove any child layers that may have been removed before the reload
+        newLayerPaths.forEach((path) => {
+          if (!originalLayerPaths.includes(path)) {
+            this.removeLayerUsingPath(path);
+          }
+        });
         MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), originalMapOrderedLayerInfo);
+
+        const changedVisibilityPaths = originalMapOrderedLayerInfo
+          .filter((info) => {
+            const config = configs.find((c) => c.layerPath === info.layerPath);
+            return config?.initialSettings.states?.visible !== info.visible;
+          })
+          .map((info) => info.layerPath);
+
+        // Add listener for each layer with visibility
+        // that needs to be changed when added to the map
+        changedVisibilityPaths.forEach((path) => {
+          function setLayerVisibility(sender: LayerApi, event: LayerAddedEvent): void {
+            if (path.includes(event.layer.geoviewLayerId)) {
+              whenThisThen(
+                () => {
+                  const lyrConfig = sender.getLayerEntryConfig(path);
+                  return lyrConfig && lyrConfig.layerStatus === 'loaded';
+                },
+                10000,
+                500
+              )
+                .then(() => {
+                  const { visible } = originalMapOrderedLayerInfo.filter((info) => info.layerPath === path)[0];
+                  sender.getGeoviewLayerHybrid(path)?.setVisible(visible, path);
+                  sender.offLayerAdded(setLayerVisibility);
+                })
+                .catch((err) => logger.logError(err));
+            }
+          }
+          // Tried with onLayerLoaded, but didn't work as expected
+          this.onLayerAdded(setLayerVisibility);
+        });
       })
-      .catch((error) => logger.logError(error));
+      .catch((err) => logger.logError(err));
   }
 
   /**
    * Adds a Geoview Layer by GeoCore UUID.
    * @param {string} uuid - The GeoCore UUID to add to the map
-   * @returns {Promise<void>} A promise which resolves when done adding
+   * @returns {Promise<GeoViewLayerAddedResult | undefined>} A promise which resolves when done adding
    */
-  async addGeoviewLayerByGeoCoreUUID(uuid: string): Promise<void> {
+  async addGeoviewLayerByGeoCoreUUID(uuid: string): Promise<(GeoViewLayerAddedResult | undefined)[]> {
     // Add a place holder to the ordered layer info array
     const layerInfo: TypeOrderedLayerInfo = {
       layerPath: uuid,
@@ -630,9 +652,9 @@ export class LayerApi {
     // Create geocore layer configs and add
     const geoCoreGeoviewLayerInstance = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
     const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
-    layers.forEach((geoviewLayerConfig) => {
+    return layers.map((geoviewLayerConfig) => {
       // Redirect
-      this.addGeoviewLayer(geoviewLayerConfig);
+      return this.addGeoviewLayer(geoviewLayerConfig);
     });
   }
 
