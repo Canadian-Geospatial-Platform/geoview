@@ -560,9 +560,9 @@ export class LayerApi {
   }
 
   /**
-   * Gets all layer paths from an Entry Config
-   * @param {string} parentPath - The Map Config Layer Entry
-   * @returns {string[]} All parent / child layer paths
+   * Gets all child paths from a parent path
+   * @param {string} parentPath - The parent path
+   * @returns {string[]} Child layer paths
    */
   #getAllChildPaths(parentPath: string): string[] {
     const parentLayerEntryConfig = this.getLayerEntryConfig(parentPath)?.geoviewLayerConfig.listOfLayerEntryConfig;
