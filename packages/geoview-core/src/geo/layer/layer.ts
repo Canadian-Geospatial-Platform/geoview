@@ -633,9 +633,9 @@ export class LayerApi {
   /**
    * Adds a Geoview Layer by GeoCore UUID.
    * @param {string} uuid - The GeoCore UUID to add to the map
-   * @returns {Promise<GeoViewLayerAddedResult | undefined>} A promise which resolves when done adding
+   * @returns {Promise<void>} A promise which resolves when done adding
    */
-  async addGeoviewLayerByGeoCoreUUID(uuid: string): Promise<(GeoViewLayerAddedResult | undefined)[]> {
+  async addGeoviewLayerByGeoCoreUUID(uuid: string): Promise<void> {
     // Add a place holder to the ordered layer info array
     const layerInfo: TypeOrderedLayerInfo = {
       layerPath: uuid,
@@ -652,9 +652,9 @@ export class LayerApi {
     // Create geocore layer configs and add
     const geoCoreGeoviewLayerInstance = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
     const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
-    return layers.map((geoviewLayerConfig) => {
+    layers.forEach((geoviewLayerConfig) => {
       // Redirect
-      return this.addGeoviewLayer(geoviewLayerConfig);
+      this.addGeoviewLayer(geoviewLayerConfig);
     });
   }
 
