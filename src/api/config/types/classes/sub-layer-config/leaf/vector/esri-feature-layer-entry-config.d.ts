@@ -1,5 +1,5 @@
 import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
-import { TypeStyleConfig, TypeLayerEntryType, TypeSourceEsriFeatureInitialConfig } from '@config/types/map-schema-types';
+import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceEsriFeatureInitialConfig } from '@config/types/map-schema-types';
 /**
  * The ESRI feature geoview sublayer class.
  */
@@ -7,7 +7,7 @@ export declare class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEn
     /** Source settings to apply to the GeoView feature layer source at creation time. */
     source: TypeSourceEsriFeatureInitialConfig;
     /** Style to apply to the feature layer. */
-    style?: TypeStyleConfig;
+    layerStyle?: TypeLayerStyleConfig;
     /**
      * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
      * used to do its validation.

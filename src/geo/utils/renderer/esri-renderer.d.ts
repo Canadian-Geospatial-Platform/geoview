@@ -1,4 +1,4 @@
-import { TypeStyleConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
 /** *****************************************************************************************************************************
  * type guard function that redefines an EsriBaseRenderer as an EsriUniqueValueRenderer if the type attribute of the
  * verifyIfRenderer parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
@@ -71,7 +71,7 @@ export declare const esriRendererIsClassBreaks: (verifyIfRenderer: EsriBaseRende
  *
  * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-export declare function getStyleFromEsriRenderer(renderer: EsriBaseRenderer): TypeStyleConfig | undefined;
+export declare function getStyleFromEsriRenderer(renderer: EsriBaseRenderer): TypeLayerStyleConfig | undefined;
 export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 export type EsriBaseRenderer = {
     type: EsriRendererTypes;

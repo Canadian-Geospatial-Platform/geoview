@@ -1,4 +1,4 @@
-import { TypeStyleConfig } from '@config/types/map-schema-types';
+import { TypeLayerStyleConfig } from '@config/types/map-schema-types';
 export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 export type EsriBaseRenderer = {
     type: EsriRendererTypes;
@@ -156,7 +156,7 @@ export declare const esriRendererIsClassBreaks: (verifyIfRenderer: EsriBaseRende
  *
  * @param {EsriBaseRenderer} renderer - ESRI renderer to convert.
  *
- * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+ * @returns {TypeLayerStyleSettings | undefined} The Geoview style or undefined if it can not be created.
  */
-export declare function createStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeStyleConfig | undefined;
+export declare function createStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeLayerStyleConfig | undefined;
 export {};

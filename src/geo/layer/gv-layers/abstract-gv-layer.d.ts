@@ -11,7 +11,7 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeStyleConfig, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType } from '@/geo/map/map-schema-types';
+import { TypeLayerStyleConfig, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType } from '@/geo/map/map-schema-types';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from './abstract-base-layer';
@@ -64,12 +64,12 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * Gets the layer style
      * @returns The layer style
      */
-    getStyle(layerPath: string): TypeStyleConfig | undefined;
+    getStyle(layerPath: string): TypeLayerStyleConfig | undefined;
     /**
      * Sets the layer style
      * @param {TypeStyleConfig | undefined} style - The layer style
      */
-    setStyle(layerPath: string, style: TypeStyleConfig): void;
+    setStyle(layerPath: string, style: TypeLayerStyleConfig): void;
     /**
      * Gets the layer attributions
      * @returns {string[]} The layer attributions
@@ -267,7 +267,7 @@ type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleCh
  * Define an event for the delegate
  */
 export type LayerStyleChangedEvent = {
-    style: TypeStyleConfig;
+    style: TypeLayerStyleConfig;
     layerPath: string;
 };
 /**

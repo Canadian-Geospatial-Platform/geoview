@@ -1,4 +1,4 @@
-import { TypeStyleConfig, TypeLayerEntryType, TypeSourceWfsInitialConfig } from '@config/types/map-schema-types';
+import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceWfsInitialConfig } from '@config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 import { WfsLayerConfig } from '@config/types/classes/geoview-config/vector-config/wfs-config';
 /**
@@ -9,7 +9,7 @@ export declare class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     /** Source settings to apply to the GeoView image layer source at creation time. */
     source: TypeSourceWfsInitialConfig;
     /** Style to apply to the raster layer. */
-    style?: TypeStyleConfig;
+    layerStyle?: TypeLayerStyleConfig;
     /**
      * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
      * used to do its validation.

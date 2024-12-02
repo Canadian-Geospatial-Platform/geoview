@@ -1,7 +1,7 @@
 import { Extent } from 'ol/extent';
 import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntryPartial, TypeResultSet, TypeResultSetEntry, TypeStyleConfig } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
 import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 type LayerActions = ILayerState['actions'];
 export interface ILayerState {
@@ -53,7 +53,7 @@ export type TypeLegendResultInfo = {
 export type LegendQueryStatus = 'init' | 'querying' | 'queried';
 export type TypeLegend = {
     type: TypeGeoviewLayerType;
-    styleConfig?: TypeStyleConfig | null;
+    styleConfig?: TypeLayerStyleConfig | null;
     legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
 };
 export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;

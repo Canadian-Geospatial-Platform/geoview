@@ -270,7 +270,7 @@ export { WmsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf
 export { WfsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
 export { GeoJsonLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
 /** Valid keys for the geometryType property. */
-export type TypeStyleGeometry = 'point' | 'linestring' | 'multilinestring' | 'polygon' | 'multipolygon';
+export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
 export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group';
 /** Temporal dimension associated to the layer. */
@@ -423,15 +423,17 @@ export type codeValueEntryType = {
     name: string;
     code: unknown;
 };
-/** Type of Style to apply to the GeoView vector layer based on geometry types. */
-export type TypeStyleConfig = {
-    type: TypeStyleConfigType;
+/** Styles to apply to the GeoView vector layer by geometry types. */
+export type TypeLayerStyleConfig = Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>>;
+/** Style settings to apply to the GeoView vector layer. */
+export type TypeLayerStyleSettings = {
+    type: TypeLayerStyleConfigType;
     fields: string[];
     hasDefault: boolean;
-    info: TypeStyleConfigInfo[];
+    info: TypeLayerStyleConfigInfo[];
 };
 /** Information needed to render the feature. */
-export type TypeStyleConfigInfo = {
+export type TypeLayerStyleConfigInfo = {
     /** Flag used to show/hide features associated to the label (default: true). */
     visible: boolean;
     /** The label to display for the field. */
@@ -445,7 +447,7 @@ export type TypeStyleConfigInfo = {
     settings: TypeBaseVectorGeometryConfig;
 };
 /** Valid keys for the type property of style configurations. */
-export type TypeStyleConfigType = 'simple' | 'uniqueValue' | 'classBreaks';
+export type TypeLayerStyleConfigType = 'simple' | 'uniqueValue' | 'classBreaks';
 /** Definition of the line symbol vector settings type. */
 export type TypeBaseVectorGeometryConfig = {
     /** Type of vector config. */

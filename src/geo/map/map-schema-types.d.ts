@@ -63,7 +63,6 @@ export interface TypeVectorSourceInitialConfig extends TypeBaseSourceVectorIniti
     /** The character used to separate columns of csv file */
     separator?: string;
 }
-export type TypeKindOfVectorSettings = TypeBaseVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig | TypeSimpleSymbolVectorConfig | TypeIconSymbolVectorConfig;
 export type TypeBaseVectorConfig = {
     /** Type of vector config */
     type: 'lineString' | 'filledPolygon' | 'simpleSymbol' | 'iconSymbol';
@@ -168,7 +167,7 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInit
     /** The type of the remote WMS server. The default value is mapserver. */
     serverType?: TypeOfServer;
     /** Style to apply. Default = '' */
-    style?: string | string[];
+    wmsStyle?: string | string[];
 }
 export interface TypeSourceImageStaticInitialConfig extends Omit<TypeBaseSourceImageInitialConfig, 'featureInfo'> {
     /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
@@ -337,12 +336,55 @@ export declare const isFilledPolygonVectorConfig: (verifyIfConfig: TypeBaseVecto
 export declare const isSimpleSymbolVectorConfig: (verifyIfConfig: TypeBaseVectorConfig) => verifyIfConfig is TypeSimpleSymbolVectorConfig;
 export declare const isIconSymbolVectorConfig: (verifyIfConfig: TypeBaseVectorConfig) => verifyIfConfig is TypeIconSymbolVectorConfig;
 /** ******************************************************************************************************************************
- * Valid values to specify line styles.
+ * Base style configuration.
  */
-export type TypeLineStyle = 'dash' | 'dash-dot' | 'dash-dot-dot' | 'dot' | 'longDash' | 'longDash-dot' | 'null' | 'shortDash' | 'shortDash-dot' | 'shortDash-dot-dot' | 'solid';
+export type TypeBaseStyleType = 'simple' | 'uniqueValue' | 'classBreaks';
 /** ******************************************************************************************************************************
- * Stroke style for vector features.
+ * Valid keys for the TypeStyleConfig object.
  */
+export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
+/** Styles to apply to the GeoView vector layer by geometry types. */
+export type TypeLayerStyleConfig = Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>>;
+/** Style settings to apply to the GeoView vector layer. */
+export type TypeLayerStyleSettings = {
+    type: TypeLayerStyleConfigType;
+    fields: string[];
+    hasDefault: boolean;
+    info: TypeLayerStyleConfigInfo[];
+};
+/** Information needed to render the feature. */
+export type TypeLayerStyleConfigInfo = {
+    /** Flag used to show/hide features associated to the label (default: true). */
+    visible: boolean;
+    /** The label to display for the field. */
+    label: string;
+    /**
+     * Simple type has a single value at index 0; uniqueValue type has many entries (up to 3 for ESRI) and classBreaks
+     * type has two entries (index 0 for min and index 1 for max).
+     */
+    values: (string | number)[];
+    /** The geometry settings. */
+    settings: TypeKindOfVectorSettings;
+};
+/** Valid keys for the type property of style configurations. */
+export type TypeLayerStyleConfigType = 'simple' | 'uniqueValue' | 'classBreaks';
+/** Definition of the line symbol vector settings type. */
+export type TypeBaseVectorGeometryConfig = {
+    /** Type of vector config. */
+    type: TypeBaseVectorType;
+};
+/** Valid values for the type property of the base vector settingd. */
+export type TypeBaseVectorType = 'lineString' | 'filledPolygon' | 'simpleSymbol' | 'iconSymbol';
+/** Kind of symbol vector settings. */
+export type TypeKindOfVectorSettings = TypeBaseVectorGeometryConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig | TypeSimpleSymbolVectorConfig | TypeIconSymbolVectorConfig;
+/** Definition of the line symbol vector settings type. */
+export interface TypeLineStringVectorConfig extends TypeBaseVectorGeometryConfig {
+    /** Type of vector config */
+    type: 'lineString';
+    /** Line stroke symbology */
+    stroke: TypeStrokeSymbolConfig;
+}
+/** Stroke style for vector features. */
 export type TypeStrokeSymbolConfig = {
     /** Color to use for vector features. */
     color?: string;
@@ -351,23 +393,10 @@ export type TypeStrokeSymbolConfig = {
     /** Width to use for the stroke */
     width?: number;
 };
-/** ******************************************************************************************************************************
- * Definition of the line symbol vector settings type.
- */
-export interface TypeLineStringVectorConfig extends TypeBaseVectorConfig {
-    /** Type of vector config */
-    type: 'lineString';
-    /** Line stroke symbology */
-    stroke: TypeStrokeSymbolConfig;
-}
-/** ******************************************************************************************************************************
- * Valid values to specify fill styles.
- */
-export type TypeFillStyle = 'null' | 'solid' | 'backwardDiagonal' | 'cross' | 'diagonalCross' | 'forwardDiagonal' | 'horizontal' | 'vertical';
-/** ******************************************************************************************************************************
- * Definition of the line symbol vector settings type.
- */
-export interface TypePolygonVectorConfig extends TypeBaseVectorConfig {
+/** Valid values to specify line styles. */
+export type TypeLineStyle = 'dash' | 'dash-dot' | 'dash-dot-dot' | 'dot' | 'longDash' | 'longDash-dot' | 'null' | 'shortDash' | 'shortDash-dot' | 'shortDash-dot-dot' | 'solid';
+/** Definition of the polygon symbol vector settings type. */
+export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
     /** Type of vector config */
     type: 'filledPolygon';
     /** Fill color for vector features. */
@@ -381,14 +410,10 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorConfig {
     /** Kind of filling  for vector features. Default = solid.  */
     fillStyle: TypeFillStyle;
 }
-/** ******************************************************************************************************************************
- * Valid values to specify symbol shapes.
- */
-export type TypeSymbol = 'circle' | '+' | 'diamond' | 'square' | 'triangle' | 'X' | 'star';
-/** ******************************************************************************************************************************
- * Definition of the circle symbol vector settings type.
- */
-export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorConfig {
+/** Valid values to specify fill styles. */
+export type TypeFillStyle = 'null' | 'solid' | 'backwardDiagonal' | 'cross' | 'diagonalCross' | 'forwardDiagonal' | 'horizontal' | 'vertical';
+/** Definition of the circle symbol vector settings type. */
+export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorGeometryConfig {
     /** Type of vector config */
     type: 'simpleSymbol';
     /** Symbol rotation in radians. */
@@ -404,10 +429,10 @@ export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorConfig {
     /** Symbol to draw. */
     symbol: TypeSymbol;
 }
-/** ******************************************************************************************************************************
- * Definition of the icon symbol vector settings type.
- */
-export interface TypeIconSymbolVectorConfig extends TypeBaseVectorConfig {
+/** Valid values to specify symbol shapes. */
+export type TypeSymbol = 'circle' | '+' | 'diamond' | 'square' | 'triangle' | 'X' | 'star';
+/** Definition of the icon symbol vector settings type. */
+export interface TypeIconSymbolVectorConfig extends TypeBaseVectorGeometryConfig {
     /** Type of vector config */
     type: 'iconSymbol';
     /** Mime type of the icon. */
@@ -430,133 +455,3 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorConfig {
      */
     crossOrigin?: string;
 }
-/** ******************************************************************************************************************************
- * Base style configuration.
- */
-export type TypeBaseStyleType = 'simple' | 'uniqueValue' | 'classBreaks';
-/** ******************************************************************************************************************************
- * Base style configuration.
- */
-export type TypeBaseStyleConfig = {
-    /** Type of style. */
-    styleType: TypeBaseStyleType;
-};
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeBaseStyleConfig as a TypeSimpleStyleConfig if the type attribute of the
- * verifyIfConfig parameter is 'simple'. The type ascention applies only to the true block of the if clause that use
- * this function.
- *
- * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if
- * the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export declare const isSimpleStyleConfig: (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings) => verifyIfConfig is TypeSimpleStyleConfig;
-/** ******************************************************************************************************************************
- * Simple style configuration.
- */
-export interface TypeSimpleStyleConfig extends TypeBaseStyleConfig {
-    /** Type of style. */
-    styleType: 'simple';
-    /** Label associated to the style */
-    label: string;
-    /** options associated to the style. */
-    settings: TypeKindOfVectorSettings;
-}
-/** ******************************************************************************************************************************
- * Unique value style information configuration.
- */
-export type TypeUniqueValueStyleInfo = {
-    /** Label used by the style. */
-    label: string;
-    /** Values associated to the style. */
-    values: (string | number | Date)[];
-    /** Flag used to show/hide features associated to the label (default: yes). */
-    visible?: boolean;
-    /** options associated to the style. */
-    settings: TypeKindOfVectorSettings;
-};
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeStyleSettings | TypeKindOfVectorSettings as a TypeUniqueValueStyleConfig if the
- * styleType attribute of the verifyIfConfig parameter is 'uniqueValue'. The type ascention applies only to the true block of the
- * if clause that use this function.
- *
- * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the
- * type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export declare const isUniqueValueStyleConfig: (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings) => verifyIfConfig is TypeUniqueValueStyleConfig;
-/** ******************************************************************************************************************************
- * Unique value style configuration.
- */
-export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
-    /** Type of style. */
-    styleType: 'uniqueValue';
-    /** Label used if field/value association is not found. */
-    defaultLabel?: string;
-    /** Options used if field/value association is not found. */
-    defaultSettings?: TypeKindOfVectorSettings;
-    /** Flag used to show/hide features associated to the default label
-     *  (default: no if ESRI renderer in the metadata has no default symbol defined). */
-    defaultVisible?: boolean;
-    /** Fields used by the style. */
-    fields: string[];
-    /** Unique value style information configuration. */
-    uniqueValueStyleInfo: TypeUniqueValueStyleInfo[];
-}
-/** ******************************************************************************************************************************
- * Class break style information configuration.
- */
-export type TypeClassBreakStyleInfo = {
-    /** Label used by the style. */
-    label: string;
-    /** Minimum values associated to the style. */
-    minValue: number | string | Date | undefined | null;
-    /** Flag used to show/hide features associated to the label (default: yes). */
-    visible?: boolean;
-    /** Maximum values associated to the style. */
-    maxValue: number | string | Date;
-    /** options associated to the style. */
-    settings: TypeKindOfVectorSettings;
-};
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeStyleSettings | TypeKindOfVectorSettings as a TypeClassBreakStyleConfig if the
- * styleType attribute of the verifyIfConfig parameter is 'classBreaks'. The type ascention applies only to the true block of the
- * if clause that use this function.
- *
- * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the
- * type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export declare const isClassBreakStyleConfig: (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings) => verifyIfConfig is TypeClassBreakStyleConfig;
-/** ******************************************************************************************************************************
- * Class break style configuration.
- */
-export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
-    /** Type of style. */
-    styleType: 'classBreaks';
-    /** Label used if field/value association is not found. */
-    defaultLabel?: string;
-    /** Options used if field/value association is not found. */
-    defaultVisible?: boolean;
-    /** Flag used to show/hide features associated to the default label (default: yes). */
-    defaultSettings?: TypeKindOfVectorSettings;
-    /** Field used by the style. */
-    field: string;
-    /** Class break style information configuration. */
-    classBreakStyleInfo: TypeClassBreakStyleInfo[];
-}
-/** ******************************************************************************************************************************
- * Type of Style to apply to the GeoView vector layer source at creation time.
- */
-export type TypeStyleSettings = TypeBaseStyleConfig | TypeSimpleStyleConfig | TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig;
-/** ******************************************************************************************************************************
- * Valid keys for the TypeStyleConfig object.
- */
-export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
-/** ******************************************************************************************************************************
- * Type of Style to apply to the GeoView vector layer based on geometry types.
- */
-export type TypeStyleConfig = Partial<Record<TypeStyleGeometry, TypeStyleSettings>>;
