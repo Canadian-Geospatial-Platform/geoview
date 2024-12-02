@@ -928,26 +928,24 @@ export class MapViewer {
    * @param {boolean} resetLayer - Optional flag to ask viewer to reload layers with the new localize language
    * @returns {Promise<[void, void]>}
    */
-  setLanguage(displayLanguage: TypeDisplayLanguage, reloadLayers?: boolean | false): Promise<[void, void]> {
+  async setLanguage(displayLanguage: TypeDisplayLanguage, reloadLayers?: boolean | false): Promise<void> {
     // If the language hasn't changed don't do anything
-    if (AppEventProcessor.getDisplayLanguage(this.mapId) === displayLanguage) return Promise.resolve([undefined, undefined]);
+    if (AppEventProcessor.getDisplayLanguage(this.mapId) === displayLanguage) return;
     if (VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
-      const promise = AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
+      await AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
 
       // if flag is true, reload GeoCore layers
       if (reloadLayers) {
-        this.layer.reloadGeocoreLayers().catch((error) => logger.logError(error));
+        this.layer.reloadGeocoreLayers();
       }
 
       // Emit language changed event
       this.#emitMapLanguageChanged({ language: displayLanguage });
-      // Return the promise
-      return promise;
+      return;
     }
 
     // Unsupported
     this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
-    return Promise.resolve([undefined, undefined]);
   }
 
   /**
