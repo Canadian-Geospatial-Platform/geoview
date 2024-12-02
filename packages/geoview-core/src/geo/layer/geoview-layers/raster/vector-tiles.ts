@@ -240,17 +240,4 @@ export class VectorTiles extends AbstractGeoViewRaster {
     }
     return Promise.resolve(layerConfig);
   }
-
-  /**
-   * Set Vector Tile style
-   *
-   * @param {string} layerPath Path of layer to style.
-   * @param {string} styleUrl The url of the styles to apply.
-   * @returns {Promise<unknown>}
-   */
-  // GV Layers Refactoring - Obsolete (just should be removed?)
-  setVectorTileStyle(layerPath: string, styleUrl: string): Promise<unknown> {
-    // FIXME: Check if this should be removed or done somewhere else?
-    return applyStyle(this.getMapViewer().layer.getOLLayer(layerPath) as VectorTileLayer<VectorTileSource>, styleUrl);
-  }
 }

@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 // We want more than 1 Error class here to save files
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 
 export class GeoViewLayerError extends GeoViewError {
   // The layer id
@@ -37,13 +37,13 @@ export class GeoViewLayerNotCreatedError extends GeoViewLayerError {
 
 export class GeoViewLayerCreatedTwiceError extends GeoViewLayerError {
   // The layer
-  geoviewLayer: AbstractGeoViewLayer;
+  geoviewLayer: AbstractGVLayer;
 
-  constructor(geoviewLayer: AbstractGeoViewLayer, mapId: string) {
-    super(geoviewLayer.geoviewLayerId, mapId);
+  constructor(geoviewLayer: AbstractGVLayer, mapId: string) {
+    super(geoviewLayer.getGeoviewLayerId(), mapId);
 
     // Override the message
-    this.message = `Can not execute twice the createGeoViewLayers method for layer ${geoviewLayer.geoviewLayerId} on map ${mapId}`;
+    this.message = `Can not execute twice the createGeoViewLayers method for layer ${geoviewLayer.getGeoviewLayerId()} on map ${mapId}`;
 
     // Keep the informations
     this.geoviewLayer = geoviewLayer;

@@ -8,7 +8,7 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 
-import { validateExtent, getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { validateExtent, getExtentUnion } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -760,7 +760,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
           if (extent) {
             // If extent has not been defined, set it to extent
             if (!calculatedExtent) calculatedExtent = extent;
-            else getMinOrMaxExtents(calculatedExtent, extent);
+            else getExtentUnion(calculatedExtent, extent);
           }
         });
 
