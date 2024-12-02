@@ -560,12 +560,38 @@ export class LayerApi {
   }
 
   /**
+   * Gets all layer paths from an Entry Config
+   * @param {string} parentPath - The Map Config Layer Entry
+   * @returns {string[]} All parent / child layer paths
+   */
+  #getAllChildPaths(parentPath: string): string[] {
+    const parentLayerEntryConfig = this.getLayerEntryConfig(parentPath)?.geoviewLayerConfig.listOfLayerEntryConfig;
+
+    if (!parentLayerEntryConfig) return [];
+
+    function getChildPaths(listOfLayerEntryConfig: TypeLayerEntryConfig[]): string[] {
+      const layerPaths: string[] = [];
+      listOfLayerEntryConfig.forEach((entryConfig) => {
+        layerPaths.push(entryConfig.layerPath);
+        if (entryConfig.listOfLayerEntryConfig) {
+          layerPaths.push(...getChildPaths(entryConfig.listOfLayerEntryConfig));
+        }
+      });
+      return layerPaths;
+    }
+
+    const layerPaths = getChildPaths(parentLayerEntryConfig);
+    return layerPaths;
+  }
+
+  /**
    * Refreshes GeoCore Layers
-   * @returns void} A promise which resolves when done refreshing
+   * @returns {void} A promise which resolves when done refreshing
    */
   reloadGeocoreLayers(): void {
     const configs = this.getLayerEntryConfigs();
     const originalMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
+    const parentPaths: string[] = [];
 
     // Have to do the Promise allSettled so the new MapOrderedLayerInfo has all the children layerPaths
     Promise.allSettled(
@@ -579,22 +605,29 @@ export class LayerApi {
         })
         .map((config) => {
           // Remove and add back in GeoCore Layers and return their promises
+          parentPaths.push(config.layerPath);
           this.removeLayerUsingPath(config.layerPath);
           return this.addGeoviewLayerByGeoCoreUUID(config.geoviewLayerConfig.geoviewLayerId);
         })
     )
       .then(() => {
         const originalLayerPaths = originalMapOrderedLayerInfo.map((info) => info.layerPath);
-        const newLayerPaths = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId()).map((info) => info.layerPath);
 
-        // re remove any child layers that may have been removed before the reload
-        newLayerPaths.forEach((path) => {
-          if (!originalLayerPaths.includes(path)) {
-            this.removeLayerUsingPath(path);
+        // Prepare Listeners for Removing Previously Removed Layers
+        parentPaths.forEach((parentPath) => {
+          function removeChildLayers(sender: LayerApi): void {
+            const childPaths = sender.#getAllChildPaths(parentPath);
+            childPaths.forEach((childPath) => {
+              if (!originalLayerPaths.includes(childPath)) {
+                sender.removeLayerUsingPath(childPath);
+              }
+            });
+            sender.offLayerAdded(removeChildLayers);
           }
+          this.onLayerAdded(removeChildLayers);
         });
-        MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), originalMapOrderedLayerInfo);
 
+        MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), originalMapOrderedLayerInfo);
         const changedVisibilityPaths = originalMapOrderedLayerInfo
           .filter((info) => {
             const config = configs.find((c) => c.layerPath === info.layerPath);
