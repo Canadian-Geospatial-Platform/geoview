@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 /**
  * interface for north arrow icon properties
  */
@@ -11,7 +13,8 @@ interface NorthArrowIconProps {
  *
  * @param {NorthArrowIconProps} props north arrow icon properties
  */
-export function NorthArrowIcon(props: NorthArrowIconProps): JSX.Element {
+// Memoizes entire component, preventing re-renders if props haven't changed
+export const NorthArrowIcon = memo(function NorthArrowIcon(props: NorthArrowIconProps): JSX.Element {
   const { width, height } = props;
 
   return (
@@ -51,17 +54,18 @@ export function NorthArrowIcon(props: NorthArrowIconProps): JSX.Element {
       </g>
     </svg>
   );
-}
+});
 
 /**
  * Create a north pole icon
  *
  */
-export function NorthPoleIcon(): JSX.Element {
+// Memoizes entire component, preventing re-renders if props haven't changed
+export const NorthPoleIcon = memo(function NorthPoleIcon(): JSX.Element {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
       <path d="M0 0h24v24H0z" fill="none" />
       <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z" />
     </svg>
   );
-}
+});

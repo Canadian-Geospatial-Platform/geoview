@@ -427,6 +427,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setZoom(zoom);
   }
 
+  static setIsMouseInsideMap(mapId: string, inside: boolean): void {
+    // Save in store
+    this.getMapStateProtected(mapId).setterActions.setIsMouseInsideMap(inside);
+  }
+
   static setRotation(mapId: string, rotation: number): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setRotation(rotation);

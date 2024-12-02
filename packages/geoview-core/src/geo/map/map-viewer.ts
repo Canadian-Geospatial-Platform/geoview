@@ -580,9 +580,11 @@ export class MapViewer {
     const mapHTMLElement = this.map.getTargetElement();
     mapHTMLElement.addEventListener('mouseenter', () => {
       mapHTMLElement.focus({ preventScroll: true });
+      MapEventProcessor.setIsMouseInsideMap(this.mapId, true);
     });
     mapHTMLElement.addEventListener('mouseleave', () => {
       mapHTMLElement.blur();
+      MapEventProcessor.setIsMouseInsideMap(this.mapId, false);
     });
 
     // Register mouse interaction events (wheel). If element not in viewport, scroll the map into view
