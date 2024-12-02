@@ -44,7 +44,7 @@ import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { GeoViewLayerCreatedTwiceError, GeoViewLayerNotCreatedError } from '@/geo/layer/exceptions/layer-exceptions';
-import { getExtentUnionMaybe, getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentUnion } from '@/geo/utils/utilities';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -1358,7 +1358,7 @@ export class LayerApi {
 
           // If bounds has not yet been defined, set to this layers bounds.
           if (!bounds.length && layerBounds) bounds = layerBounds;
-          else if (layerBounds) bounds = getMinOrMaxExtents(bounds, layerBounds);
+          else if (layerBounds) bounds = getExtentUnion(bounds, layerBounds)!;
         });
       }
     });
@@ -1580,7 +1580,7 @@ export class LayerApi {
     let boundsUnion: Extent | undefined;
     boundsArray.forEach((bounds) => {
       // Union the bounds with each other
-      boundsUnion = getExtentUnionMaybe(boundsUnion, bounds);
+      boundsUnion = getExtentUnion(boundsUnion, bounds);
     });
 
     // Return the unioned bounds

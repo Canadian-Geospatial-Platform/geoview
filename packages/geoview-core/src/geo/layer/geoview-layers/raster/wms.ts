@@ -607,19 +607,4 @@ export class WMS extends AbstractGeoViewRaster {
       this.setTemporalDimension(layerConfig.layerPath, DateMgt.createDimensionFromOGC(wmsTimeDimension));
     }
   }
-
-  /** ***************************************************************************************************************************
-   * Set the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
-   *
-   * @param {string} wmsStyleId The style identifier that will be used.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  setWmsStyle(wmsStyleId: string, layerPath: string): void {
-    // Get the Layer using the trick for now
-    const layer = this.getOLLayer(layerPath) as ImageLayer<ImageWMS> | undefined;
-
-    // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
-    if (layer) layer.getSource()?.updateParams({ STYLES: wmsStyleId });
-  }
 }

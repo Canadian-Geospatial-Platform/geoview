@@ -28,6 +28,7 @@ import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exce
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -189,6 +190,14 @@ export abstract class AbstractGeoViewLayer {
     // GV The GVLayers need a reference to the MapViewer to be able to perform operations.
     // GV This is a trick to obtain it. Otherwise, it'd need to be provided via constructor.
     return MapEventProcessor.getMapViewer(this.mapId);
+  }
+
+  /**
+   * Gets the Geoview layer id.
+   * @returns {string} The geoview layer id
+   */
+  getGeoviewLayerId(): string {
+    return this.geoviewLayerId;
   }
 
   /** ***************************************************************************************************************************
@@ -367,7 +376,7 @@ export abstract class AbstractGeoViewLayer {
       if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
     } else {
       // Raise error
-      throw new GeoViewLayerCreatedTwiceError(this, this.mapId);
+      throw new GeoViewLayerCreatedTwiceError(this as unknown as AbstractGVLayer, this.mapId);
     }
   }
 

@@ -289,8 +289,6 @@ export class MapFeatureConfig {
     const { projection } = this.map.viewSettings;
     const center = this.map.viewSettings.initialView!.zoomAndCenter![1];
     const maxExtent = this.map.viewSettings.maxExtent!;
-    // TODO: Which one do we want, the commented one or the next one?
-    // const [extentMinX, extentMinY, extentMaxX, extentMaxY] = getMinOrMaxExtents(maxExtent, CV_MAP_EXTENTS[projection], 'min');
     const [extentMinX, extentMinY, extentMaxX, extentMaxY] = maxExtent;
 
     const minX = !Number.isNaN(extentMinX) && extentMinX < center[0] ? extentMinX : CV_VALID_MAP_CENTER[projection].long[0];
