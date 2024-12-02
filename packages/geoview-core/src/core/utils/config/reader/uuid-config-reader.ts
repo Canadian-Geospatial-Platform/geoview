@@ -91,7 +91,7 @@ export class UUIDmapConfigReader {
 
           // Get Geocore custom config layer entries values
           // TODO: Modification done only for WMS and esriDynamic... If we have esriFeature, esriImage later, we will need to fix
-          // TODO.CONT: These 4 types are the only one stored in RCS
+          // TO.DOCONT: These 4 types are the only one stored in RCS
           const customGeocoreLayerConfig = this.#getGeocoreCustomLayerConfig(result, lang);
 
           const isFeature = (url as string).indexOf('FeatureServer') > -1;

@@ -893,10 +893,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     const projectionConfig = Projection.PROJECTIONS[this.getMapState(mapId).currentProjection];
     if (bbox) {
-      // GV There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
-      // GV fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
+      // GV There were issues with fromLonLat in rare cases in LCC projections, transformExtentFromProj seems to solve them.
+      // GV fromLonLat and transformExtentFromProj give differing results in many cases, fromLonLat had issues with the first
       // GV three results from a geolocator search for "vancouver river"
-      const convertedExtent = Projection.transformExtent(bbox, Projection.PROJECTION_NAMES.LNGLAT, projectionConfig);
+      const convertedExtent = Projection.transformExtentFromProj(bbox, Projection.PROJECTION_NAMES.LNGLAT, projectionConfig);
 
       // Highlight
       this.getMapViewerLayerAPI(mapId).featureHighlight.highlightGeolocatorBBox(convertedExtent);
@@ -958,7 +958,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // If extent is in config, use it
     if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.extent) {
       const lnglatExtent = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.extent as Extent;
-      extent = Projection.transformExtent(lnglatExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
+      extent = Projection.transformExtentFromProj(lnglatExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
       options.padding = [0, 0, 0, 0];
     }
 

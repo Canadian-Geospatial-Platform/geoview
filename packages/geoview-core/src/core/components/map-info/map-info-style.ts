@@ -1,5 +1,6 @@
 // map-info.tsx
-export const getSxClasses = () => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getSxClasses = (): any => ({
   mouseScaleControlsContainer: {
     display: 'flex',
     flexDirection: 'row',

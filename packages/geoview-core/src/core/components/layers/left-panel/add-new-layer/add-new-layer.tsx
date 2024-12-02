@@ -188,10 +188,10 @@ export function AddNewLayer(): JSX.Element {
   };
 
   // TODO: REFACTOR ALL VALIDATION!!!
-  // TODOCONT: All validation MUST be refactored. For the moment they are creating config entries to be able to produce the needed
-  // TODOCONT: information for user to select the layer he wants. In the refactor we NEED single function to read metadata from url
-  // TODOCONT: and service type. At this point no layer or neither config is created, metadata is read to create the selection tree (step 3)
-  // TODOCONT: Once the user has selected the layers he wants, we create the config snippet and start the config validation process.
+  // TO.DOCONT: All validation MUST be refactored. For the moment they are creating config entries to be able to produce the needed
+  // TO.DOCONT: information for user to select the layer he wants. In the refactor we NEED single function to read metadata from url
+  // TO.DOCONT: and service type. At this point no layer or neither config is created, metadata is read to create the selection tree (step 3)
+  // TO.DOCONT: Once the user has selected the layers he wants, we create the config snippet and start the config validation process.
 
   /**
    * Using the layerURL state object, check whether URL is a valid WMS,
@@ -201,7 +201,7 @@ export function AddNewLayer(): JSX.Element {
    * @returns {Promise<boolean>} True if layer passes validation
    */
   // TODO: Move all the validations in a utility add layer file inside geo. Also delete old utilities that were used
-  // TODOCONT: in the previous version.
+  // TO.DOCONT: in the previous version.
   const wmsValidation = async (): Promise<boolean> => {
     const proj = Projection.PROJECTIONS[api.maps[mapId].getMapState().currentProjection].getCode();
     let supportedProj: string[] = [];
@@ -267,8 +267,10 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (err) {
-      if ((err as Error).message === 'proj') {
+    } catch (error) {
+      // Log error
+      logger.logError(error);
+      if ((error as Error).message === 'proj') {
         emitErrorProj('WMS', proj, supportedProj);
       } else {
         emitErrorServer('WMS');
@@ -315,8 +317,10 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('WFS');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -404,8 +408,10 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('OGC API Feature');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -431,8 +437,10 @@ export function AddNewLayer(): JSX.Element {
           setLayerList(layers);
         }
       }
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('GeoCore UUID');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -504,8 +512,10 @@ export function AddNewLayer(): JSX.Element {
       } else {
         throw new Error('err');
       }
-    } catch (err) {
+    } catch (error) {
       emitErrorServer(esriOptions(type).err);
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -540,8 +550,10 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('ESRI Image');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -583,8 +595,10 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('XYZ Tile');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -621,8 +635,10 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('CSV');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -687,8 +703,10 @@ export function AddNewLayer(): JSX.Element {
         setLayerName(layers[0].layerName!);
         setLayerEntries([layers[0]]);
       }
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('GeoJSON');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -723,8 +741,10 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (err) {
+    } catch (error) {
       emitErrorServer('GeoPackage');
+      // Log error
+      logger.logError(error);
       return false;
     }
     return true;
@@ -957,7 +977,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerEntries([]);
 
     // TODO: create a utilities function to test valid URL before we enable the continue button
-    // TODO.CONT: This function should try to ping the server for an answer...
+    // TO.DOCONT: This function should try to ping the server for an answer...
     // Check if url or geocore is provided
     setStepButtonDisable(!(event.target.value.trim().startsWith('https://') || event.target.value.trim().length !== 35));
   };

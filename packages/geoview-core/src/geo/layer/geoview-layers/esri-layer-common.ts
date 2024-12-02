@@ -236,7 +236,7 @@ export function commonGetFieldDomain(
  * @param {boolean} singleHandle True for ESRI Image
  */
 // TODO: Issue #2139 - There is a bug with the temporal dimension returned by service URL:
-// TODO.CONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
+// TO.DOCONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
 export function commonProcessTemporalDimension(
   layer: EsriDynamic | EsriFeature | EsriImage,
   esriTimeDimension: TypeJsonObject,
@@ -339,9 +339,11 @@ export function commonProcessInitialSettings(
       layerMetadata.extent.xmax,
       layerMetadata.extent.ymax,
     ] as Extent;
-    const latlonExtent = Projection.transformExtent(
+
+    // Transform to latlon extent
+    const latlonExtent = Projection.transformExtentFromObj(
       layerExtent,
-      `EPSG:${layerMetadata.extent.spatialReference.wkid}`,
+      layerMetadata.extent.spatialReference,
       Projection.PROJECTION_NAMES.LNGLAT
     );
     layerConfig.initialSettings!.bounds = latlonExtent;

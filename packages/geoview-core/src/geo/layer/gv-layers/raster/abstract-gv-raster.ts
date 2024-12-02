@@ -29,7 +29,8 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
    * @returns {OLProjection | undefined} The OpenLayer projection
    */
   getMetadataProjection(): OLProjection | undefined {
-    return Projection.getProjection(`EPSG:${this.getLayerConfig().getServiceMetadata()?.fullExtent?.spatialReference?.wkid}`) || undefined;
+    // Redirect
+    return Projection.getProjectionFromObj(this.getLayerConfig().getServiceMetadata()?.fullExtent?.spatialReference);
   }
 
   /**

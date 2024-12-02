@@ -52,7 +52,8 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * @returns {OLProjection | undefined} The OpenLayer projection
    */
   getMetadataProjection(): OLProjection | undefined {
-    return Projection.getProjection(`EPSG:${this.metadata?.fullExtent?.spatialReference?.wkid}`) || undefined;
+    // Redirect
+    return Projection.getProjectionFromObj(this.metadata?.fullExtent?.spatialReference);
   }
 
   /**
@@ -61,7 +62,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    */
   getMetadataExtent(layerPath: string): Extent | undefined {
     // Get the layer metadata precisely
-    const { extent } = this.getLayerMetadata(layerPath);
+    const extent = this.getLayerMetadata(layerPath)?.extent;
 
     // If found
     if (extent) {

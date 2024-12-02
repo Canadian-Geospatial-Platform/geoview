@@ -221,7 +221,7 @@ export class AppBarApi {
       this.#emitAppBarRemoved({ buttonPanelId, group });
     } catch (error) {
       // Log
-      logger.logError(`Failed to get app bar panel button ${group}/${buttonPanelId}`);
+      logger.logError(`Failed to get app bar panel button ${group}/${buttonPanelId}`, error);
     }
   }
 
