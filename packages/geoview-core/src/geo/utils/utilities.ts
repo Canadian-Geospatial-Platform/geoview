@@ -309,41 +309,15 @@ export function convertTypeFeatureStyleToOpenLayersStyle(style?: TypeFeatureStyl
 }
 
 /**
- * Compare sets of extents of the same projection and return the smallest or largest set.
- * Extents must be in OpenLayers extent format - [minx, miny, maxx, maxy]
- *
- * @param {Extent} extentsA First set of extents
- * @param {Extent} extentsB Second set of extents
- * @param {string} minmax Decides whether to get smallest or largest extent
- * @returns {Extent} the smallest or largest set from the extents
- */
-export function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax = 'max'): Extent {
-  // TODO: Check - Obsolete function? Use getExtentUnion or getExtentIntersection
-  let bounds: Extent = [];
-  if (minmax === 'max')
-    bounds = [
-      Math.min(extentsA[0], extentsB[0]),
-      Math.min(extentsA[1], extentsB[1]),
-      Math.max(extentsA[2], extentsB[2]),
-      Math.max(extentsA[3], extentsB[3]),
-    ];
-  else if (minmax === 'min')
-    bounds = [
-      Math.max(extentsA[0], extentsB[0]),
-      Math.max(extentsA[1], extentsB[1]),
-      Math.min(extentsA[2], extentsB[2]),
-      Math.min(extentsA[3], extentsB[3]),
-    ];
-  return bounds;
-}
-
-/**
  * Returns the union of 2 extents.
- * @param {Extent} extentA First extent
- * @param {Extent} extentB Optional second extent
- * @returns {Extent} The union of the extents
+ * @param {Extent | undefined} extentA First extent
+ * @param {Extent | undefined} extentB Optional second extent
+ * @returns {Extent | undefined} The union of the extents
  */
-export function getExtentUnion(extentA: Extent, extentB?: Extent): Extent {
+export function getExtentUnion(extentA: Extent | undefined, extentB?: Extent | undefined): Extent | undefined {
+  // If no A, return B which may be undefined too
+  if (!extentA) return extentB;
+
   // If no B, return A
   if (!extentB) return extentA;
 
@@ -357,28 +331,17 @@ export function getExtentUnion(extentA: Extent, extentB?: Extent): Extent {
 }
 
 /**
- * Returns the union of 2 extents supporting the case where extentA might be undefined.
- * @param {Extent | undefined} extentA First extent or undefined
- * @param {Extent | undefined} extentB Optional second extent
- * @returns {Extent | undefined} The union of the extents
- */
-export function getExtentUnionMaybe(extentA: Extent | undefined, extentB?: Extent): Extent | undefined {
-  // If no A, return B which may be undefined too
-  if (!extentA) return extentB;
-
-  // Redirect
-  return getExtentUnion(extentA, extentB);
-}
-
-/**
  * Returns the intersection of 2 extents.
- * @param {Extent} extentA First extent
- * @param {Extent} extentB Optional second extent
- * @returns {Extent} The intersection of the extents
+ * @param {Extent | undefined} extentA First extent
+ * @param {Extent | undefined} extentB Optional second extent
+ * @returns {Extent | undefined} The intersection of the extents
  */
-export function getExtentIntersection(extentA: Extent, extentB?: Extent): Extent {
+export function getExtentIntersection(extentA: Extent | undefined, extentB?: Extent | undefined): Extent | undefined {
   // If no B, return A
   if (!extentB) return extentA;
+
+  // If no A, return B which may be undefined too
+  if (!extentA) return extentB;
 
   // Return the intersection of A and B
   return [
@@ -387,20 +350,6 @@ export function getExtentIntersection(extentA: Extent, extentB?: Extent): Extent
     Math.min(extentA[2], extentB[2]),
     Math.min(extentA[3], extentB[3]),
   ];
-}
-
-/**
- * Returns the intersection of 2 extents supporting the case where extentA might be undefined.
- * @param {Extent | undefined} extentA First extent or undefined
- * @param {Extent | undefined} extentB Optional second extent
- * @returns {Extent | undefined} The intersection of the extents
- */
-export function getExtentIntersectionMaybe(extentA: Extent | undefined, extentB?: Extent): Extent | undefined {
-  // If no A, return B which may be undefined too
-  if (!extentA) return extentB;
-
-  // Redirect
-  return getExtentIntersection(extentA, extentB);
 }
 
 /**

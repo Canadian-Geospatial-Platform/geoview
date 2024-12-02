@@ -18,7 +18,7 @@ import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { featureInfoGetFieldType } from '../utils';
 import { AbstractGVLayer } from '../abstract-gv-layer';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentUnion } from '@/geo/utils/utilities';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**
@@ -264,7 +264,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
           if (extent) {
             // If calculatedExtent has not been defined, set it to extent
             if (!calculatedExtent) calculatedExtent = extent;
-            else getMinOrMaxExtents(calculatedExtent, extent);
+            else getExtentUnion(calculatedExtent, extent);
           }
         }
       });
