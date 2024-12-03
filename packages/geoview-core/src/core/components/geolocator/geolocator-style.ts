@@ -1,6 +1,15 @@
 import { Input, Theme, styled } from '@mui/material';
+import { SxProps } from '@mui/system';
 
-export const sxClasses = {
+type SxStyles = Record<string, SxProps<Theme>>;
+
+/**
+ * Get custom sx classes for the geolocator
+ *
+ * @param {Theme} theme the theme object
+ * @returns {Object} the sx classes object
+ */
+export const getSxClasses = (theme: Theme): SxStyles => ({
   root: {
     position: 'absolute',
     top: 12,
@@ -39,7 +48,7 @@ export const sxClasses = {
     padding: 6,
     paddingTop: 2,
     '& .MuiInputLabel-formControl': {
-      fontSize: (theme: Theme) => theme.palette.geoViewFontSize.default,
+      fontSize: theme.palette.geoViewFontSize.default,
       marginTop: 0,
     },
     '& .MuiSelect-select': {
@@ -65,11 +74,17 @@ export const sxClasses = {
       },
     },
   },
-};
+});
 
-export const sxClassesList = {
+/**
+ * Get custom sx classes for the geolocator list
+ *
+ * @param {Theme} theme the theme object
+ * @returns {Object} the sx classes object
+ */
+export const getSxClassesList = (theme: Theme): SxStyles => ({
   listStyle: {
-    fontSize: (theme: Theme) => theme.palette.geoViewFontSize.sm,
+    fontSize: theme.palette.geoViewFontSize.sm,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -79,13 +94,13 @@ export const sxClassesList = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     '& span': {
-      fontSize: (theme: Theme) => theme.palette.geoViewFontSize.xs,
+      fontSize: theme.palette.geoViewFontSize.xs,
       ':first-of-type': {
-        fontSize: (theme: Theme) => theme.palette.geoViewFontSize.sm,
+        fontSize: theme.palette.geoViewFontSize.sm,
       },
     },
   },
-};
+});
 
 export const StyledInputField = styled(Input)(({ theme }) => ({
   color: 'inherit',

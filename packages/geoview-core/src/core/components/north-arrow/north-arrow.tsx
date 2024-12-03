@@ -55,7 +55,7 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
         left: northOffset,
       }}
     >
-      <NorthArrowIcon width={sxClasses.northArrow.width} height={sxClasses.northArrow.height} />
+      <NorthArrowIcon width={sxClasses.northArrow.width || 30} height={sxClasses.northArrow.height || 30} />
     </Box>
   );
 });

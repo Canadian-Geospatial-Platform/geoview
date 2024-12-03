@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -13,6 +13,11 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 /**
  * Interface used for lightbox properties and slides
  */
+export interface LightBoxSlides {
+  src: string;
+  alt: string;
+  downloadUrl: string;
+}
 export interface LightboxProps {
   open: boolean;
   slides: LightBoxSlides[];
@@ -20,11 +25,13 @@ export interface LightboxProps {
   exited: () => void;
   scale?: number;
 }
-export interface LightBoxSlides {
-  src: string;
-  alt: string;
-  downloadUrl: string;
-}
+
+// Constants outside component to prevent recreating every render
+const LIGHTBOX_CONSTANTS = {
+  FADE_DURATION: 250,
+  SWIPE_DURATION: 500,
+  DEFAULT_SCALE: 1,
+} as const;
 
 /**
  * Create an element that displays a lightbox
@@ -32,30 +39,40 @@ export interface LightBoxSlides {
  * @param {LightboxProps} props the lightbox properties
  * @returns {JSX.Element} created lightbox element
  */
-export function LightboxImg(props: LightboxProps): JSX.Element {
-  // Log
+// Memoizes entire component, preventing re-renders if props haven't changed
+export const LightboxImg = memo(function LightboxImg({
+  open,
+  slides,
+  index,
+  exited,
+  scale = LIGHTBOX_CONSTANTS.DEFAULT_SCALE,
+}: LightboxProps): JSX.Element {
   logger.logTraceRender('components/lightbox/lightbox');
 
-  const { open, slides, index, exited, scale = 1 } = props;
-
+  // Hooks
   const { t } = useTranslation<string>();
 
-  // internal state
+  // State
   const [isOpen, setIsOpen] = useState(open);
   const [closeOnPullDown] = useState(true);
   const [closeOnBackdropClick] = useState(true);
-  const [fade] = useState(250);
-  const [swipe] = useState(500);
 
-  // get mapId
+  // Store
   const mapId = useGeoViewMapId();
 
+  // Update open state when prop changes
   useEffect(() => {
-    // Log
     logger.logTraceUseEffect('LIGHTBOX - open', open);
-
     setIsOpen(open);
   }, [open]);
+
+  // Memoized labels & render functions
+  const labels = {
+    Next: t('lightbox.next'),
+    Previous: t('lightbox.previous'),
+    Close: t('lightbox.close'),
+    Download: t('lightbox.download'),
+  };
 
   return (
     <Lightbox
@@ -71,13 +88,8 @@ export function LightboxImg(props: LightboxProps): JSX.Element {
       index={index}
       carousel={{ finite: true }}
       controller={{ closeOnPullDown, closeOnBackdropClick }}
-      animation={{ fade, swipe }}
-      labels={{
-        Next: t('lightbox.next') || undefined,
-        Previous: t('lightbox.previous') || undefined,
-        Close: t('lightbox.close') || undefined,
-        Download: t('lightbox.download') || undefined,
-      }}
+      animation={{ fade: LIGHTBOX_CONSTANTS.FADE_DURATION, swipe: LIGHTBOX_CONSTANTS.SWIPE_DURATION }}
+      labels={labels}
       on={{
         entered: () => {
           // document.getElementsByClassName('yarl__button')[1] does not work, use main container
@@ -87,22 +99,22 @@ export function LightboxImg(props: LightboxProps): JSX.Element {
       }}
       render={{
         iconClose: () => (
-          <Tooltip title={t('lightbox.close')} placement="top">
+          <Tooltip title={labels.Close} placement="top">
             <CloseIcon />
           </Tooltip>
         ),
         iconNext: () => (
-          <Tooltip title={t('lightbox.next')} placement="top">
+          <Tooltip title={labels.Next} placement="top">
             <ArrowRightIcon />
           </Tooltip>
         ),
         iconPrev: () => (
-          <Tooltip title={t('lightbox.previous')} placement="top">
+          <Tooltip title={labels.Previous} placement="top">
             <ArrowLeftIcon />
           </Tooltip>
         ),
         iconDownload: () => (
-          <Tooltip title={t('lightbox.download')} placement="top">
+          <Tooltip title={labels.Download} placement="top">
             <DownloadIcon />
           </Tooltip>
         ),
@@ -110,4 +122,4 @@ export function LightboxImg(props: LightboxProps): JSX.Element {
       plugins={[Download]}
     />
   );
-}
+});

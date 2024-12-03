@@ -31,16 +31,7 @@ import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-inter
 import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import {
-  GuidePanel,
-  Legend,
-  DetailsPanel,
-  AppBarApi,
-  AppBarCreatedEvent,
-  AppBarRemovedEvent,
-  Datapanel,
-  LayersPanel,
-} from '@/core/components';
+import { Guide, Legend, DetailsPanel, AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent, Datapanel, LayersPanel } from '@/core/components';
 import Notifications from '@/core/components/notifications/notifications';
 
 import Version from './buttons/version';
@@ -118,7 +109,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     }
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
-      guide: { icon: <QuestionMarkIcon />, content: <GuidePanel fullWidth /> },
+      guide: { icon: <QuestionMarkIcon />, content: <Guide fullWidth /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
       legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.APP_BAR} /> },

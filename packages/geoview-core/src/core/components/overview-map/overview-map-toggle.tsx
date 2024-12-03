@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
-import { sxClasses } from './overview-map-toggle-styles';
+import { getSxClasses } from './overview-map-toggle-styles';
 
 /**
  * Properties for the overview map toggle
@@ -29,7 +29,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
 
   const { t } = useTranslation<string>();
   const tooltipAndAria = t('mapctrl.overviewmap.toggle')!;
-
+  const sxClasses = useMemo(() => getSxClasses(), []);
   // internal state
   const [status, setStatus] = useState(true);
   const divRef = useRef<HTMLDivElement>(null);

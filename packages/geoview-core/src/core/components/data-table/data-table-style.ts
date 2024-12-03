@@ -1,6 +1,15 @@
 import { Theme } from '@mui/material';
+import { SxProps } from '@mui/system';
 
-export const getSxClasses = (theme: Theme) =>
+type SxStyles = Record<string, SxProps<Theme>>;
+
+/**
+ * Get custom sx classes for the data table
+ *
+ * @param {Theme} theme the theme object
+ * @returns {Object} the sx classes object
+ */
+export const getSxClasses = (theme: Theme): SxStyles =>
   ({
     dataPanel: { background: theme.palette.geoViewColor.bgColor.main, paddingBottom: '1rem' },
     gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },

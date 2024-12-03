@@ -307,7 +307,7 @@ export function Shell(props: ShellProps): JSX.Element {
 
   return (
     <Box sx={sxClasses.all}>
-      <Link id={`toplink-${mapViewer.mapId}`} href={`#bottomlink-${mapViewer.mapId}`} tabIndex={0} sx={[sxClasses.skip, { top: '0px' }]}>
+      <Link id={`toplink-${mapViewer.mapId}`} href={`#bottomlink-${mapViewer.mapId}`} tabIndex={0} sx={{ ...sxClasses.skip, top: '0px' }}>
         {t('keyboardnav.start')}
       </Link>
       <FocusTrap open={activeTrapGeoView}>
@@ -352,7 +352,12 @@ export function Shell(props: ShellProps): JSX.Element {
           })}
         </Box>
       </FocusTrap>
-      <Link id={`bottomlink-${mapViewer.mapId}`} href={`#toplink-${mapViewer.mapId}`} tabIndex={0} sx={[sxClasses.skip, { bottom: '0px' }]}>
+      <Link
+        id={`bottomlink-${mapViewer.mapId}`}
+        href={`#toplink-${mapViewer.mapId}`}
+        tabIndex={0}
+        sx={{ ...sxClasses.skip, bottom: '0px' }}
+      >
         {t('keyboardnav.end')}
       </Link>
     </Box>

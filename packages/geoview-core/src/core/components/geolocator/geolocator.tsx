@@ -1,9 +1,9 @@
-import { ChangeEvent, useCallback, useRef, useState, useEffect } from 'react';
+import { ChangeEvent, useCallback, useRef, useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBarUI, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
-import { StyledInputField, sxClasses } from './geolocator-style';
+import { StyledInputField, getSxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { useActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -32,6 +32,7 @@ export function Geolocator(): JSX.Element {
 
   const theme = useTheme();
   const mapId = useGeoViewMapId();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // internal state
   const [data, setData] = useState<GeoListItem[]>();

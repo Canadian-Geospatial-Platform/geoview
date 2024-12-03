@@ -185,7 +185,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               ) : (
                 <BrowserNotSupportedIcon />
               )}
-              <Box component="span" style={sxClasses.tableIconLabel}>
+              <Box component="span" sx={sxClasses.tableIconLabel}>
                 {item.name}
               </Box>
             </Grid>
@@ -295,7 +295,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       return (
         <Grid sx={sxClasses.itemsGrid}>
           <Grid container pt={6} pb={6}>
-            <Box component="img" alt="icon" src={layerDetails.icons[0].iconImage} style={sxClasses.wmsImage} />
+            <Box component="img" alt="icon" src={layerDetails.icons[0].iconImage} sx={sxClasses.wmsImage} />
           </Grid>
         </Grid>
       );

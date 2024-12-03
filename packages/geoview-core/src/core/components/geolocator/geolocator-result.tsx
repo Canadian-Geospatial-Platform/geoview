@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { SelectChangeEvent, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { sxClasses } from './geolocator-style';
+import { getSxClasses } from './geolocator-style';
 import {
   Box,
   Divider,
@@ -35,14 +35,15 @@ interface GeolocatorFiltersType {
  */
 export function GeolocatorResult({ geoLocationData, searchValue, error }: GeolocatorFiltersType): JSX.Element {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
   const [province, setProvince] = useState<string>('');
   const [category, setCategory] = useState<string>('');
   const [data, setData] = useState<GeoListItem[]>(geoLocationData);
 
   // get store values
   const mapSize = useMapSize();
-
-  const theme = useTheme();
 
   /**
    * Clear all filters.

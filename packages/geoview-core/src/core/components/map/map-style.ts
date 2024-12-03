@@ -1,4 +1,13 @@
-export const sxClasses = {
+import { SxProps } from '@mui/system';
+
+type SxStyles = Record<string, SxProps>;
+
+/**
+ * Get custom sx classes for the map
+ *
+ * @returns {Object} the sx classes object
+ */
+export const getSxClasses = (): SxStyles => ({
   mapContainer: {
     display: 'flex',
     flexDirection: 'column',
@@ -74,4 +83,4 @@ export const sxClasses = {
       },
     },
   },
-};
+});

@@ -29,7 +29,7 @@ import { LayersPanel } from '@/core/components/layers/layers-panel';
 import { DetailsPanel } from '@/core/components/details/details-panel';
 import { Datapanel } from '@/core/components/data-table/data-panel';
 import { logger } from '@/core/utils/logger';
-import { GuidePanel } from '@/core/components/guide/guide-panel';
+import { Guide } from '@/core/components/guide/guide';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
@@ -105,7 +105,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel /> },
-      guide: { icon: <QuestionMarkIcon />, content: <GuidePanel /> },
+      guide: { icon: <QuestionMarkIcon />, content: <Guide /> },
     } as Record<string, Tab>;
   }, []);
 
