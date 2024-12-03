@@ -1063,7 +1063,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     let configLayerEntryConfig;
     if (geoviewLayerConfig) {
-      configLayerEntryConfig = (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.find(
+      configLayerEntryConfig = (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig?.find(
         (nextEntryConfig: TypeLayerEntryConfig) => nextEntryConfig.layerId === pathArray[1]
       );
       for (let i = 2; i < pathArray.length; i++) {
