@@ -926,7 +926,7 @@ export class MapViewer {
    *
    * @param {TypeDisplayLanguage} displayLanguage - The language to use (en, fr)
    * @param {boolean} resetLayer - Optional flag to ask viewer to reload layers with the new localize language
-   * @returns {Promise<[void, void]>}
+   * @returns {Promise<void>}
    */
   async setLanguage(displayLanguage: TypeDisplayLanguage, reloadLayers?: boolean | false): Promise<void> {
     // If the language hasn't changed don't do anything
@@ -936,7 +936,9 @@ export class MapViewer {
 
       // if flag is true, reload GeoCore layers
       if (reloadLayers) {
+        // Reload just the Geocore Layers instead of the entire map
         this.layer.reloadGeocoreLayers();
+        // this.reloadWithCurrentState();
       }
 
       // Emit language changed event
