@@ -66,7 +66,7 @@ export const LightboxImg = memo(function LightboxImg({
     setIsOpen(open);
   }, [open]);
 
-  // Memoized labels & render functions
+  // Memoized labels
   const labels = {
     Next: t('lightbox.next'),
     Previous: t('lightbox.previous'),

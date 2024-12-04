@@ -1,7 +1,5 @@
 import { Theme } from '@mui/material';
-import { SxProps } from '@mui/system';
-
-type SxStyles = Record<string, SxProps<Theme>>;
+import { SxStyles } from '@/ui/style/types';
 
 /**
  * Get custom sx classes for the MUI tabs

@@ -1,7 +1,5 @@
 import { Theme } from '@mui/material/styles';
-import { SxProps } from '@mui/system';
-
-type SxStyles = Record<string, SxProps<Theme>>;
+import { SxStyles } from '@/ui/style/types';
 
 /**
  * Get custom sx classes for the navigation bar
@@ -11,6 +9,7 @@ type SxStyles = Record<string, SxProps<Theme>>;
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   navBarRef: {
+    width: 'min-content !important',
     position: 'absolute',
     right: theme.spacing(7),
     padding: '6px',

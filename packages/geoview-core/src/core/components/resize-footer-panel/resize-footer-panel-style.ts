@@ -1,6 +1,4 @@
-import { SxProps } from '@mui/system';
-
-type SxStyles = Record<string, SxProps>;
+import { SxStyles } from '@/ui/style/types';
 
 /**
  * Get custom sx classes for the resize footer panel size

@@ -38,34 +38,40 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('OVERVIEW-MAP-TOGGLE - mount');
 
-    // get toggle icon element
-    if (divRef && divRef.current) {
-      // get toggle button
-      const button = (divRef.current as HTMLElement).closest('button') as HTMLButtonElement;
+    if (!divRef?.current) return () => {};
 
-      if (button) {
-        button.setAttribute('aria-label', tooltipAndAria);
-        // listen to toggle event
-        button.addEventListener('click', () => {
-          const isCollapsed = overviewMap.getCollapsed();
+    const handleClick = (): void => {
+      const isCollapsed = overviewMap.getCollapsed();
 
-          setStatus(!isCollapsed);
+      setStatus(!isCollapsed);
 
-          const overviewMapViewport = overviewMap.getOverviewMap().getTargetElement() as HTMLElement;
+      const overviewMapViewport = overviewMap.getOverviewMap().getTargetElement() as HTMLElement;
 
-          if (overviewMapViewport) {
-            if (isCollapsed) {
-              overviewMapViewport.style.width = '40px';
-              overviewMapViewport.style.height = '40px';
-              overviewMapViewport.style.margin = '0px';
-            } else {
-              overviewMapViewport.style.width = '150px';
-              overviewMapViewport.style.height = '150px';
-            }
-          }
-        });
+      if (overviewMapViewport) {
+        if (isCollapsed) {
+          overviewMapViewport.style.width = '40px';
+          overviewMapViewport.style.height = '40px';
+          overviewMapViewport.style.margin = '0px';
+        } else {
+          overviewMapViewport.style.width = '150px';
+          overviewMapViewport.style.height = '150px';
+        }
       }
+    };
+
+    // get toggle button
+    const button = (divRef.current as HTMLElement).closest('button') as HTMLButtonElement;
+
+    if (button) {
+      button.setAttribute('aria-label', tooltipAndAria);
+      // listen to toggle event
+      button.addEventListener('click', handleClick);
     }
+
+    // Cleanup function to remove event listener
+    return () => {
+      button.removeEventListener('click', handleClick);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

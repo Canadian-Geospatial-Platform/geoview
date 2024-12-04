@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, MutableRefObject, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
 
@@ -25,6 +25,8 @@ const MAP_INFO_BASE_STYLES = {
   zIndex: 200,
 } as const;
 
+const FLEX_STYLE = { flexGrow: 1, height: '100%' };
+
 /**
  * Create a map information element that contains attribtuion, mouse position and scale
  *
@@ -36,6 +38,7 @@ export const MapInfo = memo(function MapInfo(): JSX.Element {
 
   // Hooks
   const theme = useTheme();
+  const mapInfoRef = useRef<HTMLDivElement>();
 
   // Store
   const expanded = useUIMapInfoExpanded();
@@ -50,21 +53,46 @@ export const MapInfo = memo(function MapInfo(): JSX.Element {
       background: theme.palette.geoViewColor.bgColor.dark[800],
       color: theme.palette.geoViewColor.bgColor.light[800],
     }),
-    [expanded, theme.palette.geoViewColor.bgColor.dark, theme.palette.geoViewColor.bgColor.light]
+    [expanded, theme.palette.geoViewColor.bgColor]
   );
 
+  // Scroll the map into view on mouse click in the flex area
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('MAP INFO - scrollIntoViewListener');
+
+    if (!mapInfoRef?.current) return () => {};
+
+    const handleClick = (): void => {
+      const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
+
+      document.getElementById(`shell-${mapId}`)?.scrollIntoView({
+        behavior: behaviorScroll,
+        block: 'start',
+      });
+    };
+
+    const flexBoxes = mapInfoRef.current.querySelectorAll(`.${mapId}-mapInfo-flex`);
+    flexBoxes.forEach((item) => item.addEventListener('click', handleClick));
+
+    // Cleanup function to remove event listener
+    return () => {
+      flexBoxes.forEach((item) => item.removeEventListener('click', handleClick));
+    };
+  }, [mapInfoRef, mapId]);
+
   return (
-    <Box id={`${mapId}-mapInfo`} sx={containerStyles}>
+    <Box ref={mapInfoRef as MutableRefObject<HTMLDivElement>} id={`${mapId}-mapInfo`} sx={containerStyles}>
       <MapInfoExpandButton />
       <Attribution />
       {interaction === 'dynamic' && (
         <>
-          <div style={{ flexGrow: 1 }} />
+          <div className={`${mapId}-mapInfo-flex`} style={FLEX_STYLE} />
           <MousePosition />
         </>
       )}
       <Scale />
-      <div style={{ flexGrow: 1 }} />
+      <div className={`${mapId}-mapInfo-flex`} style={FLEX_STYLE} />
       {interaction === 'dynamic' && (
         <>
           <MapInfoFixNorthSwitch />

@@ -208,6 +208,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   }, [mapSize, theme.breakpoints.values.sm]);
 
   useEffect(() => {
+    const tabPanel = tabPanelRef?.current;
     const handleFooterbarEscapeKey = (e: KeyboardEvent): void => {
       if (!isCollapsed) {
         handleEscapeKey(e.key, tabs[selectedTab ?? 0]?.id, true, () => {
@@ -215,7 +216,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
         });
       }
     };
-    tabPanelRef.current?.addEventListener('keydown', handleFooterbarEscapeKey);
+    tabPanel?.addEventListener('keydown', handleFooterbarEscapeKey);
+
+    return () => {
+      tabPanel?.removeEventListener('keydown', handleFooterbarEscapeKey);
+    };
   }, [selectedTab, isCollapsed, tabs, onCloseKeyboard]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

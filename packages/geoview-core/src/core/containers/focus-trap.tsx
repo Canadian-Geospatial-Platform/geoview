@@ -102,7 +102,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const handleExit = (evt: KeyboardEvent): void => {
     if (!ARROW_KEY_CODES.includes(evt.code as string)) {
       // remove the border from the map
-      // TODO: Handle the focus style/stste within the store (set here, listen in map)
+      // TODO: Handle the focus style/state within the store (set here, listen in map)
       mapElementStore!.style.border = 'unset';
     }
 

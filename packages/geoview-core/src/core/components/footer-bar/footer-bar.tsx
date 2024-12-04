@@ -356,20 +356,30 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [footerBarTabsConfig, mapId]);
 
   // Scroll the footer into view on mouse click
-  useEffect((): void => {
+  useEffect(() => {
     // Log
     logger.logTraceUseEffect('FOOTER BAR - scrollIntoViewListener');
 
-    if (tabsContainerRef && tabsContainerRef.current) {
-      const header = tabsContainerRef.current.querySelector('#footerbar-header');
-      header?.addEventListener('click', () => {
-        // Register mouse interaction events (click). If element not in viewport, scroll the footer into view
-        if (!isElementInViewport(tabsContainerRef.current!)) {
-          const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
-          tabsContainerRef.current?.scrollIntoView({ behavior: behaviorScroll as ScrollBehavior, block: 'center' });
-        }
-      });
-    }
+    if (!tabsContainerRef?.current) return () => {};
+
+    const handleClick = (): void => {
+      const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
+
+      if (!isElementInViewport(tabsContainerRef.current!)) {
+        tabsContainerRef.current?.scrollIntoView({
+          behavior: behaviorScroll,
+          block: 'center',
+        });
+      }
+    };
+
+    const header = tabsContainerRef.current.querySelector('#footerbar-header');
+    header?.addEventListener('click', handleClick);
+
+    // Cleanup function to remove event listener
+    return () => {
+      header?.removeEventListener('click', handleClick);
+    };
   }, [tabsContainerRef]);
 
   return memoFooterBarTabs.length > 0 ? (

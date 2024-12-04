@@ -217,10 +217,18 @@ export function Geolocator(): JSX.Element {
     // Log
     logger.logTraceUseEffect('GEOLOCATOR - mount');
 
+    if (!geolocatorRef?.current) return () => {};
+
+    const geolocator = geolocatorRef.current;
     const handleGeolocatorEscapeKey = (e: KeyboardEvent): void => {
       handleEscapeKey(e.key, '', false, () => resetSearch());
     };
-    geolocatorRef.current?.addEventListener('keydown', handleGeolocatorEscapeKey);
+    geolocator.addEventListener('keydown', handleGeolocatorEscapeKey);
+
+    // Cleanup function to remove event listener
+    return () => {
+      geolocator.removeEventListener('keydown', handleGeolocatorEscapeKey);
+    };
   }, [mapId, resetSearch]);
 
   useEffect(() => {
