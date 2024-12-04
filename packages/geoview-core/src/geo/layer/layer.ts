@@ -586,7 +586,6 @@ export class LayerApi {
 
   /**
    * Refreshes GeoCore Layers
-   * @returns {void} A promise which resolves when done refreshing
    */
   reloadGeocoreLayers(): void {
     const configs = this.getLayerEntryConfigs();
