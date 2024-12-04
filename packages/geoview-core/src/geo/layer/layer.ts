@@ -560,6 +560,7 @@ export class LayerApi {
   }
 
   /**
+   * TODO Add this function to utilties
    * Gets all child paths from a parent path
    * @param {string} parentPath - The parent path
    * @returns {string[]} Child layer paths
