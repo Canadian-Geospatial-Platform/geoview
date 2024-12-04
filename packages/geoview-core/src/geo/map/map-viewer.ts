@@ -926,11 +926,9 @@ export class MapViewer {
     if (VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
       await AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
 
-      // if flag is true, reload GeoCore layers
+      // if flag is true, reload just the GeoCore layers instead of reloading the whole map with current state
       if (reloadLayers) {
-        // Reload just the Geocore Layers instead of the entire map
         this.layer.reloadGeocoreLayers();
-        // this.reloadWithCurrentState();
       }
 
       // Emit language changed event
