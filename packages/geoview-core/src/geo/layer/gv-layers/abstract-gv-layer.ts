@@ -251,8 +251,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // Get the layer config
       const layerConfig = this.getLayerConfig();
 
-      // If queryable
-      if (!layerConfig.source?.featureInfo?.queryable) {
+      // If the layer is not queryable
+      if (layerConfig.source?.featureInfo?.queryable === false) {
         logger.logError(`Layer at path ${layerConfig.layerPath} is not queryable`);
         return null;
       }

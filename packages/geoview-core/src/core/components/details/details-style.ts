@@ -54,6 +54,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     wordBreak: 'break-word',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    ' th': {
+      wordBreak: 'normal',
+    },
   },
   boxContainerFeatureInfo: {
     wordWrap: 'break-word',

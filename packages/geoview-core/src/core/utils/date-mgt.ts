@@ -703,7 +703,7 @@ export abstract class DateMgt {
       if (index[SECOND_DATE_ELEMENT] + 1) returnValue = `${returnValue}${dateFragments[index[SECOND_DATE_ELEMENT]]}`;
       if (returnValue && index[THIRD_DATE_ELEMENT] + 1) returnValue = `${returnValue}${separators[DATE]}`;
       if (index[THIRD_DATE_ELEMENT] + 1) returnValue = `${returnValue}${dateFragments[index[THIRD_DATE_ELEMENT]]}`;
-      if (index[TIME] + 1) returnValue = `${returnValue}${separators[DATE_TIME]}${timeString.slice(0, 8)}`;
+      if (index[TIME] + 1 && timeString) returnValue = `${returnValue}${separators[DATE_TIME]}${timeString.slice(0, 8)}`;
 
       return returnValue;
     }
