@@ -59,7 +59,13 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
   function setFeatureItem(featureInfoItem: TypeFieldEntry): JSX.Element | JSX.Element[] {
     function process(item: string, alias: string, index: number): JSX.Element {
       let element: JSX.Element;
-      if (typeof item === 'string' && isImage(item)) {
+      if (alias === 'html') {
+        element = (
+          <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
+            <HtmlToReact htmlContent={sanitizeHtmlContent(item)} />
+          </Box>
+        );
+      } else if (typeof item === 'string' && isImage(item)) {
         element = (
           <CardMedia
             key={generateId()}
@@ -89,7 +95,9 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
 
     const { alias, value } = featureInfoItem;
     let values: string | string[] = Array.isArray(value) ? String(value.map(stringify)) : String(stringify(value));
-    values = values.toString().split(';');
+    // Split text but leave html intact
+    if (alias !== 'html') values = values.toString().split(';');
+
     const results = Array.isArray(values)
       ? values.map((item: string, index: number) => process(item, alias, index))
       : process(values, alias, 0);
@@ -110,9 +118,11 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
           }}
           key={`${featureInfoItem.alias} ${index.toString()}`}
         >
-          <Grid size={{ xs: 'auto' }} sx={{ fontWeight: 'bold', width: '80% !important' }}>
-            {featureInfoItem.alias}
-          </Grid>
+          {featureInfoItem.alias !== 'html' && (
+            <Grid size={{ xs: 'auto' }} sx={{ fontWeight: 'bold', width: '80% !important' }}>
+              {featureInfoItem.alias}
+            </Grid>
+          )}
           <Grid sx={{ ml: 'auto', wordWrap: 'break-word', pr: '0.3125rem' }}>{setFeatureItem(featureInfoItem)}</Grid>
         </Grid>
       ))}

@@ -18,6 +18,7 @@ import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { Projection } from '@/geo/utils/projection';
 
 /**
  * Manages a WMS layer.
@@ -117,6 +118,18 @@ export class GVWMS extends AbstractGVRaster {
       // Get the layer config and source
       const layerConfig = this.getLayerConfig();
 
+      // Check if bounds are properly set
+      if (!layerConfig.initialSettings!.bounds) {
+        const newBounds = this.getBounds(this.getLayerPath());
+        if (newBounds)
+          layerConfig.initialSettings!.bounds = Projection.transformExtentFromProj(
+            newBounds,
+            this.getMapViewer().getView().getProjection(),
+            Projection.PROJECTION_NAMES.LNGLAT
+          );
+        else return [];
+      }
+
       const clickCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
       if (
         lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
@@ -130,8 +143,9 @@ export class GVWMS extends AbstractGVRaster {
       const featureInfoFormat = this.getLayerConfig().getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format as TypeJsonArray;
       if (featureInfoFormat)
         if (featureInfoFormat.includes('text/xml' as TypeJsonObject)) infoFormat = 'text/xml';
+        else if (featureInfoFormat.includes('text/html' as TypeJsonObject)) infoFormat = 'text/html';
         else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
-        else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml and text/plain for WMS services.');
+        else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml, text/html and text/plain for WMS services.');
 
       const wmsSource = this.getOLSource();
       const viewResolution = this.getMapViewer().getView().getResolution()!;
@@ -166,12 +180,16 @@ export class GVWMS extends AbstractGVRaster {
               }
             }
           }
+        } else if (infoFormat === 'text/html') {
+          featureMember = { html: response.data };
         } else featureMember = { plain_text: { '#text': response.data } };
+
         if (featureMember) {
           const featureInfoResult = GVWMS.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
           return featureInfoResult;
         }
       }
+
       return [];
     } catch (error) {
       // Log
