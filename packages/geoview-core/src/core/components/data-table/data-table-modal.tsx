@@ -157,7 +157,7 @@ export default function DataTableModal(): JSX.Element {
           <Box sx={{ minHeight: '300px', minWidth: '450px', position: 'relative' }}>
             <CircularProgress
               isLoaded={!isLoading}
-              sx={{
+              style={{
                 backgroundColor: 'inherit',
               }}
             />

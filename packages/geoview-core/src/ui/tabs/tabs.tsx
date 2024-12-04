@@ -218,6 +218,9 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     tabPanelRef.current?.addEventListener('keydown', handleFooterbarEscapeKey);
   }, [selectedTab, isCollapsed, tabs, onCloseKeyboard]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sxMerged: any = { ...sxClasses.panel, visibility: TabContentVisibilty };
+
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
       <Grid container id="footerbar-header" sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100], width: '100%' }}>
@@ -270,13 +273,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           {rightButtons as ReactNode}
         </Grid>
       </Grid>
-      <Box
-        id="tabPanel"
-        sx={{
-          ...sxClasses.panel,
-          visibility: TabContentVisibilty,
-        }}
-      >
+      <Box id="tabPanel" sx={sxMerged}>
         {tabPanels.map((tab, index) => {
           return tab ? (
             <TabPanel

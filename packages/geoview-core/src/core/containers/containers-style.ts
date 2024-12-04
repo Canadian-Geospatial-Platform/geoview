@@ -29,8 +29,7 @@ export const getFocusTrapSxClasses = (theme: Theme): SxStyles => {
       border: 'unset',
     },
     enableFocus: {
-      border: `5px solid ${borderColor}
-      }`,
+      border: `5px solid ${borderColor}`,
     },
   };
 };

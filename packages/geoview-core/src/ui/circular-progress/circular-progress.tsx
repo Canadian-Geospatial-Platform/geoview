@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import { CSSProperties } from 'react';
 
-import { useTheme } from '@mui/material/styles';
+import { SxProps, Theme, useTheme } from '@mui/material/styles';
 import { CircularProgress as MaterialCircularProgress, CircularProgressProps, Box, Fade } from '@mui/material';
 
 import { getSxClasses } from './circular-progress-style';
@@ -12,7 +12,7 @@ import { getSxClasses } from './circular-progress-style';
 interface TypeCircularProgressProps extends CircularProgressProps {
   isLoaded: boolean;
   style?: CSSProperties;
-  sx?: CSSProperties;
+  sx?: SxProps<Theme>;
 }
 
 /**
@@ -27,9 +27,10 @@ export function CircularProgress(props: TypeCircularProgressProps): JSX.Element 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const sxMerged = { ...sxClasses.loading, ...sx };
   return (
     <Fade in={!isLoaded} timeout={250} mountOnEnter unmountOnExit>
-      <Box sx={{ ...sxClasses.loading, ...sx }} style={{ ...style }}>
+      <Box sx={sxMerged} style={{ ...style }}>
         <MaterialCircularProgress sx={sxClasses.progress} {...rest} />
       </Box>
     </Fade>

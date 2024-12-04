@@ -476,10 +476,10 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     columnVirtualizerOptions: { overscan: 2 },
     localization: dataTableLocalization,
     muiTableHeadCellProps: {
-      sx: () => sxClasses.tableHeadCell,
+      sx: sxClasses.tableHeadCell,
     },
     muiTableHeadProps: {
-      sx: () => sxClasses.tableHead,
+      sx: sxClasses.tableHead,
     },
     defaultColumn: {
       muiFilterTextFieldProps: {
