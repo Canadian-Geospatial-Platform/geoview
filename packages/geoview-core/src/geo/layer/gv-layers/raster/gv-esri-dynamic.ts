@@ -249,9 +249,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const layerConfig = this.getLayerConfig();
 
       // If not queryable
-      if (!layerConfig.source?.featureInfo?.queryable) return [];
+      if (!layerConfig.source.featureInfo?.queryable) return [];
 
-      let identifyUrl = layerConfig.source?.dataAccessPath;
+      let identifyUrl = layerConfig.source.dataAccessPath;
       if (!identifyUrl) return [];
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
