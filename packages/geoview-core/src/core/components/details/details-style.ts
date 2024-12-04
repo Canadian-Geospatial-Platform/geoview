@@ -52,8 +52,20 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   featureInfoItemValue: {
     marginRight: 0,
     wordBreak: 'break-word',
-    overflow: 'hidden',
+    overflowX: 'auto',
     textOverflow: 'ellipsis',
+    ' table': {
+      border: '1px solid',
+      width: '100%',
+      borderCollapse: 'collapse',
+    },
+    ' th, td': {
+      border: '1px solid',
+      wordBreak: 'normal',
+      textAllign: 'center',
+      padding: '5px',
+      whiteSpace: 'nowrap',
+    },
   },
   boxContainerFeatureInfo: {
     wordWrap: 'break-word',
