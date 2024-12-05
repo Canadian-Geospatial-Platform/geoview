@@ -220,11 +220,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
     this.getLayerConfig().layerStatus = 'loaded';
 
-    // Emit event
-    this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
-
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
     this.setVisible(this.getLayerConfig().initialSettings?.states?.visible !== false);
+
+    // Emit event
+    this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
   }
 
   /**

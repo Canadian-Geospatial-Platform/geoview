@@ -1364,11 +1364,11 @@ export abstract class AbstractGeoViewLayer {
     // Set loaded
     layerConfig.layerStatus = 'loaded';
 
-    // Emit event
-    this.#emitIndividualLayerLoaded({ layerPath: layerConfig.layerPath });
-
     // Set visibility
     this.setVisible(layerConfig.initialSettings?.states?.visible !== false, layerConfig.layerPath);
+
+    // Emit event
+    this.#emitIndividualLayerLoaded({ layerPath: layerConfig.layerPath });
   }
 
   /**

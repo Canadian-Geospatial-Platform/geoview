@@ -734,7 +734,17 @@ export class LayerApi {
         // If new layers mode, create the corresponding GVLayer
         if (LayerApi.LAYERS_HYBRID_MODE) {
           const gvLayer = this.#createGVLayer(this.getMapId(), geoviewLayer, event.source, event.config, event.extraConfig);
-          if (gvLayer) return gvLayer.getOLLayer();
+
+          // If found the GV layer
+          if (gvLayer) {
+            // Register a hook when a layer is loaded on the map
+            gvLayer!.onIndividualLayerLoaded((sender, payload) => {
+              // Log
+              logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
+              this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
+            });
+            return gvLayer.getOLLayer();
+          }
         }
 
         // Don't provide any layer, working in old mode
@@ -766,12 +776,15 @@ export class LayerApi {
         layerBeingAdded!
           .createGeoViewLayers()
           .then(() => {
-            // Register a hook when a layer is loaded on the map
-            layerBeingAdded!.onIndividualLayerLoaded((sender, payload) => {
-              // Log
-              logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
-              this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
-            });
+            // If not HYBRID MODE
+            if (!LayerApi.LAYERS_HYBRID_MODE) {
+              // Register a hook when a layer is loaded on the map
+              layerBeingAdded!.onIndividualLayerLoaded((sender, payload) => {
+                // Log
+                logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
+                this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
+              });
+            }
 
             // Add the layer on the map
             this.#addToMap(layerBeingAdded!);
@@ -1861,7 +1874,7 @@ type LayerLoadedDelegate = EventDelegateBase<LayerApi, LayerLoadedEvent, void>;
  */
 export type LayerLoadedEvent = {
   // The loaded layer
-  layer: AbstractGeoViewLayer;
+  layer: AbstractGeoViewLayer | AbstractGVLayer;
 
   layerPath: string;
 };
