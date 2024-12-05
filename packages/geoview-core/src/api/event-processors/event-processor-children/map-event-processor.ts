@@ -29,6 +29,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeMapConfig,
+  TypeMapFeaturesInstance,
 } from '@/geo/map/map-schema-types';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -1157,7 +1158,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Creates a map config based on current map state.
    * @param {string} mapId - Id of map.
    */
-  static createMapConfigFromMapState(mapId: string): TypeMapFeaturesConfig | undefined {
+  static createMapConfigFromMapState(mapId: string): TypeMapFeaturesInstance | undefined {
     const config = MapEventProcessor.getGeoViewMapConfig(mapId);
 
     if (config) {
@@ -1201,8 +1202,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       };
 
       // Construct map config
-      const newMapConfig: TypeMapFeaturesConfig = {
-        mapId,
+      const newMapConfig: TypeMapFeaturesInstance = {
         map,
         theme: AppEventProcessor.getDisplayTheme(mapId),
         navBar: config.navBar,
