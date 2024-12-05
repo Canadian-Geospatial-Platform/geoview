@@ -33,7 +33,7 @@ import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
-import { TypeOrderedLayerInfo, api, unmountMap } from '@/app';
+import { TypeMapFeaturesInstance, TypeOrderedLayerInfo, api, unmountMap } from '@/app';
 import { Plugin } from '@/api/plugin/plugin';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 
@@ -1216,9 +1216,9 @@ export class MapViewer {
 
   /**
    * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
-   * @param {TypeMapFeaturesConfig} mapConfig - Optional map config to use for reload.
+   * @param {TypeMapFeaturesConfig | TypeMapFeaturesInstance} mapConfig - Optional map config to use for reload.
    */
-  async reload(mapConfig?: TypeMapFeaturesConfig): Promise<void> {
+  async reload(mapConfig?: TypeMapFeaturesConfig | TypeMapFeaturesInstance): Promise<void> {
     // If no config is provided, get the original from the store
     const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(this.mapId);
 
@@ -1529,9 +1529,9 @@ export class MapViewer {
 
   /**
    * Creates a map config based on current map state.
-   * @returns {TypeMapFeaturesConfig | undefined} Map config with current map state.
+   * @returns {TypeMapFeaturesInstance | undefined} Map config with current map state.
    */
-  createMapConfigFromMapState(): TypeMapFeaturesConfig | undefined {
+  createMapConfigFromMapState(): TypeMapFeaturesInstance | undefined {
     return MapEventProcessor.createMapConfigFromMapState(this.mapId);
   }
 

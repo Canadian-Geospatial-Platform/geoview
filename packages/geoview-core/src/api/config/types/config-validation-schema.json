@@ -50,7 +50,9 @@
           "$ref": "#/definitions/TypeGlobalSettings"
         }
       },
-      "required": ["map"]
+      "required": [
+        "map"
+      ]
     },
     "TypeMapConfig": {
       "additionalProperties": false,
@@ -81,7 +83,11 @@
           "type": "object"
         }
       },
-      "required": ["basemapOptions", "interaction", "viewSettings"]
+      "required": [
+        "basemapOptions",
+        "interaction",
+        "viewSettings"
+      ]
     },
     "TypeListOfAbstractGeoviewLayerConfig": {
       "description": "The list of geoview layer configurations. The map config validation ends here. The only thing we need to verify for the moment is it must be an array.",
@@ -90,13 +96,23 @@
     "TypeDisplayTheme": {
       "description": "Valid values for the theme property.",
       "additionalProperties": false,
-      "enum": ["dark", "light", "geo.ca"],
+      "enum": [
+        "dark",
+        "light",
+        "geo.ca"
+      ],
       "default": "geo.ca"
     },
     "TypeValidNavBarProps": {
       "description": "Valid values for the navBar array.",
       "additionalProperties": false,
-      "enum": ["zoom", "fullscreen", "home", "location", "basemap-select"]
+      "enum": [
+        "zoom",
+        "fullscreen",
+        "home",
+        "location",
+        "basemap-select"
+      ]
     },
     "TypeNavBarProps": {
       "description": "Controls available on the navigation bar.",
@@ -106,13 +122,25 @@
       "items": {
         "$ref": "#/definitions/TypeValidNavBarProps"
       },
-      "default": ["zoom", "fullscreen", "home", "basemap-select"],
+      "default": [
+        "zoom",
+        "fullscreen",
+        "home",
+        "basemap-select"
+      ],
       "minItems": 0
     },
     "TypeValidFooterBarTabsCoreProps": {
       "description": "Valid values for the footerBar tabs core array.",
       "additionalProperties": false,
-      "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
+      "enum": [
+        "legend",
+        "layers",
+        "details",
+        "data-table",
+        "time-slider",
+        "geochart"
+      ]
     },
     "TypeFooterBarTabsCustomProps": {
       "description": "Footer bar tabs custom definition.",
@@ -145,7 +173,12 @@
                 "$ref": "#/definitions/TypeValidFooterBarTabsCoreProps"
               },
               "minItems": 1,
-              "default": ["legend", "layers", "details", "data-table"],
+              "default": [
+                "legend",
+                "layers",
+                "details",
+                "data-table"
+              ],
               "uniqueItems": true
             },
             "custom": {
@@ -168,16 +201,36 @@
         },
         "selectedTab": {
           "type": "string",
-          "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart"],
+          "enum": [
+            "legend",
+            "layers",
+            "details",
+            "data-table",
+            "time-slider",
+            "geochart"
+          ],
           "description": "Footer tab to be selected at map load"
         }
       },
-      "required": ["tabs"]
+      "required": [
+        "tabs"
+      ]
     },
     "TypeValidAppBarCoreProps": {
       "description": "Valid values for the app bar tabs core array.",
       "additionalProperties": false,
-      "enum": ["geolocator", "export", "basemap-panel", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel"]
+      "enum": [
+        "geolocator",
+        "export",
+        "basemap-panel",
+        "geochart",
+        "details",
+        "legend",
+        "guide",
+        "data-table",
+        "layers",
+        "aoi-panel"
+      ]
     },
     "TypeAppBarProps": {
       "type": "object",
@@ -195,7 +248,9 @@
                 "$ref": "#/definitions/TypeValidAppBarCoreProps"
               },
               "minItems": 0,
-              "default": ["geolocator"],
+              "default": [
+                "geolocator"
+              ],
               "uniqueItems": true
             }
           }
@@ -207,11 +262,24 @@
         },
         "selectedTab": {
           "type": "string",
-          "enum": ["geolocator", "basemap-panel", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel"],
+          "enum": [
+            "geolocator",
+            "basemap-panel",
+            "geochart",
+            "details",
+            "legend",
+            "guide",
+            "data-table",
+            "layers",
+            "aoi-panel",
+            ""
+          ],
           "description": "App bar tab to be selected at map load"
         }
       },
-      "required": ["tabs"]
+      "required": [
+        "tabs"
+      ]
     },
     "TypeOverviewMapProps": {
       "type": "object",
@@ -229,7 +297,10 @@
     "TypeValidMapComponentProps": {
       "description": "Valid values for the map component array.",
       "additionalProperties": false,
-      "enum": ["overview-map", "north-arrow"]
+      "enum": [
+        "overview-map",
+        "north-arrow"
+      ]
     },
     "TypeMapComponents": {
       "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
@@ -239,13 +310,18 @@
       "items": {
         "$ref": "#/definitions/TypeValidMapComponentProps"
       },
-      "default": ["overview-map", "north-arrow"],
+      "default": [
+        "overview-map",
+        "north-arrow"
+      ],
       "minItems": 0
     },
     "TypeValidMapCorePackageProps": {
       "description": "Valid values for the map core package array.",
       "additionalProperties": false,
-      "enum": ["swiper"]
+      "enum": [
+        "swiper"
+      ]
     },
     "TypeMapCorePackages": {
       "description": "Core map packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
@@ -271,7 +347,9 @@
           "type": "string"
         }
       },
-      "required": ["name"]
+      "required": [
+        "name"
+      ]
     },
     "TypeExternalPackages": {
       "description": "List of external packages to initialize on viewer load.",
@@ -307,7 +385,9 @@
     },
     "TypeValidVersions": {
       "description": "The schema version that can be used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer.",
-      "enum": ["1.0"]
+      "enum": [
+        "1.0"
+      ]
     },
     "TypeGlobalSettings": {
       "additionalProperties": false,
@@ -339,17 +419,31 @@
           "default": true
         }
       },
-      "required": ["basemapId", "shaded", "labeled"]
+      "required": [
+        "basemapId",
+        "shaded",
+        "labeled"
+      ]
     },
     "TypeBasemapId": {
       "description": "Id of the basemap to use.",
-      "enum": ["transport", "osm", "simple", "nogeom", "shaded", "imagery"],
+      "enum": [
+        "transport",
+        "osm",
+        "simple",
+        "nogeom",
+        "shaded",
+        "imagery"
+      ],
       "default": "transport"
     },
     "TypeInteraction": {
       "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).",
       "additionalProperties": false,
-      "enum": ["static", "dynamic"],
+      "enum": [
+        "static",
+        "dynamic"
+      ],
       "default": "dynamic"
     },
     "AbstractGeoviewLayerConfig": {
@@ -407,7 +501,9 @@
             "const": true
           }
         },
-        "required": ["useInternalSchema"]
+        "required": [
+          "useInternalSchema"
+        ]
       },
       "then": {
         "description": "Use Internal Schema",
@@ -435,7 +531,10 @@
           }
         }
       },
-      "required": ["geoviewLayerType", "listOfLayerEntryConfig"]
+      "required": [
+        "geoviewLayerType",
+        "listOfLayerEntryConfig"
+      ]
     },
     "TypeListOfLayerEntryConfig": {
       "description": "The list of layer configurations. The AbstractGeoviewLayerConfig validation ends here. The only thing we need to verify for the moment is it must be an array of at least one element.",
@@ -469,7 +568,12 @@
           "items": {
             "type": "number"
           },
-          "default": [-125, 30, -60, 89]
+          "default": [
+            -125,
+            30,
+            -60,
+            89
+          ]
         },
         "minZoom": {
           "description": "The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
@@ -492,7 +596,12 @@
     "TypeHighlightColors": {
       "description": "Color to use for feature highlights.",
       "additionalProperties": false,
-      "enum": ["black", "white", "red", "green"],
+      "enum": [
+        "black",
+        "white",
+        "red",
+        "green"
+      ],
       "default": "black"
     },
     "TypeOverlayObjects": {
@@ -548,11 +657,17 @@
           "default": 4326
         }
       },
-      "required": ["id", "coordinate"]
+      "required": [
+        "id",
+        "coordinate"
+      ]
     },
     "TypeDisplayLanguage": {
       "description": "Display languages supported.",
-      "enum": ["en", "fr"]
+      "enum": [
+        "en",
+        "fr"
+      ]
     },
     "TypeGeoviewLayerType": {
       "description": "Type of GeoView layer.",
@@ -744,16 +859,29 @@
           }
         ]
       ],
-      "default": [4.5, [-90, 67]]
+      "default": [
+        4.5,
+        [
+          -90,
+          67
+        ]
+      ]
     },
     "TypeValidMapProjectionCodes": {
       "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.",
-      "enum": [3978, 3857],
+      "enum": [
+        3978,
+        3857
+      ],
       "default": 3978
     },
     "TypeValidSourceProjectionCodes": {
       "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.",
-      "enum": [3978, 3857, 4326],
+      "enum": [
+        3978,
+        3857,
+        4326
+      ],
       "default": 3978
     },
     "EsriDynamicLayerConfig": {
@@ -768,7 +896,9 @@
           "type": "object",
           "properties": {
             "geoviewLayerType": {
-              "enum": ["esriDynamic"]
+              "enum": [
+                "esriDynamic"
+              ]
             }
           }
         }
@@ -786,7 +916,9 @@
           "type": "object",
           "properties": {
             "geoviewLayerType": {
-              "enum": ["esriImage"]
+              "enum": [
+                "esriImage"
+              ]
             }
           }
         }
@@ -804,7 +936,9 @@
           "type": "object",
           "properties": {
             "geoviewLayerType": {
-              "enum": ["esriFeature"]
+              "enum": [
+                "esriFeature"
+              ]
             }
           }
         }
@@ -822,7 +956,9 @@
           "type": "object",
           "properties": {
             "geoviewLayerType": {
-              "enum": ["ogcWms"]
+              "enum": [
+                "ogcWms"
+              ]
             }
           }
         }
@@ -840,7 +976,9 @@
           "type": "object",
           "properties": {
             "geoviewLayerType": {
-              "enum": ["ogcWfs"]
+              "enum": [
+                "ogcWfs"
+              ]
             }
           }
         }
@@ -858,7 +996,9 @@
           "type": "object",
           "properties": {
             "geoviewLayerType": {
-              "enum": ["GeoJSON"]
+              "enum": [
+                "GeoJSON"
+              ]
             }
           }
         }
@@ -924,7 +1064,9 @@
             "const": true
           }
         },
-        "required": ["useInternalSchema"]
+        "required": [
+          "useInternalSchema"
+        ]
       },
       "then": {
         "description": "Use Internal Schema",
@@ -938,7 +1080,11 @@
             "$ref": "#/definitions/TypeLayerEntryType"
           }
         },
-        "required": ["entryType", "layerId", "layerName"]
+        "required": [
+          "entryType",
+          "layerId",
+          "layerName"
+        ]
       },
       "else": {
         "description": "Use Input Schema",
@@ -955,7 +1101,9 @@
             }
           }
         },
-        "required": ["layerId"]
+        "required": [
+          "layerId"
+        ]
       },
       "errorMessage": {
         "if": "The data does not respect the EntryConfigBaseClass schema definition."
@@ -998,7 +1146,9 @@
           "type": "object",
           "properties": {
             "entryType": {
-              "enum": ["group"]
+              "enum": [
+                "group"
+              ]
             },
             "listOfLayerEntryConfig": {
               "description": "The list of layer entry configurations to use from the GeoView layer group.",
@@ -1027,7 +1177,9 @@
               }
             },
             "entryType": {
-              "enum": ["raster-image"]
+              "enum": [
+                "raster-image"
+              ]
             },
             "source": {
               "$ref": "#/definitions/TypeSourceEsriDynamicInitialConfig"
@@ -1051,7 +1203,9 @@
           "type": "object",
           "properties": {
             "entryType": {
-              "enum": ["raster-image"]
+              "enum": [
+                "raster-image"
+              ]
             },
             "source": {
               "$ref": "#/definitions/TypeSourceEsriImageInitialConfig"
@@ -1156,7 +1310,14 @@
     },
     "TypeStyleGeometry": {
       "description": "Valid keys for the geometryType property.",
-      "enum": ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]
+      "enum": [
+        "Point",
+        "MultiPoint",
+        "LineString",
+        "MultiLineString",
+        "Polygon",
+        "MultiPolygon"
+      ]
     },
     "TypeBaseSourceInitialConfig": {
       "description": "Base type from which we derive the source properties for all the leaf nodes in the layer tree.",
@@ -1226,7 +1387,11 @@
     },
     "TypeOfServer": {
       "description": "The type of the remote WMS server.",
-      "enum": ["mapserver", "geoserver", "qgis"],
+      "enum": [
+        "mapserver",
+        "geoserver",
+        "qgis"
+      ],
       "default": "mapserver"
     },
     "TypeSourceImageStaticInitialConfig": {
@@ -1281,7 +1446,10 @@
             },
             "strategy": {
               "description": "The loading strategy to use. By default an all strategy is used, a one-off strategy which loads all features at once.",
-              "enum": ["all", "bbox"],
+              "enum": [
+                "all",
+                "bbox"
+              ],
               "default": "all"
             }
           }
@@ -1365,14 +1533,28 @@
           "items": {
             "type": "number"
           },
-          "default": [256, 256]
+          "default": [
+            256,
+            256
+          ]
         }
       },
-      "required": ["origin", "resolutions"]
+      "required": [
+        "origin",
+        "resolutions"
+      ]
     },
     "TypeVectorSourceFormats": {
       "description": "The feature format used by the XHR feature loader when access path is set.",
-      "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "featureAPI", "GeoPackage", "CSV"]
+      "enum": [
+        "GeoJSON",
+        "EsriJSON",
+        "KML",
+        "WFS",
+        "featureAPI",
+        "GeoPackage",
+        "CSV"
+      ]
     },
     "TypeSourceEsriDynamicInitialConfig": {
       "description": "Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree.",
@@ -1432,7 +1614,12 @@
     },
     "TypeEsriFormatParameter": {
       "description": "The format of the exported image.",
-      "enum": ["png", "jpg", "gif", "svg"],
+      "enum": [
+        "png",
+        "jpg",
+        "gif",
+        "svg"
+      ],
       "default": "png"
     },
     "TypeSourceEsriFeatureInitialConfig": {
@@ -1472,7 +1659,9 @@
           }
         }
       },
-      "required": ["queryable"]
+      "required": [
+        "queryable"
+      ]
     },
     "TypeOutfields": {
       "type": "object",
@@ -1504,12 +1693,22 @@
           ]
         }
       },
-      "required": ["name", "alias", "type", "domain"]
+      "required": [
+        "name",
+        "alias",
+        "type",
+        "domain"
+      ]
     },
     "TypeOutfieldsType": {
       "description": "The types supported by the outfields object.",
       "additionalProperties": false,
-      "enum": ["string", "number", "date", "url"]
+      "enum": [
+        "string",
+        "number",
+        "date",
+        "url"
+      ]
     },
     "codedValueType": {
       "description": "Coded value definition.",
@@ -1517,7 +1716,9 @@
       "type": "object",
       "properties": {
         "type": {
-          "enum": ["codedValue"]
+          "enum": [
+            "codedValue"
+          ]
         },
         "name": {
           "description": "The domain name.",
@@ -1552,7 +1753,9 @@
       "type": "object",
       "properties": {
         "type": {
-          "enum": ["range"]
+          "enum": [
+            "range"
+          ]
         },
         "name": {
           "description": "The domain name.",
@@ -1567,11 +1770,21 @@
           }
         }
       },
-      "required": ["type", "name", "range"]
+      "required": [
+        "type",
+        "name",
+        "range"
+      ]
     },
     "TypeLayerEntryType": {
       "description": "Layer entry data type.",
-      "enum": ["vector", "vector-tile", "raster-tile", "raster-image", "group"]
+      "enum": [
+        "vector",
+        "vector-tile",
+        "raster-tile",
+        "raster-image",
+        "group"
+      ]
     },
     "TypeTemporalDimension": {
       "additionalProperties": false,
@@ -1591,7 +1804,10 @@
           "$ref": "#/definitions/TypeRangeItems"
         },
         "nearestValues": {
-          "enum": ["discrete", "absolute"]
+          "enum": [
+            "discrete",
+            "absolute"
+          ]
         },
         "singleHandle": {
           "type": "boolean"
@@ -1667,7 +1883,11 @@
     },
     "TypeLayerStyleConfigType": {
       "description": "Valid keys for the type property of style configurations.",
-      "enum": ["simple", "uniqueValue", "classBreaks"]
+      "enum": [
+        "simple",
+        "uniqueValue",
+        "classBreaks"
+      ]
     },
     "TypeLayerStyleConfigInfo": {
       "type": "object",
@@ -1737,7 +1957,12 @@
     },
     "TypeBaseVectorType": {
       "description": "Valid values for the type property of the base vector settings.",
-      "enum": ["lineString", "filledPolygon", "simpleSymbol", "iconSymbol"]
+      "enum": [
+        "lineString",
+        "filledPolygon",
+        "simpleSymbol",
+        "iconSymbol"
+      ]
     },
     "TypeLineStringVectorConfig": {
       "description": "Definition of the line symbol vector settings type.",
@@ -1750,7 +1975,9 @@
           "type": "object",
           "properties": {
             "type": {
-              "enum": ["lineString"]
+              "enum": [
+                "lineString"
+              ]
             },
             "stroke": {
               "$ref": "#/definitions/TypeStrokeSymbolConfig"
@@ -1803,7 +2030,9 @@
           "type": "object",
           "properties": {
             "type": {
-              "enum": ["filledPolygon"]
+              "enum": [
+                "filledPolygon"
+              ]
             },
             "color": {
               "type": "string"
@@ -1832,7 +2061,16 @@
     },
     "TypeFillStyle": {
       "description": "Valid values to specify fill styles.",
-      "enum": ["null", "solid", "backwardDiagonal", "cross", "diagonalCross", "forwardDiagonal", "horizontal", "vertical"]
+      "enum": [
+        "null",
+        "solid",
+        "backwardDiagonal",
+        "cross",
+        "diagonalCross",
+        "forwardDiagonal",
+        "horizontal",
+        "vertical"
+      ]
     },
     "TypeSimpleSymbolVectorConfig": {
       "description": " Definition of the simple symbol vector settings type.",
@@ -1845,7 +2083,9 @@
           "type": "object",
           "properties": {
             "type": {
-              "enum": ["simpleSymbol"]
+              "enum": [
+                "simpleSymbol"
+              ]
             },
             "rotation": {
               "description": "Symbol rotation in radians.",
@@ -1877,7 +2117,15 @@
     },
     "TypeSymbol": {
       "description": "Valid values to specify symbol shapes.",
-      "enum": ["circle", "+", "diamond", "square", "triangle", "X", "star"]
+      "enum": [
+        "circle",
+        "+",
+        "diamond",
+        "square",
+        "triangle",
+        "X",
+        "star"
+      ]
     },
     "TypeIconSymbolVectorConfig": {
       "type": "object",
@@ -1889,7 +2137,9 @@
           "type": "object",
           "properties": {
             "type": {
-              "enum": ["iconSymbol"]
+              "enum": [
+                "iconSymbol"
+              ]
             },
             "mimeType": {
               "type": "string"
@@ -1946,10 +2196,19 @@
         },
         "data": {
           "description": "A required property that can be any type.",
-          "type": ["object", "array", "string", "number", "boolean", "null"]
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
         }
       },
-      "required": ["data"]
+      "required": [
+        "data"
+      ]
     }
   }
 }

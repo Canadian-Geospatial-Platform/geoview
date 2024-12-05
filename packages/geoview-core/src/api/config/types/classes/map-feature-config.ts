@@ -213,12 +213,15 @@ export class MapFeatureConfig {
         ? this.map.viewSettings.projection
         : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
 
-    this.#validateCenter();
-
-    // zoom cannot be undefined because undefined values were set with default values.
-    const zoom = this.map.viewSettings.initialView!.zoomAndCenter![0];
-    this.map.viewSettings.initialView!.zoomAndCenter![0] =
-      !Number.isNaN(zoom) && zoom >= 0 && zoom <= 28 ? zoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![0];
+    // TODO: add validation for extent and layerIds
+    if (this.map.viewSettings.initialView!.zoomAndCenter) {
+      this.#validateCenter();
+      const zoom = this.map.viewSettings.initialView!.zoomAndCenter![0];
+      this.map.viewSettings.initialView!.zoomAndCenter![0] =
+        !Number.isNaN(zoom) && zoom >= 0 && zoom <= 28
+          ? zoom
+          : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![0];
+    }
 
     this.#validateBasemap();
 
@@ -233,7 +236,7 @@ export class MapFeatureConfig {
     this.map.viewSettings.maxZoom =
       !Number.isNaN(maxZoom) && maxZoom >= 0 && maxZoom <= 50 ? maxZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.maxZoom;
 
-    this.#validateMaxExtent();
+    if (this.map.viewSettings.initialView!.zoomAndCenter) this.#validateMaxExtent();
     this.#logModifs(providedMapConfig);
   }
 
