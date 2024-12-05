@@ -1,10 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
-
 import { Box } from '@/ui';
+
 import { logger } from '@/core/utils/logger';
-import { useMapHoverFeatureInfo, useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapHoverFeatureInfo,
+  useMapIsMouseInsideMap,
+  useMapPointerPosition,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './hover-tooltip-styles';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -14,58 +18,36 @@ import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-inti
  *
  * @returns {JSX.Element} the hover tooltip component
  */
-export function HoverTooltip(): JSX.Element | null {
+// Memoizes entire component, preventing re-renders if props haven't changed
+export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
   // Log, commented too annoying
   // logger.logTraceRender('components/hover-tooltip/hover-tooltip');
 
+  // Hooks
   const { t } = useTranslation<string>();
-  const mapId = useGeoViewMapId();
-
   const theme: Theme & {
     iconImage: React.CSSProperties;
   } = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // internal component state
+  // State
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const [tooltipValue, setTooltipValue] = useState<string>('');
   const [tooltipIcon, setTooltipIcon] = useState<string>('');
-  const [showTooltip, setShowTooltip] = useState<boolean>(false);
 
-  const sxClasses = getSxClasses(theme);
-
-  // store state
+  // Store
   const hoverFeatureInfo = useMapHoverFeatureInfo();
   const pointerPosition = useMapPointerPosition();
-  const mapElem = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${mapId}"]`) as HTMLElement;
+  const isMouseouseInMap = useMapIsMouseInsideMap();
+  const mapElem = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${useGeoViewMapId()}"]`) as HTMLElement;
 
-  const tooltipRef = useRef<HTMLDivElement>(null);
-
-  // Update tooltip when store value change from propagation by hover-layer-set to map-event-processor
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('HOVER-TOOLTIP - hoverFeatureInfo', hoverFeatureInfo);
-
-    if (hoverFeatureInfo) {
-      setTooltipValue(hoverFeatureInfo!.fieldInfo?.value as string | '');
-      setTooltipIcon(hoverFeatureInfo!.featureIcon.toDataURL());
-      setShowTooltip(true);
-    }
-  }, [hoverFeatureInfo]);
-
-  // clear the tooltip and mouse move and set pixel location
-  useEffect(() => {
-    // Log, commented too annoying
-    // logger.logTraceUseEffect('HOVER-TOOLTIP - pointerPosition', pointerPosition);
-
-    setTooltipValue('');
-    setTooltipIcon('');
-    setShowTooltip(false);
-  }, [pointerPosition]);
-
-  // Update tooltip position when we have the dimensions of the tooltip
   useEffect(() => {
     logger.logTraceUseEffect('HOVER-TOOLTIP - tooltipValue changed', tooltipValue);
 
     if (!mapElem || !tooltipRef.current || !pointerPosition || !pointerPosition.pixel || !tooltipValue) {
+      tooltipRef.current!.style.left = `-1000px`;
+      tooltipRef.current!.style.top = `-1000px`;
+
       return;
     }
 
@@ -88,20 +70,27 @@ export function HoverTooltip(): JSX.Element | null {
     tooltipRef.current.style.top = `${tooltipY}px`;
   }, [tooltipValue, mapElem, pointerPosition]);
 
-  if (showTooltip && !tooltipValue) {
-    return null;
-  }
+  // Update tooltip when store value change from propagation by hover-layer-set to map-event-processor
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('HOVER-TOOLTIP - hoverFeatureInfo', hoverFeatureInfo);
+
+    if (hoverFeatureInfo && isMouseouseInMap) {
+      setTooltipValue((hoverFeatureInfo.fieldInfo?.value as string) || '');
+      setTooltipIcon(hoverFeatureInfo.featureIcon.toDataURL());
+    }
+  }, [hoverFeatureInfo, isMouseouseInMap]);
+
+  // Clear tooltip on mouse move
+  useEffect(() => {
+    setTooltipIcon('');
+    setTooltipValue('');
+  }, [pointerPosition]);
 
   return (
-    <Box
-      ref={tooltipRef}
-      sx={sxClasses.tooltipItem}
-      style={{
-        visibility: showTooltip ? 'visible' : 'hidden',
-      }}
-    >
+    <Box ref={tooltipRef} sx={sxClasses.tooltipItem}>
       <Box component="img" className="layer-icon" alt={t('hovertooltip.alticon')!} src={tooltipIcon} />
       <Box sx={sxClasses.tooltipText}>{tooltipValue}</Box>
     </Box>
   );
-}
+});

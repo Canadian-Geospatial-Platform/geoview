@@ -1,7 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useTheme } from '@mui/material';
 import { Box, ListItemButton, Grid, Tooltip, Typography, ListItem } from '@/ui';
 import { GeoListItem } from './geolocator';
-import { sxClassesList } from './geolocator-style';
+import { getSxClassesList } from './geolocator-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { logger } from '@/core/utils/logger';
@@ -21,6 +22,8 @@ type tooltipProp = Pick<GeoListItem, 'name' | 'province' | 'category'>;
  */
 export default function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Element {
   const { zoomToGeoLocatorLocation } = useMapStoreActions();
+  const theme = useTheme();
+  const sxClassesList = useMemo(() => getSxClassesList(theme), [theme]);
 
   /**
    * Get the title for tooltip

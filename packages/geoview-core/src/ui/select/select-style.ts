@@ -1,9 +1,14 @@
 import { Theme } from '@mui/material/styles';
+import { SxStyles } from '@/ui/style/types';
 
+/**
+ * Get custom sx classes for the MUI select
+ *
+ * @param {Theme} theme the theme object
+ * @returns {Object} the sx classes object
+ */
 // TODO: Refactor Note - No theme when an external component (e.g. GeoChart) uses a CGPV UI component. I had to add the "?" to support when no theme are set (no map).
-// ? I doubt we want to define an explicit type for style properties?
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (theme: Theme): any => ({
+export const getSxClasses = (theme: Theme): SxStyles => ({
   formControl: {
     fontSize: theme.palette.geoViewFontSize?.sm,
     width: '100%',

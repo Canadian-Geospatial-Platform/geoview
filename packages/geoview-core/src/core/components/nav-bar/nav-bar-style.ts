@@ -1,9 +1,15 @@
 import { Theme } from '@mui/material/styles';
+import { SxStyles } from '@/ui/style/types';
 
-// ? I doubt we want to define an explicit type for style properties?
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (theme: Theme): any => ({
+/**
+ * Get custom sx classes for the navigation bar
+ *
+ * @param {Theme} theme the theme object
+ * @returns {Object} the sx classes object
+ */
+export const getSxClasses = (theme: Theme): SxStyles => ({
   navBarRef: {
+    width: 'min-content !important',
     position: 'absolute',
     right: theme.spacing(7),
     padding: '6px',

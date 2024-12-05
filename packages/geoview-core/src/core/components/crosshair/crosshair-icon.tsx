@@ -1,7 +1,10 @@
+import { memo } from 'react';
+
 /**
  * Create a cross hair icon
  */
-export function CrosshairIcon(): JSX.Element {
+// Memoizes entire component, preventing re-renders if props haven't changed
+export const CrosshairIcon = memo(function CrosshairIcon(): JSX.Element {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 275 275" focusable="false">
       <g fill="none" stroke="#616161" strokeWidth="1px" id="crosshairs" transform="translate(0 -1824.72) scale(2)">
@@ -9,4 +12,4 @@ export function CrosshairIcon(): JSX.Element {
       </g>
     </svg>
   );
-}
+});

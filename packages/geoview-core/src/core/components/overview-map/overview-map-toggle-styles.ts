@@ -1,4 +1,11 @@
-export const sxClasses = {
+type SxClasses = Record<string, object>;
+
+/**
+ * Get custom sx classes for the overview map toggle
+ *
+ * @returns {Object} the sx classes object
+ */
+export const getSxClasses = (): SxClasses => ({
   toggleBtn: {
     transform: 'rotate(45deg)',
     color: 'black',
@@ -20,4 +27,4 @@ export const sxClasses = {
     top: 0,
     right: 0,
   },
-};
+});

@@ -1,8 +1,13 @@
 import { Theme } from '@mui/material/styles';
+import { SxStyles } from '@/ui/style/types';
 
-// ? I doubt we want to define an explicit type for style properties?
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getFocusTrapSxClasses = (theme: Theme): any => {
+/**
+ * Get custom sx classes for the focus trap container
+ *
+ * @param {Theme} theme the theme object
+ * @returns {Object} the sx classes object
+ */
+export const getFocusTrapSxClasses = (theme: Theme): SxStyles => {
   const borderColor =
     theme.palette.mode === 'light' ? theme.palette.geoViewColor.primary.dark[300] : theme.palette.geoViewColor.primary.light[300];
 
@@ -22,15 +27,18 @@ export const getFocusTrapSxClasses = (theme: Theme): any => {
       border: 'unset',
     },
     enableFocus: {
-      border: `5px solid ${borderColor}
-      }`,
+      border: `5px solid ${borderColor}`,
     },
   };
 };
 
-// ? I doubt we want to define an explicit type for style properties?
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getShellSxClasses = (theme: Theme): any => ({
+/**
+ * Get custom sx classes for the shell container
+ *
+ * @param {Theme} theme the theme object
+ * @returns {Object} the sx classes object
+ */
+export const getShellSxClasses = (theme: Theme): SxStyles => ({
   all: {
     height: '100%',
     width: '100%',

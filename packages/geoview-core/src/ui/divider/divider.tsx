@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { useTheme } from '@mui/material/styles';
+import { SxProps, Theme, useTheme } from '@mui/material/styles';
 import { Divider as MaterialDivider, DividerProps } from '@mui/material';
 
 import { getSxClasses } from './divider-style';
@@ -10,6 +10,7 @@ import { getSxClasses } from './divider-style';
 interface TypeDividerProps extends DividerProps {
   orientation?: 'horizontal' | 'vertical';
   grow?: boolean;
+  sx?: SxProps<Theme>;
 }
 
 /**
@@ -30,12 +31,6 @@ export function Divider(props: TypeDividerProps): JSX.Element {
     dividerOrientation = orientation === 'horizontal' ? sxClasses.horizontal : sxClasses.vertical;
   }
 
-  return (
-    <MaterialDivider
-      sx={{ ...(grow ? sxClasses.grow : {}), ...dividerOrientation, ...sx }}
-      className={`${className ?? ''}`}
-      style={style}
-      {...rest}
-    />
-  );
+  const sxMerged = { ...(grow ? sxClasses.grow : {}), ...dividerOrientation, ...sx };
+  return <MaterialDivider sx={sxMerged} className={`${className ?? ''}`} style={style} {...rest} />;
 }

@@ -1,6 +1,11 @@
-// map-info.tsx
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (): any => ({
+import { SxStyles } from '@/ui/style/types';
+
+/**
+ * Get custom sx classes for the map information bar
+ *
+ * @returns {Object} the sx classes object
+ */
+export const getSxClasses = (): SxStyles => ({
   mouseScaleControlsContainer: {
     display: 'flex',
     flexDirection: 'row',

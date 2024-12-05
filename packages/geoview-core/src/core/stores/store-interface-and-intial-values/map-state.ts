@@ -36,6 +36,7 @@ export interface IMapState {
   fixNorth: boolean;
   highlightedFeatures: TypeFeatureInfoEntry[];
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
+  isMouseInsideMap: boolean;
   initialFilters: Record<string, string>;
   interaction: TypeInteraction;
   mapExtent: Extent | undefined;
@@ -96,6 +97,7 @@ export interface IMapState {
     setAttribution: (attribution: string[]) => void;
     setInitialFilters: (filters: Record<string, string>) => void;
     setInteraction: (interaction: TypeInteraction) => void;
+    setIsMouseInsideMap: (isMouseInsideMap: boolean) => void;
     setZoom: (zoom: number) => void;
     setRotation: (rotation: number) => void;
     setOverlayClickMarker: (overlay: Overlay) => void;
@@ -147,6 +149,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     hoverFeatureInfo: undefined,
     initialFilters: {},
     interaction: 'static',
+    isMouseInsideMap: false,
     mapExtent: undefined,
     mapLoaded: false,
     northArrow: false,
@@ -576,6 +579,19 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
+       * Sets to true if mouse is inside map.
+       * @param {boolean} isMouseInsideMap - True if mouse is inside map.
+       */
+      setIsMouseInsideMap: (isMouseInsideMap: boolean): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            isMouseInsideMap,
+          },
+        });
+      },
+
+      /**
        * Sets the zoom level of the map.
        * @param {number} zoom - The zoom level.
        */
@@ -885,6 +901,7 @@ export const useMapFeatureHighlightColor = (): TypeHighlightColors =>
 export const useMapFixNorth = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInitialFilters = (): Record<string, string> => useStore(useGeoViewStore(), (state) => state.mapState.initialFilters);
 export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
+export const useMapIsMouseInsideMap = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.isMouseInsideMap);
 export const useMapHoverFeatureInfo = (): TypeHoverFeatureInfo => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
 export const useMapLoaded = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapNorthArrow = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);

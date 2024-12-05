@@ -23,7 +23,7 @@ export * from './footer-bar/footer-bar';
 export * from './geolocator/geo-list';
 export * from './geolocator/geolocator';
 export * from './geolocator/geolocator-style';
-export * from './guide/guide-panel';
+export * from './guide/guide';
 export * from './hover-tooltip/hover-tooltip';
 export * from './legend/legend';
 export * from './layers/layers-panel';

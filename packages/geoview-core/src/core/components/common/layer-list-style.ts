@@ -1,8 +1,13 @@
 import { Theme } from '@mui/material';
+import { SxStyles } from '@/ui/style/types';
 
-// ? I doubt we want to define an explicit type for style properties?
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (theme: Theme): any => ({
+/**
+ * Get custom sx classes for the common layer list
+ *
+ * @param {Theme} theme the theme object
+ * @returns {Object} the sx classes object
+ */
+export const getSxClasses = (theme: Theme): SxStyles => ({
   list: {
     overflowY: 'auto',
     color: 'text.primary',
@@ -71,8 +76,10 @@ export const getSxClasses = (theme: Theme): any => ({
       },
     },
   },
-  borderWithIndex: `2px solid ${theme.palette.geoViewColor.primary.main} !important`,
-  borderNone: 'none',
+  borderWithIndex: { border: `2px solid ${theme.palette.geoViewColor.primary.main} !important` },
+  borderNone: {
+    border: 'none',
+  },
   headline: { fontSize: theme.palette.geoViewFontSize.md, fontWeight: 'bold' },
   layersInstructionsPaper: {
     padding: '2rem',

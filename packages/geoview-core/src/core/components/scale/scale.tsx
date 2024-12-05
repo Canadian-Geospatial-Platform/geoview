@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { memo, useState, useCallback, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -17,31 +17,39 @@ interface TypeScale {
   borderBottom: boolean;
 }
 
+// Constants outside component to prevent recreating every render
+const SCALE_MODES = {
+  METRIC: 0,
+  IMPERIAL: 1,
+  NUMERIC: 2,
+} as const;
+
+const BOX_STYLES = { minWidth: 120 } as const;
+
 /**
- * Create an element that displays the scale
+ * Create a scale component
  *
  * @returns {JSX.Element} created scale element
  */
-export function Scale(): JSX.Element {
-  // Log
+// Memoizes entire component, preventing re-renders if props haven't changed
+export const Scale = memo(function Scale(): JSX.Element {
   logger.logTraceRender('components/scale/scale');
 
-  const mapId = useGeoViewMapId();
-
+  // Hooks
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // internal component state
-  const [scaleMode, setScaleMode] = useState<number>(0);
+  // State
+  const [scaleMode, setScaleMode] = useState<number>(SCALE_MODES.METRIC);
 
-  // get the values from store
+  // Store
+  const mapId = useGeoViewMapId();
   const expanded = useUIMapInfoExpanded();
   const scale = useMapScale();
   const interaction = useMapInteraction();
 
-  // Memoize scale values array since it doesn't change
+  // Memoize values
   const scaleValues: TypeScale[] = useMemo(
     () => [
       {
@@ -63,22 +71,25 @@ export function Scale(): JSX.Element {
     [scale.labelGraphicMetric, scale.labelGraphicImperial, scale.labelNumeric]
   );
 
-  // Memoize getScaleWidth function
+  // Callback
   const getScaleWidth = useCallback(
     (mode: number): string => {
-      if (mode === 0) return scale.lineWidthMetric;
-      if (mode === 1) return scale.lineWidthImperial;
-      return 'none';
+      switch (mode) {
+        case SCALE_MODES.METRIC:
+          return scale.lineWidthMetric;
+        case SCALE_MODES.IMPERIAL:
+          return scale.lineWidthImperial;
+        default:
+          return 'none';
+      }
     },
     [scale.lineWidthMetric, scale.lineWidthImperial]
   );
-
-  // Memoize switchScale callback
   const switchScale = useCallback((): void => {
     setScaleMode((prev) => (prev + 1) % 3);
   }, []);
 
-  // Memoize the expanded content
+  // Memoize UI - expanded content
   const expandedContent = useMemo(
     () => (
       <Box sx={sxClasses.scaleExpandedContainer}>
@@ -93,7 +104,7 @@ export function Scale(): JSX.Element {
             />
             <Box
               component="span"
-              className={index === 2 ? '' : 'hasScaleLine'}
+              className={index === SCALE_MODES.NUMERIC ? '' : 'hasScaleLine'}
               sx={{
                 ...sxClasses.scaleText,
                 borderBottom: value.borderBottom ? '1px solid' : 'none',
@@ -109,7 +120,7 @@ export function Scale(): JSX.Element {
     [scaleValues, scaleMode, sxClasses, theme.palette.geoViewFontSize.lg, getScaleWidth]
   );
 
-  // Memoize the collapsed content
+  // Memoize UI - collapsed content
   const collapsedContent = useMemo(
     () => (
       <Box
@@ -129,7 +140,7 @@ export function Scale(): JSX.Element {
 
   return (
     <Tooltip title={t('mapnav.scale')!} placement="top">
-      <Box sx={{ minWidth: 120 }}>
+      <Box sx={BOX_STYLES}>
         <Box id={`${mapId}-scaleControlBarMetric`} sx={sxClasses.scaleControl} />
         <Box id={`${mapId}-scaleControlBarImperial`} sx={sxClasses.scaleControl} />
         <Button onClick={switchScale} type="text" sx={sxClasses.scaleContainer} disableRipple className={`interaction-${interaction}`}>
@@ -138,4 +149,4 @@ export function Scale(): JSX.Element {
       </Box>
     </Tooltip>
   );
-}
+});

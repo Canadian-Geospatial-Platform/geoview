@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, MutableRefObject } from 'react';
+import { useEffect, useRef, useCallback, MutableRefObject, useMemo } from 'react';
 
 import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -11,7 +11,7 @@ import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 
 import { MapViewer } from '@/geo/map/map-viewer';
 
-import { sxClasses } from './map-style';
+import { getSxClasses } from './map-style';
 import { useMapLoaded, useMapNorthArrow, useMapOverviewMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Plugin } from '@/api/plugin/plugin';
@@ -35,6 +35,7 @@ export function Map(props: MapProps): JSX.Element {
   const { viewer } = props;
 
   const defaultTheme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(), []);
 
   // internal state - get ref to div element
   const mapElement = useRef<HTMLElement | undefined>();

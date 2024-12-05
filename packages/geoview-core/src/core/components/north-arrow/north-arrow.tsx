@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { memo, useMemo, useRef } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 
@@ -13,27 +13,35 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a north arrow
+ * Create a north arrow component
  *
  * @returns {JSX.Element} the north arrow component
  */
-export function NorthArrow(): JSX.Element {
-  // Log
+// Memoizes entire component, preventing re-renders if props haven't changed
+export const NorthArrow = memo(function NorthArrow(): JSX.Element {
   logger.logTraceRender('components/north-arrow/north-arrow');
 
+  // Hooks
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // internal component state (do not use useState for item used inside function only without rendering... use useRef)
+  // State (no useState for item used inside function only without rendering... use useRef)
   const northArrowRef = useRef<HTMLDivElement>(null);
 
-  // get the values from store
+  // Store
   const mapProjection = useMapProjection();
   const northArrowElement = useMapNorthArrowElement();
-
   const { rotationAngle, northOffset } = useManageArrow();
 
-  return `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC || `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.WM ? (
+  // Memoize this check as it's used in conditional rendering
+  const isValidProjection = useMemo(
+    () => `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC || `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.WM,
+    [mapProjection]
+  );
+
+  if (!isValidProjection) return <Box />;
+
+  return (
     <Box
       ref={northArrowRef}
       sx={sxClasses.northArrowContainer}
@@ -47,36 +55,31 @@ export function NorthArrow(): JSX.Element {
         left: northOffset,
       }}
     >
-      <NorthArrowIcon width={sxClasses.northArrow.width} height={sxClasses.northArrow.height} />
+      <NorthArrowIcon width={sxClasses.northArrow.width || 30} height={sxClasses.northArrow.height || 30} />
     </Box>
-  ) : (
-    <Box />
   );
-}
+});
 
 /**
  * Create a north pole flag icon
  * @returns {JSX.Element} the north pole marker icon
  */
-export function NorthPoleFlag(): JSX.Element {
-  const mapId = useGeoViewMapId();
-
-  // internal state
-  const northPoleId = `${mapId}-northpole`;
+// Memoizes entire component, preventing re-renders if props haven't changed
+export const NorthPoleFlag = memo(function NorthPoleFlag(): JSX.Element {
+  // State
+  const northPoleId = `${useGeoViewMapId()}-northpole`;
   const northPoleRef = useRef<HTMLDivElement | null>(null);
 
-  // get the values from store
+  // Store
   const mapProjection = useMapProjection();
   const { setOverlayNorthMarkerRef } = useMapStoreActions();
   setTimeout(() => setOverlayNorthMarkerRef(northPoleRef.current as HTMLElement), 0); // set marker reference
 
+  const isVisible = `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC;
+
   return (
-    <Box
-      ref={northPoleRef}
-      id={northPoleId}
-      style={{ visibility: `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC ? 'visible' : 'hidden' }}
-    >
+    <Box ref={northPoleRef} id={northPoleId} style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
       <NorthPoleIcon />
     </Box>
   );
-}
+});

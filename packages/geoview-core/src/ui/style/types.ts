@@ -1,10 +1,14 @@
 // Can populate using https://www.htmlcsscolor.com/hex/F1F2F5
 import { darken, lighten, alpha } from '@mui/material';
+import { Theme } from '@mui/material/styles';
+import { SxProps } from '@mui/system';
 import _ from 'lodash';
 
 const ColorKeyValues = _.range(50, 1000, 50);
 type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;
+
+export type SxStyles = Record<string, SxProps<Theme> | SxProps>;
 
 export class GeoViewColorClass {
   main: string;

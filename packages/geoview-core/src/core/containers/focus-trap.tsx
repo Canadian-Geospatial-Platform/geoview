@@ -102,7 +102,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const handleExit = (evt: KeyboardEvent): void => {
     if (!ARROW_KEY_CODES.includes(evt.code as string)) {
       // remove the border from the map
-      mapElementStore!.style.border = sxClasses.exitFocus.border;
+      // TODO: Handle the focus style/state within the store (set here, listen in map)
+      mapElementStore!.style.border = 'unset';
     }
 
     if (evt.code === 'KeyQ' && evt.ctrlKey) {
@@ -130,7 +131,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const handleEnable = (): void => {
     setOpen(false);
     setFocusTrap();
-    document.getElementById(`mapTargetElement-${mapId}`)!.style.border = sxClasses.enableFocus.border;
+    document.getElementById(`mapTargetElement-${mapId}`)!.style.border = '5px solid black';
   };
 
   const handleSkip = (): void => {
@@ -164,7 +165,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
           setOpen(false);
           exitFocus();
           // remove border from the map
-          document.getElementById(`mapTargetElement-${mapId}`)!.style.border = sxClasses.exitFocus.border;
+          document.getElementById(`mapTargetElement-${mapId}`)!.style.border = 'unset';
         },
         { once: true }
       );
