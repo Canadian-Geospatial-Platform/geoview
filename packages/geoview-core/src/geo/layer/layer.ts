@@ -613,7 +613,7 @@ export class LayerApi {
       .then(() => {
         const originalLayerPaths = originalMapOrderedLayerInfo.map((info) => info.layerPath);
 
-        // Prepare Listeners for Removing Previously Removed Layers
+        // Prepare listeners for removing previously removed layers
         parentPaths.forEach((parentPath) => {
           function removeChildLayers(sender: LayerApi): void {
             const childPaths = sender.#getAllChildPaths(parentPath);
@@ -627,37 +627,17 @@ export class LayerApi {
           this.onLayerAdded(removeChildLayers);
         });
 
+        // Prepare listeners for changing the visibility
         MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), originalMapOrderedLayerInfo);
-        const changedVisibilityPaths = originalMapOrderedLayerInfo
-          .filter((info) => {
-            const config = configs.find((c) => c.layerPath === info.layerPath);
-            return config?.initialSettings.states?.visible !== info.visible;
-          })
-          .map((info) => info.layerPath);
-
-        // Add listener for each layer with visibility
-        // that needs to be changed when added to the map
-        changedVisibilityPaths.forEach((path) => {
-          function setLayerVisibility(sender: LayerApi, event: LayerAddedEvent): void {
-            if (path.includes(event.layer.geoviewLayerId)) {
-              whenThisThen(
-                () => {
-                  const lyrConfig = sender.getLayerEntryConfig(path);
-                  return lyrConfig && lyrConfig.layerStatus === 'loaded';
-                },
-                10000,
-                500
-              )
-                .then(() => {
-                  const { visible } = originalMapOrderedLayerInfo.filter((info) => info.layerPath === path)[0];
-                  sender.getGeoviewLayerHybrid(path)?.setVisible(visible, path);
-                  sender.offLayerAdded(setLayerVisibility);
-                })
-                .catch((err) => logger.logError(err));
+        originalMapOrderedLayerInfo.forEach((layerInfo) => {
+          function setLayerVisibility(sender: LayerApi, event: LayerLoadedEvent): void {
+            if (layerInfo.layerPath === event.layerPath) {
+              const { visible } = originalMapOrderedLayerInfo.filter((info) => info.layerPath === event.layerPath)[0];
+              event.layer?.setVisible(visible, event.layerPath);
+              sender.offLayerLoaded(setLayerVisibility);
             }
           }
-          // Tried with onLayerLoaded, but didn't work as expected
-          this.onLayerAdded(setLayerVisibility);
+          this.onLayerLoaded(setLayerVisibility);
         });
       })
       .catch((err) => logger.logError(err));
