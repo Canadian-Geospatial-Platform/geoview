@@ -1344,22 +1344,23 @@ export class LayerApi {
     // If it is a group layer, highlight sublayers
     if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath])) {
       Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
-        const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath)!;
+        // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
+        const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath);
         if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
-          const otherOpacity = theLayer.getOpacity(registeredLayerPath);
-          theLayer.setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
-        } else this.getOLLayer(registeredLayerPath)!.setZIndex(999);
+          const otherOpacity = theLayer?.getOpacity(registeredLayerPath);
+          theLayer?.setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
+        } else this.getOLLayer(registeredLayerPath)?.setZIndex(999);
       });
     } else {
       Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
-        const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath)!;
-        // check for otherOlLayer is undefined. It would be undefined if a layer status is error
+        // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
+        const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath);
         if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
-          const otherOpacity = theLayer.getOpacity(registeredLayerPath);
-          theLayer.setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
+          const otherOpacity = theLayer?.getOpacity(registeredLayerPath);
+          theLayer?.setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
         }
       });
-      this.getOLLayer(layerPath)!.setZIndex(999);
+      this.getOLLayer(layerPath)?.setZIndex(999);
     }
   }
 
@@ -1372,20 +1373,21 @@ export class LayerApi {
       const { layerPath, originalOpacity } = this.#highlightedLayer;
       if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath])) {
         Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
-          const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath)!;
+          // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
+          const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath);
           if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
-            const otherOpacity = theLayer.getOpacity(registeredLayerPath);
-            theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
-          } else theLayer.setOpacity(originalOpacity || 1, registeredLayerPath);
+            const otherOpacity = theLayer?.getOpacity(registeredLayerPath);
+            theLayer?.setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
+          } else theLayer?.setOpacity(originalOpacity || 1, registeredLayerPath);
         });
       } else {
         Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
-          // check for otherOlLayer is undefined. It would be undefined if a layer status is error
-          const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath)!;
+          // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
+          const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath);
           if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
-            const otherOpacity = theLayer.getOpacity(registeredLayerPath);
-            theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
-          } else theLayer.setOpacity(originalOpacity || 1, registeredLayerPath);
+            const otherOpacity = theLayer?.getOpacity(registeredLayerPath);
+            theLayer?.setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
+          } else theLayer?.setOpacity(originalOpacity || 1, registeredLayerPath);
         });
       }
       MapEventProcessor.setLayerZIndices(this.getMapId());
@@ -1641,6 +1643,17 @@ export class LayerApi {
   }
 
   /**
+   * Recalculates the bounds for all layers and updates the store.
+   */
+  recalculateBoundsAll(): void {
+    // For each layer path
+    this.getLayerEntryConfigIds().forEach((layerPath: string) => {
+      const bounds = this.calculateBounds(layerPath);
+      LegendEventProcessor.setLayerBounds(this.getMapId(), layerPath, bounds);
+    });
+  }
+
+  /**
    * Recursively gathers all bounds on the layers associated with the given layer path and store them in the bounds parameter.
    * @param {ConfigBaseClass} layerConfig - The layer config being processed
    * @param {Extent[]} bounds - The currently gathered bounds during the recursion
@@ -1649,11 +1662,14 @@ export class LayerApi {
     // If a leaf
     if (!layerEntryIsGroupLayer(layerConfig)) {
       // Get the layer
-      const layer = this.getGeoviewLayerHybrid(layerConfig.layerPath) as AbstractGeoViewLayer | AbstractGVLayer;
+      const layer = this.getGeoviewLayerHybrid(layerConfig.layerPath);
 
-      // Get the bounds of the layer
-      const calculatedBounds = layer.getBounds(layerConfig.layerPath);
-      if (calculatedBounds) bounds.push(calculatedBounds);
+      // If the layer is of right type (should be, because we checked if not a group)
+      if (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer) {
+        // Get the bounds of the layer
+        const calculatedBounds = layer.getBounds(layerConfig.layerPath);
+        if (calculatedBounds) bounds.push(calculatedBounds);
+      }
     } else {
       // Is a group
       layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => {
