@@ -513,6 +513,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // refresh layers so new projection is render properly and await on it
       await this.getMapViewer(mapId).refreshLayers();
+
+      // When the map projection is changed, all layer bounds must be recalculated
+      this.getMapViewer(mapId).layer.recalculateBoundsAll();
     } finally {
       // Remove circular progress as refresh is done
       AppEventProcessor.setCircularProgress(mapId, false);

@@ -105,7 +105,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The layer path
    * @param {Extent | undefined} bounds - The extent of the layer at the given path
    */
-  static setLayerBounds(mapId: string, layerPath: string, bounds: Extent): void {
+  static setLayerBounds(mapId: string, layerPath: string, bounds: Extent | undefined): void {
     // Find the layer for the given layer path
     const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
     const layer = this.findLayerByPath(layers, layerPath);
