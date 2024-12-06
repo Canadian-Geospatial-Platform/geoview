@@ -569,7 +569,11 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // If both layer config had bounds and layer has real bounds, take the intersection between them
-    if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
+    if (layerConfigBounds && layerBounds) {
+      layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
+    } else if (layerConfigBounds && !layerBounds) {
+      layerBounds = layerConfigBounds;
+    }
 
     // Validate
     layerBounds = validateExtentWhenDefined(layerBounds, this.getMapViewer().getProjection().getCode());
