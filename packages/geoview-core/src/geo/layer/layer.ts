@@ -560,52 +560,87 @@ export class LayerApi {
   }
 
   /**
-   * Refreshes GeoCore Layers
-   * @returns {Promise<void>} A promise which resolves when done refreshing
+   * TODO Add this function to utilties
+   * Gets all child paths from a parent path
+   * @param {string} parentPath - The parent path
+   * @returns {string[]} Child layer paths
    */
-  reloadGeocoreLayers(): Promise<void> {
+  #getAllChildPaths(parentPath: string): string[] {
+    const parentLayerEntryConfig = this.getLayerEntryConfig(parentPath)?.geoviewLayerConfig.listOfLayerEntryConfig;
+
+    if (!parentLayerEntryConfig) return [];
+
+    function getChildPaths(listOfLayerEntryConfig: TypeLayerEntryConfig[]): string[] {
+      const layerPaths: string[] = [];
+      listOfLayerEntryConfig.forEach((entryConfig) => {
+        layerPaths.push(entryConfig.layerPath);
+        if (entryConfig.listOfLayerEntryConfig) {
+          layerPaths.push(...getChildPaths(entryConfig.listOfLayerEntryConfig));
+        }
+      });
+      return layerPaths;
+    }
+
+    const layerPaths = getChildPaths(parentLayerEntryConfig);
+    return layerPaths;
+  }
+
+  /**
+   * Refreshes GeoCore Layers
+   */
+  reloadGeocoreLayers(): void {
     const configs = this.getLayerEntryConfigs();
     const originalMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
-    const promisesOfGeoCoreGeoviewLayers: Promise<TypeGeoviewLayerConfig[]>[] = [];
+    const parentPaths: string[] = [];
 
-    configs
-      .filter((config) => {
-        // Filter to just Geocore layers and not child layers
-        if (api.config.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
-          return true;
-        }
-        return false;
-      })
-      .forEach((config) => {
-        // Remove and add back in GeoCore Layers and return their promises
-        this.removeLayerUsingPath(config.layerPath);
-        const geoCore = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
-        promisesOfGeoCoreGeoviewLayers.push(geoCore.createLayersFromUUID(config.geoviewLayerConfig.geoviewLayerId));
-      });
+    // Have to do the Promise allSettled so the new MapOrderedLayerInfo has all the children layerPaths
+    Promise.allSettled(
+      configs
+        .filter((config) => {
+          // Filter to just Geocore layers and not child layers
+          if (api.config.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
+            return true;
+          }
+          return false;
+        })
+        .map((config) => {
+          // Remove and add back in GeoCore Layers and return their promises
+          parentPaths.push(config.layerPath);
+          this.removeLayerUsingPath(config.layerPath);
+          return this.addGeoviewLayerByGeoCoreUUID(config.geoviewLayerConfig.geoviewLayerId);
+        })
+    )
+      .then(() => {
+        const originalLayerPaths = originalMapOrderedLayerInfo.map((info) => info.layerPath);
 
-    return Promise.allSettled(promisesOfGeoCoreGeoviewLayers)
-      .then((promisedLayers) => {
-        promisedLayers
-          .filter((promise) => promise.status === 'fulfilled')
-          .map((promise) => promise as PromiseFulfilledResult<TypeGeoviewLayerConfig[]>)
-          .forEach((promise) => {
-            promise.value.forEach((geoviewLayerConfig) => {
-              this.addGeoviewLayer(geoviewLayerConfig);
+        // Prepare listeners for removing previously removed layers
+        parentPaths.forEach((parentPath) => {
+          function removeChildLayers(sender: LayerApi): void {
+            const childPaths = sender.#getAllChildPaths(parentPath);
+            childPaths.forEach((childPath) => {
+              if (!originalLayerPaths.includes(childPath)) {
+                sender.removeLayerUsingPath(childPath);
+              }
             });
-          });
-        const newMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
-        const originalLayerPaths = originalMapOrderedLayerInfo.map((layer) => layer.layerPath);
-        const childLayersToRemove = newMapOrderedLayerInfo
-          .map((layer) => layer.layerPath)
-          .filter((path) => !originalLayerPaths.includes(path));
-        if (childLayersToRemove) {
-          childLayersToRemove.forEach((childPath) => {
-            this.removeLayerUsingPath(childPath);
-          });
-        }
+            sender.offLayerAdded(removeChildLayers);
+          }
+          this.onLayerAdded(removeChildLayers);
+        });
+
+        // Prepare listeners for changing the visibility
         MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), originalMapOrderedLayerInfo);
+        originalMapOrderedLayerInfo.forEach((layerInfo) => {
+          function setLayerVisibility(sender: LayerApi, event: LayerLoadedEvent): void {
+            if (layerInfo.layerPath === event.layerPath) {
+              const { visible } = originalMapOrderedLayerInfo.filter((info) => info.layerPath === event.layerPath)[0];
+              event.layer?.setVisible(visible, event.layerPath);
+              sender.offLayerLoaded(setLayerVisibility);
+            }
+          }
+          this.onLayerLoaded(setLayerVisibility);
+        });
       })
-      .catch((error) => logger.logError(error));
+      .catch((err) => logger.logError(err));
   }
 
   /**
