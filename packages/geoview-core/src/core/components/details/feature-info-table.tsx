@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import linkifyHtml from 'linkify-html';
@@ -8,7 +8,6 @@ import { isImage, stringify, generateId, sanitizeHtmlContent } from '@/core/util
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { logger } from '@/core/utils/logger';
 import { TypeFieldEntry } from '@/geo/map/map-schema-types';
-
 import { getSxClasses } from './details-style';
 import { useLightBox } from '@/core/components/common';
 
@@ -16,117 +15,167 @@ interface FeatureInfoTableProps {
   featureInfoList: TypeFieldEntry[];
 }
 
-/**
- * Feature info table that creates a table keys/values of the given feature info
- *
- * @param {FeatureInfoTableProps} Feature info table properties
- * @returns {JSX.Element} the layers list
- */
-export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JSX.Element {
-  // Log
-  logger.logTraceRender('components/details/feature-info-table');
+interface FeatureItemProps {
+  item: string;
+  alias: string;
+  index: number;
+  featureInfoItem: TypeFieldEntry;
+  onInitLightBox: (value: string, alias: string, index: number) => void;
+}
 
-  const { t } = useTranslation<string>();
+interface FeatureRowProps {
+  featureInfoItem: TypeFieldEntry;
+  index: number;
+  onInitLightBox: (value: string, alias: string, index: number) => void;
+}
 
+// Extracted FeatureItem component
+export const FeatureItem = memo(function FeatureItem({
+  item,
+  alias,
+  index,
+  featureInfoItem,
+  onInitLightBox,
+}: FeatureItemProps): JSX.Element {
+  // Hooks
+  const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const { initLightBox, LightBoxComponent } = useLightBox();
-
-  // linkify options
-  const linkifyOptions = useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('DETAILS PANEL - Feature Info table - linkifyOptions');
-
-    return {
+  const linkifyOptions = useMemo(
+    () => ({
       attributes: {
         title: t('details.externalLink'),
       },
       defaultProtocol: 'https',
       format: {
-        url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10, value.length)}` : value),
+        url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10)}` : value),
       },
       ignoreTags: ['script', 'style', 'img'],
       target: '_blank',
-    };
-  }, [t]);
+    }),
+    [t]
+  );
 
-  /**
-   * Parse the content of the field to see if we need to create an image, a string element or a link
-   * @param {TypeFieldEntry} featureInfoItem the field item
-   * @returns {JSX.Element | JSX.Element[]} the React element(s)
-   */
-  function setFeatureItem(featureInfoItem: TypeFieldEntry): JSX.Element | JSX.Element[] {
-    function process(item: string, alias: string, index: number): JSX.Element {
-      let element: JSX.Element;
-      if (alias === 'html') {
-        element = (
-          <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
-            <HtmlToReact htmlContent={sanitizeHtmlContent(item)} />
-          </Box>
-        );
-      } else if (typeof item === 'string' && isImage(item)) {
-        element = (
-          <CardMedia
-            key={generateId()}
-            sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
-            alt={`${alias} ${index}`}
-            className={`returnLightboxFocusItem-${index}`}
-            src={item}
-            tabIndex={0}
-            click={() => initLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
-            keyDown={(e: KeyboardEvent) => {
-              if (e.key === 'Enter') {
-                initLightBox(featureInfoItem.value as string, `${index}_${featureInfoItem.alias}`, index);
-              }
-            }}
-          />
-        );
-      } else {
-        element = (
-          <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
-            <HtmlToReact htmlContent={sanitizeHtmlContent(linkifyHtml(item, linkifyOptions))} />
-          </Box>
-        );
-      }
-
-      return element;
-    }
-
-    const { alias, value } = featureInfoItem;
-    let values: string | string[] = Array.isArray(value) ? String(value.map(stringify)) : String(stringify(value));
-    // Split text but leave html intact
-    if (alias !== 'html') values = values.toString().split(';');
-
-    const results = Array.isArray(values)
-      ? values.map((item: string, index: number) => process(item, alias, index))
-      : process(values, alias, 0);
-
-    return results;
+  let element: JSX.Element;
+  if (alias === 'html') {
+    element = (
+      <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
+        <HtmlToReact htmlContent={sanitizeHtmlContent(item)} />
+      </Box>
+    );
+  } else if (typeof item === 'string' && isImage(item)) {
+    element = (
+      <CardMedia
+        key={generateId()}
+        sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
+        alt={`${alias} ${index}`}
+        className={`returnLightboxFocusItem-${index}`}
+        src={item}
+        tabIndex={0}
+        onClick={() => onInitLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === 'Enter') {
+            onInitLightBox(featureInfoItem.value as string, `${index}_${featureInfoItem.alias}`, index);
+          }
+        }}
+      />
+    );
+  } else {
+    element = (<Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
+      <HtmlToReact htmlContent={sanitizeHtmlContent(linkifyHtml(stringify(item) as string, linkifyOptions))} />
+    </Box>);
   }
+
+  return element
+});
+
+// Extracted FeatureRow component
+export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onInitLightBox }: FeatureRowProps): JSX.Element {
+  const theme = useTheme();
+  const { alias, value } = featureInfoItem;
+
+  // Split text but leave html intact
+  // f (alias !== 'html') values = values.toString().split(';');
+
+  // Convert value to string, handling arrays and other types
+  const stringValue = useMemo((): string => {
+    if (Array.isArray(value)) {
+      return value.map((item) => stringify(item)).join(';');
+    }
+    return stringify(value) as string;
+  }, [value]);
+
+  const valueArray = stringValue.split(';');
+
+  // Generate stable IDs for each item when component mounts
+  const itemIds = useMemo(() => valueArray.map(() => generateId()), [valueArray]);
+
+  return (
+    <Grid
+      container
+      spacing={5}
+      sx={{
+        backgroundColor: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.1) : '',
+        color: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.9) : '',
+        marginBottom: '1.25rem',
+      }}
+    >
+       {featureInfoItem.alias !== 'html' && (<Grid
+        sx={{
+          fontWeight: 'bold',
+          width: '80%',
+          flexGrow: 0,
+          maxWidth: 'none',
+          flexBasis: 'auto',
+        }}
+      >
+        {alias}
+      </Grid>)}
+      <Grid
+        sx={{
+          marginLeft: 'auto',
+          wordWrap: 'break-word',
+          paddingRight: '0.3125rem',
+          flexGrow: 1,
+        }}
+      >
+        {valueArray.map((item: string, idx: number) => (
+          <FeatureItem
+            key={`${alias}_${itemIds[idx]}`}
+            item={item}
+            alias={alias}
+            index={idx}
+            featureInfoItem={featureInfoItem}
+            onInitLightBox={onInitLightBox}
+          />
+        ))}
+      </Grid>
+    </Grid>
+  );
+});
+
+export const FeatureInfoTable = memo(function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JSX.Element {
+  logger.logTraceRender('components/details/feature-info-table');
+
+  // Hooks
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
+  // Store
+  const { initLightBox, LightBoxComponent } = useLightBox();
 
   return (
     <Box sx={sxClasses.boxContainerFeatureInfo}>
       {featureInfoList.map((featureInfoItem, index) => (
-        <Grid
-          container
-          spacing={5}
-          sx={{
-            backgroundColor: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.1) : '',
-            color: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.9) : '',
-            marginBottom: '1.25rem',
-          }}
-          key={`${featureInfoItem.alias} ${index.toString()}`}
-        >
-          {featureInfoItem.alias !== 'html' && (
-            <Grid size={{ xs: 'auto' }} sx={{ fontWeight: 'bold', width: '80% !important' }}>
-              {featureInfoItem.alias}
-            </Grid>
-          )}
-          <Grid sx={{ ml: 'auto', wordWrap: 'break-word', pr: '0.3125rem' }}>{setFeatureItem(featureInfoItem)}</Grid>
-        </Grid>
+        <FeatureRow
+          key={`${featureInfoItem.alias}_${generateId()}`}
+          featureInfoItem={featureInfoItem}
+          index={index}
+          onInitLightBox={initLightBox}
+        />
       ))}
       <LightBoxComponent />
     </Box>
   );
-}
+});

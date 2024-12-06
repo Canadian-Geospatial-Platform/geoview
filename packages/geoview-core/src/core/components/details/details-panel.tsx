@@ -17,7 +17,7 @@ import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info-new';
 import { LAYER_STATUS, TABS } from '@/core/utils/constant';
-import DetailsSkeleton from './details-skeleton';
+import { DetailsSkeleton } from './details-skeleton';
 
 interface DetailsPanelType {
   fullWidth?: boolean;
@@ -69,33 +69,36 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    * @param {TypeFeatureInfoEntry} feature The feature to check
    * @returns {boolean} true if feature is in checkedFeatures
    */
+  // Create a memoized Set of checked feature IDs
+  const checkedFeaturesSet = useMemo(() => {
+    return new Set(checkedFeatures.map((feature) => (feature.geometry as TypeGeometry)?.ol_uid));
+  }, [checkedFeatures]);
+
+  // Modified isFeatureInCheckedFeatures using the Set for O(1) lookup
   const isFeatureInCheckedFeatures = useCallback(
     (feature: TypeFeatureInfoEntry): boolean => {
-      // Log
-      logger.logTraceUseCallback('DETAILS-PANEL - isFeatureInCheckedFeatures');
-
-      return checkedFeatures.some((checkedFeature) => {
-        return (checkedFeature.geometry as TypeGeometry)?.ol_uid === (feature.geometry as TypeGeometry)?.ol_uid;
-      });
+      return checkedFeaturesSet.has((feature.geometry as TypeGeometry)?.ol_uid);
     },
-    [checkedFeatures]
+    [checkedFeaturesSet]
   );
 
   /**
    * Clears the highlighed features when they are not checked.
    * @param {TypeFeatureInfoEntry[] | undefined | null} arrayToClear The array to clear of the unchecked features
    */
+  // Modified clearHighlightsUnchecked
   const clearHighlightsUnchecked = useCallback(
     (arrayToClear: TypeFeatureInfoEntry[] | undefined | null) => {
-      // Log
       logger.logTraceUseCallback('DETAILS-PANEL - clearHighlightsUnchecked');
 
-      // Clear any feature that's not currently checked
       arrayToClear?.forEach((feature) => {
-        if (!isFeatureInCheckedFeatures(feature)) removeHighlightedFeature(feature);
+        const featureId = (feature.geometry as TypeGeometry)?.ol_uid;
+        if (!checkedFeaturesSet.has(featureId)) {
+          removeHighlightedFeature(feature);
+        }
       });
     },
-    [isFeatureInCheckedFeatures, removeHighlightedFeature]
+    [checkedFeaturesSet, removeHighlightedFeature]
   );
 
   /**
@@ -438,7 +441,15 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     if (memoIsAllLayersQueryStatusProcessing()) {
       return <DetailsSkeleton />;
     }
+
+    if (!memoIsAllLayersQueryStatusProcessing() && !memoSelectedLayerDataFeatures) {
+      return null;
+    }
+
     if (memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0) {
+      // Get only the current feature
+      const currentFeature = memoSelectedLayerDataFeatures[currentFeatureIndex];
+
       return (
         <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
           <Grid container sx={sxClasses.rightPanelBtnHolder}>
@@ -486,10 +497,11 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
               </Box>
             </Grid>
           </Grid>
-          <FeatureInfo features={memoSelectedLayerData?.features} currentFeatureIndex={currentFeatureIndex} />
+          <FeatureInfo feature={currentFeature} />
         </Box>
       );
     }
+
     return null;
   };
 
