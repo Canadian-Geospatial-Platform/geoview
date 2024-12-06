@@ -1,11 +1,11 @@
 /**
- * Create a north arrow
+ * Create a north arrow component
  *
  * @returns {JSX.Element} the north arrow component
  */
-export declare function NorthArrow(): JSX.Element;
+export declare const NorthArrow: import("react").NamedExoticComponent<object>;
 /**
  * Create a north pole flag icon
  * @returns {JSX.Element} the north pole marker icon
  */
-export declare function NorthPoleFlag(): JSX.Element;
+export declare const NorthPoleFlag: import("react").NamedExoticComponent<object>;

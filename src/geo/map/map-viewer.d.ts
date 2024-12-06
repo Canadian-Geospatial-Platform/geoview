@@ -9,7 +9,7 @@ import { TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDis
 import { Basemap } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { TypeOrderedLayerInfo } from '@/app';
+import { TypeMapFeaturesInstance, TypeOrderedLayerInfo } from '@/app';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
@@ -143,9 +143,9 @@ export declare class MapViewer {
      *
      * @param {TypeDisplayLanguage} displayLanguage - The language to use (en, fr)
      * @param {boolean} resetLayer - Optional flag to ask viewer to reload layers with the new localize language
-     * @returns {Promise<[void, void]>}
+     * @returns {Promise<void>}
      */
-    setLanguage(displayLanguage: TypeDisplayLanguage, reloadLayers?: boolean | false): Promise<[void, void]>;
+    setLanguage(displayLanguage: TypeDisplayLanguage, reloadLayers?: boolean | false): Promise<void>;
     /**
      * Set the display projection of the map
      *
@@ -236,9 +236,9 @@ export declare class MapViewer {
     remove(deleteContainer: boolean): Promise<HTMLElement>;
     /**
      * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
-     * @param {TypeMapFeaturesConfig} mapConfig - Optional map config to use for reload.
+     * @param {TypeMapFeaturesConfig | TypeMapFeaturesInstance} mapConfig - Optional map config to use for reload.
      */
-    reload(mapConfig?: TypeMapFeaturesConfig): Promise<void>;
+    reload(mapConfig?: TypeMapFeaturesConfig | TypeMapFeaturesInstance): Promise<void>;
     /**
      * Reload a map from a config object created using current map state. It first removes then recreates the map.
      */
@@ -353,9 +353,9 @@ export declare class MapViewer {
     convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent;
     /**
      * Creates a map config based on current map state.
-     * @returns {TypeMapFeaturesConfig | undefined} Map config with current map state.
+     * @returns {TypeMapFeaturesInstance | undefined} Map config with current map state.
      */
-    createMapConfigFromMapState(): TypeMapFeaturesConfig | undefined;
+    createMapConfigFromMapState(): TypeMapFeaturesInstance | undefined;
     /**
      * Registers a map init event callback.
      * @param {MapInitDelegate} callback - The callback to be executed whenever the event is emitted

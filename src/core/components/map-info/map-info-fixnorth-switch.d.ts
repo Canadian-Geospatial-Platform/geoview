@@ -3,4 +3,4 @@
  *
  * @returns {JSX.Element} the fix north switch
  */
-export declare function MapInfoFixNorthSwitch(): JSX.Element;
+export declare const MapInfoFixNorthSwitch: import("react").NamedExoticComponent<object>;

@@ -3,4 +3,4 @@
  *
  * @returns {JSX.Element} the rotation buttons
  */
-export declare function MapInfoRotationButton(): JSX.Element;
+export declare const MapInfoRotationButton: import("react").NamedExoticComponent<object>;

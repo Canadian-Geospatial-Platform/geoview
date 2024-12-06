@@ -4,4 +4,4 @@
  *
  * @returns {JSX.Element} created attribution element
  */
-export declare function Attribution(): JSX.Element;
+export declare const Attribution: import("react").NamedExoticComponent<object>;

@@ -1,5 +1,5 @@
 /**
- * Create the mouse position
+ * Create mouse position component
  * @returns {JSX.Element} the mouse position component
  */
-export declare function MousePosition(): JSX.Element;
+export declare const MousePosition: import("react").NamedExoticComponent<object>;

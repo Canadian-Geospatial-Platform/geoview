@@ -39,7 +39,7 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * @param {string} layerPath - The layer path
      * @param {Extent | undefined} bounds - The extent of the layer at the given path
      */
-    static setLayerBounds(mapId: string, layerPath: string, bounds: Extent): void;
+    static setLayerBounds(mapId: string, layerPath: string, bounds: Extent | undefined): void;
     /**
      * Gets the extent of a feature or group of features
      * @param {string} mapId - The map identifier

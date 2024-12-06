@@ -3,4 +3,4 @@
  *
  * @returns {JSX.Element} the hover tooltip component
  */
-export declare function HoverTooltip(): JSX.Element | null;
+export declare const HoverTooltip: import("react").NamedExoticComponent<object>;

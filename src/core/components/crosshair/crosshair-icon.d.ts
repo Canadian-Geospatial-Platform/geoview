@@ -1,4 +1,4 @@
 /**
  * Create a cross hair icon
  */
-export declare function CrosshairIcon(): JSX.Element;
+export declare const CrosshairIcon: import("react").NamedExoticComponent<object>;

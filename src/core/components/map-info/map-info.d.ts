@@ -3,4 +3,4 @@
  *
  * @returns {JSX.Element} the map information element
  */
-export declare function MapInfo(): JSX.Element;
+export declare const MapInfo: import("react").NamedExoticComponent<object>;

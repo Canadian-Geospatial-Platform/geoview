@@ -6,5 +6,5 @@ type CrosshairProps = {
  * @param {CrosshairProps} - Crossahir props who caintain the mapTargetELement
  * @returns {JSX.Element} the crosshair component
  */
-export declare function Crosshair({ mapTargetElement }: CrosshairProps): JSX.Element;
+export declare const Crosshair: import("react").NamedExoticComponent<CrosshairProps>;
 export {};
