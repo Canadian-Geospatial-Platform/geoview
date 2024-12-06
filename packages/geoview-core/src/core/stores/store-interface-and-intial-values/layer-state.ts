@@ -382,7 +382,7 @@ export const useIconLayerSet = (layerPath: string): string[] => {
   const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const layer = LegendEventProcessor.findLayerByPath(layers, layerPath);
   if (layer) {
-    return layer.icons.map((icon) => icon.iconImage).filter((d) => d !== null) as string[];
+    return layer.items.map((item) => item.icon).filter((d) => d !== null) as string[];
   }
   return [];
 };
