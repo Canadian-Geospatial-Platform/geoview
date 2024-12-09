@@ -73,9 +73,9 @@ export const DATE_FILTER: Record<string, string> = {
 };
 
 export const STRING_FILTER: Record<string, string> = {
-  contains: `(filterId) like ('%value%')`,
-  startsWith: `(filterId) like ('value%')`,
-  endsWith: `(filterId) like ('%value')`,
+  contains: `lower(filterId) like lower('%value%')`,
+  startsWith: `lower(filterId) like lower('value%')`,
+  endsWith: `lower(filterId) like lower('%value')`,
   empty: '(filterId) is null',
   notEmpty: '(filterId) is not null',
   equals: `filterId = 'value'`,
