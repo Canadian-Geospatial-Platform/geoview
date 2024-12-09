@@ -123,10 +123,18 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path
    * @param {string[]} objectIds - The IDs of features to get extents from.
+   * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent | undefined>} The extent of the feature, if available
    */
-  static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[]): Promise<Extent | undefined> | undefined {
-    return MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath)?.getExtentFromFeatures(layerPath, objectIds);
+  static getExtentFromFeatures(
+    mapId: string,
+    layerPath: string,
+    objectIds: string[],
+    outfield?: string
+  ): Promise<Extent | undefined> | undefined {
+    return MapEventProcessor.getMapViewerLayerAPI(mapId)
+      .getGeoviewLayerHybrid(layerPath)
+      ?.getExtentFromFeatures(layerPath, objectIds, outfield);
   }
 
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
