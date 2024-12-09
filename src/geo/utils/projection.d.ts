@@ -1,6 +1,7 @@
 import { Coordinate } from 'ol/coordinate';
 import { Projection as olProjection, ProjectionLike } from 'ol/proj';
 import { Extent } from 'ol/extent';
+import { TypeJsonObject } from '@/core/types/global-types';
 /**
  * Class used to handle functions for trasforming projections
  *
@@ -16,11 +17,19 @@ export declare abstract class Projection {
      * constant used for the available projection names
      */
     static PROJECTION_NAMES: {
+        3578: string;
         LCC: string;
+        3979: string;
+        102184: string;
+        102190: string;
         WM: string;
         LNGLAT: string;
         CSRS: string;
         CSRS98: string;
+    };
+    static CUSTOM_WKT_NUM: number;
+    static CUSTOM_WKT_AND_NUM: {
+        [wkt_num: string]: string;
     };
     /**
      * List of supported projections and their OpenLayers projection
@@ -43,13 +52,49 @@ export declare abstract class Projection {
      * original).
      *
      * @param {Extent} extent The extent to transform.
+     * @param {TypeJsonObject | undefined} projection An object containing a wkid or wkt property.
+     * @param {ProjectionLike} destination Destination projection-like.
+     * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
+     *
+     * @returns The new extent transformed in the destination projection.
+     */
+    static transformExtentFromObj(extent: Extent, projection: TypeJsonObject | undefined, destination: ProjectionLike, stops?: number | undefined): Extent;
+    /**
+     * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
+     * original).
+     *
+     * @param {Extent} extent The extent to transform.
+     * @param {number} wkid An EPSG id number.
+     * @param {ProjectionLike} destination Destination projection-like.
+     * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
+     *
+     * @returns The new extent transformed in the destination projection.
+     */
+    static transformExtentFromWKID(extent: Extent, wkid: number, destination: ProjectionLike, stops?: number | undefined): Extent;
+    /**
+     * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
+     * original).
+     *
+     * @param {Extent} extent The extent to transform.
+     * @param {string} customWKT A custom WKT projection.
+     * @param {ProjectionLike} destination Destination projection-like.
+     * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
+     *
+     * @returns The new extent transformed in the destination projection.
+     */
+    static transformExtentFromWKT(extent: Extent, customWKT: string, destination: ProjectionLike, stops?: number | undefined): Extent;
+    /**
+     * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
+     * original).
+     *
+     * @param {Extent} extent The extent to transform.
      * @param {ProjectionLike} source Source projection-like.
      * @param {ProjectionLike} destination Destination projection-like.
      * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
      *
      * @returns The new extent transformed in the destination projection.
      */
-    static transformExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent;
+    static transformExtentFromProj(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent;
     /**
      * Convert points from one projection to another using proj4
      *
@@ -87,9 +132,23 @@ export declare abstract class Projection {
      * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
      *
      * @param {ProjectionLike} projectionLike Either a code string which is a combination of authority and identifier such as "EPSG:4326", or an existing projection object, or undefined.
-     * @return {olProjection | null} — Projection object, or null if not in list.
+     * @return {olProjection | undefined} — Projection object, or undefined if not in list.
      */
-    static getProjection(projectionLike: ProjectionLike): olProjection | null;
+    static getProjectionFromObj(projection: TypeJsonObject | undefined): olProjection | undefined;
+    /**
+     * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
+     *
+     * @param {ProjectionLike} projectionLike Either a code string which is a combination of authority and identifier such as "EPSG:4326", or an existing projection object, or undefined.
+     * @return {olProjection | undefined} — Projection object, or undefined if not in list.
+     */
+    static getProjectionFromWKT(customWKT: string): olProjection | undefined;
+    /**
+     * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
+     *
+     * @param {ProjectionLike} projectionLike Either a code string which is a combination of authority and identifier such as "EPSG:4326", or an existing projection object, or undefined.
+     * @return {olProjection | undefined} — Projection object, or undefined if not in list.
+     */
+    static getProjectionFromProj(projectionLike: ProjectionLike): olProjection | undefined;
     /**
      * Get map point resolution
      *

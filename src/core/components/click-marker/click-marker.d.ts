@@ -10,4 +10,4 @@ export type TypeClickMarker = {
  *
  * @returns {JSX.Element} the react element with a marker on click
  */
-export declare function ClickMarker(): JSX.Element;
+export declare const ClickMarker: import("react").NamedExoticComponent<object>;

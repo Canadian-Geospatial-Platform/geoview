@@ -1,6 +1,6 @@
 /**
- * Create an element that displays the scale
+ * Create a scale component
  *
  * @returns {JSX.Element} created scale element
  */
-export declare function Scale(): JSX.Element;
+export declare const Scale: import("react").NamedExoticComponent<object>;

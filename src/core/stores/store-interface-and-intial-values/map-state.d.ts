@@ -23,6 +23,7 @@ export interface IMapState {
     fixNorth: boolean;
     highlightedFeatures: TypeFeatureInfoEntry[];
     hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
+    isMouseInsideMap: boolean;
     initialFilters: Record<string, string>;
     interaction: TypeInteraction;
     mapExtent: Extent | undefined;
@@ -80,6 +81,7 @@ export interface IMapState {
         setAttribution: (attribution: string[]) => void;
         setInitialFilters: (filters: Record<string, string>) => void;
         setInteraction: (interaction: TypeInteraction) => void;
+        setIsMouseInsideMap: (isMouseInsideMap: boolean) => void;
         setZoom: (zoom: number) => void;
         setRotation: (rotation: number) => void;
         setOverlayClickMarker: (overlay: Overlay) => void;
@@ -136,6 +138,7 @@ export declare const useMapFeatureHighlightColor: () => TypeHighlightColors;
 export declare const useMapFixNorth: () => boolean;
 export declare const useMapInitialFilters: () => Record<string, string>;
 export declare const useMapInteraction: () => TypeInteraction;
+export declare const useMapIsMouseInsideMap: () => boolean;
 export declare const useMapHoverFeatureInfo: () => TypeHoverFeatureInfo;
 export declare const useMapLoaded: () => boolean;
 export declare const useMapNorthArrow: () => boolean;

@@ -1,6 +1,9 @@
+import { Theme } from '@mui/material/styles';
+import { SxProps } from '@mui/system';
 declare const ColorKeyValues: number[];
 type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;
+export type SxStyles = Record<string, SxProps<Theme> | SxProps>;
 export declare class GeoViewColorClass {
     #private;
     main: string;

@@ -1,3 +1,4 @@
+import { SxProps, Theme } from '@mui/material/styles';
 import { DividerProps } from '@mui/material';
 /**
  * Properties for the Divider
@@ -5,6 +6,7 @@ import { DividerProps } from '@mui/material';
 interface TypeDividerProps extends DividerProps {
     orientation?: 'horizontal' | 'vertical';
     grow?: boolean;
+    sx?: SxProps<Theme>;
 }
 /**
  * Create a customized Material UI Divider

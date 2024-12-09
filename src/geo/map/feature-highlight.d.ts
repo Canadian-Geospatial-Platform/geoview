@@ -4,7 +4,7 @@ import { Extent } from 'ol/extent';
 import { TypeHighlightColors } from '@config/types/map-schema-types';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeFeatureInfoEntry } from './map-schema-types';
-import { PointMarkers } from '@/core/components/point-markers/point-markers';
+import { PointMarkers } from './point-markers';
 /** *****************************************************************************************************************************
  * A class to handle highlighting of features
  *

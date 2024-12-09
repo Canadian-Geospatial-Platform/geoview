@@ -3,4 +3,4 @@
  *
  * @returns {JSX.Element} the expand buttons
  */
-export declare function MapInfoExpandButton(): JSX.Element;
+export declare const MapInfoExpandButton: import("react").NamedExoticComponent<object>;

@@ -1,4 +1,5 @@
 import { CSSProperties } from 'react';
+import { SxProps, Theme } from '@mui/material/styles';
 import { CircularProgressProps } from '@mui/material';
 /**
  * Circular Progress Properties
@@ -6,7 +7,7 @@ import { CircularProgressProps } from '@mui/material';
 interface TypeCircularProgressProps extends CircularProgressProps {
     isLoaded: boolean;
     style?: CSSProperties;
-    sx?: CSSProperties;
+    sx?: SxProps<Theme>;
 }
 /**
  * Create a customized Material UI Circular Progress

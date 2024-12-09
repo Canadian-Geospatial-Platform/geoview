@@ -10,10 +10,10 @@ interface NorthArrowIconProps {
  *
  * @param {NorthArrowIconProps} props north arrow icon properties
  */
-export declare function NorthArrowIcon(props: NorthArrowIconProps): JSX.Element;
+export declare const NorthArrowIcon: import("react").NamedExoticComponent<NorthArrowIconProps>;
 /**
  * Create a north pole icon
  *
  */
-export declare function NorthPoleIcon(): JSX.Element;
+export declare const NorthPoleIcon: import("react").NamedExoticComponent<object>;
 export {};

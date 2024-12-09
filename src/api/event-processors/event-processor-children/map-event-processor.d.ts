@@ -5,7 +5,7 @@ import { Coordinate } from 'ol/coordinate';
 import { TypeBasemapOptions, TypeInteraction, TypeLayerInitialSettings, TypeValidMapProjectionCodes, TypePointMarker, TypeHighlightColors } from '@config/types/map-schema-types';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import { MapConfigLayerEntry, TypeFeatureInfoEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { MapConfigLayerEntry, TypeFeatureInfoEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -97,6 +97,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setMapPointerPosition(mapId: string, pointerPosition: TypeMapMouseInfo): void;
     static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): Promise<TypeFeatureInfoResultSet>;
     static setZoom(mapId: string, zoom: number): void;
+    static setIsMouseInsideMap(mapId: string, inside: boolean): void;
     static setRotation(mapId: string, rotation: number): void;
     static setMapChangeSize(mapId: string, size: [number, number], scale: TypeScaleInfo): void;
     static setMapMoveEnd(mapId: string, centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: string, isNorthVisible: boolean, mapExtent: Extent, scale: TypeScaleInfo): void;
@@ -255,7 +256,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * Creates a map config based on current map state.
      * @param {string} mapId - Id of map.
      */
-    static createMapConfigFromMapState(mapId: string): TypeMapFeaturesConfig | undefined;
+    static createMapConfigFromMapState(mapId: string): TypeMapFeaturesInstance | undefined;
     /**
      * Apply all available filters to layer.
      *
