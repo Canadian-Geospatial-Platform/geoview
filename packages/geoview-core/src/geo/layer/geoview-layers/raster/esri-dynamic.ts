@@ -969,9 +969,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * Sends a query to get ESRI Dynamic feature geometries and calculates an extent from them.
    * @param {string} layerPath - The layer path.
    * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent | undefined>} The extent of the features, if available.
    */
-  override async getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
+  override async getExtentFromFeatures(layerPath: string, objectIds: string[], outfield?: string): Promise<Extent | undefined> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
     let baseUrl = layerEntryConfig.source.dataAccessPath;
@@ -980,7 +981,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (baseUrl) {
       // Construct query
       if (!baseUrl.endsWith('/')) baseUrl += '/';
-      const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=&objectIds=${idString}&&geometryPrecision=1&returnGeometry=true`;
+      // GV: Outfields here is not wanted, it is included because some sevices require it in the query. It would be possible to use
+      // GV cont: objectid, but it is not universal through the services, so we pass a value through.
+      const outfieldQuery = outfield ? `&outFields=${outfield}` : '';
+      const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=&objectIds=${idString}${outfieldQuery}&returnGeometry=true`;
 
       try {
         const response = await fetch(queryUrl);

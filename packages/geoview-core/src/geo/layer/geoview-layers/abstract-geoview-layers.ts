@@ -1395,11 +1395,12 @@ export abstract class AbstractGeoViewLayer {
    * Overridable function that gets the extent of an array of features.
    * @param {string} layerPath - The layer path
    * @param {string[]} objectIds - The IDs of features to get extents from.
+   * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent | undefined>} The extent of the features, if available
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
+  getExtentFromFeatures(layerPath: string, objectIds: string[], outfield?: string): Promise<Extent | undefined> {
     logger.logError(`Feature geometry for ${objectIds} is unavailable from ${layerPath}`);
     return Promise.resolve(undefined);
   }
