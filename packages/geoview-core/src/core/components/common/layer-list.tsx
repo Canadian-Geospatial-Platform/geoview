@@ -32,34 +32,39 @@ interface LayerListItemProps {
   isSelected: boolean;
   layer: LayerListEntry;
   onListItemClick: (layer: LayerListEntry) => void;
-  layerIndex: number;
 }
 
-const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onListItemClick, layerIndex }: LayerListItemProps) {
+// Memoizes entire component, preventing re-renders if props haven't changed
+export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onListItemClick }: LayerListItemProps) {
+  // Hooks
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
 
-  const isDisabled = layer?.numOffeatures === 0 || layer?.features === null;
+  // Style
+  const listItemSpring = useSpring({
+    delay: 500,
+    from: { opacity: 0.1 },
+    to: { opacity: 1 },
+  });
+  const containerClass = [
+    'layer-panel',
+    'bordered',
+    layer.layerStatus ?? '',
+    `query-${layer.queryStatus}`,
+    isSelected ? 'selectedLayer bordered-primary' : '',
+  ]
+    .join(' ')
+    .trim();
 
+  // Constant for state
+  const isDisabled = layer?.numOffeatures === 0 || layer?.features === null;
   const isLoading =
     layer?.numOffeatures === 0 ||
     layer?.features === null ||
     layer.queryStatus === 'processing' ||
     layer.layerStatus === 'loading' ||
     layer.layerStatus === 'processing';
-
-  /**
-   * Render Layer Icon based on layerPath
-   * @returns
-   */
-  const renderLayerIcon = (): JSX.Element | null => {
-    // If there is content, this is a guide section with no icon
-    if (layer.layerPath && !layer.content) {
-      return <LayerIcon layer={layer} />;
-    }
-    return null;
-  };
 
   /**
    * Get layer status based on query status and layer status
@@ -79,39 +84,6 @@ const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onLis
   }, [layer, t]);
 
   /**
-   * Render Layer body.
-   * @returns JSX.Element
-   */
-  const renderLayerBody = (): JSX.Element => {
-    return (
-      <Box sx={sxClasses.listPrimaryText}>
-        <Typography className="layerTitle">{layer.layerName}</Typography>
-        <Box display="flex" alignContent="center">
-          <Typography component="p" variant="subtitle1" noWrap display="block">
-            {getLayerStatus()}
-          </Typography>
-        </Box>
-      </Box>
-    );
-  };
-
-  function getContainerClass(): string {
-    const result: string[] = ['layer-panel', 'bordered', layer.layerStatus ?? '', `query-${layer.queryStatus}`];
-
-    // if layer has selected child but its not itself selected
-    if (isSelected) {
-      result.push('selectedLayer bordered-primary');
-    }
-    return result.join(' ');
-  }
-
-  const listItemSpring = useSpring({
-    delay: layerIndex * 150,
-    from: { opacity: 0.1 },
-    to: { opacity: 1 },
-  });
-
-  /**
    * Handle layer click when mouse enter is pressed.
    */
   const handleLayerKeyDown = useCallback(
@@ -129,7 +101,7 @@ const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onLis
   const AnimatedPaper = animated(Paper);
 
   return (
-    <AnimatedPaper sx={{ marginBottom: '1rem' }} style={listItemSpring} className={getContainerClass()}>
+    <AnimatedPaper sx={{ marginBottom: '1rem' }} style={listItemSpring} className={containerClass}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem
@@ -146,8 +118,15 @@ const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onLis
               disabled={isDisabled || isLoading}
               aria-label={layer.layerName}
             >
-              {renderLayerIcon()}
-              {renderLayerBody()}
+              {layer.layerPath && !layer.content && <LayerIcon layer={layer} />}
+              <Box sx={sxClasses.listPrimaryText}>
+                <Typography className="layerTitle">{layer.layerName}</Typography>
+                <Box display="flex" alignContent="center">
+                  <Typography component="p" variant="subtitle1" noWrap display="block">
+                    {getLayerStatus()}
+                  </Typography>
+                </Box>
+              </Box>
             </ListItemButton>
           </ListItem>
         </Box>
@@ -165,7 +144,9 @@ const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onLis
  * @param {Function} onListItemClick  Callback function excecuted when list item is clicked.
  * @returns {JSX.Element}
  */
-export function LayerList({ layerList, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element {
+// Memoizes entire component, preventing re-renders if props haven't changed
+export const LayerList = memo(function LayerList({ layerList, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element {
+  // Hooks
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
@@ -173,7 +154,7 @@ export function LayerList({ layerList, selectedLayerPath, onListItemClick }: Lay
   return (
     <List sx={sxClasses.list}>
       {!!layerList.length &&
-        layerList.map((layer, ind) => (
+        layerList.map((layer) => (
           <LayerListItem
             id={`${layer?.layerUniqueId ?? ''}`}
             key={layer.layerPath}
@@ -183,7 +164,6 @@ export function LayerList({ layerList, selectedLayerPath, onListItemClick }: Lay
             isSelected={(layer?.numOffeatures ?? 1) > 0 && layer.layerPath === selectedLayerPath}
             layer={layer}
             onListItemClick={onListItemClick}
-            layerIndex={ind}
           />
         ))}
       {!layerList.length && (
@@ -191,7 +171,6 @@ export function LayerList({ layerList, selectedLayerPath, onListItemClick }: Lay
           id="dummyPath"
           key="dummyPath"
           isSelected={false}
-          layerIndex={0}
           layer={
             {
               layerPath: '',
@@ -207,4 +186,4 @@ export function LayerList({ layerList, selectedLayerPath, onListItemClick }: Lay
       )}
     </List>
   );
-}
+});

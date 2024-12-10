@@ -6,7 +6,7 @@ import { Box, FullscreenIcon, ButtonGroup, Button } from '@/ui';
 import { ResponsiveGrid } from './responsive-grid';
 import { useFooterPanelHeight } from './use-footer-panel-height';
 import { getSxClasses } from './responsive-grid-layout-style';
-import FullScreenDialog from './full-screen-dialog';
+import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';

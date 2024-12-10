@@ -1,79 +1,112 @@
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Box } from '@/ui';
 import { LightBoxSlides, LightboxImg } from '@/core/components/lightbox/lightbox';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { logger } from '@/core/utils/logger';
 
+// Constants outside component to prevent recreating every render
+const FOCUS_DELAY = 250;
+const BASE64_IMAGE_PATTERN = /^data:image\/(png|jpeg|gif|webp);base64/;
+
+// Define props interface for BaseLightBoxComponent
+interface BaseLightBoxProps {
+  isLightBoxOpen: boolean;
+  slides: LightBoxSlides[];
+  slidesIndex: number;
+  imgScale?: number;
+  aliasIndex: string;
+  onExit: () => void;
+}
 interface UseLightBoxReturnType {
-  initLightBox: (images: string, alias: string, index: number | undefined, scale?: number) => void;
+  initLightBox: (images: string, alias: string, index?: number, scale?: number) => void;
   LightBoxComponent: () => JSX.Element;
 }
 
-/**
- * Custom Lightbox hook which handle rendering of the lightbox.
- * @returns {UseLightBoxReturnType}
- */
+// Memoized base component with props
+const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
+  isLightBoxOpen,
+  slides,
+  slidesIndex,
+  imgScale,
+  aliasIndex,
+  onExit,
+}: BaseLightBoxProps) {
+  logger.logTraceRender('components/common/use-lightbox (BaseLightBoxComponent)');
+  // Store
+  const activeTrapGeoView = useUIActiveTrapGeoView();
+
+  // Callbacks
+  const handleLightboxExit = useCallback(() => {
+    onExit();
+
+    if (!activeTrapGeoView) return;
+
+    setTimeout(() => {
+      const element = document.querySelector(`.returnLightboxFocusItem-${aliasIndex}`) as HTMLElement;
+      if (element) {
+        element.focus();
+        element.classList.add('keyboard-focused');
+      }
+    }, FOCUS_DELAY);
+  }, [activeTrapGeoView, aliasIndex, onExit]);
+
+  if (!isLightBoxOpen) return <Box />;
+
+  return <LightboxImg open={isLightBoxOpen} slides={slides} index={slidesIndex} scale={imgScale} exited={handleLightboxExit} />;
+});
+
 export function useLightBox(): UseLightBoxReturnType {
-  // Internal state
+  // State
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
   const [imgScale, setImgScale] = useState<number | undefined>();
   const [aliasIndex, setAliasIndex] = useState('0');
 
-  // Store state
-  const activeTrapGeoView = useUIActiveTrapGeoView();
-
-  /**
-   * Initialize lightbox with state.
-   * @param {string} images images url formatted as string and joined with ';' identifier.
-   * @param {string} alias alt tag for the image.
-   * @param {number | undefined} index index of the image which is displayed.
-   */
-  const initLightBox = (images: string, alias: string, index: number | undefined, scale?: number): void => {
-    setIsLightBoxOpen(true);
-    let slidesList = [];
-    if (images.startsWith('data:image/png;base64')) {
-      // special case - check if image is base64 and its a single image
-      slidesList = [{ src: images, alt: alias, downloadUrl: '' }];
-    } else {
-      slidesList = images.split(';').map((item) => ({ src: item, alt: alias, downloadUrl: item }));
+  // Callbacks
+  const createSlidesList = useCallback((images: string, alias: string): LightBoxSlides[] => {
+    if (BASE64_IMAGE_PATTERN.test(images)) {
+      return [{ src: images, alt: alias, downloadUrl: '' }];
     }
-    setSlides(slidesList);
-    setSlidesIndex(index ?? 0);
-    setImgScale(scale);
-    setAliasIndex(alias.split('_')[0]);
-  };
+    return images.split(';').map((item) => ({
+      src: item,
+      alt: alias,
+      downloadUrl: item,
+    }));
+  }, []);
 
-  /**
-   * Create LightBox Component based on lightbox is opened or not.
-   * @returns {JSX.Element}
-   */
-  function LightBoxComponent(): JSX.Element {
-    // TODO: fix bug https://github.com/Canadian-Geospatial-Platform/geoview/issues/2553
-    return isLightBoxOpen ? (
-      <LightboxImg
-        open={isLightBoxOpen}
+  const handleExit = useCallback(() => {
+    setIsLightBoxOpen(false);
+    setSlides([]);
+    setSlidesIndex(0);
+  }, []);
+
+  const initLightBox = useCallback(
+    (images: string, alias: string, index?: number, scale?: number): void => {
+      setIsLightBoxOpen(true);
+      setSlides(createSlidesList(images, alias));
+      setSlidesIndex(index ?? 0);
+      setImgScale(scale);
+      setAliasIndex(alias.split('_')[0]);
+    },
+    [createSlidesList]
+  );
+
+  const LightBoxComponent = useCallback(() => {
+    return (
+      <BaseLightBoxComponent
+        isLightBoxOpen={isLightBoxOpen}
         slides={slides}
-        index={slidesIndex}
-        scale={imgScale}
-        exited={() => {
-          setIsLightBoxOpen(false);
-          setSlides([]);
-          setSlidesIndex(0);
-
-          // If keyboard navigation mode enable, focus to caller item (with timeout so keyboard-focused class can be applied)
-          if (activeTrapGeoView) {
-            setTimeout(() => {
-              const element = document.querySelector(`.returnLightboxFocusItem-${aliasIndex}`) as HTMLElement;
-              element?.focus();
-              element?.classList.add('keyboard-focused');
-            }, 250);
-          }
-        }}
+        slidesIndex={slidesIndex}
+        imgScale={imgScale}
+        aliasIndex={aliasIndex}
+        onExit={handleExit}
       />
-    ) : (
-      <Box />
     );
-  }
-  return { initLightBox, LightBoxComponent };
+  }, [isLightBoxOpen, slides, slidesIndex, imgScale, aliasIndex, handleExit]);
+
+  return {
+    initLightBox,
+    LightBoxComponent,
+  };
 }

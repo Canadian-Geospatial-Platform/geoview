@@ -200,3 +200,17 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
     };
   }, []);
 };
+
+export const usePerformanceMonitor = (componentName: string): void => {
+  const renderCount = useRef(0);
+  const lastRender = useRef(performance.now());
+
+  useEffect(() => {
+    const now = performance.now();
+    const timeSinceLastRender = now - lastRender.current;
+    renderCount.current++;
+
+    writeConsole(`PERFORMANCE - ${componentName} render #${renderCount.current} took ${timeSinceLastRender.toFixed(2)}ms`);
+    lastRender.current = now;
+  });
+};

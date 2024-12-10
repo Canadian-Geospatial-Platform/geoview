@@ -29,22 +29,46 @@ interface UseFooterPanelHeightReturnType {
   activeFooterBarTabId: string;
 }
 
+// Constants outside component to prevent recreating every render
+const DEFAULT_HEIGHT = 600;
+const MOBILE_OFFSET = 200;
+const PADDING_BOTTOM = '24px';
+const TABLE_HEIGHT_OFFSET = 100;
+
+const defaultPanelStyle = {
+  overflow: 'auto',
+  overflowY: 'auto' as const,
+};
+
 /**
  * Custom Hook to calculate the height of footer panel content when we set the map in fullscreen mode.
  * @param {'legend' | 'default'} footerPanelTab type of footer tab.
  * @returns {UseFooterPanelHeightReturnType} An object of ref objects that are attached to DOM.
  */
 export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPanelHeightType): UseFooterPanelHeightReturnType {
-  const defaultHeight = 600;
+  // Hooks
   const theme = useTheme();
-  const mapId = useGeoViewMapId();
-  const leftPanelRef = useRef<HTMLDivElement>(null);
-  const rightPanelRef = useRef<HTMLDivElement>(null);
-
-  const panelTitleRefHeight = useRef<number>(0);
-
   const mobileView = useMediaQuery(theme.breakpoints.down('md'));
 
+  // State
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const panelTitleRefHeight = useRef<number>(0);
+
+  // Store
+  const mapId = useGeoViewMapId();
+  const isMapFullScreen = useAppFullscreenActive();
+  const mapSize = useMapSize();
+  const footerPanelResizeValue = useUIFooterPanelResizeValue();
+  const activeFooterBarTabId = useUIActiveFooterBarTabId();
+  const { setTableHeight } = useDataTableStoreActions();
+  const { tabGroup } = useActiveAppBarTab();
+
+  // Store - Tracking dependencies for data updates
+  const arrayOfLayerData = useDetailsLayerDataArray();
+  const allFeaturesLayerData = useDataTableAllFeaturesDataArray();
+
+  // Callbacks
   // NOTE: this will keep the reference of panel title when tabs are changed.
   const panelTitleRef = useCallback((node: HTMLDivElement) => {
     if (node) {
@@ -52,75 +76,59 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
     }
   }, []);
 
-  const isMapFullScreen = useAppFullscreenActive();
-  const mapSize = useMapSize();
-  const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const activeFooterBarTabId = useUIActiveFooterBarTabId();
-  const arrayOfLayerData = useDetailsLayerDataArray();
-  const allFeaturesLayerData = useDataTableAllFeaturesDataArray();
-  const { setTableHeight } = useDataTableStoreActions();
-  const { tabGroup } = useActiveAppBarTab();
+  const updatePanelHeight = useCallback((panel: HTMLElement, height: string) => {
+    // eslint-disable-next-line no-param-reassign
+    panel.style.maxHeight = height;
+    Object.assign(panel.style, defaultPanelStyle);
+  }, []);
 
-  /**
-   * Set the height of right panel
-   * @param {string} height calculate height of the right panel based on footerPanelTab
-   */
-  const rightPanelHeight = (height?: string): void => {
-    const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
-    if (rightPanel) {
-      rightPanel.style.maxHeight = height ?? `${defaultHeight}px`;
-      rightPanel.style.overflowY = 'auto';
-    }
-  };
+  const calculateLeftPanelHeight = useCallback(
+    (footerBarHeight: number): number => {
+      if (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.LAYERS) {
+        return window.screen.height - MOBILE_OFFSET;
+      }
+      return (window.screen.height * footerPanelResizeValue) / 100 - panelTitleRefHeight.current - footerBarHeight - 10;
+    },
+    [footerPanelResizeValue, tabGroup]
+  );
 
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('USE-FOOTER-PANEL-HEIGHT - footerPanelResizeValue', footerPanelResizeValue, isMapFullScreen);
+    logger.logTraceUseEffect('USE-FOOTER-PANEL-HEIGHT', footerPanelResizeValue, isMapFullScreen);
 
-    if (leftPanelRef.current && isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default')) {
-      const tabsContainer = document.getElementById(`${mapId}-tabsContainer`)!;
-      const footerBar = tabsContainer?.firstElementChild?.firstElementChild;
+    if (!leftPanelRef.current) return;
 
-      const footerBarHeight = footerBar?.clientHeight ?? 0;
+    const shouldUpdateFullscreen = isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default');
 
-      let leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleRefHeight.current - footerBarHeight - 10;
+    if (shouldUpdateFullscreen) {
+      const tabsContainer = document.getElementById(`${mapId}-tabsContainer`);
+      const footerBarHeight = tabsContainer?.firstElementChild?.firstElementChild?.clientHeight ?? 0;
+      const leftPanelHeight = calculateLeftPanelHeight(footerBarHeight);
 
-      // update the height of left panel when data table and layers is rendered in appbar and map is in fullscreen.
-      if (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.LAYERS) {
-        leftPanelHeight = window.screen.height - 200;
-      }
+      updatePanelHeight(leftPanelRef.current, `${leftPanelHeight}px`);
+      leftPanelRef.current.style.paddingBottom = PADDING_BOTTOM;
 
-      leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
-      leftPanelRef.current.style.overflow = 'auto';
-      leftPanelRef.current.style.paddingBottom = '24px';
-
-      if (activeFooterBarTabId === TABS.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE) {
-        rightPanelHeight(`${leftPanelHeight}px`);
-        setTableHeight(`${leftPanelHeight - 100}px`);
-      } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
-        const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
-        if (childElem) {
-          childElem.style.maxHeight = `${leftPanelHeight}px`;
-          childElem.style.overflowY = 'auto';
+      // Handle right panel updates
+      const rightPanel = rightPanelRef.current?.firstElementChild as HTMLElement;
+      if (rightPanel) {
+        if (activeFooterBarTabId === TABS.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE) {
+          updatePanelHeight(rightPanel, `${leftPanelHeight}px`);
+          setTableHeight(`${leftPanelHeight - TABLE_HEIGHT_OFFSET}px`);
+        } else if (activeFooterBarTabId === TABS.GEO_CHART) {
+          updatePanelHeight(rightPanel, `${leftPanelHeight}px`);
+        } else {
+          updatePanelHeight(rightPanel, `${leftPanelHeight}px`);
         }
-      } else {
-        rightPanelHeight(`${leftPanelHeight}px`);
       }
-    }
-    // reset the footer panel after map is not in fullscreen.
-    if (!isMapFullScreen && leftPanelRef.current) {
-      leftPanelRef.current.style.maxHeight = `${defaultHeight}px`;
-      leftPanelRef.current.style.overflow = 'auto';
-      rightPanelHeight();
-      if (activeFooterBarTabId === TABS.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE) {
-        setTableHeight(`${defaultHeight - 100}px`);
-        // check if table exist as child in right panel.
-      } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
-        const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
-        if (childElem) {
-          childElem.style.maxHeight = `${defaultHeight}px`;
-          childElem.style.overflowY = 'auto';
+    } else {
+      // Non-fullscreen updates
+      updatePanelHeight(leftPanelRef.current, `${DEFAULT_HEIGHT}px`);
+
+      const rightPanel = rightPanelRef.current?.firstElementChild as HTMLElement;
+      if (rightPanel) {
+        if (activeFooterBarTabId === TABS.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE) {
+          setTableHeight(`${DEFAULT_HEIGHT - TABLE_HEIGHT_OFFSET}px`);
         }
+        updatePanelHeight(rightPanel, `${DEFAULT_HEIGHT}px`);
       }
     }
   }, [
@@ -133,6 +141,8 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
     arrayOfLayerData,
     allFeaturesLayerData,
     tabGroup,
+    calculateLeftPanelHeight,
+    updatePanelHeight,
   ]);
 
   /**
@@ -140,13 +150,14 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
    */
   useEffect(() => {
     if (leftPanelRef.current && !isMapFullScreen) {
-      if ((tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.LAYERS) && mobileView) {
-        leftPanelRef.current.style.maxHeight = `100%`;
-      } else {
-        leftPanelRef.current.style.maxHeight = `${defaultHeight}px`;
-      }
+      const height =
+        (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.LAYERS) && mobileView
+          ? '100%'
+          : `${DEFAULT_HEIGHT}px`;
+
+      updatePanelHeight(leftPanelRef.current, height);
     }
-  }, [mapSize, isMapFullScreen, tabGroup, mobileView]);
+  }, [mapSize, isMapFullScreen, tabGroup, mobileView, updatePanelHeight]);
 
   return { leftPanelRef, rightPanelRef, panelTitleRef, activeFooterBarTabId };
 }

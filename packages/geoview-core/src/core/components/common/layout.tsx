@@ -1,4 +1,4 @@
-import { useCallback, ReactNode, useRef, useMemo } from 'react';
+import { useCallback, ReactNode, useRef, useMemo, memo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
@@ -20,7 +20,18 @@ interface LayoutProps {
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
 }
 
-export function Layout({
+// Constants outside component to prevent recreating every render
+const TITLE_STYLES = {
+  fontWeight: '600',
+  marginTop: '12px',
+  overflow: 'hidden',
+  display: '-webkit-box',
+  webkitBoxOrient: 'vertical',
+  webkitLineClamp: '2',
+} as const;
+
+// Memoizes entire component, preventing re-renders if props haven't changed
+export const Layout = memo(function Layout({
   children,
   guideContentIds,
   layerList,
@@ -31,10 +42,16 @@ export function Layout({
   onGuideIsOpen,
   containerType = CONTAINER_TYPE.FOOTER_BAR,
 }: LayoutProps): JSX.Element {
+  logger.logTraceRender('components/common/layout');
+
+  // Hooks
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
   const theme = useTheme();
 
+  // Store
   const { setSelectedFooterLayerListItemId } = useUIStoreActions();
+
+  // Callbacks
   /**
    * Handles clicks to layers in left panel. Sets selected layer.
    *
@@ -43,9 +60,11 @@ export function Layout({
   const handleLayerChange = useCallback(
     (layer: LayerListEntry): void => {
       onLayerListClicked?.(layer);
+
       // Show the panel (hiding the layers list in the process if we're on mobile)
       responsiveLayoutRef.current?.setIsRightPanelVisible(true);
       responsiveLayoutRef.current?.setRightPanelFocus();
+
       // set the focus item when layer item clicked.
       setSelectedFooterLayerListItemId(`${layer.layerUniqueId}`);
     },
@@ -78,15 +97,10 @@ export function Layout({
   const renderLayerTitle = useCallback((): JSX.Element => {
     // clamping code copied from https://tailwindcss.com/docs/line-clamp
     const sxClasses = {
+      ...TITLE_STYLES,
       fontSize: theme.palette.geoViewFontSize.lg,
       textAlign: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? 'center' : 'left',
       width: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? '100%' : 'auto',
-      fontWeight: '600',
-      marginTop: '12px',
-      overflow: 'hidden',
-      display: '-webkit-box',
-      webkitBoxOrient: 'vertical',
-      webkitLineClamp: '2',
       ...(!fullWidth && { [theme.breakpoints.up('md')]: { display: 'none' } }),
     };
 
@@ -113,4 +127,4 @@ export function Layout({
       containerType={containerType}
     />
   );
-}
+});
