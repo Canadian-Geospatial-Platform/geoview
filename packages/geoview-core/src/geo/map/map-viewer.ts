@@ -431,10 +431,7 @@ export class MapViewer {
       };
 
       // Save in the store
-      MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates).catch((error) => {
-        // Log
-        logger.logPromiseFailed('setClickCoordinates in #handleMapSingleClick in MapViewer', error);
-      });
+      MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates);
 
       // Emit to the outside
       this.#emitMapSingleClick(clickCoordinates);
