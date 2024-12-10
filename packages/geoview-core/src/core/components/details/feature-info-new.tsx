@@ -14,6 +14,7 @@ import { getSxClasses } from './details-style';
 
 interface FeatureInfoProps {
   feature: TypeFeatureInfoEntry;
+  onRenderComplete: (flag: boolean) => void;
 }
 
 interface FeatureHeaderProps {
@@ -79,8 +80,9 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
   );
 });
 
-export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
+export function FeatureInfo({ feature, onRenderComplete }: FeatureInfoProps): JSX.Element | null {
   logger.logTraceRender('components/details/feature-info-new');
+  logger.logMarkerCheck('DETAILS-MARKER', 'ddd new feature info');
 
   // Hooks
   const theme = useTheme();
@@ -94,10 +96,28 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
   const { zoomToExtent, highlightBBox, transformPoints, showClickMarker } = useMapStoreActions();
 
+  useEffect(() => {
+    // Call the callback after the component has mounted
+    onRenderComplete?.(false);
+    logger.logMarkerCheck('DETAILS-MARKER', 'ddd child child render');
+
+    // Notify parent when component is ready
+    const timer = setTimeout(() => {
+      onRenderComplete(true);
+    }, 0);
+
+    // Cleanup function to handle unmounting
+    return () => {
+      clearTimeout(timer);
+      onRenderComplete(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [feature]); // Empty dependency array means this runs once after initial render
+
   // Feature data processing
   const featureData = useMemo(() => {
     if (!feature) return null;
-
+    logger.logMarkerCheck('DETAILS-MARKER', 'ddd feature data');
     return {
       uid: feature.geometry ? (feature.geometry as TypeGeometry).ol_uid : null,
       iconSrc: feature.featureIcon.toDataURL(),
@@ -111,6 +131,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   // Process feature info list
   const featureInfoList: TypeFieldEntry[] = useMemo(() => {
     if (!feature?.fieldInfo) return [];
+    logger.logMarkerCheck('DETAILS-MARKER', 'ddd feature list');
 
     return Object.entries(feature.fieldInfo)
       .filter(([key]) => key !== feature.nameField)
@@ -172,7 +193,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   // Effects
   useEffect(() => {
     logger.logTraceUseEffect('FEATURE-INFO-NEW - checkedFeatures', checkedFeatures);
-
+    logger.logMarkerCheck('DETAILS-MARKER', 'ddd checkfeat');
     if (!featureData?.uid) return;
 
     setChecked(checkedFeatures.some((checkedFeature) => (checkedFeature.geometry as TypeGeometry)?.ol_uid === featureData.uid));
@@ -180,7 +201,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
   // Early return if no feature
   if (!featureData) return null;
-
+  logger.logMarkerCheck('DETAILS-MARKER', 'ddd feature');
   return (
     <Paper sx={PAPER_STYLES}>
       <FeatureHeader
