@@ -10,13 +10,11 @@
           "queryable": true,
           "nameField": "Project",
           "outfields": [
-            [
-              { "name": "program", "alias": "Program", "type": "string", "domain": null },
-              { "name": "project_id", "alias": "Project ID", "type": "string", "domain": null },
-              { "name": "geom_type", "alias": "Geometry type", "type": "string", "domain": null },
-              { "name": "geom_area", "alias": "Geometry area", "type": "string", "domain": null },
-              { "name": "SRID", "alias": "SRID", "type": "string", "domain": null }
-            ]
+            { "name": "program", "alias": "Program", "type": "string", "domain": null },
+            { "name": "project_id", "alias": "Project ID", "type": "string", "domain": null },
+            { "name": "geom_type", "alias": "Geometry type", "type": "string", "domain": null },
+            { "name": "geom_area", "alias": "Geometry area", "type": "string", "domain": null },
+            { "name": "SRID", "alias": "SRID", "type": "string", "domain": null }
           ]
         }
       },
