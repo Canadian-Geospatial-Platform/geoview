@@ -81,8 +81,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
-    // Redirect
-    this.#propagateToStore(resultSetEntry, type === 'layerName' ? 'name' : 'click');
+    // Redirect - Add layer to the list after registration
+    this.#propagateToStore(resultSetEntry, type === 'layer-registration' ? 'name' : 'click');
   }
 
   /**

@@ -119,16 +119,17 @@ export class GVWMS extends AbstractGVRaster {
       const layerConfig = this.getLayerConfig();
 
       // Check if bounds are properly set
-      if (!layerConfig.initialSettings!.bounds) {
-        const newBounds = this.getBounds(this.getLayerPath());
-        if (newBounds)
-          layerConfig.initialSettings!.bounds = Projection.transformExtentFromProj(
-            newBounds,
-            this.getMapViewer().getView().getProjection(),
-            Projection.PROJECTION_NAMES.LNGLAT
-          );
-        else return [];
-      }
+      // TODO: We always do the check if not bounds are not set properly from layer creation process
+      //  if (!layerConfig.initialSettings!.bounds) {
+      const newBounds = this.getBounds(this.getLayerPath());
+      if (newBounds)
+        layerConfig.initialSettings!.bounds = Projection.transformExtentFromProj(
+          newBounds,
+          this.getMapViewer().getView().getProjection(),
+          Projection.PROJECTION_NAMES.LNGLAT
+        );
+      //    else return [];
+      //  }
 
       const clickCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
       if (

@@ -57,15 +57,16 @@ export const FeatureItem = memo(function FeatureItem({
     [t]
   );
 
-  let element: JSX.Element;
   if (alias === 'html') {
-    element = (
+    return (
       <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
         <HtmlToReact htmlContent={sanitizeHtmlContent(item)} />
       </Box>
     );
-  } else if (typeof item === 'string' && isImage(item)) {
-    element = (
+  }
+
+  if (typeof item === 'string' && isImage(item)) {
+    return (
       <CardMedia
         key={generateId()}
         sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
@@ -81,22 +82,19 @@ export const FeatureItem = memo(function FeatureItem({
         }}
       />
     );
-  } else {
-    element = (<Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
-      <HtmlToReact htmlContent={sanitizeHtmlContent(linkifyHtml(stringify(item) as string, linkifyOptions))} />
-    </Box>);
   }
 
-  return element
+  return (
+    <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
+      <HtmlToReact htmlContent={sanitizeHtmlContent(linkifyHtml(stringify(item) as string, linkifyOptions))} />
+    </Box>
+  );
 });
 
 // Extracted FeatureRow component
 export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onInitLightBox }: FeatureRowProps): JSX.Element {
   const theme = useTheme();
   const { alias, value } = featureInfoItem;
-
-  // Split text but leave html intact
-  // f (alias !== 'html') values = values.toString().split(';');
 
   // Convert value to string, handling arrays and other types
   const stringValue = useMemo((): string => {
@@ -106,7 +104,8 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
     return stringify(value) as string;
   }, [value]);
 
-  const valueArray = stringValue.split(';');
+  // Split text but leave html intact
+  const valueArray = alias !== 'html' ? stringValue.split(';') : [stringValue];
 
   // Generate stable IDs for each item when component mounts
   const itemIds = useMemo(() => valueArray.map(() => generateId()), [valueArray]);
@@ -121,17 +120,19 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
         marginBottom: '1.25rem',
       }}
     >
-       {featureInfoItem.alias !== 'html' && (<Grid
-        sx={{
-          fontWeight: 'bold',
-          width: '80%',
-          flexGrow: 0,
-          maxWidth: 'none',
-          flexBasis: 'auto',
-        }}
-      >
-        {alias}
-      </Grid>)}
+      {featureInfoItem.alias !== 'html' && (
+        <Grid
+          sx={{
+            fontWeight: 'bold',
+            width: '80%',
+            flexGrow: 0,
+            maxWidth: 'none',
+            flexBasis: 'auto',
+          }}
+        >
+          {alias}
+        </Grid>
+      )}
       <Grid
         sx={{
           marginLeft: 'auto',
@@ -164,6 +165,9 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({ featureInfoList
 
   // Store
   const { initLightBox, LightBoxComponent } = useLightBox();
+
+  // Remove last item who is the internall geoviewID field
+  if (featureInfoList[featureInfoList.length - 1].alias === 'geoviewID') featureInfoList.pop();
 
   return (
     <Box sx={sxClasses.boxContainerFeatureInfo}>
