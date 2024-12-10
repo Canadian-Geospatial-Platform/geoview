@@ -47,7 +47,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
   // States
-  const [isChildRendered, setIsChildRendered] = useState(false);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [selectedLayerPathLocal, setselectedLayerPathLocal] = useState<string>(selectedLayerPath);
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
@@ -321,9 +320,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
       // Log
       logger.logTraceUseCallback('DETAILS PANEL - handleFeatureNavigateChange', currentFeatureIndex);
 
-      // Reset shilcren state
-      setIsChildRendered(false); // Reset the render state
-
       // Keep previous index for navigation
       prevFeatureIndex.current = currentFeatureIndex;
 
@@ -347,11 +343,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     },
     [setSelectedLayerPath]
   );
-
-  const handleChildRender = useCallback(() => {
-    logger.logMarkerCheck('DETAILS-MARKER', 'ddd child render');
-    setIsChildRendered(true);
-  }, []);
   // #endregion
 
   // #region PROCESSING ***********************************************************************************************
@@ -421,9 +412,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    */
   const memoIsAllLayersQueryStatusProcessed = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DETAILS-PANEL - order layer status processing.');
+    logger.logTraceUseMemo('DETAILS-PANEL - AllLayersQueryStatusProcessed.');
 
-    logger.logMarkerCheck('DETAILS-MARKER', 'ddde memo processing', arrayOfLayerDataBatch);
     if (!arrayOfLayerDataBatch || arrayOfLayerDataBatch?.length === 0) return () => false;
 
     return () => arrayOfLayerDataBatch?.every((layer) => layer.queryStatus === FEATURE_INFO_STATUS.PROCESSED);
@@ -439,19 +429,13 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   logger.logMarkerStart('DETAILS-MARKER');
   const renderContent = (): JSX.Element | null => {
     if (!memoIsAllLayersQueryStatusProcessed()) {
-      logger.logMarkerCheck('DETAILS-MARKER', 'ddd skeleton', memoIsAllLayersQueryStatusProcessed());
       return <DetailsSkeleton />;
-    }
-
-    if (!memoIsAllLayersQueryStatusProcessed() && memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length === 0) {
-      logger.logMarkerCheck('DETAILS-MARKER', 'ddd null');
-      return null;
     }
 
     if (memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0) {
       // Get only the current feature
       const currentFeature = memoSelectedLayerDataFeatures[currentFeatureIndex];
-      logger.logMarkerCheck('DETAILS-MARKER', 'ddd data');
+
       return (
         <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
           <Grid container sx={sxClasses.rightPanelBtnHolder}>
@@ -499,11 +483,12 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
               </Box>
             </Grid>
           </Grid>
-          <FeatureInfo feature={currentFeature} onRenderComplete={handleChildRender} />
+          <FeatureInfo feature={currentFeature} />
         </Box>
       );
     }
 
+    // if no condition met, return null for Guide tab
     return null;
   };
 

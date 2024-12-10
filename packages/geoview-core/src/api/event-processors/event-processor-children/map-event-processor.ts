@@ -412,15 +412,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setPointerPosition(pointerPosition);
   }
 
-  static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): Promise<TypeFeatureInfoResultSet> {
-    // Perform query via the feature info layer set process
-    const promise = this.getMapViewerLayerAPI(mapId).featureInfoLayerSet.queryLayers(clickCoordinates.lnglat);
-
+  static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): void {
+    // GV: We do not need to perform query, there is a handler on the map click in layer set.
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setClickCoordinates(clickCoordinates);
-
-    // Return the promise
-    return promise;
   }
 
   static setZoom(mapId: string, zoom: number): void {
