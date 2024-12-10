@@ -16,7 +16,7 @@ import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info-new';
-import { LAYER_STATUS, TABS } from '@/core/utils/constant';
+import { FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
 import { DetailsSkeleton } from './details-skeleton';
 
 interface DetailsPanelType {
@@ -29,37 +29,31 @@ interface DetailsPanelType {
  * @returns {JSX.Element} the layers list
  */
 export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Element {
-  // Log
   logger.logTraceRender('components/details/details-panel');
 
+  // Hooks
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // Get states and actions from store
+  // Store
   const mapId = useGeoViewMapId();
   const selectedLayerPath = useDetailsSelectedLayerPath();
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
   const mapClickCoordinates = useMapClickCoordinates();
-
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
-  // #region USE STATE SECTION ****************************************************************************************
-
-  // internal state
+  // States
+  const [isChildRendered, setIsChildRendered] = useState(false);
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [selectedLayerPathLocal, setselectedLayerPathLocal] = useState<string>(selectedLayerPath);
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
-
   const prevLayerSelected = useRef<TypeLayerData>();
   const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>();
   const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
-
-  // #endregion
 
   // #region MAIN HOOKS SECTION ***************************************************************************************
 
@@ -304,7 +298,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   // #endregion
 
   // #region EVENT HANDLERS SECTION ***********************************************************************************
-
   /**
    * Handles click to remove all features in right panel.
    */
@@ -327,6 +320,9 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     (change: -1 | 1): void => {
       // Log
       logger.logTraceUseCallback('DETAILS PANEL - handleFeatureNavigateChange', currentFeatureIndex);
+
+      // Reset shilcren state
+      setIsChildRendered(false); // Reset the render state
 
       // Keep previous index for navigation
       prevFeatureIndex.current = currentFeatureIndex;
@@ -352,6 +348,10 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     [setSelectedLayerPath]
   );
 
+  const handleChildRender = useCallback(() => {
+    logger.logMarkerCheck('DETAILS-MARKER', 'ddd child render');
+    setIsChildRendered(true);
+  }, []);
   // #endregion
 
   // #region PROCESSING ***********************************************************************************************
@@ -417,39 +417,41 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   }, [mapClickCoordinates, memoLayersList]);
 
   /**
-   * Check all layers status is processing while querying
+   * Check all layers status is processed while querying
    */
-  const memoIsAllLayersQueryStatusProcessing = useMemo(() => {
+  const memoIsAllLayersQueryStatusProcessed = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - order layer status processing.');
 
+    logger.logMarkerCheck('DETAILS-MARKER', 'ddde memo processing', arrayOfLayerDataBatch);
     if (!arrayOfLayerDataBatch || arrayOfLayerDataBatch?.length === 0) return () => false;
 
-    return () => !!arrayOfLayerDataBatch?.every((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
+    return () => arrayOfLayerDataBatch?.every((layer) => layer.queryStatus === FEATURE_INFO_STATUS.PROCESSED);
   }, [arrayOfLayerDataBatch]);
 
   // #endregion
-
-  // #region RENDER SECTION *******************************************************************************************
 
   /**
    * Render the right panel content based on detail's layer and loading status.
    * NOTE: Here we return null, so that in responsive grid layout, it can be used as flag to render the guide for details.
    * @returns {JSX.Element | null} JSX.Element | null
    */
+  logger.logMarkerStart('DETAILS-MARKER');
   const renderContent = (): JSX.Element | null => {
-    if (memoIsAllLayersQueryStatusProcessing()) {
+    if (!memoIsAllLayersQueryStatusProcessed()) {
+      logger.logMarkerCheck('DETAILS-MARKER', 'ddd skeleton', memoIsAllLayersQueryStatusProcessed());
       return <DetailsSkeleton />;
     }
 
-    if (!memoIsAllLayersQueryStatusProcessing() && !memoSelectedLayerDataFeatures) {
+    if (!memoIsAllLayersQueryStatusProcessed() && memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length === 0) {
+      logger.logMarkerCheck('DETAILS-MARKER', 'ddd null');
       return null;
     }
 
     if (memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0) {
       // Get only the current feature
       const currentFeature = memoSelectedLayerDataFeatures[currentFeatureIndex];
-
+      logger.logMarkerCheck('DETAILS-MARKER', 'ddd data');
       return (
         <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
           <Grid container sx={sxClasses.rightPanelBtnHolder}>
@@ -497,7 +499,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
               </Box>
             </Grid>
           </Grid>
-          <FeatureInfo feature={currentFeature} />
+          <FeatureInfo feature={currentFeature} onRenderComplete={handleChildRender} />
         </Box>
       );
     }
@@ -517,6 +519,4 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
       {renderContent()}
     </Layout>
   );
-
-  // # endregion
 }
