@@ -6,7 +6,7 @@ import { GeochartEventProcessor } from '@/api/event-processors/event-processor-c
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-import { TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 import { TypeJsonValue } from '@/core/types/global-types';
 import { api } from '@/app';
 
@@ -32,11 +32,11 @@ export class GeoCore {
 
   /**
    * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
-   *
-   * @param {GeoCoreLayerEntryConfig} geocoreLayerConfig the layer configuration
+   * @param {string} uuid the UUID of the layer
+   * @param {GeoCoreLayerConfig} geoCoreLayerConfig the layer configuration
    * @returns {Promise<TypeGeoviewLayerConfig[]>} list of layer configurations to add to the map
    */
-  async createLayersFromUUID(uuid: string): Promise<TypeGeoviewLayerConfig[]> {
+  async createLayersFromUUID(uuid: string, layerEntryConfig?: GeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig[]> {
     // Get the map config
     const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.#mapId);
 
@@ -49,6 +49,21 @@ export class GeoCore {
 
       // Validate the generated Geoview Layer Config
       ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);
+
+      // Set the initialSettings parameter if present
+      if (layerEntryConfig?.initialSettings) {
+        for (let i = 0; i < response.layers.length; i++) {
+          response.layers[i].initialSettings = { ...response.layers[i].initialSettings, ...layerEntryConfig.initialSettings };
+          // Need to set the initial settings of the LayerEntryConfigs. Only applies to top layers.
+          // Visibility is passed down to children, but other values may not.
+          for (let j = 0; j < response.layers[i].listOfLayerEntryConfig.length; j++) {
+            response.layers[i].listOfLayerEntryConfig[j].initialSettings = {
+              ...response.layers[i].listOfLayerEntryConfig[j].initialSettings,
+              ...layerEntryConfig.initialSettings,
+            };
+          }
+        }
+      }
 
       // For each found geochart associated with the Geocore UUIDs
       response.geocharts?.forEach((geochartConfig) => {

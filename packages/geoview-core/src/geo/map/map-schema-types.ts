@@ -404,6 +404,9 @@ export type GeoCoreLayerConfig = {
   // TO.DOCONT: For this we will need a little trick because when we create the config the setting are set at the root level and in our config it will take it from the layerID.
   // TO.DOCONT: There is refactor to do to make this work for all layer type. Global setting should be cascade to child of the root layer.
   geoviewLayerName: string;
+
+  /** Initial settings to apply to the GeoCore layer at creation time. */
+  initialSettings?: TypeLayerInitialSettings;
 };
 
 /**
