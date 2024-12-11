@@ -50,6 +50,9 @@ export class GeoCore {
       // Validate the generated Geoview Layer Config
       ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);
 
+      // Set the Layer Name for the main layer
+      if (layerConfig?.geoviewLayerName) response.layers[0].listOfLayerEntryConfig[0].layerName = layerConfig.geoviewLayerName;
+
       // Set the initialSettings parameter if present
       if (layerConfig?.initialSettings) {
         for (let i = 0; i < response.layers.length; i++) {

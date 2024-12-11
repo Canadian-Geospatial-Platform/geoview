@@ -429,7 +429,7 @@ export function AddNewLayer(): JSX.Element {
 
       const geoCoreGeoviewLayerInstance = new GeoCore(mapId, api.maps[mapId].getDisplayLanguage());
       const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(layerURL);
-      if (layers.length === 1) {
+      if (layers.length >= 1) {
         if (layers.length === 1) {
           setLayerName(layers[0].geoviewLayerName!);
           setLayerEntries(layers);
@@ -883,8 +883,15 @@ export function AddNewLayer(): JSX.Element {
         });
       } else if (layerEntries.length > 0) {
         (layerEntries as TypeGeoviewLayerConfig[]).forEach((geoviewLayerConfig) => {
-          const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
-          if (addedLayer) addedLayers.push(addedLayer);
+          if (layerName !== geoviewLayerConfig.geoviewLayerName) {
+            const tempConfig = geoviewLayerConfig;
+            tempConfig.listOfLayerEntryConfig[0].layerName = layerName;
+            const addedLayer = api.maps[mapId].layer.addGeoviewLayer(tempConfig);
+            if (addedLayer) addedLayers.push(addedLayer);
+          } else {
+            const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+            if (addedLayer) addedLayers.push(addedLayer);
+          }
         });
       }
 
