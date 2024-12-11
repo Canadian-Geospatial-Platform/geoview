@@ -24,6 +24,7 @@ import {
   mapConfigLayerEntryIsGeoCore,
   layerEntryIsGroupLayer,
   TypeLayerStatus,
+  GeoCoreLayerConfig,
 } from '@/geo/map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -449,7 +450,9 @@ export class LayerApi {
         const geoCore = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
 
         // Create the layers from the UUID
-        promisesOfGeoCoreGeoviewLayers.push(geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId));
+        promisesOfGeoCoreGeoviewLayers.push(
+          geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig as GeoCoreLayerConfig)
+        );
       } else {
         // Add a resolved promise for a regular Geoview Layer Config
         promisesOfGeoCoreGeoviewLayers.push(Promise.resolve([geoviewLayerConfig as TypeGeoviewLayerConfig]));
