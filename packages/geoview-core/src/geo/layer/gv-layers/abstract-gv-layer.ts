@@ -579,11 +579,13 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
               dictFieldTypes[fieldName] = this.getFieldType(fieldName);
             }
             const fieldType = dictFieldTypes[fieldName];
-            const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName);
+            const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
             if (fieldEntry) {
-              featureInfoEntry.fieldInfo[fieldName] = {
+              featureInfoEntry.fieldInfo[fieldEntry.name] = {
                 fieldKey: fieldKeyCounter++,
-                value: this.getFieldValue(feature, fieldName, fieldEntry!.type as 'string' | 'number' | 'date'),
+                value:
+                  this.getFieldValue(feature, fieldName, fieldEntry!.type as 'string' | 'number' | 'date') ||
+                  this.getFieldValue(feature, fieldEntry.name, fieldEntry!.type as 'string' | 'number' | 'date'),
                 dataType: fieldEntry!.type,
                 alias: fieldEntry!.alias,
                 domain: fieldDomain,
