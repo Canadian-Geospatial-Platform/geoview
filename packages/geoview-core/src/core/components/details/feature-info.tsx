@@ -80,7 +80,7 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
 });
 
 export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
-  logger.logTraceRender('components/details/feature-info-new');
+  logger.logTraceRender('components/details/feature-info');
 
   // Hooks
   const theme = useTheme();
@@ -171,7 +171,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
   // Effects
   useEffect(() => {
-    logger.logTraceUseEffect('FEATURE-INFO-NEW - checkedFeatures', checkedFeatures);
+    logger.logTraceUseEffect('FEATURE-INO - checkedFeatures', checkedFeatures);
 
     if (!featureData?.uid) return;
 
