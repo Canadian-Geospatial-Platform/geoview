@@ -547,7 +547,7 @@ export class MapViewer {
           });
         }
       }
-    }, 1000);
+    }, 250);
   }
 
   /**
@@ -692,7 +692,7 @@ export class MapViewer {
           this.#checkMapLayersLoaded();
         }
       }
-    }, 1000);
+    }, 250);
   }
 
   /**
@@ -726,7 +726,7 @@ export class MapViewer {
           this.#emitMapLayersLoaded();
         }
       }
-    }, 1000);
+    }, 250);
   }
 
   /**
@@ -761,7 +761,7 @@ export class MapViewer {
             resolve();
           }
         }
-      }, 1000);
+      }, 250);
     });
   }
 

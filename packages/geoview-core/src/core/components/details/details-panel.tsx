@@ -15,7 +15,7 @@ import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map
 
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';
-import { FeatureInfo } from './feature-info-new';
+import { FeatureInfo } from './feature-info';
 import { FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
 import { DetailsSkeleton } from './details-skeleton';
 
@@ -428,10 +428,12 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    */
   const renderContent = (): JSX.Element | null => {
     // If there is no layer, return null for the guide to show
-    if (memoLayersList && memoLayersList.length === 0) return null;
+    if ((memoLayersList && memoLayersList.length === 0) || selectedLayerPath === '') {
+      return null;
+    }
 
-    // Until process, return skeleton
-    if (!memoIsAllLayersQueryStatusProcessed() || !(memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0)) {
+    // Until process or something found for selected layerPath, return skeleton
+    if (!memoIsAllLayersQueryStatusProcessed() && !(memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0)) {
       return <DetailsSkeleton />;
     }
 
