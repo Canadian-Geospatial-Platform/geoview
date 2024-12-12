@@ -16,7 +16,7 @@ import { logger } from '@/core/utils/logger';
 import { TypeJsonObject } from '@/core/types/global-types';
 
 /**
- * Class used to handle functions for trasforming projections
+ * Class used to handle functions for transforming projections
  *
  * @exports
  * @class Projection
@@ -34,6 +34,7 @@ export abstract class Projection {
     3578: 'EPSG:3578',
     LCC: 'EPSG:3978',
     3979: 'EPSG:3979',
+    102100: 'EPSG:102100', // TODO: Minor - This is technically supposed to be ESRI:102100, but some things would need to change in order to support this, works now
     102184: 'EPSG:102184', // TODO: Minor - This is technically supposed to be ESRI:102184, but more things would need to change in order to support this, works now
     102190: 'EPSG:102190', // TODO: Minor - This is technically supposed to be ESRI:102190, but some things would need to change in order to support this, works now
     WM: 'EPSG:3857',
@@ -225,9 +226,14 @@ export abstract class Projection {
    */
   static getProjectionFromObj(projection: TypeJsonObject | undefined): olProjection | undefined {
     // If wkid
-    if (projection && projection.wkid) {
-      // Redirect
-      return Projection.getProjectionFromProj(`EPSG:${projection.wkid}`);
+    if (projection) {
+      if (projection.latestWkid) {
+        return Projection.getProjectionFromProj(`EPSG:${projection.latestWkid}`);
+      }
+      if (projection.wkid) {
+        // Redirect
+        return Projection.getProjectionFromProj(`EPSG:${projection.wkid}`);
+      }
     }
 
     // If wkt
@@ -390,6 +396,22 @@ function init3979Projection(): void {
 }
 
 /**
+ * initialize EPSG:102100 (ESRI:102100) projection
+ * @private
+ */
+function init102100Projection(): void {
+  proj4.defs(
+    Projection.PROJECTION_NAMES[102100],
+    '+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs'
+  );
+  register(proj4);
+
+  const projection = olGetProjection(Projection.PROJECTION_NAMES[102100]);
+
+  if (projection) Projection.PROJECTIONS['102100'] = projection;
+}
+
+/**
  * initialize EPSG:102184 (ESRI:102184) projection
  * @private
  */
@@ -429,6 +451,7 @@ initCSRSProjection();
 initCSRS98Projection();
 init3578Projection();
 init3979Projection();
+init102100Projection();
 init102184Projection();
 init102190Projection();
 logger.logInfo('Projections initialized');
