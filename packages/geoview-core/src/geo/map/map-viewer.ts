@@ -76,6 +76,9 @@ export class MapViewer {
   // Minimum delay (in milliseconds) for map to be in loading state
   static readonly #MIN_DELAY_LOADING = 2000;
 
+  // The default densification number when forming layer extents, to make ture to compensate for earth curvature
+  static DEFAULT_STOPS: number = 25;
+
   // map config properties
   mapFeaturesConfig: TypeMapFeaturesConfig;
 
@@ -1444,11 +1447,12 @@ export class MapViewer {
   /**
    * Transforms extent from LngLat to the current projection of the map.
    * @param {Extent} extent - The LngLat extent
+   * @param {number} stops - The number of stops to perform densification on the extent
    * @returns {Extent} The extent in the map projection
    */
-  convertExtentLngLatToMapProj(extent: Extent): Extent {
+  convertExtentLngLatToMapProj(extent: Extent, stops: number = MapViewer.DEFAULT_STOPS): Extent {
     // Redirect
-    return this.convertExtentFromProjToMapProj(extent, Projection.PROJECTION_NAMES.LNGLAT);
+    return this.convertExtentFromProjToMapProj(extent, Projection.PROJECTION_NAMES.LNGLAT, stops);
   }
 
   /**
@@ -1497,12 +1501,13 @@ export class MapViewer {
    * Transforms extent from given projection to the current projection of the map.
    * @param {Extent} extent - The given extent
    * @param {ProjectionLike} fromProj - The projection of the given extent
+   * @param {number} stops - The number of stops to perform densification on the extent
    * @returns {Extent} The extent in the map projection
    */
-  convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike): Extent {
+  convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike, stops: number = MapViewer.DEFAULT_STOPS): Extent {
     // If different projections
     if (fromProj !== this.getProjection().getCode()) {
-      return Projection.transformExtentFromProj(extent, fromProj, this.getProjection());
+      return Projection.transformExtentFromProj(extent, fromProj, this.getProjection(), stops);
     }
 
     // Same projection

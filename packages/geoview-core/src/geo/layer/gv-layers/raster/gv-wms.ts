@@ -564,9 +564,6 @@ export class GVWMS extends AbstractGVRaster {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
 
-    // Get the source projection
-    const sourceProjection = this.getOLSource().getProjection() || undefined;
-
     // Get the layer config bounds
     let layerConfigBounds = layerConfig?.initialSettings?.bounds;
 
@@ -576,8 +573,8 @@ export class GVWMS extends AbstractGVRaster {
       layerConfigBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerConfigBounds, 'EPSG:4326');
     }
 
-    // Get the layer bounds from metadata
-    const metadataExtent = this.#getBoundsExtentFromMetadata(sourceProjection?.getCode() || '');
+    // Get the layer bounds from metadata, favoring a bounds in the same project as the map
+    const metadataExtent = this.#getBoundsExtentFromMetadata(this.getMapViewer().getProjection().getCode());
 
     // If any
     let layerBounds;
@@ -613,26 +610,43 @@ export class GVWMS extends AbstractGVRaster {
     if (boundingBoxes) {
       // Find the one with the right projection
       for (let i = 0; i < (boundingBoxes.length as number); i++) {
-        if (boundingBoxes[i].crs === projection)
-          return [
-            boundingBoxes[i].crs as string,
-            // TODO: Check - Is it always in that order, 1, 0, 3, 2 or does that depend on the projection?
-            [boundingBoxes[i].extent[1], boundingBoxes[i].extent[0], boundingBoxes[i].extent[3], boundingBoxes[i].extent[2]] as Extent,
-          ];
+        // Read the extent info from the GetCap
+        const { crs, extent } = boundingBoxes[i] as unknown as { crs: string; extent: Extent };
+
+        // If it's the crs we want
+        if (crs === projection) {
+          const extentSafe: Extent = GVWMS.#readExtentCarefully(extent);
+          return [crs, extentSafe];
+        }
       }
 
-      // Not found. If any
+      // At this point, none could be found. If there's any to go with, we try our best...
       if (boundingBoxes.length > 0) {
         // Take the first one and return the bounds and projection
-        return [
-          boundingBoxes[0].crs as string,
-          // TODO: Check - Is it always in that order, 1, 0, 3, 2 or does that depend on the projection?
-          [boundingBoxes[0].extent[1], boundingBoxes[0].extent[0], boundingBoxes[0].extent[3], boundingBoxes[0].extent[2]] as Extent,
-        ];
+        const { crs, extent } = boundingBoxes[0] as unknown as { crs: string; extent: Extent };
+        const extentSafe: Extent = GVWMS.#readExtentCarefully(extent);
+        return [crs as string, extentSafe as Extent];
       }
     }
 
     // Really not found
     return undefined;
+  }
+
+  /**
+   * Reads an extent and verifies if it might be reversed (ymin,xmin,ymax,ymin) and when
+   * so puts it puts it back in order (xmin,ymin,xmax,ymax).
+   * @returns {Extent} The extent in order (xmin,ymin,xmax,ymax).
+   */
+  static #readExtentCarefully(extent: Extent): Extent {
+    // Sometimes (e.g. with 4326, 4269, and others?) the extent coordinates might be in wrong order.
+    // If any number in 1 and 3 position, as absolute, is greater than 90, it's reversed for sure
+    if (Math.abs(extent[1]) > 90 || Math.abs(extent[3]) > 90) {
+      // Careful!
+      return [extent[1], extent[0], extent[3], extent[2]];
+    }
+
+    // All good
+    return extent;
   }
 }
