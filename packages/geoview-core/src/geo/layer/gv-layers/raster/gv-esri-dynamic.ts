@@ -23,6 +23,7 @@ import {
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -724,16 +725,27 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
    * @returns {Promise<Extent | undefined>} The extent of the features, if available.
    */
-  override async getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
+  override async getExtentFromFeatures(layerPath: string, objectIds: string[], outfield?: string): Promise<Extent | undefined> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig();
+    const serviceMetaData = layerEntryConfig.getServiceMetadata() as TypeJsonObject;
+    const wkid = serviceMetaData?.spatialReference.wkid ? serviceMetaData.spatialReference.wkid : undefined;
     let baseUrl = layerEntryConfig.source.dataAccessPath;
 
     const idString = objectIds.join('%2C');
     if (baseUrl) {
       // Construct query
       if (!baseUrl.endsWith('/')) baseUrl += '/';
-      const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=&objectIds=${idString}&&geometryPrecision=1&returnGeometry=true`;
+      // GV: outFields here is not wanted, it is included because some sevices require it in the query. It would be possible to use
+      // GV cont: OBJECTID, but it is not universal through the services, so we pass a value through.
+      const outfieldQuery = outfield ? `&outFields=${outfield}` : '';
+      let precision = '';
+      let allowableOffset = '';
+      if ((serviceMetaData?.layers as Array<TypeJsonObject>).every((layer) => layer.geometryType !== 'esriGeometryPoint')) {
+        precision = '&geometryPrecision=1';
+        allowableOffset = '&maxAllowableOffset=7937.5158750317505';
+      }
+      const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=&objectIds=${idString}${outfieldQuery}${precision}&returnGeometry=true${allowableOffset}`;
 
       try {
         const response = await fetch(queryUrl);
@@ -743,7 +755,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         const responseFeatures = new EsriJSON().readFeatures(
           { features: responseJson.features },
           {
-            dataProjection: `EPSG:${responseJson.spatialReference.wkid}`,
+            dataProjection: wkid ? `EPSG:${wkid}` : `EPSG:${responseJson.spatialReference.wkid}`,
             featureProjection: this.getMapViewer().getProjection().getCode(),
           }
         );
