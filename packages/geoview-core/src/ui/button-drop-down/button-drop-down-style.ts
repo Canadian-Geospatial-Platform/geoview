@@ -11,7 +11,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   buttonDropDown: {
     display: 'flex',
     fontSize: theme?.typography?.fontSize,
-    height: 50,
+    color: theme.palette.geoViewColor?.primary.dark,
+    backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50],
   },
   buttonText: {},
   buttonArrow: {
