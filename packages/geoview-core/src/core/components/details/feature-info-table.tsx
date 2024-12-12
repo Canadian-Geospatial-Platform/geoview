@@ -86,7 +86,7 @@ export const FeatureItem = memo(function FeatureItem({
 
   return (
     <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
-      <HtmlToReact htmlContent={sanitizeHtmlContent(linkifyHtml(stringify(item) as string, linkifyOptions))} />
+      <HtmlToReact htmlContent={sanitizeHtmlContent(linkifyHtml(item.toString(), linkifyOptions))} />
     </Box>
   );
 });
@@ -97,18 +97,15 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
   const { alias, value } = featureInfoItem;
 
   // Convert value to string, handling arrays and other types
-  const stringValue = useMemo((): string => {
+  const stringValue = useMemo((): string[] => {
     if (Array.isArray(value)) {
-      return value.map((item) => stringify(item)).join(';');
+      return [value.map((item) => stringify(item)).join(';')] as string[];
     }
-    return stringify(value) as string;
+    return [stringify(value)] as string[];
   }, [value]);
 
-  // Split text but leave html intact
-  const valueArray = alias !== 'html' ? stringValue.split(';') : [stringValue];
-
   // Generate stable IDs for each item when component mounts
-  const itemIds = useMemo(() => valueArray.map(() => generateId()), [valueArray]);
+  const itemIds = useMemo(() => stringValue.map(() => generateId()), [stringValue]);
 
   return (
     <Grid
@@ -141,7 +138,7 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
           flexGrow: 1,
         }}
       >
-        {valueArray.map((item: string, idx: number) => (
+        {stringValue.map((item: string, idx: number) => (
           <FeatureItem
             key={`${alias}_${itemIds[idx]}`}
             item={item}

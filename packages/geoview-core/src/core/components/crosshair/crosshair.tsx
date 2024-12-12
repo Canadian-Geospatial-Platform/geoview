@@ -47,10 +47,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
       logger.logTraceUseCallback('CROSSHAIR - simulateClick', pointerPosition);
       if (event.key === 'Enter' && pointerPosition) {
         // Update the store
-        setClickCoordinates(pointerPosition).catch((error) => {
-          // Log
-          logger.logPromiseFailed('Failed to setClickCoordinates in crosshair.simulateClick', error);
-        });
+        setClickCoordinates(pointerPosition);
       }
     },
     [pointerPosition, setClickCoordinates]
