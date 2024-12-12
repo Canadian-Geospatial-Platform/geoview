@@ -426,9 +426,12 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    * NOTE: Here we return null, so that in responsive grid layout, it can be used as flag to render the guide for details.
    * @returns {JSX.Element | null} JSX.Element | null
    */
-  logger.logMarkerStart('DETAILS-MARKER');
   const renderContent = (): JSX.Element | null => {
-    if (!memoIsAllLayersQueryStatusProcessed()) {
+    // If there is no layer, return null for the guide to show
+    if (memoLayersList && memoLayersList.length === 0) return null;
+
+    // Until process, return skeleton
+    if (!memoIsAllLayersQueryStatusProcessed() || !(memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0)) {
       return <DetailsSkeleton />;
     }
 
