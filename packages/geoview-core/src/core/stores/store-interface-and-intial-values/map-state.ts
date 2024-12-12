@@ -15,7 +15,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { TypePointMarker } from '@/api/config/types/map-schema-types';
-import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from './feature-info-state';
+import { TypeHoverFeatureInfo } from './feature-info-state';
 import { CV_MAP_CENTER } from '@/api/config/types/config-constants';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
@@ -84,7 +84,7 @@ export interface IMapState {
     zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]) => Promise<void>;
     zoomToMyLocation: (position: GeolocationPosition) => Promise<void>;
     transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
-    setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => Promise<TypeFeatureInfoResultSet>;
+    setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => void;
     setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions) => void;
     setFixNorth: (ifFix: boolean) => void;
     setOverlayClickMarkerRef: (htmlRef: HTMLElement) => void;
@@ -459,7 +459,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        * @param {TypeMapMouseInfo} pointerPosition - The pointer position.
        * @returns {Promise<TypeFeatureInfoResultSet>}
        */
-      setClickCoordinates: (pointerPosition: TypeMapMouseInfo): Promise<TypeFeatureInfoResultSet> => {
+      setClickCoordinates: (pointerPosition: TypeMapMouseInfo): void => {
         // Redirect to processor
         return MapEventProcessor.setClickCoordinates(get().mapId, pointerPosition);
       },
