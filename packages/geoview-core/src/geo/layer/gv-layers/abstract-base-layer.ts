@@ -146,12 +146,13 @@ export abstract class AbstractBaseLayer {
   /**
    * Overridable function that gets the extent of an array of features.
    * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent | undefined>} The extent of the features, if available
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  getExtentFromFeatures(objectIds: string[]): Promise<Extent | undefined> {
-    logger.logError(`Feature geometry for ${objectIds} is unavailable from ${this.getLayerPath()}`);
+  getExtentFromFeatures(objectIds: string[], outfield?: string): Promise<Extent | undefined> {
+    logger.logError(`Feature geometry for ${objectIds}-${outfield} is unavailable from ${this.getLayerPath()}`);
     return Promise.resolve(undefined);
   }
 
