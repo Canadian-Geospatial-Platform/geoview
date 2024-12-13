@@ -1260,7 +1260,7 @@ function searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeLaye
       // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
       // unique value definition.
       const fieldName = feature.getKeys().find((key) => {
-        return key.toLowerCase() === fields?.[j]?.toLowerCase();
+        return key.toLowerCase() === fields[j]?.toLowerCase();
       });
       if (fieldName) {
         // TODO: info - explain why we need to use == instead of ===

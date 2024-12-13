@@ -283,6 +283,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         logger.logInfo('There is a problem with this query: ', identifyUrl);
         throw new Error(`Error code = ${jsonResponse.error.code} ${jsonResponse.error.message}` || '');
       }
+
       const features = new EsriJSON().readFeatures(
         { features: jsonResponse.results },
         { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: mapViewer.getProjection().getCode() }
