@@ -48,7 +48,7 @@ import { UIEventProcessor } from './ui-event-processor';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 import { LegendEventProcessor } from './legend-event-processor';
 import { TypeLegendLayer } from '@/core/components/layers/types';
@@ -109,6 +109,20 @@ export class MapEventProcessor extends AbstractEventProcessor {
               (removedFeatures[i].geometry as TypeGeometry).ol_uid
             );
         }
+      },
+      {
+        equalityFn: (prev, curr) => {
+          // Quick length checks first (prevents re-render) and calls to removeHighlight
+          if (prev === curr) return true;
+          if (prev.length !== curr.length) return false;
+          if (prev.length === 0) return true;
+
+          // Use Set for O(1) lookup instead of array operations
+          const prevUids = new Set(prev.map((feature) => (feature.geometry as TypeGeometry).ol_uid));
+
+          // Single pass through current features
+          return curr.every((feature) => prevUids.has((feature.geometry as TypeGeometry).ol_uid));
+        },
       }
     );
 
@@ -412,15 +426,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setPointerPosition(pointerPosition);
   }
 
-  static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): Promise<TypeFeatureInfoResultSet> {
-    // Perform query via the feature info layer set process
-    const promise = this.getMapViewerLayerAPI(mapId).featureInfoLayerSet.queryLayers(clickCoordinates.lnglat);
-
+  static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): void {
+    // GV: We do not need to perform query, there is a handler on the map click in layer set.
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setClickCoordinates(clickCoordinates);
-
-    // Return the promise
-    return promise;
   }
 
   static setZoom(mapId: string, zoom: number): void {
