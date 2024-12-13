@@ -327,6 +327,7 @@ function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeLaye
   const fields = [renderer.field1];
   if (renderer.field2) fields.push(renderer.field2);
   if (renderer.field3) fields.push(renderer.field3);
+
   const uniqueValueStyleInfo: TypeLayerStyleConfigInfo[] = [];
   renderer.uniqueValueInfos.forEach((symbolInfo) => {
     const settings = convertSymbol(symbolInfo.symbol);
@@ -342,12 +343,29 @@ function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeLaye
     }
   });
 
+  // Add default setting to the end of the array
+  const defaultSettings = convertSymbol(renderer.defaultSymbol);
+  const hasDefault = !!defaultSettings;
+  if (hasDefault) {
+    if (
+      renderer.rotationType === 'geographic' &&
+      (isIconSymbolVectorConfig(defaultSettings) || isSimpleSymbolVectorConfig(defaultSettings))
+    )
+      defaultSettings.rotation = Math.PI / 2 - defaultSettings.rotation!;
+    uniqueValueStyleInfo.push({
+      label: renderer.defaultLabel,
+      visible: true,
+      values: [''],
+      settings: defaultSettings,
+    });
+  }
+
   // If any found
   if (uniqueValueStyleInfo.length > 0) {
     const styleGeometry = getStyleGeometry(uniqueValueStyleInfo[0].settings);
     const styleSettings: TypeLayerStyleSettings = {
       type: 'uniqueValue',
-      hasDefault: false,
+      hasDefault: !!renderer.defaultLabel,
       fields,
       info: uniqueValueStyleInfo,
     };

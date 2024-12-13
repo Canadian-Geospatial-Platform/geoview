@@ -1510,8 +1510,12 @@ export class LayerApi {
       // Assign value to registered layer. This is use by applyFilter function to set visibility
       // TODO: check if we need to refactor to centralize attribute setting....
       const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType];
-      const toggledStyleInfo = geometryStyleConfig?.info.find((styleInfo) => styleInfo.label === item.name);
-      if (toggledStyleInfo) toggledStyleInfo.visible = visibility;
+      // Get all styles with the label matching the name of the clicked item and update their visibility
+      const toggledStyleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
+      toggledStyleInfos?.forEach((toggledStyleInfo) => {
+        // eslint-disable-next-line no-param-reassign
+        if (toggledStyleInfo) toggledStyleInfo.visible = visibility;
+      });
     }
 
     // Update the legend layers if necessary
