@@ -14,7 +14,7 @@ export interface ILayerState {
     selectedLayerSortingArrowId: string;
     actions: {
         deleteLayer: (layerPath: string) => void;
-        getExtentFromFeatures: (layerPath: string, featureIds: string[]) => Promise<Extent | undefined>;
+        getExtentFromFeatures: (layerPath: string, featureIds: string[], outfield?: string) => Promise<Extent | undefined>;
         queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
         getLayer: (layerPath: string) => TypeLegendLayer | undefined;
         getLayerBounds: (layerPath: string) => number[] | undefined;

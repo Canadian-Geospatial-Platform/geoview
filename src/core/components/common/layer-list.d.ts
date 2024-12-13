@@ -18,6 +18,13 @@ interface LayerListProps {
     selectedLayerPath: string | undefined;
     onListItemClick: (layer: LayerListEntry) => void;
 }
+interface LayerListItemProps {
+    id: string;
+    isSelected: boolean;
+    layer: LayerListEntry;
+    onListItemClick: (layer: LayerListEntry) => void;
+}
+export declare const LayerListItem: import("react").NamedExoticComponent<LayerListItemProps>;
 /**
  * Create a list of layers
  * @param {LayerListEntry} layerList  Array of layer list entries.
@@ -27,5 +34,5 @@ interface LayerListProps {
  * @param {Function} onListItemClick  Callback function excecuted when list item is clicked.
  * @returns {JSX.Element}
  */
-export declare function LayerList({ layerList, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element;
+export declare const LayerList: import("react").NamedExoticComponent<LayerListProps>;
 export {};

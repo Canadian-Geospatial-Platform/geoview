@@ -8,5 +8,5 @@ export interface TypeIconStackProps {
 interface LayerIconProps {
     layer: TypeLegendLayer | LayerListEntry;
 }
-export declare function LayerIcon({ layer }: LayerIconProps): JSX.Element;
+export declare const LayerIcon: import("react").NamedExoticComponent<LayerIconProps>;
 export {};

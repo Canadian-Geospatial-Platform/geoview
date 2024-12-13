@@ -12,7 +12,7 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -95,7 +95,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setMapAttribution(mapId: string, attribution: string[]): void;
     static setMapLoaded(mapId: string, mapLoaded: boolean): void;
     static setMapPointerPosition(mapId: string, pointerPosition: TypeMapMouseInfo): void;
-    static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): Promise<TypeFeatureInfoResultSet>;
+    static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): void;
     static setZoom(mapId: string, zoom: number): void;
     static setIsMouseInsideMap(mapId: string, inside: boolean): void;
     static setRotation(mapId: string, rotation: number): void;

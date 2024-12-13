@@ -104,5 +104,5 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
      * @returns {Promise<Extent | undefined>} The extent of the features, if available.
      */
-    getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined>;
+    getExtentFromFeatures(layerPath: string, objectIds: string[], outfield?: string): Promise<Extent | undefined>;
 }

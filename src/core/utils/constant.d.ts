@@ -18,6 +18,11 @@ export declare const LAYER_STATUS: {
     readonly LOADED: "loaded";
     readonly ERROR: "error";
 };
+export declare const FEATURE_INFO_STATUS: {
+    readonly PROCESSING: "processing";
+    readonly PROCESSED: "processed";
+    readonly ERROR: "error";
+};
 export declare const VECTOR_LAYER: {
     csv: string;
     esriFeature: string;

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { TypeContainerBox } from '@/core/types/global-types';
-interface FocusTrapContainerType {
+interface FocusTrapContainerProps {
     children: ReactNode;
     id: string;
     containerType?: TypeContainerBox;
@@ -12,5 +12,5 @@ interface FocusTrapContainerType {
  * @param {boolean} open enable and disabling of focus trap.
  * @returns {JSX.Element}
  */
-export declare function FocusTrapContainer({ children, open, id, containerType }: FocusTrapContainerType): JSX.Element;
+export declare const FocusTrapContainer: import("react").NamedExoticComponent<FocusTrapContainerProps>;
 export {};

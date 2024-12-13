@@ -34,6 +34,7 @@ import { Notifications } from '@/core/utils/notifications';
  */
 export declare class MapViewer {
     #private;
+    static DEFAULT_STOPS: number;
     mapFeaturesConfig: TypeMapFeaturesConfig;
     mapId: string;
     map: OLMap;
@@ -314,9 +315,10 @@ export declare class MapViewer {
     /**
      * Transforms extent from LngLat to the current projection of the map.
      * @param {Extent} extent - The LngLat extent
+     * @param {number} stops - The number of stops to perform densification on the extent
      * @returns {Extent} The extent in the map projection
      */
-    convertExtentLngLatToMapProj(extent: Extent): Extent;
+    convertExtentLngLatToMapProj(extent: Extent, stops?: number): Extent;
     /**
      * Transforms extent from current projection of the map to LngLat.
      * @param {Extent} extent - The extent in map projection
@@ -341,9 +343,10 @@ export declare class MapViewer {
      * Transforms extent from given projection to the current projection of the map.
      * @param {Extent} extent - The given extent
      * @param {ProjectionLike} fromProj - The projection of the given extent
+     * @param {number} stops - The number of stops to perform densification on the extent
      * @returns {Extent} The extent in the map projection
      */
-    convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike): Extent;
+    convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike, stops?: number): Extent;
     /**
      * Transforms extent from map projection to given projection. If the projects are the same, the extent is simply returned.
      * @param {Extent} extent - The given extent
