@@ -112,7 +112,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       },
       {
         equalityFn: (prev, curr) => {
-          // Quick length checks first (prevents re-render) and calls to to removeHighlight
+          // Quick length checks first (prevents re-render) and calls to removeHighlight
           if (prev === curr) return true;
           if (prev.length !== curr.length) return false;
           if (prev.length === 0) return true;
