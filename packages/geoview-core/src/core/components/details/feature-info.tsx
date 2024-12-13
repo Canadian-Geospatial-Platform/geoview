@@ -171,7 +171,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
   // Effects
   useEffect(() => {
-    logger.logTraceUseEffect('FEATURE-INO - checkedFeatures', checkedFeatures);
+    logger.logTraceUseEffect('FEATURE-INFO - checkedFeatures', checkedFeatures);
 
     if (!featureData?.uid) return;
 
