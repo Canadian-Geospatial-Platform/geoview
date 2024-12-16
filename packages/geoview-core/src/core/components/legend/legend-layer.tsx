@@ -1,93 +1,97 @@
-import { memo, useCallback, useMemo, useState } from 'react';
-import { ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
+import { useCallback, useMemo } from 'react';
+import { useTheme } from '@mui/material';
+import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
-import { useMapStoreActions } from '@/core/stores/';
-import { logger } from '@/core/utils/logger';
+import { useLayerStoreActions, useMapStoreActions } from '@/core/stores/';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '../common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';
 import { CollapsibleContent } from './legend-layer-container';
-
-// Define component types and interfaces
-type LegendLayerType = React.FC<{ layer: TypeLegendLayer }>;
+import { getSxClasses } from './legend-styles';
 
 interface LegendLayerProps {
   layer: TypeLegendLayer;
 }
 
 // Main LegendLayer component
-export const LegendLayer: LegendLayerType = memo(function LegendLayer({ layer }: LegendLayerProps) {
+export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   // Hooks
-  logger.logDebug('legend1 LegendLayerType', layer);
-
-  // const { t } = useTranslation();
-  // const theme = useTheme();
-  // const sxClasses = getSxClasses(theme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   // Stores
   const { initLightBox, LightBoxComponent } = useLightBox();
-  const { getLegendCollapsedFromOrderedLayerInfo, setLegendCollapsed } = useMapStoreActions();
+  const { getLegendCollapsedFromOrderedLayerInfo, getVisibilityFromOrderedLayerInfo, setLegendCollapsed } = useMapStoreActions();
+  const { getLayerStatus } = useLayerStoreActions();
+
+  // const [layerState, setLayerState] = useState(layer);
+  const isCollapsed = getLegendCollapsedFromOrderedLayerInfo(layer.layerPath);
+  const isVisible = getVisibilityFromOrderedLayerInfo(layer.layerPath);
+  const layerStatus = getLayerStatus(layer.layerPath);
+
+  // Create a new layer object with updated status (no useMemo to ensure updates)
+  const currentLayer = { ...layer, layerStatus };
 
   // Memoized values
   const layerChildren = useMemo(
-    () => layer.children?.filter((c) => ['processed', 'loaded'].includes(c.layerStatus ?? '')) ?? [],
-    [layer.children]
+    () => currentLayer.children?.filter((c) => ['processed', 'loaded'].includes(c.layerStatus ?? '')) ?? [],
+    [currentLayer.children]
   );
-
-  const [legendExpanded, setLegendExpanded] = useState(getLegendCollapsedFromOrderedLayerInfo(layer.layerPath));
 
   const handleExpandGroupClick = useCallback(
     (e: React.MouseEvent): void => {
       e.stopPropagation();
-      setLegendCollapsed(layer.layerPath);
-      setLegendExpanded(getLegendCollapsedFromOrderedLayerInfo(layer.layerPath));
+      setLegendCollapsed(layer.layerPath); // store value
     },
     [layer.layerPath, setLegendCollapsed]
   );
 
   return (
     <>
-      <ListItem key={layer.layerName} divider onClick={handleExpandGroupClick}>
-        <LayerIcon layer={layer} />
-        <>
-          <Tooltip title={layer.layerName} placement="top">
-            <ListItemText
-              sx={{
-                '&:hover': {
-                  cursor: 'pointer',
-                },
-              }}
-              primary={layer.layerName}
-              className="layerTitle"
-              disableTypography
-              secondary={
-                <SecondaryControls
-                  layer={layer}
-                  layerStatus={layer.layerStatus || 'error'}
-                  itemsLength={layer.items ? layer.items.length : 0}
-                  childLayers={layerChildren}
-                />
-              }
-            />
-          </Tooltip>
-          {!!(layer.children?.length > 1 || layer.items?.length > 1) && (
-            <IconButton sx={{ marginBottom: '20px' }} className="buttonOutline" edge="end" size="small" tooltip="layers.toggleCollapse">
-              {legendExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-            </IconButton>
-          )}
-        </>
-      </ListItem>
-      <CollapsibleContent
-        layer={layer}
-        legendExpanded={legendExpanded}
-        initLightBox={initLightBox}
-        childLayers={layerChildren}
-        items={layer.items}
-        LegendLayerComponent={LegendLayer}
-      />
-      {LightBoxComponent}
+      <Box sx={sxClasses.legendLayerListItem}>
+        <ListItem key={layer.layerName} divider onClick={handleExpandGroupClick}>
+          <LayerIcon layer={currentLayer} />
+          <>
+            <Tooltip title={layer.layerName} placement="top">
+              <ListItemText
+                sx={{
+                  '&:hover': {
+                    cursor: 'pointer',
+                  },
+                }}
+                primary={layer.layerName}
+                className="layerTitle"
+                disableTypography
+                secondary={
+                  <SecondaryControls
+                    layer={currentLayer}
+                    layerStatus={layer.layerStatus || 'error'}
+                    itemsLength={layer.items ? layer.items.length : 0}
+                    childLayers={layerChildren}
+                    visibility={isVisible}
+                  />
+                }
+              />
+            </Tooltip>
+            {!!(layer.children?.length > 1 || layer.items?.length > 1) && (
+              <IconButton sx={{ marginBottom: '20px' }} className="buttonOutline" edge="end" size="small" tooltip="layers.toggleCollapse">
+                {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+              </IconButton>
+            )}
+          </>
+        </ListItem>
+        <CollapsibleContent
+          layer={currentLayer}
+          legendExpanded={!isCollapsed}
+          initLightBox={initLightBox}
+          childLayers={layerChildren}
+          items={layer.items}
+          LegendLayerComponent={LegendLayer}
+        />
+      </Box>
+      <LightBoxComponent />
     </>
   );
-});
+}
 
 export default LegendLayer;

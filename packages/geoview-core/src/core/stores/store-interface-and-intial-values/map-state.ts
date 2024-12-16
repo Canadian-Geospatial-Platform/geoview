@@ -811,14 +811,29 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        * @param {boolean} collapsed - Flag indicating if the layer should be hoverable.
        */
       setLegendCollapsed: (layerPath: string, collapsed?: boolean): void => {
-        const curLayerInfo = get().mapState.orderedLayerInfo;
-        const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
-        if (layerInfo) {
-          const newCollapsed = collapsed || !layerInfo.legendCollapsed;
-          layerInfo.legendCollapsed = newCollapsed;
+        // const curLayerInfo = get().mapState.orderedLayerInfo;
+        // const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
+        // if (layerInfo) {
+        //   const newCollapsed = collapsed || !layerInfo.legendCollapsed;
+        //   layerInfo.legendCollapsed = newCollapsed;
 
-          // Redirect
-          get().mapState.setterActions.setOrderedLayerInfo(curLayerInfo);
+        //   // Redirect
+        //   get().mapState.setterActions.setOrderedLayerInfo(curLayerInfo);
+        // }
+
+        const curLayerInfo = get().mapState.orderedLayerInfo;
+        const layerIndex = curLayerInfo.findIndex((info) => info.layerPath === layerPath);
+
+        if (layerIndex !== -1) {
+          // Create shallow copy of array
+          const newLayerInfo = curLayerInfo.slice();
+          // Only create new object for the changed layer
+          newLayerInfo[layerIndex] = {
+            ...curLayerInfo[layerIndex],
+            legendCollapsed: collapsed ?? !curLayerInfo[layerIndex].legendCollapsed,
+          };
+
+          get().mapState.setterActions.setOrderedLayerInfo(newLayerInfo);
         }
       },
 

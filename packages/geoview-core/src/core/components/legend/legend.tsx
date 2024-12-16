@@ -80,7 +80,6 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LEGEND - visibleLayers', orderedLayerInfo.length, orderedLayerInfo);
-
     setLegendLayers(layersList);
     updateLegendLayerListByWindowSize(layersList);
 

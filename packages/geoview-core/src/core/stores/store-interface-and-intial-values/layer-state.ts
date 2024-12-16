@@ -11,6 +11,7 @@ import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import {
   layerEntryIsEsriDynamic,
   TypeFeatureInfoEntryPartial,
+  TypeLayerStatus,
   TypeLayerStyleConfig,
   TypeResultSet,
   TypeResultSetEntry,
@@ -42,6 +43,7 @@ export interface ILayerState {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
     getLayerDeleteInProgress: () => boolean;
+    getLayerStatus: (layerPath: string) => TypeLayerStatus;
     refreshLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -153,6 +155,16 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * Get the LayerDeleteInProgress state.
        */
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
+
+      /**
+       * Gets the layer status in the store which correspond to the layer path
+       * @param {string} layerPath - The layer path of the bounds to get
+       * @returns {TypeLayerStatus | undefined} The status or undefined
+       */
+      getLayerStatus: (layerPath: string): TypeLayerStatus | undefined => {
+        const curLayers = get().layerState.legendLayers;
+        return LegendEventProcessor.findLayerByPath(curLayers, layerPath)!.layerStatus;
+      },
 
       /**
        * Refresh layer and set states to original values.
