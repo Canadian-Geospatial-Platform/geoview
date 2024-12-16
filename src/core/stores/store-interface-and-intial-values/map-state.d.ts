@@ -9,7 +9,7 @@ import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { TypePointMarker } from '@/api/config/types/map-schema-types';
-import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from './feature-info-state';
+import { TypeHoverFeatureInfo } from './feature-info-state';
 type MapActions = IMapState['actions'];
 export interface IMapState {
     attribution: string[];
@@ -69,7 +69,7 @@ export interface IMapState {
         zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]) => Promise<void>;
         zoomToMyLocation: (position: GeolocationPosition) => Promise<void>;
         transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
-        setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => Promise<TypeFeatureInfoResultSet>;
+        setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => void;
         setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions) => void;
         setFixNorth: (ifFix: boolean) => void;
         setOverlayClickMarkerRef: (htmlRef: HTMLElement) => void;

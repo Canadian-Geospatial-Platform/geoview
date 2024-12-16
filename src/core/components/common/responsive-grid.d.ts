@@ -6,7 +6,7 @@ interface ResponsiveGridProps extends GridProps {
 interface ResponsiveGridPanelProps extends GridProps {
     children: ReactNode;
     isRightPanelVisible: boolean;
-    sxProps?: SxProps | undefined;
+    sxProps?: SxProps;
     isEnlarged: boolean;
     fullWidth?: boolean;
     className?: string;

@@ -1,9 +1,9 @@
-import { DialogProps } from '@mui/material';
 import { ReactNode } from 'react';
+import { DialogProps } from '@mui/material';
 interface FullScreenDialogProps extends DialogProps {
     open: boolean;
     onClose: () => void;
     children: ReactNode;
 }
-declare function FullScreenDialog({ open, onClose, children }: FullScreenDialogProps): JSX.Element;
-export default FullScreenDialog;
+export declare const FullScreenDialog: import("react").NamedExoticComponent<FullScreenDialogProps>;
+export {};

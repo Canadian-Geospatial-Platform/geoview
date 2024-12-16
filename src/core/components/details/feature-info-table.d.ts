@@ -2,11 +2,19 @@ import { TypeFieldEntry } from '@/geo/map/map-schema-types';
 interface FeatureInfoTableProps {
     featureInfoList: TypeFieldEntry[];
 }
-/**
- * Feature info table that creates a table keys/values of the given feature info
- *
- * @param {FeatureInfoTableProps} Feature info table properties
- * @returns {JSX.Element} the layers list
- */
-export declare function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JSX.Element;
+interface FeatureItemProps {
+    item: string;
+    alias: string;
+    index: number;
+    featureInfoItem: TypeFieldEntry;
+    onInitLightBox: (value: string, alias: string, index: number) => void;
+}
+interface FeatureRowProps {
+    featureInfoItem: TypeFieldEntry;
+    index: number;
+    onInitLightBox: (value: string, alias: string, index: number) => void;
+}
+export declare const FeatureItem: import("react").NamedExoticComponent<FeatureItemProps>;
+export declare const FeatureRow: import("react").NamedExoticComponent<FeatureRowProps>;
+export declare const FeatureInfoTable: import("react").NamedExoticComponent<FeatureInfoTableProps>;
 export {};
