@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Box, ListItem, Tooltip, ListItemText, ListItemIcon, List, BrowserNotSupportedIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
@@ -15,22 +15,21 @@ export const ItemsList = memo(function ItemsList({ items }: ItemsListProps) {
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   if (!items?.length) {
     return null;
   }
 
-  return (
-    <List sx={sxClasses.subList}>
-      {items.map((item, index) => (
-        <ListItem key={`${item.icon}/${item.name}/${index}`} className={!item.isVisible ? 'unchecked' : 'checked'}>
-          <ListItemIcon>{item.icon ? <Box component="img" alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>
-          <Tooltip title={item.name} placement="top" enterDelay={1000}>
-            <ListItemText primary={item.name} />
-          </Tooltip>
-        </ListItem>
-      ))}
-    </List>
-  );
+  // Direct mapping since we only reach this code if items has content
+  const listItems = items.map((item) => (
+    <ListItem key={`${item.icon}-${item.name}`} className={!item.isVisible ? 'unchecked' : 'checked'}>
+      <ListItemIcon>{item.icon ? <Box component="img" alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>
+      <Tooltip title={item.name} placement="top" enterDelay={1000}>
+        <ListItemText primary={item.name} />
+      </Tooltip>
+    </ListItem>
+  ));
+
+  return <List sx={sxClasses.subList}>{listItems}</List>;
 });

@@ -32,6 +32,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // If it is a WMS and there is a legend image, add it with the lightbox handlers
   if (layer.type === CV_CONST_LAYER_TYPES.WMS && layer.icons.length && layer.icons[0].iconImage && layer.icons[0].iconImage !== 'no data') {
     const imgSrc = layer.icons[0].iconImage;
     return (
@@ -48,11 +49,14 @@ export const CollapsibleContent = memo(function CollapsibleContent({
     );
   }
 
-  // if (!(childLayers?.length > 1 || items?.length > 1)) {
-  //   return null;
-  // }
+  // If there is only one item or no childlayer, do not create the component
+  if (childLayers?.length === 0 && items?.length === 1) {
+    return null;
+  }
 
-  // TODO: childslayers always empty... seems to be use for items
+  if (layer.children?.length > 0) layer.children.every((item) => logger.logDebug('TTT item', item.layerPath));
+
+  // Render list of items (layer class) or there is a child layer so render a new legend-layer component
   return (
     <Collapse in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
       {layer.children?.length > 0 && (

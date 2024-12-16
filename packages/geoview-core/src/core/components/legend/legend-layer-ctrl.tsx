@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material';
-import { memo, useCallback, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -23,30 +23,29 @@ interface SecondaryControlsProps {
   layerStatus: string;
   itemsLength: number;
   childLayers: TypeLegendLayer[];
+  visibility: boolean;
 }
 
 // SecondaryControls component
-export const SecondaryControls = memo(function SecondaryControls({ layer, layerStatus, itemsLength, childLayers }: SecondaryControlsProps) {
-  logger.logDebug('legend1 - ctrl', layer, layerStatus, itemsLength, childLayers);
+export function SecondaryControls({ layer, layerStatus, itemsLength, childLayers, visibility }: SecondaryControlsProps): JSX.Element {
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Stores
   const highlightedLayer = useLayerHighlightedLayer();
-  const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
+  const { setOrToggleLayerVisibility } = useMapStoreActions();
   const { setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
 
-  const [visibility, setVisibility] = useState(getVisibilityFromOrderedLayerInfo(layer.layerPath));
+  // Is button disabled?
   const isLayerVisible = layer.controls?.visibility ?? false;
 
-  // #region Handlers
+  // #region Handlers Callbacks
   const handleToggleVisibility = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>): void => {
       e.stopPropagation();
       setOrToggleLayerVisibility(layer.layerPath);
-      setVisibility(getVisibilityFromOrderedLayerInfo(layer.layerPath));
     },
     [layer.layerPath, setOrToggleLayerVisibility]
   );
@@ -74,6 +73,7 @@ export const SecondaryControls = memo(function SecondaryControls({ layer, layerS
     return <Box />;
   }
 
+  // Calculate subtitle after the condition
   let subTitle = '';
   if (childLayers.length) {
     subTitle = t('legend.subLayersCount').replace('{count}', childLayers.length.toString());
@@ -84,7 +84,7 @@ export const SecondaryControls = memo(function SecondaryControls({ layer, layerS
   return (
     <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
       {!!subTitle.length && <Typography fontSize={14}>{subTitle}</Typography>}
-      <Box>
+      <Box sx={sxClasses.subtitle}>
         <IconButton
           edge="end"
           tooltip="layers.toggleVisibility"
@@ -92,7 +92,7 @@ export const SecondaryControls = memo(function SecondaryControls({ layer, layerS
           onClick={handleToggleVisibility}
           disabled={!isLayerVisible}
         >
-          {visibility ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+          {visibility ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
         </IconButton>
         <IconButton
           tooltip="legend.highlightLayer"
@@ -108,4 +108,4 @@ export const SecondaryControls = memo(function SecondaryControls({ layer, layerS
       </Box>
     </Stack>
   );
-});
+}
