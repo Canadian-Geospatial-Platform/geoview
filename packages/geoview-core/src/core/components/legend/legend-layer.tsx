@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { memo, useCallback } from 'react';
 import { useTheme } from '@mui/material';
 import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
@@ -13,6 +13,37 @@ interface LegendLayerProps {
   layer: TypeLegendLayer;
 }
 
+interface LegendLayerHeaderProps {
+  layer: TypeLegendLayer;
+  isCollapsed: boolean;
+  isVisible: boolean;
+  onExpandClick: (e: React.MouseEvent) => void;
+}
+
+// Extracted Header Component
+const LegendLayerHeader = memo(
+  ({ layer, isCollapsed, isVisible, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
+    <ListItem key={layer.layerName} divider onClick={onExpandClick}>
+      <LayerIcon layer={layer} />
+      <Tooltip title={layer.layerName} placement="top">
+        <ListItemText
+          sx={{ '&:hover': { cursor: 'pointer' } }}
+          primary={layer.layerName}
+          className="layerTitle"
+          disableTypography
+          secondary={<SecondaryControls layer={layer} visibility={isVisible} />}
+        />
+      </Tooltip>
+      {(layer.children?.length > 1 || layer.items?.length > 1) && (
+        <IconButton className="buttonOutline" edge="end" size="small" tooltip="layers.toggleCollapse">
+          {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+        </IconButton>
+      )}
+    </ListItem>
+  )
+);
+LegendLayerHeader.displayName = 'LegendLayerHeader';
+
 // Main LegendLayer component
 export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   // Hooks
@@ -23,20 +54,18 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { getLegendCollapsedFromOrderedLayerInfo, getVisibilityFromOrderedLayerInfo, setLegendCollapsed } = useMapStoreActions();
   const { getLayerStatus } = useLayerStoreActions();
-
-  // const [layerState, setLayerState] = useState(layer);
   const isCollapsed = getLegendCollapsedFromOrderedLayerInfo(layer.layerPath);
   const isVisible = getVisibilityFromOrderedLayerInfo(layer.layerPath);
   const layerStatus = getLayerStatus(layer.layerPath);
 
   // Create a new layer object with updated status (no useMemo to ensure updates)
-  const currentLayer = { ...layer, layerStatus };
-
-  // Memoized values
-  const layerChildren = useMemo(
-    () => currentLayer.children?.filter((c) => ['processed', 'loaded'].includes(c.layerStatus ?? '')) ?? [],
-    [currentLayer.children]
-  );
+  const currentLayer = {
+    ...layer,
+    layerStatus,
+    items: layer.items?.map((item) => ({
+      ...item,
+    })),
+  };
 
   const handleExpandGroupClick = useCallback(
     (e: React.MouseEvent): void => {
@@ -49,43 +78,11 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   return (
     <>
       <Box sx={sxClasses.legendLayerListItem}>
-        <ListItem key={layer.layerName} divider onClick={handleExpandGroupClick}>
-          <LayerIcon layer={currentLayer} />
-          <>
-            <Tooltip title={layer.layerName} placement="top">
-              <ListItemText
-                sx={{
-                  '&:hover': {
-                    cursor: 'pointer',
-                  },
-                }}
-                primary={layer.layerName}
-                className="layerTitle"
-                disableTypography
-                secondary={
-                  <SecondaryControls
-                    layer={currentLayer}
-                    layerStatus={layer.layerStatus || 'error'}
-                    itemsLength={layer.items ? layer.items.length : 0}
-                    childLayers={layerChildren}
-                    visibility={isVisible}
-                  />
-                }
-              />
-            </Tooltip>
-            {!!(layer.children?.length > 1 || layer.items?.length > 1) && (
-              <IconButton sx={{ marginBottom: '20px' }} className="buttonOutline" edge="end" size="small" tooltip="layers.toggleCollapse">
-                {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-              </IconButton>
-            )}
-          </>
-        </ListItem>
+        <LegendLayerHeader layer={currentLayer} isCollapsed={isCollapsed} isVisible={isVisible} onExpandClick={handleExpandGroupClick} />
         <CollapsibleContent
           layer={currentLayer}
           legendExpanded={!isCollapsed}
           initLightBox={initLightBox}
-          childLayers={layerChildren}
-          items={layer.items}
           LegendLayerComponent={LegendLayer}
         />
       </Box>
