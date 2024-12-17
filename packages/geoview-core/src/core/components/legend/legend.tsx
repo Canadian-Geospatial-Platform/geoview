@@ -19,7 +19,6 @@ interface LegendType {
 }
 
 export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): JSX.Element {
-  // Log
   logger.logTraceRender('components/legend/legend');
 
   const mapId = useGeoViewMapId();

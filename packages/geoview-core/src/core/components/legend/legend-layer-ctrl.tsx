@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -13,72 +13,89 @@ import {
   HighlightIcon,
 } from '@/ui';
 import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TypeLegendLayer } from '@/core/components/layers/types';
+import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import { useMapStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 
 interface SecondaryControlsProps {
   layer: TypeLegendLayer;
-  layerStatus: string;
-  itemsLength: number;
-  childLayers: TypeLegendLayer[];
-  visibility: boolean;
+  visibility: boolean; // Visibility come from store ordered layer info array
 }
 
-// SecondaryControls component
-export function SecondaryControls({ layer, layerStatus, itemsLength, childLayers, visibility }: SecondaryControlsProps): JSX.Element {
+type ControlActions = {
+  handleToggleVisibility: (e: React.MouseEvent) => void;
+  handleHighlightLayer: (e: React.MouseEvent) => void;
+  handleZoomTo: (e: React.MouseEvent) => void;
+};
+
+// Custom hook for control actions
+const useControlActions = (layerPath: string): ControlActions => {
+  const { setOrToggleLayerVisibility } = useMapStoreActions();
+  const { setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
+
+  return useMemo(
+    () => ({
+      handleToggleVisibility: (e: React.MouseEvent): void => {
+        e.stopPropagation();
+        setOrToggleLayerVisibility(layerPath);
+      },
+      handleHighlightLayer: (e: React.MouseEvent): void => {
+        e.stopPropagation();
+        setHighlightLayer(layerPath);
+      },
+      handleZoomTo: (e: React.MouseEvent): void => {
+        e.stopPropagation();
+        zoomToLayerExtent(layerPath).catch((error) => {
+          logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
+        });
+      },
+    }),
+    [layerPath, setHighlightLayer, setOrToggleLayerVisibility, zoomToLayerExtent]
+  );
+};
+
+// Create subtitle
+const useSubtitle = (children: TypeLegendLayer[], items: TypeLegendItem[]): string => {
   // Hooks
   const { t } = useTranslation();
+
+  return useMemo(() => {
+    if (children.length) {
+      return t('legend.subLayersCount').replace('{count}', children.length.toString());
+    }
+    if (items.length > 1) {
+      return t('legend.itemsCount')
+        .replace('{count}', items.filter((item) => item.isVisible).length.toString())
+        .replace('{totalCount}', items.length.toString());
+    }
+    return '';
+  }, [children.length, items, t]);
+};
+
+// SecondaryControls component
+export function SecondaryControls({ layer, visibility }: SecondaryControlsProps): JSX.Element {
+  logger.logTraceRender('components/legend/legend-layer-ctrl');
+
+  // Hooks
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Stores
   const highlightedLayer = useLayerHighlightedLayer();
-  const { setOrToggleLayerVisibility } = useMapStoreActions();
-  const { setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
 
   // Is button disabled?
   const isLayerVisible = layer.controls?.visibility ?? false;
 
-  // #region Handlers Callbacks
-  const handleToggleVisibility = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>): void => {
-      e.stopPropagation();
-      setOrToggleLayerVisibility(layer.layerPath);
-    },
-    [layer.layerPath, setOrToggleLayerVisibility]
-  );
+  // Extract constant from layer prop
+  const { layerStatus, items, children } = layer;
 
-  const handleHighlightLayer = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>): void => {
-      e.stopPropagation();
-      setHighlightLayer(layer.layerPath);
-    },
-    [layer.layerPath, setHighlightLayer]
-  );
+  // Component helper
+  const controls = useControlActions(layer.layerPath);
+  const subTitle = useSubtitle(children, items);
 
-  const handleZoomTo = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>): void => {
-      e.stopPropagation();
-      zoomToLayerExtent(layer.layerPath).catch((error) => {
-        logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
-      });
-    },
-    [layer.layerPath, zoomToLayerExtent]
-  );
-  // #endregion Handlers
-
-  if (!['processed', 'loaded'].includes(layerStatus)) {
+  if (!['processed', 'loaded'].includes(layerStatus || 'error')) {
     return <Box />;
-  }
-
-  // Calculate subtitle after the condition
-  let subTitle = '';
-  if (childLayers.length) {
-    subTitle = t('legend.subLayersCount').replace('{count}', childLayers.length.toString());
-  } else if (itemsLength > 1) {
-    subTitle = t('legend.itemsCount').replace('{count}', itemsLength.toString()).replace('{totalCount}', itemsLength.toString());
   }
 
   return (
@@ -89,7 +106,7 @@ export function SecondaryControls({ layer, layerStatus, itemsLength, childLayers
           edge="end"
           tooltip="layers.toggleVisibility"
           className="buttonOutline"
-          onClick={handleToggleVisibility}
+          onClick={controls.handleToggleVisibility}
           disabled={!isLayerVisible}
         >
           {visibility ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
@@ -98,11 +115,11 @@ export function SecondaryControls({ layer, layerStatus, itemsLength, childLayers
           tooltip="legend.highlightLayer"
           sx={{ marginTop: '-0.3125rem' }}
           className="buttonOutline"
-          onClick={handleHighlightLayer}
+          onClick={controls.handleHighlightLayer}
         >
           {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
-        <IconButton tooltip="legend.zoomTo" className="buttonOutline" onClick={handleZoomTo}>
+        <IconButton tooltip="legend.zoomTo" className="buttonOutline" onClick={controls.handleZoomTo}>
           <ZoomInSearchIcon />
         </IconButton>
       </Box>
