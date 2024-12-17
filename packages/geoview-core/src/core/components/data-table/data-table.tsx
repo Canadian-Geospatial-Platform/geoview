@@ -103,6 +103,15 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
   const { enableFocusTrap } = useUIStoreActions();
 
+  const handleDensityChange = (newDensity) => {
+    setDensity(newDensity);
+  };
+
+  const handleToggleColumnFilters = () => {
+    setShowColumnFilters((prev) => !prev);
+    setColumnsFiltersVisibility(false, layerPath);
+  };
+
   /**
    * Create table header cell
    * @param {string} header value to be displayed in cell
@@ -403,11 +412,9 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     columns,
     data: rows,
     enableDensityToggle: true,
-    onDensityChange: setDensity,
-    onShowColumnFiltersChange: () => {
-      setShowColumnFilters(!showColumnFilters);
-      setColumnsFiltersVisibility(false, layerPath);
-    },
+    onDensityChange: handleDensityChange,
+    onShowColumnFiltersChange: handleToggleColumnFilters,
+
     // NOTE: showGlobalFilter as true when layer change and we want to show global filter by default
     initialState: {
       showColumnFilters: datatableSettings[layerPath].columnsFiltersVisibility,
