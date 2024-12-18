@@ -23,6 +23,7 @@ import {
   type MRT_ColumnFiltersState as MRTColumnFiltersState,
   type MRT_DensityState as MRTDensityState,
   type MRT_ColumnVirtualizer as MRTColumnVirtualizer,
+  type MRT_TableInstance as MRTTableInstance,
   Box,
   Button,
   IconButton,
@@ -400,8 +401,27 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.features, handleZoomIn]);
 
+  let useTable: MRTTableInstance<ColumnsType>;
+
+  const renderTopToolbar = useCallback(
+    ({ table }) => (
+      <TopToolbar
+        table={table}
+        sxClasses={sxClasses}
+        datatableSettings={datatableSettings}
+        layerPath={layerPath}
+        t={t}
+        globalFilter={globalFilter}
+        useTable={useTable}
+        columns={columns}
+        data={data}
+      />
+    ),
+    [datatableSettings, layerPath, globalFilter, columns, data] // Include dependencies
+  );
+
   // Create the Material React Table
-  const useTable = useMaterialReactTable({
+  useTable = useMaterialReactTable({
     columns,
     data: rows,
     enableDensityToggle: true,
@@ -430,20 +450,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     onGlobalFilterChange: setGlobalFilter,
     enableBottomToolbar: false,
     positionToolbarAlertBanner: 'none', // hide existing row count
-    renderTopToolbar: ({ table }) => (
-      <TopToolbar
-        table={table}
-        sxClasses={sxClasses}
-        datatableSettings={datatableSettings}
-        layerPath={layerPath}
-        t={t}
-        globalFilter={globalFilter}
-        useTable={useTable}
-        columns={columns}
-        data={data}
-      />
-    ),
-
+    renderTopToolbar,
     enableFilterMatchHighlighting: true,
     enableColumnResizing: true,
     enableColumnVirtualization: true,
