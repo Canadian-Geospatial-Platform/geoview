@@ -1,41 +1,190 @@
 {
   "map": {
-    "interaction": "dynamic",
-    "viewSettings": {
-      "projection": 3978
-    },
-    "basemapOptions": {
-      "basemapId": "transport",
-      "shaded": true,
-      "labeled": false
-    },
-    "listOfGeoviewLayerConfig": [
-      {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"
+      "interaction": "dynamic",
+      "viewSettings": {
+          "projection": 3978
       },
-      {
-        "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",
-        "geoviewLayerType": "geoCore"
-      }
+      "basemapOptions": {
+          "basemapId": "transport",
+          "shaded": true,
+          "labeled": false
+      },
+      "listOfGeoviewLayerConfig": [
+        {
+            "geoviewLayerType": "geoCore",
+            "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": 0,
+                "layerName": "Airborne Radioactivity - Main Group",
+                "listOfLayerEntryConfig": [
+                  {
+                    "layerId": 1,
+                    "layerName":"Airborne Radioactivity - Feature Layer",
+                    "initialSettings": {
+                      "states": {
+                        "visible": false
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+        },
+        {
+            "geoviewLayerType": "geoCore",
+            "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": 0,
+                "layerStyle": {
+                  "Point": {
+                      "type": "uniqueValue",
+                      "hasDefault": false,
+                      "fields": [
+                          "SYMBOL_EN"
+                      ],
+                      "info": [
+                          {
+                              "label": "Confederation to 1914",
+                              "visible": true,
+                              "values": [
+                                  "Confederation to 1914"
+                              ],
+                              "settings": {
+                                  "type": "iconSymbol",
+                                  "mimeType": "image/png",
+                                  "src": "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAahJREFUKJGd0ksoRFEcBvDvjMvci3E9GkxMxttYIIQo8igWHkmsRikLoSxlbSVZjKasyIIFmhQa5JmFZOGxMHYjeSQLxsw05ozhHgtcMWYWvjqbU7/zP9/pcPhnuN8blDqiGSONBCQHYG8gOPV62ZooijQgpB5XtySxsZvLu+j72weEcApoUzVQJ8TeejyuHkFQWfwgpc6BpwfH+PToCs4Xrn/com6oIKm1q26ZUmc7z0ctypBSZ7qX+sZMg3O42nn067M1cgoffVUYBpomKXXs8rxo5wCAMfQc7VtD/0Jf2TOeoaq5OEabmmgAYOIAgABlZ4e2wE/4GZv1ClqdpkyGAAl/dtGg6KPSCwAWLndkgE2bpS6y4joojE+KAwi5kCEBzKXVeR3rw8cBkSqbhz4/DYzBLEMlH2lOTtHsd07UVsz0bfuhsIQQ9BvbwAv8vCCoDr4nEsJe3O62yoaSVY0lvnB36QjWzUsoxVAU1megpqUU6sTYDUlSdH8dJn+AsIiIe8bs5Zm5ut5Mvc6AIegBvAE4AcGUUhk5SwiR/ODH5BgvAOPnCpp3ofqRTtNnzMYAAAAASUVORK5CYII=",
+                                  "rotation": 0,
+                                  "opacity": 1,
+                                  "offset": [
+                                      0,
+                                      0
+                                  ]
+                              }
+                          },
+                          {
+                              "label": "First World War",
+                              "visible": false,
+                              "values": [
+                                  "First World War"
+                              ],
+                              "settings": {
+                                  "type": "iconSymbol",
+                                  "mimeType": "image/png",
+                                  "src": "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAZ5JREFUKJGd0ssvA1EUBvDvjqmZelUH7UwkbZQFQSKqImw8dtLEomFlZ9HY+EssiC07G1IWBInEYyMWgiZeG7owI6lE23REemdavRZqhCqJLzmbm/zuOefm8vhn+O8HlKZrGSNBAtIKsFcQRA2D7TgcDloS0szzFMuz2Xg8XvuUSILjOCiyDElyPmQyz2G7vXqrCFKqz+hpfX5jcweapn2Zoqurs3FkeGiDUn1cFGvWLUip3mwY2dmV1TUkEsmifaLRC+SyOS4YHF2kNH0gio4UDwCMIXx9fWP7CX3k8uoG/p5up6K4JwEs8ABAgL6721jpJyzk/l6FIst9FgRIhWGaf0LTNAGwCmtHBty5XPV+VdV+hXV1EkBIzIIEiHR0tE+cnkZLIkEQ4PM1gTFELCiIVRFFlo9GhgcH9vYPi5DNxiMUGoMgiCt2e/XxZ0dCmPnyEgoE/Nsud0P3yckZVFUDz5ehpcWH3t4AJMm5m89zUx+XWR+gvLLykbFUv9frmfZ6PJMA2gC8AjgHwZIgVC0TQvJF8L2z0wAwV6hf8waIeZGd6U5WcwAAAABJRU5ErkJggg==",
+                                  "rotation": 0,
+                                  "opacity": 1,
+                                  "offset": [
+                                      0,
+                                      0
+                                  ]
+                              }
+                          },
+                          {
+                              "label": "Second World War",
+                              "visible": true,
+                              "values": [
+                                  "Second World War"
+                              ],
+                              "settings": {
+                                  "type": "iconSymbol",
+                                  "mimeType": "image/png",
+                                  "src": "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAZ5JREFUKJGd0EsoRFEYB/D/GZe511zzyhhiMTMiQxI2YsPKMylRSkqKlFhpSspGSRSSjcdOpAalPGJhpUkWrFiI2RiSzDTX454rc48FrhiP8q9TX6d+fQ8O/wz39YPSsJkxUkNAsgAWAcGRorBNk8lEf4RUvmtjqjoa8vvN94FL6LgYmF0uiHZ7QJbvOgQhYT0KUip1y7fBicOhEUgzC5+mSBnuT81pbVmjVGrgeeOKBimV0p+pMnrQ68Hj8nbUPleeQahU0eX3dM1SGt7leVOIAwDG0HGx54v9Dr3nemAEwdpqi9XlaAYwyQEAAYpufPs/n/AtweMTWJ3OIg0CJP5ZCv8JI7IMgMVrOzLgTMzKLPyLGtJSAULONUgAb1pZaWPgF8QV5iApLxeMwatBPS96LQ7nXsbidMlpU3sUinHYkDc1hljBsCQICb6PjoSwp4eH+vTK8g2jb6vAv7oGaWMHxGpEYlUFXHW1EJPt26qqa9MmeC/iDIZrxkLFtmx3p83tbkafxw0gAuAQBHN6vThPCFGj4GtniwJg/O39mhf/K5CfkLtGyAAAAABJRU5ErkJggg==",
+                                  "rotation": 0,
+                                  "opacity": 1,
+                                  "offset": [
+                                      0,
+                                      0
+                                  ]
+                              }
+                          },
+                          {
+                              "label": "Korean War",
+                              "visible": false,
+                              "values": [
+                                  "Korean War"
+                              ],
+                              "settings": {
+                                  "type": "iconSymbol",
+                                  "mimeType": "image/png",
+                                  "src": "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAYtJREFUKJGdz79rU2EUxvHvSa+5N2libixtwEpTEYkZjKBLsItQapfiInYKXTIEQd0U/AdcTKG2a91cxCCoVEEonSTiYkEIVKiIYCQdDEkoeW+09zioVzTGgg+8cHjhc35Y/GesPz+MabmqMifICdA9hE3P02eJRMIMhKbbKeL7Zdl572qzDkNDMHoU20197HY7pUgkvtYHjWlfo/P5jr++CI0Hv6+RuT4uUwuPjWlfcpyDDwNoTPsYPa/sr92E1kbfPbp1G756IZm+smpMa8NxEk0LQJUSb6sH/oYCvL0MJ+eSkkoXgBULQCCvH14NREHqNRibzAcQJKq99v7wiwE0GtyosC0jx89oYx/oHgaRdwEUqGjm3Dy1W4ORnYF0DlUqAbSdWMUbnXxBfmVKX17tR9YhZKYM4ej9SCRe/TVRRHu7uxf93OxTRh6d1jdP4NM6WHFk4jycugBu6rnvh4pBr59FeHi4odo86x3JXpbxbAFuZIE94DXCXduO3RMRvw9+n5z0gKUf75/5BuXZh6Fohy1dAAAAAElFTkSuQmCC",
+                                  "rotation": 0,
+                                  "opacity": 1,
+                                  "offset": [
+                                      0,
+                                      0
+                                  ]
+                              }
+                          },
+                          {
+                              "label": "Peacekeeping",
+                              "visible": true,
+                              "values": [
+                                  "Peacekeeping"
+                              ],
+                              "settings": {
+                                  "type": "iconSymbol",
+                                  "mimeType": "image/png",
+                                  "src": "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAatJREFUKJGd0jFoE1Ecx/HvP7kmd03iJSElwaLYq4OpRSQKFgUFt0IpFNGpkx2Ki1hcHNxdCio6OOjmoBAiiFZwEYTSrRYpioNBtLYErUlzxHuJ5p6D7YnGVPAH/+XB5/3//8cz+M8Yfx4otZHUWsYE2Qe6jbDUbOontm2rrlB57pTv69l3lVpyZb1BOCwMZm1yqfhHz3OnLSvxuAMqVT+/Xv96/crcMjfX3N+muDqc7T97Iv9Qqfpp09xRCqBS9UHVas9eLC1xr+p17DOzXKH5zQ9dGD1wW6mNZ6ZpVw0ArZmef73a8ze0lUtvPjFeqKWcnD0J3DAABEYWyp+7P+FmXn34gpNNjgQQpLfW+v5P6LXagO4NdtTwNp+JH2LV3Rb2p2MgUg6gQPHk/p1neLnWFR2JGBx0+tCaYgCjZrw4kGX+wXHn2MTzcgfaGw5xa3wYK9Jz37ISC786iuhWo3FqtDAwt9iXKJQW3/NoxSVtCGNOmonDe8ilYk99PzS1dVnwASKxWEXr6tGh3ZlzQ7syk5chD7SBFwh3otH4XRHxO+DPzqkmcG2zts0PBFWRZ33W55YAAAAASUVORK5CYII=",
+                                  "rotation": 0,
+                                  "opacity": 1,
+                                  "offset": [
+                                      0,
+                                      0
+                                  ]
+                              }
+                          },
+                          {
+                              "label": "Afghanistan",
+                              "visible": false,
+                              "values": [
+                                  "Afghanistan"
+                              ],
+                              "settings": {
+                                  "type": "iconSymbol",
+                                  "mimeType": "image/png",
+                                  "src": "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAadJREFUKJGd0ksoRFEYB/D/MZe5dzzGlccUxjOZsRksyLBRkkghVlZmISWRzSzsWShkFhQ7CzKNyCsbG1KTmBSJvMpzYYaZpjl35B4L44oxlH99m1O/833f6XD4Z7jvB5Q+JzJGGghIIcBeQeCSJLam1WppREgDPossy8OXD1eJ1+57qFQq5KVmQyem3AQCvk5BiF8Jg5R6ex59nrHB9UnY7pxfphgpak7vqGpbotTbyvMJDgVS6s2jweBw/+IQZt2nYfv0HTogvUhRvbWWKUqfN3le6+EAgDF0bh87o39CH7GerKDRVCPm6jLbAYxzAECA8p0LV+QnDOXo5gS5afpyBQJE8/Ti/xMGghQA0yg7MuDMkJxVilvnrzBd1AGEnCuQAPZqg7kNB/MRUZlahCnHCMZgV6Caj7PnpOq3Fyq7zU1btjCUz/GYqLdCiNHMCUL8zmdHQljQ72+pK65e3UvOKHG4NrB8u4skjkdDthlNJbXQiSkbshxl+bhM+QAxsbEPjHkqjPqCLmNmQfsAYADwCmAfBNNqddwMIUQOg++dRQnAaKh+zRtAE5CN4Z5HEQAAAABJRU5ErkJggg==",
+                                  "rotation": 0,
+                                  "opacity": 1,
+                                  "offset": [
+                                      0,
+                                      0
+                                  ]
+                              }
+                          }
+                      ]
+                  }
+              }
+              }
+            ]
+        },
+        {
+            "geoviewLayerType": "geoCore",
+            "geoviewLayerId": "0fca08b5-e9d0-414b-a3c4-092ff9c5e326"
+        },
+        {
+            "geoviewLayerType": "geoCore",
+            "geoviewLayerId": "03ccfb5c-a06e-43e3-80fd-09d4f8f69703"
+        }
     ]
-  },
+    },
   "components": [
-    "overview-map"
+      "overview-map"
   ],
   "overviewMap": {
-    "hideOnZoom": 7
+      "hideOnZoom": 7
   },
   "footerBar": {
-    "tabs": {
-      "core": [
-        "legend",
-        "layers",
-        "details",
-        "geochart",
-        "data-table"
-      ]
-    }
+      "tabs": {
+          "core": [
+              "legend",
+              "layers",
+              "details",
+              "geochart",
+              "data-table"
+          ]
+      }
   },
   "corePackages": [],
   "theme": "geo.ca"

@@ -407,6 +407,9 @@ export type GeoCoreLayerConfig = {
 
   /** Initial settings to apply to the GeoCore layer at creation time. */
   initialSettings?: TypeLayerInitialSettings;
+
+  /** The layer entries to use from the GeoCore layer. */
+  listOfLayerEntryConfig?: TypeLayerEntryConfig[];
 };
 
 /**
