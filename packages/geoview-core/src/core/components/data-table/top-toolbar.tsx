@@ -7,22 +7,16 @@ import {
   MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
   MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
   MRT_TableInstance,
-  MRT_RowData,
   MRT_ColumnDef,
 } from 'material-react-table';
 import ClearFiltersIcon from '@mui/icons-material/ClearAll';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-import { ColumnsType, MappedLayerDataType } from './data-table-types';
+import { ColumnsType } from './data-table-types';
 import { TypeFeatureInfoEntry } from '@/geo';
 
-interface TopToolbarProps<TData> {
-  /**
-   * The Material React Table instance.
-   */
-  table: MRT_TableInstance<ColumnsType>;
-
+interface TopToolbarProps<TData extends ColumnsType> {
   /**
    * Classes or styles for the component.
    */
@@ -71,8 +65,8 @@ interface TopToolbarProps<TData> {
   };
 }
 
-function TopToolbar<TData>(props: TopToolbarProps<TData>) {
-  const { table, sxClasses, datatableSettings, layerPath, t, globalFilter, useTable, columns, data } = props;
+function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
+  const { sxClasses, datatableSettings, layerPath, t, globalFilter, useTable, columns, data } = props;
   return (
     <Box display="flex" sx={{ justifyContent: 'space-between', borderBottom: '1px solid #9e9e9e' }} p={4}>
       <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>

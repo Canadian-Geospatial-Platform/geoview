@@ -30,6 +30,7 @@ import {
   Tooltip,
   ZoomInSearchIcon,
   InfoOutlinedIcon,
+  MRT_TableOptions,
 } from '@/ui';
 
 import TopToolbar from './top-toolbar';
@@ -97,7 +98,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
   const { enableFocusTrap } = useUIStoreActions();
 
-  const handleDensityChange = (newDensity) => {
+  const handleDensityChange = (newDensity: MRTDensityState) => {
     setDensity(newDensity);
   };
 
@@ -404,9 +405,8 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   let useTable: MRTTableInstance<ColumnsType>;
 
   const renderTopToolbar = useCallback(
-    ({ table }) => (
+    ({ table }: { table: MRTTableInstance<ColumnsType> }) => (
       <TopToolbar
-        table={table}
         sxClasses={sxClasses}
         datatableSettings={datatableSettings}
         layerPath={layerPath}
