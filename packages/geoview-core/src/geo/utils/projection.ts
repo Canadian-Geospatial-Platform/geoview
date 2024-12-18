@@ -23,11 +23,6 @@ import { TypeJsonObject } from '@/core/types/global-types';
  */
 export abstract class Projection {
   /**
-   * constant for the CRS84 URL
-   */
-  static CRS_84_URL = 'http://www.opengis.net/def/crs/OGC/1.3/CRS84';
-
-  /**
    * constant used for the available projection names
    */
   static PROJECTION_NAMES = {
@@ -40,6 +35,7 @@ export abstract class Projection {
     WM: 'EPSG:3857',
     4269: 'EPSG:4269',
     LNGLAT: 'EPSG:4326',
+    CRS84: 'CRS:84', // Supporting CRS:84 which is equivalent to 4326 except it's long-lat, whereas the 4326 standard is lat-long.
     CSRS: 'EPSG:4617',
     CSRS98: 'EPSG:4140',
   };
@@ -323,13 +319,23 @@ export abstract class Projection {
  * Initializes the CRS84 Projection
  */
 function initCRS84Projection(): void {
-  const newDefinition = proj4.defs(Projection.PROJECTION_NAMES.LNGLAT);
-  newDefinition.axis = 'neu';
-  proj4.defs(Projection.CRS_84_URL, newDefinition);
+  // define 3978 projection
+  proj4.defs(Projection.PROJECTION_NAMES.CRS84, '+proj=longlat +datum=WGS84 +no_defs +type=crs');
+  register(proj4);
 
-  const projection = olGetProjection(Projection.CRS_84_URL);
+  const projection = olGetProjection(Projection.PROJECTION_NAMES.CRS84);
+  if (projection) Projection.PROJECTIONS['CRS:84'] = projection;
+}
 
-  if (projection) Projection.PROJECTIONS[Projection.CRS_84_URL] = projection;
+/**
+ * Initializes the 4326 Projection
+ */
+function init4326Projection(): void {
+  proj4.defs(Projection.PROJECTION_NAMES.LNGLAT, '+proj=longlat +datum=WGS84 +no_defs +type=crs');
+  register(proj4);
+
+  const projection = olGetProjection(Projection.PROJECTION_NAMES.LNGLAT);
+  if (projection) Projection.PROJECTIONS['4326'] = projection;
 }
 
 /**
@@ -469,6 +475,7 @@ function init102190Projection(): void {
 
 // Initialize the supported projections
 initCRS84Projection();
+init4326Projection();
 initWMProjection();
 initLCCProjection();
 initCSRSProjection();
