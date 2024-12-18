@@ -8,23 +8,26 @@ import {
   MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
   MRT_TableInstance,
   MRT_RowData,
+  MRT_ColumnDef,
 } from 'material-react-table';
 import ClearFiltersIcon from '@mui/icons-material/ClearAll';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
+import { ColumnsType, MappedLayerDataType } from './data-table-types';
+import { TypeFeatureInfoEntry } from '@/geo';
 
 interface TopToolbarProps<TData> {
   /**
    * The Material React Table instance.
    */
-  table: MRT_TableInstance<MRT_RowData>;
+  table: MRT_TableInstance<ColumnsType>;
 
   /**
    * Classes or styles for the component.
    */
   sxClasses: {
-    selectedRows: React.CSSProperties | Record<string, unknown>;
+    selectedRows: React.CSSProperties;
   };
 
   /**
@@ -58,13 +61,13 @@ interface TopToolbarProps<TData> {
   /**
    * Column definitions for the table.
    */
-  columns: Array<Record<string, unknown>>;
+  columns: MRT_ColumnDef<ColumnsType, unknown>[];
 
   /**
    * The data object containing features for the table.
    */
   data: {
-    features: Array<Record<string, unknown>>;
+    features?: TypeFeatureInfoEntry[] | null;
   };
 }
 
