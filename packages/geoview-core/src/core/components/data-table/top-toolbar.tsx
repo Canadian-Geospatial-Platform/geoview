@@ -1,0 +1,114 @@
+import React from 'react';
+import { Box, IconButton, Tooltip } from '@mui/material';
+/* eslint-disable camelcase */
+import {
+  MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
+  MRT_ToggleFiltersButton as MRTToggleFiltersButton,
+  MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
+  MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
+  MRT_TableInstance,
+  MRT_RowData,
+} from 'material-react-table';
+import ClearFiltersIcon from '@mui/icons-material/ClearAll';
+import ExportButton from './export-button';
+import JSONExportButton from './json-export-button';
+import FilterMap from './filter-map';
+
+interface TopToolbarProps<TData> {
+  /**
+   * The Material React Table instance.
+   */
+  table: MRT_TableInstance<MRT_RowData>;
+
+  /**
+   * Classes or styles for the component.
+   */
+  sxClasses: {
+    selectedRows: React.CSSProperties | Record<string, unknown>;
+  };
+
+  /**
+   * Settings for the datatable, indexed by layerPath.
+   */
+  datatableSettings: Record<string, { toolbarRowSelectedMessageRecord: string }>;
+
+  /**
+   * The path for the current layer being processed.
+   */
+  layerPath: string;
+
+  /**
+   * Translation function for internationalization.
+   */
+  t: (key: string) => string;
+
+  /**
+   * The current global filter value.
+   */
+  globalFilter: string | null;
+
+  /**
+   * Utility functions provided by the table instance.
+   */
+  useTable: {
+    resetColumnFilters: () => void;
+    getFilteredRowModel: () => { rows: Array<{ original: TData }> };
+  };
+
+  /**
+   * Column definitions for the table.
+   */
+  columns: Array<Record<string, unknown>>;
+
+  /**
+   * The data object containing features for the table.
+   */
+  data: {
+    features: Array<Record<string, unknown>>;
+  };
+}
+
+function TopToolbar<TData>(props: TopToolbarProps<TData>) {
+  const { table, sxClasses, datatableSettings, layerPath, t, globalFilter, useTable, columns, data } = props;
+  return (
+    <Box display="flex" sx={{ justifyContent: 'space-between', borderBottom: '1px solid #9e9e9e' }} p={4}>
+      <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
+        <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>
+        <Box display="flex">
+          <Box sx={sxClasses.selectedRows}>{t('dataTable.filterMap')}</Box>
+          <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
+        </Box>
+      </Box>
+      <Box display="flex" sx={{ flexDirection: 'column' }}>
+        <Box sx={{ float: 'right', marginLeft: 'auto', maxWidth: '15rem' }}>
+          <MRTGlobalFilterTextField className="buttonOutline" table={table} />
+        </Box>
+        <Box display="flex" sx={{ justifyContent: 'space-around' }}>
+          <IconButton className="buttonOutline" color="primary" onClick={() => useTable.resetColumnFilters()}>
+            <Tooltip title={t('dataTable.clearFilters')} placement="bottom" arrow>
+              <ClearFiltersIcon />
+            </Tooltip>
+          </IconButton>
+
+          <MRTToggleFiltersButton className="buttonOutline" table={table} />
+          {/* Override column pinning options */}
+          <MRTShowHideColumnsButton
+            className="buttonOutline"
+            table={{ ...table, options: { ...table.options, enableColumnPinning: false } }}
+          />
+          <MRTToggleDensePaddingButton className="buttonOutline" table={table} />
+          {/* Export Buttons */}
+          <ExportButton layerPath={layerPath} rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} columns={columns}>
+            <JSONExportButton
+              rows={useTable.getFilteredRowModel().rows.map((row) => row.original)}
+              features={data.features as TypeFeatureInfoEntry[]}
+              layerPath={layerPath}
+            />
+          </ExportButton>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+export default React.memo(TopToolbar);

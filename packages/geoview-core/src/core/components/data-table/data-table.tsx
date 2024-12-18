@@ -18,10 +18,6 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
   type MRT_ColumnDef as MRTColumnDef,
-  MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
-  MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
-  MRT_ToggleFiltersButton as MRTToggleFiltersButton,
-  MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
   type MRT_SortingState as MRTSortingState,
   type MRT_RowVirtualizer as MRTRowVirtualizer,
   type MRT_ColumnFiltersState as MRTColumnFiltersState,
@@ -31,11 +27,11 @@ import {
   Button,
   IconButton,
   Tooltip,
-  ClearFiltersIcon,
   ZoomInSearchIcon,
   InfoOutlinedIcon,
 } from '@/ui';
 
+import TopToolbar from './top-toolbar';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -47,9 +43,6 @@ import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
-import ExportButton from './export-button';
-import JSONExportButton from './json-export-button';
-import FilterMap from './filter-map';
 import { useLightBox } from '@/core/components/common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import { DataTableProps, ColumnsType } from './data-table-types';
@@ -440,44 +433,19 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     enableBottomToolbar: false,
     positionToolbarAlertBanner: 'none', // hide existing row count
     renderTopToolbar: ({ table }) => (
-      <Box display="flex" sx={{ justifyContent: 'space-between', borderBottom: '1px solid #9e9e9e' }} p={4}>
-        <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
-          <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>
-          <Box display="flex">
-            <Box sx={sxClasses.selectedRows}>{t('dataTable.filterMap')}</Box>
-            <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
-          </Box>
-        </Box>
-        <Box display="flex" sx={{ flexDirection: 'column' }}>
-          <Box sx={{ float: 'right', marginLeft: 'auto', maxWidth: '15rem' }}>
-            <MRTGlobalFilterTextField className="buttonOutline" table={table} />
-          </Box>
-          <Box display="flex" sx={{ justifyContent: 'space-around' }}>
-            <IconButton className="buttonOutline" color="primary" onClick={() => useTable.resetColumnFilters()}>
-              <Tooltip title={t('dataTable.clearFilters')} placement="bottom" arrow>
-                <ClearFiltersIcon />
-              </Tooltip>
-            </IconButton>
-
-            <MRTToggleFiltersButton className="buttonOutline" table={table} />
-            {/* enable column pinning options is override, so that pinning option in menu can be hide. */}
-            <MRTShowHideColumnsButton
-              className="buttonOutline"
-              table={{ ...table, options: { ...table.options, enableColumnPinning: false } }}
-            />
-            <MRTToggleDensePaddingButton className="buttonOutline" table={table} />
-            {/* Only use filtered rows from material table */}
-            <ExportButton layerPath={layerPath} rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} columns={columns}>
-              <JSONExportButton
-                rows={useTable.getFilteredRowModel().rows.map((row) => row.original)}
-                features={data.features as TypeFeatureInfoEntry[]}
-                layerPath={layerPath}
-              />
-            </ExportButton>
-          </Box>
-        </Box>
-      </Box>
+      <TopToolbar
+        table={table}
+        sxClasses={sxClasses}
+        datatableSettings={datatableSettings}
+        layerPath={layerPath}
+        t={t}
+        globalFilter={globalFilter}
+        useTable={useTable}
+        columns={columns}
+        data={data}
+      />
     ),
+
     enableFilterMatchHighlighting: true,
     enableColumnResizing: true,
     enableColumnVirtualization: true,
