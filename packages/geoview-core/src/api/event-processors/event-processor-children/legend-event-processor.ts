@@ -176,14 +176,18 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             iconDetails.push(iconDetailsEntry);
           } else {
             iconDetailsEntry.iconType = 'list';
-            iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
-              const legendLayerListItem: TypeLegendItem = {
-                geometryType,
-                icon: canvas ? canvas.toDataURL() : null,
-                name: styleSettings.info[i].label,
-                isVisible: styleSettings.info[i].visible !== false,
-              };
-              return legendLayerListItem;
+            iconDetailsEntry.iconList = [];
+            styleRepresentation.arrayOfCanvas!.forEach((canvas, i) => {
+              // Check if there is already an entry for this label before adding it.
+              if (!iconDetailsEntry.iconList?.find((listItem) => listItem.name === styleSettings.info[i].label)) {
+                const legendLayerListItem: TypeLegendItem = {
+                  geometryType,
+                  icon: canvas ? canvas.toDataURL() : null,
+                  name: styleSettings.info[i].label,
+                  isVisible: styleSettings.info[i].visible !== false,
+                };
+                iconDetailsEntry.iconList?.push(legendLayerListItem);
+              }
             });
             if (styleRepresentation.defaultCanvas) {
               const legendLayerListItem: TypeLegendItem = {

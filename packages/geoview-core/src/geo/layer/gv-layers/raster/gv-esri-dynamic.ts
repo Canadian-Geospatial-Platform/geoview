@@ -301,7 +301,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * Counts the number of times the value of a field is used by the unique value style information object. Depending on the
    * visibility of the default, we count visible or invisible settings.
    * @param {TypeLayerStyleSettings} styleSettings - The unique value style settings to evaluate.
-   * @returns {TypeFieldOfTheSameValue[][]} The result of the evaluation. The first index of the array correspond to the field's
+   * @returns {TypeFieldOfTheSameValue[][]} The result of the evaluation. The first index of the array corresponds to the field's
    * index in the style settings and the second one to the number of different values the field may have based on visibility of
    * the feature.
    * @private
@@ -309,16 +309,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
   static #countFieldOfTheSameValue(styleSettings: TypeLayerStyleSettings): TypeFieldOfTheSameValue[][] {
     return styleSettings.info.reduce<TypeFieldOfTheSameValue[][]>(
       (counter, styleEntry): TypeFieldOfTheSameValue[][] => {
-        if (
-          (styleEntry.visible === false && styleSettings.info[styleSettings.info.length - 1].visible !== false) ||
-          (styleEntry.visible !== false && styleSettings.info[styleSettings.info.length - 1].visible === false)
-        ) {
+        if (styleEntry.visible !== false) {
           styleEntry.values.forEach((styleValue, i) => {
-            const valueExist = counter[i].find((counterEntry) => counterEntry.value === styleValue);
+            const valueExist = counter[i]?.find((counterEntry) => counterEntry.value === styleValue);
             if (valueExist) valueExist.nbOccurence++;
-            else counter[i].push({ value: styleValue, nbOccurence: 1 });
+            else if (counter[i]) counter[i].push({ value: styleValue, nbOccurence: 1 });
+            // eslint-disable-next-line no-param-reassign
+            else counter[i] = [{ value: styleValue, nbOccurence: 1 }];
           });
         }
+
         return counter;
       },
       styleSettings.fields.map<TypeFieldOfTheSameValue[]>(() => [])
@@ -378,7 +378,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
         for (let i = 0; i < styleSettings.info.length; i++) {
           if (filterArray.length % 2 === 0) {
             if (i === 0) {
-              if (styleSettings.info[0].visible !== false && styleSettings.info[styleSettings.info.length - 1].visible === false)
+              // First set, visible, default not visible
+              if (
+                styleSettings.info[0].visible !== false &&
+                (!styleSettings.hasDefault ||
+                  (styleSettings.hasDefault && styleSettings.info[styleSettings.info.length - 1].visible === false))
+              )
                 filterArray.push(
                   `${styleSettings.fields[0]} >= ${GVEsriDynamic.#formatFieldValue(
                     styleSettings.fields[0],
@@ -386,7 +391,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
                     layerConfig.source.featureInfo!
                   )}`
                 );
-              else if (styleSettings.info[0].visible === false && styleSettings.info[styleSettings.info.length - 1].visible !== false) {
+              else if (
+                // First set, not visible, default visible
+                styleSettings.info[0].visible === false &&
+                styleSettings.hasDefault &&
+                styleSettings.info[styleSettings.info.length - 1].visible !== false
+              ) {
                 filterArray.push(
                   `${styleSettings.fields[0]} < ${GVEsriDynamic.#formatFieldValue(
                     styleSettings.fields[0],
@@ -396,7 +406,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
                 );
                 visibleWhenGreatherThisIndex = i;
               }
-            } else if (styleSettings.info[i].visible !== false && styleSettings.info[styleSettings.info.length - 1].visible === false) {
+            } else if (
+              // Visible, default not visible
+              styleSettings.info[i].visible !== false &&
+              (!styleSettings.hasDefault ||
+                (styleSettings.hasDefault && styleSettings.info[styleSettings.info.length - 1].visible === false))
+            ) {
               filterArray.push(
                 `${styleSettings.fields[0]} > ${GVEsriDynamic.#formatFieldValue(
                   styleSettings.fields[0],
@@ -412,7 +427,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
                     layerConfig.source.featureInfo!
                   )}`
                 );
-            } else if (styleSettings.info[i].visible === false && styleSettings.info[styleSettings.info.length - 1].visible !== false) {
+            } else if (
+              // Not visible, default visible
+              styleSettings.info[i].visible === false &&
+              styleSettings.hasDefault &&
+              styleSettings.info[styleSettings.info.length - 1].visible !== false
+            ) {
               filterArray.push(
                 `${styleSettings.fields[0]} <= ${GVEsriDynamic.#formatFieldValue(
                   styleSettings.fields[0],
@@ -422,7 +442,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
               );
               visibleWhenGreatherThisIndex = i;
             }
-          } else if (styleSettings.info[styleSettings.info.length - 1].visible === false) {
+          } else if (
+            !styleSettings.hasDefault ||
+            (styleSettings.hasDefault && styleSettings.info[styleSettings.info.length - 1].visible === false)
+          ) {
+            // Default is not visible/does not exist
             if (styleSettings.info[i].visible === false) {
               filterArray.push(
                 `${styleSettings.fields[0]} <= ${GVEsriDynamic.#formatFieldValue(
@@ -440,7 +464,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
                 )}`
               );
             }
-          } else if (styleSettings.info[i].visible !== false) {
+          } else if (styleSettings.hasDefault && styleSettings.info[i].visible !== false) {
+            // Has default and default is visible
             filterArray.push(
               `${styleSettings.fields[0]} > ${GVEsriDynamic.#formatFieldValue(
                 styleSettings.fields[0],
@@ -453,6 +478,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
             visibleWhenGreatherThisIndex = i;
           }
         }
+
         if (visibleWhenGreatherThisIndex !== -1)
           filterArray.push(
             `${styleSettings.fields[0]} > ${GVEsriDynamic.#formatFieldValue(
@@ -462,7 +488,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
             )}`
           );
 
-        if (styleSettings.info[styleSettings.info.length - 1].visible !== false) {
+        if (styleSettings.hasDefault && styleSettings.info[styleSettings.info.length - 1].visible !== false) {
           const filterValue = `${filterArray.slice(0, -1).reduce((previousFilterValue, filterNode, i) => {
             if (i === 0) return `(${filterNode} or `;
             if (i % 2 === 0) return `${previousFilterValue} and ${filterNode}) or `;
@@ -479,6 +505,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
             }, '')})`
           : // We use '(1=0)' as false to select nothing
             '(1=0)';
+
         return `${filterValue}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }
     }
@@ -520,6 +547,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       fieldNotUsed[entrySelected] = false;
       fieldOrder.push(entrySelected);
     }
+
     return fieldOrder;
   }
 
@@ -547,10 +575,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   ): TypeQueryTree {
     const queryTree: TypeQueryTree = [];
     styleSettings.info.forEach((styleEntry) => {
-      if (
-        (styleEntry.visible === false && styleSettings.info[styleSettings.info.length - 1].visible !== false) ||
-        (styleEntry.visible !== false && styleSettings.info[styleSettings.info.length - 1].visible === false)
-      ) {
+      if (styleEntry.visible !== false) {
         let levelToSearch = queryTree;
         for (let i = 0; i < fieldOrder.length; i++) {
           if (fieldOfTheSameValue[fieldOrder[i]].find((field) => field.value === styleEntry.values[fieldOrder[i]])) {
@@ -563,6 +588,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         }
       }
     });
+
     return queryTree;
   }
 
@@ -605,6 +631,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // If i points to the last element of the queryTree, close the parenthesis.
       if (i === queryTree.length - 1) queryString = `${queryString})`;
     }
+
     return queryString === '(' ? '(1=0)' : queryString;
   }
 
