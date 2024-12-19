@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material';
 import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
@@ -8,6 +8,7 @@ import { LayerIcon } from '../common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';
 import { CollapsibleContent } from './legend-layer-container';
 import { getSxClasses } from './legend-styles';
+import { logger } from '@/core/utils/logger';
 
 interface LegendLayerProps {
   layer: TypeLegendLayer;
@@ -20,6 +21,13 @@ interface LegendLayerHeaderProps {
   onExpandClick: (e: React.MouseEvent) => void;
 }
 
+// Constant style outside of render
+const styles = {
+  listItemText: {
+    '&:hover': { cursor: 'pointer' },
+  },
+} as const;
+
 // Extracted Header Component
 const LegendLayerHeader = memo(
   ({ layer, isCollapsed, isVisible, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
@@ -27,7 +35,7 @@ const LegendLayerHeader = memo(
       <LayerIcon layer={layer} />
       <Tooltip title={layer.layerName} placement="top">
         <ListItemText
-          sx={{ '&:hover': { cursor: 'pointer' } }}
+          sx={styles.listItemText}
           primary={layer.layerName}
           className="layerTitle"
           disableTypography
@@ -46,9 +54,11 @@ LegendLayerHeader.displayName = 'LegendLayerHeader';
 
 // Main LegendLayer component
 export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
+  logger.logTraceRender('components/legend/legend-layer');
+
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Stores
   const { initLightBox, LightBoxComponent } = useLightBox();
@@ -90,5 +100,3 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
     </>
   );
 }
-
-export default LegendLayer;

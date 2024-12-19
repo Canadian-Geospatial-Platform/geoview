@@ -29,6 +29,11 @@ type ControlActions = {
   handleZoomTo: (e: React.MouseEvent) => void;
 };
 
+// Constant style outside of render
+const styles = {
+  btnMargin: { marginTop: '-0.3125rem' },
+} as const;
+
 // Custom hook for control actions
 const useControlActions = (layerPath: string): ControlActions => {
   const { setOrToggleLayerVisibility } = useMapStoreActions();
@@ -73,7 +78,7 @@ const useSubtitle = (children: TypeLegendLayer[], items: TypeLegendItem[]): stri
   }, [children.length, items, t]);
 };
 
-// SecondaryControls component
+// SecondaryControls component (no memo to force re render from layers panel modifications)
 export function SecondaryControls({ layer, visibility }: SecondaryControlsProps): JSX.Element {
   logger.logTraceRender('components/legend/legend-layer-ctrl');
 
@@ -111,12 +116,7 @@ export function SecondaryControls({ layer, visibility }: SecondaryControlsProps)
         >
           {visibility ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
         </IconButton>
-        <IconButton
-          tooltip="legend.highlightLayer"
-          sx={{ marginTop: '-0.3125rem' }}
-          className="buttonOutline"
-          onClick={controls.handleHighlightLayer}
-        >
+        <IconButton tooltip="legend.highlightLayer" sx={styles.btnMargin} className="buttonOutline" onClick={controls.handleHighlightLayer}>
           {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
         <IconButton tooltip="legend.zoomTo" className="buttonOutline" onClick={controls.handleZoomTo}>

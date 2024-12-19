@@ -353,7 +353,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     createNewLegendEntries(2, layers);
 
     // Update the legend layers with the updated array, triggering the subscribe
-    this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    // Reorder the array so legend tab is in synch
+    const sortedLayers = layers.sort((a, b) =>
+      MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, a.layerPath) >
+      MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, b.layerPath)
+        ? 1
+        : -1
+    );
+
+    this.getLayerState(mapId).setterActions.setLegendLayers(sortedLayers);
   }
   // #endregion
 
