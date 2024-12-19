@@ -38,6 +38,7 @@ export abstract class Projection {
     CRS84: 'CRS:84', // Supporting CRS:84 which is equivalent to 4326 except it's long-lat, whereas the 4326 standard is lat-long.
     CSRS: 'EPSG:4617',
     CSRS98: 'EPSG:4140',
+    3400: 'EPSG:3400',
   };
 
   // Incremental number when creating custom WKTs on the fly
@@ -473,6 +474,21 @@ function init102190Projection(): void {
   if (projection) Projection.PROJECTIONS['102190'] = projection;
 }
 
+/**
+ * Initializes the EPSG:3400 projection
+ */
+function init3400Projection(): void {
+  proj4.defs(
+    Projection.PROJECTION_NAMES[3400],
+    '+proj=tmerc +lat_0=0 +lon_0=-115 +k=0.9992 +x_0=500000 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs'
+  );
+  register(proj4);
+
+  const projection = olGetProjection(Projection.PROJECTION_NAMES[3400]);
+
+  if (projection) Projection.PROJECTIONS['3400'] = projection;
+}
+
 // Initialize the supported projections
 initCRS84Projection();
 init4326Projection();
@@ -486,4 +502,5 @@ init4269Projection();
 init102100Projection();
 init102184Projection();
 init102190Projection();
+init3400Projection();
 logger.logInfo('Projections initialized');

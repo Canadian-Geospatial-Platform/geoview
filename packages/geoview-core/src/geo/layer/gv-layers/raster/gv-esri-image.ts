@@ -255,7 +255,8 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 }
 
-interface TypeEsriImageLayerLegend {
+// Exported for use in ESRI Dynamic raster layers
+export interface TypeEsriImageLayerLegend {
   layers: {
     layerId: number | string;
     layerName: string;

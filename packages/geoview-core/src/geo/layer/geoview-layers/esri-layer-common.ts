@@ -268,19 +268,22 @@ export function commonProcessFeatureInfoConfig(
   const queryable = (layerMetadata.capabilities as string).includes('Query');
   if (layerConfig.source.featureInfo) {
     // if queryable flag is undefined, set it accordingly to what is specified in the metadata
-    if (layerConfig.source.featureInfo.queryable === undefined) layerConfig.source.featureInfo.queryable = queryable;
+    if (layerConfig.source.featureInfo.queryable === undefined && layerMetadata.fields?.length)
+      layerConfig.source.featureInfo.queryable = queryable;
     // else the queryable flag comes from the user config.
-    else if (layerConfig.source.featureInfo.queryable && !layerMetadata.fields && layerMetadata.type !== 'Group Layer') {
+    else if (layerConfig.source.featureInfo.queryable && layerMetadata.type !== 'Group Layer') {
       layerConfig.layerStatus = 'error';
       throw new Error(
         `The config whose layer path is ${layerPath} cannot set a layer as queryable because it does not have field definitions`
       );
     }
-  } else layerConfig.source.featureInfo = layerConfig.isMetadataLayerGroup ? { queryable: false } : { queryable };
+  } else
+    layerConfig.source.featureInfo =
+      layerConfig.isMetadataLayerGroup || !layerMetadata.fields?.length ? { queryable: false } : { queryable };
   MapEventProcessor.setMapLayerQueryable(layer.mapId, layerPath, layerConfig.source.featureInfo.queryable);
 
   // dynamic group layer doesn't have fields definition
-  if (layerMetadata.type !== 'Group Layer') {
+  if (layerMetadata.type !== 'Group Layer' && layerMetadata.fields) {
     // Process undefined outfields or aliasFields
     if (!layerConfig.source.featureInfo.outfields?.length) {
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
@@ -371,6 +374,7 @@ export async function commonProcessLayerMetadata<
   if (queryUrl) {
     if (layerConfig.geoviewLayerConfig.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_IMAGE)
       queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
+
     try {
       const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
       if (data?.error) {

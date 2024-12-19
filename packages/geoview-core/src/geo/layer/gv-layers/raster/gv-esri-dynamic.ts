@@ -19,11 +19,17 @@ import {
   TypeFeatureInfoEntry,
   rangeDomainType,
   codedValueType,
+  TypeLayerStyleConfig,
+  TypeLayerStyleConfigInfo,
 } from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { TypeJsonObject } from '@/api/config/types/config-types';
+import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
+import { CONST_LAYER_TYPES } from '../../geoview-layers/abstract-geoview-layers';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { TypeEsriImageLayerLegend } from './gv-esri-image';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -657,6 +663,84 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
+   * Overrides the fetching of the legend for an Esri Dynamic layer.
+   * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
+   */
+  override async getLegend(): Promise<TypeLegend | null> {
+    const layerConfig = this.getLayerConfig();
+    // Only raster layers need the alternate code
+    if (layerConfig.getLayerMetadata()?.type !== 'Raster Layer') return super.getLegend();
+
+    try {
+      if (!layerConfig) return null;
+      const legendUrl = `${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`;
+      const response = await fetch(legendUrl);
+      const legendJson: TypeEsriImageLayerLegend = await response.json();
+
+      let legendInfo;
+      if (legendJson.layers && legendJson.layers.length === 1) {
+        legendInfo = legendJson.layers[0].legend;
+      } else if (legendJson.layers.length) {
+        const layerInfo = legendJson.layers.find((layer) => layer.layerId.toString() === layerConfig.layerId);
+        if (layerInfo) legendInfo = layerInfo.legend;
+      }
+
+      if (!legendInfo) {
+        const legend: TypeLegend = {
+          type: CONST_LAYER_TYPES.ESRI_IMAGE,
+          styleConfig: this.getStyle(layerConfig.layerPath),
+          legend: null,
+        };
+
+        return legend;
+      }
+
+      const uniqueValueStyleInfo: TypeLayerStyleConfigInfo[] = [];
+      legendInfo.forEach((info) => {
+        const styleInfo: TypeLayerStyleConfigInfo = {
+          label: info.label,
+          visible: layerConfig.initialSettings.states?.visible || true,
+          values: info.label.split(','),
+          settings: {
+            type: 'iconSymbol',
+            mimeType: info.contentType,
+            src: info.imageData,
+            width: info.width,
+            height: info.height,
+          },
+        };
+        uniqueValueStyleInfo.push(styleInfo);
+      });
+
+      const styleSettings: TypeLayerStyleSettings = {
+        type: 'uniqueValue',
+        fields: ['default'],
+        hasDefault: false,
+        info: uniqueValueStyleInfo,
+      };
+
+      const styleConfig: TypeLayerStyleConfig = {
+        Point: styleSettings,
+      };
+
+      // TODO: Refactor - Find a better place to set the style than in a getter or rename this function like another TODO suggests
+      // Set the style
+      this.setStyle(layerConfig.layerPath, styleConfig);
+
+      const legend: TypeLegend = {
+        type: CONST_LAYER_TYPES.ESRI_IMAGE,
+        styleConfig,
+        legend: await getLegendStyles(this.getStyle(layerConfig.layerPath)),
+      };
+
+      return legend;
+    } catch (error) {
+      logger.logError(`Get Legend for ${layerConfig.layerPath} error`, error);
+      return null;
+    }
+  }
+
+  /**
    * Overrides when the layer gets in loaded status.
    */
   override onLoaded(): void {
@@ -714,7 +798,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
       )}`;
     });
 
-    olLayer?.getSource()!.updateParams({ layerDefs: `{"${layerConfig.layerId}": "${filterValueToUse}"}` });
+    // Raster layer queries do not accept any layerDefs
+    const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
+    olLayer?.getSource()!.updateParams({ layerDefs });
     olLayer?.changed();
 
     // Emit event
