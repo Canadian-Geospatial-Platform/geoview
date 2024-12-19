@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Box, Collapse, List } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
@@ -24,6 +24,14 @@ interface WMSLegendImageProps {
   sxClasses: Record<string, object>;
 }
 
+// Constant style outside of render
+const styles = {
+  wmsImage: {
+    maxWidth: '90%',
+    cursor: 'pointer',
+  },
+} as const;
+
 // Extracted WMS Legend Component
 const WMSLegendImage = memo(
   ({ imgSrc, initLightBox, legendExpanded, sxClasses }: WMSLegendImageProps): JSX.Element => (
@@ -32,7 +40,7 @@ const WMSLegendImage = memo(
         component="img"
         tabIndex={0}
         src={imgSrc}
-        sx={{ maxWidth: '90%', cursor: 'pointer' }}
+        sx={styles.wmsImage}
         onClick={() => initLightBox(imgSrc, '', 0, 2)}
         onKeyDown={(e) => (e.code === 'Space' || e.code === 'Enter' ? initLightBox(imgSrc, '', 0, 2) : null)}
       />
@@ -51,7 +59,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Props extraction
   const { children, items } = layer;

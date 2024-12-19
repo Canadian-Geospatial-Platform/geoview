@@ -22,6 +22,7 @@ const LegendListItem = memo(
 );
 LegendListItem.displayName = 'LegendListItem';
 
+// Item list component (no memo to force re render from layers panel modifications)
 export const ItemsList = memo(function ItemsList({ items }: ItemsListProps): JSX.Element | null {
   logger.logTraceRender('components/legend/legend-layer-items');
 
