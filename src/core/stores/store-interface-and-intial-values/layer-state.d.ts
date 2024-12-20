@@ -1,7 +1,7 @@
 import { Extent } from 'ol/extent';
 import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntryPartial, TypeLayerStatus, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
 import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 type LayerActions = ILayerState['actions'];
 export interface ILayerState {
@@ -19,6 +19,7 @@ export interface ILayerState {
         getLayer: (layerPath: string) => TypeLegendLayer | undefined;
         getLayerBounds: (layerPath: string) => number[] | undefined;
         getLayerDeleteInProgress: () => boolean;
+        getLayerStatus: (layerPath: string) => TypeLayerStatus;
         refreshLayer: (layerPath: string) => void;
         setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
         setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
