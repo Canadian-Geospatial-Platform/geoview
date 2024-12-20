@@ -812,13 +812,19 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       setLegendCollapsed: (layerPath: string, collapsed?: boolean): void => {
         const curLayerInfo = get().mapState.orderedLayerInfo;
-        const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
-        if (layerInfo) {
-          const newCollapsed = collapsed || !layerInfo.legendCollapsed;
-          layerInfo.legendCollapsed = newCollapsed;
+        const layerIndex = curLayerInfo.findIndex((info) => info.layerPath === layerPath);
+
+        if (layerIndex !== -1) {
+          // Create shallow copy of array
+          const newLayerInfo = curLayerInfo.slice();
+          // Only create new object for the changed layer
+          newLayerInfo[layerIndex] = {
+            ...curLayerInfo[layerIndex],
+            legendCollapsed: collapsed ?? !curLayerInfo[layerIndex].legendCollapsed,
+          };
 
           // Redirect
-          get().mapState.setterActions.setOrderedLayerInfo(curLayerInfo);
+          get().mapState.setterActions.setOrderedLayerInfo(newLayerInfo);
         }
       },
 

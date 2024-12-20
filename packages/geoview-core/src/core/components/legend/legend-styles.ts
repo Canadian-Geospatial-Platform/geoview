@@ -24,7 +24,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     fontWeight: 'normal',
     fontSize: theme.palette.geoViewFontSize.md,
     textAlign: 'left',
-    marginBottom: '15px',
   },
   layersListContainer: {
     padding: '20px',

@@ -11,6 +11,7 @@ import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import {
   layerEntryIsEsriDynamic,
   TypeFeatureInfoEntryPartial,
+  TypeLayerStatus,
   TypeLayerStyleConfig,
   TypeResultSet,
   TypeResultSetEntry,
@@ -21,6 +22,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
+import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 
 // #region INTERFACES & TYPES
 
@@ -42,6 +44,7 @@ export interface ILayerState {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
     getLayerDeleteInProgress: () => boolean;
+    getLayerStatus: (layerPath: string) => TypeLayerStatus;
     refreshLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -153,6 +156,16 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * Get the LayerDeleteInProgress state.
        */
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
+
+      /**
+       * Gets the layer status in the store which correspond to the layer path
+       * @param {string} layerPath - The layer path of the bounds to get
+       * @returns {TypeLayerStatus | undefined} The status or undefined
+       */
+      getLayerStatus: (layerPath: string): TypeLayerStatus | undefined => {
+        const curLayers = get().layerState.legendLayers;
+        return LegendEventProcessor.findLayerByPath(curLayers, layerPath)!.layerStatus;
+      },
 
       /**
        * Refresh layer and set states to original values.
@@ -381,8 +394,11 @@ export const useSelectedLayer = (): TypeLegendLayer | undefined => {
 export const useIconLayerSet = (layerPath: string): string[] => {
   const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const layer = LegendEventProcessor.findLayerByPath(layers, layerPath);
-  if (layer) {
+  if (layer && layer.type !== CV_CONST_LAYER_TYPES.WMS) {
     return layer.items.map((item) => item.icon).filter((d) => d !== null) as string[];
+  }
+  if (layer && layer.type === CV_CONST_LAYER_TYPES.WMS) {
+    return layer.icons.map((item) => item.iconImage).filter((d) => d !== null) as string[];
   }
   return [];
 };
