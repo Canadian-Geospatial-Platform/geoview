@@ -10,10 +10,6 @@ import { TypeJsonObject } from '@/core/types/global-types';
  */
 export declare abstract class Projection {
     /**
-     * constant for the CRS84 URL
-     */
-    static CRS_84_URL: string;
-    /**
      * constant used for the available projection names
      */
     static PROJECTION_NAMES: {
@@ -26,6 +22,7 @@ export declare abstract class Projection {
         WM: string;
         4269: string;
         LNGLAT: string;
+        CRS84: string;
         CSRS: string;
         CSRS98: string;
     };
