@@ -96,7 +96,7 @@
           cgpv.api.maps.Map1.layer.setAllLayersVisibility(false)
         </li>
         <li><button id="Rename-layer">Rename Water Quantity layer</button><br />
-          cgpv.api.maps.Map1.layer.setLayerName('Water Quantity')
+          cgpv.api.maps.Map1.layer.setLayerName('uniqueValueId/1', 'Water Quantity')
         </li>
         <li><button id="Place-marker">Place a marker on map</button><br />
           cgpv.api.maps.Map1.clickMarkerIconShow({lnglat: [-90, 60]})
@@ -456,7 +456,7 @@
 
       // add an event listener when a button is clicked
       renameLayerButton.addEventListener('click', async () => {
-        cgpv.api.maps.Map1.layer.setLayerName('Water Quantity')
+        cgpv.api.maps.Map1.layer.setLayerName(LYR_PATH_UNIQUE, 'Water Quantity')
       });
 
       // Place Marker Button========================================================================================================

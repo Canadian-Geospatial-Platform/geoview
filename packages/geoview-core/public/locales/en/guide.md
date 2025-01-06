@@ -209,6 +209,8 @@ The _Layers_ tab has the following submenu options:
 
 #### ![]({{assetsURL}}/img/guide/footer/view_25.svg) View
 
+_**Note: Click on a layer to display its Layer information in the right section.**_
+
 The _View_ submenu option under the _Layers_ tab consists of two sections. The left section lists all the layers displayed on the map. Click on a layer and the right section lists will show the layer settings (available options for that layer).
 
 **Layer Icons**
@@ -297,9 +299,9 @@ To remove a layer, click on the delete icon ![]({{assetsURL}}/img/guide/layers/r
 <a id="detailsSection"></a>
 ### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Details [Top](#footerSection)
 
-The **Details** tab has two sections. The available layers for the map are listed in the left section, and the feature details for each layer are displayed in the right section.
-
 _**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
+
+The **Details** tab has two sections. The available layers for the map are listed in the left section, and the feature details for each layer are displayed in the right section.
 
 Click on a layer to see its feature details.
 
@@ -315,6 +317,8 @@ Check the highlight box ![]({{assetsURL}}/img/guide/layers/check.png) to keep th
 =2!dataTable=
 <a id="dataTableSection"></a>
 ### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Data Table [Top](#footerSection)
+
+_**Note: Click on a layer to display its Data Table information in the right section.**_
 
 The **Data Table** tab has two sections. The layers are listed on the left and the layer data on the right. Click on a layer to show the layer data in the table on the right.
 
@@ -398,7 +402,9 @@ To access the buttons and/or input fields within a cell, make sure the cell is h
 <a id="timeSliderSection"></a>
 ### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Time Slider [Top](#footerSection)
 
-The Time Slider tab on the Footer Bar has two sections. Layers with a time dimension are listed in the left section. Click on a layer to display its Time Slider in the right section:
+_**Note: Click on a layer to display its Time Slider information in the right section.**_
+
+The Time Slider tab on the Footer Bar has two sections. Layers with a time dimension are listed in the left section.
 
 The Time Slider section displays a slider bar with one or two draggable handles. A point in time layer will show one handle. A time period layer will show two handles, to adjust the start and end time of the period.
 
@@ -419,9 +425,9 @@ The field being filtered on is displayed in the lower left of the Time Slider se
 <a id="chartSection"></a>
 ### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Chart [Top](#footerSection)
 
-The Chart tab on the Footer Bar has two sections. Layers with a chart are listed in the left section. Select a feature on the map to display its chart in the right section.
-
 _**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
+
+The Chart tab on the Footer Bar has two sections. Layers with a chart are listed in the left section. Select a feature on the map to display its chart in the right section.
 
 The Feature dropdown (upper left of the chart section), can be used to select a feature. This is useful when features are close together on the map, making it difficult to click on the desired one.
 

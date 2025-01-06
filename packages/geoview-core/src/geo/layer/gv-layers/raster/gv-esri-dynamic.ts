@@ -8,7 +8,7 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 
-import { validateExtent, getExtentUnion } from '@/geo/utils/utilities';
+import { validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -25,7 +25,6 @@ import {
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { CONST_LAYER_TYPES } from '../../geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -839,54 +838,75 @@ export class GVEsriDynamic extends AbstractGVRaster {
   override async getExtentFromFeatures(objectIds: string[], outfield?: string): Promise<Extent | undefined> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig();
-    const serviceMetaData = layerEntryConfig.getServiceMetadata() as TypeJsonObject;
-    const wkid = serviceMetaData?.spatialReference.wkid ? serviceMetaData.spatialReference.wkid : undefined;
     let baseUrl = layerEntryConfig.source.dataAccessPath;
 
     const idString = objectIds.join('%2C');
     if (baseUrl) {
       // Construct query
       if (!baseUrl.endsWith('/')) baseUrl += '/';
-      // GV: outFields here is not wanted, it is included because some sevices require it in the query. It would be possible to use
-      // GV cont: OBJECTID, but it is not universal through the services, so we pass a value through.
+
+      // Use the returnExtentOnly=true to get only the extent of ids
+      // TODO: We should return a real extent geometry Projection.transformAndDensifyExtent
       const outfieldQuery = outfield ? `&outFields=${outfield}` : '';
-      let precision = '';
-      let allowableOffset = '';
-      if ((serviceMetaData?.layers as Array<TypeJsonObject>).every((layer) => layer.geometryType !== 'esriGeometryPoint')) {
-        precision = '&geometryPrecision=1';
-        allowableOffset = '&maxAllowableOffset=7937.5158750317505';
-      }
-      const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=&objectIds=${idString}${outfieldQuery}${precision}&returnGeometry=true${allowableOffset}`;
+      const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&objectIds=${idString}${outfieldQuery}&returnExtentOnly=true`;
 
       try {
         const response = await fetch(queryUrl);
         const responseJson = await response.json();
+        const { extent } = responseJson;
 
-        // Convert response json to OL features
-        const responseFeatures = new EsriJSON().readFeatures(
-          { features: responseJson.features },
-          {
-            dataProjection: wkid ? `EPSG:${wkid}` : `EPSG:${responseJson.spatialReference.wkid}`,
-            featureProjection: this.getMapViewer().getProjection().getCode(),
-          }
+        const projExtent = Projection.transformExtentFromProj(
+          [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
+          `EPSG:${extent.spatialReference.wkid}`,
+          this.getMapViewer().getProjection().getCode()
         );
 
-        // Determine max extent from features
-        let calculatedExtent: Extent | undefined;
-        responseFeatures.forEach((feature) => {
-          const extent = feature.getGeometry()?.getExtent();
-
-          if (extent) {
-            // If extent has not been defined, set it to extent
-            if (!calculatedExtent) calculatedExtent = extent;
-            else getExtentUnion(calculatedExtent, extent);
-          }
-        });
-
-        return calculatedExtent;
+        return projExtent;
       } catch (error) {
         logger.logError(`Error fetching geometry from ${queryUrl}`, error);
       }
+
+      // TODO: Cleanup - Keep fo reference
+      // // GV: outFields here is not wanted, it is included because some sevices require it in the query. It would be possible to use
+      // // GV cont: OBJECTID, but it is not universal through the services, so we pass a value through.
+      // const outfieldQuery = outfield ? `&outFields=${outfield}` : '';
+      // let precision = '';
+      // let allowableOffset = '';
+      // if ((serviceMetaData?.layers as Array<TypeJsonObject>).every((layer) => layer.geometryType !== 'esriGeometryPoint')) {
+      //   precision = '&geometryPrecision=1';
+      //   allowableOffset = '&maxAllowableOffset=7937.5158750317505';
+      // }
+      // const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=&objectIds=${idString}${outfieldQuery}${precision}&returnGeometry=true${allowableOffset}`;
+
+      // try {
+      //   const response = await fetch(queryUrl);
+      //   const responseJson = await response.json();
+
+      //   // Convert response json to OL features
+      //   const responseFeatures = new EsriJSON().readFeatures(
+      //     { features: responseJson.features },
+      //     {
+      //       dataProjection: wkid ? `EPSG:${wkid}` : `EPSG:${responseJson.spatialReference.wkid}`,
+      //       featureProjection: this.getMapViewer().getProjection().getCode(),
+      //     }
+      //   );
+
+      //   // Determine max extent from features
+      //   let calculatedExtent: Extent | undefined;
+      //   responseFeatures.forEach((feature) => {
+      //     const extent = feature.getGeometry()?.getExtent();
+
+      //     if (extent) {
+      //       // If extent has not been defined, set it to extent
+      //       if (!calculatedExtent) calculatedExtent = extent;
+      //       else getExtentUnion(calculatedExtent, extent);
+      //     }
+      //   });
+
+      //   return calculatedExtent;
+      // } catch (error) {
+      //   logger.logError(`Error fetching geometry from ${queryUrl}`, error);
+      // }
     }
     return undefined;
   }
