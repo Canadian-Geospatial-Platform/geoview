@@ -688,7 +688,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       if (!legendInfo) {
         const legend: TypeLegend = {
           type: CONST_LAYER_TYPES.ESRI_IMAGE,
-          styleConfig: this.getStyle(layerConfig.layerPath),
+          styleConfig: this.getStyle(),
           legend: null,
         };
 
@@ -725,12 +725,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
       // TODO: Refactor - Find a better place to set the style than in a getter or rename this function like another TODO suggests
       // Set the style
-      this.setStyle(layerConfig.layerPath, styleConfig);
+      this.setStyle(styleConfig);
 
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
         styleConfig,
-        legend: await getLegendStyles(this.getStyle(layerConfig.layerPath)),
+        legend: await getLegendStyles(this.getStyle()),
       };
 
       return legend;

@@ -1,4 +1,7 @@
 import BaseLayer from 'ol/layer/Base';
+import { Feature } from 'ol';
+import { FeatureLike } from 'ol/Feature';
+import { Geometry } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
@@ -7,7 +10,6 @@ import Style from 'ol/style/Style';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import Feature, { FeatureLike } from 'ol/Feature';
 import { ProjectionLike } from 'ol/proj';
 
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -28,21 +30,27 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Constructs a GeoView Vector layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {VectorSource} olSource - The OpenLayer source.
+   * @param {VectorSource<Feature<Geometry>>} olSource - The OpenLayer source.
    * @param {VectorLayerEntryConfig} layerConfig - The layer configuration.
    */
-  protected constructor(mapId: string, olSource: VectorSource, layerConfig: VectorLayerEntryConfig) {
+  protected constructor(mapId: string, olSource: VectorSource<Feature<Geometry>>, layerConfig: VectorLayerEntryConfig) {
     super(mapId, olSource, layerConfig);
 
     // Get the style label in case we need it later
     const label = layerConfig.layerName || layerConfig.layerId;
 
     // Create the vector layer options.
-    const layerOptions: VectorLayerOptions<Feature, VectorSource> = {
+    const layerOptions: VectorLayerOptions<VectorSource<Feature<Geometry>>> = {
       properties: { layerConfig },
       source: olSource,
       style: (feature) => {
-        return AbstractGVVector.calculateStyleForFeature(this, feature, label, layerConfig.filterEquation, layerConfig.legendFilterIsOff);
+        return AbstractGVVector.calculateStyleForFeature(
+          this as AbstractGVLayer,
+          feature as FeatureLike,
+          label,
+          layerConfig.filterEquation,
+          layerConfig.legendFilterIsOff
+        );
       },
     };
 
@@ -50,7 +58,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     AbstractGVVector.initOptionsWithInitialSettings(layerOptions, layerConfig);
 
     // Create and set the OpenLayer layer
-    this.olLayer = new VectorLayer(layerOptions);
+    this.olLayer = new VectorLayer<VectorSource<Feature<Geometry>>>(layerOptions);
   }
 
   /**

@@ -10,7 +10,7 @@ import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { ProjectionLike } from 'ol/proj';
-import { Point } from 'ol/geom';
+import { Geometry, Point } from 'ol/geom';
 import { getUid } from 'ol/util';
 
 import { TypeOutfields } from '@config/types/map-schema-types';
@@ -301,20 +301,23 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration used by the source.
    * @param {VectorSource} vectorSource The source configuration for the vector layer.
    *
-   * @returns {VectorLayer<Feature>} The vector layer created.
+   * @returns {VectorSource<Feature<Geometry>>} The vector layer created.
    */
   // GV Layers Refactoring - Obsolete (this is bridging between config and layers, okay)
-  protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource): VectorLayer<Feature> {
+  protected createVectorLayer(
+    layerConfig: VectorLayerEntryConfig,
+    vectorSource: VectorSource
+  ): VectorLayer<VectorSource<Feature<Geometry>>> {
     // GV Time to request an OpenLayers layer!
     // TODO: There may be some additional enhancements to be done now that we can notice how emitLayerRequesting and emitLayerCreation are getting "close" to each other.
     // TODO.CONT: This whole will be removed when migration to config api... do we invest time in it?
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source: vectorSource });
 
     // If any response
-    let olLayer: VectorLayer<Feature> | undefined;
+    let olLayer: VectorLayer<VectorSource<Feature<Geometry>>> | undefined;
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
-      olLayer = requestResult[0] as VectorLayer<Feature>;
+      olLayer = requestResult[0] as VectorLayer<VectorSource<Feature<Geometry>>>;
     } else throw new Error('Error on layerRequesting event');
 
     // GV Time to emit about the layer creation!
@@ -336,10 +339,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const mapProjection: ProjectionLike = this.getMapViewer().getProjection().getCode();
 
     const format = new FormatGeoJSON();
-    const geoJsonStr = format.writeFeatures((this.getOLLayer(layerPath) as VectorLayer<Feature>).getSource()!.getFeatures(), {
-      dataProjection: 'EPSG:4326', // Output projection,
-      featureProjection: mapProjection,
-    });
+    const geoJsonStr = format.writeFeatures(
+      (this.getOLLayer(layerPath) as VectorLayer<VectorSource<Feature<Geometry>>>).getSource()!.getFeatures(),
+      {
+        dataProjection: 'EPSG:4326', // Output projection,
+        featureProjection: mapProjection,
+      }
+    );
 
     return JSON.parse(geoJsonStr);
   }
