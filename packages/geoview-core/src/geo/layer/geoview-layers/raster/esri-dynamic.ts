@@ -278,6 +278,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     // Create the source
     const source = new ImageArcGISRest(sourceOptions);
 
+    // Raster layer queries do not accept any layerDefs
+    if (this.metadata?.layers[0].type === 'Raster Layer') {
+      const params = source.getParams();
+      source.updateParams({ ...params, layerDefs: '' });
+    }
+
     // GV Time to request an OpenLayers layer!
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
 

@@ -1136,7 +1136,6 @@ async function getPointStyleSubRoutine(
 export async function getLegendStyles(styleConfig: TypeLayerStyleConfig | undefined): Promise<TypeVectorLayerStyles> {
   try {
     if (!styleConfig) return {};
-
     const legendStyles: TypeVectorLayerStyles = {};
     if (styleConfig.Point) {
       // ======================================================================================================================
