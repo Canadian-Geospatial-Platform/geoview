@@ -265,7 +265,7 @@ export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'
 export type TypeLayerStatusSimplified = 'loading' | 'loaded' | 'error';
 
 // TODO: Refactor - Layers refactoring. After migration, can get rid of this type
-export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
+// TODO: NOW export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
 
 export type TypeEsriFormatParameter = 'png' | 'jpg' | 'gif' | 'svg';
 

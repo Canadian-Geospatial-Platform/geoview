@@ -203,6 +203,8 @@ L’onglet **Couches** comprend les sous-menus suivants&nbsp;:
 
 #### ![]({{assetsURL}}/img/guide/footer/view_25.svg) Vue
 
+_**N.B.&nbsp;: Cliquez sur une couche pour afficher ses information dans la section de droite.**_
+
 Le sous-menu **Vue** de l’onglet **Couches** se divise en deux sections. La section de gauche présente les couches affichées sur la carte. Si vous cliquez sur une couche, ses paramètres (options accessibles pour la couche) s’afficheront dans la section de droite.
 
 **Icônes de couche**
@@ -291,9 +293,9 @@ Pour retirer une couche, cliquez sur l’icône de suppression ![]({{assetsURL}}
 <a id="detailsSection"></a>
 ### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Détails [Haut de page](#footerSection)
 
-L’onglet **Détails** se divise en deux sections. La section de gauche dresse la liste des couches accessibles, tandis que celle de droite affiche le détail des éléments pour chaque couche.
-
 _**N.B.&nbsp;: Il faut sélectionner un élément sur la carte pour que la couche devienne cliquable dans la liste, sans quoi elle sera désactivée (grisée).**_
+
+L’onglet **Détails** se divise en deux sections. La section de gauche dresse la liste des couches accessibles, tandis que celle de droite affiche le détail des éléments pour chaque couche.
 
 Cliquez sur une couche pour afficher ses éléments en détail.
 
@@ -309,6 +311,8 @@ Cochez la case ![]({{assetsURL}}/img/guide/layers/check.png) pour garder l’él
 =2!dataTable=
 <a id="dataTableSection"></a>
 ### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Données [Haut de page](#footerSection)
+
+_**N.B.&nbsp;: Cliquez sur une couche pour afficher ses données dans la section de droite.**_
 
 L’onglet **Données** se divise en deux sections. La liste des couches se trouve à gauche, et les données des couches, à droite. Cliquez sur une couche pour en voir les données dans le tableau de droite.
 
@@ -392,7 +396,9 @@ Pour accéder aux boutons ou aux champs de saisie d’une cellule, assurez-vous 
 <a id="timeSliderSection"></a>
 ### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Curseur temporel [Haut de page](#footerSection)
 
-L’onglet **Curseur temporel** dans le pied de page se divise en deux sections. La liste des couches ayant un facteur temporel se trouve dans la section de gauche. Cliquez sur une couche pour afficher son curseur temporel dans la section de droite&nbsp;:
+_**N.B.&nbsp;: Cliquez sur une couche pour afficher son curseur temporel dans la section de droite.**_
+
+L’onglet **Curseur temporel** dans le pied de page se divise en deux sections. La liste des couches ayant un facteur temporel se trouve dans la section de gauche.
 
 Une barre de curseur s’affiche avec un ou deux points déplaçables. Pour les couches à facteur temporel ponctuel, il n’y a qu’un point déplaçable. Pour les couches à plage temporelle, il y a deux points déplaçables permettant de régler le début et la fin de la plage.
 
@@ -413,9 +419,9 @@ Le champ visé par le filtre s’affiche en bas à gauche de la section du curse
 <a id="chartSection"></a>
 ### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Graphique [Haut de page](#footerSection)
 
-L’onglet **Graphique** dans le pied de page se divise en deux sections. La liste des couches comportant un graphique se trouve dans la section de gauche. Sélectionnez un élément sur la carte pour en voir le graphique dans la section de droite.
-
 _**N.B.&nbsp;: Il faut sélectionner un élément sur la carte pour que la couche devienne cliquable dans la liste, sans quoi elle sera désactivée (grisée).**_
+
+L’onglet **Graphique** dans le pied de page se divise en deux sections. La liste des couches comportant un graphique se trouve dans la section de gauche. Sélectionnez un élément sur la carte pour en voir le graphique dans la section de droite.
 
 Le menu déroulant **Élément** (en haut à gauche de la section du graphique) permet également de sélectionner un élément. Il s’agit d’une fonction pratique lorsque plusieurs éléments sont rapprochés sur la carte et qu’il est difficile de sélectionner celui voulu.
 

@@ -176,7 +176,7 @@ export class PointMarkers {
       if (coordinates.length) {
         let extent = coordinates[0] as number[];
         for (let i = 1; i < coordinates.length; i++) {
-          extent = getExtentUnion(extent, coordinates[i]);
+          extent = getExtentUnion(extent, coordinates[i])!;
         }
 
         return extent;

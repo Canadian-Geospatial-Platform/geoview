@@ -101,8 +101,7 @@ export abstract class AbstractBaseLayer {
    * @returns The layer status
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getLayerStatus(layerPath: string): TypeLayerStatus {
-    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
+  getLayerStatus(): TypeLayerStatus {
     // Take the layer status from the config
     return this.getLayerConfig()!.layerStatus;
   }
@@ -112,8 +111,7 @@ export abstract class AbstractBaseLayer {
    * @returns The layer name
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getLayerName(layerPath: string): string | undefined {
-    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
+  getLayerName(): string | undefined {
     return this.#layerName;
   }
 
@@ -121,10 +119,9 @@ export abstract class AbstractBaseLayer {
    * Sets the layer name
    * @param {string | undefined} name - The layer name
    */
-  setLayerName(layerPath: string, name: string | undefined): void {
-    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
+  setLayerName(name: string | undefined): void {
     this.#layerName = name;
-    this.#emitLayerNameChanged({ layerPath, layerName: name });
+    this.#emitLayerNameChanged({ layerName: name });
   }
 
   /**
@@ -148,14 +145,14 @@ export abstract class AbstractBaseLayer {
 
   /**
    * Overridable function that gets the extent of an array of features.
-   * @param {string} layerPath - The layer path
    * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent | undefined>} The extent of the features, if available
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
-    logger.logError(`Feature geometry for ${objectIds} is unavailable from ${layerPath}`);
+  getExtentFromFeatures(objectIds: string[], outfield?: string): Promise<Extent | undefined> {
+    logger.logError(`Feature geometry for ${objectIds}-${outfield} is unavailable from ${this.getLayerPath()}`);
     return Promise.resolve(undefined);
   }
 
@@ -317,9 +314,6 @@ export abstract class AbstractBaseLayer {
 export type LayerNameChangedEvent = {
   // The new layer name.
   layerName?: string;
-  // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-  // The layer path.
-  layerPath: string;
 };
 
 /**
