@@ -393,16 +393,18 @@ export abstract class AbstractLayerSet {
    * @param {AbstractGVLayer} geoviewLayer - The geoview layer
    * @param {QueryType} queryType - The query type
    * @param {TypeLocation} location - The location for the query
+   * @param {boolean} queryGeometry - The query geometry boolean
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise resolving to the query results
    */
   protected static queryLayerFeatures(
     data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry,
     geoviewLayer: AbstractGVLayer,
     queryType: QueryType,
-    location: TypeLocation
+    location: TypeLocation,
+    queryGeometry: boolean = true
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Get Feature Info
-    return geoviewLayer.getFeatureInfo(queryType, data.layerPath, location);
+    return geoviewLayer.getFeatureInfo(queryType, location, queryGeometry);
   }
 
   /**
