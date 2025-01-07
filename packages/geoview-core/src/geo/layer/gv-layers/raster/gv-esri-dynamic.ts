@@ -29,6 +29,7 @@ import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { CONST_LAYER_TYPES } from '../../geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeEsriImageLayerLegend } from './gv-esri-image';
+import { transform } from 'ol/proj';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -221,32 +222,41 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the return of feature information at a given pixel location.
    * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtPixel(location: Pixel, queryGeometry = true): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Redirect to getFeatureInfoAtCoordinate
-    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location));
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), queryGeometry);
   }
 
   /**
    * Overrides the return of feature information at a given coordinate.
    * @param {Coordinate} location - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtCoordinate(
+    location: Coordinate,
+    queryGeometry = true
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Transform coordinate from map project to lntlat
     const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
 
     // Redirect to getFeatureInfoAtLongLat
-    return this.getFeatureInfoAtLongLat(projCoordinate);
+    return this.getFeatureInfoAtLongLat(projCoordinate, queryGeometry);
   }
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override async getFeatureInfoAtLongLat(lnglat: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override async getFeatureInfoAtLongLat(
+    lnglat: Coordinate,
+    queryGeometry = true
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // If invisible
       if (!this.getVisible()) return [];
@@ -273,14 +283,29 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const layerDefs = this.getOLSource()?.getParams()?.layerDefs || '';
       const size = mapViewer.map.getSize()!;
 
+      // function calculatePixelWidth(map, latitude) {
+      const view = this.getMapViewer().map.getView();
+      const resolution = view.getResolution()!; // Map resolution in meters (LCC)
+
+      // Conversion factor: meters per degree of longitude at given latitude
+      const metersPerDegreeLon = 111320 * Math.cos((lnglat[1] * Math.PI) / 180);
+
+      // Convert 1 pixel width (resolution in meters) to degrees
+      const pixelWidthInDegrees = resolution / metersPerDegreeLon;
+
+      const off = pixelWidthInDegrees;
+      // }
+
+      console.log('off ' + off);
       identifyUrl =
         `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
         `&imageDisplay=${size[0]},${size[1]},96` +
         `&layers=visible:${layerConfig.layerId}` +
         `&layerDefs=${layerDefs}` +
-        `&returnFieldName=true&sr=4326&returnGeometry=true` +
-        `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}`;
+        `&returnFieldName=true&sr=4326&returnGeometry=${queryGeometry}` +
+        `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
+        `&maxAllowableOffset=${off}`;
 
       const response = await fetch(identifyUrl);
       const jsonResponse = await response.json();
@@ -288,6 +313,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
         logger.logInfo('There is a problem with this query: ', identifyUrl);
         throw new Error(`Error code = ${jsonResponse.error.code} ${jsonResponse.error.message}` || '');
       }
+
+      // If no features
+      if (!jsonResponse.results) return [];
 
       const features = new EsriJSON().readFeatures(
         { features: jsonResponse.results },

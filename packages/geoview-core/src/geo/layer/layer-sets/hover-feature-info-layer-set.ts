@@ -107,7 +107,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       // If layer was found
       if (layer && layer instanceof AbstractGVLayer) {
         // If state is not queryable
-        if (!AbstractLayerSet.isStateQueryable(layer)) return;
+        return; // if (!AbstractLayerSet.isStateQueryable(layer)) return;
 
         // Flag processing
         this.resultSet[layerPath].feature = undefined;
@@ -117,7 +117,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
 
         // Process query on results data
-        AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layer, queryType, pixelCoordinate)
+        AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layer, queryType, pixelCoordinate, false)
           .then((arrayOfRecords) => {
             if (arrayOfRecords === null) {
               this.resultSet[layerPath].queryStatus = 'error';
