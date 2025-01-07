@@ -12,23 +12,7 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668"
-      },
-      {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
-      },
-      {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "0fca08b5-e9d0-414b-a3c4-092ff9c5e326"
-      },
-      {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "03ccfb5c-a06e-43e3-80fd-09d4f8f69703"
-      },
-      {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "6433173f-bca8-44e6-be8e-3e8a19d3c299"
+        "geoviewLayerId": "1dcd28aa-99da-4f62-b157-15631379b170"
       }
     ]
   },
