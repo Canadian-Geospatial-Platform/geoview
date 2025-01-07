@@ -165,7 +165,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       getLayerStatus: (layerPath: string): TypeLayerStatus | undefined => {
         const curLayers = get().layerState.legendLayers;
 
-        // If the layer is nnot found, it is because itis deleted, return error status
+        // If the layer is not found, it is because it is deleted, return error status
         return LegendEventProcessor.findLayerByPath(curLayers, layerPath) !== undefined
           ? LegendEventProcessor.findLayerByPath(curLayers, layerPath)!.layerStatus
           : 'error';
