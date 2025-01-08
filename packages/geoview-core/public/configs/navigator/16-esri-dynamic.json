@@ -11,10 +11,6 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "472ef86d-7f7c-423b-a7d2-b6f92b79fd6d",
-        "geoviewLayerType": "geoCore"
-      },
-      {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": "Historical Flood Events (HFE)",
         "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
@@ -85,7 +81,7 @@
                       ],
                       "opacity": 1,
                       "rotation": 0,
-                      "src": "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAcdJREFUKJFjYSATsCBz/v//z/Tt++fwZ6/v2X359lGckZHxHx+34BNJMZVdnOyc27Bq/P//v8iDZzcm7Tg+yev915v8yIokhMzCn768v1FKTKGYkZHxK1zj////me8+vjx99YHikP///2I468W7UxJLd11NjXTtZ2FgYEiBa3zz4WnaluO9/tg0wcCff1+Zdp+aFfLpy/stfDyCG1gYGBgYnry46/Xtx2NWZIW6CmEMP39/Y7j1dAvC5vdn+J+8uh3EwMAA0fjl+0cVZE1mGqkMzmYRDAwMDAxr9zKgaP785Z0Skh//siNrZGPhgLPZWblRnPz3/z92uEZ2Ns6XDAwMijDJo9dmMTAyMjH8/vOD4fKDlSgaOdm5X8M1CvJKnGBl4bf4/ecjAwMDA8P/fz8ZDl+eiBFAAtyqDIK84gfgGiWElKrs9TJ99pzrUMFQDQWMjMwMNnpx5+Sl1HvgGvn4+L7ffnA50tmwbO3hK7Plfv1+j6KJi0OawV4v+bogr2ggIyPjP7hGBgYGBlUF3TNX7x3QczMtnvTh82vb37+/STEwMv7jYOV+KMArtusbN1OJrKTab5h6lLSqreTwkYGBIR6Xc5EBAG+8pa3DWR79AAAAAElFTkSuQmCC",
+                      "src": "iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABw0lEQVQ4jWNhoBJgGRoG/f//n+nry8fhzy4ft/v2/pU4IxPDPx5RmSfSBva7OPiFthFl0P///0UeHNk86fSCFq/vH97wI8vxSsiFPzl3cKO0oV0xIyPjV5wG/f//n/nOgXXTj00tC2H4/x/D1s8vHkns70hNdSidxsLAwJCC06BXN8+mnZnX5I/NEBj49/cP06l5LSGfnt3ZwielsgGrQc8vHfX69e0zK7KYlL4tw5+f3xhe3TgLF/vy6hH/k7NHgxgYGLAb9P39GxVkvqKNL4NtwQQGBgYGhh01YSiGfX37RAmn1/7//cuOIsnBjZUN9SKqWmQOGzfvSwYGBkUY/86+1QyMTEwMf35+Z3h24RCKQRy8gq9xGsQvpXiCmZXd4u/vnxAX/vvLcGvXMgZ0wMEvzMAnrXIAp0EqGtZVn7zjfa5smIUSViiAkZFByyf5nIKVZw9OgxhlZb/f3bUmUss3ee3NnUvl/v76gWIGGxcvg5ZP0nUuOelARkbGfzgNYmBgYFB2CzlzZtVMPYPwgkmfXz60/fP9mxQDI8M/Vi6+h7wS8ru+S/4uUTbx/Y2uD2teMwlL/8jAwBCP03tYwOArRgCKzaW6FXcnxAAAAABJRU5ErkJggg==",
                       "type": "iconSymbol"
                     }
                   },
@@ -250,6 +246,26 @@
                     }
                   },
                   {
+                    "visible": false,
+                    "label": "Regulated, Yearly, Low",
+                    "values": [
+                      "Regulated",
+                      "Yearly",
+                      "Low"
+                    ],
+                    "settings": {
+                      "mimeType": "image/png",
+                      "offset": [
+                        0,
+                        0
+                      ],
+                      "opacity": 1,
+                      "rotation": 0,
+                      "src": "iVBORw0KGgoAAAANSUhEUgAAABQAAAATCAYAAACQjC21AAAACXBIWXMAAA7EAAAOxAGVKw4bAAABTklEQVQ4jWNhoDJgGTADV4Vq84StvvqFKgYuDFYx/P7vWz0DA0MAVQxkZPjb95+B0WFBkKJdwrr7hygycHGwcsA/hv8OEIMZuxkYGMzJNnBmmjHrv7fvu5CcarYoRDE0bs391WQZyP72fQ4DA4Mqstj//4xtM9OMN6TPOvubJAPnhMoIMf5jqMUipcLx9l06AwPDFJIMZP3P2sDAwCCIXZaxbq6f+sLkTTc/E2Xg4lBF9X//GDNwWcbAwCDKzPqnnIGBoYYoA//9Y+xhYGBgxWMgAyPD/8LFQfJTY9c9fI7XwAUhSs4M/xl88BkGBVz/GFiaGBgYUnEa2NDAwMR4maGXCMOgzvyfuChQvi9u/cPrWA1UvKKYxMDAoE+0gQwMzP+YmDsZGBj8MAxcFarN8/3f92YSDIM4koHBFzlLwg2EliSSpBqIDgauPCQWAAAl/F2MVoc3hAAAAABJRU5ErkJggg==",
+                      "type": "iconSymbol"
+                    }
+                  },
+                  {
                     "visible": true,
                     "label": "Regulated, Yearly, Normal",
                     "values": [],
@@ -293,6 +309,10 @@
             "layerFilter": "Total_CSO_Volume > 5000000"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "472ef86d-7f7c-423b-a7d2-b6f92b79fd6d",
+        "geoviewLayerType": "geoCore"
       }
     ]
   },
