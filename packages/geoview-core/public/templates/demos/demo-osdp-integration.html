@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OSDP Integration - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>OSDP Integration</strong></h1>
+            </td>
+          </tr>
+          <tr>
+            <td><a href="./demos.html">Main</a><br /></td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td><p>Demonstration of Open Science Data Portal Integration</p></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="map-title-holder">
+      <h4 id="HMap1">OSDP Integration</h4>
+    </div>
+
+    <div id="mapSection">
+      <div
+        id="Map1"
+        class="geoview-map"
+        data-lang="fr"
+        data-config-url="./configs/OSDP/osdp-empty.json"
+      ></div>
+    </div>
+
+    <div>
+      <ul>
+        <li>
+          <button id="deleteMap" style="margin: 10px">Delete map div</button>
+          Deletes map div if it exists, leaving the map object in cgpv.maps - Simulates moving away from map tab.
+          <details>
+            <summary>Code</summary>
+            <pre>
+              document.getElementById('Map1').remove();
+            </pre>
+          </details>
+        </li>
+        <li>
+          <button id="createMap" style="margin: 10px">Create map div</button>
+          Creates a new div for the map, if the original div has been deleted
+          <details>
+            <summary>Code</summary>
+            <pre>
+              if (!document.getElementById('Map1')) {
+                const newDiv = document.createElement('div');
+                const id = document.createAttribute('id');
+                id.value = 'Map1';
+                newDiv.setAttributeNode(id);
+                const lang = document.createAttribute('data-lang');
+                lang.value = 'fr';
+                newDiv.setAttributeNode(lang);
+                document.getElementById('mapSection').appendChild(newDiv);
+              }
+            </pre>
+          </details>
+        </li>
+        <li>
+          <button id="refreshMap" style="margin: 10px">Refresh map</button>
+          Recreates the map using the stored config, creating a new div if it has been deleted
+          <details>
+            <summary>Code</summary>
+            <pre>
+              <pre>
+                return new Promise (resolve => {
+                  removeMap('Map1')
+                    .then(() => {
+                      cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig).replace(/'/g, "\\'"), 800)
+                      .then(() => {
+                          resolve();
+                        });
+                    });
+                  });
+
+                  function removeMap(map) {
+                    return new Promise(resolve => {
+                      if (cgpv.api.maps[map]) {
+                        cgpv.api.maps[map].remove(false)
+                          .then(() => {
+                            resolve();
+                          });
+                      } else {
+                        resolve();
+                      }
+                    });
+                  }
+              </pre>
+            </pre>
+          </details>
+        </li>
+        <li>
+          <button id="updateState" style="margin: 10px">Update State</button>
+          Updates the stored config with the current map state
+          <details>
+            <summary>Code</summary>
+            <pre>
+              mapConfig = cgpv.api.maps.Map1.createMapConfigFromMapState();
+            </pre>
+          </details>
+        </li>
+        <li>
+          <button id="changeLanguage" style="margin: 10px">Change Language</button>
+          Changes the language from french to english or english to french and reloads the map if it exists
+          <details>
+            <summary>Code</summary>
+            <pre>
+              lang = lang === 'fr' ? 'en' : 'fr';
+              const mapDiv = document.getElementById('Map1');
+              if (mapDiv) {
+                mapDiv.setAttribute('data-lang', lang);
+                cgpv.api.maps.Map1.reloadWithCurrentState();
+              }
+            </pre>
+          </details>
+        </li>
+      </ul>
+    </div>
+
+    <div class="selector">
+      <textarea id="layerUuids" cols="40" rows="5">21b821cf-0f1c-40ee-8925-eab12d357668,ccc75c12-5acc-4a6a-959f-ef6f621147b9,0fca08b5-e9d0-414b-a3c4-092ff9c5e326</textarea>
+      <ul>
+        <li>
+          <button id="addLayers" style="margin: 10px">Add Layers</button>
+          Add entered Geocore UUID's to the map. Can be separated with commas or each on a new line
+          <details>
+            <summary>Code</summary>
+            <pre>
+              if (document.getElementById('Map1')) {
+                const layerUuids = document.getElementById('layerUuids').value;
+                const uuidList = layerUuids.split('\n').join(',').split(',');
+                addLayers(uuidList);
+              }
+
+              function addLayers(layers) {
+                layers.forEach((layer) => {
+                  cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layer);
+                });
+              }
+            </pre>
+          </details>
+        </li>
+      </ul>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      // Empty map config
+      let mapConfig = {
+        "map": {
+          "interaction": "dynamic",
+          "viewSettings": {
+            "projection": 3857
+          },
+          "basemapOptions": {
+            "basemapId": "transport",
+            "shaded": false,
+            "labeled": true
+          },
+          "listOfGeoviewLayerConfig": []
+        },
+        "components": ["overview-map"],
+        "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+              "appBar": {
+                "tabs": {
+                  "core": ["geolocator", "export"]
+                }
+              },
+        "footerBar": {
+          "tabs": {
+            "core": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
+          }
+        },
+        "corePackages": [],
+        "theme": "geo.ca"
+      };
+
+      let lang = 'fr';
+
+      function createMapDiv() {
+        if (!document.getElementById('Map1')) {
+          // Create the div
+          const newDiv = document.createElement('div');
+
+          // Create id and data-lang attributes and add them to div
+          const id = document.createAttribute('id');
+          id.value = 'Map1';
+          newDiv.setAttributeNode(id);
+          const dataLang = document.createAttribute('data-lang');
+          dataLang.value = lang;
+          newDiv.setAttributeNode(dataLang);
+
+          // Append the div to the mapSection div
+          document.getElementById('mapSection').appendChild(newDiv);
+        }
+      }
+
+      /** OSDP function
+       * Removes a map if it exists.
+       *
+       * @param map The map id.
+       * @returns Promise<void>
+       */
+      function removeMap(map) {
+        return new Promise(resolve => {
+          if (cgpv.api.maps[map]) {
+            cgpv.api.maps[map].remove(false)
+              .then(() => {
+                resolve();
+              });
+          } else {
+            resolve();
+          }
+        });
+      }
+
+      /** OSDP function
+       * Adds layers to the map.
+       * 
+       * @param layers Array of layers.
+       */
+      function addLayers(layers) {
+        layers.forEach((layer) => {
+          cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layer);
+        });
+      }
+
+      /** OSDP function
+       * Refresh the map.
+       *
+       * @param layers Array of layers.
+       */
+      function refreshMap() {
+        return new Promise (resolve => {
+          removeMap('Map1')
+            .then(() => {
+              cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800)
+              .then(() => {
+                  resolve();
+                });
+            });
+          });
+      }
+
+      // Delete Button============================================================================================================
+      const deleteMapButton = document.getElementById('deleteMap');
+
+      // add an event listener when a button is clicked
+      deleteMapButton.addEventListener('click', function () {
+        // Delete map div
+        document.getElementById('Map1').remove();
+      });
+
+      // Create Button============================================================================================================
+      const createMapButton = document.getElementById('createMap');
+
+      // add an event listener when a button is clicked
+      createMapButton.addEventListener('click', createMapDiv);
+
+      // Refresh Button============================================================================================================
+      const refreshMapButton = document.getElementById('refreshMap');
+
+      // add an event listener when a button is clicked
+      refreshMapButton.addEventListener('click', function () {
+        createMapDiv();
+        refreshMap();
+      });
+
+      // Update Button============================================================================================================
+      const updateMapButton = document.getElementById('updateState');
+
+      // add an event listener when a button is clicked
+      updateMapButton.addEventListener('click', function () {
+        mapConfig = cgpv.api.maps.Map1.createMapConfigFromMapState();
+        console.log(mapConfig);
+      });
+
+      // Change Language Button============================================================================================================
+      const changeLanguageButton = document.getElementById('changeLanguage');
+
+      // add an event listener when a button is clicked
+      changeLanguageButton.addEventListener('click', function () {
+        lang = lang === 'fr' ? 'en' : 'fr';
+        const mapDiv = document.getElementById('Map1');
+        if (mapDiv) {
+          mapDiv.setAttribute('data-lang', lang);
+          cgpv.api.maps.Map1.reloadWithCurrentState();
+        }
+      });
+
+      // Add Layers Button============================================================================================================
+      const addLayersButton = document.getElementById('addLayers');
+
+      // add an event listener when a button is clicked
+      addLayersButton.addEventListener('click', function () {
+        if (document.getElementById('Map1')) {
+          const layerUuids = document.getElementById('layerUuids').value;
+          const uuidList = layerUuids.split('\n').join(',').split(',');
+          addLayers(uuidList);
+        }
+      });
+
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init();
+    </script>
+  </body>
+</html>

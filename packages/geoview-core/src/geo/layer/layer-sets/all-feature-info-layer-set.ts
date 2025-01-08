@@ -90,7 +90,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {QueryType} queryType - The query's type to perform
    * @returns {Promise<TypeAllFeatureInfoResultSet | void>} A promise which will hold the result of the query
    */
-  // TODO: (futur development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
+  // TODO: (future development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
   async queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeAllFeatureInfoResultSet | void> {
     // FIXME: Watch out for code reentrancy between queries!
     // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
