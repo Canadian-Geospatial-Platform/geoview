@@ -1584,9 +1584,9 @@ export async function getFeatureCanvas(
       if (featureStyle) {
         if (geometryType === 'Point') {
           if (
-            (styleSettings.type === 'simple' && styleSettings.info[0].settings.type === 'simpleSymbol') ||
-            (styleSettings.type === 'uniqueValue' && styleSettings.info[0].settings.type === 'simpleSymbol') ||
-            (styleSettings.type === 'classBreaks' && isSimpleSymbolVectorConfig(styleSettings.info[0].settings))
+            (styleSettings.type === 'simple' && !(featureStyle.getImage() instanceof Icon)) ||
+            (styleSettings.type === 'uniqueValue' && !(featureStyle.getImage() instanceof Icon)) ||
+            (styleSettings.type === 'classBreaks' && !(featureStyle.getImage() instanceof Icon))
           ) {
             canvas = createPointCanvas(featureStyle);
           } else {
