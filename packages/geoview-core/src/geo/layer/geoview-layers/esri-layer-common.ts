@@ -142,7 +142,8 @@ export function commonValidateListOfLayerEntryConfig(
 
       // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)...
       // Don't forget to replace the old version in the registered layers
-      MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(groupLayerConfig);
+      // TODO: Officially remove setLayerEntryConfigObsolete once passed testing
+      // MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(groupLayerConfig);
 
       (layer.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
         // Make sure to copy the layerConfig source before recycling it in the constructors. This was causing the 'source' value to leak between layer entry configs
@@ -164,7 +165,8 @@ export function commonValidateListOfLayerEntryConfig(
 
         // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
         // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)... (standardizing this call with the other one above for now)
-        MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(subLayerEntryConfig);
+        // TODO: Officially remove setLayerEntryConfigObsolete once passed testing
+        // MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(subLayerEntryConfig);
       });
 
       layer.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);

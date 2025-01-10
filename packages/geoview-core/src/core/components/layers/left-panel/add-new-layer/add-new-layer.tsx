@@ -248,7 +248,7 @@ export function AddNewLayer(): JSX.Element {
                   geoviewLayerConfig: wmsGeoviewLayerConfig,
                   layerId: childLayer.Name as string,
                   layerName: childLayer.Title as string,
-                } as OgcWmsLayerEntryConfig)
+                } as unknown as OgcWmsLayerEntryConfig)
               );
             }
 

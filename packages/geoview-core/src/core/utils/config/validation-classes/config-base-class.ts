@@ -223,6 +223,28 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Clones the configuration class.
+   *
+   * @returns {ConfigBaseClass} The cloned ConfigBaseClass object.
+   */
+  clone(): ConfigBaseClass {
+    // Redirect to clone the object and return it
+    return this.onClone();
+  }
+
+  /**
+   * Overridable function to clone a child of a ConfigBaseClass.
+   *
+   * @returns {ConfigBaseClass} The cloned child object of a ConfigBaseClass.
+   */
+  protected onClone(): ConfigBaseClass {
+    // Crash on purpose.
+    // GV Make sure to implement a 'protected override onClone(): ConfigBaseClass' in the child-class to
+    // GV use this cloning feature. See OgcWMSLayerEntryConfig for example.
+    throw new Error(`Not implemented exception onClone on layer path ${this.layerPath}`);
+  }
+
+  /**
    * Recursively checks the list of layer entries to see if all of them are greater than or equal to the provided layer status.
    *
    * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.

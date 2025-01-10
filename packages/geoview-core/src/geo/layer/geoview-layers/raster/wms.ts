@@ -7,9 +7,7 @@ import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 import { Extent } from 'ol/extent';
 
-import cloneDeep from 'lodash/cloneDeep';
-
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
@@ -21,6 +19,7 @@ import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -396,7 +395,7 @@ export class WMS extends AbstractGeoViewRaster {
         }
 
         if ('Layer' in layerFound) {
-          this.#createGroupLayer(layerFound, layerConfig as AbstractBaseLayerEntryConfig);
+          this.#createGroupLayer(layerFound, layerConfig as unknown as GroupLayerEntryConfig);
           return;
         }
 
@@ -409,11 +408,11 @@ export class WMS extends AbstractGeoViewRaster {
    * This method create recursively dynamic group layers from the service metadata.
    *
    * @param {TypeJsonObject} layer The dynamic group layer metadata.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
+   * @param {GroupLayerEntryConfig} layerConfig The group layer configuration associated to the dynamic group.
    * @private
    */
   // GV Layers Refactoring - Obsolete (in config)
-  #createGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig): void {
+  #createGroupLayer(layer: TypeJsonObject, layerConfig: GroupLayerEntryConfig): void {
     // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
     // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
     // TODO: The answer is no. Even if the final structure is the same, the input structure is different for each geoview layer types.
@@ -423,17 +422,17 @@ export class WMS extends AbstractGeoViewRaster {
     arrayOfLayerMetadata.forEach((subLayer) => {
       // Log for pertinent debugging purposes
       logger.logTraceCore('WMS - createGroupLayer', 'Cloning the layer config', layerConfig.layerPath);
-      const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
-      subLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
+      const subLayerEntryConfig: ConfigBaseClass = layerConfig.clone();
+      subLayerEntryConfig.parentLayerConfig = layerConfig;
       subLayerEntryConfig.layerId = subLayer.Name as string;
       subLayerEntryConfig.layerName = subLayer.Title as string;
-      newListOfLayerEntryConfig.push(subLayerEntryConfig);
+      newListOfLayerEntryConfig.push(subLayerEntryConfig as TypeLayerEntryConfig);
 
       // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
       this.getMapViewer().layer.registerLayerConfigInit(subLayerEntryConfig);
     });
 
-    const switchToGroupLayer = Cast<GroupLayerEntryConfig>(layerConfig);
+    const switchToGroupLayer = layerConfig;
     switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
     switchToGroupLayer.layerName = layer.Title as string;
     switchToGroupLayer.isMetadataLayerGroup = true;

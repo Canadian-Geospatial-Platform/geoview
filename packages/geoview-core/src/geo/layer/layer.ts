@@ -250,22 +250,23 @@ export class LayerApi {
     return this.#layerEntryConfigs?.[layerPath];
   }
 
-  /**
-   * Obsolete function to set the layer configuration in the registered layers.
-   */
-  setLayerEntryConfigObsolete(layerConfig: ConfigBaseClass): void {
-    // FIXME: This function should be deleted once the Layers refactoring is done. It unregisters and registers an updated layer entry config.
-    // FIX.MECONT: This is because of the EsriDynamic and EsriFeature entry config being generated on-the-fly when registration of layer entry config has already happened.
-    // Get the config already existing if any
-    const alreadyExisting = this.#layerEntryConfigs[layerConfig.layerPath];
-    if (alreadyExisting) {
-      // Unregister the old one
-      this.unregisterLayerConfig(alreadyExisting, false);
-    }
+  // TODO: Officially remove setLayerEntryConfigObsolete once passed testing
+  // /**
+  //  * Obsolete function to set the layer configuration in the registered layers.
+  //  */
+  // setLayerEntryConfigObsolete(layerConfig: ConfigBaseClass): void {
+  //   // FIXME: This function should be deleted once the Layers refactoring is done. It unregisters and registers an updated layer entry config.
+  //   // FIX.MECONT: This is because of the EsriDynamic and EsriFeature entry config being generated on-the-fly when registration of layer entry config has already happened.
+  //   // Get the config already existing if any
+  //   const alreadyExisting = this.#layerEntryConfigs[layerConfig.layerPath];
+  //   if (alreadyExisting) {
+  //     // Unregister the old one
+  //     this.unregisterLayerConfig(alreadyExisting, false);
+  //   }
 
-    // Register this new one
-    this.registerLayerConfigInit(layerConfig);
-  }
+  //   // Register this new one
+  //   this.registerLayerConfigInit(layerConfig);
+  // }
 
   /**
    * Returns the OpenLayer instance associated with the layer path.
@@ -1202,12 +1203,19 @@ export class LayerApi {
     // Remove layer info from registered layers
     this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
       if (registeredLayerPath.startsWith(layerPath)) {
-        // Remove ol layer
+        // Remove actual OL layer from the map
         if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
-        // Unregister layer
+
+        // Unregister layer config from the application
         this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath)!);
-        // Remove from registered layers
+
+        // Remove from registered layer configs
         delete this.#layerEntryConfigs[registeredLayerPath];
+        delete this.#geoviewLayers[registeredLayerPath];
+
+        // Remove from registered layers
+        delete this.#gvLayers[registeredLayerPath];
+        delete this.#olLayers[registeredLayerPath];
       }
     });
 
