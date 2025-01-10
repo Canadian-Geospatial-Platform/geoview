@@ -11,8 +11,16 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "1dcd28aa-99da-4f62-b157-15631379b170"
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
+        "metadataAccessPath": "https://gisp.dfo-mpo.gc.ca/arcgis/rest/services/FGP/Fieldnotes_Pacific_Science_Field_Operations_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
       }
     ]
   },

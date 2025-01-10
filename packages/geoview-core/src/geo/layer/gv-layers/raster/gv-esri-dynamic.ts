@@ -8,7 +8,7 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 
-import { validateExtent } from '@/geo/utils/utilities';
+import { getMetersPerPixel, validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -22,14 +22,14 @@ import {
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
 } from '@/geo/map/map-schema-types';
-import { esriGetFieldType, esriGetFieldDomain } from '../utils';
+import { esriGetFieldType, esriGetFieldDomain, esriQueryRecordsByUrlObjectIds } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { CONST_LAYER_TYPES } from '../../geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeEsriImageLayerLegend } from './gv-esri-image';
-import { transform } from 'ol/proj';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -56,6 +56,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
   public constructor(mapId: string, olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
     super(mapId, olSource, layerConfig);
 
+    // TODO: Investigate to see if we can call the export map for the whole service at once instead of making many call
+    // TODO.CONT: We can use the layers and layersDef parameters to set what should be visible.
+    // TODO.CONT: layers=show:layerId ; layerDefs={ "layerId": "layer def" }
+    // TODO.CONT: There is no allowableOffset on esri dynamic to speed up. We will need to see what can be done for layers in wrong projection
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
       source: olSource,
@@ -279,49 +283,72 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const boundsLL = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[0], mapExtent[1]]);
       const boundsUR = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[2], mapExtent[3]]);
       const extent = { xmin: boundsLL[0], ymin: boundsLL[1], xmax: boundsUR[0], ymax: boundsUR[1] };
-
       const layerDefs = this.getOLSource()?.getParams()?.layerDefs || '';
       const size = mapViewer.map.getSize()!;
 
-      // function calculatePixelWidth(map, latitude) {
-      const view = this.getMapViewer().map.getView();
-      const resolution = view.getResolution()!; // Map resolution in meters (LCC)
+      // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
+      const offset = getMetersPerPixel(mapViewer, lnglat[1]);
+      console.log(`off ${offset}`);
 
-      // Conversion factor: meters per degree of longitude at given latitude
-      const metersPerDegreeLon = 111320 * Math.cos((lnglat[1] * Math.PI) / 180);
-
-      // Convert 1 pixel width (resolution in meters) to degrees
-      const pixelWidthInDegrees = resolution / metersPerDegreeLon;
-
-      const off = pixelWidthInDegrees;
-      // }
-
-      console.log('off ' + off);
       identifyUrl =
         `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
         `&imageDisplay=${size[0]},${size[1]},96` +
         `&layers=visible:${layerConfig.layerId}` +
         `&layerDefs=${layerDefs}` +
-        `&returnFieldName=true&sr=4326&returnGeometry=${queryGeometry}` +
         `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
-        `&maxAllowableOffset=${off}`;
+        `&returnGeometry=false`;
 
-      const response = await fetch(identifyUrl);
-      const jsonResponse = await response.json();
-      if (jsonResponse.error) {
+      logger.logMarkerStart('off identify');
+      const identifyResponse = await fetch(identifyUrl);
+      const identifyJsonResponse = await identifyResponse.json();
+      if (identifyJsonResponse.error) {
         logger.logInfo('There is a problem with this query: ', identifyUrl);
-        throw new Error(`Error code = ${jsonResponse.error.code} ${jsonResponse.error.message}` || '');
+        throw new Error(`Error code = ${identifyJsonResponse.error.code} ${identifyJsonResponse.error.message}` || '');
       }
+
+      // If no features identified
+      if (identifyJsonResponse.results.length === 0) return [];
+
+      // Extract OBJECTIDs
+      const oidField = layerConfig.source.featureInfo.outfields
+        ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
+        : 'OBJECTID';
+      const objectIds = identifyJsonResponse.results.map((result: TypeJsonObject) => result.attributes[oidField]);
+      logger.logMarkerCheck('off identify');
+
+      logger.logMarkerStart('off query');
+      const response1 = await esriQueryRecordsByUrlObjectIds(
+        layerConfig.source.dataAccessPath + layerConfig.layerId,
+        'Polygon',
+        objectIds,
+        '*',
+        true,
+        mapViewer.getMapState().currentProjection,
+        offset,
+        false
+      );
+      logger.logMarkerCheck('off query');
+
+      logger.logMarkerStart('off feature');
+      const features1 = new EsriJSON().readFeatures({ features: response1 }) as Feature<Geometry>[];
+      const arrayOfFeatureInfoEntries1 = await this.formatFeatureInfoResult(features1, layerConfig);
+      logger.logMarkerCheck('off feature');
+      return arrayOfFeatureInfoEntries1;
+      console.log('off ' + response1);
 
       // If no features
       if (!jsonResponse.results) return [];
-
+      logger.logMarkerStart('off start');
+      console.log('off ring' + jsonResponse.results[0].geometry.rings.length);
       const features = new EsriJSON().readFeatures(
         { features: jsonResponse.results },
-        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: mapViewer.getProjection().getCode() }
+        { dataProjection: 'EPSG:4326', featureProjection: mapViewer.getProjection().getCode() }
       ) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
+      logger.logMarkerCheck('off start');
+
+      console.log('off ' + arrayOfFeatureInfoEntries[0].geometry.values_.geometry.flatCoordinates.length);
       return arrayOfFeatureInfoEntries;
     } catch (error) {
       // Log
