@@ -1707,7 +1707,8 @@
         "string",
         "number",
         "date",
-        "url"
+        "url",
+        "oid"
       ]
     },
     "codedValueType": {

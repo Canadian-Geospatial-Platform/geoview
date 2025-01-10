@@ -22,6 +22,7 @@ import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
 
 import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
+import { MapViewer } from '@/app';
 
 /**
  * Interface used for css style declarations
@@ -308,6 +309,7 @@ export function convertTypeFeatureStyleToOpenLayersStyle(style?: TypeFeatureStyl
   return getDefaultDrawingStyle(style?.strokeColor, style?.strokeWidth, style?.fillColor);
 }
 
+// #region EXTENT
 /**
  * Returns the union of 2 extents.
  * @param {Extent | undefined} extentA First extent
@@ -432,6 +434,7 @@ export function validateExtentWhenDefined(extent: Extent | undefined, code: stri
   if (extent) return validateExtent(extent, code);
   return undefined;
 }
+// #endregion EXTENT
 
 /**
  * Gets the area of a given geometry
@@ -474,4 +477,39 @@ export function calculateDistance(coordinates: Coordinate[], inProj: string, out
   });
 
   return { total: Math.round((getLength(geom) / 1000) * 100) / 100, sections };
+}
+
+/**
+ * Get meters per pixel for different projections
+ * @param {MapViewer} map - The Geoview map viewer instance
+ * @param {number?} lat - The latitude, only needed for Web Mercator
+ * @returns {nubmber} Number representing meters per pixel
+ */
+export function getMetersPerPixel(map: MapViewer, lat?: number): number {
+  const view = map.getView();
+  const projection = view.getProjection().getCode();
+  const resolution = view.getResolution();
+
+  if (!resolution) return 0;
+
+  // Web Mercator needs latitude correction because of severe distortion at high latitudes
+  // At latitude 60°N, the scale distortion factor is about 2:1
+  if (projection === 'EPSG:3857') {
+    if (lat === undefined) {
+      // Get center of current view if latitude not provided
+      const center = view.getCenter();
+      if (center) {
+        // Transform center point to get latitude
+        const [, latitude] = Projection.transform(center, projection, Projection.PROJECTION_NAMES.LNGLAT);
+        const latitudeCorrection = Math.cos((latitude * Math.PI) / 180);
+        return resolution * latitudeCorrection;
+      }
+      return resolution;
+    }
+    const latitudeCorrection = Math.cos((lat * Math.PI) / 180);
+    return resolution * latitudeCorrection;
+  }
+
+  // LCC (and other meter-based projections) can use resolution directly
+  return resolution;
 }

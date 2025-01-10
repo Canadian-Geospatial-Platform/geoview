@@ -165,16 +165,13 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
    *
    * @param {string} esriFieldType The ESRI field type.
    *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
+   * @returns {'string' | 'date' | 'number' | 'oid'} The type of the field.
    * @static @private
    */
-  static #convertEsriFieldType(esriFieldType: string): 'string' | 'date' | 'number' {
+  static #convertEsriFieldType(esriFieldType: string): 'string' | 'date' | 'number' | 'oid' {
     if (esriFieldType === 'esriFieldTypeDate') return 'date';
-    if (
-      ['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger', 'esriFieldTypeOID'].includes(
-        esriFieldType
-      )
-    )
+    if (esriFieldType === 'esriFieldTypeOID') return 'oid';
+    if (['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger'].includes(esriFieldType))
       return 'number';
     return 'string';
   }

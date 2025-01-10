@@ -72,6 +72,11 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       try {
         // Create a new promise that will resolved when features have been updated with their geometries
         return new Promise<TypeFeatureInfoEntry[]>((resolve, reject) => {
+          // Get oid field
+          const oidField = chunk[0].fieldInfo
+            ? Object.keys(chunk[0].fieldInfo).find((key) => chunk[0].fieldInfo[key]!.dataType === 'oid') || undefined
+            : undefined;
+
           // Get the ids
           const objectids = chunk.map((record) => {
             return record.geometry?.get('OBJECTID') as number;
