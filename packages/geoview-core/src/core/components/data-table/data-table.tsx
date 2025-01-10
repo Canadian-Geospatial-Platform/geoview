@@ -299,13 +299,15 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     async (feature: TypeFeatureInfoEntry) => {
       let { extent } = feature;
 
-      // If there is no extent, the layer is ESRI Dynamic, get the feature extent using its OBJECTID
-      // GV: Some layers do not use OBJECTID, these are the other values seen so far.
-      // TODO: Update field info types to include esriFieldTypeOID to identify the ID field.
-      const idFields = ['OBJECTID', 'OBJECTID_1', 'FID', 'STATION_NUMBER'];
-      const idField = idFields.find((fieldName) => feature.fieldInfo[fieldName]?.value !== undefined);
-      if (!extent && idField !== undefined)
-        extent = await getExtentFromFeatures(layerPath, [feature.fieldInfo[idField]!.value as string], idField);
+      // Get oid field
+      const oidField =
+        feature && feature.fieldInfo
+          ? Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]!.dataType === 'oid') || undefined
+          : undefined;
+
+      // If there is no extent, the layer is ESRI Dynamic, get the feature extent using its oid field
+      if (!extent && oidField !== undefined)
+        extent = await getExtentFromFeatures(layerPath, [feature.fieldInfo[oidField]!.value as string], oidField);
 
       if (extent) {
         // Project

@@ -72,7 +72,8 @@
         "string",
         "number",
         "date",
-        "url"
+        "url",
+        "oid"
       ]
     },
     "TypeFeatureInfoNotQueryable": {

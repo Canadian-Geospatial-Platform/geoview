@@ -500,7 +500,7 @@ export type TypeOutfields = {
 };
 
 /** The types supported by the outfields object. */
-export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url';
+export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url' | 'oid';
 
 export type codedValueType = {
   type: 'codedValue';
