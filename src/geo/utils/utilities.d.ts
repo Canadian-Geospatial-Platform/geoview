@@ -115,43 +115,19 @@ export declare function coordFormatDMS(value: number): string;
  */
 export declare function convertTypeFeatureStyleToOpenLayersStyle(style?: TypeFeatureStyle): Style;
 /**
- * Compare sets of extents of the same projection and return the smallest or largest set.
- * Extents must be in OpenLayers extent format - [minx, miny, maxx, maxy]
- *
- * @param {Extent} extentsA First set of extents
- * @param {Extent} extentsB Second set of extents
- * @param {string} minmax Decides whether to get smallest or largest extent
- * @returns {Extent} the smallest or largest set from the extents
- */
-export declare function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax?: string): Extent;
-/**
  * Returns the union of 2 extents.
- * @param {Extent} extentA First extent
- * @param {Extent} extentB Optional second extent
- * @returns {Extent} The union of the extents
- */
-export declare function getExtentUnion(extentA: Extent, extentB?: Extent): Extent;
-/**
- * Returns the union of 2 extents supporting the case where extentA might be undefined.
- * @param {Extent | undefined} extentA First extent or undefined
+ * @param {Extent | undefined} extentA First extent
  * @param {Extent | undefined} extentB Optional second extent
  * @returns {Extent | undefined} The union of the extents
  */
-export declare function getExtentUnionMaybe(extentA: Extent | undefined, extentB?: Extent): Extent | undefined;
+export declare function getExtentUnion(extentA: Extent | undefined, extentB?: Extent | undefined): Extent | undefined;
 /**
  * Returns the intersection of 2 extents.
- * @param {Extent} extentA First extent
- * @param {Extent} extentB Optional second extent
- * @returns {Extent} The intersection of the extents
- */
-export declare function getExtentIntersection(extentA: Extent, extentB?: Extent): Extent;
-/**
- * Returns the intersection of 2 extents supporting the case where extentA might be undefined.
- * @param {Extent | undefined} extentA First extent or undefined
+ * @param {Extent | undefined} extentA First extent
  * @param {Extent | undefined} extentB Optional second extent
  * @returns {Extent | undefined} The intersection of the extents
  */
-export declare function getExtentIntersectionMaybe(extentA: Extent | undefined, extentB?: Extent): Extent | undefined;
+export declare function getExtentIntersection(extentA: Extent | undefined, extentB?: Extent | undefined): Extent | undefined;
 /**
  * Converts an extent to a polygon
  * @param {Extent} extent - The extent to convert

@@ -2,7 +2,6 @@ import { EventDelegateBase } from '@/api/events/event-helper';
 import { QueryType, TypeFeatureInfoEntry, TypeLayerEntryConfig, TypeLayerStatus, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
 import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { LayerApi } from '@/geo/layer/layer';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
@@ -55,22 +54,22 @@ export declare abstract class AbstractLayerSet {
     protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void;
     /**
      * Registers the layer in the layer-set.
-     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+     * @param {AbstractBaseLayer} layer - The layer
      */
-    registerLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): Promise<void>;
+    registerLayer(layer: AbstractBaseLayer): Promise<void>;
     /**
      * An overridable registration condition function for a layer-set to check if the registration
      * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
-     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+     * @param {AbstractBaseLayer} layer - The layer
      * @returns {boolean} True if the layer should be registered, false otherwise
      */
-    protected onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean;
+    protected onRegisterLayerCheck(layer: AbstractBaseLayer): boolean;
     /**
      * An overridable registration function for a layer-set that the registration process will use to
      * create a new entry in the layer set for a specific geoview layer and layer path.
-     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer config
+     * @param {AbstractBaseLayer} layer - The layer config
      */
-    protected onRegisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): void;
+    protected onRegisterLayer(layer: AbstractBaseLayer): void;
     /**
      * Unregisters the layer config and layer from the layer-set.
      * @param {string} layerPath - The layer path
@@ -85,9 +84,9 @@ export declare abstract class AbstractLayerSet {
     /**
      * An overridable unregistration function for a layer-set that the registration process will use to
      * unregister a specific geoview layer.
-     * @param {AbstractGeoViewLayer | AbstractBaseLayer | undefined} layer - The layer
+     * @param {AbstractBaseLayer | undefined} layer - The layer
      */
-    protected onUnregisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer | undefined): void;
+    protected onUnregisterLayer(layer: AbstractBaseLayer | undefined): void;
     /**
      * An overridable function for a layer-set to process a layer status changed event.
      * @param {ConfigBaseClass} layerConfig - The layer config
@@ -108,30 +107,30 @@ export declare abstract class AbstractLayerSet {
     /**
      * Processes layer data to query features on it, if the layer path can be queried.
      * @param {TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry} data - The layer data
-     * @param {AbstractGeoViewLayer | AbstractGVLayer} geoviewLayer - The geoview layer
+     * @param {AbstractGVLayer} geoviewLayer - The geoview layer
      * @param {QueryType} queryType - The query type
      * @param {TypeLocation} location - The location for the query
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise resolving to the query results
      */
-    protected static queryLayerFeatures(data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry, geoviewLayer: AbstractGeoViewLayer | AbstractGVLayer, queryType: QueryType, location: TypeLocation): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected static queryLayerFeatures(data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry, geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
      * Checks if the layer is of queryable type based on its class definition
-     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+     * @param {AbstractBaseLayer} layer - The layer
      * @returns True if the layer is of queryable type
      */
-    protected static isQueryableType(layer: AbstractGeoViewLayer | AbstractBaseLayer): boolean;
+    protected static isQueryableType(layer: AbstractBaseLayer): boolean;
     /**
      * Checks if the layer config source is queryable.
-     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+     * @param {AbstractBaseLayer} layer - The layer
      * @returns {boolean} True if the source is queryable or undefined
      */
-    protected static isSourceQueryable(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean;
+    protected static isSourceQueryable(layer: AbstractBaseLayer): boolean;
     /**
      * Checks if the layer config state is queryable.
-     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+     * @param {AbstractBaseLayer} layer - The layer
      * @returns {boolean} True if the state is queryable or undefined
      */
-    protected static isStateQueryable(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean;
+    protected static isStateQueryable(layer: AbstractBaseLayer): boolean;
     /**
      * Align records with informatiom provided by OutFields from layer config.
      * This will update fields in and delete unwanted fields from the arrayOfRecords

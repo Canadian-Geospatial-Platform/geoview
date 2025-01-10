@@ -31,10 +31,10 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     protected constructor(mapId: string, olSource: Source, layerConfig: AbstractBaseLayerEntryConfig);
     /**
-     * Gets the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds.
+     * Gets the bounds of the layer.
      * @returns {Extent} The layer bounding box.
      */
-    abstract getBounds(layerPath: string): Extent | undefined;
+    abstract getBounds(): Extent | undefined;
     /**
      * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
      * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
@@ -64,12 +64,12 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * Gets the layer style
      * @returns The layer style
      */
-    getStyle(layerPath: string): TypeLayerStyleConfig | undefined;
+    getStyle(): TypeLayerStyleConfig | undefined;
     /**
      * Sets the layer style
      * @param {TypeStyleConfig | undefined} style - The layer style
      */
-    setStyle(layerPath: string, style: TypeLayerStyleConfig): void;
+    setStyle(style: TypeLayerStyleConfig): void;
     /**
      * Gets the layer attributions
      * @returns {string[]} The layer attributions
@@ -195,7 +195,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * Gets the layerFilter that is associated to the layer.
      * @returns {string | undefined} The filter associated to the layer or undefined.
      */
-    getLayerFilter(layerPath: string): string | undefined;
+    getLayerFilter(): string | undefined;
     /**
      * Initializes common properties on a layer options.
      * @param {Options} layerOptions - The layer options to initialize
@@ -268,7 +268,6 @@ type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleCh
  */
 export type LayerStyleChangedEvent = {
     style: TypeLayerStyleConfig;
-    layerPath: string;
 };
 /**
  * Define an event for the delegate
@@ -296,7 +295,6 @@ type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilter
  * Define an event for the delegate
  */
 export type LayerFilterAppliedEvent = {
-    layerPath: string;
     filter: string;
 };
 /**

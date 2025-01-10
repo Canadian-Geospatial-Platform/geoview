@@ -1,19 +1,11 @@
 import BaseLayer from 'ol/layer/Base';
-import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
-import { Extent } from 'ol/extent';
 import LayerGroup from 'ol/layer/Group';
-import Feature from 'ol/Feature';
 import Source from 'ol/source/Source';
-import { TypeOutfieldsType } from '@config/types/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStyleConfig, TypeLayerInitialSettings, TypeLayerStatus, TypeStyleGeometry, CONST_LAYER_ENTRY_TYPES, TypeLoadEndListenerType, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType } from '@/geo/map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStyleConfig, TypeLayerInitialSettings, TypeLayerStatus, TypeStyleGeometry, CONST_LAYER_ENTRY_TYPES } from '@/geo/map/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -75,6 +67,11 @@ export declare abstract class AbstractGeoViewLayer {
      * @returns {MapViewer} The MapViewer
      */
     getMapViewer(): MapViewer;
+    /**
+     * Gets the Geoview layer id.
+     * @returns {string} The geoview layer id
+     */
+    getGeoviewLayerId(): string;
     /** ***************************************************************************************************************************
      * Gets the layer configuration of the specified layer path.
      *
@@ -91,32 +88,11 @@ export declare abstract class AbstractGeoViewLayer {
      * @returns {BaseLayer | undefined} The layer configuration or undefined if not found.
      */
     getOLLayer(layerPath: string): BaseLayer | undefined;
-    /** ***************************************************************************************************************************
-     * Gets the Geoview layer id.
-     * @returns {string} The geoview layer id
-     */
-    getGeoviewLayerId(): string;
-    /** ***************************************************************************************************************************
-     * Gets the Geoview layer name.
-     * @returns {string | undefined} The geoview layer name
-     */
-    getGeoviewLayerName(): string | undefined;
     /**
      * Gets the layer status
      * @returns The layer status
      */
     getLayerStatus(layerPath: string): TypeLayerStatus;
-    /** ***************************************************************************************************************************
-     * Gets the layer name.
-     * @returns {string | undefined} The geoview layer name
-     */
-    getLayerName(layerPath: string): string | undefined;
-    /** ***************************************************************************************************************************
-     * Sets the layer name.
-     * @param {string} layerPath The layer path.
-     * @param {string} name The layer name.
-     */
-    setLayerName(layerPath: string, name: string | undefined): void;
     /**
      * Gets the layer style
      * @returns The layer style
@@ -258,252 +234,17 @@ export declare abstract class AbstractGeoViewLayer {
      */
     protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined>;
     /** ***************************************************************************************************************************
-     * Return feature information for the layer specified.
-     *
-     * @param {QueryType} queryType  The type of query to perform.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     * @param {TypeLocation} location An optionsl pixel, coordinate or polygon that will be used by the query.
-     *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
-     */
-    getFeatureInfo(queryType: QueryType, layerPath: string, location?: TypeLocation): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features on a layer. Returns an empty array [] when the layer is
-     * not queryable.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-     */
-    protected getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features around the provided Pixel. Returns an empty array [] when the layer is
-     * not queryable.
-     *
-     * @param {Coordinate} location The pixel coordinate that will be used by the query.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-     */
-    protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features around the provided coordinate. Returns an empty array [] when the layer is
-     * not queryable.
-     *
-     * @param {Coordinate} location The coordinate that will be used by the query.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-     */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features around the provided longitude latitude. Returns an empty array [] when the
-     * layer is not queryable.
-     *
-     * @param {Coordinate} location The coordinate that will be used by the query.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-     */
-    protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features in the provided bounding box. Returns an empty array [] when the layer is
-     * not queryable.
-     *
-     * @param {Coordinate} location The coordinate that will be used by the query.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-     */
-    protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features in the provided polygon. Returns an empty array [] when the layer is
-     * not queryable.
-     *
-     * @param {Coordinate} location The coordinate that will be used by the query.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-     */
-    protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /**
-     * Queries the legend.
-     * This function raises legend querying and queried events.
-     * @returns {Promise<TypeLegend | null>} The promise when the legend (or null) will be received
-     */
-    queryLegend(layerPath: string): Promise<TypeLegend | null>;
-    /**
-     * Update the size of the icon image list based on styles.
-     * @param {TypeLegend} legend - The legend to check.
-     */
-    updateIconImageCache(legend: TypeLegend): void;
-    /** ***************************************************************************************************************************
      * Creates a layer group.
      * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
      * @param {TypeLayerInitialSettings } initialSettings Initial settings to apply to the layer.
      * @returns {LayerGroup} A new layer group.
      */
     protected createLayerGroup(layerConfig: TypeLayerEntryConfig, initialSettings: TypeLayerInitialSettings): LayerGroup;
-    /** ***************************************************************************************************************************
-     * Returns the domain of the specified field or null if the field has no domain.
-     *
-     * @param {string} fieldName field name for which we want to get the domain.
-     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-     */
-    protected getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType;
-    /** ***************************************************************************************************************************
-     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-     *
-     * @param {string} fieldName field name for which we want to get the type.
-     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {TypeOutfieldsType} The type of the field.
-     */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
-    /** ***************************************************************************************************************************
-     * Return the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
-     * numbers representing an extent: [minx, miny, maxx, maxy]. This routine return undefined when the layer path can't be found.
-     * The extent is used to clip the data displayed on the map.
-     *
-     * @param {string} layerPath Layer path to the layer's configuration.
-     *
-     * @returns {Extent | undefined} The layer extent.
-     */
-    getExtent(layerPath: string): Extent | undefined;
-    /** ***************************************************************************************************************************
-     * set the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
-     * numbers representing an extent: [minx, miny, maxx, maxy]. This routine does nothing when the layerPath specified is not
-     * found.
-     *
-     * @param {Extent} layerExtent The extent to assign to the layer.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     */
-    setExtent(layerExtent: Extent, layerPath: string): void;
-    /** ***************************************************************************************************************************
-     * Return the opacity of the layer (between 0 and 1). This routine return undefined when the layerPath specified is not found.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {number | undefined} The opacity of the layer.
-     */
-    getOpacity(layerPath: string): number | undefined;
-    /** ***************************************************************************************************************************
-     * Set the opacity of the layer (between 0 and 1). This routine does nothing when the layerPath specified is not found.
-     *
-     * @param {number} layerOpacity The opacity of the layer.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     */
-    setOpacity(layerOpacity: number, layerPath: string): void;
-    /** ***************************************************************************************************************************
-     * Return the visibility of the layer (true or false). This routine return undefined when the layerPath specified is not found.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {boolean | undefined} The visibility of the layer.
-     */
-    getVisible(layerPath: string): boolean | undefined;
-    /** ***************************************************************************************************************************
-     * Set the visibility of the layer (true or false). This routine does nothing when the layerPath specified is not found.
-     *
-     * @param {boolean} layerVisibility The visibility of the layer.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     */
-    setVisible(layerVisibility: boolean, layerPath: string): void;
-    /** ***************************************************************************************************************************
-     * Return the min zoom of the layer. This routine return undefined when the layerPath specified is not found.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {number | undefined} The min zoom of the layer.
-     */
-    getMinZoom(layerPath: string): number | undefined;
-    /** ***************************************************************************************************************************
-     * Set the min zoom of the layer. This routine does nothing when the layerPath specified is not found.
-     *
-     * @param {boolean} layerVisibility The min zoom of the layer.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     */
-    setMinZoom(minZoom: number, layerPath: string): void;
-    /** ***************************************************************************************************************************
-     * Return the max zoom of the layer. This routine return undefined when the layerPath specified is not found.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {number | undefined} The max zoom of the layer.
-     */
-    getMaxZoom(layerPath: string): number | undefined;
-    /** ***************************************************************************************************************************
-     * Set the max zoom of the layer. This routine does nothing when the layerPath specified is not found.
-     *
-     * @param {boolean} layerVisibility The max zoom of the layer.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     */
-    setMaxZoom(maxZoom: number, layerPath: string): void;
-    /** ***************************************************************************************************************************
-     * Overridable function returning the legend of the layer. Returns null when the layerPath specified is not found. If the style property
-     * of the layerConfig object is undefined, the legend property of the object returned will be null.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     * @returns {Promise<TypeLegend | null>} The legend of the layer.
-     */
-    getLegend(layerPath: string): Promise<TypeLegend | null>;
-    /** ***************************************************************************************************************************
-     * Get and format the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
-     * since the base date. Vector feature dates must be in ISO format.
-     *
-     * @param {Feature} feature - The features that hold the field values.
-     * @param {string} fieldName - The field name.
-     * @param {'number' | 'string' | 'date'} fieldType - The field type.
-     *
-     * @returns {string | number | Date} The formatted value of the field.
-     */
-    protected getFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType): string | number | Date;
-    /** ***************************************************************************************************************************
-     * Convert the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
-     *
-     * @param {Feature[]} features The array of features to convert.
-     * @param {ImageLayerEntryConfig | VectorLayerEntryConfig} layerConfig The layer configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The Array of feature information.
-     */
-    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Get the layerFilter that is associated to the layer. Returns undefined when the layer config can't be found using the layer
-     * path.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {string | undefined} The filter associated to the layer or undefined.
-     */
-    getLayerFilter(layerPath: string): string | undefined;
-    /**
-     * Overridable function called when the layer gets in loaded status.
-     * @param layerConfig - The layer configuration
-     */
-    onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void;
     /**
      * Overridable function called when the layer gets in error status.
      * @param layerConfig - The layer configuration
      */
     onError(layerConfig: AbstractBaseLayerEntryConfig): void;
-    /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
-     *
-     * @param {string} layerPath The Layer path to the layer's configuration.
-     *
-     * @returns {Extent} The new layer bounding box.
-     */
-    abstract getBounds(layerPath: string): Extent | undefined;
-    /**
-     * Overridable function that gets the extent of an array of features.
-     * @param {string} layerPath - The layer path
-     * @param {string[]} objectIds - The IDs of features to get extents from.
-     * @param {string} outfield - ID field to return for services that require a value in outfields.
-     * @returns {Promise<Extent | undefined>} The extent of the features, if available
-     */
-    getExtentFromFeatures(layerPath: string, objectIds: string[], outfield?: string): Promise<Extent | undefined>;
     /** ***************************************************************************************************************************
      * Set the layerStatus code of all layers in the listOfLayerEntryConfig.
      *
@@ -529,57 +270,10 @@ export declare abstract class AbstractGeoViewLayer {
      */
     waitForAllLayerStatusAreGreaterThanOrEqualTo(timeout?: number, checkFrequency?: number): Promise<void>;
     /**
-     * The olLayerAndLoadEndListeners setter method for the ConfigBaseClass class and its descendant classes.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration we are creating a layer for.
-     * @param {BaseLayer} olLayer - The OpenLayer we are creating
-     * @param {TypeLoadEndListenerType} listenerType - The layer listener type.
-     */
-    setLayerAndLoadEndListeners(layerConfig: AbstractBaseLayerEntryConfig, olLayer: BaseLayer, listenerType: TypeLoadEndListenerType): void;
-    /**
      * Recursively gets all layer entry configs in the GeoView Layer.
      * @returns {ConfigBaseClass[]} The list of layer entry configs
      */
     getAllLayerEntryConfigs(): ConfigBaseClass[];
-    /**
-     * Registers a layer name changed event handler.
-     * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
-     */
-    onLayerNameChanged(callback: LayerNameChangedDelegate): void;
-    /**
-     * Unregisters a layer name changed event handler.
-     * @param {LayerNameChangedDelegate} callback - The callback to stop being called whenever the event is emitted
-     */
-    offLayerNameChanged(callback: LayerNameChangedDelegate): void;
-    /**
-     * Registers a legend querying event handler.
-     * @param {LegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
-     */
-    onLegendQuerying(callback: LegendQueryingDelegate): void;
-    /**
-     * Unregisters a legend querying event handler.
-     * @param {LegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
-     */
-    offLegendQuerying(callback: LegendQueryingDelegate): void;
-    /**
-     * Registers a legend queried event handler.
-     * @param {LegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
-     */
-    onLegendQueried(callback: LegendQueriedDelegate): void;
-    /**
-     * Unregisters a legend queried event handler.
-     * @param {LegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
-     */
-    offLegendQueried(callback: LegendQueriedDelegate): void;
-    /**
-     * Registers a visible changed event handler.
-     * @param {VisibleChangedDelegate} callback The callback to be executed whenever the event is emitted
-     */
-    onVisibleChanged(callback: VisibleChangedDelegate): void;
-    /**
-     * Unregisters a visible changed event handler.
-     * @param {VisibleChangedDelegate} callback The callback to stop being called whenever the event is emitted
-     */
-    offVisibleChanged(callback: VisibleChangedDelegate): void;
     /**
      * Registers a layer entry config processed event handler.
      * @param {LayerEntryProcessedDelegate} callback The callback to be executed whenever the event is emitted
@@ -623,22 +317,6 @@ export declare abstract class AbstractGeoViewLayer {
      */
     offLayerCreation(callback: LayerCreationDelegate): void;
     /**
-     * Emits filter applied event.
-     * @param {FilterAppliedEvent} event - The event to emit
-     * @private
-     */
-    protected emitLayerFilterApplied(event: LayerFilterAppliedEvent): void;
-    /**
-     * Registers a filter applied event handler.
-     * @param {FilterAppliedDelegate} callback - The callback to be executed whenever the event is emitted
-     */
-    onLayerFilterApplied(callback: LayerFilterAppliedDelegate): void;
-    /**
-     * Unregisters a filter applied event handler.
-     * @param {FilterAppliedDelegate} callback - The callback to stop being called whenever the event is emitted
-     */
-    offLayerFilterApplied(callback: LayerFilterAppliedDelegate): void;
-    /**
      * Registers a layer style changed event handler.
      * @param {LayerStyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
      */
@@ -648,16 +326,6 @@ export declare abstract class AbstractGeoViewLayer {
      * @param {LayerStyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerStyleChanged(callback: LayerStyleChangedDelegate): void;
-    /**
-     * Registers an opacity changed event handler.
-     * @param {LayerOpacityChangedDelegate} callback - The callback to be executed whenever the event is emitted
-     */
-    onLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void;
-    /**
-     * Unregisters an opacity changed event handler.
-     * @param {LayerOpacityChangedDelegate} callback - The callback to stop being called whenever the event is emitted
-     */
-    offLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void;
     /**
      * Registers an individual layer loaded event handler.
      * @param {IndividualLayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
@@ -676,10 +344,6 @@ export type LegendQueryingEvent = {
     layerPath: string;
 };
 /**
- * Define a delegate for the event handler function signature
- */
-type LegendQueryingDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueryingEvent, void>;
-/**
  * Define an event for the delegate
  */
 export type LegendQueriedEvent = {
@@ -687,20 +351,12 @@ export type LegendQueriedEvent = {
     legend: TypeLegend;
 };
 /**
- * Define a delegate for the event handler function signature
- */
-type LegendQueriedDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueriedEvent, void>;
-/**
  * Define an event for the delegate
  */
 export type VisibleChangedEvent = {
     layerPath: string;
     visible: boolean;
 };
-/**
- * Define a delegate for the event handler function signature
- */
-type VisibleChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, VisibleChangedEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -738,39 +394,6 @@ export interface TypeWmsLegendStyle {
     name: string;
     legend: HTMLCanvasElement | null;
 }
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerFilterAppliedEvent, void>;
-/**
- * Define an event for the delegate
- */
-export type LayerFilterAppliedEvent = {
-    layerPath: string;
-    filter: string;
-};
-/**
- * Define a delegate for the event handler function signature.
- */
-type LayerNameChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerNameChangedEvent, void>;
-/**
- * Define an event for the delegate.
- */
-export type LayerNameChangedEvent = {
-    layerName?: string;
-    layerPath: string;
-};
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerOpacityChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerOpacityChangedEvent, void>;
-/**
- * Define an event for the delegate
- */
-export type LayerOpacityChangedEvent = {
-    layerPath: string;
-    opacity: number;
-};
 /**
  * Define a delegate for the event handler function signature
  */

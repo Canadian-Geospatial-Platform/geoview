@@ -2,7 +2,6 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
-import { GeoJSONObject } from 'ol/format/GeoJSON';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
@@ -87,10 +86,4 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
      */
     protected createVectorSource(layerConfig: AbstractBaseLayerEntryConfig, sourceOptions?: SourceOptions<Feature>, readOptions?: ReadOptions): VectorSource<Feature>;
-    /** ***************************************************************************************************************************
-     * Override the features of a geojson layer with new geojson.
-     * @param {string} layerPath - The path of the layer to override.
-     * @param {GeoJSONObject | string} geojson - The new geoJSON.
-     */
-    overrideGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void;
 }

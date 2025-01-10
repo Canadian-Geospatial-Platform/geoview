@@ -62,15 +62,6 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      */
     constructor(mapId: string, layerConfig: TypeOgcFeatureLayerConfig);
     /** ***************************************************************************************************************************
-     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-     *
-     * @param {string} fieldName field name for which we want to get the type.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {'string' | 'date' | 'number'} The type of the field.
-     */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number';
-    /** ***************************************************************************************************************************
      * This method reads the service metadata from the metadataAccessPath.
      *
      * @returns {Promise<void>} A promise that the execution is completed.

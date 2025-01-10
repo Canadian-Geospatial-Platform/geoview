@@ -1,14 +1,10 @@
-import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
 import BaseLayer from 'ol/layer/Base';
-import { Extent } from 'ol/extent';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
     listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
@@ -93,71 +89,4 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {OgcWmsLayerEntryConfig} layerConfig The layer entry to configure
      */
     protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: OgcWmsLayerEntryConfig): void;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features around the provided Pixel.
-     *
-     * @param {Coordinate} location The pixel coordinate that will be used by the query.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-     */
-    protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features around the provided projection coordinate.
-     *
-     * @param {Coordinate} location The coordinate that will be used by the query.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
-     */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features around the provided coordinate.
-     *
-     * @param {Coordinate} lnglat The coordinate that will be used by the query.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
-     */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return the legend of the layer. This routine return null when the layerPath specified is not found. If the legend can't be
-     * read, the legend property of the object returned will be null.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
-     */
-    getLegend(layerPath: string): Promise<TypeLegend | null>;
-    /** ***************************************************************************************************************************
-     * Set the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
-     *
-     * @param {string} wmsStyleId The style identifier that will be used.
-     * @param {string} layerPath The layer path to the layer's configuration.
-     */
-    setWmsStyle(wmsStyleId: string, layerPath: string): void;
-    /**
-     * Overrides when the layer gets in loaded status.
-     */
-    onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void;
-    /** ***************************************************************************************************************************
-     * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
-     * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-     * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-     * is done.
-     * TODO ! The combination of the legend filter and the dimension filter probably does not apply to WMS. The code can be simplified.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     * @param {string} filter An optional filter to be used in place of the getViewFilter value.
-     * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
-     */
-    applyViewFilter(layerPath: string, filter: string, combineLegendFilter?: boolean): void;
-    /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
-     *
-     * @param {string} layerPath The Layer path to the layer's configuration.
-     *
-     * @returns {Extent | undefined} The new layer bounding box.
-     */
-    getBounds(layerPath: string): Extent | undefined;
 }

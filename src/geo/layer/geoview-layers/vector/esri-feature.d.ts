@@ -6,9 +6,8 @@ import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'EsriJSON';
 }
@@ -82,24 +81,6 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * @returns {boolean} true if an error is detected.
      */
     esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean;
-    /** ***************************************************************************************************************************
-     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-     *
-     * @param {string} fieldName field name for which we want to get the type.
-     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {TypeOutfieldsType} The type of the field.
-     */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
-    /** ***************************************************************************************************************************
-     * Return the domain of the specified field.
-     *
-     * @param {string} fieldName field name for which we want to get the domain.
-     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-     */
-    protected getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType;
     /** ***************************************************************************************************************************
      * This method will create a Geoview temporal dimension if it exist in the service metadata
      * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object

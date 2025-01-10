@@ -25,6 +25,7 @@ export declare abstract class Projection {
         CRS84: string;
         CSRS: string;
         CSRS98: string;
+        3400: string;
     };
     static CUSTOM_WKT_NUM: number;
     static CUSTOM_WKT_AND_NUM: {

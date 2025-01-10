@@ -64,10 +64,29 @@ export declare class GVEsriImage extends AbstractGVRaster {
      * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
      * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPath: string, filter: string, combineLegendFilter?: boolean): void;
+    applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
     /**
      * Gets the bounds of the layer and returns updated bounds.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    getBounds(layerPath: string): Extent | undefined;
+    getBounds(): Extent | undefined;
+}
+export interface TypeEsriImageLayerLegend {
+    layers: {
+        layerId: number | string;
+        layerName: string;
+        layerType: string;
+        minScale: number;
+        maxScale: number;
+        legendType: string;
+        legend: {
+            label: string;
+            url: string;
+            imageData: string;
+            contentType: string;
+            height: number;
+            width: number;
+            values: string[];
+        }[];
+    }[];
 }

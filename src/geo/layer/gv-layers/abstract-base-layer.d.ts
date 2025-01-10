@@ -54,17 +54,17 @@ export declare abstract class AbstractBaseLayer {
      * Gets the layer status
      * @returns The layer status
      */
-    getLayerStatus(layerPath: string): TypeLayerStatus;
+    getLayerStatus(): TypeLayerStatus;
     /**
      * Gets the layer name
      * @returns The layer name
      */
-    getLayerName(layerPath: string): string | undefined;
+    getLayerName(): string | undefined;
     /**
      * Sets the layer name
      * @param {string | undefined} name - The layer name
      */
-    setLayerName(layerPath: string, name: string | undefined): void;
+    setLayerName(name: string | undefined): void;
     /**
      * Returns the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
      * numbers representing an extent: [minx, miny, maxx, maxy].
@@ -80,11 +80,11 @@ export declare abstract class AbstractBaseLayer {
     setExtent(layerExtent: Extent): void;
     /**
      * Overridable function that gets the extent of an array of features.
-     * @param {string} layerPath - The layer path
      * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+     * @param {string} outfield - ID field to return for services that require a value in outfields.
      * @returns {Promise<Extent | undefined>} The extent of the features, if available
      */
-    getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined>;
+    getExtentFromFeatures(objectIds: string[], outfield?: string): Promise<Extent | undefined>;
     /**
      * Gets the opacity of the layer (between 0 and 1).
      * @returns {number} The opacity of the layer.
@@ -161,7 +161,6 @@ export declare abstract class AbstractBaseLayer {
  */
 export type LayerNameChangedEvent = {
     layerName?: string;
-    layerPath: string;
 };
 /**
  * Define a delegate for the event handler function signature.

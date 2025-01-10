@@ -20,5 +20,5 @@ export declare abstract class AbstractGVVectorTile extends AbstractGVLayer {
      * Gets the bounds of the layer and returns updated bounds.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    getBounds(layerPath: string): Extent | undefined;
+    getBounds(): Extent | undefined;
 }

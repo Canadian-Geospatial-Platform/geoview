@@ -66,7 +66,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * Sets the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
      * @param {string} wmsStyleId - The style identifier that will be used.
      */
-    setWmsStyle(wmsStyleId: string, layerPath: string): void;
+    setWmsStyle(wmsStyleId: string): void;
     /**
      * Overrides when the layer gets in loaded status.
      */
@@ -80,10 +80,10 @@ export declare class GVWMS extends AbstractGVRaster {
      * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
      * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPath: string, filter: string, combineLegendFilter?: boolean): void;
+    applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
     /**
      * Gets the bounds of the layer and returns updated bounds.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    getBounds(layerPath: string): Extent | undefined;
+    getBounds(): Extent | undefined;
 }

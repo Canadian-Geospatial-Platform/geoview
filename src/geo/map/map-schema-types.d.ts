@@ -144,7 +144,6 @@ export type TypeFieldEntry = {
 export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo' | 'geometry'>;
 /** The simplified layer statuses */
 export type TypeLayerStatusSimplified = 'loading' | 'loaded' | 'error';
-export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
 export type TypeEsriFormatParameter = 'png' | 'jpg' | 'gif' | 'svg';
 export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig;
