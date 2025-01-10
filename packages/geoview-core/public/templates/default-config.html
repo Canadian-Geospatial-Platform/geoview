@@ -245,7 +245,7 @@
     <script>
       cgpv.api.createMapFromConfig(
         'CONF7',
-        `{
+        JSON.stringify({
               'map': {
                 'interaction': 'dynamic',
                 'viewSettings': {
@@ -273,7 +273,7 @@
               'components': ['overview-map'],
               'corePackages': [],
               'theme': 'geo.ca'
-        }`
+        })
       );
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready

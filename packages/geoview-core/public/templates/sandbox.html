@@ -244,7 +244,7 @@
         // TODO: the delete has a timeout so we need to wait before trying to recreate the map...
         // TO.DOCONT: this should be cleaner
         setTimeout(() => {
-          cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value)
+          cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value.replaceAll("'", '"'))
             .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'sandboxMap'));
         }, 1500);
       });
@@ -320,9 +320,7 @@
       });
 
       // Create default map==========================================================================================================
-      cgpv.api.createMapFromConfig(
-        'sandboxMap',
-        `{
+      cgpv.api.createMapFromConfig('sandboxMap', JSON.stringify({
               'map': {
                 'interaction': 'dynamic',
                 'viewSettings': {
@@ -353,7 +351,7 @@
               },
               'corePackages': [],
               'theme': 'geo.ca'
-        }`
+        })
       ).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'sandboxMap'));
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
