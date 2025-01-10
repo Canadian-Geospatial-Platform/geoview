@@ -93,7 +93,7 @@
                 return new Promise (resolve => {
                   removeMap('Map1')
                     .then(() => {
-                      cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig).replace(/'/g, "\\'"), 800)
+                      cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800)
                       .then(() => {
                           resolve();
                         });
