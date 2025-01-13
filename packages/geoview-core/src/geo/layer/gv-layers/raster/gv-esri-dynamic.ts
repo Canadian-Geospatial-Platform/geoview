@@ -30,6 +30,8 @@ import { CONST_LAYER_TYPES } from '../../geoview-layers/abstract-geoview-layers'
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeEsriImageLayerLegend } from './gv-esri-image';
 import { TypeJsonObject } from '@/api/config/types/config-types';
+import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
+import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -41,6 +43,8 @@ type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryT
  * @class GVEsriDynamic
  */
 export class GVEsriDynamic extends AbstractGVRaster {
+  #fetchWorkerPool: FetchEsriWorkerPool;
+
   // The default hit tolerance the query should be using
   static override DEFAULT_HIT_TOLERANCE: number = 7;
 
@@ -55,6 +59,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   public constructor(mapId: string, olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
     super(mapId, olSource, layerConfig);
+
+    // Setup the worker pool
+    this.#fetchWorkerPool = new FetchEsriWorkerPool();
+    this.#fetchWorkerPool.init().then(() => logger.logTraceCore('Worker pool for fetch ESRI initialized'));
 
     // TODO: Investigate to see if we can call the export map for the whole service at once instead of making many call
     // TODO.CONT: We can use the layers and layersDef parameters to set what should be visible.
@@ -261,6 +269,26 @@ export class GVEsriDynamic extends AbstractGVRaster {
     return this.getFeatureInfoAtLongLat(projCoordinate, queryGeometry);
   }
 
+  async yourQueryMethod(layerConfig: any, objectIds: number[], queryGeometry: boolean): Promise<any> {
+    try {
+      const params: QueryParams = {
+        url: layerConfig.source.dataAccessPath + layerConfig.layerId,
+        geometryType: (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', ''),
+        objectIds,
+        queryGeometry,
+        projection: 3978,
+        maxAllowableOffset: 7000,
+      };
+
+      const response = await this.#fetchWorkerPool.process(params);
+      const features = new EsriJSON().readFeatures({ features: response }) as Feature<Geometry>[];
+      return await this.formatFeatureInfoResult(features, layerConfig);
+    } catch (error) {
+      console.error('Query processing failed:', error);
+      throw error;
+    }
+  }
+
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
@@ -325,6 +353,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
       const maxAllowableOffset = queryGeometry ? getMetersPerPixel(mapViewer, lnglat[1]) : 0;
 
+      this.yourQueryMethod(layerConfig, objectIds, true).then((features) => console.log('Features worker', features));
+
       // TODO: We need to separate the query attribute from geometry. We can use the attributes returned by identify to show details panel
       // TODO.CONT: or create 2 distinc query one for attributes and one for geometry. This way we can display the anel faster and wait later for geometry
       // TODO.CONT: We need to see if we can fetch in async mode without freezing the ui. If not we will need a web worker for the fetch.
@@ -335,13 +365,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
         (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', '') as TypeStyleGeometry,
         objectIds,
         '*',
-        queryGeometry,
+        false,
         mapViewer.getMapState().currentProjection,
         maxAllowableOffset,
         false
       );
 
       // TODO: This is also time consuming, the creation of the feature can take several seconds, check web worker
+      // TODO.CONT: Because web worker can only use sereialize date and not object with function it may be difficult for this...
       // Transform the features in an OL feature
       const features = new EsriJSON().readFeatures({ features: response }) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);

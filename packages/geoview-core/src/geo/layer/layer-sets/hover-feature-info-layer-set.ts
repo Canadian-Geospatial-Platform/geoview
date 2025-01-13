@@ -107,7 +107,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       // If layer was found
       if (layer && layer instanceof AbstractGVLayer) {
         // If state is not queryable
-        if (!AbstractLayerSet.isStateQueryable(layer)) return;
+        return; // if (!AbstractLayerSet.isStateQueryable(layer)) return;
 
         // Flag processing
         this.resultSet[layerPath].feature = undefined;

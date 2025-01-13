@@ -83,14 +83,14 @@ export abstract class AbstractWorker<T> {
    * @param args - Arguments to pass to the worker for initialization.
    * @returns A promise that resolves when the worker is initialized.
    */
-  protected abstract init(...args: unknown[]): Promise<void>;
+  public abstract init(...args: unknown[]): Promise<void>;
 
   /**
    * Process the worker. This method should be implemented by subclasses.
    * @param args - Arguments to pass to the worker for process.
    * @returns A promise that resolves when the worker is processed.
    */
-  protected abstract process(...args: unknown[]): Promise<string>;
+  public abstract process(...args: unknown[]): Promise<unknown>;
 
   /**
    * Terminates the worker.
