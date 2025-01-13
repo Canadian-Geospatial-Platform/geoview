@@ -1,7 +1,6 @@
 import { Coordinate } from 'ol/coordinate';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeResultSet } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
 import { EventType, AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
@@ -23,15 +22,15 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
     constructor(layerApi: LayerApi);
     /**
      * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+     * @param {AbstractBaseLayer} layer - The layer
      * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
      */
-    protected onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean;
+    protected onRegisterLayerCheck(layer: AbstractBaseLayer): boolean;
     /**
      * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
-     * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+     * @param {AbstractBaseLayer} layer - The layer
      */
-    protected onRegisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): void;
+    protected onRegisterLayer(layer: AbstractBaseLayer): void;
     /**
      * Overrides the behavior to apply when propagating to the store
      * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate

@@ -1,15 +1,16 @@
+import { Feature } from 'ol';
+import { FeatureLike } from 'ol/Feature';
+import { Geometry } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import Style from 'ol/style/Style';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import { FeatureLike } from 'ol/Feature';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { AbstractGVLayer } from '../abstract-gv-layer';
-import { AbstractGeoViewLayer } from '../../geoview-layers/abstract-geoview-layers';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -18,10 +19,10 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     /**
      * Constructs a GeoView Vector layer to manage an OpenLayer layer.
      * @param {string} mapId - The map id
-     * @param {VectorSource} olSource - The OpenLayer source.
+     * @param {VectorSource<Feature<Geometry>>} olSource - The OpenLayer source.
      * @param {VectorLayerEntryConfig} layerConfig - The layer configuration.
      */
-    protected constructor(mapId: string, olSource: VectorSource, layerConfig: VectorLayerEntryConfig);
+    protected constructor(mapId: string, olSource: VectorSource<Feature<Geometry>>, layerConfig: VectorLayerEntryConfig);
     /**
      * Overrides the get of the OpenLayers Layer
      * @returns {VectorLayer<Feature>} The OpenLayers Layer
@@ -78,19 +79,18 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param {string} filter - A filter to be used in place of the getViewFilter value.
      * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
      */
-    applyViewFilter(layerPath: string, filter: string, combineLegendFilter?: boolean): void;
+    applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
     /**
      * Gets the bounds of the layer and returns updated bounds.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    getBounds(layerPath: string): Extent | undefined;
+    getBounds(): Extent | undefined;
     /**
      * Gets the extent of an array of features.
-     * @param {string} layerPath - The layer path.
      * @param {string[]} objectIds - The uids of the features to calculate the extent from.
      * @returns {Promise<Extent | undefined>} The extent of the features, if available.
      */
-    getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined>;
+    getExtentFromFeatures(objectIds: string[]): Promise<Extent | undefined>;
     /**
      * Return the vector layer as a GeoJSON object
      * @returns {JSON} Layer's features as GeoJSON
@@ -98,12 +98,12 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     getFeaturesAsGeoJSON(): JSON;
     /**
      * Calculates a style for the given feature, based on the layer current style and options.
-     * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer on which to work for the style.
+     * @param {AbstractGVLayer} layer - The layer on which to work for the style.
      * @param {FeatureLike} feature - Feature that need its style to be defined.
      * @param {string} label - The style label when one has to be created
      * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
      * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
      * @returns {Style} The style for the feature
      */
-    static calculateStyleForFeature(layer: AbstractGeoViewLayer | AbstractGVLayer, feature: FeatureLike, label: string, layerPath: string, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean): Style | undefined;
+    static calculateStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, label: string, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean): Style | undefined;
 }

@@ -5,12 +5,9 @@ import { VectorImage as VectorLayer } from 'ol/layer';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
-import { Coordinate } from 'ol/coordinate';
-import { Extent } from 'ol/extent';
-import { Pixel } from 'ol/pixel';
-import { TypeOutfieldsType } from '@config/types/map-schema-types';
+import { Geometry } from 'ol/geom';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeFeatureInfoEntry, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 export type TypeVectorLayerGroup = LayerGroup;
@@ -45,15 +42,6 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
      */
     protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
-    /** ***************************************************************************************************************************
-     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-     *
-     * @param {string} fieldName field name for which we want to get the type.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {TypeOutfieldsType} The type of the field.
-     */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
     /** ***************************************************************************************************************************
      * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
      *
@@ -92,80 +80,15 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration used by the source.
      * @param {VectorSource} vectorSource The source configuration for the vector layer.
      *
-     * @returns {VectorLayer<Feature>} The vector layer created.
+     * @returns {VectorSource<Feature<Geometry>>} The vector layer created.
      */
-    protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource): VectorLayer<Feature>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features stored in the layer.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-     */
-    protected getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features around the provided Pixel.
-     *
-     * @param {Coordinate} location - The pixel coordinate that will be used by the query.
-     * @param {string} layerPath - The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table or null if an error occured.
-     */
-    protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features around the provided projected coordinate.
-     *
-     * @param {Coordinate} location - The pixel coordinate that will be used by the query.
-     * @param {string} layerPath - The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-     */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features around the provided longitude latitude.
-     *
-     * @param {Coordinate} lnglat - The coordinate that will be used by the query.
-     * @param {string} layerPath - The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-     */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null>;
-    /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
-     *
-     * @param {string} layerPath The Layer path to the layer's configuration.
-     *
-     * @returns {Extent | undefined} The new layer bounding box.
-     */
-    getBounds(layerPath: string): Extent | undefined;
-    /**
-     * Gets the extent of an array of features.
-     * @param {string} layerPath - The layer path.
-     * @param {string[]} objectIds - The uids of the features to calculate the extent from.
-     * @returns {Promise<Extent | undefined>} The extent of the features, if available.
-     */
-    getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined>;
+    protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource): VectorLayer<VectorSource<Feature<Geometry>>>;
     /**
      * Return the vector layer as a GeoJSON object
      * @param {string} layerPath - Layer path to get GeoJSON
      * @returns {JSON} Layer's features as GeoJSON
      */
     getFeaturesAsGeoJSON(layerPath: string): JSON;
-    /**
-     * Overrides when the layer gets in loaded status.
-     */
-    onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void;
-    /** ***************************************************************************************************************************
-     * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
-     * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-     * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-     * is done.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     * @param {string} filter A filter to be used in place of the getViewFilter value.
-     * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
-     */
-    applyViewFilter(layerPath: string, filter: string, combineLegendFilter?: boolean): void;
     /** ***************************************************************************************************************************
      * Converts csv text to feature array.
      *

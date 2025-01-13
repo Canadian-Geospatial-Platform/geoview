@@ -1,11 +1,9 @@
 import BaseLayer from 'ol/layer/Base';
-import { Extent } from 'ol/extent';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.XYZ_TILES;
@@ -57,15 +55,6 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      */
     constructor(mapId: string, layerConfig: TypeXYZTilesConfig);
     /** ***************************************************************************************************************************
-     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-     *
-     * @param {string} fieldName field name for which we want to get the type.
-     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {TypeOutfieldsType} The type of the field.
-     */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
-    /** ***************************************************************************************************************************
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.
      *
@@ -89,12 +78,4 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
      */
     protected processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
-    /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
-     *
-     * @param {string} layerPath The Layer path to the layer's configuration.
-     *
-     * @returns {Extent | undefined} The new layer bounding box.
-     */
-    getBounds(layerPath: string): Extent | undefined;
 }

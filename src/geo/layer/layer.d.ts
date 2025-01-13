@@ -37,7 +37,6 @@ export declare class LayerApi {
     hoverFeatureInfoLayerSet: HoverFeatureInfoLayerSet;
     allFeatureInfoLayerSet: AllFeatureInfoLayerSet;
     featureInfoLayerSet: FeatureInfoLayerSet;
-    static LAYERS_HYBRID_MODE: boolean;
     /**
      * Initializes layer types and listen to add/remove layer events from outside
      * @param {MapViewer} mapViewer - A reference to the map viewer
@@ -50,57 +49,22 @@ export declare class LayerApi {
     getMapId(): string;
     /**
      * Gets the GeoView Layer Ids.
-     * Note: those are different than the layer paths.
-     * @returns {string[]} The GeoView Layer Ids
+     * @returns The ids of the new Geoview Layers
      */
     getGeoviewLayerIds(): string[];
     /**
      * Gets all GeoView Layers
-     * @returns {AbstractGeoViewLayer[]} The GeoView Layers
+     * @returns The list of new Geoview Layers
      */
-    getGeoviewLayers(): AbstractGeoViewLayer[];
+    getGeoviewLayers(): AbstractBaseLayer[];
     /**
      * Returns the GeoView instance associated to the layer path.
      * The first element of the layerPath is the geoviewLayerId and this function will
      * work with either the geoViewLayerId or the layerPath.
-     * @param {string} layerPath - The layer path (or in this case the geoviewLayerId) of the layer's configuration.
-     * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
-     */
-    getGeoviewLayer(layerPath: string): AbstractGeoViewLayer | undefined;
-    /**
-     * Temporary new function for migration purposes, replacing getGeoviewLayerIds
-     * @returns The ids of the new Geoview Layers
-     */
-    getGeoviewLayerIdsNew(): string[];
-    /**
-     * Temporary new function for migration purposes, replacing getGeoviewLayers
-     * @returns The list of new Geoview Layers
-     */
-    getGeoviewLayersNew(): AbstractBaseLayer[];
-    /**
-     * New function for migration purposes, replacing getGeoviewLayer
      * @param {string} layerPath - The layer path
      * @returns The new Geoview Layer
      */
-    getGeoviewLayerNew(layerPath: string): AbstractBaseLayer | undefined;
-    /**
-     * Hybrid function for migration purposes, bridging the gap between getGeoviewLayer and getGeoviewLayerNew
-     * @param {string} layerPath - The layer path
-     * @returns The new Geoview Layer
-     */
-    getGeoviewLayerIdsHybrid(): string[];
-    /**
-     * Hybrid function for migration purposes, bridging the gap between getGeoviewLayer and getGeoviewLayerNew
-     * @param {string} layerPath - The layer path
-     * @returns The new Geoview Layer
-     */
-    getGeoviewLayersHybrid(): AbstractGeoViewLayer[] | AbstractBaseLayer[];
-    /**
-     * Hybrid function for migration purposes, bridging the gap between getGeoviewLayer and getGeoviewLayerNew
-     * @param {string} layerPath - The layer path
-     * @returns The new Geoview Layer or the old Geoview Layer
-     */
-    getGeoviewLayerHybrid(layerPath: string): AbstractGeoViewLayer | AbstractBaseLayer | undefined;
+    getGeoviewLayer(layerPath: string): AbstractBaseLayer | undefined;
     /**
      * Verifies if a layer is registered. Returns true if registered.
      * @param {string} layerPath - The layer path to check.
@@ -188,7 +152,7 @@ export declare class LayerApi {
      * This function may be used to start managing a layer in the UI when said layer has been created outside of the regular config->layer flow.
      * @param {AbstractGVLayer} layer - The layer to register
      */
-    registerLayerInLayerSets(layer: AbstractGVLayer, layerPath: string): void;
+    registerLayerInLayerSets(layer: AbstractGVLayer): void;
     /**
      * Unregisters the layer in the LayerApi to stop managing it.
      * @param {ConfigBaseClass} layerConfig - The layer entry config to unregister
@@ -198,7 +162,7 @@ export declare class LayerApi {
     /**
      * Checks if the layer results sets are all greater than or equal to the provided status
      */
-    checkLayerStatus(status: TypeLayerStatus, layerEntriesToCheck: MapConfigLayerEntry[] | undefined, callbackNotGood?: (geoviewLayer: AbstractGeoViewLayer) => void): [boolean, number];
+    checkLayerStatus(status: TypeLayerStatus, layerEntriesToCheck: MapConfigLayerEntry[] | undefined, callbackNotGood?: (geoviewLayer: AbstractBaseLayer) => void): [boolean, number];
     /**
      * Checks if the layer results sets are all ready using the resultSet from the FeatureInfo LayerSet
      */
@@ -355,7 +319,7 @@ type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent, void>;
  * Define an event for the delegate
  */
 export type LayerAddedEvent = {
-    layer: AbstractGeoViewLayer;
+    layer: AbstractGeoViewLayer | AbstractGVLayer;
 };
 /**
  * Define a delegate for the event handler function signature
@@ -365,7 +329,7 @@ type LayerLoadedDelegate = EventDelegateBase<LayerApi, LayerLoadedEvent, void>;
  * Define an event for the delegate
  */
 export type LayerLoadedEvent = {
-    layer: AbstractGeoViewLayer | AbstractGVLayer;
+    layer: AbstractGVLayer;
     layerPath: string;
 };
 /**

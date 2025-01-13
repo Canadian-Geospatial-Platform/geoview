@@ -6,7 +6,9 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
     format: 'WFS';
 }
@@ -59,15 +61,6 @@ export declare class WFS extends AbstractGeoViewVector {
      */
     constructor(mapId: string, layerConfig: TypeWFSLayerConfig);
     /** ***************************************************************************************************************************
-     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-     *
-     * @param {string} fieldName field name for which we want to get the type.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {'string' | 'date' | 'number'} The type of the field.
-     */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number';
-    /** ***************************************************************************************************************************
      * This method reads the service metadata from the metadataAccessPath.
      *
      * @returns {Promise<void>} A promise that the execution is completed.
@@ -89,6 +82,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
      */
     protected processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
+    static getFieldType(fieldName: string, layerConfig: VectorLayerEntryConfig): TypeOutfieldsType;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *

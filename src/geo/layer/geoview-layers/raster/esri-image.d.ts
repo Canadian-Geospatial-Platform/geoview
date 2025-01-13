@@ -1,13 +1,10 @@
 import BaseLayer from 'ol/layer/Base';
-import { Extent } from 'ol/extent';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
     listOfLayerEntryConfig: EsriImageLayerEntryConfig[];
@@ -57,15 +54,6 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      */
     constructor(mapId: string, layerConfig: TypeEsriImageLayerConfig);
     /** ***************************************************************************************************************************
-     * Return the legend of the layer.This routine return null when the layerPath specified is not found. If the legend can't be
-     * read, the legend property of the object returned will be null.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     *
-     * @returns {Promise<TypeLegend | null>} The legend of the layer.
-     */
-    getLegend(layerPath: string): Promise<TypeLegend | null>;
-    /** ***************************************************************************************************************************
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.
      *
@@ -74,24 +62,6 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * @returns {TypeLayerEntryConfig[]} A new list of layer entries configuration with deleted error layers.
      */
     protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
-    /** ***************************************************************************************************************************
-     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-     *
-     * @param {string} fieldName field name for which we want to get the type.
-     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {TypeOutfieldsType} The type of the field.
-     */
-    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
-    /** ***************************************************************************************************************************
-     * Return the domain of the specified field.
-     *
-     * @param {string} fieldName field name for which we want to get the domain.
-     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-     */
-    protected getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType;
     /** ***************************************************************************************************************************
      * This method will create a Geoview temporal dimension if it exist in the service metadata
      * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
@@ -128,27 +98,4 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * @returns { Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
      */
     protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined>;
-    /**
-     * Overrides when the layer gets in loaded status.
-     */
-    onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void;
-    /** ***************************************************************************************************************************
-     * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
-     * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-     * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-     * is done.
-     *
-     * @param {string} layerPath The layer path to the layer's configuration.
-     * @param {string} filter An optional filter to be used in place of the getViewFilter value.
-     * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
-     */
-    applyViewFilter(layerPath: string, filter: string, combineLegendFilter?: boolean): void;
-    /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
-     *
-     * @param {string} layerPath The Layer path to the layer's configuration.
-     *
-     * @returns {Extent | undefined} The new layer bounding box.
-     */
-    getBounds(layerPath: string): Extent | undefined;
 }
