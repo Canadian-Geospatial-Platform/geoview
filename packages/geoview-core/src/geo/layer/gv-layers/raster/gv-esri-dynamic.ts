@@ -24,7 +24,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain, esriQueryRecordsByUrlObjectIds } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeOutfieldsType, TypeStyleGeometry } from '@/api/config/types/map-schema-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { CONST_LAYER_TYPES } from '../../geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -60,11 +60,21 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // TODO.CONT: We can use the layers and layersDef parameters to set what should be visible.
     // TODO.CONT: layers=show:layerId ; layerDefs={ "layerId": "layer def" }
     // TODO.CONT: There is no allowableOffset on esri dynamic to speed up. We will need to see what can be done for layers in wrong projection
+    // TODO.CONT: We may try to use the service projection imageLayerOptions.source?.updateParams({ imageSR: 3978 }); and let OL project on the fly
+    // TODO.CONT: from some test, it reduce time by half
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
       source: olSource,
       properties: { layerConfig },
     };
+
+    // TODO: For testing purpose on projection and performance
+    if (layerConfig.geoviewLayerConfig.geoviewLayerId === '6c343726-1e92-451a-876a-76e17d398a1c') {
+      imageLayerOptions.source?.updateParams({ imageSR: 3978 });
+    }
+    if (layerConfig.geoviewLayerConfig.geoviewLayerId === 'e2424b6c-db0c-4996-9bc0-2ca2e6714d71') {
+      imageLayerOptions.source?.updateParams({ imageSR: 3857 });
+    }
 
     // Init the layer options with initial settings
     AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
@@ -286,10 +296,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const layerDefs = this.getOLSource()?.getParams()?.layerDefs || '';
       const size = mapViewer.map.getSize()!;
 
-      // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
-      const offset = getMetersPerPixel(mapViewer, lnglat[1]);
-      console.log(`off ${offset}`);
-
+      // Identify query to get oid features value, at this point we do not query geometry
       identifyUrl =
         `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
@@ -297,9 +304,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
         `&layers=visible:${layerConfig.layerId}` +
         `&layerDefs=${layerDefs}` +
         `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
-        `&returnGeometry=false`;
+        `&returnGeometry=false&sr=4326`;
 
-      logger.logMarkerStart('off identify');
       const identifyResponse = await fetch(identifyUrl);
       const identifyJsonResponse = await identifyResponse.json();
       if (identifyJsonResponse.error) {
@@ -315,40 +321,30 @@ export class GVEsriDynamic extends AbstractGVRaster {
         ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
         : 'OBJECTID';
       const objectIds = identifyJsonResponse.results.map((result: TypeJsonObject) => result.attributes[oidField]);
-      logger.logMarkerCheck('off identify');
 
-      logger.logMarkerStart('off query');
-      const response1 = await esriQueryRecordsByUrlObjectIds(
+      // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
+      const maxAllowableOffset = queryGeometry ? getMetersPerPixel(mapViewer, lnglat[1]) : 0;
+
+      // TODO: We need to separate the query attribute from geometry. We can use the attributes returned by identify to show details panel
+      // TODO.CONT: or create 2 distinc query one for attributes and one for geometry. This way we can display the anel faster and wait later for geometry
+      // TODO.CONT: We need to see if we can fetch in async mode without freezing the ui. If not we will need a web worker for the fetch.
+      // TODO.CONT: If we go with web worker, we need a reusable approach so we can use with all our queries
+      // Get features
+      const response = await esriQueryRecordsByUrlObjectIds(
         layerConfig.source.dataAccessPath + layerConfig.layerId,
-        'Polygon',
+        (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', '') as TypeStyleGeometry,
         objectIds,
         '*',
-        true,
+        queryGeometry,
         mapViewer.getMapState().currentProjection,
-        offset,
+        maxAllowableOffset,
         false
       );
-      logger.logMarkerCheck('off query');
 
-      logger.logMarkerStart('off feature');
-      const features1 = new EsriJSON().readFeatures({ features: response1 }) as Feature<Geometry>[];
-      const arrayOfFeatureInfoEntries1 = await this.formatFeatureInfoResult(features1, layerConfig);
-      logger.logMarkerCheck('off feature');
-      return arrayOfFeatureInfoEntries1;
-      console.log('off ' + response1);
-
-      // If no features
-      if (!jsonResponse.results) return [];
-      logger.logMarkerStart('off start');
-      console.log('off ring' + jsonResponse.results[0].geometry.rings.length);
-      const features = new EsriJSON().readFeatures(
-        { features: jsonResponse.results },
-        { dataProjection: 'EPSG:4326', featureProjection: mapViewer.getProjection().getCode() }
-      ) as Feature<Geometry>[];
+      // TODO: This is also time consuming, the creation of the feature can take several seconds, check web worker
+      // Transform the features in an OL feature
+      const features = new EsriJSON().readFeatures({ features: response }) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
-      logger.logMarkerCheck('off start');
-
-      console.log('off ' + arrayOfFeatureInfoEntries[0].geometry.values_.geometry.flatCoordinates.length);
       return arrayOfFeatureInfoEntries;
     } catch (error) {
       // Log

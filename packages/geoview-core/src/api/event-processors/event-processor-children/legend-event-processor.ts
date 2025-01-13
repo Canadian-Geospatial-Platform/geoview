@@ -639,6 +639,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const visibleValues = new Set(styleUnique.filter((style) => style.visible).map((style) => style.values.join(';')));
     const unvisibleValues = new Set(styleUnique.filter((style) => !style.visible).map((style) => style.values.join(';')));
 
+    // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
+    // TODO: The fields contain undefined, it should be empty. Check in new config api
+    // TODO: This is a workaround
+    if (uniqueValueStyle.fields[0] === undefined) uniqueValueStyle.fields.pop();
+
     // Filter features based on visibility
     return features.filter((feature) => {
       const fieldValues = uniqueValueStyle.fields.map((field) => feature.fieldInfo[field]!.value).join(';');

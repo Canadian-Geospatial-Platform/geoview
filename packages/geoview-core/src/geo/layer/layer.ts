@@ -886,9 +886,9 @@ export class LayerApi {
 
     // Create the right GV Layer based on the OLLayer and config type
     let gvLayer;
-    if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriDynamicLayerEntryConfig)
+    if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriDynamicLayerEntryConfig) {
       gvLayer = new GVEsriDynamic(mapId, olSource, layerConfig);
-    else if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriImageLayerEntryConfig)
+    } else if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriImageLayerEntryConfig)
       gvLayer = new GVEsriImage(mapId, olSource, layerConfig);
     else if (olSource instanceof Static && layerConfig instanceof ImageStaticLayerEntryConfig)
       gvLayer = new GVImageStatic(mapId, olSource, layerConfig);
