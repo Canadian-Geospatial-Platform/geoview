@@ -333,6 +333,13 @@ export abstract class AbstractGeoViewLayer {
     }, 0);
   }
 
+  /**
+   * Method for pre-emptively getting the full config for applying entry configs
+   */
+  async preflightGetAllLayerEntryConfigs(): Promise<void> {
+    await this.getAdditionalServiceDefinition();
+  }
+
   /** ***************************************************************************************************************************
    * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
