@@ -558,6 +558,23 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapStateProtected(mapId).orderedLayerInfo.find((orderedLayerInfo) => orderedLayerInfo.layerPath === layerPath);
   }
 
+  /**
+   * Gets the ordered layer info for one layer and its children.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The path of the layer to get.
+   * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The array of ordered layer info to search, default is current ordered layer info.
+   * @returns {TypeOrderedLayerInfo[] | undefined} The ordered layer info of the layer and its children.
+   */
+  static getMapLayerAndChildrenOrderedInfo(
+    mapId: string,
+    layerPath: string,
+    orderedLayerInfo: TypeOrderedLayerInfo[] = this.getMapStateProtected(mapId).orderedLayerInfo
+  ): TypeOrderedLayerInfo[] {
+    return orderedLayerInfo.filter(
+      (info: TypeOrderedLayerInfo) => info.layerPath.startsWith(`${layerPath}/`) || info.layerPath === layerPath
+    );
+  }
+
   static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number {
     // Get index of a layer
     const info = this.getMapStateProtected(mapId).orderedLayerInfo;
@@ -749,8 +766,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const layerPath = (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
       ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}`
       : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
-    const index = this.getMapIndexFromOrderedLayerInfo(mapId, layerPathToReplace || layerPath);
-    const replacedLayers = orderedLayerInfo.filter((layerInfo) => layerInfo.layerPath.startsWith(layerPathToReplace || layerPath));
+    const pathToSearch = layerPathToReplace || layerPath;
+    const index = this.getMapIndexFromOrderedLayerInfo(mapId, pathToSearch);
+    const replacedLayers = this.getMapLayerAndChildrenOrderedInfo(mapId, pathToSearch);
     const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
 
@@ -803,7 +821,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static removeOrderedLayerInfo(mapId: string, layerPath: string): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
-    const newOrderedLayerInfo = orderedLayerInfo.filter((layerInfo) => !layerInfo.layerPath.startsWith(layerPath));
+    const newOrderedLayerInfo = orderedLayerInfo.filter(
+      (layerInfo) => !layerInfo.layerPath.startsWith(`${layerPath}/`) || !(layerInfo.layerPath === layerPath)
+    );
 
     // Redirect
     this.setMapOrderedLayerInfo(mapId, newOrderedLayerInfo);
@@ -1087,7 +1107,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
     if (layerEntryConfig!.entryType === 'group') {
       const sublayerPaths = MapEventProcessor.getMapLayerOrder(mapId).filter(
-        (entryLayerPath) => entryLayerPath.startsWith(layerPath) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
+        (entryLayerPath) =>
+          entryLayerPath.startsWith(`${layerPath}/`) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
       );
       sublayerPaths.forEach((sublayerPath) => listOfLayerEntryConfig.push(MapEventProcessor.createLayerEntryConfig(mapId, sublayerPath)));
     }
@@ -1134,7 +1155,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Check for sublayers
     const sublayerPaths = MapEventProcessor.getMapLayerOrder(mapId).filter(
       // We only want the immediate child layers, group sublayers will handle their own sublayers
-      (entryLayerPath) => entryLayerPath.startsWith(layerPath) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
+      (entryLayerPath) => entryLayerPath.startsWith(`${layerPath}/`) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
     );
 
     // Build list of sublayer entry configs

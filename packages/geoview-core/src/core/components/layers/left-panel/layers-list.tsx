@@ -2,7 +2,7 @@ import { useTheme } from '@mui/material/styles';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
-import { useGeoViewMapId, useMapStoreActions } from '@/core/stores';
+import { useGeoViewMapId, useLayerStoreActions, useMapStoreActions } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { TABS } from '@/core/utils/constant';
@@ -23,10 +23,12 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
 
   const mapId = useGeoViewMapId();
   const { getIndexFromOrderedLayerInfo } = useMapStoreActions();
+  const { sortLegendLayersChildren } = useLayerStoreActions();
 
   const sortedLayers = layersList.sort((a, b) =>
     getIndexFromOrderedLayerInfo(a.layerPath) > getIndexFromOrderedLayerInfo(b.layerPath) ? 1 : -1
   );
+  sortLegendLayersChildren(sortedLayers);
 
   const textToSlug = (text: string): string => {
     return text
