@@ -155,6 +155,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
               layerConfig.layerPath,
               url as string,
               JSON.parse(xhr.responseText).count,
+              oidField,
               this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount as number | undefined
             );
 
@@ -245,10 +246,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string} layerPath - The layer path of the layer.
    * @param {string} url - The base url for the service.
    * @param {number} featureCount - The number of features in the layer.
+   * @param {string} oidField - The unique identifier field name.
    * @param {number} maxRecordCount - The max features per query from the service.
    * @param {number} featureLimit - The maximum number of features to fetch per query.
    * @param {number} queryLimit - The maximum number of queries to run at once.
-   * @param {string} oidField - The unique identifier field name.
    * @returns {Promise<string[]>} An array of the response text for the features.
    * @private
    */
@@ -259,10 +260,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerPath: string,
     url: string,
     featureCount: number,
+    oidField: string,
     maxRecordCount?: number,
     featureLimit: number = 500,
-    queryLimit: number = 10,
-    oidField: string = 'OBJECTID'
+    queryLimit: number = 10
   ): Promise<string[]> {
     // Update url
     const baseUrl = url.replace('&where=1%3D1&returnCountOnly=true', `&outfields=*&geometryPrecision=1`);
