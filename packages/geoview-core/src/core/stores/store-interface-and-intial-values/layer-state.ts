@@ -52,6 +52,7 @@ export interface ILayerState {
     setLayerDeleteInProgress: (newVal: boolean) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     setSelectedLayerPath: (layerPath: string) => void;
+    sortLegendLayersChildren: (legendLayerList: TypeLegendLayer[]) => void;
     toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
     setSelectedLayerSortingArrowId: (layerId: string) => void;
@@ -234,6 +235,14 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       setSelectedLayerPath: (layerPath: string): void => {
         // Redirect to event processor
         LegendEventProcessor.setSelectedLayersTabLayer(get().mapId, layerPath);
+      },
+
+      /**
+       * Sorts legend layers children recursively in given legend layers list.
+       * @param {TypeLegendLayer[]} legendLayerList - The list to sort.
+       */
+      sortLegendLayersChildren: (legendLayerList: TypeLegendLayer[]): void => {
+        LegendEventProcessor.sortLegendLayersChildren(get().mapId, legendLayerList);
       },
 
       /**

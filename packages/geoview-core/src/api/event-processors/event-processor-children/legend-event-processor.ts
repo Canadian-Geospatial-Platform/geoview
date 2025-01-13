@@ -359,6 +359,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         ? 1
         : -1
     );
+    this.sortLegendLayersChildren(mapId, sortedLayers);
 
     this.getLayerState(mapId).setterActions.setLegendLayers(sortedLayers);
   }
@@ -397,7 +398,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         foundLayer = layer;
       }
 
-      if (layerPath?.startsWith(layer.layerPath) && layer.children?.length > 0) {
+      if (layerPath.startsWith(`${layer.layerPath}/`) && layer.children?.length > 0) {
         const result: TypeLegendLayer | undefined = LegendEventProcessor.findLayerByPath(layer.children, layerPath);
         if (result) {
           foundLayer = result;
@@ -742,4 +743,22 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       return matchingBreak ? matchingBreak.visible : classBreakStyle.info[classBreakStyle.info.length - 1].visible;
     });
   }
+
+  /**
+   * Sorts legend layers children recursively in given legend layers list.
+   * @param {string} mapId - The ID of the map.
+   * @param {TypeLegendLayer[]} legendLayerList - The list to sort.
+   */
+  static sortLegendLayersChildren = (mapId: string, legendLayerList: TypeLegendLayer[]): void => {
+    legendLayerList.forEach((legendLayer) => {
+      if (legendLayer.children.length)
+        legendLayer.children.sort((a, b) =>
+          MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, a.layerPath) >
+          MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, b.layerPath)
+            ? 1
+            : -1
+        );
+      this.sortLegendLayersChildren(mapId, legendLayer.children);
+    });
+  };
 }
