@@ -226,7 +226,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
         header: value.alias,
         filterFn: 'contains',
         columnFilterModeOptions: ['contains', 'startsWith', 'endsWith', 'empty', 'notEmpty'],
-        ...(value.dataType === 'number' && {
+        ...((value.dataType === 'number' || value.dataType === 'oid') && {
           filterFn: 'between',
           columnFilterModeOptions: [
             'equals',

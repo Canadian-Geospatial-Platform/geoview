@@ -15,7 +15,6 @@ import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GeometryApi } from '../geometry/geometry';
-import { getMetersPerPixel } from '@/geo/utils/utilities';
 
 /**
  * Returns the type of the specified field.
@@ -39,7 +38,6 @@ export function esriGetFieldType(
   layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
   fieldName: string
 ): TypeOutfieldsType {
-  logger.logError('TEST')
   const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
   if (!fieldDefinition) return 'string';
