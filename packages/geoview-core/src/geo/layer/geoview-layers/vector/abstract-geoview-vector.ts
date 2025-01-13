@@ -488,12 +488,19 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
   }
 
+  /**
+   * Gets the Object ID field name from the layer configuration
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration object
+   * @returns {string} The name of the OID field if found, otherwise returns 'OBJECTID' as default
+   * @description Extracts the Object ID field name from the layer configuration. An OID (Object ID) is a
+   * standardized identifier used to uniquely identify features in a layer. If no OID field is specified
+   * in the configuration, it defaults to 'OBJECTID'.
+   * @private
+   */
   static #getEsriOidField(layerConfig: AbstractBaseLayerEntryConfig): string {
     // Get oid field
-    return layerConfig.source &&
-      layerConfig.source.featureInfo &&
-      (layerConfig.source.featureInfo as TypeFeatureInfoLayerConfig).outfields === undefined
-      ? (layerConfig.source.featureInfo as TypeFeatureInfoLayerConfig).outfields.filter((field) => field.type === 'oid')[0].name
+    return layerConfig.source?.featureInfo && (layerConfig.source.featureInfo as TypeFeatureInfoLayerConfig).outfields !== undefined
+      ? (layerConfig.source.featureInfo as TypeFeatureInfoLayerConfig).outfields.filter((field) => field.type === 'oid')[0]?.name
       : 'OBJECTID';
   }
 }
