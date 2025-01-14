@@ -110,6 +110,13 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
     // GV As it is (and was like this before events refactor), the this.resultSet is mutating between async calls.
 
+    // TODO: Use the AbortController and kill the active query if there is one in progress. The query layer here call the getFeatureInfoAtLongLat
+    // TODO.CONT: in gv-esri-dynamic. It is for this particular format we need check because identify are slow and many can be sent at the same time
+    // Create an AbortController instance
+    // const controller = new AbortController();
+    // const signal = controller.signal;
+    // controller.abort(); // Cancels the fetch request
+
     // Prepare to hold all promises of features in the loop below
     const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];
 

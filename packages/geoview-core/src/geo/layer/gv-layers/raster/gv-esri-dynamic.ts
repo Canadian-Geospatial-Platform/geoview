@@ -22,9 +22,9 @@ import {
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
 } from '@/geo/map/map-schema-types';
-import { esriGetFieldType, esriGetFieldDomain, esriQueryRecordsByUrlObjectIds } from '../utils';
+import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
-import { TypeOutfieldsType, TypeStyleGeometry } from '@/api/config/types/map-schema-types';
+import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { CONST_LAYER_TYPES } from '../../geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -60,11 +60,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
   public constructor(mapId: string, olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
     super(mapId, olSource, layerConfig);
 
+    // TODO: Performance - Do we need worker pool or one worker per layer is enough. If a worker is already working we should terminate it
+    // TODO.CONT: and use the abort controller to cancel the fetch and start a new one. So every esriDynamic layer has it's own worker.
     // Setup the worker pool
     this.#fetchWorkerPool = new FetchEsriWorkerPool();
-    this.#fetchWorkerPool.init().then(() => logger.logTraceCore('Worker pool for fetch ESRI initialized'));
+    this.#fetchWorkerPool
+      .init()
+      .then(() => logger.logTraceCore('Worker pool for fetch ESRI initialized'))
+      .catch((err) => logger.logError('Worker pool error', err));
 
-    // TODO: Investigate to see if we can call the export map for the whole service at once instead of making many call
+    // TODO: Performance - Investigate to see if we can call the export map for the whole service at once instead of making many call
     // TODO.CONT: We can use the layers and layersDef parameters to set what should be visible.
     // TODO.CONT: layers=show:layerId ; layerDefs={ "layerId": "layer def" }
     // TODO.CONT: There is no allowableOffset on esri dynamic to speed up. We will need to see what can be done for layers in wrong projection
@@ -76,7 +81,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       properties: { layerConfig },
     };
 
-    // TODO: For testing purpose on projection and performance
+    // TODO: Performance - For testing purpose on projection and performance
     if (layerConfig.geoviewLayerConfig.geoviewLayerId === '6c343726-1e92-451a-876a-76e17d398a1c') {
       imageLayerOptions.source?.updateParams({ imageSR: 3978 });
     }
@@ -269,7 +274,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
     return this.getFeatureInfoAtLongLat(projCoordinate, queryGeometry);
   }
 
-  async yourQueryMethod(layerConfig: any, objectIds: number[], queryGeometry: boolean): Promise<any> {
+  async getFeatureInfoGeometryWorker(
+    layerConfig: EsriDynamicLayerEntryConfig,
+    objectIds: number[],
+    queryGeometry: boolean,
+    projection: number,
+    maxAllowableOffset: number
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       const params: QueryParams = {
         url: layerConfig.source.dataAccessPath + layerConfig.layerId,
@@ -277,14 +288,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
         objectIds,
         queryGeometry,
         projection: 3978,
-        maxAllowableOffset: 7000,
+        maxAllowableOffset,
       };
 
       const response = await this.#fetchWorkerPool.process(params);
+      logger.logDebug('worker', response);
       const features = new EsriJSON().readFeatures({ features: response }) as Feature<Geometry>[];
       return await this.formatFeatureInfoResult(features, layerConfig);
     } catch (error) {
-      console.error('Query processing failed:', error);
+      logger.logError('Query processing failed:', error);
       throw error;
     }
   }
@@ -306,7 +318,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
 
-      // If not queryable
+      // If not queryable or there no url access path to query return []
       if (!layerConfig.source.featureInfo?.queryable) return [];
 
       let identifyUrl = layerConfig.source.dataAccessPath;
@@ -315,7 +327,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
 
       // GV: We cannot directly use the view extent and reproject. If we do so some layers (issue #2413) identify will return empty resultset
-      // GV-CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the repojection it works
+      // GV.CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the repojection it works
       const mapViewer = this.getMapViewer();
       const mapExtent = mapViewer.getView().calculateExtent();
       const boundsLL = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[0], mapExtent[1]]);
@@ -324,7 +336,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const layerDefs = this.getOLSource()?.getParams()?.layerDefs || '';
       const size = mapViewer.map.getSize()!;
 
-      // Identify query to get oid features value, at this point we do not query geometry
+      // Identify query to get oid features value and attributes, at this point we do not query geometry
       identifyUrl =
         `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
@@ -332,7 +344,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         `&layers=visible:${layerConfig.layerId}` +
         `&layerDefs=${layerDefs}` +
         `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
-        `&returnGeometry=false&sr=4326`;
+        `&returnGeometry=false&sr=4326&&returnFieldName=true`;
 
       const identifyResponse = await fetch(identifyUrl);
       const identifyJsonResponse = await identifyResponse.json();
@@ -341,7 +353,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         throw new Error(`Error code = ${identifyJsonResponse.error.code} ${identifyJsonResponse.error.message}` || '');
       }
 
-      // If no features identified
+      // If no features identified return []
       if (identifyJsonResponse.results.length === 0) return [];
 
       // Extract OBJECTIDs
@@ -353,29 +365,37 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
       const maxAllowableOffset = queryGeometry ? getMetersPerPixel(mapViewer, lnglat[1]) : 0;
 
-      this.yourQueryMethod(layerConfig, objectIds, true).then((features) => console.log('Features worker', features));
-
-      // TODO: We need to separate the query attribute from geometry. We can use the attributes returned by identify to show details panel
-      // TODO.CONT: or create 2 distinc query one for attributes and one for geometry. This way we can display the anel faster and wait later for geometry
+      // TODO: Performance - We need to separate the query attribute from geometry. We can use the attributes returned by identify to show details panel
+      // TODO.CONT: or create 2 distinc query one for attributes and one for geometry. This way we can display the panel faster and wait later for geometry
       // TODO.CONT: We need to see if we can fetch in async mode without freezing the ui. If not we will need a web worker for the fetch.
       // TODO.CONT: If we go with web worker, we need a reusable approach so we can use with all our queries
       // Get features
-      const response = await esriQueryRecordsByUrlObjectIds(
-        layerConfig.source.dataAccessPath + layerConfig.layerId,
-        (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', '') as TypeStyleGeometry,
-        objectIds,
-        '*',
-        false,
-        mapViewer.getMapState().currentProjection,
-        maxAllowableOffset,
-        false
-      );
+      // const response = await esriQueryRecordsByUrlObjectIds(
+      //   layerConfig.source.dataAccessPath + layerConfig.layerId,
+      //   (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', '') as TypeStyleGeometry,
+      //   objectIds,
+      //   '*',
+      //   false,
+      //   mapViewer.getMapState().currentProjection,
+      //   maxAllowableOffset,
+      //   false
+      // );
 
-      // TODO: This is also time consuming, the creation of the feature can take several seconds, check web worker
+      // TODO: Performance - This is also time consuming, the creation of the feature can take several seconds, check web worker
       // TODO.CONT: Because web worker can only use sereialize date and not object with function it may be difficult for this...
-      // Transform the features in an OL feature
-      const features = new EsriJSON().readFeatures({ features: response }) as Feature<Geometry>[];
+      // TODO.CONT: For the moment, the feature is created without a geometry. This should be added by web worker
+      // TODO.CONT: Splitting the query will help avoid layer details error when geometry is big anf let ui not frezze. The Web worker
+      // TODO.CONT: geometry assignement must not be in an async function.
+      // Transform the features in an OL feature - at this point, there is no geometry associated with the feature
+      const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results }) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
+
+      this.getFeatureInfoGeometryWorker(layerConfig, objectIds, true, mapViewer.getMapState().currentProjection, maxAllowableOffset)
+        .then((featuresJSON) => {
+          logger.logDebug('Features worker', featuresJSON);
+        })
+        .catch((err) => logger.logError('Features worker', err));
+
       return arrayOfFeatureInfoEntries;
     } catch (error) {
       // Log
