@@ -264,20 +264,20 @@ export class GeoCore {
       }
 
       if (layerConfig?.listOfLayerEntryConfig) {
-        // const newLayers: Promise<TypeGeoviewLayerConfig | undefined>[] = response.layers.map(async (lyr) => {
-        //   const fullConfig = await this.getFullConfig(lyr);
-        //   if (!fullConfig) return Promise.resolve(undefined);
-        //   return GeoCore.mergeLayerEntryConfigs(fullConfig, layerConfig);
-        // });
+        const newLayers: Promise<TypeGeoviewLayerConfig | undefined>[] = response.layers.map(async (lyr) => {
+          const fullConfig = await this.getFullConfig(lyr);
+          if (!fullConfig) return Promise.resolve(undefined);
+          return GeoCore.mergeLayerEntryConfigs(fullConfig, layerConfig);
+        });
 
-        // // Set the response layers to the merged config values
-        // const resolvedLayers = await Promise.all(newLayers);
-        // resolvedLayers.forEach((lyr, i) => {
-        //   if (lyr) {
-        //     response.layers[i] = lyr;
-        //   }
-        // });
-        response.layers[0].listOfLayerEntryConfig = layerConfig.listOfLayerEntryConfig;
+        // Set the response layers to the merged config values
+        const resolvedLayers = await Promise.all(newLayers);
+        resolvedLayers.forEach((lyr, i) => {
+          if (lyr) {
+            response.layers[i] = lyr;
+          }
+        });
+        // response.layers[0].listOfLayerEntryConfig = layerConfig.listOfLayerEntryConfig;
       }
 
       // For each found geochart associated with the Geocore UUIDs
