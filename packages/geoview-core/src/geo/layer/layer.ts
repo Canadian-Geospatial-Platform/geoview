@@ -1004,14 +1004,11 @@ export class LayerApi {
         MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerPath);
       } else if (layerConfig.parentLayerConfig) {
         // Here the map index of a sub layer path hasn't been set and there's a parent layer config for the current layer config
-
         // Get the map index of the parent layer path
         const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
 
-        // Get the number of child layers
-        const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId()).filter((layerInfo) =>
-          layerInfo.layerPath.startsWith(parentLayerPath)
-        ).length;
+        // Get the number of layers
+        const numberOfLayers = MapEventProcessor.getMapLayerAndChildrenOrderedInfo(this.getMapId(), parentLayerPath).length;
 
         // If the map index of the parent has been set
         if (parentLayerIndex !== -1) {
@@ -1201,7 +1198,7 @@ export class LayerApi {
 
     // Remove layer info from registered layers
     this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
-      if (registeredLayerPath.startsWith(layerPath)) {
+      if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
         // Remove ol layer
         if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
         // Unregister layer
@@ -1280,7 +1277,10 @@ export class LayerApi {
         // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
         const theLayer = this.getGeoviewLayer(registeredLayerPath);
         if (theLayer) {
-          if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
+          if (
+            !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
+            !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])
+          ) {
             const otherOpacity = theLayer.getOpacity();
             theLayer.setOpacity((otherOpacity || 1) * 0.25);
           } else this.getOLLayer(registeredLayerPath)!.setZIndex(999);
@@ -1313,7 +1313,10 @@ export class LayerApi {
           // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
           const theLayer = this.getGeoviewLayer(registeredLayerPath);
           if (theLayer) {
-            if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
+            if (
+              !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
+              !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])
+            ) {
               const otherOpacity = theLayer.getOpacity();
               theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1);
             } else theLayer.setOpacity(originalOpacity || 1);
@@ -1348,7 +1351,9 @@ export class LayerApi {
 
     layerIds.forEach((layerId) => {
       // Get sublayerpaths and layerpaths from layer IDs.
-      const subLayerPaths = Object.keys(this.#layerEntryConfigs).filter((layerPath) => layerPath.startsWith(layerId));
+      const subLayerPaths = Object.keys(this.#layerEntryConfigs).filter(
+        (layerPath) => layerPath.startsWith(`${layerId}/`) || layerPath === layerId
+      );
 
       if (subLayerPaths.length) {
         // Get max extents from all selected layers.
@@ -1457,7 +1462,7 @@ export class LayerApi {
     const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath);
     // Determine the outcome of the new visibility based on parameters
     const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
-    const layerInfos = curOrderedLayerInfo.filter((info: TypeOrderedLayerInfo) => info.layerPath.startsWith(layerPath));
+    const layerInfos = MapEventProcessor.getMapLayerAndChildrenOrderedInfo(this.getMapId(), layerPath, curOrderedLayerInfo);
 
     layerInfos.forEach((layerInfo: TypeOrderedLayerInfo) => {
       if (layerInfo) {
@@ -1491,7 +1496,7 @@ export class LayerApi {
       }
       const children = curOrderedLayerInfo.filter(
         // eslint-disable-next-line no-loop-func
-        (info: TypeOrderedLayerInfo) => info.layerPath.startsWith(parentLayerPath) && info.layerPath !== parentLayerPath
+        (info: TypeOrderedLayerInfo) => info.layerPath.startsWith(`${parentLayerPath}/`) && info.layerPath !== parentLayerPath
       );
       if (!children.some((child: TypeOrderedLayerInfo) => child.visible === true)) {
         this.setOrToggleLayerVisibility(parentLayerPath, false);
