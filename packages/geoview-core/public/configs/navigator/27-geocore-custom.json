@@ -16,6 +16,7 @@
             "listOfLayerEntryConfig": [
               {
                 "layerId": 0,
+                "entryType": "group",
                 "layerName": "Airborne Radioactivity - Main Group",
                 "listOfLayerEntryConfig": [
                   {
