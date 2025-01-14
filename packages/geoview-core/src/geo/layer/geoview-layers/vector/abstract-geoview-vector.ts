@@ -266,6 +266,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     queryLimit: number = 10
   ): Promise<string[]> {
     // Update url
+    // TODO: Performance - Check if we should add &maxAllowableOffset=10 to the url. It creates small sliver but download size if 18mb compare to 50mb for outlier-election-2019
+    // TODO.CONT: Download time is 90 seconds compare to 130 seconds. It may worth the loss of precision...
     const baseUrl = url.replace('&where=1%3D1&returnCountOnly=true', `&outfields=*&geometryPrecision=1`);
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
 
