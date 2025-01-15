@@ -43,7 +43,7 @@
               "states": {
                 "hoverable": true,
                 "legendCollapsed": false,
-                "opacity": 0.7,
+                "opacity": 0.3,
                 "queryable": true,
                 "visible": true
               }
