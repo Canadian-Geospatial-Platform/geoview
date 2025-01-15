@@ -55,7 +55,7 @@ export class Config {
       listOfGeoviewLayerConfig.forEach((geoviewLayerEntry) => {
         if (mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {
           //  Skip it, because we don't validate the GeoCore configuration anymore. Not the same way as typical GeoView Layer Types at least.
-          // ? Why not do GeoCore request here? Then could easily replace listOfLayerEntries and validate / process along with other layers?
+          // TODO Why not do GeoCore request here? Then could easily replace listOfLayerEntries and validate / process along with other layers
         } else if (Object.values(CONST_LAYER_TYPES).includes((geoviewLayerEntry as TypeGeoviewLayerConfig).geoviewLayerType)) {
           const geoViewLayerEntryCasted = geoviewLayerEntry as TypeGeoviewLayerConfig;
           this.#setLayerEntryType(geoViewLayerEntryCasted.listOfLayerEntryConfig!, geoViewLayerEntryCasted.geoviewLayerType);

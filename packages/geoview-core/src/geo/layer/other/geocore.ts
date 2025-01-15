@@ -1,7 +1,6 @@
 import { TypeDisplayLanguage } from '@config/types/map-schema-types';
 
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
-// import { UUIDmapConfigReader } from '@/api/config/uuid-config-reader';
 import { Config } from '@/core/utils/config/config';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
