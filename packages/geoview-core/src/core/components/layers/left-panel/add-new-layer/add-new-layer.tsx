@@ -883,8 +883,19 @@ export function AddNewLayer(): JSX.Element {
         });
       } else if (layerEntries.length > 0) {
         (layerEntries as TypeGeoviewLayerConfig[]).forEach((geoviewLayerConfig) => {
-          const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
-          if (addedLayer) addedLayers.push(addedLayer);
+          if (layerName !== geoviewLayerConfig.geoviewLayerName) {
+            const tempConfig = geoviewLayerConfig;
+            if (tempConfig.listOfLayerEntryConfig.length > 1) {
+              tempConfig.geoviewLayerName = layerName;
+            } else {
+              tempConfig.listOfLayerEntryConfig[0].layerName = layerName;
+            }
+            const addedLayer = api.maps[mapId].layer.addGeoviewLayer(tempConfig);
+            if (addedLayer) addedLayers.push(addedLayer);
+          } else {
+            const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+            if (addedLayer) addedLayers.push(addedLayer);
+          }
         });
       }
 
