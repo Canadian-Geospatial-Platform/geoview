@@ -42,7 +42,7 @@
             "initialSettings": {
               "states": {
                 "hoverable": true,
-                "legendCollpased": false,
+                "legendCollapsed": false,
                 "opacity": 0.7,
                 "queryable": true,
                 "visible": true
@@ -54,6 +54,11 @@
       {
         "geoviewLayerType": "geoCore",
         "geoviewLayerId": "03ccfb5c-a06e-43e3-80fd-09d4f8f69703",
+        "initialSettings": {
+          "controls": {
+            "highlight": true
+          }
+        },
         "listOfLayerEntryConfig": [
           {
             "layerId": "regina",
@@ -81,7 +86,7 @@
         "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9",
         "listOfLayerEntryConfig": [
           {
-            "layerId": 0,
+            "layerId": "0",
             "layerStyle": {
               "Point": {
                 "type": "uniqueValue",

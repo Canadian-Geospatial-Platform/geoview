@@ -50,12 +50,10 @@ export class GeoCore {
       const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid]);
 
       // Use user supplied listOfLayerEntryConfig if provided
-      if (layerConfig?.listOfLayerEntryConfig) {
+      if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
         const tempLayerConfig = { ...layerConfig } as unknown as TypeGeoviewLayerConfig;
-        for (let i = 0; i < layerConfig.listOfLayerEntryConfig.length; i++) {
-          tempLayerConfig.metadataAccessPath = response.layers[i].metadataAccessPath;
-          tempLayerConfig.geoviewLayerType = response.layers[i].geoviewLayerType;
-        }
+        tempLayerConfig.metadataAccessPath = response.layers[0].metadataAccessPath;
+        tempLayerConfig.geoviewLayerType = response.layers[0].geoviewLayerType;
 
         const config = new Config(this.#displayLanguage);
         const newLayerConfig = config.getValidMapConfig([tempLayerConfig]);
