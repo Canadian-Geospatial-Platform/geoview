@@ -35,8 +35,8 @@ export type TypeVectorLayerGroup = LayerGroup;
 export type TypeVectorLayer = VectorSource<Feature>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 
-const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude/latitude', 'latitude / latitude'];
-const EXCLUDED_HEADERS_LNG = ['longitude', 'lon', 'x', 'xcoord', 'longitude/longitude', 'longitude / longitude'];
+const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
+const EXCLUDED_HEADERS_LNG = ['longitude', 'lon', 'x', 'xcoord', 'longitude|longitude', 'longitude | longitude'];
 const EXCLUDED_HEADERS_GEN = ['geometry', 'geom'];
 const EXCLUDED_HEADERS = EXCLUDED_HEADERS_LAT.concat(EXCLUDED_HEADERS_LNG).concat(EXCLUDED_HEADERS_GEN);
 
@@ -428,6 +428,25 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       if (matches[1].length && matches[1] !== separator) parsedData.push([]);
       parsedData[parsedData.length - 1].push(matches[2] !== undefined ? matches[2].replace(/""/g, '"') : matches[3]);
     }
+
+    // These characters are removed from the headers as they break the data table filtering (Issue #2693).
+    parsedData[0].forEach((header, i) => {
+      if (header.includes("'")) logger.logWarning("Header included illegal character (') replaced with (_)");
+      parsedData[0][i] = header.replaceAll("'", '_');
+      if (header.includes('/')) logger.logWarning('Header included illegal character (/) replaced with (|)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('/', '|');
+      if (header.includes('+')) logger.logWarning('Header included illegal character (+) replaced with (plus)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('+', 'plus');
+      if (header.includes('-')) logger.logWarning('Header included illegal character (-) replaced with (_)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('-', '_');
+      if (header.includes('*')) logger.logWarning('Header included illegal character (*) replaced with (x)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('*', 'x');
+      if (header.includes('(')) logger.logWarning('Header included illegal character (() replaced with ([)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('(', '[');
+      if (header.includes(')')) logger.logWarning('Header included illegal character ()) replaced with (])');
+      parsedData[0][i] = parsedData[0][i].replaceAll(')', ']');
+    });
+
     return parsedData;
   }
 
