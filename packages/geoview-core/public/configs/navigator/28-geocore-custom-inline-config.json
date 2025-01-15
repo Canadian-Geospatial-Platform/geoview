@@ -54,11 +54,6 @@
       {
         "geoviewLayerType": "geoCore",
         "geoviewLayerId": "03ccfb5c-a06e-43e3-80fd-09d4f8f69703",
-        "initialSettings": {
-          "controls": {
-            "highlight": true
-          }
-        },
         "listOfLayerEntryConfig": [
           {
             "layerId": "regina",
