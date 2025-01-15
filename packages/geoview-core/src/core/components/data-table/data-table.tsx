@@ -30,7 +30,6 @@ import {
   Tooltip,
   ZoomInSearchIcon,
   InfoOutlinedIcon,
-  MRT_TableOptions,
 } from '@/ui';
 
 import TopToolbar from './top-toolbar';
@@ -405,7 +404,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   let useTable: MRTTableInstance<ColumnsType>;
 
   const renderTopToolbar = useCallback(
-    ({ table }: { table: MRTTableInstance<ColumnsType> }) => (
+    (table: MRTTableInstance<ColumnsType>) => (
       <TopToolbar
         sxClasses={sxClasses}
         datatableSettings={datatableSettings}
@@ -415,6 +414,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
         useTable={useTable}
         columns={columns}
         data={data}
+        table={table}
       />
     ),
     [datatableSettings, layerPath, globalFilter, columns, data] // Include dependencies
