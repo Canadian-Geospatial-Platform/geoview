@@ -15,12 +15,12 @@
         "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",
         "listOfLayerEntryConfig": [
           {
-            "layerId": 0,
+            "layerId": "0",
             "entryType": "group",
             "layerName": "Airborne Radioactivity - Main Group",
             "listOfLayerEntryConfig": [
               {
-                "layerId": 1,
+                "layerId": "1",
                 "layerName": "Airborne Radioactivity - Feature Layer",
                 "initialSettings": {
                   "states": {
