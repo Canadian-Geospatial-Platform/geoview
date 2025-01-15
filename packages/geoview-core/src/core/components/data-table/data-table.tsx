@@ -97,8 +97,8 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
   const { enableFocusTrap } = useUIStoreActions();
 
-  const handleDensityChange: Function = (newDensity: MRTDensityState): void => {
-    setDensity(newDensity);
+  const handleDensityChange = (updaterOrValue: MRTDensityState | ((prevState: MRTDensityState) => MRTDensityState)): void => {
+    setDensity(updaterOrValue);
   };
 
   const handleToggleColumnFilters = () => {
