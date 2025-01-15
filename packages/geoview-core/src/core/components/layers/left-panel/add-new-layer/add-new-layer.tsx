@@ -885,7 +885,11 @@ export function AddNewLayer(): JSX.Element {
         (layerEntries as TypeGeoviewLayerConfig[]).forEach((geoviewLayerConfig) => {
           if (layerName !== geoviewLayerConfig.geoviewLayerName) {
             const tempConfig = geoviewLayerConfig;
-            tempConfig.listOfLayerEntryConfig[0].layerName = layerName;
+            if (tempConfig.listOfLayerEntryConfig.length > 1) {
+              tempConfig.geoviewLayerName = layerName;
+            } else {
+              tempConfig.listOfLayerEntryConfig[0].layerName = layerName;
+            }
             const addedLayer = api.maps[mapId].layer.addGeoviewLayer(tempConfig);
             if (addedLayer) addedLayers.push(addedLayer);
           } else {
