@@ -52,8 +52,10 @@ export class GeoCore {
       // Use user supplied listOfLayerEntryConfig if provided
       if (layerConfig?.listOfLayerEntryConfig) {
         const tempLayerConfig = { ...layerConfig } as unknown as TypeGeoviewLayerConfig;
-        tempLayerConfig.metadataAccessPath = response.layers[0].metadataAccessPath;
-        tempLayerConfig.geoviewLayerType = response.layers[0].geoviewLayerType;
+        for (let i = 0; i < layerConfig.listOfLayerEntryConfig.length; i++) {
+          tempLayerConfig.metadataAccessPath = response.layers[i].metadataAccessPath;
+          tempLayerConfig.geoviewLayerType = response.layers[i].geoviewLayerType;
+        }
 
         const config = new Config(this.#displayLanguage);
         const newLayerConfig = config.getValidMapConfig([tempLayerConfig]);
