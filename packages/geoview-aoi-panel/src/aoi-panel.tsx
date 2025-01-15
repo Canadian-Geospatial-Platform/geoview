@@ -1,3 +1,5 @@
+/* eslint react/prop-types: 0 */
+
 import { Extent } from 'geoview-core/src/api/config/types/map-schema-types';
 import { useMapStoreActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './area-of-interest-style';
