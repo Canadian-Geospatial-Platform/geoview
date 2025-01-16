@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, memo, isValidElement } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo, isValidElement, type ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
@@ -404,7 +404,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   let useTable: MRTTableInstance<ColumnsType>;
 
   const renderTopToolbar = useCallback(
-    (table: MRTTableInstance<ColumnsType>) => (
+    (props: { table: MRTTableInstance<ColumnsType> }): ReactNode => (
       <TopToolbar
         sxClasses={sxClasses}
         datatableSettings={datatableSettings}
@@ -414,7 +414,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
         useTable={useTable}
         columns={columns}
         data={data}
-        table={table}
+        table={props.table}
       />
     ),
     [datatableSettings, layerPath, globalFilter, columns, data] // Include dependencies
