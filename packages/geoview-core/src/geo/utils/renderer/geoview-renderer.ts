@@ -1539,7 +1539,7 @@ export function getAndCreateFeatureStyle(
     }
   }
 
-  // Get the style accordingly to its type and geometry.
+  // Get the style according to its type and geometry.
   if (styleWorkOn![geometryType]) {
     const styleSettings = style![geometryType]!;
     const { type } = styleSettings;

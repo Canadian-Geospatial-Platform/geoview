@@ -75,9 +75,9 @@
                 const id = document.createAttribute('id');
                 id.value = 'Map1';
                 newDiv.setAttributeNode(id);
-                const lang = document.createAttribute('data-lang');
-                lang.value = 'fr';
-                newDiv.setAttributeNode(lang);
+                const dataLang = document.createAttribute('data-lang');
+                dataLang.value = lang;
+                newDiv.setAttributeNode(dataLang);
                 document.getElementById('mapSection').appendChild(newDiv);
               }
             </pre>
@@ -128,7 +128,8 @@
         </li>
         <li>
           <button id="changeLanguage" style="margin: 10px">Change Language</button>
-          Changes the language from french to english or english to french and reloads the map if it exists
+          Changes the language from french to english or english to french and reloads the map if it exists.
+          Note: this will not change the language of the layers, as they are loaded in the current state.
           <details>
             <summary>Code</summary>
             <pre>
