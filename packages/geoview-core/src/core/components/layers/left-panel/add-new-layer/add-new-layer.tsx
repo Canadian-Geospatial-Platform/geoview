@@ -34,12 +34,10 @@ import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-class
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { GeoPackage, TypeGeoPackageLayerConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { GeoCore } from '@/geo/layer/other/geocore';
 import { GeoViewLayerAddedResult, LayerApi } from '@/geo/layer/layer';
 import {
@@ -66,7 +64,8 @@ export function AddNewLayer(): JSX.Element {
   const { t } = useTranslation<string>();
   const theme = useTheme();
 
-  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES } = CONST_LAYER_TYPES;
+  // TODO: refactor - add the Geopacakges when refactor is done GEOPACKAGE
+  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES } = CONST_LAYER_TYPES;
   const { GEOCORE } = CONST_LAYER_ENTRY_TYPES;
 
   const [geoviewLayerInstance, setGeoviewLayerInstance] = useState<AbstractGeoViewLayer | undefined>();
@@ -104,7 +103,6 @@ export function AddNewLayer(): JSX.Element {
     [ESRI_FEATURE, 'ESRI Feature Service'],
     [ESRI_IMAGE, 'ESRI Image Service'],
     [GEOJSON, 'GeoJSON'],
-    [GEOPACKAGE, 'GeoPackage'],
     [WMS, 'OGC Web Map Service (WMS)'],
     [WFS, 'OGC Web Feature Service (WFS)'],
     [OGC_FEATURE, 'OGC API Features'],
@@ -712,43 +710,44 @@ export function AddNewLayer(): JSX.Element {
     return true;
   };
 
+  // TODO: refactor - add the Geopacakges when refactor is done. We keep code for reference
   /**
    * Using the layerURL state object, check whether URL is a valid GeoPackage.
    *
    * @returns {boolean} True if layer passes validation
    */
-  const geoPackageValidation = (): boolean => {
-    try {
-      // We assume a single GeoPackage file is present
-      setHasMetadata(false);
-      const geoPackageGeoviewLayerConfig = {
-        geoviewLayerType: GEOPACKAGE,
-        listOfLayerEntryConfig: [] as GeoPackageLayerEntryConfig[],
-      } as TypeGeoPackageLayerConfig;
-      const geopackageGeoviewLayerInstance = new GeoPackage(mapId, geoPackageGeoviewLayerConfig);
-      // Synchronize the geoviewLayerId.
-      geoPackageGeoviewLayerConfig.geoviewLayerId = geopackageGeoviewLayerInstance.geoviewLayerId;
-      setGeoviewLayerInstance(geopackageGeoviewLayerInstance);
-      const layers = [
-        new GeoPackageLayerEntryConfig({
-          geoviewLayerConfig: geoPackageGeoviewLayerConfig,
-          layerId: geoPackageGeoviewLayerConfig.geoviewLayerId,
-          layerName: '',
-          source: {
-            dataAccessPath: layerURL,
-          },
-        } as GeoPackageLayerEntryConfig),
-      ];
-      setLayerName(layers[0].layerName!);
-      setLayerEntries([layers[0]]);
-    } catch (error) {
-      emitErrorServer('GeoPackage');
-      // Log error
-      logger.logError(error);
-      return false;
-    }
-    return true;
-  };
+  // const geoPackageValidation = (): boolean => {
+  // try {
+  //   // We assume a single GeoPackage file is present
+  //   setHasMetadata(false);
+  //   const geoPackageGeoviewLayerConfig = {
+  //     geoviewLayerType: GEOPACKAGE,
+  //     listOfLayerEntryConfig: [] as GeoPackageLayerEntryConfig[],
+  //   } as TypeGeoPackageLayerConfig;
+  //   const geopackageGeoviewLayerInstance = new GeoPackage(mapId, geoPackageGeoviewLayerConfig);
+  //   // Synchronize the geoviewLayerId.
+  //   geoPackageGeoviewLayerConfig.geoviewLayerId = geopackageGeoviewLayerInstance.geoviewLayerId;
+  //   setGeoviewLayerInstance(geopackageGeoviewLayerInstance);
+  //   const layers = [
+  //     new GeoPackageLayerEntryConfig({
+  //       geoviewLayerConfig: geoPackageGeoviewLayerConfig,
+  //       layerId: geoPackageGeoviewLayerConfig.geoviewLayerId,
+  //       layerName: '',
+  //       source: {
+  //         dataAccessPath: layerURL,
+  //       },
+  //     } as GeoPackageLayerEntryConfig),
+  //   ];
+  //   setLayerName(layers[0].layerName!);
+  //   setLayerEntries([layers[0]]);
+  // } catch (error) {
+  //   emitErrorServer('GeoPackage');
+  //   // Log error
+  //   logger.logError(error);
+  //   return false;
+  // }
+  // return true;
+  // };
 
   /**
    * Attempt to determine the layer type based on the URL format
@@ -769,8 +768,6 @@ export function AddNewLayer(): JSX.Element {
       setLayerType(WFS);
     } else if (displayURL.toUpperCase().endsWith('.JSON') || displayURL.toUpperCase().endsWith('.GEOJSON')) {
       setLayerType(GEOJSON);
-    } else if (displayURL.toUpperCase().endsWith('.GPKG')) {
-      setLayerType(GEOPACKAGE);
     } else if (displayURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || displayURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
       setLayerType(XYZ_TILES);
     } else if (displayURL.indexOf('/') === -1 && displayURL.replaceAll('-', '').length === 32) {
@@ -818,7 +815,6 @@ export function AddNewLayer(): JSX.Element {
     else if (layerType === ESRI_FEATURE) promise = esriValidation(ESRI_FEATURE);
     else if (layerType === ESRI_IMAGE) promise = esriImageValidation();
     else if (layerType === GEOJSON) promise = geoJSONValidation();
-    else if (layerType === GEOPACKAGE) promise = Promise.resolve(geoPackageValidation());
     else if (layerType === GEOCORE) promise = geocoreValidation();
     else if (layerType === CSV) promise = csvValidation();
 

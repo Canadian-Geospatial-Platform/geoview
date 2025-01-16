@@ -80,7 +80,7 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
 });
 
 export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
-  logger.logTraceRender('components/details/feature-info');
+  logger.logTraceRender('components/details/feature-info', feature);
 
   // Hooks
   const theme = useTheme();

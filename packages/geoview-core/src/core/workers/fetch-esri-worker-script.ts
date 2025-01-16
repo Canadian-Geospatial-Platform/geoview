@@ -48,26 +48,6 @@ async function queryEsriFeatures(params: QueryParams): Promise<TypeJsonObject> {
   const identifyResponse = await fetch(`${params.url}/query${urlParam}`);
   const identifyJsonResponse = await identifyResponse.json();
 
-  // const response = await fetch(`${params.url}/query`, {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/x-www-form-urlencoded',
-  //   },
-  //   body: new URLSearchParams({
-  //     f: 'json',
-  //     geometryType: params.geometryType,
-  //     objectIds: params.objectIds.join(','),
-  //     outFields: '*',
-  //     returnGeometry: params.queryGeometry.toString(),
-  //     outSR: params.projection.toString(),
-  //     maxAllowableOffset: params.maxAllowableOffset.toString(),
-  //   }),
-  // });
-
-  // if (!response.ok) {
-  //   throw new Error(`HTTP error! status: ${response.status}`);
-  // }
-
   return identifyJsonResponse;
 }
 
@@ -97,7 +77,7 @@ const worker = {
     try {
       logger.logTrace('Starting query processing', JSON.stringify(params));
       const response = await queryEsriFeatures(params);
-      logger.logDebug('Query completed');
+      logger.logTrace('Query completed');
       return response;
     } catch (error) {
       logger.logError('Query processing failed', error);

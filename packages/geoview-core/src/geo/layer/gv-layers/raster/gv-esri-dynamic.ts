@@ -32,6 +32,8 @@ import { TypeEsriImageLayerLegend } from './gv-esri-image';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
+import { Circle, Point } from 'ol/geom';
+import { delay } from '@/core/utils/utilities';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -274,27 +276,33 @@ export class GVEsriDynamic extends AbstractGVRaster {
     return this.getFeatureInfoAtLongLat(projCoordinate, queryGeometry);
   }
 
+  /**
+   * Query the features geometry with a web worker
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
+   * @param {number[]} objectIds - Array of object IDs to query
+   * @param {boolean} queryGeometry - Whether to include geometry in the query
+   * @param {number} projection - The spatial reference ID for the output
+   * @param {number} maxAllowableOffset - The maximum allowable offset for geometry simplification
+   * @returns {TypeJsonObject} A promise of esri response for query.
+   */
   async getFeatureInfoGeometryWorker(
     layerConfig: EsriDynamicLayerEntryConfig,
     objectIds: number[],
     queryGeometry: boolean,
     projection: number,
     maxAllowableOffset: number
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  ): Promise<TypeJsonObject> {
     try {
       const params: QueryParams = {
         url: layerConfig.source.dataAccessPath + layerConfig.layerId,
         geometryType: (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', ''),
         objectIds,
         queryGeometry,
-        projection: 3978,
+        projection,
         maxAllowableOffset,
       };
 
-      const response = await this.#fetchWorkerPool.process(params);
-      logger.logDebug('worker', response);
-      const features = new EsriJSON().readFeatures({ features: response }) as Feature<Geometry>[];
-      return await this.formatFeatureInfoResult(features, layerConfig);
+      return await this.#fetchWorkerPool.process(params);
     } catch (error) {
       logger.logError('Query processing failed:', error);
       throw error;
@@ -344,7 +352,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         `&layers=visible:${layerConfig.layerId}` +
         `&layerDefs=${layerDefs}` +
         `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
-        `&returnGeometry=false&sr=4326&&returnFieldName=true`;
+        `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
       const identifyResponse = await fetch(identifyUrl);
       const identifyJsonResponse = await identifyResponse.json();
@@ -360,7 +368,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const oidField = layerConfig.source.featureInfo.outfields
         ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
         : 'OBJECTID';
-      const objectIds = identifyJsonResponse.results.map((result: TypeJsonObject) => result.attributes[oidField]);
+      const objectIds = identifyJsonResponse.results.map((result: TypeJsonObject) => result.attributes[oidField].replace(',', ''));
 
       // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
       const maxAllowableOffset = queryGeometry ? getMetersPerPixel(mapViewer, lnglat[1]) : 0;
@@ -392,6 +400,28 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
       this.getFeatureInfoGeometryWorker(layerConfig, objectIds, true, mapViewer.getMapState().currentProjection, maxAllowableOffset)
         .then((featuresJSON) => {
+          featuresJSON.features.forEach((feat, index) => {
+            const geom = new EsriJSON().readFeature(feat, {
+              dataProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
+              featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
+            }) as Feature<Geometry>;
+
+            if (
+              arrayOfFeatureInfoEntries[index] &&
+              arrayOfFeatureInfoEntries[index].geometry &&
+              arrayOfFeatureInfoEntries[index].geometry instanceof Feature
+            ) {
+              arrayOfFeatureInfoEntries[index].extent = geom.getGeometry()?.getExtent();
+              arrayOfFeatureInfoEntries[index].geometry.setGeometry(geom.getGeometry());
+            }
+          });
+
+          // arrayOfFeatureInfoEntries!.forEach((featureInfoEntry, i) => {
+          //   const feature = features[i];
+          //   featureInfoEntry.geometry = feature.getGeometry();
+
+          //   arrayOfFeatureInfoEntries[0].geometry.setGeometry(featuresJSON.features[0])
+          // });
           logger.logDebug('Features worker', featuresJSON);
         })
         .catch((err) => logger.logError('Features worker', err));

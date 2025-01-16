@@ -1581,7 +1581,7 @@ export async function getFeatureCanvas(
       const styleSettings = style[geometryType]!;
       const { type } = styleSettings;
 
-      // TODO: Performance - Wrap the style processing in a Promise to prevent blocking, Use requestAnimationFrame to process style during next frame
+      // TODO: Performance #2688 - Wrap the style processing in a Promise to prevent blocking, Use requestAnimationFrame to process style during next frame
       // Wrap the style processing in a Promise to prevent blocking
       // return new Promise((resolve) => {
       //   // Use requestAnimationFrame to process style during next frame
