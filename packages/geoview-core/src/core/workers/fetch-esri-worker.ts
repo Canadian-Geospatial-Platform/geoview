@@ -48,9 +48,8 @@ export class FetchEsriWorker extends AbstractWorker<FetchEsriWorkerType> {
    * Initializes the worker - empty for now.
    * @returns A promise that resolves when initialization is complete.
    */
-  public async init(): Promise<void> {
-    const result = await this.proxy.init();
-    return result;
+  public init(): Promise<void> {
+    return this.proxy.init();
   }
 
   /**
@@ -58,8 +57,7 @@ export class FetchEsriWorker extends AbstractWorker<FetchEsriWorkerType> {
    * @param {QueryParams} queryParams - The query parameters for the fetch.
    * @returns A promise that resolves to the processed JSON string.
    */
-  public async process(queryParams: QueryParams): Promise<TypeJsonObject> {
-    const result = await this.proxy.process(queryParams);
-    return result;
+  public process(queryParams: QueryParams): Promise<TypeJsonObject> {
+    return this.proxy.process(queryParams);
   }
 }

@@ -22,7 +22,7 @@ import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
 
 import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
-import { MapViewer } from '@/app';
+import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 
 /**
  * Interface used for css style declarations
@@ -481,31 +481,17 @@ export function calculateDistance(coordinates: Coordinate[], inProj: string, out
 
 /**
  * Get meters per pixel for different projections
- * @param {MapViewer} map - The Geoview map viewer instance
+ * @param {TypeValidMapProjectionCodes} projection - The projection of the map
+ * @param {number} resolution - The resolution of the map
  * @param {number?} lat - The latitude, only needed for Web Mercator
  * @returns {nubmber} Number representing meters per pixel
  */
-export function getMetersPerPixel(map: MapViewer, lat?: number): number {
-  const view = map.getView();
-  const projection = view.getProjection().getCode();
-  const resolution = view.getResolution();
-
+export function getMetersPerPixel(projection: TypeValidMapProjectionCodes, resolution: number, lat?: number): number {
   if (!resolution) return 0;
 
   // Web Mercator needs latitude correction because of severe distortion at high latitudes
   // At latitude 60°N, the scale distortion factor is about 2:1
-  if (projection === 'EPSG:3857') {
-    if (lat === undefined) {
-      // Get center of current view if latitude not provided
-      const center = view.getCenter();
-      if (center) {
-        // Transform center point to get latitude
-        const [, latitude] = Projection.transform(center, projection, Projection.PROJECTION_NAMES.LNGLAT);
-        const latitudeCorrection = Math.cos((latitude * Math.PI) / 180);
-        return resolution * latitudeCorrection;
-      }
-      return resolution;
-    }
+  if (projection === 3857 && lat !== undefined) {
     const latitudeCorrection = Math.cos((lat * Math.PI) / 180);
     return resolution * latitudeCorrection;
   }

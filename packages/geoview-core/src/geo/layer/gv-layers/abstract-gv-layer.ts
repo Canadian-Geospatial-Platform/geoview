@@ -320,7 +320,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel, queryGeometry = true): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtPixel(location: Pixel, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoAtPixel on layer path ${this.getLayerPath()}`);
   }
@@ -332,7 +332,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry = true): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoAtCoordinate on layer path ${this.getLayerPath()}`);
   }
@@ -344,7 +344,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtLongLat(location: Coordinate, queryGeometry = true): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtLongLat(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoAtLongLat on layer path ${this.getLayerPath()}`);
   }
@@ -356,7 +356,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[], queryGeometry = true): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoUsingBBox(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoUsingBBox on layer path ${this.getLayerPath()}`);
   }
@@ -368,7 +368,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], queryGeometry = true): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoUsingPolygon on layer path ${this.getLayerPath()}`);
   }

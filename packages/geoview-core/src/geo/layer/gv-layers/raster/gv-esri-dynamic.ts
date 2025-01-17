@@ -24,7 +24,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
-import { TypeOutfieldsType, TypeStyleGeometry } from '@/api/config/types/map-schema-types';
+import { TypeOutfieldsType, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { CONST_LAYER_TYPES } from '../../geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -256,7 +256,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtPixel(location: Pixel, queryGeometry = true): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtPixel(
+    location: Pixel,
+    queryGeometry: boolean = true
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Redirect to getFeatureInfoAtCoordinate
     return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), queryGeometry);
   }
@@ -269,7 +272,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override getFeatureInfoAtCoordinate(
     location: Coordinate,
-    queryGeometry = true
+    queryGeometry: boolean = true
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Transform coordinate from map project to lntlat
     const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
@@ -287,7 +290,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {number} maxAllowableOffset - The maximum allowable offset for geometry simplification
    * @returns {TypeJsonObject} A promise of esri response for query.
    */
-  async getFeatureInfoGeometryWorker(
+  async fetchFeatureInfoGeometryWithWorker(
     layerConfig: EsriDynamicLayerEntryConfig,
     objectIds: number[],
     queryGeometry: boolean,
@@ -319,7 +322,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override async getFeatureInfoAtLongLat(
     lnglat: Coordinate,
-    queryGeometry = true
+    queryGeometry: boolean = true
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // If invisible
@@ -373,7 +376,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const objectIds = identifyJsonResponse.results.map((result: TypeJsonObject) => String(result.attributes[oidField]).replace(',', ''));
 
       // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
-      const maxAllowableOffset = queryGeometry ? getMetersPerPixel(mapViewer, lnglat[1]) : 0;
+      const maxAllowableOffset = queryGeometry
+        ? getMetersPerPixel(
+            mapViewer.getMapState().currentProjection as TypeValidMapProjectionCodes,
+            mapViewer.getView().getResolution() || 7000,
+            lnglat[1]
+          )
+        : 0;
 
       // TODO: Performance - We need to separate the query attribute from geometry. We can use the attributes returned by identify to show details panel
       // TODO.CONT: or create 2 distinc query one for attributes and one for geometry. This way we can display the panel faster and wait later for geometry
@@ -404,7 +413,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       if (queryGeometry)
         // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
         // TODO.CONT: the esri query (was working with identify). But identify was failing on huge geometry...
-        this.getFeatureInfoGeometryWorker(layerConfig, objectIds, true, mapViewer.getMapState().currentProjection, maxAllowableOffset)
+        this.fetchFeatureInfoGeometryWithWorker(layerConfig, objectIds, true, mapViewer.getMapState().currentProjection, maxAllowableOffset)
           .then((featuresJSON) => {
             (featuresJSON.features as TypeJsonObject[]).forEach((feat: TypeJsonObject, index: number) => {
               // TODO: Performance - There is still a problem when we create the feature with new EsriJSON().readFeature. It goes trought a loop and take minutes on the deflate function

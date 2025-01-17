@@ -68,15 +68,14 @@ const worker = {
 
   /**
    * Processes an ESRI query request
-   * @async
    * @param {QueryParams} params - The parameters for the ESRI query
    * @returns {Promise<TypeJsonObject>} A promise that resolves to the query results
    * @throws {Error} When the query processing fails
    */
-  async process(params: QueryParams): Promise<TypeJsonObject> {
+  process(params: QueryParams): Promise<TypeJsonObject> {
     try {
       logger.logTrace('Starting query processing', JSON.stringify(params));
-      const response = await queryEsriFeatures(params);
+      const response = queryEsriFeatures(params);
       logger.logTrace('Query completed');
       return response;
     } catch (error) {
