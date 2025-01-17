@@ -24,7 +24,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeOutfieldsType, TypeStyleGeometry } from '@/api/config/types/map-schema-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { CONST_LAYER_TYPES } from '../../geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -32,6 +32,7 @@ import { TypeEsriImageLayerLegend } from './gv-esri-image';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
+import { GeometryApi } from '../../geometry/geometry';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -87,6 +88,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
     if (layerConfig.geoviewLayerConfig.geoviewLayerId === 'e2424b6c-db0c-4996-9bc0-2ca2e6714d71') {
       imageLayerOptions.source?.updateParams({ imageSR: 3857 });
+    }
+    if (layerConfig.geoviewLayerConfig.geoviewLayerId === '1dcd28aa-99da-4f62-b157-15631379b170') {
+      imageLayerOptions.source?.updateParams({ imageSR: 4269 });
     }
 
     // Init the layer options with initial settings
@@ -396,33 +400,46 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results }) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
 
-      this.getFeatureInfoGeometryWorker(layerConfig, objectIds, true, mapViewer.getMapState().currentProjection, maxAllowableOffset)
-        .then((featuresJSON) => {
-          (featuresJSON.features as unknown as TypeFeatureInfoEntry[]).forEach((feat: TypeFeatureInfoEntry, index: number) => {
-            const geom = new EsriJSON().readFeature(feat, {
-              dataProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
-              featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
-            }) as Feature<Geometry>;
+      // If geometry is needed, use web worker to query and assing geometry later
+      if (queryGeometry)
+        // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
+        // TODO.CONT: the esri query (was working with identify). But identify was failing on huge geometry...
+        this.getFeatureInfoGeometryWorker(layerConfig, objectIds, true, mapViewer.getMapState().currentProjection, maxAllowableOffset)
+          .then((featuresJSON) => {
+            (featuresJSON.features as TypeJsonObject[]).forEach((feat: TypeJsonObject, index: number) => {
+              // TODO: Performance - There is still a problem when we create the feature with new EsriJSON().readFeature. It goes trought a loop and take minutes on the deflate function
+              // TODO.CONT: 1dcd28aa-99da-4f62-b157-15631379b170, ocean biology layer has huge amount of verticies and when zoomed in we require more
+              // TODO.CONT: more definition so the feature creation take more time. Investigate if we can create the geometry instead
+              // TODO.CONT: Investigate using this approach in esri-feature.ts
+              // const geom = new EsriJSON().readFeature(feat, {
+              //   dataProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
+              //   featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
+              // }) as Feature<Geometry>;
 
-            if (
-              arrayOfFeatureInfoEntries![index] &&
-              arrayOfFeatureInfoEntries![index].geometry &&
-              arrayOfFeatureInfoEntries![index].geometry instanceof Feature
-            ) {
-              arrayOfFeatureInfoEntries![index].extent = geom.getGeometry()?.getExtent();
-              arrayOfFeatureInfoEntries![index].geometry.setGeometry(geom.getGeometry());
-            }
-          });
+              // TODO: Performance - Relying on style to get geometry is not good. We shold extract it from metadata and keep it in dedicated attribute
+              const geomType = Object.keys(layerConfig?.layerStyle || []);
 
-          // arrayOfFeatureInfoEntries!.forEach((featureInfoEntry, i) => {
-          //   const feature = features[i];
-          //   featureInfoEntry.geometry = feature.getGeometry();
+              // Get coordinates in right format and create geometry
+              const coordinates = (feat.geometry?.points ||
+                feat.geometry?.paths ||
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                feat.geometry?.rings || [feat.geometry?.x, feat.geometry?.y]) as any; // MultiPoint or Line or Polygon or Point schema
+              const newGeom: Geometry | null =
+                geomType.length > 0
+                  ? (GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) as unknown as Geometry)
+                  : null;
 
-          //   arrayOfFeatureInfoEntries[0].geometry.setGeometry(featuresJSON.features[0])
-          // });
-          logger.logDebug('Features worker', featuresJSON);
-        })
-        .catch((err) => logger.logError('Features worker', err));
+              // TODO: Perfromance - We will need a trigger to refresh the higight and detaiils panel (for zoom button) when extent and
+              // TODO.CONT: is applied. Sometime the delay is too big so we need to change tab or layer in layer list to trigger the refresh
+              // We assume order of arrayOfFeatureInfoEntries is the same as featuresJSON.features as they are process in same order
+              const entry = arrayOfFeatureInfoEntries![index];
+              if (newGeom !== null && entry.geometry && entry.geometry instanceof Feature) {
+                entry.extent = newGeom.getExtent();
+                entry.geometry.setGeometry(newGeom);
+              }
+            });
+          })
+          .catch((err) => logger.logError('Features worker', err));
 
       return arrayOfFeatureInfoEntries;
     } catch (error) {
