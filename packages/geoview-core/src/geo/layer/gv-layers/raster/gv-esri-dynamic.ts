@@ -32,8 +32,6 @@ import { TypeEsriImageLayerLegend } from './gv-esri-image';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
-import { Circle, Point } from 'ol/geom';
-import { delay } from '@/core/utils/utilities';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -368,7 +366,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const oidField = layerConfig.source.featureInfo.outfields
         ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
         : 'OBJECTID';
-      const objectIds = identifyJsonResponse.results.map((result: TypeJsonObject) => result.attributes[oidField].replace(',', ''));
+      const objectIds = identifyJsonResponse.results.map((result: TypeJsonObject) => String(result.attributes[oidField]).replace(',', ''));
 
       // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
       const maxAllowableOffset = queryGeometry ? getMetersPerPixel(mapViewer, lnglat[1]) : 0;
@@ -400,19 +398,19 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
       this.getFeatureInfoGeometryWorker(layerConfig, objectIds, true, mapViewer.getMapState().currentProjection, maxAllowableOffset)
         .then((featuresJSON) => {
-          featuresJSON.features.forEach((feat, index) => {
+          (featuresJSON.features as unknown as TypeFeatureInfoEntry[]).forEach((feat: TypeFeatureInfoEntry, index: number) => {
             const geom = new EsriJSON().readFeature(feat, {
               dataProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
               featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
             }) as Feature<Geometry>;
 
             if (
-              arrayOfFeatureInfoEntries[index] &&
-              arrayOfFeatureInfoEntries[index].geometry &&
-              arrayOfFeatureInfoEntries[index].geometry instanceof Feature
+              arrayOfFeatureInfoEntries![index] &&
+              arrayOfFeatureInfoEntries![index].geometry &&
+              arrayOfFeatureInfoEntries![index].geometry instanceof Feature
             ) {
-              arrayOfFeatureInfoEntries[index].extent = geom.getGeometry()?.getExtent();
-              arrayOfFeatureInfoEntries[index].geometry.setGeometry(geom.getGeometry());
+              arrayOfFeatureInfoEntries![index].extent = geom.getGeometry()?.getExtent();
+              arrayOfFeatureInfoEntries![index].geometry.setGeometry(geom.getGeometry());
             }
           });
 
