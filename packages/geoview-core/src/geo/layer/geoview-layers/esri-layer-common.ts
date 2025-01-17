@@ -142,6 +142,7 @@ export function commonValidateListOfLayerEntryConfig(
 
       // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)...
       // Don't forget to replace the old version in the registered layers
+      // TODO: TEST GROUP LAYER TEST Officially remove setLayerEntryConfigObsolete once passed testing
       MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(groupLayerConfig);
 
       (layer.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
@@ -164,6 +165,7 @@ export function commonValidateListOfLayerEntryConfig(
 
         // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
         // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)... (standardizing this call with the other one above for now)
+        // TODO: TEST GROUP LAYER TEST Officially remove setLayerEntryConfigObsolete once passed testing
         MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(subLayerEntryConfig);
       });
 

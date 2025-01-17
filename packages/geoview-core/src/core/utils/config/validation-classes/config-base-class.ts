@@ -149,6 +149,9 @@ export abstract class ConfigBaseClass {
     }
     if (newLayerStatus === 'processed' && this.#waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
 
+    // GV For quick debug, uncomment the line
+    // if (newLayerStatus === 'error') debugger;
+
     // TODO: Cleanup - Commenting this and leaving it here for now.. It turns out that the parentLayerConfig property can't be trusted
     // GV due to a bug with different instances of entryconfigs stored in the objects and depending how you navigate the objects, you get
     // GV different instances. Example below (where 'parentLayerConfig.listOfLayerEntryConfig[0]' is indeed going back to 'uniqueValueId/uniqueValueId/4')
@@ -220,6 +223,28 @@ export abstract class ConfigBaseClass {
       layerStatus: this.layerStatus,
       isMetadataLayerGroup: this.isMetadataLayerGroup,
     } as unknown as TypeJsonObject;
+  }
+
+  /**
+   * Clones the configuration class.
+   *
+   * @returns {ConfigBaseClass} The cloned ConfigBaseClass object.
+   */
+  clone(): ConfigBaseClass {
+    // Redirect to clone the object and return it
+    return this.onClone();
+  }
+
+  /**
+   * Overridable function to clone a child of a ConfigBaseClass.
+   *
+   * @returns {ConfigBaseClass} The cloned child object of a ConfigBaseClass.
+   */
+  protected onClone(): ConfigBaseClass {
+    // Crash on purpose.
+    // GV Make sure to implement a 'protected override onClone(): ConfigBaseClass' in the child-class to
+    // GV use this cloning feature. See OgcWMSLayerEntryConfig for example.
+    throw new Error(`Not implemented exception onClone on layer path ${this.layerPath}`);
   }
 
   /**

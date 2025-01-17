@@ -165,6 +165,9 @@ export class LayerApi {
   // Maximum time duration to wait when registering a layer for the time slider
   static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
 
+  // Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up
+  static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
+
   /**
    * Initializes layer types and listen to add/remove layer events from outside
    * @param {MapViewer} mapViewer - A reference to the map viewer
@@ -639,7 +642,7 @@ export class LayerApi {
     } else if (layerConfigIsCSV(geoviewLayerConfig)) {
       layerBeingAdded = new CSV(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsWMS(geoviewLayerConfig)) {
-      layerBeingAdded = new WMS(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new WMS(this.getMapId(), geoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
     } else if (layerConfigIsEsriDynamic(geoviewLayerConfig)) {
       layerBeingAdded = new EsriDynamic(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsEsriFeature(geoviewLayerConfig)) {
@@ -1202,12 +1205,19 @@ export class LayerApi {
     // Remove layer info from registered layers
     this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
       if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
-        // Remove ol layer
+        // Remove actual OL layer from the map
         if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
-        // Unregister layer
+
+        // Unregister layer config from the application
         this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath)!);
-        // Remove from registered layers
+
+        // Remove from registered layer configs
         delete this.#layerEntryConfigs[registeredLayerPath];
+        delete this.#geoviewLayers[registeredLayerPath];
+
+        // Remove from registered layers
+        delete this.#gvLayers[registeredLayerPath];
+        delete this.#olLayers[registeredLayerPath];
       }
     });
 
