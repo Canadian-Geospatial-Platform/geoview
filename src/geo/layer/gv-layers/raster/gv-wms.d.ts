@@ -61,7 +61,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * Overrides the fetching of the legend for a WMS layer.
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
      */
-    getLegend(): Promise<TypeLegend | null>;
+    onFetchLegend(): Promise<TypeLegend | null>;
     /**
      * Sets the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
      * @param {string} wmsStyleId - The style identifier that will be used.

@@ -37,6 +37,7 @@ export declare class LayerApi {
     hoverFeatureInfoLayerSet: HoverFeatureInfoLayerSet;
     allFeatureInfoLayerSet: AllFeatureInfoLayerSet;
     featureInfoLayerSet: FeatureInfoLayerSet;
+    static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS: boolean;
     /**
      * Initializes layer types and listen to add/remove layer events from outside
      * @param {MapViewer} mapViewer - A reference to the map viewer

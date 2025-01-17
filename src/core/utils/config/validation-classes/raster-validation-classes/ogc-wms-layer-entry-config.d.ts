@@ -1,4 +1,5 @@
 import { TypeSourceImageWmsInitialConfig } from '@/geo/map/map-schema-types';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
@@ -17,4 +18,10 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: OgcWmsLayerEntryConfig);
+    /**
+     * Clones an instance of a OgcWmsLayerEntryConfig.
+     *
+     * @returns {ConfigBaseClass} The cloned OgcWmsLayerEntryConfig instance
+     */
+    protected onClone(): ConfigBaseClass;
 }

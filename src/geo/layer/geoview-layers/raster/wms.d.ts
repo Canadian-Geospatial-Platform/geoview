@@ -48,12 +48,13 @@ export declare const geoviewEntryIsWMS: (verifyIfGeoViewEntry: TypeLayerEntryCon
 export declare class WMS extends AbstractGeoViewRaster {
     #private;
     WMSStyles: string[];
+    fullSubLayers: boolean;
     /** ***************************************************************************************************************************
      * Initialize layer
      * @param {string} mapId the id of the map
      * @param {TypeWMSLayerConfig} layerConfig the layer configuration
      */
-    constructor(mapId: string, layerConfig: TypeWMSLayerConfig);
+    constructor(mapId: string, layerConfig: TypeWMSLayerConfig, fullSubLayers: boolean);
     /** ***************************************************************************************************************************
      * This method reads the service metadata from the metadataAccessPath.
      *

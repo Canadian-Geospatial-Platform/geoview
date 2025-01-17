@@ -118,6 +118,14 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
      */
     static getMapOrderedLayerInfoForLayer(mapId: string, layerPath: string): TypeOrderedLayerInfo | undefined;
+    /**
+     * Gets the ordered layer info for one layer and its children.
+     * @param {string} mapId - The map id.
+     * @param {string} layerPath - The path of the layer to get.
+     * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The array of ordered layer info to search, default is current ordered layer info.
+     * @returns {TypeOrderedLayerInfo[] | undefined} The ordered layer info of the layer and its children.
+     */
+    static getMapLayerAndChildrenOrderedInfo(mapId: string, layerPath: string, orderedLayerInfo?: TypeOrderedLayerInfo[]): TypeOrderedLayerInfo[];
     static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number;
     static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
     static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;

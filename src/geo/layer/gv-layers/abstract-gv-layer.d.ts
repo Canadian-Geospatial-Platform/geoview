@@ -160,7 +160,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     protected getFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Queries the legend.
-     * This function raises legend querying and queried events. It calls the overridable getLegend() function.
+     * This function raises legend querying and queried events. It calls the overridable onFetchLegend() function.
      * @returns {Promise<TypeLegend | null>} The promise when the legend (or null) will be received
      */
     queryLegend(): Promise<TypeLegend | null>;
@@ -174,7 +174,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * of the layerConfig object is undefined, the legend property of the object returned will be null.
      * @returns {Promise<TypeLegend | null>} The legend of the layer.
      */
-    getLegend(): Promise<TypeLegend | null>;
+    onFetchLegend(): Promise<TypeLegend | null>;
     /**
      * Gets and formats the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
      * since the base date. Vector feature dates must be in ISO format.

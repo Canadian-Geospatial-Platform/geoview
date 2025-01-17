@@ -134,4 +134,10 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * - Features with no matching style follow the defaultVisible setting
      */
     static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[];
+    /**
+     * Sorts legend layers children recursively in given legend layers list.
+     * @param {string} mapId - The ID of the map.
+     * @param {TypeLegendLayer[]} legendLayerList - The list to sort.
+     */
+    static sortLegendLayersChildren: (mapId: string, legendLayerList: TypeLegendLayer[]) => void;
 }
