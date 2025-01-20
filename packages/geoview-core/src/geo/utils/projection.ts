@@ -150,6 +150,10 @@ export abstract class Projection {
    * @returns The new extent transformed in the destination projection.
    */
   static transformExtentFromProj(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent {
+    // This is included for certain outliers.
+    // TODO Refactor: invalid extents should be handled before this point, test and remove - 5a65ad7c-561a-466a-8375-8d876624df9d
+    if (typeof extent[0] !== 'number')
+      return olTransformExtent([-180, 90, 180, 90], Projection.PROJECTION_NAMES.LNGLAT, destination, stops);
     // Project
     return olTransformExtent(extent, source, destination, stops);
   }
