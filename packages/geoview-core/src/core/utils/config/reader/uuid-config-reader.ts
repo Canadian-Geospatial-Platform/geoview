@@ -390,6 +390,14 @@ export class UUIDmapConfigReader {
             // Log
             logger.logWarning(`Layer type ${layerType} not supported`);
           }
+
+          // If there's only the one layer, replace the layer name with the name from GeoCore
+          if (
+            listOfGeoviewLayerConfig[i].listOfLayerEntryConfig.length === 1 &&
+            !listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].listOfLayerEntryConfig
+          ) {
+            listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].layerName = name as string;
+          }
         }
       }
     }
