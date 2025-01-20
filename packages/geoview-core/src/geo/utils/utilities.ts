@@ -406,19 +406,19 @@ export function validateExtent(extent: Extent, code: string = 'EPSG:4326'): Exte
     'EPSG:3978': [-7192737.96, -3004297.73, 5183275.29, 4484204.83],
   };
 
-  // Replace any invalid entries with maximum value
-  const minX = extent[0] < maxExtents[code][0] || extent[0] === -Infinity || Number.isNaN(extent[0]) ? maxExtents[code][0] : extent[0];
-  const minY = extent[1] < maxExtents[code][1] || extent[1] === -Infinity || Number.isNaN(extent[1]) ? maxExtents[code][1] : extent[1];
-  const maxX = extent[2] > maxExtents[code][2] || extent[2] === Infinity || Number.isNaN(extent[2]) ? maxExtents[code][2] : extent[2];
-  const maxY = extent[3] > maxExtents[code][3] || extent[3] === Infinity || Number.isNaN(extent[3]) ? maxExtents[code][3] : extent[3];
+  let validatedExtent: Extent;
+  // In rare cases, services return 'NaN' as extents, not picked up by Number.isNan
+  if (typeof extent[0] !== 'number') validatedExtent = maxExtents[code];
+  else {
+    // Replace any invalid entries with maximum value
+    const minX = extent[0] < maxExtents[code][0] || extent[0] === -Infinity || Number.isNaN(extent[0]) ? maxExtents[code][0] : extent[0];
+    const minY = extent[1] < maxExtents[code][1] || extent[1] === -Infinity || Number.isNaN(extent[1]) ? maxExtents[code][1] : extent[1];
+    const maxX = extent[2] > maxExtents[code][2] || extent[2] === Infinity || Number.isNaN(extent[2]) ? maxExtents[code][2] : extent[2];
+    const maxY = extent[3] > maxExtents[code][3] || extent[3] === Infinity || Number.isNaN(extent[3]) ? maxExtents[code][3] : extent[3];
 
-  // Check the order
-  const validatedExtent: Extent = [
-    minX < maxX ? minX : maxX,
-    minY < maxY ? minY : maxY,
-    maxX > minX ? maxX : minX,
-    maxY > minY ? maxY : minY,
-  ];
+    // Check the order
+    validatedExtent = [minX < maxX ? minX : maxX, minY < maxY ? minY : maxY, maxX > minX ? maxX : minX, maxY > minY ? maxY : minY];
+  }
 
   return validatedExtent;
 }
