@@ -1,9 +1,13 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { Extent } from 'ol/extent';
-import { XYZ, OSM } from 'ol/source';
+import { XYZ, OSM, VectorTile } from 'ol/source';
 import TileGrid from 'ol/tilegrid/TileGrid';
 import TileLayer from 'ol/layer/Tile';
+import VectorTileLayer from 'ol/layer/VectorTile';
+import MVT from 'ol/format/MVT';
+
+import { applyStyle } from 'ol-mapbox-style';
 
 import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@config/types/map-schema-types';
 import { EventDelegateBase, api } from '@/app';
@@ -72,8 +76,12 @@ export class Basemap {
   basemapsList: TypeJsonObject = toJsonObject({
     3978: {
       transport: {
-        url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
-        jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer?f=json',
+        // url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
+        // jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer?f=json',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
+        jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer?f=json',
+        styleUrl:
+          'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/b2bba07183154bc7a0b0073be80474f7/resources/styles/root.json',
       },
       simple: {
         url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer/WMTS/tile/1.0.0/Simple/default/default028mm/{z}/{y}/{x}.jpg',
@@ -84,8 +92,14 @@ export class Basemap {
         jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer?f=json',
       },
       label: {
-        url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3978/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3978/default/default028mm/{z}/{y}/{x}.jpg',
-        jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3978/MapServer?f=json',
+        // url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3978/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3978/default/default028mm/{z}/{y}/{x}.jpg',
+        // jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3978/MapServer?f=json',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
+        jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer?f=json',
+        styleUrl: {
+          en: 'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/5e29be10a78547a3a6a219ccf7bd42d0/resources/styles/root.json',
+          fr: 'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/667be32b4489469cbccc551144d457be/resources/styles/root.json',
+        },
       },
       imagery: {
         url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -94,8 +108,12 @@ export class Basemap {
     },
     3857: {
       transport: {
-        url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer/WMTS/tile/1.0.0/BaseMaps_CBMT_CBCT_GEOM_3857/default/default028mm/{z}/{y}/{x}.jpg',
-        jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer?f=json',
+        // url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer/WMTS/tile/1.0.0/BaseMaps_CBMT_CBCT_GEOM_3857/default/default028mm/{z}/{y}/{x}.jpg',
+        // jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer?f=json',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3857_V_OSM/VectorTileServer',
+        jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3857_V_OSM/VectorTileServer?f=json',
+        styleUrl:
+          'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/516e82031eee4e97a71652ebb0e94879/resources/styles/root.json',
       },
       simple: {
         url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer/WMTS/tile/1.0.0/Simple/default/default028mm/{z}/{y}/{x}.jpg',
@@ -106,8 +124,14 @@ export class Basemap {
         jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer?f=json',
       },
       label: {
-        url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3857/default/default028mm/{z}/{y}/{x}.jpg',
-        jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer?f=json',
+        // url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3857/default/default028mm/{z}/{y}/{x}.jpg',
+        // jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer?f=json',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3857_V_OSM/VectorTileServer',
+        jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3857_V_OSM/VectorTileServer?f=json',
+        styleUrl: {
+          en: 'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/50cb5f2dfaaf4ccb88f37be2d8e5661e/resources/styles/root.json',
+          fr: 'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/0d77943ff03e43fc933b411f80c9b835/resources/styles/root.json',
+        },
       },
       imagery: {
         url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -239,13 +263,24 @@ export class Basemap {
           // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
           urlProj = Basemap.#getProjectionFromUrl(basemapLayer.url as string);
 
-          // Return a basemap layer
-          return {
-            basemapId,
-            type: basemapId,
-            url: basemapLayer.url as string,
-            jsonUrl: basemapLayer.jsonUrl as string,
-            source: new XYZ({
+          let source;
+          if (basemapLayer.styleUrl) {
+            const tileSize = [tileInfo.rows as number, tileInfo.cols as number];
+            source = new VectorTile({
+              attributions: getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId)),
+              projection: Projection.PROJECTIONS[tileInfo.spatialReference.wkid as number],
+              url: basemapLayer.url as string,
+              format: new MVT(),
+              // crossOrigin: 'Anonymous',
+              tileGrid: new TileGrid({
+                tileSize,
+                extent,
+                origin,
+                resolutions,
+              }),
+            });
+          } else {
+            source = new XYZ({
               attributions: getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId)),
               projection: Projection.PROJECTIONS[urlProj],
               url: basemapLayer.url as string,
@@ -255,7 +290,17 @@ export class Basemap {
                 origin,
                 resolutions,
               }),
-            }),
+            });
+          }
+
+          // Return a basemap layer
+          return {
+            basemapId,
+            type: basemapId,
+            url: basemapLayer.url as string,
+            jsonUrl: basemapLayer.jsonUrl as string,
+            styleUrl: basemapLayer.styleUrl as string,
+            source,
             opacity,
             origin,
             extent,
@@ -402,12 +447,17 @@ export class Basemap {
       if (basemapLayers.length && coreBasemapOptions.labeled) {
         const labelLayer = await this.#createBasemapLayer(
           'label',
+          // toJsonObject({
+          //   url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll('xxxx', languageCode === 'en' ? 'CBMT' : 'CBCT'),
+          //   jsonUrl: (this.basemapsList[projectionCode].label.jsonUrl as string)?.replaceAll(
+          //     'xxxx',
+          //     languageCode === 'en' ? 'CBMT' : 'CBCT'
+          //   ),
+          // }),
           toJsonObject({
-            url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll('xxxx', languageCode === 'en' ? 'CBMT' : 'CBCT'),
-            jsonUrl: (this.basemapsList[projectionCode].label.jsonUrl as string)?.replaceAll(
-              'xxxx',
-              languageCode === 'en' ? 'CBMT' : 'CBCT'
-            ),
+            url: this.basemapsList[projectionCode].label.url as string,
+            jsonUrl: this.basemapsList[projectionCode].label.jsonUrl as string,
+            styleUrl: this.basemapsList[projectionCode].label.styleUrl[languageCode] as string,
           }),
           0.8,
           true
@@ -487,6 +537,7 @@ export class Basemap {
       return {
         ...layer,
         url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
+        // TODO: Handle custom vector tile basemaps too
         source: new XYZ({
           attributions: attribution[languageCode],
           projection: Projection.PROJECTIONS[projection],
@@ -560,10 +611,27 @@ export class Basemap {
 
       // Add basemap layers
       basemap.layers.forEach((layer, index) => {
-        const basemapLayer = new TileLayer({
-          opacity: layer.opacity,
-          source: layer.source,
-        });
+        let basemapLayer;
+        if (layer.source instanceof VectorTile) {
+          basemapLayer = new VectorTileLayer({
+            opacity: layer.opacity,
+            source: layer.source,
+            declutter: true,
+          });
+
+          // Apply Style to Vector Tile Basemap
+          const tileGrid = layer.source.getTileGrid();
+          if (tileGrid) {
+            applyStyle(basemapLayer, layer.styleUrl, {
+              resolutions: tileGrid.getResolutions(),
+            }).catch((err) => logger.logError(err));
+          }
+        } else {
+          basemapLayer = new TileLayer({
+            opacity: layer.opacity,
+            source: layer.source,
+          });
+        }
 
         // Set this basemap's group id to basemap
         basemapLayer.set('mapId', 'basemap');
