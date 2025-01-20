@@ -27,6 +27,7 @@ export interface ILayerState {
         setLayerDeleteInProgress: (newVal: boolean) => void;
         setLayerOpacity: (layerPath: string, opacity: number) => void;
         setSelectedLayerPath: (layerPath: string) => void;
+        sortLegendLayersChildren: (legendLayerList: TypeLegendLayer[]) => void;
         toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
         zoomToLayerExtent: (layerPath: string) => Promise<void>;
         setSelectedLayerSortingArrowId: (layerId: string) => void;

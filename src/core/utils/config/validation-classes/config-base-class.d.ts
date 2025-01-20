@@ -84,6 +84,18 @@ export declare abstract class ConfigBaseClass {
      */
     onSerialize(): TypeJsonObject;
     /**
+     * Clones the configuration class.
+     *
+     * @returns {ConfigBaseClass} The cloned ConfigBaseClass object.
+     */
+    clone(): ConfigBaseClass;
+    /**
+     * Overridable function to clone a child of a ConfigBaseClass.
+     *
+     * @returns {ConfigBaseClass} The cloned child object of a ConfigBaseClass.
+     */
+    protected onClone(): ConfigBaseClass;
+    /**
      * Recursively checks the list of layer entries to see if all of them are greater than or equal to the provided layer status.
      *
      * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.

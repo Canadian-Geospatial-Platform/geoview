@@ -16,6 +16,7 @@ export declare abstract class Projection {
         3578: string;
         LCC: string;
         3979: string;
+        42101: string;
         102100: string;
         102184: string;
         102190: string;

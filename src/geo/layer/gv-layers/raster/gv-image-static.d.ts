@@ -38,7 +38,7 @@ export declare class GVImageStatic extends AbstractGVRaster {
      * Overrides the fetching of the legend for an Esri image layer.
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
      */
-    getLegend(): Promise<TypeLegend | null>;
+    onFetchLegend(): Promise<TypeLegend | null>;
     /**
      * Gets the bounds of the layer and returns updated bounds.
      * @returns {Extent | undefined} The layer bounding box.
