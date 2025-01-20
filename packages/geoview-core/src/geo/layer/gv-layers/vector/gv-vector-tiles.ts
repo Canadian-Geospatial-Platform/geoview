@@ -1,6 +1,7 @@
 import VectorTileLayer from 'ol/layer/VectorTile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import { VectorTile } from 'ol/source';
+import { applyStyle } from 'ol-mapbox-style';
 
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { featureInfoGetFieldType } from '../utils';
@@ -51,5 +52,20 @@ export class GVVectorTiles extends AbstractGVVectorTile {
   protected override getFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
+  }
+
+  async changeStyle(styleUrl: string): Promise<void> {
+    if (styleUrl) {
+      const olLayer = this.olLayer as VectorTileLayer;
+      const source = olLayer?.getSource();
+      if (olLayer && source) {
+        const tileGrid = source.getTileGrid();
+        if (tileGrid) {
+          await applyStyle(olLayer, styleUrl, {
+            resolutions: tileGrid.getResolutions(),
+          });
+        }
+      }
+    }
   }
 }
