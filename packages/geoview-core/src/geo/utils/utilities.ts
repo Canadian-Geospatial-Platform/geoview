@@ -7,7 +7,7 @@ import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL, getLength as getLengthOL } from 'ol/sphere';
 import { Extent } from 'ol/extent';
-import XYZ from 'ol/source/XYZ';
+import { XYZ, OSM, VectorTile } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
 import { LineString, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
@@ -205,7 +205,7 @@ export function getDefaultDrawingStyle(strokeColor?: Color | string, strokeWidth
  *
  * @returns {TileLayer<XYZ>} return the created basemap
  */
-export function createEmptyBasemap(): TileLayer<XYZ> {
+export function createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile> {
   // create empty tilelayer to use as initial basemap while we load basemap
   const emptyBasemap: TypeBasemapLayer = {
     basemapId: 'empty',
