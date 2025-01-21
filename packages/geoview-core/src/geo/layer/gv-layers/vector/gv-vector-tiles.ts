@@ -54,18 +54,21 @@ export class GVVectorTiles extends AbstractGVVectorTile {
     return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
 
-  async changeStyle(styleUrl: string): Promise<void> {
+  changeStyle(styleUrl: string): Promise<void> {
     if (styleUrl) {
       const olLayer = this.olLayer as VectorTileLayer;
       const source = olLayer?.getSource();
       if (olLayer && source) {
         const tileGrid = source.getTileGrid();
         if (tileGrid) {
-          await applyStyle(olLayer, styleUrl, {
+          return applyStyle(olLayer, styleUrl, {
             resolutions: tileGrid.getResolutions(),
           });
         }
       }
     }
+
+    // Done, no style, no layer, no source, or no tilegrid to process
+    return Promise.resolve();
   }
 }
