@@ -9,11 +9,13 @@ import {
   EntryConfigBaseClass,
   TypeDisplayLanguage,
   TypeGeoviewLayerType,
+  TypeLayerStyleConfig,
 } from '@config/types/map-schema-types';
 import { MapConfigError } from '@config/types/classes/config-exceptions';
 
 import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';
+import { createStyleUsingEsriRenderer, EsriBaseRenderer } from './esri-renderer-parser';
 
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
@@ -586,5 +588,14 @@ export class ConfigApi {
       if (!geoviewLayerConfig.getErrorDetectedFlag()) return geoviewLayerConfig.getMetadataLayerTree()!;
     }
     throw new MapConfigError('Unable to build metadata layer tree.');
+  }
+
+  /**
+   * Returns the ESRI Renderer as a Style Config
+   * @param {EsriBaseRenderer} renderer The input renderer to be converted to a GeoView Style
+   * @returns {TypeLayerStyleConfig} The converted style
+   */
+  static getStyleFromESRIRenderer(renderer: EsriBaseRenderer): TypeLayerStyleConfig | undefined {
+    return createStyleUsingEsriRenderer(renderer);
   }
 }
