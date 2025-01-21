@@ -355,20 +355,23 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           </Box>
           <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} variant="middle" />
           {layerDetails.layerAttribution &&
-            layerDetails.layerAttribution!.map((attribution) => {
-              return (
-                <Typography
-                  sx={{
-                    marginTop: '10px',
-                    color: theme.palette.geoViewColor.textColor.light[200],
-                    fontSize: theme.palette.geoViewFontSize.sm,
-                    textAlign: 'center',
-                  }}
-                  key={generateId()}
-                >
-                  {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
-                </Typography>
-              );
+            layerDetails.layerAttribution.map((attribution) => {
+              if (attribution) {
+                return (
+                  <Typography
+                    sx={{
+                      marginTop: '10px',
+                      color: theme.palette.geoViewColor.textColor.light[200],
+                      fontSize: theme.palette.geoViewFontSize.sm,
+                      textAlign: 'center',
+                    }}
+                    key={generateId()}
+                  >
+                    {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
+                  </Typography>
+                );
+              }
+              return null;
             })}
         </>
       )}

@@ -91,6 +91,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
     this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
+
+    // If there is a layer style in the config, set it in the layer
+    if (layerConfig.layerStyle) this.setStyle(layerConfig.layerStyle);
   }
 
   /**
@@ -108,7 +111,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).once(['featuresloadend', 'imageloadend', 'tileloadend'], this.onLoaded.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).once(['featuresloaderror', 'imageloaderror', 'tileloaderror'], this.onError.bind(this));
+    (this.#olSource as any).once(['featuresloaderror', 'tileloaderror'], this.onError.bind(this));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).on(['imageloaderror'], this.onImageLoadError.bind(this));
   }
 
   /**
@@ -230,6 +235,17 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   protected onError(): void {
     // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
     this.getLayerConfig().layerStatus = 'error';
+  }
+
+  /**
+   * Overridable method called when the layer image is in error and couldn't be loaded correctly.
+   * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
+   */
+  protected onImageLoadError(): void {
+    // Add notification with the current zoom level
+    this.getMapViewer().notifications.showError(
+      `Error loading source image for layer ${this.getLayerPath()} at zoom level: ${this.getMapViewer().getView().getZoom()}`
+    );
   }
 
   /**
