@@ -19,6 +19,7 @@ import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
+import { WMS_PROXY_URL } from '@/app';
 
 /**
  * Manages a WMS layer.
@@ -353,6 +354,7 @@ export class GVWMS extends AbstractGVRaster {
 
       if (queryUrl) {
         queryUrl = queryUrl.toLowerCase().startsWith('http:') ? `https${queryUrl.slice(4)}` : queryUrl;
+
         axios
           .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })
           .then((response) => {
@@ -361,9 +363,25 @@ export class GVWMS extends AbstractGVRaster {
             }
             resolve(readImage(Cast<Blob>(response.data)));
           })
-          .catch(() => resolve(null));
+          .catch((error) => {
+            if (error.code === 'ERR_NETWORK') {
+              // Try appending link with proxy url to avoid CORS issues
+              queryUrl = `${WMS_PROXY_URL}${queryUrl}`;
+
+              axios
+                .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })
+                .then((response) => {
+                  if (response.data.type === 'text/xml') {
+                    resolve(null);
+                  }
+                  resolve(readImage(Cast<Blob>(response.data)));
+                })
+                .catch(() => resolve(null));
+            } else resolve(null);
+          });
       } else resolve(null);
     });
+
     return promisedImage;
   }
 
