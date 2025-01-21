@@ -409,7 +409,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results }) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
 
-      // If geometry is needed, use web worker to query and assing geometry later
+      // If geometry is needed, use web worker to query and assign geometry later
       if (queryGeometry)
         // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
         // TODO.CONT: the esri query (was working with identify). But identify was failing on huge geometry...

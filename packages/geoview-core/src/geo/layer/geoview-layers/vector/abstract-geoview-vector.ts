@@ -518,6 +518,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * in the configuration, it defaults to 'OBJECTID'.
    * @private
    */
+  // TODO: We should have this function in abstract-base-layer to be called like layerConfig.getEsriOidField() - issue 2699
+  // TODO.CONT: This should be rename without the esri. The oid type should be mandatory and if not present, we should crate one.
+  // TODO.CONT: We already create the internalGeoviewId but we should make this more officiel by assigning a type of oid
   static #getEsriOidField(layerConfig: AbstractBaseLayerEntryConfig): string {
     // Get oid field
     return layerConfig.source?.featureInfo && (layerConfig.source.featureInfo as TypeFeatureInfoLayerConfig).outfields !== undefined

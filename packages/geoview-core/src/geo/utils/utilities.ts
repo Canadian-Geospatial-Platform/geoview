@@ -484,7 +484,7 @@ export function calculateDistance(coordinates: Coordinate[], inProj: string, out
  * @param {TypeValidMapProjectionCodes} projection - The projection of the map
  * @param {number} resolution - The resolution of the map
  * @param {number?} lat - The latitude, only needed for Web Mercator
- * @returns {nubmber} Number representing meters per pixel
+ * @returns {number} Number representing meters per pixel
  */
 export function getMetersPerPixel(projection: TypeValidMapProjectionCodes, resolution: number, lat?: number): number {
   if (!resolution) return 0;
