@@ -76,8 +76,6 @@ export class Basemap {
   basemapsList: TypeJsonObject = toJsonObject({
     3978: {
       transport: {
-        // url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
-        // jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer?f=json',
         url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
         jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer?f=json',
         styleUrl:
@@ -92,8 +90,6 @@ export class Basemap {
         jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer?f=json',
       },
       label: {
-        // url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3978/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3978/default/default028mm/{z}/{y}/{x}.jpg',
-        // jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3978/MapServer?f=json',
         url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer',
         jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer?f=json',
         styleUrl: {
@@ -108,8 +104,6 @@ export class Basemap {
     },
     3857: {
       transport: {
-        // url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer/WMTS/tile/1.0.0/BaseMaps_CBMT_CBCT_GEOM_3857/default/default028mm/{z}/{y}/{x}.jpg',
-        // jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer?f=json',
         url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3857_V_OSM/VectorTileServer',
         jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3857_V_OSM/VectorTileServer?f=json',
         styleUrl:
@@ -124,8 +118,6 @@ export class Basemap {
         jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer?f=json',
       },
       label: {
-        // url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3857/default/default028mm/{z}/{y}/{x}.jpg',
-        // jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer?f=json',
         url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3857_V_OSM/VectorTileServer',
         jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3857_V_OSM/VectorTileServer?f=json',
         styleUrl: {
@@ -271,7 +263,6 @@ export class Basemap {
               projection: Projection.PROJECTIONS[tileInfo.spatialReference.wkid as number],
               url: basemapLayer.url as string,
               format: new MVT(),
-              // crossOrigin: 'Anonymous',
               tileGrid: new TileGrid({
                 tileSize,
                 extent,
@@ -447,13 +438,6 @@ export class Basemap {
       if (basemapLayers.length && coreBasemapOptions.labeled) {
         const labelLayer = await this.#createBasemapLayer(
           'label',
-          // toJsonObject({
-          //   url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll('xxxx', languageCode === 'en' ? 'CBMT' : 'CBCT'),
-          //   jsonUrl: (this.basemapsList[projectionCode].label.jsonUrl as string)?.replaceAll(
-          //     'xxxx',
-          //     languageCode === 'en' ? 'CBMT' : 'CBCT'
-          //   ),
-          // }),
           toJsonObject({
             url: this.basemapsList[projectionCode].label.url as string,
             jsonUrl: this.basemapsList[projectionCode].label.jsonUrl as string,
