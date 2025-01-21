@@ -8,7 +8,7 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 
-import { validateExtent } from '@/geo/utils/utilities';
+import { getMetersPerPixel, validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -24,11 +24,15 @@ import {
 } from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeOutfieldsType, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { CONST_LAYER_TYPES } from '../../geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeEsriImageLayerLegend } from './gv-esri-image';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
+import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
+import { GeometryApi } from '../../geometry/geometry';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -40,6 +44,8 @@ type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryT
  * @class GVEsriDynamic
  */
 export class GVEsriDynamic extends AbstractGVRaster {
+  #fetchWorkerPool: FetchEsriWorkerPool;
+
   // The default hit tolerance the query should be using
   static override DEFAULT_HIT_TOLERANCE: number = 7;
 
@@ -55,11 +61,37 @@ export class GVEsriDynamic extends AbstractGVRaster {
   public constructor(mapId: string, olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
     super(mapId, olSource, layerConfig);
 
+    // TODO: Performance - Do we need worker pool or one worker per layer is enough. If a worker is already working we should terminate it
+    // TODO.CONT: and use the abort controller to cancel the fetch and start a new one. So every esriDynamic layer has it's own worker.
+    // Setup the worker pool
+    this.#fetchWorkerPool = new FetchEsriWorkerPool();
+    this.#fetchWorkerPool
+      .init()
+      .then(() => logger.logTraceCore('Worker pool for fetch ESRI initialized'))
+      .catch((err) => logger.logError('Worker pool error', err));
+
+    // TODO: Performance - Investigate to see if we can call the export map for the whole service at once instead of making many call
+    // TODO.CONT: We can use the layers and layersDef parameters to set what should be visible.
+    // TODO.CONT: layers=show:layerId ; layerDefs={ "layerId": "layer def" }
+    // TODO.CONT: There is no allowableOffset on esri dynamic to speed up. We will need to see what can be done for layers in wrong projection
+    // TODO.CONT: We may try to use the service projection imageLayerOptions.source?.updateParams({ imageSR: 3978 }); and let OL project on the fly
+    // TODO.CONT: from some test, it reduce time by half
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
       source: olSource,
       properties: { layerConfig },
     };
+
+    // TODO: Performance - For testing purpose on projection and performance
+    if (layerConfig.geoviewLayerConfig.geoviewLayerId === '6c343726-1e92-451a-876a-76e17d398a1c') {
+      imageLayerOptions.source?.updateParams({ imageSR: 3978 });
+    }
+    if (layerConfig.geoviewLayerConfig.geoviewLayerId === 'e2424b6c-db0c-4996-9bc0-2ca2e6714d71') {
+      imageLayerOptions.source?.updateParams({ imageSR: 3857 });
+    }
+    if (layerConfig.geoviewLayerConfig.geoviewLayerId === '1dcd28aa-99da-4f62-b157-15631379b170') {
+      imageLayerOptions.source?.updateParams({ imageSR: 4269 });
+    }
 
     // Init the layer options with initial settings
     AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
@@ -221,32 +253,77 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the return of feature information at a given pixel location.
    * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtPixel(
+    location: Pixel,
+    queryGeometry: boolean = true
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Redirect to getFeatureInfoAtCoordinate
-    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location));
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), queryGeometry);
   }
 
   /**
    * Overrides the return of feature information at a given coordinate.
    * @param {Coordinate} location - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtCoordinate(
+    location: Coordinate,
+    queryGeometry: boolean = true
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Transform coordinate from map project to lntlat
     const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
 
     // Redirect to getFeatureInfoAtLongLat
-    return this.getFeatureInfoAtLongLat(projCoordinate);
+    return this.getFeatureInfoAtLongLat(projCoordinate, queryGeometry);
+  }
+
+  /**
+   * Query the features geometry with a web worker
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
+   * @param {number[]} objectIds - Array of object IDs to query
+   * @param {boolean} queryGeometry - Whether to include geometry in the query
+   * @param {number} projection - The spatial reference ID for the output
+   * @param {number} maxAllowableOffset - The maximum allowable offset for geometry simplification
+   * @returns {TypeJsonObject} A promise of esri response for query.
+   */
+  async fetchFeatureInfoGeometryWithWorker(
+    layerConfig: EsriDynamicLayerEntryConfig,
+    objectIds: number[],
+    queryGeometry: boolean,
+    projection: number,
+    maxAllowableOffset: number
+  ): Promise<TypeJsonObject> {
+    try {
+      const params: QueryParams = {
+        url: layerConfig.source.dataAccessPath + layerConfig.layerId,
+        geometryType: (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', ''),
+        objectIds,
+        queryGeometry,
+        projection,
+        maxAllowableOffset,
+      };
+
+      return await this.#fetchWorkerPool.process(params);
+    } catch (error) {
+      logger.logError('Query processing failed:', error);
+      throw error;
+    }
   }
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override async getFeatureInfoAtLongLat(lnglat: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override async getFeatureInfoAtLongLat(
+    lnglat: Coordinate,
+    queryGeometry: boolean = true
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // If invisible
       if (!this.getVisible()) return [];
@@ -254,7 +331,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
 
-      // If not queryable
+      // If not queryable or there no url access path to query return []
       if (!layerConfig.source.featureInfo?.queryable) return [];
 
       let identifyUrl = layerConfig.source.dataAccessPath;
@@ -263,37 +340,116 @@ export class GVEsriDynamic extends AbstractGVRaster {
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
 
       // GV: We cannot directly use the view extent and reproject. If we do so some layers (issue #2413) identify will return empty resultset
-      // GV-CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the repojection it works
+      // GV.CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the repojection it works
       const mapViewer = this.getMapViewer();
       const mapExtent = mapViewer.getView().calculateExtent();
       const boundsLL = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[0], mapExtent[1]]);
       const boundsUR = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[2], mapExtent[3]]);
       const extent = { xmin: boundsLL[0], ymin: boundsLL[1], xmax: boundsUR[0], ymax: boundsUR[1] };
-
       const layerDefs = this.getOLSource()?.getParams()?.layerDefs || '';
       const size = mapViewer.map.getSize()!;
 
+      // Identify query to get oid features value and attributes, at this point we do not query geometry
       identifyUrl =
         `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
         `&imageDisplay=${size[0]},${size[1]},96` +
         `&layers=visible:${layerConfig.layerId}` +
         `&layerDefs=${layerDefs}` +
-        `&returnFieldName=true&sr=4326&returnGeometry=true` +
-        `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}`;
+        `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
+        `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
-      const response = await fetch(identifyUrl);
-      const jsonResponse = await response.json();
-      if (jsonResponse.error) {
+      const identifyResponse = await fetch(identifyUrl);
+      const identifyJsonResponse = await identifyResponse.json();
+      if (identifyJsonResponse.error) {
         logger.logInfo('There is a problem with this query: ', identifyUrl);
-        throw new Error(`Error code = ${jsonResponse.error.code} ${jsonResponse.error.message}` || '');
+        throw new Error(`Error code = ${identifyJsonResponse.error.code} ${identifyJsonResponse.error.message}` || '');
       }
 
-      const features = new EsriJSON().readFeatures(
-        { features: jsonResponse.results },
-        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: mapViewer.getProjection().getCode() }
-      ) as Feature<Geometry>[];
+      // If no features identified return []
+      if (identifyJsonResponse.results.length === 0) return [];
+
+      // Extract OBJECTIDs
+      const oidField = layerConfig.source.featureInfo.outfields
+        ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
+        : 'OBJECTID';
+      const objectIds = identifyJsonResponse.results.map((result: TypeJsonObject) => String(result.attributes[oidField]).replace(',', ''));
+
+      // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
+      const maxAllowableOffset = queryGeometry
+        ? getMetersPerPixel(
+            mapViewer.getMapState().currentProjection as TypeValidMapProjectionCodes,
+            mapViewer.getView().getResolution() || 7000,
+            lnglat[1]
+          )
+        : 0;
+
+      // TODO: Performance - We need to separate the query attribute from geometry. We can use the attributes returned by identify to show details panel
+      // TODO.CONT: or create 2 distinc query one for attributes and one for geometry. This way we can display the panel faster and wait later for geometry
+      // TODO.CONT: We need to see if we can fetch in async mode without freezing the ui. If not we will need a web worker for the fetch.
+      // TODO.CONT: If we go with web worker, we need a reusable approach so we can use with all our queries
+      // Get features
+      // const response = await esriQueryRecordsByUrlObjectIds(
+      //   layerConfig.source.dataAccessPath + layerConfig.layerId,
+      //   (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', '') as TypeStyleGeometry,
+      //   objectIds,
+      //   '*',
+      //   false,
+      //   mapViewer.getMapState().currentProjection,
+      //   maxAllowableOffset,
+      //   false
+      // );
+
+      // TODO: Performance - This is also time consuming, the creation of the feature can take several seconds, check web worker
+      // TODO.CONT: Because web worker can only use sereialize date and not object with function it may be difficult for this...
+      // TODO.CONT: For the moment, the feature is created without a geometry. This should be added by web worker
+      // TODO.CONT: Splitting the query will help avoid layer details error when geometry is big anf let ui not frezze. The Web worker
+      // TODO.CONT: geometry assignement must not be in an async function.
+      // Transform the features in an OL feature - at this point, there is no geometry associated with the feature
+      const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results }) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
+
+      // If geometry is needed, use web worker to query and assign geometry later
+      if (queryGeometry)
+        // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
+        // TODO.CONT: the esri query (was working with identify). But identify was failing on huge geometry...
+        this.fetchFeatureInfoGeometryWithWorker(layerConfig, objectIds, true, mapViewer.getMapState().currentProjection, maxAllowableOffset)
+          .then((featuresJSON) => {
+            (featuresJSON.features as TypeJsonObject[]).forEach((feat: TypeJsonObject, index: number) => {
+              // TODO: Performance - There is still a problem when we create the feature with new EsriJSON().readFeature. It goes trought a loop and take minutes on the deflate function
+              // TODO.CONT: 1dcd28aa-99da-4f62-b157-15631379b170, ocean biology layer has huge amount of verticies and when zoomed in we require more
+              // TODO.CONT: more definition so the feature creation take more time. Investigate if we can create the geometry instead
+              // TODO.CONT: Investigate using this approach in esri-feature.ts
+              // const geom = new EsriJSON().readFeature(feat, {
+              //   dataProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
+              //   featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
+              // }) as Feature<Geometry>;
+
+              // TODO: Performance - Relying on style to get geometry is not good. We shold extract it from metadata and keep it in dedicated attribute
+              const geomType = Object.keys(layerConfig?.layerStyle || []);
+
+              // Get coordinates in right format and create geometry
+              const coordinates = (feat.geometry?.points ||
+                feat.geometry?.paths ||
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                feat.geometry?.rings || [feat.geometry?.x, feat.geometry?.y]) as any; // MultiPoint or Line or Polygon or Point schema
+              const newGeom: Geometry | null =
+                geomType.length > 0
+                  ? (GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) as unknown as Geometry)
+                  : null;
+
+              // TODO: Perfromance - We will need a trigger to refresh the higight and detaiils panel (for zoom button) when extent and
+              // TODO.CONT: is applied. Sometime the delay is too big so we need to change tab or layer in layer list to trigger the refresh
+              // We assume order of arrayOfFeatureInfoEntries is the same as featuresJSON.features as they are process in same order
+              const entry = arrayOfFeatureInfoEntries![index];
+              if (newGeom !== null && entry.geometry && entry.geometry instanceof Feature) {
+                entry.extent = newGeom.getExtent();
+                entry.geometry.setGeometry(newGeom);
+              }
+            });
+          })
+          .catch((err) => logger.logError('Features worker', err));
+
       return arrayOfFeatureInfoEntries;
     } catch (error) {
       // Log

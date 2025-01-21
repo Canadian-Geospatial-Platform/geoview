@@ -115,6 +115,12 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
         // Check if EsriDynamic config
         if (layerConfig && layerEntryIsEsriDynamic(layerConfig)) {
+          // Get oid field
+          const oidField =
+            layerConfig.source.featureInfo && layerConfig.source.featureInfo.outfields
+              ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
+              : 'OBJECTID';
+
           // Query for the specific object ids
           // TODO: Put the server original projection in the config metadata (add a new optional param in source for esri)
           // TO.DOCONT: When we get the projection we can get the projection in original server (will solve error trying to reproject https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7 in 3857)
@@ -123,7 +129,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
             `${layerConfig.source?.dataAccessPath}/${layerConfig.layerId}`,
             geometryType,
             objectIDs,
-            'OBJECTID',
+            oidField,
             true,
             MapEventProcessor.getMapState(get().mapId).currentProjection
           );

@@ -236,12 +236,13 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Returns feature information for the layer specified.
    * @param {QueryType} queryType - The type of query to perform.
    * @param {TypeLocation} location - An optionsl pixel, coordinate or polygon that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
   async getFeatureInfo(
     queryType: QueryType,
-    layerPath: string,
-    location: TypeLocation = null
+    location: TypeLocation = null,
+    queryGeometry: boolean = true
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
     try {
@@ -266,19 +267,19 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           promiseGetFeature = this.getAllFeatureInfo();
           break;
         case 'at_pixel':
-          promiseGetFeature = this.getFeatureInfoAtPixel(location as Pixel);
+          promiseGetFeature = this.getFeatureInfoAtPixel(location as Pixel, queryGeometry);
           break;
         case 'at_coordinate':
-          promiseGetFeature = this.getFeatureInfoAtCoordinate(location as Coordinate);
+          promiseGetFeature = this.getFeatureInfoAtCoordinate(location as Coordinate, queryGeometry);
           break;
         case 'at_long_lat':
-          promiseGetFeature = this.getFeatureInfoAtLongLat(location as Coordinate);
+          promiseGetFeature = this.getFeatureInfoAtLongLat(location as Coordinate, queryGeometry);
           break;
         case 'using_a_bounding_box':
-          promiseGetFeature = this.getFeatureInfoUsingBBox(location as Coordinate[]);
+          promiseGetFeature = this.getFeatureInfoUsingBBox(location as Coordinate[], queryGeometry);
           break;
         case 'using_a_polygon':
-          promiseGetFeature = this.getFeatureInfoUsingPolygon(location as Coordinate[]);
+          promiseGetFeature = this.getFeatureInfoUsingPolygon(location as Coordinate[], queryGeometry);
           break;
         default:
           // Default is empty array
@@ -315,10 +316,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to return of feature information at a given pixel location.
    * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtPixel(location: Pixel, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoAtPixel on layer path ${this.getLayerPath()}`);
   }
@@ -326,10 +328,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to return of feature information at a given coordinate.
    * @param {Coordinate} location - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoAtCoordinate on layer path ${this.getLayerPath()}`);
   }
@@ -337,10 +340,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to return of feature information at the provided long lat coordinate.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtLongLat(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtLongLat(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoAtLongLat on layer path ${this.getLayerPath()}`);
   }
@@ -348,10 +352,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to return of feature information at the provided bounding box.
    * @param {Coordinate} location - The bounding box that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[]): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoUsingBBox(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoUsingBBox on layer path ${this.getLayerPath()}`);
   }
@@ -359,10 +364,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to return of feature information at the provided polygon.
    * @param {Coordinate} location - The polygon that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[]): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoUsingPolygon on layer path ${this.getLayerPath()}`);
   }

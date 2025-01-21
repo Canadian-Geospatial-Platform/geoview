@@ -117,7 +117,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
 
         // Process query on results data
-        AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layer, queryType, pixelCoordinate)
+        AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layer, queryType, pixelCoordinate, false)
           .then((arrayOfRecords) => {
             if (arrayOfRecords === null) {
               this.resultSet[layerPath].queryStatus = 'error';
@@ -146,13 +146,12 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
             // Log
             logger.logPromiseFailed('queryLayerFeatures in queryLayers in hoverFeatureInfoLayerSet', error);
           });
-      } else {
-        this.resultSet[layerPath].feature = null;
-        this.resultSet[layerPath].queryStatus = 'error';
-
-        // Propagate to the store
-        MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
       }
+      this.resultSet[layerPath].feature = null;
+      this.resultSet[layerPath].queryStatus = 'error';
+
+      // Propagate to the store
+      MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
     });
   }
 
