@@ -92,3 +92,5 @@ export const CONTAINER_TYPE = {
   APP_BAR: 'appBar',
   FOOTER_BAR: 'footerBar',
 } as const;
+
+export const WMS_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy?';

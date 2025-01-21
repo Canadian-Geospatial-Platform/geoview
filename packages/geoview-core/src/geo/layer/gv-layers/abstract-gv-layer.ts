@@ -91,6 +91,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
     this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
+
+    // If there is a layer style in the config, set it in the layer
+    if (layerConfig.layerStyle) this.setStyle(layerConfig.layerStyle);
   }
 
   /**
