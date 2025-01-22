@@ -121,7 +121,7 @@ export const LayerIcon = memo(function LayerIcon({ layer }: LayerIconProps): JSX
   const isError = layer.layerStatus === 'error' || ('queryStatus' in layer && layer.queryStatus === 'error');
 
   const isLoading =
-    layer.layerStatus === 'processing' || layer.layerStatus === 'loading' || ('queryStatus' in layer && layer.queryStatus === 'processing');
+    (layer.layerStatus !== 'loaded' && layer.layerStatus !== 'error') || ('queryStatus' in layer && layer.queryStatus === 'processing');
 
   const hasChildren = 'children' in layer && layer?.children.length;
 

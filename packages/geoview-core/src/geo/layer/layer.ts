@@ -713,10 +713,17 @@ export class LayerApi {
           gvLayer.onIndividualLayerLoaded((sender, payload) => {
             // Log
             logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
+
+            const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), payload.layerPath);
+            // Ensure that the layer bounds are set when the layer is loaded
+            if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), payload.layerPath);
+
             this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
           });
+
           return gvLayer.getOLLayer();
         }
+
         throw new Error('Error, no corresponding GV layer');
       });
 
@@ -1637,9 +1644,11 @@ export class LayerApi {
       // Get the layer
       const layer = this.getGeoviewLayer(layerConfig.layerPath) as AbstractGVLayer;
 
-      // Get the bounds of the layer
-      const calculatedBounds = layer.getBounds();
-      if (calculatedBounds) bounds.push(calculatedBounds);
+      if (layer) {
+        // Get the bounds of the layer
+        const calculatedBounds = layer.getBounds();
+        if (calculatedBounds) bounds.push(calculatedBounds);
+      }
     } else {
       // Is a group
       layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => {

@@ -347,14 +347,17 @@ export function commonProcessInitialSettings(
     ] as Extent;
 
     // Transform to latlon extent
-    const latlonExtent = Projection.transformExtentFromObj(
-      layerExtent,
-      layerMetadata.extent.spatialReference,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
-    layerConfig.initialSettings!.bounds = latlonExtent;
+    if (layerExtent) {
+      const latlonExtent = Projection.transformExtentFromObj(
+        layerExtent,
+        layerMetadata.extent.spatialReference,
+        Projection.PROJECTION_NAMES.LNGLAT
+      );
+      layerConfig.initialSettings!.bounds = latlonExtent;
+    }
   }
-  layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds);
+
+  layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
 }
 
 /** ***************************************************************************************************************************

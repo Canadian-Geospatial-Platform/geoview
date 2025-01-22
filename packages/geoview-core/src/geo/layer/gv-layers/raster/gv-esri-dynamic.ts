@@ -1011,13 +1011,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
         const responseJson = await response.json();
         const { extent } = responseJson;
 
-        const projExtent = Projection.transformExtentFromProj(
-          [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
-          `EPSG:${extent.spatialReference.wkid}`,
-          this.getMapViewer().getProjection().getCode()
-        );
-
-        return projExtent;
+        if (extent) {
+          const projExtent = Projection.transformExtentFromProj(
+            [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
+            `EPSG:${extent.spatialReference.wkid}`,
+            this.getMapViewer().getProjection().getCode()
+          );
+          return validateExtent(projExtent, this.getMapViewer().getProjection().getCode());
+        }
       } catch (error) {
         logger.logError(`Error fetching geometry from ${queryUrl}`, error);
       }
