@@ -574,9 +574,10 @@ export class LayerApi {
   /**
    * Adds a Geoview Layer by GeoCore UUID.
    * @param {string} uuid - The GeoCore UUID to add to the map
+   * @param {string} layerEntryConfig - The optional layer configuration
    * @returns {Promise<void>} A promise which resolves when done adding
    */
-  async addGeoviewLayerByGeoCoreUUID(uuid: string): Promise<void> {
+  async addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<void> {
     // Add a place holder to the ordered layer info array
     const layerInfo: TypeOrderedLayerInfo = {
       layerPath: uuid,
@@ -590,9 +591,18 @@ export class LayerApi {
     // TO.DOCONT: fetch (createLayersFromUUID) fails, will there be garbage in layer info?
     MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerInfo);
 
+    const optionalConfig: GeoCoreLayerConfig | undefined = layerEntryConfig
+      ? {
+          geoviewLayerType: 'geoCore',
+          geoviewLayerId: uuid,
+          geoviewLayerName: 'custom',
+          listOfLayerEntryConfig: JSON.parse(layerEntryConfig),
+        }
+      : undefined;
+
     // Create geocore layer configs and add
     const geoCoreGeoviewLayerInstance = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
-    const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
+    const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid, optionalConfig);
     layers.forEach((geoviewLayerConfig) => {
       // Redirect
       this.addGeoviewLayer(geoviewLayerConfig);

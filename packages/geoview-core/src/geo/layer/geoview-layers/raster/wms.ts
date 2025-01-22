@@ -104,7 +104,7 @@ export class WMS extends AbstractGeoViewRaster {
       curatedMetadataUrl = `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
     }
     if (curatedMetadataUrl) {
-      const metadataAccessPathIsXmlFile = curatedMetadataUrl.slice(-4).toLowerCase() === '.xml';
+      const metadataAccessPathIsXmlFile = curatedMetadataUrl.includes('.xml?');
       if (metadataAccessPathIsXmlFile) {
         // XML metadata is a special case that does not use GetCapabilities to get the metadata
         await this.#fetchXmlServiceMetadata(curatedMetadataUrl);
