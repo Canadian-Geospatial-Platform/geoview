@@ -419,7 +419,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
         table={props.table}
       />
     ),
-    [datatableSettings, layerPath, globalFilter, columns, data] // Include dependencies
+    [datatableSettings, layerPath, globalFilter, columns, data, sxClasses, t, useTable] // Include dependencies
   );
 
   // Create the Material React Table
