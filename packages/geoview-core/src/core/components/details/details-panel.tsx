@@ -133,7 +133,15 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
             layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath ?? ''}`,
           }) as LayerListEntry
       );
-    return layerListEntries;
+
+    // Split the layers list into two groups while preserving order
+    const layersWithFeatures = layerListEntries.filter((layer) => layer.numOffeatures && layer.numOffeatures > 0);
+    const layersWithoutFeatures = layerListEntries.filter((layer) => layer.numOffeatures === 0);
+
+    // Combine the lists (features first, then no features)
+    const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
+
+    return orderedLayerListEntries;
   }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel, mapId]);
 
   /**
@@ -287,7 +295,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
         // Log
         logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
         // None found, select none
-        //  TODO: Investigate infinte loop in AppBar for statement.
+        //  TODO: Investigate infinite loop in AppBar for statement.
         // setSelectedLayerPath('');
       }
     }

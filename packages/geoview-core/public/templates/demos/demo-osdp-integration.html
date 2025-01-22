@@ -44,12 +44,7 @@
     </div>
 
     <div id="mapSection">
-      <div
-        id="Map1"
-        class="geoview-map"
-        data-lang="fr"
-        data-config-url="./configs/OSDP/osdp-empty.json"
-      ></div>
+      <div id="Map1" class="geoview-map" data-lang="fr" data-config-url="./configs/OSDP/osdp-empty.json"></div>
     </div>
 
     <div>
@@ -128,8 +123,8 @@
         </li>
         <li>
           <button id="changeLanguage" style="margin: 10px">Change Language</button>
-          Changes the language from french to english or english to french and reloads the map if it exists.
-          Note: this will not change the language of the layers, as they are loaded in the current state.
+          Changes the language from french to english or english to french and reloads the map if it exists. Note: this will not change the
+          language of the layers, as they are loaded in the current state.
           <details>
             <summary>Code</summary>
             <pre>
@@ -146,7 +141,9 @@
     </div>
 
     <div class="selector">
-      <textarea id="layerUuids" cols="40" rows="5">21b821cf-0f1c-40ee-8925-eab12d357668,ccc75c12-5acc-4a6a-959f-ef6f621147b9,0fca08b5-e9d0-414b-a3c4-092ff9c5e326</textarea>
+      <textarea id="layerUuids" cols="40" rows="5">
+21b821cf-0f1c-40ee-8925-eab12d357668,ccc75c12-5acc-4a6a-959f-ef6f621147b9,0fca08b5-e9d0-414b-a3c4-092ff9c5e326</textarea
+      >
       <ul>
         <li>
           <button id="addLayers" style="margin: 10px">Add Layers</button>
@@ -169,38 +166,62 @@
           </details>
         </li>
       </ul>
+
+      <div class="selector">
+        <select name="Selecty custom config" id="switchCustom">
+          <option value="Airborne Radioactivity">Airborne Radioactivity</option>
+          <option value="IAAC">IAAC</option>
+          <option value="CESI">CESI</option>
+        </select>
+      </div>
+      <div style="display: grid">
+        <input id="layerUuidCustom" style="margin-top: 10px; margin-bottom: 10px; width: 300px" />
+        <textarea id="layerUuidCustomEntries" cols="80" rows="25"></textarea>
+      </div>
+      <ul>
+        <li>
+          <button id="addLayersCustom" style="margin: 10px">Add Layers</button>
+          Add entered Geocore UUID's to the map with a custom configuration (List of layer entries)
+          <details>
+            <summary>Code</summary>
+            <pre>
+                cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(uuid, customListOfLayerEntries);
+            </pre>
+          </details>
+        </li>
+      </ul>
     </div>
 
     <script src="codedoc.js"></script>
     <script>
       // Empty map config
       let mapConfig = {
-        "map": {
-          "interaction": "dynamic",
-          "viewSettings": {
-            "projection": 3857
+        map: {
+          interaction: 'dynamic',
+          viewSettings: {
+            projection: 3857,
           },
-          "basemapOptions": {
-            "basemapId": "transport",
-            "shaded": false,
-            "labeled": true
+          basemapOptions: {
+            basemapId: 'transport',
+            shaded: false,
+            labeled: true,
           },
-          "listOfGeoviewLayerConfig": []
+          listOfGeoviewLayerConfig: [],
         },
-        "components": ["overview-map"],
-        "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
-              "appBar": {
-                "tabs": {
-                  "core": ["geolocator", "export"]
-                }
-              },
-        "footerBar": {
-          "tabs": {
-            "core": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
-          }
+        components: ['overview-map'],
+        navBar: ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
+        appBar: {
+          tabs: {
+            core: ['geolocator', 'export'],
+          },
         },
-        "corePackages": [],
-        "theme": "geo.ca"
+        footerBar: {
+          tabs: {
+            core: ['legend', 'layers', 'details', 'data-table', 'time-slider', 'geochart'],
+          },
+        },
+        corePackages: [],
+        theme: 'geo.ca',
       };
 
       let lang = 'fr';
@@ -230,12 +251,11 @@
        * @returns Promise<void>
        */
       function removeMap(map) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           if (cgpv.api.maps[map]) {
-            cgpv.api.maps[map].remove(false)
-              .then(() => {
-                resolve();
-              });
+            cgpv.api.maps[map].remove(false).then(() => {
+              resolve();
+            });
           } else {
             resolve();
           }
@@ -259,15 +279,13 @@
        * @param layers Array of layers.
        */
       function refreshMap() {
-        return new Promise (resolve => {
-          removeMap('Map1')
-            .then(() => {
-              cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800)
-              .then(() => {
-                  resolve();
-                });
+        return new Promise((resolve) => {
+          removeMap('Map1').then(() => {
+            cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800).then(() => {
+              resolve();
             });
           });
+        });
       }
 
       // Delete Button============================================================================================================
@@ -326,6 +344,134 @@
           const uuidList = layerUuids.split('\n').join(',').split(',');
           addLayers(uuidList);
         }
+      });
+
+      // Add Layers Custom Button============================================================================================================
+      const addLayersCustomButton = document.getElementById('addLayersCustom');
+
+      // add an event listener when a button is clicked
+      addLayersCustomButton.addEventListener('click', function () {
+        if (document.getElementById('Map1')) {
+          const layerUuid = document.getElementById('layerUuidCustom').value;
+          const layerUuidEntries = document.getElementById('layerUuidCustomEntries').value;
+
+          if (layerUuidEntries === '') cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layerUuid);
+          else cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layerUuid, layerUuidEntries);
+        }
+      });
+
+      const uuidConfig = {
+        AirborneRadioactivity: '21b821cf-0f1c-40ee-8925-eab12d357668',
+        AirborneRadioactivityConfig: [
+          {
+            layerId: '0',
+            entryType: 'group',
+            layerName: 'Airborne Radioactivity - Main Group',
+            listOfLayerEntryConfig: [
+              {
+                layerId: '1',
+                layerName: 'Airborne Radioactivity - Feature Layer',
+                initialSettings: {
+                  states: {
+                    visible: false,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        IAAC: 'f4c51eaa-a6ca-48b9-a1fc-b0651da20509',
+        IAACConfig: [
+          {
+            layerId: '0',
+            entryType: 'group',
+            layerName: 'IAAC Projects',
+            listOfLayerEntryConfig: [
+              {
+                layerId: '0',
+                initialSettings: {
+                  states: {
+                    legendCollapsed: true,
+                    visible: false,
+                  },
+                },
+              },
+              {
+                layerId: '1',
+                initialSettings: {
+                  states: {
+                    legendCollapsed: false,
+                    visible: true,
+                  },
+                },
+              },
+              {
+                layerId: '2',
+                initialSettings: {
+                  states: {
+                    legendCollapsed: true,
+                    visible: false,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        CESI: '5a65ad7c-561a-466a-8375-8d876624df9d',
+        CESIConfig: [
+          {
+            layerId: '0',
+            entryType: 'group',
+            layerName: 'CESI - Water Quantity Group',
+            listOfLayerEntryConfig: [
+              {
+                layerId: '1',
+                initialSettings: {
+                  states: {
+                    visible: false,
+                  },
+                },
+              },
+            ],
+          },
+          {
+            layerId: '4',
+            entryType: 'group',
+            layerName: 'CESI - Water Quality Group',
+            initialSettings: {
+              states: {
+                visible: false,
+                legendCollapsed: true,
+              },
+            },
+            listOfLayerEntryConfig: [
+              {
+                layerId: '5',
+              },
+              {
+                layerId: '6',
+              },
+              {
+                layerId: '7',
+              },
+            ],
+          },
+        ],
+      };
+
+      // Add a samples selector
+      const layerUuid = document.getElementById('layerUuidCustom');
+      const layerUuidEntries = document.getElementById('layerUuidCustomEntries');
+      layerUuid.value = uuidConfig['AirborneRadioactivity'];
+      layerUuidEntries.value = JSON.stringify(uuidConfig[`AirborneRadioactivityConfig`], null, 2);
+
+      const switchCustom = document.getElementById('switchCustom');
+      switchCustom.addEventListener('change', (e) => {
+        const layerUuid = document.getElementById('layerUuidCustom');
+        const layerUuidEntries = document.getElementById('layerUuidCustomEntries');
+
+        layerUuid.value = uuidConfig[e.target.value.replaceAll(' ', '')];
+        layerUuidEntries.value = JSON.stringify(uuidConfig[`${e.target.value.replaceAll(' ', '')}Config`], null, 2);
       });
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
