@@ -28,12 +28,14 @@ export abstract class Projection {
   static PROJECTION_NAMES = {
     3578: 'EPSG:3578',
     LCC: 'EPSG:3978',
+    3978: 'EPSG:3978',
     3979: 'EPSG:3979',
     42101: 'EPSG:42101',
     102100: 'EPSG:102100', // TODO: Minor - The official name of this projection is ESRI:102100 (not EPSG:102100). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     102184: 'EPSG:102184', // TODO: Minor - The official name of this projection is ESRI:102184 (not EPSG:102184). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     102190: 'EPSG:102190', // TODO: Minor - The official name of this projection is ESRI:102190 (not EPSG:102190). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     WM: 'EPSG:3857',
+    3857: 'EPSG:3857',
     4269: 'EPSG:4269',
     LNGLAT: 'EPSG:4326',
     CRS84: 'CRS:84', // Supporting CRS:84 which is equivalent to 4326 except it's long-lat, whereas the 4326 standard is lat-long.

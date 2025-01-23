@@ -82,8 +82,10 @@ export class Basemap {
           'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/b2bba07183154bc7a0b0073be80474f7/resources/styles/root.json',
       },
       simple: {
-        url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer/WMTS/tile/1.0.0/Simple/default/default028mm/{z}/{y}/{x}.jpg',
-        jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer?f=json',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/Simple_V/VectorTileServer',
+        jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/Simple_V/VectorTileServer?f=json',
+        styleUrl:
+          'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/Simple_V/VectorTileServer/resources/styles/root.json',
       },
       shaded: {
         url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
@@ -110,8 +112,10 @@ export class Basemap {
           'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/516e82031eee4e97a71652ebb0e94879/resources/styles/root.json',
       },
       simple: {
-        url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer/WMTS/tile/1.0.0/Simple/default/default028mm/{z}/{y}/{x}.jpg',
-        jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer?f=json',
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/Simple_3857/VectorTileServer',
+        jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/Simple_3857/VectorTileServer?f=json',
+        styleUrl:
+          'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/Simple_3857/VectorTileServer/resources/styles/root.json',
       },
       shaded: {
         url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
@@ -253,7 +257,8 @@ export class Basemap {
 
           // Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
           // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
-          urlProj = Basemap.#getProjectionFromUrl(basemapLayer.url as string);
+          // urlProj = Basemap.#getProjectionFromUrl(basemapLayer.url as string);
+          urlProj = tileInfo.spatialReference.latestWkid as number;
 
           let source;
           if (basemapLayer.styleUrl) {
