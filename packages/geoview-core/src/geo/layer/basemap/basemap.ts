@@ -139,27 +139,6 @@ export class Basemap {
   // Keep all callback delegates references
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
 
-  // #region PRIVATE UTILITY FUNCTIONS
-
-  /**
-   * Get projection from basemap url
-   * Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
-   * can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
-   * @param {string} url - Basemap url
-   * @returns {number} Projection code
-   * @private
-   */
-  static #getProjectionFromUrl(url: string): number {
-    let code = 0;
-    const index = url.indexOf('/MapServer');
-
-    if (url.substring(index - 6, index) === 'Simple') code = 3978;
-    else code = Number(url.substring(index - 4, index));
-
-    return code;
-  }
-  // #endregion
-
   // #region OVERVIEW MAP
   async setOverviewMap(): Promise<void> {
     const overviewMap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
