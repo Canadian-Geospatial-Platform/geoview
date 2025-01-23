@@ -50,7 +50,7 @@ interface TopToolbarProps<TData extends ColumnsType> {
   useTable: {
     resetColumnFilters: () => void;
     getFilteredRowModel: () => { rows: Array<{ original: TData }> };
-  };
+  } | null;
 
   /**
    * Column definitions for the table.
@@ -83,7 +83,7 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
           <MRTGlobalFilterTextField className="buttonOutline" table={table} />
         </Box>
         <Box display="flex" sx={{ justifyContent: 'space-around' }}>
-          <IconButton className="buttonOutline" color="primary" onClick={() => useTable.resetColumnFilters()}>
+          <IconButton className="buttonOutline" color="primary" onClick={() => useTable?.resetColumnFilters()}>
             <Tooltip title={t('dataTable.clearFilters')} placement="bottom" arrow>
               <ClearFiltersIcon />
             </Tooltip>
@@ -96,14 +96,17 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
             table={{ ...table, options: { ...table.options, enableColumnPinning: false } }}
           />
           <MRTToggleDensePaddingButton className="buttonOutline" table={table} />
+
           {/* Export Buttons */}
-          <ExportButton layerPath={layerPath} rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} columns={columns}>
-            <JSONExportButton
-              rows={useTable.getFilteredRowModel().rows.map((row) => row.original)}
-              features={data.features as TypeFeatureInfoEntry[]}
-              layerPath={layerPath}
-            />
-          </ExportButton>
+          {useTable?.getFilteredRowModel()?.rows ? (
+            <ExportButton layerPath={layerPath} rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} columns={columns}>
+              <JSONExportButton
+                rows={useTable.getFilteredRowModel().rows.map((row) => row.original)}
+                features={data.features as TypeFeatureInfoEntry[]}
+                layerPath={layerPath}
+              />
+            </ExportButton>
+          ) : undefined}
         </Box>
       </Box>
     </Box>
