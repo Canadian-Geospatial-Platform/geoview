@@ -17,7 +17,7 @@ import { ColumnsType } from './data-table-types';
 import { TypeFeatureInfoEntry } from '@/geo';
 import { SxStyles } from '@/ui/style/types';
 
-// gv: Disabled prop-types for this to work. From the react 19 ugprade guide it seems that prop-types are deprecated.
+// GV: Disabled prop-types for this to work. From the react 19 ugprade guide it seems that prop-types are deprecated.
 interface TopToolbarProps<TData extends ColumnsType> {
   /**
    * Classes or styles for the component.
