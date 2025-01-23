@@ -80,6 +80,7 @@ const useSubtitle = (children: TypeLegendLayer[], items: TypeLegendItem[]): stri
 
 // SecondaryControls component (no memo to force re render from layers panel modifications)
 export function SecondaryControls({ layer, visibility }: SecondaryControlsProps): JSX.Element {
+  // Log
   logger.logTraceRender('components/legend/legend-layer-ctrl');
 
   // Hooks
