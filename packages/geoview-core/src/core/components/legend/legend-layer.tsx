@@ -54,6 +54,7 @@ LegendLayerHeader.displayName = 'LegendLayerHeader';
 
 // Main LegendLayer component
 export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
+  // Log
   logger.logTraceRender('components/legend/legend-layer');
 
   // Hooks
@@ -81,6 +82,9 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
 
   const handleExpandGroupClick = useCallback(
     (e: React.MouseEvent): void => {
+      // Log
+      logger.logTraceUseCallback('LEGEND_LAYER - handleExpandGroupClick', layer.layerPath, setLegendCollapsed);
+
       e.stopPropagation();
       setIsCollapsed(!getLegendCollapsedFromOrderedLayerInfo(layer.layerPath));
       setLegendCollapsed(layer.layerPath); // store value
