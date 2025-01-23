@@ -1168,7 +1168,7 @@ export class MapViewer {
                   if (data.geometry !== undefined) {
                     // add the geometry
                     // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
-                    this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId(null));
+                    this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId());
                   }
                 })
                 .catch((error) => {

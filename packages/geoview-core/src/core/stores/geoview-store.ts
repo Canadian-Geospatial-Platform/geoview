@@ -1,18 +1,17 @@
-import { create, useStore } from 'zustand';
+import { useStore, UseBoundStore, Mutate, StoreApi } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-
 import cloneDeep from 'lodash/cloneDeep';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { IAppState, initializeAppState } from './store-interface-and-intial-values/app-state';
-import { IFeatureInfoState, initFeatureInfoState } from './store-interface-and-intial-values/feature-info-state';
-import { ILayerState, initializeLayerState } from './store-interface-and-intial-values/layer-state';
-import { IMapState, initializeMapState } from './store-interface-and-intial-values/map-state';
-import { IDataTableState, initialDataTableState } from './store-interface-and-intial-values/data-table-state';
-import { ITimeSliderState, initializeTimeSliderState } from './store-interface-and-intial-values/time-slider-state';
-import { IGeochartState, initializeGeochartState } from './store-interface-and-intial-values/geochart-state';
-import { ISwiperState, initializeSwiperState } from './store-interface-and-intial-values/swiper-state';
-import { IUIState, initializeUIState } from './store-interface-and-intial-values/ui-state';
+import { IAppState, initializeAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { IFeatureInfoState, initFeatureInfoState } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { ILayerState, initializeLayerState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { IMapState, initializeMapState } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { IDataTableState, initialDataTableState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { ITimeSliderState, initializeTimeSliderState } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { IGeochartState, initializeGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import { ISwiperState, initializeSwiperState } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import { IUIState, initializeUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
@@ -94,11 +93,14 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
   } as IGeoviewState;
 };
 
+// Wrap the store definition with the subscribveWithSelector middleware
 export const geoviewStoreDefinitionWithSubscribeSelector = subscribeWithSelector(geoviewStoreDefinition);
 
-// TODO: Refactor - Indicate why we need to use a fake store?
-const fakeStore = create<IGeoviewState>()(geoviewStoreDefinitionWithSubscribeSelector);
-export type GeoviewStoreType = typeof fakeStore;
+// Define a type alias for the subscribeWithSelector middleware tuple to improve readability and facilitate usage below
+type SubscribeWithSelectorMiddleware = [['zustand/subscribeWithSelector', never]];
+
+// Define a type for the Geoview Store with the middleware to improve readability and facilitate usage in the code base
+export type GeoviewStoreType = UseBoundStore<Mutate<StoreApi<IGeoviewState>, SubscribeWithSelectorMiddleware>>;
 
 // **********************************************************
 // GeoView state selectors

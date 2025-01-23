@@ -13,7 +13,7 @@ import { TypeJsonObject } from '@/core/types/global-types';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
 
-import { CloseIcon, IconButton } from '..';
+import { CloseIcon, IconButton } from '@/ui';
 import { getSxClasses } from './modal-style';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 

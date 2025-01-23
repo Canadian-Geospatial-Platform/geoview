@@ -15,7 +15,7 @@ import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 
-import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './geometry-types';
+import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from '@/geo/layer/geometry/geometry-types';
 
 /**
  * Store a group of features

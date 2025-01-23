@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Coordinate } from 'ol/coordinate'; // only for typing
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent'; // only for Typing
@@ -17,6 +18,7 @@ import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { TypePointMarker } from '@/api/config/types/map-schema-types';
 import { TypeHoverFeatureInfo } from './feature-info-state';
 import { CV_MAP_CENTER } from '@/api/config/types/config-constants';
+import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
 
@@ -61,9 +63,6 @@ export interface IMapState {
   actions: {
     createBasemapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
-    getIndexFromOrderedLayerInfo: (layerPath: string) => number;
-    getLegendCollapsedFromOrderedLayerInfo: (layerPath: string) => boolean;
-    getVisibilityFromOrderedLayerInfo: (layerPath: string) => boolean;
     showClickMarker: (marker: TypeClickMarker) => void;
     hideClickMarker: () => void;
     highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
@@ -220,36 +219,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       getPixelFromCoordinate: (coord: Coordinate): [number, number] => {
         // Redirect to processor and return the result
         return MapEventProcessor.getPixelFromCoordinate(get().mapId, coord);
-      },
-
-      /**
-       * Retrieves the index from ordered layer information.
-       * @param {string} layerPath - The path of the layer.
-       * @returns {number} The index of the layer.
-       */
-      getIndexFromOrderedLayerInfo: (layerPath: string): number => {
-        // Redirect to processor and return the result
-        return MapEventProcessor.getMapIndexFromOrderedLayerInfo(get().mapId, layerPath);
-      },
-
-      /**
-       * Retrieves the visibility from ordered layer information.
-       * @param {string} layerPath - The path of the layer.
-       * @returns {boolean} The visibility of the layer.
-       */
-      getLegendCollapsedFromOrderedLayerInfo: (layerPath: string): boolean => {
-        // Redirect to processor and return the result
-        return MapEventProcessor.getMapLegendCollapsedFromOrderedLayerInfo(get().mapId, layerPath);
-      },
-
-      /**
-       * Retrieves the visibility from ordered layer information.
-       * @param {string} layerPath - The path of the layer.
-       * @returns {boolean} The visibility of the layer.
-       */
-      getVisibilityFromOrderedLayerInfo: (layerPath: string): boolean => {
-        // Redirect to processor and return the result
-        return MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(get().mapId, layerPath);
       },
 
       /**
@@ -912,7 +881,6 @@ export const useMapHoverFeatureInfo = (): TypeHoverFeatureInfo => useStore(useGe
 export const useMapLoaded = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapNorthArrow = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
 export const useMapNorthArrowElement = (): TypeNorthArrow => useStore(useGeoViewStore(), (state) => state.mapState.northArrowElement);
-export const useMapOrderedLayerInfo = (): TypeOrderedLayerInfo[] => useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo);
 export const useMapOverviewMap = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.overviewMap);
 export const useMapOverviewMapHideZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.overviewMapHideZoom);
 export const useMapPointerPosition = (): TypeMapMouseInfo | undefined =>
@@ -929,6 +897,40 @@ export const useMapZoom = (): number => useStore(useGeoViewStore(), (state) => s
 // Getter function for one-time access, there is no subcription to modification
 export const getMapPointerPosition = (mapId: string): TypeMapMouseInfo | undefined =>
   getGeoViewStore(mapId).getState().mapState.pointerPosition;
+
+export const useSelectorLayerVisibility = (layerPath: string): boolean => {
+  // Get the store
+  const geoviewStore = useGeoViewStore();
+  // Hook
+  const orderedLayerInfo = useStore(geoviewStore, (state) => state.mapState.orderedLayerInfo);
+  // Redirect
+  return MapEventProcessor.findMapLayerFromOrderedInfo(geoviewStore.getState().mapId, layerPath, orderedLayerInfo)?.visible || false;
+};
+
+export const useSelectorLayerLegendCollapsed = (layerPath: string): boolean => {
+  // Get the store
+  const geoviewStore = useGeoViewStore();
+  // Hook
+  const orderedLayerInfo = useStore(geoviewStore, (state) => state.mapState.orderedLayerInfo);
+  // Redirect
+  const { mapId } = geoviewStore.getState();
+  return MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, orderedLayerInfo)?.legendCollapsed || false;
+};
+
+export const useSelectorLayerPathOrder = (): string[] => {
+  // Hook
+  const orderedLayerInfo = useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo);
+
+  // Compute a dependency string based on the ordered layerPath values
+  const layerPathsKey = orderedLayerInfo.map((layer) => layer.layerPath).join('|||');
+
+  // Only re-create the array if the layerPathsKey changes
+  return useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('MAP-STATE - useSelectorLayerPathOrder', layerPathsKey); // Purposely use the 'layerPathsKey' variable to fix the linter warning in the dependency array of the useMemo
+    return orderedLayerInfo.map((layer) => layer.layerPath);
+  }, [orderedLayerInfo, layerPathsKey]);
+};
 
 // Store Actions
 export const useMapStoreActions = (): MapActions => useStore(useGeoViewStore(), (state) => state.mapState.actions);

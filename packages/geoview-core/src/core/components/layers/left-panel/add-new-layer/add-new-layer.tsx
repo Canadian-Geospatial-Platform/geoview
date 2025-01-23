@@ -1120,10 +1120,10 @@ export function AddNewLayer(): JSX.Element {
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>): void => {
-    if (e.key === 'Enter') {
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>): void => {
+    if (event.key === 'Enter') {
       handleBack();
-      e.preventDefault();
+      event.preventDefault();
     }
   };
 

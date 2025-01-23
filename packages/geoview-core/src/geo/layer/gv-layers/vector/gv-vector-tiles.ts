@@ -4,8 +4,8 @@ import { VectorTile } from 'ol/source';
 import { applyStyle } from 'ol-mapbox-style';
 
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { featureInfoGetFieldType } from '../utils';
-import { AbstractGVVectorTile } from './abstract-gv-vector-tile';
+import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
+import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**

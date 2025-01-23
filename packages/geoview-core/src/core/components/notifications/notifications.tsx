@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Theme, useTheme } from '@mui/material/styles';
 import _ from 'lodash';
+import { Theme, useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
 import { animated } from '@react-spring/web';
 import {
@@ -27,7 +27,7 @@ import { logger } from '@/core/utils/logger';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useShake } from '@/core/utils/useSpringAnimations';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { FocusTrapContainer } from '../common';
+import { FocusTrapContainer } from '@/core/components/common';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { SxStyles } from '@/ui/style/types';
 

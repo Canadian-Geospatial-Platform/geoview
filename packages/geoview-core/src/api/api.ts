@@ -12,7 +12,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import * as GeoUtilities from '@/geo/utils/utilities';
 
 import { initMapDivFromFunctionCall } from '@/app';
-import EventHelper, { EventDelegateBase } from './events/event-helper';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -96,8 +96,8 @@ export class API {
     }
 
     // Add event listener for when tab pressed
-    document.addEventListener('keyup', (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+    document.addEventListener('keyup', (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
 
       // get array of map elements
       const elements: Element[] = Array.from(document.getElementsByClassName('geoview-map'));

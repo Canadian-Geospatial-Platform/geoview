@@ -1,6 +1,6 @@
 import LayerGroup from 'ol/layer/Group';
 
-import { AbstractBaseLayer } from './abstract-base-layer';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 
 /**
