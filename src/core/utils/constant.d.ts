@@ -49,3 +49,4 @@ export declare const CONTAINER_TYPE: {
     readonly APP_BAR: "appBar";
     readonly FOOTER_BAR: "footerBar";
 };
+export declare const WMS_PROXY_URL = "https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy?";

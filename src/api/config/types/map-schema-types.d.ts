@@ -407,7 +407,7 @@ export type TypeOutfields = {
     domain: null | codedValueType | rangeDomainType;
 };
 /** The types supported by the outfields object. */
-export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url';
+export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url' | 'oid';
 export type codedValueType = {
     type: 'codedValue';
     name: string;

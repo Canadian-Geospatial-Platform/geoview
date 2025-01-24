@@ -127,9 +127,10 @@ export declare class LayerApi {
     /**
      * Adds a Geoview Layer by GeoCore UUID.
      * @param {string} uuid - The GeoCore UUID to add to the map
+     * @param {string} layerEntryConfig - The optional layer configuration
      * @returns {Promise<void>} A promise which resolves when done adding
      */
-    addGeoviewLayerByGeoCoreUUID(uuid: string): Promise<void>;
+    addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<void>;
     /**
      * Adds a layer to the map. This is the main method to add a GeoView Layer on the map.
      * It handles all the processing, including the validations, and makes sure to inform the layer sets about the layer.
