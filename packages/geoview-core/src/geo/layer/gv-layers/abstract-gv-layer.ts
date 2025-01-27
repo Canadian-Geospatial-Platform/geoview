@@ -28,7 +28,8 @@ import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/laye
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from './abstract-base-layer';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { getLocalizedMessage } from '@/core/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -242,9 +243,15 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
    */
   protected onImageLoadError(): void {
+    logger.logError(
+      `Error loading source image for layer path: ${this.getLayerPath()} at zoom level: ${this.getMapViewer().getView().getZoom()}`
+    );
+    const lang = document.getElementById(this.getMapId())!.getAttribute('data-lang') as 'en' | 'fr';
     // Add notification with the current zoom level
     this.getMapViewer().notifications.showError(
-      `Error loading source image for layer ${this.getLayerPath()} at zoom level: ${this.getMapViewer().getView().getZoom()}`
+      getLocalizedMessage('layers.errorImageLoad', lang),
+      [this.getLayerName()!, this.getMapViewer().getView().getZoom()!],
+      true
     );
   }
 
@@ -477,7 +484,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   async onFetchLegend(): Promise<TypeLegend | null> {
     try {
       const legend: TypeLegend = {
-        type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
+        type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType as TypeGeoviewLayerType,
         styleConfig: this.getStyle(),
         legend: await getLegendStyles(this.getStyle()),
       };
@@ -574,7 +581,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         const featureInfoEntry: TypeFeatureInfoEntry = {
           // feature key for building the data-grid
           featureKey: featureKeyCounter++,
-          geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
+          geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType as TypeGeoviewLayerType,
           extent,
           geometry: feature,
           featureIcon: canvas,
