@@ -11,6 +11,7 @@ import { TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
+import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 export declare const layerTypes: Record<"CSV" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/geo/layer/geoview-layers/abstract-geoview-layers").TypeGeoviewLayerType>;
 /**
  * Fetch the json response from the ESRI map server to get REST endpoint metadata
@@ -177,3 +178,11 @@ export declare function calculateDistance(coordinates: Coordinate[], inProj: str
     total: number;
     sections: number[];
 };
+/**
+ * Get meters per pixel for different projections
+ * @param {TypeValidMapProjectionCodes} projection - The projection of the map
+ * @param {number} resolution - The resolution of the map
+ * @param {number?} lat - The latitude, only needed for Web Mercator
+ * @returns {number} Number representing meters per pixel
+ */
+export declare function getMetersPerPixel(projection: TypeValidMapProjectionCodes, resolution: number, lat?: number): number;

@@ -110,9 +110,10 @@ export declare abstract class AbstractLayerSet {
      * @param {AbstractGVLayer} geoviewLayer - The geoview layer
      * @param {QueryType} queryType - The query type
      * @param {TypeLocation} location - The location for the query
+     * @param {boolean} queryGeometry - The query geometry boolean
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise resolving to the query results
      */
-    protected static queryLayerFeatures(data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry, geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected static queryLayerFeatures(data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry, geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation, queryGeometry?: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
      * Checks if the layer is of queryable type based on its class definition
      * @param {AbstractBaseLayer} layer - The layer

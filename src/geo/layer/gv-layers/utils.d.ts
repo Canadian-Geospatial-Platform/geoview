@@ -40,9 +40,10 @@ export declare function esriParseFeatureInfoEntries(records: TypeJsonObject[], g
  * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
  * @param {string} url - An Esri url indicating a feature layer to query
  * @param {TypeStyleGeometry?} geometryType - The geometry type for the geometries in the layer being queried (used when geometries are returned)
+ * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
-export declare function esriQueryRecordsByUrl(url: string, geometryType?: TypeStyleGeometry): Promise<TypeFeatureInfoEntryPartial[]>;
+export declare function esriQueryRecordsByUrl(url: string, geometryType?: TypeStyleGeometry, parseFeatureInfoEntries?: boolean): Promise<TypeFeatureInfoEntryPartial[]>;
 /**
  * Asynchronously queries an Esri feature layer given the url and object ids and returns an array of `TypeFeatureInfoEntryPartial` records.
  * @param {string} layerUrl - An Esri url indicating a feature layer to query
@@ -51,9 +52,11 @@ export declare function esriQueryRecordsByUrl(url: string, geometryType?: TypeSt
  * @param {string} fields - The list of field names to include in the output
  * @param {boolean} geometry - True to return the geometries in the output
  * @param {number} outSR - The spatial reference of the output geometries from the query
+ * @param {number} maxOffset - The max allowable offset value to simplify geometry
+ * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
-export declare function esriQueryRecordsByUrlObjectIds(layerUrl: string, geometryType: TypeStyleGeometry, objectIds: number[], fields: string, geometry: boolean, outSR?: number): Promise<TypeFeatureInfoEntryPartial[]>;
+export declare function esriQueryRecordsByUrlObjectIds(layerUrl: string, geometryType: TypeStyleGeometry, objectIds: number[], fields: string, geometry: boolean, outSR?: number, maxOffset?: number, parseFeatureInfoEntries?: boolean): Promise<TypeFeatureInfoEntryPartial[]>;
 /**
  * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
  * @param {url} string An Esri url indicating a relationship table to query

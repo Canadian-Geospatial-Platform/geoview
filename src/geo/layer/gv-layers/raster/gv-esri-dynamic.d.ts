@@ -8,6 +8,7 @@ import { TypeFeatureInfoEntry, rangeDomainType, codedValueType } from '@/geo/map
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 /**
  * Manages an Esri Dynamic layer.
  *
@@ -60,21 +61,34 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     /**
      * Overrides the return of feature information at a given pixel location.
      * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+     * @param {boolean} queryGeometry - The query geometry boolean.
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtPixel(location: Pixel, queryGeometry?: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
      * Overrides the return of feature information at a given coordinate.
      * @param {Coordinate} location - The coordinate that will be used by the query.
+     * @param {boolean} queryGeometry - The query geometry boolean.
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry?: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    /**
+     * Query the features geometry with a web worker
+     * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
+     * @param {number[]} objectIds - Array of object IDs to query
+     * @param {boolean} queryGeometry - Whether to include geometry in the query
+     * @param {number} projection - The spatial reference ID for the output
+     * @param {number} maxAllowableOffset - The maximum allowable offset for geometry simplification
+     * @returns {TypeJsonObject} A promise of esri response for query.
+     */
+    fetchFeatureInfoGeometryWithWorker(layerConfig: EsriDynamicLayerEntryConfig, objectIds: number[], queryGeometry: boolean, projection: number, maxAllowableOffset: number): Promise<TypeJsonObject>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
      * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+     * @param {boolean} queryGeometry - The query geometry boolean.
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtLongLat(lnglat: Coordinate, queryGeometry?: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
      * Gets the layer view filter. The filter is derived from the uniqueValue or the classBreak visibility flags and a layerFilter
      * associated to the layer.

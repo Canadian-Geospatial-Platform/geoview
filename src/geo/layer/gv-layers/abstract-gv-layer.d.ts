@@ -104,12 +104,18 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     protected onError(): void;
     /**
+     * Overridable method called when the layer image is in error and couldn't be loaded correctly.
+     * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
+     */
+    protected onImageLoadError(): void;
+    /**
      * Returns feature information for the layer specified.
      * @param {QueryType} queryType - The type of query to perform.
      * @param {TypeLocation} location - An optionsl pixel, coordinate or polygon that will be used by the query.
+     * @param {boolean} queryGeometry - The query geometry boolean
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
      */
-    getFeatureInfo(queryType: QueryType, layerPath: string, location?: TypeLocation): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    getFeatureInfo(queryType: QueryType, location?: TypeLocation, queryGeometry?: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
      * Overridable function to get all feature information for all the features stored in the layer.
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
@@ -118,33 +124,38 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     /**
      * Overridable function to return of feature information at a given pixel location.
      * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+     * @param {boolean} queryGeometry - The query geometry boolean.
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtPixel(location: Pixel, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
      * Overridable function to return of feature information at a given coordinate.
      * @param {Coordinate} location - The coordinate that will be used by the query.
+     * @param {boolean} queryGeometry - The query geometry boolean.
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
      * Overridable function to return of feature information at the provided long lat coordinate.
      * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+     * @param {boolean} queryGeometry - The query geometry boolean
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtLongLat(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtLongLat(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
      * Overridable function to return of feature information at the provided bounding box.
      * @param {Coordinate} location - The bounding box that will be used by the query.
+     * @param {boolean} queryGeometry - The query geometry boolean.
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoUsingBBox(location: Coordinate[]): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoUsingBBox(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
      * Overridable function to return of feature information at the provided polygon.
      * @param {Coordinate} location - The polygon that will be used by the query.
+     * @param {boolean} queryGeometry - The query geometry boolean.
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoUsingPolygon(location: Coordinate[]): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoUsingPolygon(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
      * Overridable function to return the domain of the specified field or null if the field has no domain.
      * @param {string} fieldName - The field name for which we want to get the domain.
