@@ -371,7 +371,7 @@ export type TypeGeoviewLayerConfig = {
   /** The GeoView layer access path (English/French). */
   metadataAccessPath?: string;
   /** Type of GeoView layer. */
-  geoviewLayerType: TypeGeoviewLayerType;
+  geoviewLayerType: 'geoCore' | TypeGeoviewLayerType;
   /** Date format used by the service endpoint. */
   serviceDateFormat?: string;
   /** Date format used by the getFeatureInfo to output date variable. */

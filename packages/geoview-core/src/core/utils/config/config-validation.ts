@@ -183,7 +183,7 @@ export class ConfigValidation {
       if (!mapConfigLayerEntryIsGeoCore(listOfGeoviewLayerConfig[i])) {
         const gvLayerConfigCasted = listOfGeoviewLayerConfig[i] as TypeGeoviewLayerConfig;
         isValid = this.#isValidTypeListOfLayerEntryConfig(
-          gvLayerConfigCasted.geoviewLayerType,
+          gvLayerConfigCasted.geoviewLayerType as TypeGeoviewLayerType,
           gvLayerConfigCasted.listOfLayerEntryConfig,
           validator
         );
