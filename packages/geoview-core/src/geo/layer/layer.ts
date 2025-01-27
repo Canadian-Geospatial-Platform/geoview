@@ -464,6 +464,10 @@ export class LayerApi {
             configToCreateIndex > configToTestIndex
           ) {
             this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
+            // Remove geoCore ordered layer info placeholder
+            if (MapEventProcessor.getMapOrderedLayerInfoForLayer(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId))
+              MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId, false);
+
             return false;
           }
         }
@@ -586,17 +590,18 @@ export class LayerApi {
       hoverable: true,
       legendCollapsed: false,
     };
-    // TODO: Check - Shouldn't we wait for the layer to actually be retrieved positively from
-    // TO.DOCONT: Geocore, before adding ordered layer information? What if the
-    // TO.DOCONT: fetch (createLayersFromUUID) fails, will there be garbage in layer info?
+
+    // GV: This is here as a placeholder so that the layers will appear in the proper order,
+    // GV: regardless of how quickly we get the response. It is removed if the layer fails.
     MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerInfo);
 
-    const optionalConfig: GeoCoreLayerConfig | undefined = layerEntryConfig
+    const parsedLayerEntryConfig = layerEntryConfig ? JSON.parse(layerEntryConfig) : undefined;
+    const optionalConfig: GeoCoreLayerConfig | undefined = parsedLayerEntryConfig
       ? {
           geoviewLayerType: 'geoCore',
           geoviewLayerId: uuid,
-          geoviewLayerName: 'custom',
-          listOfLayerEntryConfig: JSON.parse(layerEntryConfig),
+          geoviewLayerName: parsedLayerEntryConfig.layerName,
+          listOfLayerEntryConfig: parsedLayerEntryConfig,
         }
       : undefined;
 
@@ -625,8 +630,13 @@ export class LayerApi {
     ConfigValidation.validateListOfGeoviewLayerConfig(this.mapViewer.getDisplayLanguage(), [geoviewLayerConfig]);
 
     // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
-    if (geoviewLayerConfig.geoviewLayerId in this.#geoviewLayers) this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
-    else {
+    if (geoviewLayerConfig.geoviewLayerId in this.#geoviewLayers) {
+      // Remove geoCore ordered layer info placeholder
+      if (MapEventProcessor.getMapOrderedLayerInfoForLayer(this.getMapId(), geoviewLayerConfig.geoviewLayerId))
+        MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId, false);
+
+      this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
+    } else {
       // Process the addition of the layer
       return this.#addGeoviewLayerStep2(geoviewLayerConfig);
     }
@@ -694,6 +704,12 @@ export class LayerApi {
       layerBeingAdded.onLayerEntryProcessed((geoviewLayer, event) => {
         // Log
         logger.logDebug(`Layer entry config processed for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
+
+        const selectedLayerPath =
+          this.mapViewer.mapFeaturesConfig.footerBar?.selectedLayersLayerPath ||
+          this.mapViewer.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
+        if (selectedLayerPath && event.config.layerPath.startsWith(selectedLayerPath))
+          LegendEventProcessor.setSelectedLayersTabLayer(this.getMapId(), selectedLayerPath as string);
 
         // GV Do we need to register a layer entry config here? Leave the note for now
         // this.registerLayerConfigInit(layerConfig);
