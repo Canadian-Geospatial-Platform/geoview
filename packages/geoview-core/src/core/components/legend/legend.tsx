@@ -2,9 +2,7 @@ import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Typography } from '@/ui';
-import { useGeoViewMapId } from '@/core/stores/';
-import { useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useMapOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useGeoViewMapId, useUIActiveFooterBarTabId } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './legend-styles';
@@ -12,6 +10,7 @@ import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useFooterPanelHeight } from '@/core/components/common';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { useDebounceLayerLegendLayers, useDebounceMapOrderedLayerInfo } from './hooks/use-legend-debounce';
 
 interface LegendType {
   fullWidth?: boolean;
@@ -36,6 +35,12 @@ const styles = {
   },
 } as const;
 
+// Memoize the sxClasses
+const useStyles = () => {
+  const theme = useTheme();
+  return useMemo(() => getSxClasses(theme), [theme]);
+};
+
 // Constant style outside of render (responsive widths)
 const responsiveWidths = {
   full: { xs: '100%' },
@@ -48,13 +53,14 @@ const responsiveWidths = {
   },
 } as const;
 
-export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): JSX.Element {
+export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): JSX.Element | null {
   logger.logTraceRender('components/legend/legend');
 
   // Hooks
   const { t } = useTranslation<string>();
+  const memoizedT = useCallback((key: string) => t(key), [t]);
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useStyles();
 
   // State
   const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
@@ -62,8 +68,13 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
 
   // Store
   const mapId = useGeoViewMapId();
-  const orderedLayerInfo = useMapOrderedLayerInfo();
-  const layersList = useLayerLegendLayers();
+  // const orderedLayerInfo = useMapOrderedLayerInfo();
+  // const layersList = useLayerLegendLayers();
+  const id = useUIActiveFooterBarTabId();
+
+  const orderedLayerInfo = useDebounceMapOrderedLayerInfo();
+  const layersList = useDebounceLayerLegendLayers();
+
 
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef } = useFooterPanelHeight({ footerPanelTab: 'legend' });
@@ -140,10 +151,10 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
       return (
         <Box sx={styles.noLayersContainer}>
           <Typography variant="h3" gutterBottom sx={sxClasses.legendInstructionsTitle}>
-            {t('legend.noLayersAdded')}
+            {memoizedT('legend.noLayersAdded')}
           </Typography>
           <Typography component="p" sx={sxClasses.legendInstructionsBody}>
-            {t('legend.noLayersAddedDescription')}
+            {memoizedT('legend.noLayersAddedDescription')}
           </Typography>
         </Box>
       );
@@ -156,7 +167,10 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
         ))}
       </Box>
     ));
-  }, [legendLayers, formattedLegendLayerList, fullWidth, sxClasses, t]);
+  }, [legendLayers, formattedLegendLayerList, fullWidth, sxClasses, memoizedT]);
+
+  // Early return with empty fragment if not the active tab
+  if (id !== 'legend') return null;
 
   return (
     <Box sx={sxClasses.container} {...(!fullWidth && { ref: leftPanelRef })} id={`${mapId}-${containerType}-legendContainer`}>

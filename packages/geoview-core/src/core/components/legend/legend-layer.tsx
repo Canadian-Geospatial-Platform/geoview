@@ -28,28 +28,32 @@ const styles = {
   },
 } as const;
 
+// Memoize the sxClasses
+const useStyles = () => {
+  const theme = useTheme();
+  return useMemo(() => getSxClasses(theme), [theme]);
+};
+
 // Extracted Header Component
-const LegendLayerHeader = memo(
-  ({ layer, isCollapsed, isVisible, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
-    <ListItem key={layer.layerName} divider onClick={onExpandClick}>
-      <LayerIcon layer={layer} />
-      <Tooltip title={layer.layerName} placement="top">
-        <ListItemText
-          sx={styles.listItemText}
-          primary={layer.layerName}
-          className="layerTitle"
-          disableTypography
-          secondary={<SecondaryControls layer={layer} visibility={isVisible} />}
-        />
-      </Tooltip>
-      {(layer.children?.length > 1 || layer.items?.length > 1) && (
-        <IconButton className="buttonOutline" edge="end" size="small" tooltip="layers.toggleCollapse">
-          {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-        </IconButton>
-      )}
-    </ListItem>
-  )
-);
+const LegendLayerHeader = memo(({ layer, isCollapsed, isVisible, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
+  <ListItem key={layer.layerName} divider onClick={onExpandClick}>
+    <LayerIcon layer={layer} />
+    <Tooltip title={layer.layerName} placement="top">
+      <ListItemText
+        sx={styles.listItemText}
+        primary={layer.layerName}
+        className="layerTitle"
+        disableTypography
+        secondary={<SecondaryControls layer={layer} visibility={isVisible} />}
+      />
+    </Tooltip>
+    {(layer.children?.length > 1 || layer.items?.length > 1) && (
+      <IconButton className="buttonOutline" edge="end" size="small" tooltip="layers.toggleCollapse">
+        {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+      </IconButton>
+    )}
+  </ListItem>
+));
 LegendLayerHeader.displayName = 'LegendLayerHeader';
 
 // Main LegendLayer component
@@ -57,8 +61,7 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   logger.logTraceRender('components/legend/legend-layer');
 
   // Hooks
-  const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const sxClasses = useStyles();
 
   // Stores
   const { initLightBox, LightBoxComponent } = useLightBox();
@@ -68,14 +71,14 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   const isVisible = getVisibilityFromOrderedLayerInfo(layer.layerPath);
   const layerStatus = getLayerStatus(layer.layerPath);
 
-  // Create a new layer object with updated status (no useMemo to ensure updates)
-  const currentLayer = {
-    ...layer,
-    layerStatus,
-    items: layer.items?.map((item) => ({
-      ...item,
-    })),
-  };
+    // Create a new layer object with updated status (no useMemo to ensure updates in inner child)
+    const currentLayer = {
+      ...layer,
+      layerStatus,
+      items: layer.items?.map((item) => ({
+        ...item,
+      })),
+    };
 
   const handleExpandGroupClick = useCallback(
     (e: React.MouseEvent): void => {

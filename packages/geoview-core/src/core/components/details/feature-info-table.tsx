@@ -29,6 +29,12 @@ interface FeatureRowProps {
   onInitLightBox: (value: string, alias: string, index: number) => void;
 }
 
+// Memoize the sxClasses
+const useStyles = () => {
+  const theme = useTheme();
+  return useMemo(() => getSxClasses(theme), [theme]);
+};
+
 // Extracted FeatureItem component
 export const FeatureItem = memo(function FeatureItem({
   item,
@@ -39,8 +45,7 @@ export const FeatureItem = memo(function FeatureItem({
 }: FeatureItemProps): JSX.Element {
   // Hooks
   const { t } = useTranslation();
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useStyles();
 
   const linkifyOptions = useMemo(
     () => ({
@@ -157,8 +162,7 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({ featureInfoList
   logger.logTraceRender('components/details/feature-info-table');
 
   // Hooks
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useStyles();
 
   // Store
   const { initLightBox, LightBoxComponent } = useLightBox();
