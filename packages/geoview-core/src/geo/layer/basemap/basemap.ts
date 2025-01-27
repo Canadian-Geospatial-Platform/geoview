@@ -234,9 +234,7 @@ export class Basemap {
           // Set extent for this layer
           extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
 
-          // Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
-          // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
-          // urlProj = Basemap.#getProjectionFromUrl(basemapLayer.url as string);
+          // Set the spatial Reference for this layer
           urlProj = tileInfo.spatialReference.latestWkid as number;
 
           let source;
