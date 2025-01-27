@@ -210,6 +210,10 @@
             "geochart"
           ],
           "description": "Footer tab to be selected at map load"
+        },
+        "selectedLayersLayerPath": {
+          "type": "string",
+          "description": "Layerpath of layer to be selected in the layers tab at map load"
         }
       },
       "required": [
@@ -275,6 +279,10 @@
             ""
           ],
           "description": "App bar tab to be selected at map load"
+        },
+        "selectedLayersLayerPath": {
+          "type": "string",
+          "description": "Layerpath of layer to be selected at map load"
         }
       },
       "required": [

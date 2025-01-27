@@ -695,6 +695,12 @@ export class LayerApi {
         // Log
         logger.logDebug(`Layer entry config processed for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
 
+        const selectedLayerPath =
+          this.mapViewer.mapFeaturesConfig.footerBar?.selectedLayersLayerPath ||
+          this.mapViewer.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
+        if (selectedLayerPath && event.config.layerPath.startsWith(selectedLayerPath))
+          LegendEventProcessor.setSelectedLayersTabLayer(this.getMapId(), selectedLayerPath as string);
+
         // GV Do we need to register a layer entry config here? Leave the note for now
         // this.registerLayerConfigInit(layerConfig);
       });
