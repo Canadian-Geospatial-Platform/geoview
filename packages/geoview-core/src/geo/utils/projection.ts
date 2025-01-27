@@ -28,7 +28,6 @@ export abstract class Projection {
   static PROJECTION_NAMES = {
     3578: 'EPSG:3578',
     LCC: 'EPSG:3978',
-    3978: 'EPSG:3978',
     3979: 'EPSG:3979',
     42101: 'EPSG:42101',
     102100: 'EPSG:102100', // TODO: Minor - The official name of this projection is ESRI:102100 (not EPSG:102100). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
