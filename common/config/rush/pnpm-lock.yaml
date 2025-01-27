@@ -436,9 +436,6 @@ importers:
       worker-loader:
         specifier: ^3.0.8
         version: 3.0.8(webpack@5.97.1)
-      worker-plugin:
-        specifier: 5.0.1
-        version: 5.0.1(webpack@5.97.1)
 
   ../../packages/geoview-geochart:
     dependencies:
@@ -7744,15 +7741,6 @@ packages:
     engines: {node: '>=6.11.5'}
     dev: true
 
-  /loader-utils@1.4.2:
-    resolution: {integrity: sha512-I5d00Pd/jwMD2QCduo657+YM/6L3KZu++pmX9VFncxaxvHcru9jx1lBaFft+r4Mt2jK0Yhp41XlRAihzPxHNCg==}
-    engines: {node: '>=4.0.0'}
-    dependencies:
-      big.js: 5.2.2
-      emojis-list: 3.0.0
-      json5: 1.0.2
-    dev: true
-
   /loader-utils@2.0.4:
     resolution: {integrity: sha512-xXqpXoINfFhgua9xiqD8fPFHgkoq1mmmpE92WlDbm9rNRd/EbRb+Gqf908T2DMfuHjjJlksiK2RbHVOdD/MqSw==}
     engines: {node: '>=8.9.0'}
@@ -10435,15 +10423,6 @@ packages:
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
-      webpack: 5.97.1(webpack-cli@5.1.4)
-    dev: true
-
-  /worker-plugin@5.0.1(webpack@5.97.1):
-    resolution: {integrity: sha512-Pn7+19jIiANcGuTSGdy+vrzyF+SGH03A5wV8iu4jRTMAOfAC9bNeiHo4+l5tPS7F0uvICMBv+h8UCvL7lunxcA==}
-    peerDependencies:
-      webpack: '>= 4'
-    dependencies:
-      loader-utils: 1.4.2
       webpack: 5.97.1(webpack-cli@5.1.4)
     dev: true
 
