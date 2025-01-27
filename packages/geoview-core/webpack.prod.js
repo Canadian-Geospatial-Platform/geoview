@@ -22,6 +22,7 @@ const config = {
       analyzerMode: 'static',
       openAnalyzer: true,
       reportFilename: '../analysis/bundle-analyzer.html',
+      analyzeAfterCompile: true,
     }),
     new WebpackBundleSizeAnalyzerPlugin('../analysis/bundle-size-analyzer.log'),
     // compress file for our production build

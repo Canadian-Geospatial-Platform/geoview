@@ -1,5 +1,5 @@
 import { AbstractWorker } from './abstract-worker';
-import { TypeWorkerExportChunk, TypeWorkerExportProjectionInfo } from './json-export-script';
+import Worker, { TypeWorkerExportChunk, TypeWorkerExportProjectionInfo } from './json-export-worker-script';
 
 /**
  * How to create a new worker:
@@ -42,7 +42,7 @@ export class JsonExportWorker extends AbstractWorker<JsonExportWorkerType> {
    * Initializes the worker with the 'json-export' script.
    */
   constructor() {
-    super('json-export', new Worker(new URL('./json-export-script.ts', import.meta.url)));
+    super('FetchEsriWorker', new Worker());
   }
 
   /**
