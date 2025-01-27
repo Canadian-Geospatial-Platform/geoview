@@ -242,7 +242,7 @@ export class Basemap {
             const tileSize = [tileInfo.rows as number, tileInfo.cols as number];
             source = new VectorTile({
               attributions: getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId)),
-              projection: Projection.PROJECTIONS[tileInfo.spatialReference.wkid as number],
+              projection: Projection.PROJECTIONS[urlProj],
               url: basemapLayer.url as string,
               format: new MVT(),
               tileGrid: new TileGrid({
