@@ -123,8 +123,8 @@
         </li>
         <li>
           <button id="changeLanguage" style="margin: 10px">Change Language</button>
-          Changes the language from french to english or english to french and reloads the map if it exists. Note: this will not change the
-          language of the layers, as they are loaded in the current state.
+          Changes the language from french to english or english to french and reloads the map if it exists. Note: this will change the
+          language of the layers, as maintainGeocoreLayerNames is set to false.
           <details>
             <summary>Code</summary>
             <pre>
@@ -132,7 +132,7 @@
               const mapDiv = document.getElementById('Map1');
               if (mapDiv) {
                 mapDiv.setAttribute('data-lang', lang);
-                cgpv.api.maps.Map1.reloadWithCurrentState();
+                cgpv.api.maps.Map1.reloadWithCurrentState(false);
               }
             </pre>
           </details>
@@ -330,7 +330,7 @@
         const mapDiv = document.getElementById('Map1');
         if (mapDiv) {
           mapDiv.setAttribute('data-lang', lang);
-          cgpv.api.maps.Map1.reloadWithCurrentState();
+          cgpv.api.maps.Map1.reloadWithCurrentState(false);
         }
       });
 

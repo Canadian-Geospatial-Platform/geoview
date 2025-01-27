@@ -105,7 +105,8 @@ export abstract class AbstractGeoviewLayerConfig {
     // GV: GeoCore layers are processed by the configApi. GeoView layer instances do not recognize them as a valid geoView layer Type.
     // GV: However, whe have the isGeocore flag to keep track of geocore layers that were converted to geoview layers.
     this.isGeocore = (userGeoviewLayerConfig.isGeocore as boolean) || false;
-    if (this.isGeocore) this.geoviewLayerName = userGeoviewLayerConfig.geoviewLayerName as string;
+    if (this.isGeocore)
+      this.geoviewLayerName = userGeoviewLayerConfig.geoviewLayerName ? (userGeoviewLayerConfig.geoviewLayerName as string) : '';
     this.geoviewLayerId = (userGeoviewLayerConfig.geoviewLayerId || generateId()) as string;
     this.metadataAccessPath = userGeoviewLayerConfig.metadataAccessPath as string;
 

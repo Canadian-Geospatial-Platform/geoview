@@ -422,7 +422,7 @@ export class ConfigApi {
     // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
     // be translated to a json object.
     const providedMapFeatureConfig: TypeJsonObject | undefined =
-      //                                                                     We clone to prevent modifications from leaking back to the user object.
+      // We clone to prevent modifications from leaking back to the user object.
       typeof mapConfig === 'string' ? ConfigApi.#convertStringToJson(mapConfig as string) : (cloneDeep(mapConfig) as TypeJsonObject);
 
     try {
