@@ -245,10 +245,11 @@
     executeButton.addEventListener('click', async (e) => {
       const geoViewRenderer = cgpv.api.config.getStyleFromESRIRenderer(inputTextArea.value);
       if (serviceUrlInput.value) {
+        const serviceType = cgpv.api.config.guessLayerType(serviceUrlInput.value);
         const urlArray = serviceUrlInput.value.split("/");
         const index = urlArray.pop();
         const serviceUrl = urlArray.join("/");
-        const geoviewConfig = await cgpv.api.config.createLayerConfig(serviceUrl, "esriFeature", [index]);
+        const geoviewConfig = await cgpv.api.config.createLayerConfig(serviceUrl, serviceType, [index]);
         geoviewConfig.listOfLayerEntryConfig[0].layerStyle = geoViewRenderer;
         outputTextArea.value = JSON.stringify(geoviewConfig, undefined, 2);
       } else {
