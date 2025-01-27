@@ -592,10 +592,14 @@ export class ConfigApi {
 
   /**
    * Returns the ESRI Renderer as a Style Config
-   * @param {EsriBaseRenderer} renderer The input renderer to be converted to a GeoView Style
+   * @param {string} input The input renderer to be converted to a GeoView Style
    * @returns {TypeLayerStyleConfig} The converted style
    */
-  static getStyleFromESRIRenderer(renderer: EsriBaseRenderer): TypeLayerStyleConfig | undefined {
-    return createStyleUsingEsriRenderer(renderer);
+  static getStyleFromESRIRenderer(input: string): TypeLayerStyleConfig | undefined {
+    const renderer = this.#convertStringToJson(input);
+    if (renderer) {
+      return createStyleUsingEsriRenderer(renderer as unknown as EsriBaseRenderer);
+    }
+    return undefined;
   }
 }

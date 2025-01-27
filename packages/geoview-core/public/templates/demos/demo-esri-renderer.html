@@ -1,89 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ESRI Renderer - Canadian Geospatial Platform Viewer</title>
-    <link rel="shortcut icon" href="./favicon.ico" />
-    <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="msapplication-config" content="./img/browserconfig.xml" />
-    <meta name="theme-color" content="#ffffff" />
-    <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="theme-color" content="#ffffff" />
-    <link rel="stylesheet" href="css/style.css" />
 
-    <style>
-      .config-json-valid {
-        color: green;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESRI Renderer - Canadian Geospatial Platform Viewer</title>
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="msapplication-config" content="./img/browserconfig.xml" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="stylesheet" href="css/style.css" />
 
-      .config-error {
-        color: red;
-      }
+  <style>
+    .config-json-valid {
+      color: green;
+    }
 
-      .tab-container {
-          width: 100%;
-          margin: 0 auto;
-      }
+    .config-error {
+      color: red;
+    }
 
-      .tabs {
-          display: flex;
-          border-bottom: 1px solid #ccc;
-      }
+    .tab-container {
+      width: 100%;
+      margin: 0 auto;
+    }
 
-      .tab-link {
-          background-color: #f1f1f1;
-          border: 1px solid #ccc;
-          border-bottom: none;
-          outline: none;
-          cursor: pointer;
-          padding: 8px 10px;
-          transition: background-color 0.3s;
-          flex: none;
-          text-align: center;
-      }
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ccc;
+    }
 
-      .tab-link:hover {
-          background-color: #ddd;
-      }
+    .tab-link {
+      background-color: #f1f1f1;
+      border: 1px solid #ccc;
+      border-bottom: none;
+      outline: none;
+      cursor: pointer;
+      padding: 8px 10px;
+      transition: background-color 0.3s;
+      flex: none;
+      text-align: center;
+    }
 
-      .tab-link.active {
-          background-color: #ccc;
-      }
+    .tab-link:hover {
+      background-color: #ddd;
+    }
 
-      .tab-content {
-          padding: 16px;
-          border: 1px solid #ccc;
-          border-top: none;
-      }
+    .tab-link.active {
+      background-color: #ccc;
+    }
 
-      .editor {
-        display: inline-flex;
-        gap: 10px;
-        font-family: monospace;
-        line-height: 21px;
-        background: #282a3a;
-        border-radius: 2px;
-        padding: 20px 10px;
-        height: 500px;
-        overflow-y: auto;
-      }
+    .tab-content {
+      padding: 16px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
 
-      .line-numbers {
-        width: 20px;
-        text-align: right;
-        height: 9999px;
-      }
+    .editor {
+      display: inline-flex;
+      gap: 10px;
+      font-family: monospace;
+      line-height: 21px;
+      background: #282a3a;
+      border-radius: 2px;
+      padding: 20px 10px;
+      height: 500px;
+      overflow-y: auto;
+    }
 
-      .line-numbers span {
-        counter-increment: linenumber;
-      }
+    .line-numbers {
+      width: 20px;
+      text-align: right;
+      height: 9999px;
+    }
 
-      .line-numbers span::before {
-        content: counter(linenumber);
-        display: block;
-        color: #506882;
-      }
+    .line-numbers span {
+      counter-increment: linenumber;
+    }
+
+    .line-numbers span::before {
+      content: counter(linenumber);
+      display: block;
+      color: #506882;
+    }
 
     textarea {
       height: 99999px;
@@ -98,6 +99,15 @@
       resize: none;
       overflow-x: auto;
       white-space: nowrap;
+    }
+
+    label {
+      font-size: 14px;
+      font-style: italic;
+    }
+
+    #serviceUrlInput {
+      width: 700px;
     }
   </style>
 </head>
@@ -124,23 +134,31 @@
     <table>
       <tbody>
         <tr>
-          <td>This page is used to test the ConfigApi.</td>
+          <td>This page is used to create a valid GeoView style config from an ESRI Renderer.
+            If a Feature Service URL is provided, then a layer config with the style included will be generated.
+          <br>
+          Example: <i>https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/0</i>
+          </td>
         </tr>
         <tr>
-          <td>Feature Service URL (optional)</td>
-          <td><input type="text" id="serviceUrl" name="serviceUrl"></td>
           <td>
-            <button id="executeParser">Execute</button>
+            <label for="serviceUrlInput">ESRI Feature Service URL (optional)</label>
+            <input type="text" id="serviceUrlInput" name="serviceUrl">
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <button id="executeButton">Execute</button>
           </td>
         </tr>
         <tr>
           <td>
             <span>Input ESRI Renderer</span>
             <div class="editor">
-              <div class="line-numbers" id="inputLineNumbersTab1">
+              <div class="line-numbers" id="inputLineNumbers">
                 <span></span>
               </div>
-              <textarea id="inputTextAreaTab1" cols="110">
+              <textarea id="inputTextArea" cols="110">
               </textarea>
             </div>
             <div>
@@ -149,12 +167,12 @@
           </td>
           <td>
             <span>Style configuration:</span>
-            <span id="messageTab1" >File not validated...</span>
+            <span id="messageTab1">File not validated...</span>
             <div class="editor">
-              <div class="line-numbers" id="outputLineNumbersTab1">
+              <div class="line-numbers" id="outputLineNumbers">
                 <span></span>
               </div>
-              <textarea id="outputTextAreaTab1" cols="110">
+              <textarea id="outputTextArea" cols="110">
               </textarea>
             </div>
           </td>
@@ -176,18 +194,71 @@
   <pre id="codeSnippet" class="panel"></pre>
 
   <script src="codedoc.js"></script>
-
+  
   <script>
-    // Utility functions ========================================================================================================
-
     // Function used to generate line numbers in the input and output containers.
     generateLineNumbers = (textContainerId, lineNumbersContainerId) => {
       const textarea = document.getElementById(textContainerId);
       const lineNumbersContainer = document.getElementById(lineNumbersContainerId);
-      const lines = textarea.value.split('\n').length+1;
+      const lines = textarea.value.split('\n').length + 1;
       const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
       lineNumbersContainer.innerHTML = lineNumbers;
     };
+
+    const initialValue = {
+      "type": "simple",
+      "symbol": {
+        "type": "esriSMS",
+        "color": [
+          255,
+          130,
+          0,
+          217
+        ],
+        "angle": 0,
+        "xoffset": 0,
+        "yoffset": 0,
+        "size": 6,
+        "style": "esriSMSCircle",
+        "outline": {
+          "type": "esriSLS",
+          "color": [
+            255,
+            255,
+            255,
+            128
+          ],
+          "width": 0.998,
+          "style": "esriSLSSolid"
+        }
+      }
+    }
+    
+    const executeButton = document.getElementById('executeButton');
+    const intputTextArea = document.getElementById('inputTextArea');
+    inputTextArea.value = JSON.stringify(initialValue, undefined, 2);
+    generateLineNumbers('inputTextArea', 'inputLineNumbers');
+
+    const outputTextArea = document.getElementById('outputTextArea');
+    const serviceUrlInput = document.getElementById('serviceUrlInput');
+
+    executeButton.addEventListener('click', async (e) => {
+      const geoViewRenderer = cgpv.api.config.getStyleFromESRIRenderer(inputTextArea.value);
+      if (serviceUrlInput.value) {
+        const urlArray = serviceUrlInput.value.split("/");
+        const index = urlArray.pop();
+        const serviceUrl = urlArray.join("/");
+        const geoviewConfig = await cgpv.api.config.createLayerConfig(serviceUrl, "esriFeature", [index]);
+        geoviewConfig.listOfLayerEntryConfig[0].layerStyle = geoViewRenderer;
+        outputTextArea.value = JSON.stringify(geoviewConfig, undefined, 2);
+      } else {
+        outputTextArea.value = JSON.stringify(geoViewRenderer, undefined, 2);
+      }
+      generateLineNumbers('outputTextArea', 'outputLineNumbers');
+    })
+
+    // Utility functions ========================================================================================================
+
 
     // Function used to display messages to report progression of the process.
     printMessage = (messageObject, messageString, status) => {
@@ -274,7 +345,7 @@
         return `${accumulator}== ${geoviewLayer.geoviewLayerId} ===============================================================================================\n${geoviewLayer.serialize()}\n`;
       }, '');
       layerPathErrorFlag = mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
-        return `${accumulator}${generateLayerPathErrorFlag(geoviewLayer.listOfLayerEntryConfig, `geoviewLayerId ${geoviewLayer.geoviewLayerId}: ${geoviewLayer.getErrorDetectedFlag()? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`)}\n\n`;
+        return `${accumulator}${generateLayerPathErrorFlag(geoviewLayer.listOfLayerEntryConfig, `geoviewLayerId ${geoviewLayer.geoviewLayerId}: ${geoviewLayer.getErrorDetectedFlag() ? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`)}\n\n`;
       }, '');
     }
 
@@ -285,4 +356,5 @@
     // });
   </script>
 </body>
+
 </html>
