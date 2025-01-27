@@ -110,6 +110,7 @@
     "errorServer": "source n'est pas valide",
     "errorNotLoaded": "Une erreur s'est produite lors du chargement de la couche",
     "errorProj": "ne prend pas en charge la projection cartographique actuelle",
+    "errorImageLoad": "Erreur de chargement de l'image source pour le couche: __param__ au niveau de zoom __param__",
     "only": "seulement",
     "opacity": "Opacité",
     "opacityMax": "Maximum du parent",

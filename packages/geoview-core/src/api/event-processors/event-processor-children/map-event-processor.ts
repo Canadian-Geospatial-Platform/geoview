@@ -1048,7 +1048,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {TypeLegendLayer} legendLayerInfo - Legend layer info for the layer.
    * @returns {TypeLayerInitialSettings} Initial settings object.
    */
-  static getInitialSettings(
+  static #getInitialSettings(
     layerEntryConfig: ConfigBaseClass,
     orderedLayerInfo: TypeOrderedLayerInfo,
     legendLayerInfo: TypeLegendLayer
@@ -1074,9 +1074,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Creates a layer entry config based on current layer state.
    * @param {string} mapId - Id of map.
    * @param {string} layerPath - Path of the layer to create config for.
+   * @param {boolean} isGeocore - Indicates if it is a geocore layer.
+   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
    * @returns {TypeLayerEntryConfig} Entry config object.
    */
-  static createLayerEntryConfig(mapId: string, layerPath: string): TypeLayerEntryConfig {
+  static #createLayerEntryConfig(
+    mapId: string,
+    layerPath: string,
+    isGeocore: boolean,
+    maintainGeocoreLayerNames: boolean
+  ): TypeLayerEntryConfig {
     // Get needed info
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
     const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfoForLayer(mapId, layerPath);
@@ -1110,24 +1117,33 @@ export class MapEventProcessor extends AbstractEventProcessor {
         (entryLayerPath) =>
           entryLayerPath.startsWith(`${layerPath}/`) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
       );
-      sublayerPaths.forEach((sublayerPath) => listOfLayerEntryConfig.push(MapEventProcessor.createLayerEntryConfig(mapId, sublayerPath)));
+      sublayerPaths.forEach((sublayerPath) =>
+        listOfLayerEntryConfig.push(MapEventProcessor.#createLayerEntryConfig(mapId, sublayerPath, isGeocore, maintainGeocoreLayerNames))
+      );
     }
 
     // Get initial settings
-    const initialSettings = this.getInitialSettings(layerEntryConfig!, orderedLayerInfo!, legendLayerInfo!);
+    const initialSettings = this.#getInitialSettings(layerEntryConfig!, orderedLayerInfo!, legendLayerInfo!);
+
+    const source = (layerEntryConfig! as VectorLayerEntryConfig).source
+      ? cloneDeep((layerEntryConfig! as VectorLayerEntryConfig).source)
+      : undefined;
+
+    if (source?.dataAccessPath && isGeocore) source.dataAccessPath = '';
+
+    const layerStyle =
+      legendLayerInfo!.styleConfig && (!isGeocore || (isGeocore && !maintainGeocoreLayerNames)) ? legendLayerInfo!.styleConfig : undefined;
 
     // Construct layer entry config
     const newLayerEntryConfig = {
       layerId: layerEntryConfig!.layerId,
-      layerName: layerEntryConfig!.layerName,
+      layerName: isGeocore && !maintainGeocoreLayerNames ? undefined : layerEntryConfig!.layerName,
       layerFilter: (configLayerEntryConfig as VectorLayerEntryConfig)?.layerFilter
         ? (configLayerEntryConfig as VectorLayerEntryConfig).layerFilter
         : undefined,
       initialSettings,
-      layerStyle: legendLayerInfo!.styleConfig ? legendLayerInfo!.styleConfig : undefined,
-      source: (layerEntryConfig! as VectorLayerEntryConfig).source
-        ? cloneDeep((layerEntryConfig! as VectorLayerEntryConfig).source)
-        : undefined,
+      layerStyle,
+      source,
       entryType: listOfLayerEntryConfig.length ? 'group' : undefined,
       listOfLayerEntryConfig: listOfLayerEntryConfig.length ? listOfLayerEntryConfig : [],
     };
@@ -1143,14 +1159,18 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Creates a geoview layer config based on current layer state.
    * @param {string} mapId - Id of map.
    * @param {string} layerPath - Path of the layer to create config for.
+   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
    * @returns {MapConfigLayerEntry} Geoview layer config object.
    */
-  static createGeoviewLayerConfig(mapId: string, layerPath: string): MapConfigLayerEntry {
+  static #createGeoviewLayerConfig(mapId: string, layerPath: string, maintainGeocoreLayerNames: boolean): MapConfigLayerEntry {
     // Get needed info
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)!;
     const { geoviewLayerConfig } = layerEntryConfig;
     const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfoForLayer(mapId, layerPath);
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
+
+    // Check if the layer is a geocore layers
+    const isGeocore = api.config.isValidUUID(layerPath.split('/')[0]);
 
     // Check for sublayers
     const sublayerPaths = MapEventProcessor.getMapLayerOrder(mapId).filter(
@@ -1161,24 +1181,34 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Build list of sublayer entry configs
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
     if (sublayerPaths.length)
-      sublayerPaths.forEach((sublayerPath) => listOfLayerEntryConfig.push(MapEventProcessor.createLayerEntryConfig(mapId, sublayerPath)));
-    else listOfLayerEntryConfig.push(this.createLayerEntryConfig(mapId, layerPath));
+      sublayerPaths.forEach((sublayerPath) =>
+        listOfLayerEntryConfig.push(MapEventProcessor.#createLayerEntryConfig(mapId, sublayerPath, isGeocore, maintainGeocoreLayerNames))
+      );
+    else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(mapId, layerPath, isGeocore, maintainGeocoreLayerNames));
 
     // Get initial settings
-    const initialSettings = this.getInitialSettings(layerEntryConfig!, orderedLayerInfo!, legendLayerInfo!);
+    const initialSettings = this.#getInitialSettings(layerEntryConfig!, orderedLayerInfo!, legendLayerInfo!);
 
     // Construct geoview layer config
-    const newGeoviewLayerConfig: MapConfigLayerEntry = {
-      externalDateFormat: geoviewLayerConfig.externalDateFormat,
-      geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
-      geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
-      geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
-      initialSettings,
-      isTimeAware: geoviewLayerConfig.isTimeAware,
-      listOfLayerEntryConfig,
-      metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
-      serviceDateFormat: geoviewLayerConfig.serviceDateFormat,
-    };
+    const newGeoviewLayerConfig: MapConfigLayerEntry = isGeocore
+      ? {
+          geoviewLayerId: layerPath.split('/')[0],
+          geoviewLayerName: !maintainGeocoreLayerNames ? undefined : geoviewLayerConfig.geoviewLayerName,
+          geoviewLayerType: 'geoCore',
+          initialSettings,
+          listOfLayerEntryConfig,
+        }
+      : {
+          externalDateFormat: geoviewLayerConfig.externalDateFormat,
+          geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+          geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
+          geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+          initialSettings,
+          isTimeAware: geoviewLayerConfig.isTimeAware,
+          listOfLayerEntryConfig,
+          metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
+          serviceDateFormat: geoviewLayerConfig.serviceDateFormat,
+        };
 
     return newGeoviewLayerConfig;
   }
@@ -1186,8 +1216,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Creates a map config based on current map state.
    * @param {string} mapId - Id of map.
+   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
    */
-  static createMapConfigFromMapState(mapId: string): TypeMapFeaturesInstance | undefined {
+  static createMapConfigFromMapState(mapId: string, maintainGeocoreLayerNames: boolean = true): TypeMapFeaturesInstance | undefined {
     const config = MapEventProcessor.getGeoViewMapConfig(mapId);
 
     if (config) {
@@ -1197,7 +1228,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
       );
 
       // Build list of geoview layer configs
-      const listOfGeoviewLayerConfig = layerOrder.map((layerPath) => this.createGeoviewLayerConfig(mapId, layerPath));
+      const listOfGeoviewLayerConfig = layerOrder.map((layerPath) =>
+        this.#createGeoviewLayerConfig(mapId, layerPath, maintainGeocoreLayerNames)
+      );
 
       // Get info for view
       const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
