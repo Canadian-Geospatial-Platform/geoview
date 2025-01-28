@@ -163,21 +163,6 @@
         ]
       },
       {
-        "geoviewLayerId": "GeoPackageLYR1",
-        "geoviewLayerName": "Natural Earth",
-        "metadataAccessPath": "./datasets/geopackages/",
-        "geoviewLayerType": "GeoPackage",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "Natural_Earth_QGIS_layers_and_styles.gpkg",
-            "source": {
-              "dataAccessPath": "./datasets/geopackages"
-            },
-            "layerName": "Natural Earth"
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "xyzTilesLYR1",
         "geoviewLayerName": "World_Topo_Map",
         "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/",

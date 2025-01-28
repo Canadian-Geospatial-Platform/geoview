@@ -57,6 +57,9 @@ export class ConsoleLogger {
   // The interval in ms for the object trackers
   trackerInterval = 100;
 
+  // The number of logs
+  logginCount = 0;
+
   /**
    * Constructor
    * @param {number | number[]} logLevel - Indicate the level of detail for the ConsoleLogger. The higher the number, the more detailed the log.
@@ -370,7 +373,7 @@ export class ConsoleLogger {
   #logLevel(level: number, header: string, color: keyof ColorCode, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
     // eslint-disable-next-line no-console
-    if (this.#checkLevel(level)) console.log(`%c${ConsoleLogger.#formatTime(new Date())} ${header}`, `color: ${color}`, ...messages);
+    if (this.#checkLevel(level)) console.log(`%c${ConsoleLogger.#formatTime(new Date())} ${header} - ${this.logginCount++}`, `color: ${color}`, ...messages);
   }
 
   /**

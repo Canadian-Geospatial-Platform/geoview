@@ -139,7 +139,7 @@ const useManageArrow = (): ArrowReturn => {
       // set arrow rotation to map rotation as Web /mercator always has north straight up
       setRotationAngle({ angle: mapRotation * (180 / Math.PI) });
     }
-  }, [northArrowElement, fixNorth, mapSize, mapRotation, isLCCProjection, isWebMercator, mapZoom, setOffset, setRotation]);
+  }, [northArrowElement, fixNorth, mapRotation, isLCCProjection, isWebMercator, mapZoom, setOffset, setRotation]);
 
   return { rotationAngle, northOffset };
 };
