@@ -11,6 +11,9 @@ import TileLayer from 'ol/layer/Tile';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 import OLMap from 'ol/Map';
 
+import VectorTileLayer from 'ol/layer/VectorTile';
+import { VectorTile } from 'ol/source';
+import { applyStyle } from 'ol-mapbox-style';
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -94,10 +97,26 @@ export function OverviewMap(props: OverwiewMapProps): JSX.Element {
       className: `ol-overviewmap ol-custom-overviewmap`,
       layers: defaultBasemap?.layers.map((layer) => {
         // create a tile layer for this basemap layer
-        const tileLayer = new TileLayer({
-          opacity: layer.opacity,
-          source: layer.source,
-        });
+        let tileLayer;
+        if (layer.source instanceof VectorTile) {
+          tileLayer = new VectorTileLayer({
+            opacity: layer.opacity,
+            source: layer.source,
+            declutter: true,
+          });
+
+          const tileGrid = layer.source.getTileGrid();
+          if (tileGrid) {
+            applyStyle(tileLayer, layer.styleUrl, {
+              resolutions: tileGrid.getResolutions(),
+            }).catch((err) => logger.logError(err));
+          }
+        } else {
+          tileLayer = new TileLayer({
+            opacity: layer.opacity,
+            source: layer.source,
+          });
+        }
 
         // add this layer to the basemap group
         tileLayer.set(mapId, 'basemap');
