@@ -235,7 +235,8 @@
         "guide",
         "data-table",
         "layers",
-        "aoi-panel"
+        "aoi-panel",
+        "legend-panel"
       ]
     },
     "TypeAppBarProps": {
@@ -277,7 +278,7 @@
             "data-table",
             "layers",
             "aoi-panel",
-            ""
+            "customLegend"
           ],
           "description": "App bar tab to be selected at map load"
         },

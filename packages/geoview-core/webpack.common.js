@@ -77,6 +77,11 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    'geoview-customLegend-panel': {
+      import: '../geoview-customLegend-panel/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    }
   },
   output: {
     globalObject: 'self',

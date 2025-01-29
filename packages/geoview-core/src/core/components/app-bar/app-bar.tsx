@@ -290,6 +290,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       }
     };
     processPlugin('aoi-panel');
+    processPlugin('customLegend');
   }, [appBarConfig, mapId]);
 
   useEffect(() => {
