@@ -1,5 +1,5 @@
-import { logger } from '@/core/utils/logger';
 import { useRef, useEffect } from 'react';
+import { logger } from '@/core/utils/logger';
 
 /**
  * A custom hook that handles the addition and removal of event listeners.
@@ -15,6 +15,9 @@ import { useRef, useEffect } from 'react';
  *        will be inferred based on the element type (Window or HTMLElement)
  * @param {T | null} [element]
  *        Optional element to attach the event listener to. If not provided, defaults to window
+ * @param {boolean} [enabled=true]
+ *        Optional flag to enable/disable the event listener. Defaults to true
+ * @returns {void} - The function doesn't return anything
  *
  * @example
  * // Window event example
@@ -34,7 +37,8 @@ export function useEventListener<T extends HTMLElement | Window = Window>(
   handler: T extends Window
     ? (event: WindowEventMap[keyof WindowEventMap]) => void
     : (event: HTMLElementEventMap[keyof HTMLElementEventMap]) => void,
-  element?: T | null
+  element?: T | null,
+  enabled: boolean = true // Add enabled parameter with default true
 ): void {
   // Keep track of the handler
   const savedHandler = useRef(handler);
@@ -44,20 +48,26 @@ export function useEventListener<T extends HTMLElement | Window = Window>(
   }, [handler]);
 
   useEffect(() => {
-    logger.logTraceUseEffect('ADD EVENT LISTENER', eventName, element)
-    
     // Make sure element supports addEventListener
     const targetElement = (element || window) as EventTarget;
-    if (!targetElement?.addEventListener) return;
+    if (!targetElement?.addEventListener) return () => {};
 
-    // Create event listener that calls handler function stored in ref
-    const eventListener = (event: Event) => savedHandler.current(event);
+    if (enabled) {
+      logger.logTraceUseEffect('ADD EVENT LISTENER', eventName, element);
 
-    targetElement.addEventListener(eventName as string, eventListener);
+      // Create event listener that calls handler function stored in ref
+      const eventListener = (event: Event): void => savedHandler.current(event);
 
-    // Remove event listener on cleanup
-    return () => {
-      targetElement.removeEventListener(eventName as string, eventListener);
-    };
-  }, [eventName, element]);
+      targetElement.addEventListener(eventName as string, eventListener);
+
+      // Remove event listener on cleanup
+      return () => {
+        logger.logTraceUseEffect('REMOVE EVENT LISTENER', eventName, element);
+        targetElement.removeEventListener(eventName as string, eventListener);
+      };
+    }
+
+    // Return empty cleanup function if not enabled
+    return () => {};
+  }, [eventName, element, enabled]);
 }

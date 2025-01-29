@@ -9,6 +9,7 @@ import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { TypeMapMouseInfo } from '@/app';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -28,13 +29,24 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     super(layerApi);
 
     // Register a handler on the map pointer move
-    layerApi.mapViewer.onMapPointerMove(
-      debounce((mapViewer, payload) => {
-        // Query all layers which can be queried
-        this.queryLayers(payload.pixel);
-      }, 750).bind(this)
-    );
+    layerApi.mapViewer.onMapPointerMove((mapViewer, payload) => {
+      // This will execute immediately on every pointer move to clear the HoverFeatureInfo
+      MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), null);
+    
+      // This will be debounced
+      this.#debouncedQuery(payload);
+    });
+    
+    
   }
+
+  /**
+   * This will debounce the query when pointer stop moving for 750ms
+   * @param {TypeMapMouseInfo} payload - The pointer move payload
+   */
+  #debouncedQuery = debounce((payload: TypeMapMouseInfo) => {
+    this.queryLayers(payload.pixel);
+  }, 750);
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
@@ -84,15 +96,19 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Nothing to do here, hover's store only needs updating when a query happens
   }
 
-  private getOrderedLayerPaths(): string[] {
+  /**
+   * Get the ordered layer paths to query
+   * @returns {string[]} The ordered layer paths to query
+   */
+  #getOrderedLayerPaths(): string[] {
     // Get the map layer order
     const mapLayerOrder = this.layerApi.mapViewer.getMapLayerOrderInfo();
     const resultSetLayers = new Set(Object.keys(this.resultSet));
 
     // Filter and order the layers that are in our resultSet
     return mapLayerOrder
-      .map(layer => layer.layerPath)
-      .filter(layerPath => resultSetLayers.has(layerPath) && this.resultSet[layerPath].eventListenerEnabled);
+      .map((layer) => layer.layerPath)
+      .filter((layerPath) => resultSetLayers.has(layerPath) && this.resultSet[layerPath].eventListenerEnabled);
   }
 
   /**
@@ -101,11 +117,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    */
   queryLayers(pixelCoordinate: Coordinate): void {
     // FIXME: Watch out for code reentrancy between queries!
-    // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
-    // FIX.MECONT: For this one, because there is only one at the time, we should even query first layer in order of visible layer that is query able
     // Query types of what we're doing
     const queryType = 'at_pixel';
-    const orderedLayerPaths = this.getOrderedLayerPaths();
+    const orderedLayerPaths = this.#getOrderedLayerPaths();
+
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
@@ -123,9 +138,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         // Flag processing
         this.resultSet[layerPath].feature = undefined;
         this.resultSet[layerPath].queryStatus = 'init';
-
-        // Propagate to the store
-        // MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
 
         // Process query on results data
         AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layer, queryType, pixelCoordinate, false)
@@ -150,34 +162,23 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
               this.resultSet[layerPath].queryStatus = 'processed';
             }
 
-            // Propagate to the store
-            // MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
-
             // Check if this layer should update the store
-          const shouldUpdate = orderedLayerPaths
-          .slice(0, orderedLayerPaths.indexOf(layerPath))
-          .every(higherLayerPath => {
-            const higherLayer = this.resultSet[higherLayerPath];
-            return higherLayer.queryStatus === 'processed' && !higherLayer.feature;
-          });
-
-        if (shouldUpdate && 
-            this.resultSet[layerPath].queryStatus === 'processed' && 
-            this.resultSet[layerPath].feature) {
-          MapEventProcessor.setMapHoverFeatureInfo(
-            this.getMapId(), 
-            this.resultSet[layerPath].feature
-          );
-        } else if (shouldUpdate) {
-          // Only update with null if all higher layers are processed without features
-          const allHigherLayersProcessed = orderedLayerPaths
-            .slice(0, orderedLayerPaths.indexOf(layerPath) + 1)
-            .every(path => this.resultSet[path].queryStatus === 'processed');
-
-          if (allHigherLayersProcessed) {
-            MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), null);
-          }
-        }
+            const shouldUpdate = orderedLayerPaths
+            .slice(0, orderedLayerPaths.indexOf(layerPath))
+            .every((higherLayerPath) => {
+              const higherLayer = this.resultSet[higherLayerPath];
+              // Allow update if higher layer:
+              // - hasn't been processed yet (will overwrite later if needed)
+              // - OR is processed but has no feature
+              return higherLayer.queryStatus === 'init' || 
+                     (higherLayer.queryStatus === 'processed' && !higherLayer.feature) ||
+                     higherLayer.queryStatus === 'error';
+            });
+          
+            // If it should update ans there is a feature to propagate
+            if (shouldUpdate && this.resultSet[layerPath].queryStatus === 'processed' && this.resultSet[layerPath].feature) {
+              MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
+            }
           })
           .catch((error) => {
             // Log
@@ -186,9 +187,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       }
       this.resultSet[layerPath].feature = null;
       this.resultSet[layerPath].queryStatus = 'error';
-
-      // Propagate to the store
-      // MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
     });
   }
 

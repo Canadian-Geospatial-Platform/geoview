@@ -11,7 +11,7 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 import { useMapAttribution, useMapNorthArrow, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
-import useManageArrow from '@/core/components/north-arrow/hooks/useManageArrow';
+import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
 import { logger } from '@/core/utils/logger';
 
 /**

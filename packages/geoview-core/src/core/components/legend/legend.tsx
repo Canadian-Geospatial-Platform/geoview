@@ -137,17 +137,20 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
     }
   }, [orderedLayerInfo, layersList, updateLegendLayerListByWindowSize, legendLayers]);
 
-   // Memoize the no layers content
-   const noLayersContent = useMemo(() => (
-    <Box sx={styles.noLayersContainer}>
-      <Typography variant="h3" gutterBottom sx={sxClasses.legendInstructionsTitle}>
-        {memoizedT('legend.noLayersAdded')}
-      </Typography>
-      <Typography component="p" sx={sxClasses.legendInstructionsBody}>
-        {memoizedT('legend.noLayersAddedDescription')}
-      </Typography>
-    </Box>
-  ), [sxClasses, memoizedT]);
+  // Memoize the no layers content
+  const noLayersContent = useMemo(
+    () => (
+      <Box sx={styles.noLayersContainer}>
+        <Typography variant="h3" gutterBottom sx={sxClasses.legendInstructionsTitle}>
+          {memoizedT('legend.noLayersAdded')}
+        </Typography>
+        <Typography component="p" sx={sxClasses.legendInstructionsBody}>
+          {memoizedT('legend.noLayersAddedDescription')}
+        </Typography>
+      </Box>
+    ),
+    [sxClasses, memoizedT]
+  );
 
   // Memoize the rendered content based on whether there are legend layers
   const content = useMemo(() => {
