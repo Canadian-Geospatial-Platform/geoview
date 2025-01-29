@@ -291,6 +291,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     };
     processPlugin('basemap-panel');
     processPlugin('aoi-panel');
+    processPlugin('customLegend');
   }, [appBarConfig, mapId]);
 
   useEffect(() => {

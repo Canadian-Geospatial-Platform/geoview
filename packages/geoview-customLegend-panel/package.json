@@ -10,7 +10,11 @@
   "author": "Guillaume Choquette",
   "license": "MIT",
   "dependencies": {
-    "geoview-core": "workspace:~1.0.0"
+    "geoview-core": "workspace:~1.0.0",
+    "@mui/material": "^5.x.x",
+    "@mui/icons-material": "^5.x.x",
+    "@emotion/react": "^11.x.x",
+    "@emotion/styled": "^11.x.x"
   },
   "devDependencies": {
     "@babel/core": "^7.25.8",
