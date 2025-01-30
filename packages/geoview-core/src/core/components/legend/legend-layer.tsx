@@ -28,12 +28,6 @@ const styles = {
   },
 } as const;
 
-// Memoize the sxClasses
-const useStyles = () => {
-  const theme = useTheme();
-  return useMemo(() => getSxClasses(theme), [theme]);
-};
-
 // Extracted Header Component
 const LegendLayerHeader = memo(
   ({ layer, isCollapsed, isVisible, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
@@ -63,7 +57,8 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   logger.logTraceRender('components/legend/legend-layer');
 
   // Hooks
-  const sxClasses = useStyles();
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Stores
   const { initLightBox, LightBoxComponent } = useLightBox();
@@ -81,9 +76,11 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
       ...item,
     })),
   };
+logger.logDebug('HOT', currentLayer, isCollapsed)
 
   const handleExpandGroupClick = useCallback(
     (e: React.MouseEvent): void => {
+      logger.logDebug('HOT in', layer.layerPath)
       e.stopPropagation();
       setLegendCollapsed(layer.layerPath); // store value
     },

@@ -1,13 +1,8 @@
 import { useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useMapOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useDebounceValue } from '@/core/components/common/use-debounce-value';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 
-export function useDebounceMapOrderedLayerInfo(delay = 500) {
-  const orderedLayerInfo = useMapOrderedLayerInfo();
-  return useDebounceValue(orderedLayerInfo, delay);
-}
-
-export function useDebounceLayerLegendLayers(delay = 500) {
+export function useDebounceLayerLegendLayers(delay = 500): TypeLegendLayer[] {
   const legendLayers = useLayerLegendLayers();
   return useDebounceValue(legendLayers, delay);
 }

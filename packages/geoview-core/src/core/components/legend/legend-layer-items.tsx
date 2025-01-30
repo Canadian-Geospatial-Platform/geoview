@@ -9,12 +9,6 @@ interface ItemsListProps {
   items: TypeLegendItem[];
 }
 
-// Memoize the sxClasses
-const useStyles = () => {
-  const theme = useTheme();
-  return useMemo(() => getSxClasses(theme), [theme]);
-};
-
 // Extracted ListItem Component
 const LegendListItem = memo(
   ({ item }: { item: TypeLegendItem }): JSX.Element => (
@@ -33,7 +27,8 @@ export const ItemsList = memo(function ItemsList({ items }: ItemsListProps): JSX
   logger.logTraceRender('components/legend/legend-layer-items');
 
   // Hooks
-  const sxClasses = useStyles();
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Early returns
   if (!items?.length) return null;

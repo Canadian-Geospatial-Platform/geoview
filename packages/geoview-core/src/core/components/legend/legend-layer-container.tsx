@@ -32,12 +32,6 @@ const styles = {
   },
 } as const;
 
-// Memoize the sxClasses
-const useStyles = () => {
-  const theme = useTheme();
-  return useMemo(() => getSxClasses(theme), [theme]);
-};
-
 // Extracted WMS Legend Component
 const WMSLegendImage = memo(
   ({ imgSrc, initLightBox, legendExpanded, sxClasses }: WMSLegendImageProps): JSX.Element => (
@@ -64,7 +58,8 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   logger.logTraceRender('components/legend/legend-layer-container');
 
   // Hooks
-  const sxClasses = useStyles();
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Props extraction
   const { children, items } = layer;

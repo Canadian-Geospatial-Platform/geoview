@@ -34,12 +34,6 @@ const styles = {
   btnMargin: { marginTop: '-0.3125rem' },
 } as const;
 
-// Memoize the sxClasses
-const useStyles = () => {
-  const theme = useTheme();
-  return useMemo(() => getSxClasses(theme), [theme]);
-};
-
 // Custom hook for control actions
 const useControlActions = (layerPath: string): ControlActions => {
   const { setOrToggleLayerVisibility } = useMapStoreActions();
@@ -70,19 +64,18 @@ const useControlActions = (layerPath: string): ControlActions => {
 const useSubtitle = (children: TypeLegendLayer[], items: TypeLegendItem[]): string => {
   // Hooks
   const { t } = useTranslation();
-  const memoizedT = useCallback((key: string) => t(key), [t]);
 
   return useMemo(() => {
     if (children.length) {
-      return memoizedT('legend.subLayersCount').replace('{count}', children.length.toString());
+      return t('legend.subLayersCount').replace('{count}', children.length.toString());
     }
     if (items.length > 1) {
-      return memoizedT('legend.itemsCount')
+      return t('legend.itemsCount')
         .replace('{count}', items.filter((item) => item.isVisible).length.toString())
         .replace('{totalCount}', items.length.toString());
     }
     return '';
-  }, [children.length, items, memoizedT]);
+  }, [children.length, items, t]);
 };
 
 // SecondaryControls component (no memo to force re render from layers panel modifications)
@@ -90,7 +83,8 @@ export function SecondaryControls({ layer, visibility }: SecondaryControlsProps)
   logger.logTraceRender('components/legend/legend-layer-ctrl');
 
   // Hooks
-  const sxClasses = useStyles();
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Stores
   const highlightedLayer = useLayerHighlightedLayer();

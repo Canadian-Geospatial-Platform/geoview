@@ -10,7 +10,7 @@ import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useFooterPanelHeight } from '@/core/components/common';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { useDebounceLayerLegendLayers, useDebounceMapOrderedLayerInfo } from './hooks/use-legend-debounce';
+import { useDebounceLayerLegendLayers } from './hooks/use-legend-debounce';
 import { useEventListener } from '../common/use-event-listener';
 
 interface LegendType {
@@ -36,12 +36,6 @@ const styles = {
   },
 } as const;
 
-// Memoize the sxClasses
-const useStyles = () => {
-  const theme = useTheme();
-  return useMemo(() => getSxClasses(theme), [theme]);
-};
-
 // Constant style outside of render (responsive widths)
 const responsiveWidths = {
   full: { xs: '100%' },
@@ -59,9 +53,8 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
 
   // Hooks
   const { t } = useTranslation<string>();
-  const memoizedT = useCallback((key: string) => t(key), [t]);
   const theme = useTheme();
-  const sxClasses = useStyles();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
   const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
@@ -70,7 +63,6 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   // Store
   const mapId = useGeoViewMapId();
   const id = useUIActiveFooterBarTabId();
-  const orderedLayerInfo = useDebounceMapOrderedLayerInfo();
   const layersList = useDebounceLayerLegendLayers();
 
   // Custom hook for calculating the height of footer panel
@@ -127,29 +119,26 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   }, [legendLayers, updateLegendLayerListByWindowSize]);
   useEventListener<Window>('resize', formatLegendLayerList, window);
 
-  // Handle initial layer setup
+  // Handle initial layer setup (use a debounced 500ms layer)
   useEffect(() => {
-    // Only trigger effect is layerList different then legendLayers
-    if (layersList !== legendLayers) {
-      logger.logTraceUseEffect('LEGEND - layer setup', orderedLayerInfo.length, orderedLayerInfo, layersList);
-      setLegendLayers(layersList);
-      updateLegendLayerListByWindowSize(layersList);
-    }
-  }, [orderedLayerInfo, layersList, updateLegendLayerListByWindowSize, legendLayers]);
+    logger.logTraceUseEffect('LEGEND - layer setup', layersList);
+    setLegendLayers(layersList);
+    updateLegendLayerListByWindowSize(layersList);
+  }, [layersList, updateLegendLayerListByWindowSize]);
 
   // Memoize the no layers content
   const noLayersContent = useMemo(
     () => (
       <Box sx={styles.noLayersContainer}>
         <Typography variant="h3" gutterBottom sx={sxClasses.legendInstructionsTitle}>
-          {memoizedT('legend.noLayersAdded')}
+          {t('legend.noLayersAdded')}
         </Typography>
         <Typography component="p" sx={sxClasses.legendInstructionsBody}>
-          {memoizedT('legend.noLayersAddedDescription')}
+          {t('legend.noLayersAddedDescription')}
         </Typography>
       </Box>
     ),
-    [sxClasses, memoizedT]
+    [sxClasses, t]
   );
 
   // Memoize the rendered content based on whether there are legend layers
