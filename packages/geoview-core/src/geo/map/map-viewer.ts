@@ -290,7 +290,7 @@ export class MapViewer {
     // If map isn't static
     if (this.mapFeaturesConfig.map.interaction !== 'static') {
       // Register handlers on pointer move and map single click
-      this.map.on('pointermove', debounce(this.#handleMapPointerMove.bind(this), 10, { leading: true }).bind(this));
+      this.map.on('pointermove', debounce(this.#handleMapPointerMove.bind(this), 250, { leading: true }).bind(this));
       this.map.on('singleclick', debounce(this.#handleMapSingleClick.bind(this), 1000, { leading: true }).bind(this));
     }
 

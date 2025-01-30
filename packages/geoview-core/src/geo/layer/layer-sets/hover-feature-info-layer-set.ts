@@ -32,12 +32,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     layerApi.mapViewer.onMapPointerMove((mapViewer, payload) => {
       // This will execute immediately on every pointer move to clear the HoverFeatureInfo
       MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), null);
-    
+
       // This will be debounced
       this.#debouncedQuery(payload);
     });
-    
-    
   }
 
   /**
@@ -46,7 +44,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    */
   #debouncedQuery = debounce((payload: TypeMapMouseInfo) => {
     this.queryLayers(payload.pixel);
-  }, 750);
+  }, 1000);
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
@@ -163,18 +161,18 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
             }
 
             // Check if this layer should update the store
-            const shouldUpdate = orderedLayerPaths
-            .slice(0, orderedLayerPaths.indexOf(layerPath))
-            .every((higherLayerPath) => {
+            const shouldUpdate = orderedLayerPaths.slice(0, orderedLayerPaths.indexOf(layerPath)).every((higherLayerPath) => {
               const higherLayer = this.resultSet[higherLayerPath];
               // Allow update if higher layer:
               // - hasn't been processed yet (will overwrite later if needed)
               // - OR is processed but has no feature
-              return higherLayer.queryStatus === 'init' || 
-                     (higherLayer.queryStatus === 'processed' && !higherLayer.feature) ||
-                     higherLayer.queryStatus === 'error';
+              return (
+                higherLayer.queryStatus === 'init' ||
+                (higherLayer.queryStatus === 'processed' && !higherLayer.feature) ||
+                higherLayer.queryStatus === 'error'
+              );
             });
-          
+
             // If it should update ans there is a feature to propagate
             if (shouldUpdate && this.resultSet[layerPath].queryStatus === 'processed' && this.resultSet[layerPath].feature) {
               MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);

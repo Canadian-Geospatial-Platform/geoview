@@ -372,8 +372,8 @@ export class ConsoleLogger {
    */
   #logLevel(level: number, header: string, color: keyof ColorCode, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
-    // eslint-disable-next-line no-console
     if (this.#checkLevel(level))
+      // eslint-disable-next-line no-console
       console.log(`%c${ConsoleLogger.#formatTime(new Date())} ${header} - ${this.logginCount++}`, `color: ${color}`, ...messages);
   }
 

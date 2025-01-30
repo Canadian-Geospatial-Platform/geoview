@@ -106,7 +106,7 @@ export const useManageArrow = (): ArrowReturn => {
           m: 1,
         };
 
-        //If the extent is near the north pole be more precise otherwise use the original math
+        // If the extent is near the north pole be more precise otherwise use the original math
         // Note: using the precise math would be ideal but when zooming in, the calculations make very
         // large adjustments so reverting to the old less precise math provides a better experience.
         if (screenNorthPoint[0] < 2400 && screenNorthPoint[1] > -1300 && -screenNorthPoint[1] < 3000) {
@@ -118,7 +118,7 @@ export const useManageArrow = (): ArrowReturn => {
         const z = triangle.y / Math.sin(angleDegrees * RADIAN_CONVERSION);
 
         // this would be the bottom of our triangle, the length from center to where the arrow should be placed
-        let screenX =
+        const screenX =
           screenY < 0
             ? triangle.x + triangle.m * (Math.sin((90 - angleDegrees) * RADIAN_CONVERSION) * z) - ARROW_WIDTH / 2
             : screenNorthPoint[0] - ARROW_WIDTH;

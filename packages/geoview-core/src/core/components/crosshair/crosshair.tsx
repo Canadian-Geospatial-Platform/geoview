@@ -6,9 +6,10 @@ import { Box, Fade, Typography } from '@/ui';
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapPointerPosition, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getMapPointerPosition, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '../common/use-event-listener';
+import { useGeoViewMapId } from '@/app';
 
 type CrosshairProps = {
   mapTargetElement: HTMLElement;
@@ -34,7 +35,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
 
   //  Store
   const isCrosshairsActive = useAppCrosshairsActive();
-  const pointerPosition = useMapPointerPosition();
+  const mapId = useGeoViewMapId();
   const { setClickCoordinates, setMapKeyboardPanInteractions } = useMapStoreActions();
 
   // Callbacks
@@ -45,11 +46,19 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
    */
   const simulateClick = useCallback(
     (event: HTMLElementEventMap[keyof HTMLElementEventMap]) => {
-      if (event instanceof KeyboardEvent && isCrosshairsActive && event.key === 'Enter') {
-        setClickCoordinates(pointerPosition?.pixel)
+      if (!isCrosshairsActive || !(event instanceof KeyboardEvent) || event.key !== 'Enter') {
+        return;
+      }
+
+      // Use store getter, we do not subcribe to modification
+      const currentPointerPosition = getMapPointerPosition(mapId);
+      if (currentPointerPosition) {
+        logger.logTraceUseCallback('CROSSHAIR - simulateClick', currentPointerPosition.lnglat);
+        setClickCoordinates(currentPointerPosition);
       }
     },
-    [isCrosshairsActive, setClickCoordinates, pointerPosition]
+    [isCrosshairsActive, setClickCoordinates, mapId]
+  );
 
   /**
    * Modify the pixelDelta value for the keyboard pan on Shift arrow up or down
@@ -58,7 +67,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
    */
   const managePanDelta = useCallback(
     (event: HTMLElementEventMap[keyof HTMLElementEventMap]) => {
-      // Early return in callback is fine
+      // Early return in callback
       if (!isCrosshairsActive) return;
 
       const myEvent = event as KeyboardEvent;
