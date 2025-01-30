@@ -542,6 +542,7 @@ export class Basemap {
       this.defaultExtent = basemap?.defaultExtent;
 
       this.setBasemap(basemap);
+      await this.setOverviewMap();
     }
   }
 

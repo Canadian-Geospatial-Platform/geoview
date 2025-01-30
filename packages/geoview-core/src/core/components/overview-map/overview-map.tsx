@@ -7,13 +7,14 @@ import { I18nextProvider } from 'react-i18next';
 
 import { ThemeProvider } from '@mui/material/styles';
 
+import BaseLayer from 'ol/layer/Base';
 import TileLayer from 'ol/layer/Tile';
-import { OverviewMap as OLOverviewMap } from 'ol/control';
-import OLMap from 'ol/Map';
-
 import VectorTileLayer from 'ol/layer/VectorTile';
 import { VectorTile } from 'ol/source';
+import OLMap from 'ol/Map';
+import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { applyStyle } from 'ol-mapbox-style';
+
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -27,6 +28,46 @@ type OverwiewMapProps = {
   olMap: OLMap;
 };
 
+function useCreateOverviewMapLayers(mapId: string): () => BaseLayer[] {
+  const createLayers = (): BaseLayer[] => {
+    const defaultBasemap = MapEventProcessor.createOverviewMapBasemap(mapId);
+
+    const newLayers: BaseLayer[] = [];
+    defaultBasemap?.layers.forEach((layer) => {
+      // create a tile layer for this basemap layer
+      let tileLayer;
+      if (layer.source instanceof VectorTile) {
+        tileLayer = new VectorTileLayer({
+          opacity: layer.opacity,
+          source: layer.source,
+          declutter: true,
+        });
+
+        const tileGrid = layer.source.getTileGrid();
+        if (tileGrid) {
+          applyStyle(tileLayer, layer.styleUrl, {
+            resolutions: tileGrid.getResolutions(),
+          }).catch((err) => logger.logError(err));
+        }
+      } else {
+        tileLayer = new TileLayer({
+          opacity: layer.opacity,
+          source: layer.source,
+        });
+      }
+
+      if (tileLayer) {
+        // add this layer to the basemap group
+        tileLayer.set(mapId, 'basemap');
+        newLayers.push(tileLayer as BaseLayer);
+      }
+    });
+    return newLayers;
+  };
+
+  return createLayers;
+}
+
 /**
  * Creates an overview map control and adds it to the map
  * @param {OverwiewMapProps} props - Overview map props containing the viewer
@@ -39,6 +80,7 @@ export function OverviewMap(props: OverwiewMapProps): JSX.Element {
 
   const { olMap } = props;
   const mapId = useGeoViewMapId();
+  const createLayers = useCreateOverviewMapLayers(mapId);
 
   // get the values from store
   const hideOnZoom = useMapOverviewMapHideZoom();
@@ -79,7 +121,10 @@ export function OverviewMap(props: OverwiewMapProps): JSX.Element {
       // TODO: use async - look for better options then Timeout
       setTimeout(() => {
         overviewMapCtrl.setMap(olMap!);
-        setTimeout(() => overviewMapCtrl.setCollapsed(false), 500);
+        setTimeout(() => {
+          overviewMapCtrl.setCollapsed(false);
+          overviewMapCtrl.getOverviewMap().setLayers(createLayers());
+        }, 500);
       }, 2000);
     }
   }, [projection, olMap]);
@@ -88,41 +133,14 @@ export function OverviewMap(props: OverwiewMapProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('OVERVIEW-MAP - displayLanguage', displayLanguage, displayTheme);
 
-    // get default overview map
-    const defaultBasemap = MapEventProcessor.createOverviewMapBasemap(mapId);
-
     const toggleButton = document.createElement('div');
+
+    // If moving the overview map creation / updating somewhere else, maybe can do the below instead
+    // overviewMapControl.element = toggleButton;
 
     const overviewMapControl = new OLOverviewMap({
       className: `ol-overviewmap ol-custom-overviewmap`,
-      layers: defaultBasemap?.layers.map((layer) => {
-        // create a tile layer for this basemap layer
-        let tileLayer;
-        if (layer.source instanceof VectorTile) {
-          tileLayer = new VectorTileLayer({
-            opacity: layer.opacity,
-            source: layer.source,
-            declutter: true,
-          });
-
-          const tileGrid = layer.source.getTileGrid();
-          if (tileGrid) {
-            applyStyle(tileLayer, layer.styleUrl, {
-              resolutions: tileGrid.getResolutions(),
-            }).catch((err) => logger.logError(err));
-          }
-        } else {
-          tileLayer = new TileLayer({
-            opacity: layer.opacity,
-            source: layer.source,
-          });
-        }
-
-        // add this layer to the basemap group
-        tileLayer.set(mapId, 'basemap');
-
-        return tileLayer;
-      }),
+      layers: createLayers(),
       collapseLabel: toggleButton,
       label: toggleButton,
       collapsed: false,
