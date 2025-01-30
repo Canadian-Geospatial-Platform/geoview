@@ -88,7 +88,14 @@ export function commonValidateListOfLayerEntryConfig(
     const { layerPath } = layerConfig;
 
     if (layerEntryIsGroupLayer(layerConfig)) {
+      // Use the layer name from the metadata if it exists and there is no existing name.
+      if (!layerConfig.layerName)
+        layerConfig.layerName = layer.metadata!.layers[layerConfig.layerId].name
+          ? (layer.metadata!.layers[layerConfig.layerId].name as string)
+          : '';
+
       layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+
       if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
         layer.layerLoadError.push({
           layer: layerPath,
@@ -96,6 +103,7 @@ export function commonValidateListOfLayerEntryConfig(
         });
         layerConfig.layerStatus = 'error';
       }
+
       return;
     }
 

@@ -46,6 +46,7 @@ export type TypeFooterBarProps = {
   };
   collapsed: boolean;
   selectedTab: TypeValidFooterBarTabsCoreProps;
+  selectedLayersLayerPath: string;
 };
 
 /** Supported app bar values. */
@@ -69,6 +70,7 @@ export type TypeAppBarProps = {
   };
   collapsed: boolean;
   selectedTab: TypeValidAppBarCoreProps;
+  selectedLayersLayerPath: string;
 };
 
 /** Overview map options. Default none. */
