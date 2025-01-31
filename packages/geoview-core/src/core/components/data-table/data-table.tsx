@@ -101,7 +101,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     setDensity(updaterOrValue);
   };
 
-  const handleToggleColumnFilters = () => {
+  const handleToggleColumnFilters = (): void => {
     setShowColumnFilters((prev) => !prev);
     setColumnsFiltersVisibility(false, layerPath);
   };
