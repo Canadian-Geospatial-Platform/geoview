@@ -42,6 +42,18 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     this.getLayerState(mapId).setterActions.setSelectedLayerPath(layerPath);
   }
 
+  static reorderLegendLayers(mapId: string): void {
+    // Sort the layers
+    const sortedLayers = this.getLayerState(mapId).legendLayers.sort(
+      (a, b) =>
+        MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, a.layerPath) -
+        MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, b.layerPath)
+    );
+
+    // Save in store
+    this.getLayerState(mapId).setterActions.setLegendLayers(sortedLayers);
+  }
+
   /**
    * Gets a specific state.
    * @param {string} mapId - The mapId

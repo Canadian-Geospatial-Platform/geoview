@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
@@ -19,7 +20,7 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
   logger.logTraceRender('components/layers/left-panel/layers-list');
 
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   const mapId = useGeoViewMapId();
   const { getIndexFromOrderedLayerInfo } = useMapStoreActions();

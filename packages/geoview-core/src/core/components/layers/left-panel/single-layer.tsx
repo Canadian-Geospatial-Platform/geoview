@@ -24,7 +24,6 @@ import {
   useLayerDisplayState,
   useLayerSelectedLayerPath,
   useSelectedLayerSortingArrowId,
-  useLayerLegendLayers,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
@@ -77,7 +76,6 @@ export function SingleLayer({
   const datatableSettings = useDataTableLayerSettings();
   const selectedLayerSortingArrowId = useSelectedLayerSortingArrowId();
   const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
-  const legendLayers = useLayerLegendLayers();
 
   useDataTableStoreActions();
 
@@ -347,8 +345,7 @@ export function SingleLayer({
         listItems[0]?.focus();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [legendLayers, displayState]);
+  }, [displayState, selectedFooterLayerListItemId.length]);
 
   const AnimatedPaper = animated(Paper);
 
