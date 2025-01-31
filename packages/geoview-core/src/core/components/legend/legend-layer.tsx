@@ -76,11 +76,11 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
       ...item,
     })),
   };
-logger.logDebug('HOT', currentLayer, isCollapsed)
+  logger.logDebug('HOT', currentLayer, isCollapsed);
 
   const handleExpandGroupClick = useCallback(
     (e: React.MouseEvent): void => {
-      logger.logDebug('HOT in', layer.layerPath)
+      logger.logDebug('HOT in', layer.layerPath);
       e.stopPropagation();
       setLegendCollapsed(layer.layerPath); // store value
     },

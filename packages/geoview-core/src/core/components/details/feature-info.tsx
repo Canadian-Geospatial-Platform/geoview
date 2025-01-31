@@ -45,18 +45,12 @@ const TYPOGRAPHY_STYLES = {
   display: 'inline-block',
 } as const;
 
-// Memoize the sxClasses
-const useStyles = () => {
-  const theme = useTheme();
-  return useMemo(() => getSxClasses(theme), [theme]);
-};
-
 // Extracted Header Component
 const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, checked, onCheckChange, onZoomIn }: FeatureHeaderProps) {
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = useStyles();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   return (
     <Box sx={HEADER_STYLES.container}>
@@ -89,7 +83,8 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   logger.logTraceRender('components/details/feature-info', feature);
 
   // Hooks
-  const sxClasses = useStyles();
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
   const [checked, setChecked] = useState<boolean>(false);

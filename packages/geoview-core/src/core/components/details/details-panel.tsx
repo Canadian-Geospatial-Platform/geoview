@@ -23,12 +23,6 @@ interface DetailsPanelType {
   fullWidth?: boolean;
 }
 
-// Memoize the sxClasses
-const useStyles = () => {
-  const theme = useTheme();
-  return useMemo(() => getSxClasses(theme), [theme]);
-};
-
 /**
  * layers list
  *
@@ -40,9 +34,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
 
   // Hooks
   const { t } = useTranslation<string>();
-  const memoizedT = useCallback((key: string) => t(key), [t]);
   const theme = useTheme();
-  const sxClasses = useStyles();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
   const mapId = useGeoViewMapId();
@@ -112,9 +105,9 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
       logger.logTraceUseCallback('DETAILS-PANEL - getNumFeaturesLabel');
 
       const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${memoizedT('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+      return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
     },
-    [memoizedT]
+    [t]
   );
 
   /**
@@ -462,7 +455,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
           <Grid container sx={sxClasses.rightPanelBtnHolder}>
             <Grid size={{ xs: 6 }}>
               <Box style={{ marginLeft: '1.375rem' }}>
-                {memoizedT('details.featureDetailsTitle')
+                {t('details.featureDetailsTitle')
                   .replace('{count}', `${currentFeatureIndex + 1}`)
                   .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
                 <IconButton

@@ -22,7 +22,6 @@ type CrosshairProps = {
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
 export const Crosshair = memo(function Crosshair({ mapTargetElement }: CrosshairProps): JSX.Element | null {
-  // Log, commented too annoying
   logger.logTraceRender('components/crosshair/crosshair');
 
   // Hooks
