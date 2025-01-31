@@ -71,7 +71,6 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
 
   // Compute tooltip content and visibility
   const tooltipContent = useMemo(() => {
-    logger.logTraceUseMemo('HOVER TOOLTIP - infoAll', hoverFeatureInfo);
     if (!hoverFeatureInfo || !position.isValid) {
       return {
         content: { value: '', icon: '' },

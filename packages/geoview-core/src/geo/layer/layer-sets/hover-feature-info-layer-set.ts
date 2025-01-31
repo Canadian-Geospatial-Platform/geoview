@@ -42,9 +42,9 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * This will debounce the query when pointer stop moving for 750ms
    * @param {TypeMapMouseInfo} payload - The pointer move payload
    */
-  #debouncedQuery = debounce((payload: TypeMapMouseInfo) => {
-    this.queryLayers(payload.pixel);
-  }, 1000);
+  #debouncedQuery(payload: TypeMapMouseInfo): void {
+    debounce(() => this.queryLayers(payload.pixel), 1000).bind(this)();
+  }
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
