@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
-  useActiveAppBarTab,
+  useUIActiveAppBarTab,
   useUIActiveFooterBarTabId,
   useUIFooterPanelResizeValue,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -62,7 +62,7 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const activeFooterBarTabId = useUIActiveFooterBarTabId();
   const { setTableHeight } = useDataTableStoreActions();
-  const { tabGroup } = useActiveAppBarTab();
+  const { tabGroup } = useUIActiveAppBarTab();
 
   // Store - Tracking dependencies for data updates
   const arrayOfLayerData = useDetailsLayerDataArray();

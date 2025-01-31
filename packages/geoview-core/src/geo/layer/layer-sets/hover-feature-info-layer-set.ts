@@ -117,11 +117,14 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // FIXME: Watch out for code reentrancy between queries!
     // Query types of what we're doing
     const queryType = 'at_pixel';
+
+    // Get the layer visible in order and filter orderedLayerPaths to only include paths that exist in resultSet
     const orderedLayerPaths = this.#getOrderedLayerPaths();
+    const layersToQuery = orderedLayerPaths.filter((path) => path in this.resultSet);
 
     // Reinitialize the resultSet
-    // Loop on each layer path in the resultSet
-    Object.keys(this.resultSet).forEach((layerPath) => {
+    // Loop on each layer path in the resultSet were there is a layer to query
+    layersToQuery.forEach((layerPath) => {
       // If event listener is disabled
       if (!this.resultSet[layerPath].eventListenerEnabled) return;
 

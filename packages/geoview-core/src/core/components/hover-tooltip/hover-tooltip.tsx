@@ -34,33 +34,15 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
   const isMouseouseInMap = useMapIsMouseInsideMap();
   const mapElem = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${useGeoViewMapId()}"]`) as HTMLElement;
 
-  // Compute tooltip content and visibility
-  const tooltipContent = useMemo(() => {
-    if (!hoverFeatureInfo || !isMouseouseInMap || !tooltipRef.current) {
-      return {
-        content: { value: '', icon: '' },
-        isVisible: false,
-      };
-    }
-
-    logger.logTraceUseMemo('HOVER TOOLTIP - tooltipContent', hoverFeatureInfo);
-    return {
-      content: {
-        value: (hoverFeatureInfo.fieldInfo?.value as string) || '',
-        icon: hoverFeatureInfo.featureIcon ? hoverFeatureInfo.featureIcon.toDataURL() : '',
-      },
-      isVisible: true,
-    };
-  }, [hoverFeatureInfo, isMouseouseInMap]);
-
   // Calculate position with boundary checks
   const position = useMemo(() => {
     // Use store getter, we do not subcribe to modification and use it only when needed
     const pointerPosition = getMapPointerPosition(mapId);
 
     // Early return in memo
-    if (!pointerPosition?.pixel || !mapElem || !tooltipContent.content.value) {
-      return { left: '0px', top: '0px' };
+    // Check for all required conditions upfront
+    if (!pointerPosition?.pixel || !mapElem || !hoverFeatureInfo?.fieldInfo?.value || !isMouseouseInMap) {
+      return { left: '0px', top: '0px', isValid: false };
     }
     logger.logTraceUseMemo('HOVER TOOLTIP - position', pointerPosition);
 
@@ -69,7 +51,7 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
 
     // Approximate width calculation (50px for empty tooltip)
     // Assuming average character width of 10px and adding padding/margins
-    const approximateWidth = 50 + String(tooltipContent.content.value).length * 10;
+    const approximateWidth = 50 + String(hoverFeatureInfo.fieldInfo?.value).length * 10;
 
     // Only get getBoundingClientRect if we don't have it stored
     if (!mapRectRef.current) mapRectRef.current = mapElem.getBoundingClientRect();
@@ -84,15 +66,35 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
     // For height we can use a fixed value since tooltip is typically single line
     if (tooltipY < mapRectRef.current.top) tooltipY = pointerPosition.pixel[1] + 10;
 
-    return { left: `${tooltipX}px`, top: `${tooltipY}px` };
-  }, [tooltipContent.content.value, mapElem, mapId]);
+    return { left: `${tooltipX}px`, top: `${tooltipY}px`, isValid: true };
+  }, [hoverFeatureInfo, isMouseouseInMap, mapElem, mapId]);
+
+  // Compute tooltip content and visibility
+  const tooltipContent = useMemo(() => {
+    logger.logTraceUseMemo('HOVER TOOLTIP - infoAll', hoverFeatureInfo);
+    if (!hoverFeatureInfo || !position.isValid) {
+      return {
+        content: { value: '', icon: '' },
+        isVisible: false,
+      };
+    }
+
+    logger.logTraceUseMemo('HOVER TOOLTIP - tooltipContent', hoverFeatureInfo);
+    return {
+      content: {
+        value: (hoverFeatureInfo.fieldInfo?.value as string) || '',
+        icon: hoverFeatureInfo.featureIcon ? hoverFeatureInfo.featureIcon.toDataURL() : '',
+      },
+      isVisible: true,
+    };
+  }, [hoverFeatureInfo, position.isValid]);
 
   return (
     <Box
       ref={tooltipRef}
       sx={sxClasses.tooltipItem}
       style={{
-        visibility: tooltipContent.isVisible ? 'visible' : 'hidden',
+        visibility: position.isValid && tooltipContent.isVisible ? 'visible' : 'hidden',
         left: position.left,
         top: position.top,
       }}

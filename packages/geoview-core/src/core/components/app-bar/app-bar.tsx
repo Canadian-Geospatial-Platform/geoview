@@ -24,7 +24,7 @@ import ExportButton from '@/core/components/export/export-modal-button';
 import {
   useUIActiveFocusItem,
   useUIAppbarComponents,
-  useActiveAppBarTab,
+  useUIActiveAppBarTab,
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -84,7 +84,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
-  const { tabId, tabGroup, isOpen, isFocusTrapped } = useActiveAppBarTab();
+  const { tabId, tabGroup, isOpen, isFocusTrapped } = useUIActiveAppBarTab();
   const { hideClickMarker } = useMapStoreActions();
 
   const isMapFullScreen = useAppFullscreenActive();

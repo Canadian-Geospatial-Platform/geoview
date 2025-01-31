@@ -2,7 +2,7 @@ import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Typography } from '@/ui';
-import { useGeoViewMapId, useUIActiveFooterBarTabId } from '@/core/stores/';
+import { useGeoViewMapId, useUIActiveAppBarTab, useUIActiveFooterBarTabId } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './legend-styles';
@@ -62,7 +62,8 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
 
   // Store
   const mapId = useGeoViewMapId();
-  const id = useUIActiveFooterBarTabId();
+  const footerId = useUIActiveFooterBarTabId();
+  const appBarId = useUIActiveAppBarTab();
   const layersList = useDebounceLayerLegendLayers();
 
   // Custom hook for calculating the height of footer panel
@@ -157,7 +158,7 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   }, [legendLayers.length, formattedLegendLayerList, fullWidth, noLayersContent]);
 
   // Early return with empty fragment if not the active tab
-  if (id !== 'legend') return null;
+  if (footerId !== 'legend' && appBarId.tabGroup !== 'legend') return null;
 
   return (
     <Box sx={sxClasses.container} {...(!fullWidth && { ref: leftPanelRef })} id={`${mapId}-${containerType}-legendContainer`}>

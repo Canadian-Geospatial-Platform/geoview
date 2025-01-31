@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useTheme } from '@mui/material';
 import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
@@ -64,9 +64,11 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { getLegendCollapsedFromOrderedLayerInfo, getVisibilityFromOrderedLayerInfo, setLegendCollapsed } = useMapStoreActions();
   const { getLayerStatus } = useLayerStoreActions();
-  const isCollapsed = getLegendCollapsedFromOrderedLayerInfo(layer.layerPath);
   const isVisible = getVisibilityFromOrderedLayerInfo(layer.layerPath);
   const layerStatus = getLayerStatus(layer.layerPath);
+
+  // State
+  const [isCollapsed, setIsCollapsed] = useState(getLegendCollapsedFromOrderedLayerInfo(layer.layerPath));
 
   // Create a new layer object with updated status (no useMemo to ensure updates in inner child)
   const currentLayer = {
@@ -76,15 +78,14 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
       ...item,
     })),
   };
-  logger.logDebug('HOT', currentLayer, isCollapsed);
 
   const handleExpandGroupClick = useCallback(
     (e: React.MouseEvent): void => {
-      logger.logDebug('HOT in', layer.layerPath);
       e.stopPropagation();
+      setIsCollapsed(!getLegendCollapsedFromOrderedLayerInfo(layer.layerPath));
       setLegendCollapsed(layer.layerPath); // store value
     },
-    [layer.layerPath, setLegendCollapsed]
+    [getLegendCollapsedFromOrderedLayerInfo, layer.layerPath, setLegendCollapsed]
   );
 
   return (

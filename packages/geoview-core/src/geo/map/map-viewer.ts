@@ -1102,6 +1102,11 @@ export class MapViewer {
 
   // #region MAP ACTIONS
 
+  emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void {
+    // Emit the event
+    this.#emitMapSingleClick(clickCoordinates);
+  }
+
   /**
    * Loops through all geoview layers and refresh their respective source.
    * Use this function on projection change or other viewer modification who may affect rendering.
