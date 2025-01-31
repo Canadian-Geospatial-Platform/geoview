@@ -302,4 +302,8 @@ export const useAppDisplayLanguageById = (mapId: string): TypeDisplayLanguage =>
 export const useAppDisplayThemeById = (mapId: string): TypeDisplayTheme =>
   useStore(getGeoViewStore(mapId), (state) => state.appState.displayTheme);
 
+// Getter function for one-time access, there is no subcription to modification
+export const getAppCrosshairsActive = (mapId: string): boolean => getGeoViewStore(mapId).getState().appState.isCrosshairsActive;
+
+// Store Actions
 export const useAppStoreActions = (): AppActions => useStore(useGeoViewStore(), (state) => state.appState.actions);

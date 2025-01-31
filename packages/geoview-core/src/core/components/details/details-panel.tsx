@@ -22,6 +22,7 @@ import { DetailsSkeleton } from './details-skeleton';
 interface DetailsPanelType {
   fullWidth?: boolean;
 }
+
 /**
  * layers list
  *
@@ -34,7 +35,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
   const mapId = useGeoViewMapId();

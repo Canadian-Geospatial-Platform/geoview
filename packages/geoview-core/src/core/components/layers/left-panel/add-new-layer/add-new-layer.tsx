@@ -1112,7 +1112,7 @@ export function AddNewLayer(): JSX.Element {
     if (event.dataTransfer?.files) {
       const file = event.dataTransfer.files[0];
       const upFilename = file.name.toUpperCase();
-      if (upFilename.endsWith('.JSON') || upFilename.endsWith('.GEOJSON') || upFilename.endsWith('.GPKG') || upFilename.endsWith('.CSV')) {
+      if (upFilename.endsWith('.JSON') || upFilename.endsWith('.GEOJSON') || upFilename.endsWith('.CSV')) {
         handleFile(file);
       } else {
         emitErrorFile();
@@ -1222,7 +1222,7 @@ export function AddNewLayer(): JSX.Element {
                       onChange={(e) => {
                         if (e.target.files) handleFile(e.target.files[0]);
                       }}
-                      accept=".gpkg, .json, .geojson, .csv"
+                      accept=".json, .geojson, .csv"
                     />
                   </Box>
                   <Button

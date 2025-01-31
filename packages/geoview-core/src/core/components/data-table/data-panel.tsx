@@ -13,7 +13,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
-  useActiveAppBarTab,
+  useUIActiveAppBarTab,
   useUIActiveFooterBarTabId,
   useUIAppbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -52,7 +52,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
   const visibleLayers = useMapVisibleLayers();
-  const { tabGroup, isOpen } = useActiveAppBarTab();
+  const { tabGroup, isOpen } = useUIActiveAppBarTab();
   const appBarComponents = useUIAppbarComponents();
 
   // Create columns for data table.

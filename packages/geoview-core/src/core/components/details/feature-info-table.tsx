@@ -40,7 +40,7 @@ export const FeatureItem = memo(function FeatureItem({
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   const linkifyOptions = useMemo(
     () => ({
@@ -158,7 +158,7 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({ featureInfoList
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
   const { initLightBox, LightBoxComponent } = useLightBox();
