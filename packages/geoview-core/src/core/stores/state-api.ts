@@ -128,6 +128,10 @@ export class StateApi {
 
     // Redirect
     MapEventProcessor.setMapOrderedLayerInfo(mapId, orderedLayers);
+
+    // Reorder the legend layers, because the order layer info has changed
+    LegendEventProcessor.reorderLegendLayers(mapId);
+
     // Emit event
     this.#emitLayersReordered({ orderedLayers });
   }

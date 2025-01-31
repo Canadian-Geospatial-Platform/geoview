@@ -83,7 +83,7 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   const handleExpandGroupClick = useCallback(
     (e: React.MouseEvent): void => {
       // Log
-      logger.logTraceUseCallback('LEGEND_LAYER - handleExpandGroupClick', layer.layerPath, setLegendCollapsed);
+      logger.logTraceUseCallback('LEGEND_LAYER - handleExpandGroupClick', layer.layerPath);
 
       e.stopPropagation();
       setIsCollapsed(!getLegendCollapsedFromOrderedLayerInfo(layer.layerPath));
