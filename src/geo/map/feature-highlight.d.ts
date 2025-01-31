@@ -13,9 +13,9 @@ import { PointMarkers } from './point-markers';
  */
 export declare class FeatureHighlight {
     #private;
-    /** The vector source to use for the animation features */
+    /** The vector source to use for the highlight features */
     highlighSource: VectorSource;
-    /** The hidden layer to display animations. */
+    /** The hidden layer to display highlight. */
     overlayLayer: VectorLayer;
     pointMarkers: PointMarkers;
     /**

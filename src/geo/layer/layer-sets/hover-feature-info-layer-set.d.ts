@@ -10,6 +10,7 @@ import { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store
  * @class HoverFeatureInfoLayerSet
  */
 export declare class HoverFeatureInfoLayerSet extends AbstractLayerSet {
+    #private;
     /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
     resultSet: TypeHoverResultSet;
     /**
