@@ -141,57 +141,86 @@
       </ul>
     </div>
 
+    <ul>
+      <li>
+        <textarea id="layerUuids" cols="40" rows="5">21b821cf-0f1c-40ee-8925-eab12d357668,ccc75c12-5acc-4a6a-959f-ef6f621147b9,0fca08b5-e9d0-414b-a3c4-092ff9c5e326</textarea>
+        <br>
+        <button id="addLayers" style="margin: 10px">Add Layers</button>
+        Add entered Geocore UUID's to the map. Can be separated with commas or each on a new line
+        <details>
+          <summary>Code</summary>
+          <pre>
+            if (document.getElementById('Map1')) {
+              const layerUuids = document.getElementById('layerUuids').value;
+              const uuidList = layerUuids.split('\n').join(',').split(',');
+              addLayers(uuidList);
+            }
+
+            function addLayers(layers) {
+              layers.forEach((layer) => {
+                cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layer);
+              });
+            }
+          </pre>
+        </details>
+      </li>
+      <li>
+        <textarea id="layerNames" cols="100" rows="4">[Radioactivité de l'air, Radioactivity], [Périmètre de localisation des stations, Perimeter], [Carte commémorative du Canada, Commemorative Map]</textarea>
+        <br>
+        <button id="changeNames" style="margin: 10px">Change Names</button>
+        Updates the current map config, replacing some of the default layer names (from above) and refreshes the map.
+        Note: if the currently stored map config does not contain the default layers, the map will refresh with nothing changed.
+        To execute properly - Add Layers, Update State, Change Names - Update Names and Change Names again will change them back.
+        <details>
+          <summary>Code</summary>
+          <pre>
+            const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de localisation des stations', 'Perimeter'], ['Carte commémorative du Canada', 'Commemorative Map']];
+            cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
+            refreshMap();
+          </pre>
+        </details>
+      </li>
+    </ul>
+
     <div class="selector">
-      <textarea id="layerUuids" cols="40" rows="5">
-21b821cf-0f1c-40ee-8925-eab12d357668,ccc75c12-5acc-4a6a-959f-ef6f621147b9,0fca08b5-e9d0-414b-a3c4-092ff9c5e326</textarea
-      >
-      <ul>
-        <li>
-          <button id="addLayers" style="margin: 10px">Add Layers</button>
-          Add entered Geocore UUID's to the map. Can be separated with commas or each on a new line
-          <details>
-            <summary>Code</summary>
-            <pre>
-              if (document.getElementById('Map1')) {
-                const layerUuids = document.getElementById('layerUuids').value;
-                const uuidList = layerUuids.split('\n').join(',').split(',');
-                addLayers(uuidList);
-              }
-
-              function addLayers(layers) {
-                layers.forEach((layer) => {
-                  cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layer);
-                });
-              }
-            </pre>
-          </details>
-        </li>
-      </ul>
-
-      <div class="selector">
-        <select name="Selecty custom config" id="switchCustom">
-          <option value="Airborne Radioactivity">Airborne Radioactivity</option>
-          <option value="IAAC">IAAC</option>
-          <option value="CESI">CESI</option>
-        </select>
-      </div>
-      <div style="display: grid">
-        <input id="layerUuidCustom" style="margin-top: 10px; margin-bottom: 10px; width: 300px" />
-        <textarea id="layerUuidCustomEntries" cols="80" rows="25"></textarea>
-      </div>
-      <ul>
-        <li>
-          <button id="addLayersCustom" style="margin: 10px">Add Layers</button>
-          Add entered Geocore UUID's to the map with a custom configuration (List of layer entries)
-          <details>
-            <summary>Code</summary>
-            <pre>
-                cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(uuid, customListOfLayerEntries);
-            </pre>
-          </details>
-        </li>
-      </ul>
+      <select name="Selecty custom config" id="switchCustom">
+        <option value="Airborne Radioactivity">Airborne Radioactivity</option>
+        <option value="IAAC">IAAC</option>
+        <option value="CESI">CESI</option>
+      </select>
     </div>
+    <div style="display: grid">
+      <input id="layerUuidCustom" style="margin-top: 10px; margin-bottom: 10px; width: 300px" />
+      <textarea id="layerUuidCustomEntries" cols="80" rows="25"></textarea>
+    </div>
+    <ul>
+      <li>
+        <button id="addLayersCustom" style="margin: 10px">Add Layers</button>
+        Add entered Geocore UUID's to the map with a custom configuration (List of layer entries)
+        <details>
+          <summary>Code</summary>
+          <pre>
+              cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(uuid, customListOfLayerEntries);
+          </pre>
+        </details>
+      </li>
+      <li>
+        <textarea id="customLayerNames" cols="100" rows="4"></textarea>
+        <br>
+        <button id="changeNamesCustom" style="margin: 10px">Change Names</button>
+        Updates the current map config, replacing some of the default layer names (from above) and refreshes the map.
+        Note: if the currently stored map config does not contain the default layers, the map will refresh with nothing changed.
+        To execute properly - Add Layers, Update State, Change Names - Update Names and Change Names again will change them back.
+        <details>
+          <summary>Code</summary>
+          <pre>
+            const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de localisation des stations', 'Perimeter'], ['Carte commémorative du Canada', 'Commemorative Map']];
+            cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
+            refreshMap();
+          </pre>
+        </details>
+      </li>
+    </ul>
 
     <script src="codedoc.js"></script>
     <script>
@@ -347,22 +376,39 @@
         }
       });
 
-      // Add Layers Custom Button============================================================================================================
-      const addLayersCustomButton = document.getElementById('addLayersCustom');
+      // Change Names Button============================================================================================================
+      const changeNamesButton = document.getElementById('changeNames');
 
       // add an event listener when a button is clicked
-      addLayersCustomButton.addEventListener('click', function () {
-        if (document.getElementById('Map1')) {
-          const layerUuid = document.getElementById('layerUuidCustom').value;
-          const layerUuidEntries = document.getElementById('layerUuidCustomEntries').value;
+      changeNamesButton.addEventListener('click', function () {
+        const pairs = document.getElementById('layerNames').value.replace(/\[|\]/g,'').split(',').map((name) => name.trim()).reduce((result, value, index, array) => {
+          if (index % 2 === 0)
+            result.push(array.slice(index, index + 2));
+            return result;
+          }, []);
+        console.log(pairs);
+        cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
+        refreshMap();
+      });
 
-          if (layerUuidEntries === '') cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layerUuid);
-          else cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layerUuid, layerUuidEntries);
-        }
+      // Change Names Custom Button============================================================================================================
+      const changeNamesCustomButton = document.getElementById('changeNamesCustom');
+
+      // add an event listener when a button is clicked
+      changeNamesCustomButton.addEventListener('click', function () {
+        const pairs = document.getElementById('customLayerNames').value.replace(/\[|\]/g,'').split(',').map((name) => name.trim()).reduce((result, value, index, array) => {
+          if (index % 2 === 0)
+            result.push(array.slice(index, index + 2));
+            return result;
+          }, []);
+        console.log(pairs);
+        cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
+        refreshMap();
       });
 
       const uuidConfig = {
         AirborneRadioactivity: '21b821cf-0f1c-40ee-8925-eab12d357668',
+        AirborneRadioactivityNames: "[Airborne Radioactivity - Feature Layer, Radioactivité de l'air]",
         AirborneRadioactivityConfig: [
           {
             layerId: '0',
@@ -382,6 +428,7 @@
           },
         ],
         IAAC: 'f4c51eaa-a6ca-48b9-a1fc-b0651da20509',
+        IAACNames: "[IAAC Projects, IAAC Group]",
         IAACConfig: [
           {
             entryType: 'group',
@@ -418,6 +465,7 @@
           },
         ],
         CESI: '5a65ad7c-561a-466a-8375-8d876624df9d',
+        CESINames: "[CESI - Water Quality Group, Water Quality Group]",
         CESIConfig: [
           {
             layerId: '0',
@@ -459,19 +507,38 @@
         ],
       };
 
+
+      // Add Layers Custom Button============================================================================================================
+      const addLayersCustomButton = document.getElementById('addLayersCustom');
+
+      // add an event listener when a button is clicked
+      addLayersCustomButton.addEventListener('click', function () {
+        if (document.getElementById('Map1')) {
+          const layerUuid = document.getElementById('layerUuidCustom').value;
+          const layerUuidEntries = document.getElementById('layerUuidCustomEntries').value;
+
+          if (layerUuidEntries === '') cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layerUuid);
+          else cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layerUuid, layerUuidEntries);
+        }
+      });
+
       // Add a samples selector
       const layerUuid = document.getElementById('layerUuidCustom');
       const layerUuidEntries = document.getElementById('layerUuidCustomEntries');
+      const customLayerNames = document.getElementById('customLayerNames');
       layerUuid.value = uuidConfig['AirborneRadioactivity'];
       layerUuidEntries.value = JSON.stringify(uuidConfig[`AirborneRadioactivityConfig`], null, 2);
+      customLayerNames.value = uuidConfig['AirborneRadioactivityNames'];
 
       const switchCustom = document.getElementById('switchCustom');
       switchCustom.addEventListener('change', (e) => {
         const layerUuid = document.getElementById('layerUuidCustom');
         const layerUuidEntries = document.getElementById('layerUuidCustomEntries');
+        const customLayerNames = document.getElementById('customLayerNames');
 
         layerUuid.value = uuidConfig[e.target.value.replaceAll(' ', '')];
         layerUuidEntries.value = JSON.stringify(uuidConfig[`${e.target.value.replaceAll(' ', '')}Config`], null, 2);
+        customLayerNames.value = uuidConfig[`${e.target.value.replaceAll(' ', '')}Names`];
       });
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready

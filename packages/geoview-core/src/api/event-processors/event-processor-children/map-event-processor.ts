@@ -1046,6 +1046,48 @@ export class MapEventProcessor extends AbstractEventProcessor {
   };
 
   /**
+   * Get all active filters for layer.
+   *
+   * @param {string} mapId The map id.
+   * @param {string} layerPath The path for the layer to get filters from.
+   */
+  static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    if (geoviewLayer) {
+      const initialFilter = this.getInitialFilter(mapId, layerPath);
+      const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
+      const sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+      return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
+    }
+    return undefined;
+  }
+
+  /**
+   * Apply all available filters to layer.
+   *
+   * @param {string} mapId The map id.
+   * @param {string} layerPath The path of the layer to apply filters to.
+   */
+  static applyLayerFilters(mapId: string, layerPath: string): void {
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    if (geoviewLayer) {
+      if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
+        const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+        if (filter) geoviewLayer.applyViewFilter(filter);
+      } else {
+        const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
+
+        // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
+        (geoviewLayer as AbstractGVVector | GVEsriDynamic).applyViewFilter(filters.join(' and '));
+      }
+    }
+  }
+
+  // #endregion
+
+  // #region CONFIG FROM MAP STATE
+
+  /**
    * Creates layer initial settings according to provided configs.
    * @param {ConfigBaseClass} layerEntryConfig - Layer entry config for the layer.
    * @param {TypeOrderedLayerInfo} orderedLayerInfo - Ordered layer info for the layer.
@@ -1310,42 +1352,43 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Apply all available filters to layer.
+   * Searches through a map config and replaces any matching layer names with their provided partner.
    *
-   * @param {string} mapId The map id.
-   * @param {string} layerPath The path of the layer to apply filters to.
+   * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
+   * @param {TypeMapFeaturesInstance} mapConfig - The config to modify.
+   * @returns {TypeMapFeaturesInstance} Map config with updated names.
    */
-  static applyLayerFilters(mapId: string, layerPath: string): void {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
-    if (geoviewLayer) {
-      if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
-        const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
-        if (filter) geoviewLayer.applyViewFilter(filter);
-      } else {
-        const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
+  static replaceMapConfigLayerNames(namePairs: string[][], mapConfig: TypeMapFeaturesInstance): TypeMapFeaturesInstance {
+    const pairsDict: Record<string, string> = {};
+    namePairs.forEach((pair) => {
+      [pairsDict[pair[1]], pairsDict[pair[0]]] = pair;
+    });
 
-        // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
-        (geoviewLayer as AbstractGVVector | GVEsriDynamic).applyViewFilter(filters.join(' and '));
-      }
-    }
+    mapConfig.map.listOfGeoviewLayerConfig?.forEach((geoviewLayerConfig) => {
+      if (geoviewLayerConfig.geoviewLayerName && pairsDict[geoviewLayerConfig.geoviewLayerName])
+        // eslint-disable-next-line no-param-reassign
+        geoviewLayerConfig.geoviewLayerName = pairsDict[geoviewLayerConfig.geoviewLayerName];
+      if (geoviewLayerConfig.listOfLayerEntryConfig?.length)
+        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig);
+    });
+
+    return mapConfig;
   }
 
   /**
-   * Get all active filters for layer.
+   * Searches through a list of layer entry configs and replaces any matching layer names with their provided partner.
    *
-   * @param {string} mapId The map id.
-   * @param {string} layerPath The path for the layer to get filters from.
+   * @param {Record<string, string>} pairsDict -  The dict of name pairs. Presumably one english and one french name in each pair.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfigs - The layer entry configs to modify.
    */
-  static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
-    if (geoviewLayer) {
-      const initialFilter = this.getInitialFilter(mapId, layerPath);
-      const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
-      const sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
-      return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
-    }
-    return undefined;
+  static #replaceLayerEntryConfigNames(pairsDict: Record<string, string>, listOfLayerEntryConfigs: TypeLayerEntryConfig[]): void {
+    listOfLayerEntryConfigs?.forEach((layerEntryConfig) => {
+      if (layerEntryConfig.layerName && pairsDict[layerEntryConfig.layerName])
+        // eslint-disable-next-line no-param-reassign
+        layerEntryConfig.layerName = pairsDict[layerEntryConfig.layerName];
+      if (layerEntryConfig.listOfLayerEntryConfig?.length)
+        this.#replaceLayerEntryConfigNames(pairsDict, layerEntryConfig.listOfLayerEntryConfig);
+    });
   }
-
   // #endregion
 }
