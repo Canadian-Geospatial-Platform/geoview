@@ -21,6 +21,12 @@ export declare class ConsoleLogger {
     markers: LogMarker;
     trackers: LogTracker;
     trackerInterval: number;
+    logCount: {
+        renderer: number;
+        useCallback: number;
+        useMemo: number;
+        useEffect: number;
+    };
     /**
      * Constructor
      * @param {number | number[]} logLevel - Indicate the level of detail for the ConsoleLogger. The higher the number, the more detailed the log.

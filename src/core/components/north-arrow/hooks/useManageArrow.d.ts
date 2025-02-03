@@ -5,8 +5,8 @@ interface ArrowReturn {
     northOffset: number;
 }
 /**
- * Custom hook to Manage North arrow.
- * @returns rotationAngle and northoffset
+ * Custom hook to Manage North arrow (rotation and offset) and update store state.
+ * @returns {ArrowReturn} The ArrowReturn object who contains rotationAngle and northoffset
  */
-declare const useManageArrow: () => ArrowReturn;
-export default useManageArrow;
+export declare const useManageArrow: () => ArrowReturn;
+export {};

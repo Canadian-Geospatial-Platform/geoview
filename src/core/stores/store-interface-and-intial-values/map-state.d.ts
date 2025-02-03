@@ -154,5 +154,6 @@ export declare const useMapScale: () => TypeScaleInfo;
 export declare const useMapSize: () => [number, number];
 export declare const useMapVisibleLayers: () => string[];
 export declare const useMapZoom: () => number;
+export declare const getMapPointerPosition: (mapId: string) => TypeMapMouseInfo | undefined;
 export declare const useMapStoreActions: () => MapActions;
 export {};

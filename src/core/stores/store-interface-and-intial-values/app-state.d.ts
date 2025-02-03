@@ -62,5 +62,6 @@ export declare const useAppGuide: () => TypeGuideObject | undefined;
 export declare const useAppNotifications: () => NotificationDetailsType[];
 export declare const useAppDisplayLanguageById: (mapId: string) => TypeDisplayLanguage;
 export declare const useAppDisplayThemeById: (mapId: string) => TypeDisplayTheme;
+export declare const getAppCrosshairsActive: (mapId: string) => boolean;
 export declare const useAppStoreActions: () => AppActions;
 export {};

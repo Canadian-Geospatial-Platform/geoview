@@ -34,6 +34,7 @@ export type TypeFooterBarProps = {
     };
     collapsed: boolean;
     selectedTab: TypeValidFooterBarTabsCoreProps;
+    selectedLayersLayerPath: string;
 };
 /** Supported app bar values. */
 export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'basemap-panel' | 'aoi-panel' | 'geochart' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers' | '';
@@ -44,6 +45,7 @@ export type TypeAppBarProps = {
     };
     collapsed: boolean;
     selectedTab: TypeValidAppBarCoreProps;
+    selectedLayersLayerPath: string;
 };
 /** Overview map options. Default none. */
 export type TypeOverviewMapProps = {

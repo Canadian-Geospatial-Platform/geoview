@@ -62,7 +62,7 @@ type FocusItemProps = {
 };
 export declare const useUIActiveFocusItem: () => FocusItemProps;
 export declare const useUIActiveFooterBarTabId: () => string;
-export declare const useActiveAppBarTab: () => ActiveAppBarTabType;
+export declare const useUIActiveAppBarTab: () => ActiveAppBarTabType;
 export declare const useUIActiveTrapGeoView: () => boolean;
 export declare const useUIAppbarComponents: () => TypeValidAppBarCoreProps[];
 export declare const useUICorePackagesComponents: () => TypeMapCorePackages;

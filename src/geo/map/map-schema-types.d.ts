@@ -260,7 +260,7 @@ export type GeoCoreLayerConfig = {
     /**
      * The display name of the layer (English/French). This overrides the default name coming from the GeoCore API.
      */
-    geoviewLayerName: string;
+    geoviewLayerName: string | undefined;
     /** Initial settings to apply to the GeoCore layer at creation time. */
     initialSettings?: TypeLayerInitialSettings;
     /** The layer entries to use from the GeoCore layer. */

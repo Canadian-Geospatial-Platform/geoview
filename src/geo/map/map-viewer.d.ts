@@ -208,6 +208,7 @@ export declare class MapViewer {
      * @param {Extent} extent - New extent to use.
      */
     setMaxExtent(extent: Extent): void;
+    emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void;
     /**
      * Loops through all geoview layers and refresh their respective source.
      * Use this function on projection change or other viewer modification who may affect rendering.
@@ -242,8 +243,10 @@ export declare class MapViewer {
     reload(mapConfig?: TypeMapFeaturesConfig | TypeMapFeaturesInstance): Promise<void>;
     /**
      * Reload a map from a config object created using current map state. It first removes then recreates the map.
+     * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+     *                                              Set to false after a language change to update the layer names with the new language.
      */
-    reloadWithCurrentState(): void;
+    reloadWithCurrentState(maintainGeocoreLayerNames?: boolean): void;
     /**
      * Zoom to the specified extent.
      *
@@ -356,9 +359,11 @@ export declare class MapViewer {
     convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent;
     /**
      * Creates a map config based on current map state.
+     * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+     *                                              Set to false after a language change to update the layer names with the new language.
      * @returns {TypeMapFeaturesInstance | undefined} Map config with current map state.
      */
-    createMapConfigFromMapState(): TypeMapFeaturesInstance | undefined;
+    createMapConfigFromMapState(maintainGeocoreLayerNames?: boolean): TypeMapFeaturesInstance | undefined;
     /**
      * Registers a map init event callback.
      * @param {MapInitDelegate} callback - The callback to be executed whenever the event is emitted

@@ -1,5 +1,5 @@
 import { AbstractWorker } from './abstract-worker';
-import { TypeWorkerExportChunk, TypeWorkerExportProjectionInfo } from './json-export-script';
+import { TypeWorkerExportChunk, TypeWorkerExportProjectionInfo } from './json-export-worker-script';
 /**
  * How to create a new worker:
  *
