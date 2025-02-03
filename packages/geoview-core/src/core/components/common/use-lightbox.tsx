@@ -56,6 +56,8 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
 });
 
 export function useLightBox(): UseLightBoxReturnType {
+  logger.logTraceRender('components/common/useLightBox');
+
   // State
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);

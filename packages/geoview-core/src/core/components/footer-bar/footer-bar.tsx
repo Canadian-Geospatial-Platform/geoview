@@ -58,14 +58,17 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const mapId = useGeoViewMapId();
 
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const isMapFullScreen = useAppFullscreenActive();
+  const footerPanelResizeValue = useUIFooterPanelResizeValue();
+  const sxClasses = useMemo(
+    () => getSxClasses(theme, isMapFullScreen, footerPanelResizeValue),
+    [theme, isMapFullScreen, footerPanelResizeValue]
+  );
 
   const tabsContainerRef = useRef<HTMLDivElement>();
 
   // get store values and actions
-  const isMapFullScreen = useAppFullscreenActive();
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
-  const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const selectedTab = useUIActiveFooterBarTabId();
   const activeTrapGeoView = useUIActiveTrapGeoView();
@@ -122,10 +125,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         value: index,
         label: `${camelCase(tab)}.title`,
         icon: allTabs[tab]?.icon ?? '',
-        content: allTabs[tab]?.content ?? '',
+        content: <Box sx={sxClasses.tabContent}>{allTabs[tab]?.content ?? ''}</Box>,
       } as TypeTabs;
     });
-  }, [memoTabs, tabsList]);
+  }, [memoTabs, tabsList, sxClasses]);
 
   /**
    * Calculate resize values from popover values defined in store.

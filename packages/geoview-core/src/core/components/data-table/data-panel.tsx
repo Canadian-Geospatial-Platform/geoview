@@ -45,7 +45,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   const mapId = useGeoViewMapId();
   const layerData = useDataTableAllFeaturesDataArray();
-  const tableHeight = useDataTableTableHeight();
+  const tableHeight = 'fit-content';
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
   const { setSelectedLayerPath } = useDataTableStoreActions();

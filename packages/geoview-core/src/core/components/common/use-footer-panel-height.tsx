@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useEffect, useRef } from 'react';
+import { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -17,6 +17,7 @@ import { TABS } from '@/core/utils/constant';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { usePerformanceMonitor, useWhatChanged } from '@/core/utils/useWhatChanged';
 
 interface UseFooterPanelHeightType {
   footerPanelTab: 'legend' | 'default';
@@ -40,12 +41,27 @@ const defaultPanelStyle = {
   overflowY: 'auto' as const,
 };
 
+// Pure calculation function outside the hook
+const calculateLeftPanelHeight = (
+  footerBarHeight: number,
+  currentTabGroup: string,
+  currentResizeValue: number,
+  panelTitleHeight: number
+): number => {
+  if (currentTabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || currentTabGroup === CV_DEFAULT_APPBAR_CORE.LAYERS) {
+    return window.screen.height - MOBILE_OFFSET;
+  }
+  return (window.screen.height * currentResizeValue) / 100 - panelTitleHeight - footerBarHeight - 10;
+};
+
 /**
  * Custom Hook to calculate the height of footer panel content when we set the map in fullscreen mode.
  * @param {'legend' | 'default'} footerPanelTab type of footer tab.
  * @returns {UseFooterPanelHeightReturnType} An object of ref objects that are attached to DOM.
  */
 export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPanelHeightType): UseFooterPanelHeightReturnType {
+  logger.logTraceRender('components/common/useFooterPanelHeight');
+
   // Hooks
   const theme = useTheme();
   const mobileView = useMediaQuery(theme.breakpoints.down('md'));
@@ -79,44 +95,60 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
   const updatePanelHeight = useCallback((panel: HTMLElement, height: string) => {
     // eslint-disable-next-line no-param-reassign
     panel.style.maxHeight = height;
+
     Object.assign(panel.style, defaultPanelStyle);
   }, []);
 
-  const calculateLeftPanelHeight = useCallback(
-    (footerBarHeight: number): number => {
-      if (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.LAYERS) {
-        return window.screen.height - MOBILE_OFFSET;
-      }
-      return (window.screen.height * footerPanelResizeValue) / 100 - panelTitleRefHeight.current - footerBarHeight - 10;
-    },
-    [footerPanelResizeValue, tabGroup]
-  );
+  // Memoize the panel height calculation
+  const panelHeight = useMemo(() => {
+    if (!leftPanelRef.current) return null;
 
+    const tabsContainer = document.getElementById(`${mapId}-tabsContainer`);
+    const footerBarHeight = tabsContainer?.firstElementChild?.firstElementChild?.clientHeight ?? 0;
+
+    return calculateLeftPanelHeight(footerBarHeight, tabGroup, footerPanelResizeValue, panelTitleRefHeight.current);
+  }, [mapId, tabGroup, footerPanelResizeValue]);
+
+  // First effect - Handle non-fullscreen updates
   useEffect(() => {
-    logger.logTraceUseEffect('USE-FOOTER-PANEL-HEIGHT', footerPanelResizeValue, isMapFullScreen);
+    logger.logDebug('HEIGHT 3', tabGroup)
+    if (leftPanelRef.current && !isMapFullScreen) {
+      logger.logTraceUseEffect('USE-FOOTER-PANEL-HEIGHT', 'non-fullscreen updates');
 
-    if (!leftPanelRef.current) return;
+      const height =
+        (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.LAYERS) && mobileView
+          ? '100%'
+          : `${DEFAULT_HEIGHT}px`;
+
+          logger.logDebug('HEIGHT 2', height, tabGroup)
+      updatePanelHeight(leftPanelRef.current, `${DEFAULT_HEIGHT}px`);
+      
+      if (rightPanelRef.current) updatePanelHeight(rightPanelRef.current, `${DEFAULT_HEIGHT}px`);
+    }
+  }, [mapSize, isMapFullScreen, activeFooterBarTabId, tabGroup, mobileView, updatePanelHeight]);
+
+  // Second effect - Handle fullscreen updates
+  useEffect(() => {
+    // Early return
+    if (!leftPanelRef.current || panelHeight === null) return;
+    logger.logTraceUseEffect('USE-FOOTER-PANEL-HEIGHT', 'Handle fullscreen updates', isMapFullScreen);
 
     const shouldUpdateFullscreen = isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default');
 
     if (shouldUpdateFullscreen) {
-      const tabsContainer = document.getElementById(`${mapId}-tabsContainer`);
-      const footerBarHeight = tabsContainer?.firstElementChild?.firstElementChild?.clientHeight ?? 0;
-      const leftPanelHeight = calculateLeftPanelHeight(footerBarHeight);
-
-      updatePanelHeight(leftPanelRef.current, `${leftPanelHeight}px`);
+      updatePanelHeight(leftPanelRef.current, `${panelHeight}px`);
       leftPanelRef.current.style.paddingBottom = PADDING_BOTTOM;
 
       // Handle right panel updates
       const rightPanel = rightPanelRef.current?.firstElementChild as HTMLElement;
       if (rightPanel) {
         if (activeFooterBarTabId === TABS.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE) {
-          updatePanelHeight(rightPanel, `${leftPanelHeight}px`);
-          setTableHeight(`${leftPanelHeight - TABLE_HEIGHT_OFFSET}px`);
+          updatePanelHeight(rightPanel, `${panelHeight}px`);
+          setTableHeight(`${panelHeight - TABLE_HEIGHT_OFFSET}px`);
         } else if (activeFooterBarTabId === TABS.GEO_CHART) {
-          updatePanelHeight(rightPanel, `${leftPanelHeight}px`);
+          updatePanelHeight(rightPanel, `${panelHeight}px`);
         } else {
-          updatePanelHeight(rightPanel, `${leftPanelHeight}px`);
+          updatePanelHeight(rightPanel, `${panelHeight}px`);
         }
       }
     } else {
@@ -131,33 +163,8 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
         updatePanelHeight(rightPanel, `${DEFAULT_HEIGHT}px`);
       }
     }
-  }, [
-    footerPanelResizeValue,
-    isMapFullScreen,
-    activeFooterBarTabId,
-    footerPanelTab,
-    mapId,
-    setTableHeight,
-    arrayOfLayerData,
-    allFeaturesLayerData,
-    tabGroup,
-    calculateLeftPanelHeight,
-    updatePanelHeight,
-  ]);
+  }, [isMapFullScreen, activeFooterBarTabId, footerPanelTab, mapId, panelHeight, setTableHeight, tabGroup, updatePanelHeight]);
 
-  /**
-   * Update the height of the left panel when data panel and layers rendered in appbar.
-   */
-  useEffect(() => {
-    if (leftPanelRef.current && !isMapFullScreen) {
-      const height =
-        (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.LAYERS) && mobileView
-          ? '100%'
-          : `${DEFAULT_HEIGHT}px`;
-
-      updatePanelHeight(leftPanelRef.current, height);
-    }
-  }, [mapSize, isMapFullScreen, tabGroup, mobileView, updatePanelHeight]);
-
+  logger.logDebug('HEIGHT',  { leftPanelRef, rightPanelRef, panelTitleRef, activeFooterBarTabId })
   return { leftPanelRef, rightPanelRef, panelTitleRef, activeFooterBarTabId };
 }
