@@ -7,7 +7,7 @@ import { SxStyles } from '@/ui/style/types';
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme): SxStyles => ({
+export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, footerPanelResizeValue: number): SxStyles => ({
   rightButtonsContainer: {
     display: 'flex',
     flexDirection: 'row',
@@ -24,7 +24,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
+  rightGridContentHeight: {
+    zIndex: isMapFullScreen ? 'unset' : 100, // should be is full screen fialog
+    '& > :first-child': {
+      maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : '580px', // maxHeight only when not fullscreen
+      height: isMapFullScreen ? 'fit-content' : undefined, // height only when fullscreen (- padding)
+      overflowY: 'auto',
+    },
+  },
   rightGridContent: {
+    height: '100%',
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
     borderRadius: '5px',
     backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
@@ -76,5 +85,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         },
       },
     },
+  },
+  leftGridContentHeight: {
+    zIndex: isMapFullScreen ? 'unset' : 100, // should be is full screen fialog
+    maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : '580px', // maxHeight only when not fullscreen
+    height: isMapFullScreen ? 'fit-content' : undefined, // height only when fullscreen (- padding)
+    overflowY: 'auto',
   },
 });

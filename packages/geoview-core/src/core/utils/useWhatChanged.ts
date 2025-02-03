@@ -177,7 +177,7 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
       });
 
       if (!isBlankArrayAsDependency) {
-        writeConsole(whatChanged);
+        writeConsole(hookId, whatChanged);
         logFooter();
       }
     }

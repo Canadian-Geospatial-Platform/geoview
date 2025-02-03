@@ -2,13 +2,18 @@ import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Typography } from '@/ui';
-import { useGeoViewMapId, useUIActiveAppBarTab, useUIActiveFooterBarTabId } from '@/core/stores/';
+import {
+  useGeoViewMapId,
+  useUIActiveAppBarTab,
+  useUIActiveFooterBarTabId,
+  useAppFullscreenActive,
+  useUIFooterPanelResizeValue,
+} from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '@/core/components/layers/types';
-import { useFooterPanelHeight } from '@/core/components/common';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useDebounceLayerLegendLayers } from './hooks/use-legend-debounce';
 import { useEventListener } from '../common/use-event-listener';
@@ -54,7 +59,12 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const isMapFullScreen = useAppFullscreenActive();
+  const footerPanelResizeValue = useUIFooterPanelResizeValue();
+  const sxClasses = useMemo(
+    () => getSxClasses(theme, isMapFullScreen, footerPanelResizeValue),
+    [theme, isMapFullScreen, footerPanelResizeValue]
+  );
 
   // State
   const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
@@ -65,9 +75,6 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   const footerId = useUIActiveFooterBarTabId();
   const appBarId = useUIActiveAppBarTab();
   const layersList = useDebounceLayerLegendLayers();
-
-  // Custom hook for calculating the height of footer panel
-  const { leftPanelRef } = useFooterPanelHeight({ footerPanelTab: 'legend' });
 
   // Memoize breakpoint values
   const breakpoints = useMemo(
@@ -161,7 +168,7 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   if (footerId !== 'legend' && appBarId.tabGroup !== 'legend') return null;
 
   return (
-    <Box sx={sxClasses.container} {...(!fullWidth && { ref: leftPanelRef })} id={`${mapId}-${containerType}-legendContainer`}>
+    <Box sx={sxClasses.container} id={`${mapId}-${containerType}-legendContainer`}>
       <Box sx={styles.flexContainer}>{content}</Box>
     </Box>
   );
