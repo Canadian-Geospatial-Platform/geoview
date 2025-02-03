@@ -22,6 +22,8 @@ import { logger } from '@/core/utils/logger';
 export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
   const mapId = useGeoViewMapId();
+  const fileExportDefaultPrefixName = 'mapExport';
+
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
   const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
@@ -65,7 +67,11 @@ export default function ExportModal(): JSX.Element {
         .toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white, fontEmbedCSS: '' })
         .then((dataUrl) => {
           setIsMapExporting(false);
-          exportPNG(dataUrl, mapId);
+          if (exportTitle.trim() !== '') {
+            exportPNG(dataUrl, `${fileExportDefaultPrefixName} - ${exportTitle}`);
+          } else {
+            exportPNG(dataUrl, fileExportDefaultPrefixName);
+          }
           setActiveAppBarTab(legendId, 'legend', false, false);
           disableFocusTrap();
         })
@@ -130,8 +136,8 @@ export default function ExportModal(): JSX.Element {
           setIsLegendLoading(true);
           // remove hidden attribute from document legend, so that html-to-image can copy the legend container.
           const legendTab = document.getElementById(`shell-${mapId}-legend`) as HTMLElement;
-          const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
-          if (hasHiddenAttr) legendTab.removeAttribute('hidden');
+          // const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
+          // if (hasHiddenAttr) legendTab.removeAttribute('hidden');
           htmlToImage
             .toPng(legendContainer, { fontEmbedCSS: '' })
             .then((dataUrl) => {
@@ -140,7 +146,7 @@ export default function ExportModal(): JSX.Element {
               img.src = dataUrl;
               img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
               legendContainerRef.current?.appendChild(img);
-              if (hasHiddenAttr) legendTab.hidden = true;
+              // if (hasHiddenAttr) legendTab.hidden = true;
             })
             .catch((error: Error) => {
               logger.logError('Error occured while converting legend to image', error);
