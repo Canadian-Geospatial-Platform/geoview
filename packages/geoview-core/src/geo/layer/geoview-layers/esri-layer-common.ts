@@ -88,7 +88,14 @@ export function commonValidateListOfLayerEntryConfig(
     const { layerPath } = layerConfig;
 
     if (layerEntryIsGroupLayer(layerConfig)) {
+      // Use the layer name from the metadata if it exists and there is no existing name.
+      if (!layerConfig.layerName)
+        layerConfig.layerName = layer.metadata!.layers[layerConfig.layerId].name
+          ? (layer.metadata!.layers[layerConfig.layerId].name as string)
+          : '';
+
       layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+
       if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
         layer.layerLoadError.push({
           layer: layerPath,
@@ -96,6 +103,7 @@ export function commonValidateListOfLayerEntryConfig(
         });
         layerConfig.layerStatus = 'error';
       }
+
       return;
     }
 
@@ -142,6 +150,7 @@ export function commonValidateListOfLayerEntryConfig(
 
       // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)...
       // Don't forget to replace the old version in the registered layers
+      // TODO: TEST GROUP LAYER TEST Officially remove setLayerEntryConfigObsolete once passed testing
       MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(groupLayerConfig);
 
       (layer.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
@@ -164,6 +173,7 @@ export function commonValidateListOfLayerEntryConfig(
 
         // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
         // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)... (standardizing this call with the other one above for now)
+        // TODO: TEST GROUP LAYER TEST Officially remove setLayerEntryConfigObsolete once passed testing
         MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(subLayerEntryConfig);
       });
 
@@ -199,6 +209,7 @@ export function commonGetFieldType(
   if (!fieldDefinition) return 'string';
   const esriFieldType = fieldDefinition.type as string;
   if (esriFieldType === 'esriFieldTypeDate') return 'date';
+  if (esriFieldType === 'esriFieldTypeOID') return 'oid';
   if (
     ['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger', 'esriFieldTypeOID'].includes(
       esriFieldType
@@ -268,19 +279,22 @@ export function commonProcessFeatureInfoConfig(
   const queryable = (layerMetadata.capabilities as string).includes('Query');
   if (layerConfig.source.featureInfo) {
     // if queryable flag is undefined, set it accordingly to what is specified in the metadata
-    if (layerConfig.source.featureInfo.queryable === undefined) layerConfig.source.featureInfo.queryable = queryable;
+    if (layerConfig.source.featureInfo.queryable === undefined && layerMetadata.fields?.length)
+      layerConfig.source.featureInfo.queryable = queryable;
     // else the queryable flag comes from the user config.
-    else if (layerConfig.source.featureInfo.queryable && !layerMetadata.fields && layerMetadata.type !== 'Group Layer') {
+    else if (layerConfig.source.featureInfo.queryable && layerMetadata.type !== 'Group Layer') {
       layerConfig.layerStatus = 'error';
       throw new Error(
         `The config whose layer path is ${layerPath} cannot set a layer as queryable because it does not have field definitions`
       );
     }
-  } else layerConfig.source.featureInfo = layerConfig.isMetadataLayerGroup ? { queryable: false } : { queryable };
+  } else
+    layerConfig.source.featureInfo =
+      layerConfig.isMetadataLayerGroup || !layerMetadata.fields?.length ? { queryable: false } : { queryable };
   MapEventProcessor.setMapLayerQueryable(layer.mapId, layerPath, layerConfig.source.featureInfo.queryable);
 
   // dynamic group layer doesn't have fields definition
-  if (layerMetadata.type !== 'Group Layer') {
+  if (layerMetadata.type !== 'Group Layer' && layerMetadata.fields) {
     // Process undefined outfields or aliasFields
     if (!layerConfig.source.featureInfo.outfields?.length) {
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
@@ -341,14 +355,17 @@ export function commonProcessInitialSettings(
     ] as Extent;
 
     // Transform to latlon extent
-    const latlonExtent = Projection.transformExtentFromObj(
-      layerExtent,
-      layerMetadata.extent.spatialReference,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
-    layerConfig.initialSettings!.bounds = latlonExtent;
+    if (layerExtent) {
+      const latlonExtent = Projection.transformExtentFromObj(
+        layerExtent,
+        layerMetadata.extent.spatialReference,
+        Projection.PROJECTION_NAMES.LNGLAT
+      );
+      layerConfig.initialSettings!.bounds = latlonExtent;
+    }
   }
-  layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds);
+
+  layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
 }
 
 /** ***************************************************************************************************************************
@@ -371,6 +388,7 @@ export async function commonProcessLayerMetadata<
   if (queryUrl) {
     if (layerConfig.geoviewLayerConfig.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_IMAGE)
       queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
+
     try {
       const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
       if (data?.error) {

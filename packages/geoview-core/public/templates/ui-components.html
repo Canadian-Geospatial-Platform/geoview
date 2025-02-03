@@ -173,11 +173,11 @@
               track: 'normal',
               onChange: (dates) => {
                 const field = cgpv.api.maps.UI1.layer
-                  .getGeoviewLayerHybrid('historical-flood/0')
-                  .getTemporalDimension('historical-flood/0').field;
+                  .getGeoviewLayer('historical-flood/0')
+                  .getTemporalDimension().field;
                 cgpv.api.maps.UI1.layer
-                  .getGeoviewLayerHybrid('historical-flood/0')
-                  .applyViewFilter('historical-flood/0', `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
+                  .getGeoviewLayer('historical-flood/0')
+                  .applyViewFilter(`${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
               },
             })
           );

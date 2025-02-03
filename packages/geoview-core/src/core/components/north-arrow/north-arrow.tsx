@@ -8,7 +8,7 @@ import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { getSxClasses } from './north-arrow-style';
 import { useMapNorthArrowElement, useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
-import useManageArrow from './hooks/useManageArrow';
+import { useManageArrow } from './hooks/useManageArrow';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
@@ -23,7 +23,7 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State (no useState for item used inside function only without rendering... use useRef)
   const northArrowRef = useRef<HTMLDivElement>(null);

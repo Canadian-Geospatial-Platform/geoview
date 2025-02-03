@@ -1136,7 +1136,6 @@ async function getPointStyleSubRoutine(
 export async function getLegendStyles(styleConfig: TypeLayerStyleConfig | undefined): Promise<TypeVectorLayerStyles> {
   try {
     if (!styleConfig) return {};
-
     const legendStyles: TypeVectorLayerStyles = {};
     if (styleConfig.Point) {
       // ======================================================================================================================
@@ -1260,7 +1259,7 @@ function searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeLaye
       // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
       // unique value definition.
       const fieldName = feature.getKeys().find((key) => {
-        return key.toLowerCase() === fields?.[j]?.toLowerCase();
+        return key.toLowerCase() === fields[j]?.toLowerCase();
       });
       if (fieldName) {
         // TODO: info - explain why we need to use == instead of ===
@@ -1540,7 +1539,7 @@ export function getAndCreateFeatureStyle(
     }
   }
 
-  // Get the style accordingly to its type and geometry.
+  // Get the style according to its type and geometry.
   if (styleWorkOn![geometryType]) {
     const styleSettings = style![geometryType]!;
     const { type } = styleSettings;
@@ -1581,13 +1580,30 @@ export async function getFeatureCanvas(
     if (style[geometryType]) {
       const styleSettings = style[geometryType]!;
       const { type } = styleSettings;
+
+      // TODO: Performance #2688 - Wrap the style processing in a Promise to prevent blocking, Use requestAnimationFrame to process style during next frame
+      // Wrap the style processing in a Promise to prevent blocking
+      // return new Promise((resolve) => {
+      //   // Use requestAnimationFrame to process style during next frame
+      //   requestAnimationFrame(() => {
+      //     const processedStyle = processStyle[type][geometryType].call(
+      //       '',
+      //       styleSettings,
+      //       feature as Feature,
+      //       filterEquation,
+      //       legendFilterIsOff
+      //     );
+      //     resolve(processedStyle);
+      //   });
+      // });
+
       const featureStyle = processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
       if (featureStyle) {
         if (geometryType === 'Point') {
           if (
-            (styleSettings.type === 'simple' && styleSettings.info[0].settings.type === 'simpleSymbol') ||
-            (styleSettings.type === 'uniqueValue' && styleSettings.info[0].settings.type === 'simpleSymbol') ||
-            (styleSettings.type === 'classBreaks' && isSimpleSymbolVectorConfig(styleSettings.info[0].settings))
+            (styleSettings.type === 'simple' && !(featureStyle.getImage() instanceof Icon)) ||
+            (styleSettings.type === 'uniqueValue' && !(featureStyle.getImage() instanceof Icon)) ||
+            (styleSettings.type === 'classBreaks' && !(featureStyle.getImage() instanceof Icon))
           ) {
             canvas = createPointCanvas(featureStyle);
           } else {

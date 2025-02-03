@@ -3,7 +3,6 @@ import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processo
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, TypeResultSet } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
 import { EventType, AbstractLayerSet, PropagationType } from './abstract-layer-set';
@@ -45,31 +44,24 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-
+  protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
-    return (
-      super.onRegisterLayerCheck(layer, layerPath) &&
-      AbstractLayerSet.isQueryableType(layer) &&
-      AbstractLayerSet.isSourceQueryable(layer, layerPath)
-    );
+    return super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);
   }
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    */
-  protected override onRegisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): void {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-
+  protected override onRegisterLayer(layer: AbstractBaseLayer): void {
     // Call parent
-    super.onRegisterLayer(layer, layerPath);
+    super.onRegisterLayer(layer);
 
     // Update the resultSet data
+    const layerPath = layer.getLayerPath();
     this.resultSet[layerPath].eventListenerEnabled = true;
     this.resultSet[layerPath].queryStatus = 'processed';
     this.resultSet[layerPath].features = [];
@@ -81,8 +73,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
-    // Redirect
-    this.#propagateToStore(resultSetEntry, type === 'layerName' ? 'name' : 'click');
+    // Redirect - Add layer to the list after registration
+    this.#propagateToStore(resultSetEntry, type === 'layer-registration' ? 'name' : 'click');
   }
 
   /**
@@ -118,6 +110,13 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
     // GV As it is (and was like this before events refactor), the this.resultSet is mutating between async calls.
 
+    // TODO: Use the AbortController and kill the active query if there is one in progress. The query layer here call the getFeatureInfoAtLongLat
+    // TODO.CONT: in gv-esri-dynamic. It is for this particular format we need check because identify are slow and many can be sent at the same time
+    // Create an AbortController instance
+    // const controller = new AbortController();
+    // const signal = controller.signal;
+    // controller.abort(); // Cancels the fetch request
+
     // Prepare to hold all promises of features in the loop below
     const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];
 
@@ -131,12 +130,12 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       if (!this.resultSet[layerPath].eventListenerEnabled) return;
 
       // Get the layer config and layer associated with the layer path
-      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
+      const layer = this.layerApi.getGeoviewLayer(layerPath);
 
       // If layer was found
-      if (layer && (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer)) {
+      if (layer && layer instanceof AbstractGVLayer) {
         // If state is not queryable
-        if (!AbstractLayerSet.isStateQueryable(layer, layerPath)) return;
+        if (!AbstractLayerSet.isStateQueryable(layer)) return;
 
         // Flag processing
         this.resultSet[layerPath].features = undefined;

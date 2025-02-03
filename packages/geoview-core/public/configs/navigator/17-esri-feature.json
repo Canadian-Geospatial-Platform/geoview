@@ -53,37 +53,29 @@
           {
             "layerId": "8",
             "layerFilter": "Total_CSO_Volume > 5000000",
-            "style": {
+            "layerStyle": {
               "Point": {
-                "styleId": "classBreaksId",
-                "styleType": "classBreaks",
-                "defaultLabel": "Pas de données de volume / No volume data",
-                "defaultSettings": {
-                  "symbol": "square",
-                  "type": "simpleSymbol",
-                  "color": "rgba(255,127,127,1)",
-                  "offset": [0, 0],
-                  "rotation": 0,
-                  "size": 2.0010000000000003,
-                  "stroke": {
-                    "color": "rgba(0,0,0,1)",
-                    "lineStyle": "solid",
-                    "width": 0.5
-                  }
-                },
-                "defaultVisible": true,
-                "field": "Total_CSO_Volume",
-                "classBreakStyleInfo": [
+                "type": "classBreaks",
+                "hasDefault": true,
+                "fields": [
+                  "Total_CSO_Volume"
+                ],
+                "info": [
                   {
                     "label": "0 m3",
-                    "minValue": 0,
-                    "maxValue": 0,
+                    "values": [
+                      0,
+                      0
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
                       "color": "rgba(76,230,0,1)",
-                      "offset": [0, 0],
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 2.6679999999999997,
                       "stroke": {
@@ -95,14 +87,19 @@
                   },
                   {
                     "label": "0.0001 - ≤ 5,000,000 m3",
-                    "minValue": 0,
-                    "maxValue": 5000000,
+                    "values": [
+                      0.0001,
+                      5000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
-                      "color": "rgba(196,97,255,1)",
-                      "offset": [0, 0],
+                      "color": "rgba(226,176,255,1)",
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 5.114407777777778,
                       "stroke": {
@@ -114,14 +111,19 @@
                   },
                   {
                     "label": "> 5,000,000 - ≤ 10,000,000 m3",
-                    "minValue": 5000000,
-                    "maxValue": 10000000,
+                    "values": [
+                      5000000,
+                      10000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
-                      "color": "rgba(196,97,255,1)",
-                      "offset": [0, 0],
+                      "color": "rgba(217,151,255,1)",
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 7.560815555555555,
                       "stroke": {
@@ -133,14 +135,19 @@
                   },
                   {
                     "label": "> 10,000,000 - ≤ 15,000,000 m3",
-                    "minValue": 10000000,
-                    "maxValue": 15000000,
+                    "values": [
+                      10000000,
+                      15000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
-                      "color": "rgba(196,97,255,1)",
-                      "offset": [0, 0],
+                      "color": "rgba(207,125,255,1)",
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 10.007223333333332,
                       "stroke": {
@@ -152,14 +159,19 @@
                   },
                   {
                     "label": "> 15,000,000 - ≤ 20,000,000 m3",
-                    "minValue": 15000000,
-                    "maxValue": 20000000,
+                    "values": [
+                      15000000,
+                      20000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
-                      "color": "rgba(196,97,255,1)",
-                      "offset": [0, 0],
+                      "color": "rgba(200,105,255,1)",
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 12.453631111111111,
                       "stroke": {
@@ -171,14 +183,19 @@
                   },
                   {
                     "label": "> 20,000,000 - ≤ 25,000,000 m3",
-                    "minValue": 20000000,
-                    "maxValue": 25000000,
+                    "values": [
+                      20000000,
+                      25000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
-                      "color": "rgba(196,97,255,1)",
-                      "offset": [0, 0],
+                      "color": "rgba(190,80,255,1)",
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 14.90003888888889,
                       "stroke": {
@@ -190,14 +207,19 @@
                   },
                   {
                     "label": "> 25,000,000 - ≤ 30,000,000 m3",
-                    "minValue": 25000000,
-                    "maxValue": 30000000,
+                    "values": [
+                      25000000,
+                      30000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
-                      "color": "rgba(196,97,255,1)",
-                      "offset": [0, 0],
+                      "color": "rgba(183,58,255,1)",
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 17.346446666666665,
                       "stroke": {
@@ -209,14 +231,19 @@
                   },
                   {
                     "label": "> 30,000,000 - ≤ 35,000,000 m3",
-                    "minValue": 30000000,
-                    "maxValue": 35000000,
+                    "values": [
+                      30000000,
+                      35000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
-                      "color": "rgba(196,97,255,1)",
-                      "offset": [0, 0],
+                      "color": "rgba(175,37,255,1)",
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 19.792854444444444,
                       "stroke": {
@@ -228,16 +255,42 @@
                   },
                   {
                     "label": "> 35,000,000 m3",
-                    "minValue": 35000000,
-                    "maxValue": 999000000,
+                    "values": [
+                      35000000,
+                      999000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
-                      "color": "rgba(196,97,255,1)",
-                      "offset": [0, 0],
+                      "color": "rgba(165,11,255,1)",
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 22.239262222222223,
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 0.5
+                      }
+                    }
+                  },
+                  {
+                    "label": "Pas de données de volume / No volume data",
+                    "values": [],
+                    "visible": true,
+                    "settings": {
+                      "symbol": "circle",
+                      "type": "simpleSymbol",
+                      "color": "rgba(255,127,127,1)",
+                      "offset": [
+                        0,
+                        0
+                      ],
+                      "rotation": 0,
+                      "size": 2.0010000000000003,
                       "stroke": {
                         "color": "rgba(0,0,0,1)",
                         "lineStyle": "solid",
@@ -253,10 +306,18 @@
       }
     ]
   },
-  "components": ["overview-map", "north-arrow"],
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],

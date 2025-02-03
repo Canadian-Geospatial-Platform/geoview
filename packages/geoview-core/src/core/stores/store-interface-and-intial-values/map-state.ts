@@ -5,7 +5,7 @@ import { FitOptions } from 'ol/View'; // only for typing
 
 import { useStore } from 'zustand';
 import { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
-import { useGeoViewStore } from '@/core/stores/stores-managers';
+import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -15,7 +15,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { TypePointMarker } from '@/api/config/types/map-schema-types';
-import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from './feature-info-state';
+import { TypeHoverFeatureInfo } from './feature-info-state';
 import { CV_MAP_CENTER } from '@/api/config/types/config-constants';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
@@ -84,7 +84,7 @@ export interface IMapState {
     zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]) => Promise<void>;
     zoomToMyLocation: (position: GeolocationPosition) => Promise<void>;
     transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
-    setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => Promise<TypeFeatureInfoResultSet>;
+    setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => void;
     setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions) => void;
     setFixNorth: (ifFix: boolean) => void;
     setOverlayClickMarkerRef: (htmlRef: HTMLElement) => void;
@@ -459,7 +459,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        * @param {TypeMapMouseInfo} pointerPosition - The pointer position.
        * @returns {Promise<TypeFeatureInfoResultSet>}
        */
-      setClickCoordinates: (pointerPosition: TypeMapMouseInfo): Promise<TypeFeatureInfoResultSet> => {
+      setClickCoordinates: (pointerPosition: TypeMapMouseInfo): void => {
         // Redirect to processor
         return MapEventProcessor.setClickCoordinates(get().mapId, pointerPosition);
       },
@@ -812,13 +812,19 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       setLegendCollapsed: (layerPath: string, collapsed?: boolean): void => {
         const curLayerInfo = get().mapState.orderedLayerInfo;
-        const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
-        if (layerInfo) {
-          const newCollapsed = collapsed || !layerInfo.legendCollapsed;
-          layerInfo.legendCollapsed = newCollapsed;
+        const layerIndex = curLayerInfo.findIndex((info) => info.layerPath === layerPath);
+
+        if (layerIndex !== -1) {
+          // Create shallow copy of array
+          const newLayerInfo = curLayerInfo.slice();
+          // Only create new object for the changed layer
+          newLayerInfo[layerIndex] = {
+            ...curLayerInfo[layerIndex],
+            legendCollapsed: collapsed ?? !curLayerInfo[layerIndex].legendCollapsed,
+          };
 
           // Redirect
-          get().mapState.setterActions.setOrderedLayerInfo(curLayerInfo);
+          get().mapState.setterActions.setOrderedLayerInfo(newLayerInfo);
         }
       },
 
@@ -920,4 +926,9 @@ export const useMapSize = (): [number, number] => useStore(useGeoViewStore(), (s
 export const useMapVisibleLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
 export const useMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
+// Getter function for one-time access, there is no subcription to modification
+export const getMapPointerPosition = (mapId: string): TypeMapMouseInfo | undefined =>
+  getGeoViewStore(mapId).getState().mapState.pointerPosition;
+
+// Store Actions
 export const useMapStoreActions = (): MapActions => useStore(useGeoViewStore(), (state) => state.mapState.actions);

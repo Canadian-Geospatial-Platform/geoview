@@ -19,6 +19,7 @@ import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
+import { WMS_PROXY_URL } from '@/app';
 
 /**
  * Manages a WMS layer.
@@ -120,7 +121,7 @@ export class GVWMS extends AbstractGVRaster {
 
       // Check if bounds are properly set
       if (!layerConfig.initialSettings!.bounds) {
-        const newBounds = this.getBounds(this.getLayerPath());
+        const newBounds = this.getBounds();
         if (newBounds)
           layerConfig.initialSettings!.bounds = Projection.transformExtentFromProj(
             newBounds,
@@ -180,9 +181,12 @@ export class GVWMS extends AbstractGVRaster {
               }
             }
           }
-        } else if (infoFormat === 'text/html') {
-          featureMember = { html: response.data };
-        } else featureMember = { plain_text: { '#text': response.data } };
+        } else if (response.data && response.data.length > 0) {
+          // The response has any data to show
+          if (infoFormat === 'text/html') {
+            featureMember = { html: response.data };
+          } else featureMember = { plain_text: { '#text': response.data } };
+        }
 
         if (featureMember) {
           const featureInfoResult = GVWMS.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
@@ -202,7 +206,7 @@ export class GVWMS extends AbstractGVRaster {
    * Overrides the fetching of the legend for a WMS layer.
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
-  override async getLegend(): Promise<TypeLegend | null> {
+  override async onFetchLegend(): Promise<TypeLegend | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
@@ -214,7 +218,7 @@ export class GVWMS extends AbstractGVRaster {
       // If more than 1
       if (this.WMSStyles.length > 1) {
         for (let i = 0; i < this.WMSStyles.length; i++) {
-          // TODO: refactor - does this await in a loop may haev an impact on performance?
+          // TODO: refactor - does this await in a loop may have an impact on performance?
           // TO.DOCONT: In this case here, when glancing at the code, the only reason to await would be if the order that the styleLegend
           // TO.DOCONT: get added to the styleLegends array MUST be the same order as they are in the WMSStyles array (as in they are 2 arrays with same indexes pointers).
           // TO.DOCONT: Without the await, WMSStyles[2] stuff could be associated with something in styleLegends[1] position for example (1<>2).
@@ -251,7 +255,7 @@ export class GVWMS extends AbstractGVRaster {
       return legend;
     } catch (error) {
       // Log
-      logger.logError('gv-wms.getLegend()\n', error);
+      logger.logError('gv-wms.onFetchLegend()\n', error);
       return null;
     }
   }
@@ -350,17 +354,45 @@ export class GVWMS extends AbstractGVRaster {
 
       if (queryUrl) {
         queryUrl = queryUrl.toLowerCase().startsWith('http:') ? `https${queryUrl.slice(4)}` : queryUrl;
+
         axios
           .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })
           .then((response) => {
+            // Text response means something went wrong
             if (response.data.type === 'text/xml') {
               resolve(null);
             }
+
+            // Expected response, return it as image
             resolve(readImage(Cast<Blob>(response.data)));
           })
-          .catch(() => resolve(null));
+          .catch((error) => {
+            /** For some layers the layer loads fine through the proxy, but fetching the legend fails
+             * We try the fetch first without the proxy and if we get a network error, try again with the proxy.
+             */
+            if (error.code === 'ERR_NETWORK') {
+              // Try appending link with proxy url to avoid CORS issues
+              queryUrl = `${WMS_PROXY_URL}${queryUrl}`;
+
+              axios
+                .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })
+                .then((response) => {
+                  // Text response means something went wrong
+                  if (response.data.type === 'text/xml') {
+                    resolve(null);
+                  }
+
+                  // Expected response, return it as image
+                  resolve(readImage(Cast<Blob>(response.data)));
+                })
+                .catch(() => resolve(null));
+              // Not a CORS issue, return null
+            } else resolve(null);
+          });
+        // No URL to query
       } else resolve(null);
     });
+
     return promisedImage;
   }
 
@@ -483,8 +515,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {string} wmsStyleId - The style identifier that will be used.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  setWmsStyle(wmsStyleId: string, layerPath: string): void {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done (it should be moved when calling getLayerFilter below too)
+  setWmsStyle(wmsStyleId: string): void {
     // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
     this.getOLSource()?.updateParams({ STYLES: wmsStyleId });
   }
@@ -496,8 +527,8 @@ export class GVWMS extends AbstractGVRaster {
     // Call parent
     super.onLoaded();
 
-    // Apply view filter immediately (no need to provide a layer path here so '' is sent (hybrid work))
-    this.applyViewFilter('', this.getLayerConfig().layerFilter || '');
+    // Apply view filter immediately
+    this.applyViewFilter(this.getLayerConfig().layerFilter || '');
   }
 
   /**
@@ -509,13 +540,12 @@ export class GVWMS extends AbstractGVRaster {
    * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true): void {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done (it should be moved when calling getLayerFilter below too)
+  applyViewFilter(filter: string, combineLegendFilter = true): void {
     const layerConfig = this.getLayerConfig();
     const olLayer = this.getOLLayer();
 
     // Log
-    logger.logTraceCore('GVWMS - applyViewFilter', layerPath);
+    logger.logTraceCore('GVWMS - applyViewFilter', this.getLayerPath());
 
     // Get source
     const source = olLayer.getSource();
@@ -548,7 +578,6 @@ export class GVWMS extends AbstractGVRaster {
 
         // Emit event
         this.emitLayerFilterApplied({
-          layerPath,
           filter: filterValueToUse,
         });
       }
@@ -560,12 +589,8 @@ export class GVWMS extends AbstractGVRaster {
    * @returns {Extent | undefined} The layer bounding box.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getBounds(layerPath: string): Extent | undefined {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  override getBounds(): Extent | undefined {
     const layerConfig = this.getLayerConfig();
-
-    // Get the source projection
-    const sourceProjection = this.getOLSource().getProjection() || undefined;
 
     // Get the layer config bounds
     let layerConfigBounds = layerConfig?.initialSettings?.bounds;
@@ -576,8 +601,8 @@ export class GVWMS extends AbstractGVRaster {
       layerConfigBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerConfigBounds, 'EPSG:4326');
     }
 
-    // Get the layer bounds from metadata
-    const metadataExtent = this.#getBoundsExtentFromMetadata(sourceProjection?.getCode() || '');
+    // Get the layer bounds from metadata, favoring a bounds in the same project as the map
+    const metadataExtent = this.#getBoundsExtentFromMetadata(this.getMapViewer().getProjection().getCode());
 
     // If any
     let layerBounds;
@@ -613,22 +638,22 @@ export class GVWMS extends AbstractGVRaster {
     if (boundingBoxes) {
       // Find the one with the right projection
       for (let i = 0; i < (boundingBoxes.length as number); i++) {
-        if (boundingBoxes[i].crs === projection)
-          return [
-            boundingBoxes[i].crs as string,
-            // TODO: Check - Is it always in that order, 1, 0, 3, 2 or does that depend on the projection?
-            [boundingBoxes[i].extent[1], boundingBoxes[i].extent[0], boundingBoxes[i].extent[3], boundingBoxes[i].extent[2]] as Extent,
-          ];
+        // Read the extent info from the GetCap
+        const { crs, extent } = boundingBoxes[i] as unknown as { crs: string; extent: Extent };
+
+        // If it's the crs we want
+        if (crs === projection) {
+          const extentSafe: Extent = Projection.readExtentCarefully(crs, extent);
+          return [crs, extentSafe];
+        }
       }
 
-      // Not found. If any
+      // At this point, none could be found. If there's any to go with, we try our best...
       if (boundingBoxes.length > 0) {
         // Take the first one and return the bounds and projection
-        return [
-          boundingBoxes[0].crs as string,
-          // TODO: Check - Is it always in that order, 1, 0, 3, 2 or does that depend on the projection?
-          [boundingBoxes[0].extent[1], boundingBoxes[0].extent[0], boundingBoxes[0].extent[3], boundingBoxes[0].extent[2]] as Extent,
-        ];
+        const { crs, extent } = boundingBoxes[0] as unknown as { crs: string; extent: Extent };
+        const extentSafe: Extent = Projection.readExtentCarefully(crs, extent);
+        return [crs, extentSafe];
       }
     }
 

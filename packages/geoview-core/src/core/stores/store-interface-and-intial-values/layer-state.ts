@@ -11,6 +11,7 @@ import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import {
   layerEntryIsEsriDynamic,
   TypeFeatureInfoEntryPartial,
+  TypeLayerStatus,
   TypeLayerStyleConfig,
   TypeResultSet,
   TypeResultSetEntry,
@@ -21,6 +22,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
+import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 
 // #region INTERFACES & TYPES
 
@@ -42,6 +44,7 @@ export interface ILayerState {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
     getLayerDeleteInProgress: () => boolean;
+    getLayerStatus: (layerPath: string) => TypeLayerStatus;
     refreshLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -49,6 +52,7 @@ export interface ILayerState {
     setLayerDeleteInProgress: (newVal: boolean) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     setSelectedLayerPath: (layerPath: string) => void;
+    sortLegendLayersChildren: (legendLayerList: TypeLegendLayer[]) => void;
     toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
     setSelectedLayerSortingArrowId: (layerId: string) => void;
@@ -111,6 +115,12 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
         // Check if EsriDynamic config
         if (layerConfig && layerEntryIsEsriDynamic(layerConfig)) {
+          // Get oid field
+          const oidField =
+            layerConfig.source.featureInfo && layerConfig.source.featureInfo.outfields
+              ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
+              : 'OBJECTID';
+
           // Query for the specific object ids
           // TODO: Put the server original projection in the config metadata (add a new optional param in source for esri)
           // TO.DOCONT: When we get the projection we can get the projection in original server (will solve error trying to reproject https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7 in 3857)
@@ -119,7 +129,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
             `${layerConfig.source?.dataAccessPath}/${layerConfig.layerId}`,
             geometryType,
             objectIDs,
-            'OBJECTID',
+            oidField,
             true,
             MapEventProcessor.getMapState(get().mapId).currentProjection
           );
@@ -153,6 +163,20 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * Get the LayerDeleteInProgress state.
        */
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
+
+      /**
+       * Gets the layer status in the store which correspond to the layer path
+       * @param {string} layerPath - The layer path of the bounds to get
+       * @returns {TypeLayerStatus | undefined} The status or undefined
+       */
+      getLayerStatus: (layerPath: string): TypeLayerStatus | undefined => {
+        const curLayers = get().layerState.legendLayers;
+
+        // If the layer is not found, it is because it is deleted, return error status
+        return LegendEventProcessor.findLayerByPath(curLayers, layerPath) !== undefined
+          ? LegendEventProcessor.findLayerByPath(curLayers, layerPath)!.layerStatus
+          : 'error';
+      },
 
       /**
        * Refresh layer and set states to original values.
@@ -217,6 +241,14 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       setSelectedLayerPath: (layerPath: string): void => {
         // Redirect to event processor
         LegendEventProcessor.setSelectedLayersTabLayer(get().mapId, layerPath);
+      },
+
+      /**
+       * Sorts legend layers children recursively in given legend layers list.
+       * @param {TypeLegendLayer[]} legendLayerList - The list to sort.
+       */
+      sortLegendLayersChildren: (legendLayerList: TypeLegendLayer[]): void => {
+        LegendEventProcessor.sortLegendLayersChildren(get().mapId, legendLayerList);
       },
 
       /**
@@ -381,8 +413,11 @@ export const useSelectedLayer = (): TypeLegendLayer | undefined => {
 export const useIconLayerSet = (layerPath: string): string[] => {
   const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const layer = LegendEventProcessor.findLayerByPath(layers, layerPath);
-  if (layer) {
+  if (layer && layer.type !== CV_CONST_LAYER_TYPES.WMS) {
     return layer.items.map((item) => item.icon).filter((d) => d !== null) as string[];
+  }
+  if (layer && layer.type === CV_CONST_LAYER_TYPES.WMS) {
+    return layer.icons.map((item) => item.iconImage).filter((d) => d !== null) as string[];
   }
   return [];
 };

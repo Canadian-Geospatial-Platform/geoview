@@ -207,6 +207,9 @@
       const LYR_PATH_FEATURE = "esriFeatureLYR5/0";
       const LYR_PATH_GEOCORE = "f4c51eaa-a6ca-48b9-a1fc-b0651da20509";
 
+      var CNT_GENERIC_STATUS_CHANGE = 0;
+      var CNT_SPECIFIC_STATUS_CHANGE = 0;
+
       // Register a handler when the map is init
       cgpv.onMapInit((mapId) => {
         // !!
@@ -269,7 +272,7 @@
         // listen to ANY/ALL layer status at ANY time (generic event catcher)
         cgpv.api.maps[mapId].layer.legendsLayerSet.onLayerStatusUpdated((sender, payload) => {
           //cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${payload.layer.layerPath} (generic event) status changed to ${payload.layer.layerStatus}`);
-          console.log(`${payload.layer.layerPath} (generic event) status changed to ${payload.layer.layerStatus}`);
+          console.log(`${payload.layer.layerPath} (generic event ${++CNT_GENERIC_STATUS_CHANGE}) status changed to ${payload.layer.layerStatus}`);
         });
 
         // listen to layer item visibility changed event (any layers)
@@ -298,13 +301,16 @@
         // Check the layer status of the particular layer before registering the hook - to really know at which status the layer is.
         // GV If you really want to make sure to track ALL status changes for ANY particular layer, you can use a hook such as:
         // `cgpv.api.maps[mapId].layer.legendsLayerSet.onLayerStatusUpdated()`. See example in cgpv.onMapInit handler above.
+
         cgpv.api.maps.Map1.layer.getLayerEntryConfig(LYR_PATH_UNIQUE)?.onLayerStatusChanged((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${LYR_PATH_UNIQUE} (specific event) status changed to ${payload.layerStatus}`);
-          console.log(`${LYR_PATH_UNIQUE} (specific event) status changed to ${payload.layerStatus}`);
+          console.log(`${LYR_PATH_UNIQUE} (specific event ${++CNT_SPECIFIC_STATUS_CHANGE}) status changed to ${payload.layerStatus}`);
         });
 
         // listen to individual layer loaded event
-        cgpv.api.maps.Map1.layer.getGeoviewLayerHybrid(LYR_PATH_NON_METAL)?.onIndividualLayerLoaded((sender, payload) => {
+        // TODO: The gv layer does not exist at the time we attach the event. To make this work, we would
+        // TODO.CONT: need to implement a when-this-then internal approach.
+        cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_NON_METAL)?.onIndividualLayerLoaded((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess('Nonmetal mines has finished loading');
           console.log(sender.olRootLayer.getSource().getFeatures());
         });
@@ -331,22 +337,22 @@
         // !!
 
         // listen to layer visibility changed event (individual geoview layer)
-        cgpv.api.maps.Map1.layer.getGeoviewLayerHybrid(LYR_PATH_UNIQUE)?.onVisibleChanged((sender, payload) => {
+        cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onVisibleChanged((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${LYR_PATH_UNIQUE} visibility set to ${payload.visible} - individual`);
         });
 
         // listen to layer visibility changed event (individual geoview layer)
-        cgpv.api.maps.Map1.layer.getGeoviewLayerHybrid(LYR_PATH_GEOCORE)?.onVisibleChanged((sender, payload) => {
+        cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_GEOCORE)?.onVisibleChanged((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visible} - individual`);
         });
 
         // listen to layer opacity changed event
-        cgpv.api.maps.Map1.layer.getGeoviewLayerHybrid(LYR_PATH_UNIQUE)?.onLayerOpacityChanged((sender, payload) => {
+        cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onLayerOpacityChanged((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${payload.layerPath} opacity changed to ${payload.opacity}`);
         });
 
         // listen to layer filter applied event
-        cgpv.api.maps.Map1.layer.getGeoviewLayerHybrid(LYR_PATH_UNIQUE)?.onLayerFilterApplied((sender, payload) => {
+        cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_UNIQUE)?.onLayerFilterApplied((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`Filter ${payload.filter} applied to ${payload.layerPath}`);
         });
 

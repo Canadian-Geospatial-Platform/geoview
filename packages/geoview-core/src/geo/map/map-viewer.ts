@@ -76,6 +76,9 @@ export class MapViewer {
   // Minimum delay (in milliseconds) for map to be in loading state
   static readonly #MIN_DELAY_LOADING = 2000;
 
+  // The default densification number when forming layer extents, to make ture to compensate for earth curvature
+  static DEFAULT_STOPS: number = 25;
+
   // map config properties
   mapFeaturesConfig: TypeMapFeaturesConfig;
 
@@ -287,7 +290,7 @@ export class MapViewer {
     // If map isn't static
     if (this.mapFeaturesConfig.map.interaction !== 'static') {
       // Register handlers on pointer move and map single click
-      this.map.on('pointermove', debounce(this.#handleMapPointerMove.bind(this), 10, { leading: true }).bind(this));
+      this.map.on('pointermove', debounce(this.#handleMapPointerMove.bind(this), 250, { leading: true }).bind(this));
       this.map.on('singleclick', debounce(this.#handleMapSingleClick.bind(this), 1000, { leading: true }).bind(this));
     }
 
@@ -431,10 +434,7 @@ export class MapViewer {
       };
 
       // Save in the store
-      MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates).catch((error) => {
-        // Log
-        logger.logPromiseFailed('setClickCoordinates in #handleMapSingleClick in MapViewer', error);
-      });
+      MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates);
 
       // Emit to the outside
       this.#emitMapSingleClick(clickCoordinates);
@@ -531,7 +531,10 @@ export class MapViewer {
           'registered',
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
           (geoviewLayer) => {
-            logger.logTraceDetailed('checkMapReady - 1 - waiting on layer registration...', geoviewLayer.geoviewLayerId);
+            logger.logTraceDetailed(
+              'checkMapReady - 1 - waiting on layer registration...',
+              geoviewLayer.getLayerConfig().geoviewLayerConfig.geoviewLayerId
+            );
           }
         );
 
@@ -675,7 +678,10 @@ export class MapViewer {
           'processed',
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
           (geoviewLayer) => {
-            logger.logTraceDetailed('checkMapReady - 2 - waiting on layer processed...', geoviewLayer.geoviewLayerId);
+            logger.logTraceDetailed(
+              'checkMapReady - 2 - waiting on layer processed...',
+              geoviewLayer.getLayerConfig().geoviewLayerConfig.geoviewLayerId
+            );
           }
         );
 
@@ -712,7 +718,10 @@ export class MapViewer {
           'loaded',
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
           (geoviewLayer) => {
-            logger.logTraceDetailed('checkMapReady - 3 - waiting on layer loaded/error status...', geoviewLayer.geoviewLayerId);
+            logger.logTraceDetailed(
+              'checkMapReady - 3 - waiting on layer loaded/error status...',
+              geoviewLayer.getLayerConfig().geoviewLayerConfig.geoviewLayerId
+            );
           }
         );
 
@@ -1093,6 +1102,11 @@ export class MapViewer {
 
   // #region MAP ACTIONS
 
+  emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void {
+    // Emit the event
+    this.#emitMapSingleClick(clickCoordinates);
+  }
+
   /**
    * Loops through all geoview layers and refresh their respective source.
    * Use this function on projection change or other viewer modification who may affect rendering.
@@ -1238,9 +1252,11 @@ export class MapViewer {
 
   /**
    * Reload a map from a config object created using current map state. It first removes then recreates the map.
+   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   *                                              Set to false after a language change to update the layer names with the new language.
    */
-  reloadWithCurrentState(): void {
-    const currentMapConfig = this.createMapConfigFromMapState();
+  reloadWithCurrentState(maintainGeocoreLayerNames: boolean = true): void {
+    const currentMapConfig = this.createMapConfigFromMapState(maintainGeocoreLayerNames);
     this.reload(currentMapConfig).catch((error) => {
       // Log
       logger.logError(`Couldn't reload the map in map-viewer`, error);
@@ -1444,11 +1460,12 @@ export class MapViewer {
   /**
    * Transforms extent from LngLat to the current projection of the map.
    * @param {Extent} extent - The LngLat extent
+   * @param {number} stops - The number of stops to perform densification on the extent
    * @returns {Extent} The extent in the map projection
    */
-  convertExtentLngLatToMapProj(extent: Extent): Extent {
+  convertExtentLngLatToMapProj(extent: Extent, stops: number = MapViewer.DEFAULT_STOPS): Extent {
     // Redirect
-    return this.convertExtentFromProjToMapProj(extent, Projection.PROJECTION_NAMES.LNGLAT);
+    return this.convertExtentFromProjToMapProj(extent, Projection.PROJECTION_NAMES.LNGLAT, stops);
   }
 
   /**
@@ -1497,12 +1514,13 @@ export class MapViewer {
    * Transforms extent from given projection to the current projection of the map.
    * @param {Extent} extent - The given extent
    * @param {ProjectionLike} fromProj - The projection of the given extent
+   * @param {number} stops - The number of stops to perform densification on the extent
    * @returns {Extent} The extent in the map projection
    */
-  convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike): Extent {
+  convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike, stops: number = MapViewer.DEFAULT_STOPS): Extent {
     // If different projections
     if (fromProj !== this.getProjection().getCode()) {
-      return Projection.transformExtentFromProj(extent, fromProj, this.getProjection());
+      return Projection.transformExtentFromProj(extent, fromProj, this.getProjection(), stops);
     }
 
     // Same projection
@@ -1527,10 +1545,12 @@ export class MapViewer {
 
   /**
    * Creates a map config based on current map state.
+   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   *                                              Set to false after a language change to update the layer names with the new language.
    * @returns {TypeMapFeaturesInstance | undefined} Map config with current map state.
    */
-  createMapConfigFromMapState(): TypeMapFeaturesInstance | undefined {
-    return MapEventProcessor.createMapConfigFromMapState(this.mapId);
+  createMapConfigFromMapState(maintainGeocoreLayerNames: boolean = true): TypeMapFeaturesInstance | undefined {
+    return MapEventProcessor.createMapConfigFromMapState(this.mapId, maintainGeocoreLayerNames);
   }
 
   // #region EVENTS

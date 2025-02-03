@@ -1,10 +1,7 @@
 import BaseLayer from 'ol/layer/Base';
-import TileLayer from 'ol/layer/Tile';
 import VectorTileLayer from 'ol/layer/VectorTile';
-import { Options as TileOptions } from 'ol/layer/BaseTile';
 import VectorTileSource, { Options as SourceOptions } from 'ol/source/VectorTile';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
-import { Extent } from 'ol/extent';
 
 import { applyStyle } from 'ol-mapbox-style';
 
@@ -17,7 +14,6 @@ import {
   TypeGeoviewLayerConfig,
   TypeTileGrid,
   layerEntryIsGroupLayer,
-  TypeFeatureInfoLayerConfig,
 } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
@@ -25,7 +21,6 @@ import { api } from '@/app';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -106,22 +101,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   constructor(mapId: string, layerConfig: TypeVectorTilesConfig) {
     super(CONST_LAYER_TYPES.VECTOR_TILES, layerConfig, mapId);
-  }
-
-  /** ***************************************************************************************************************************
-   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {TypeOutfieldsType} The type of the field.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  // TODO refactor - this looks like it will not work, investigate further
-  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
-    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo as unknown as TypeFeatureInfoLayerConfig;
-    const outFieldEntry = fieldDefinitions.outfields?.find((fieldDefinition) => fieldDefinition.name === fieldName);
-    return outFieldEntry?.type || 'string';
   }
 
   /** ***************************************************************************************************************************
@@ -213,30 +192,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as VectorTileLayer<VectorTileSource>;
-    }
-
-    // If no olLayer was obtained
-    if (!olLayer) {
-      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
-      const tileLayerOptions: TileOptions<VectorTileSource> = { source };
-      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-      if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
-      if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings.extent;
-      if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-      if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
-      if (layerConfig.initialSettings?.states?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
-      // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-      // GV            in the 'loading' state if the flag value is false.
-
-      // TODO remove after demoing again
-      const declutter = this.mapId !== 'LYR2';
-
-      // Create the OpenLayer layer
-      olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
-
-      // Hook the loaded event
-      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'tile');
-    }
+    } else throw new Error('Error on layerRequesting event');
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });
@@ -283,44 +239,5 @@ export class VectorTiles extends AbstractGeoViewRaster {
       layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
     }
     return Promise.resolve(layerConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
-   *
-   * @param {string} layerPath The Layer path to the layer's configuration.
-   *
-   * @returns {Extent | undefined} The new layer bounding box.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  override getBounds(layerPath: string): Extent | undefined {
-    // Get the layer
-    const layer = this.getOLLayer(layerPath) as TileLayer<VectorTileSource> | undefined;
-
-    // Get the source projection
-    const sourceProjection = this.getSourceProjection(layerPath);
-
-    // Get the layer bounds
-    let sourceExtent = layer?.getSource()?.getTileGrid()?.getExtent();
-    if (sourceExtent) {
-      // Make sure we're in the map projection
-      sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
-    }
-
-    // Return the calculated layer bounds
-    return sourceExtent;
-  }
-
-  /**
-   * Set Vector Tile style
-   *
-   * @param {string} layerPath Path of layer to style.
-   * @param {string} styleUrl The url of the styles to apply.
-   * @returns {Promise<unknown>}
-   */
-  // GV Layers Refactoring - Obsolete (just should be removed?)
-  setVectorTileStyle(layerPath: string, styleUrl: string): Promise<unknown> {
-    // FIXME: Check if this should be removed or done somewhere else?
-    return applyStyle(this.getMapViewer().layer.getOLLayer(layerPath) as VectorTileLayer<VectorTileSource>, styleUrl);
   }
 }

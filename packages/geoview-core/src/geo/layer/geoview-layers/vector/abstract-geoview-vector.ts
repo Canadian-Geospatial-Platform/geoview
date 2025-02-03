@@ -4,40 +4,27 @@ import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
-import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
-import { Coordinate } from 'ol/coordinate';
-import { Extent } from 'ol/extent';
-import { Pixel } from 'ol/pixel';
 import { ProjectionLike } from 'ol/proj';
-import { Point } from 'ol/geom';
+import { Geometry, Point } from 'ol/geom';
 import { getUid } from 'ol/util';
 
-import { TypeOutfields, TypeOutfieldsType } from '@config/types/map-schema-types';
+import { TypeFeatureInfoLayerConfig, TypeOutfields } from '@config/types/map-schema-types';
 
 import { api } from '@/app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import {
-  TypeBaseSourceVectorInitialConfig,
-  TypeFeatureInfoEntry,
-  TypeFeatureInfoLayerConfig,
-  TypeLayerEntryConfig,
-} from '@/geo/map/map-schema-types';
+import { TypeBaseSourceVectorInitialConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { VECTOR_LAYER } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { analyzeLayerFilter } from '@/geo/utils/renderer/geoview-renderer';
-import { AbstractGVVector } from '../../gv-layers/vector/abstract-gv-vector';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Projection } from '@/geo/utils/projection';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -48,8 +35,8 @@ export type TypeVectorLayerGroup = LayerGroup;
 export type TypeVectorLayer = VectorSource<Feature>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 
-const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude/latitude', 'latitude / latitude'];
-const EXCLUDED_HEADERS_LNG = ['longitude', 'lon', 'x', 'xcoord', 'longitude/longitude', 'longitude / longitude'];
+const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
+const EXCLUDED_HEADERS_LNG = ['longitude', 'lon', 'x', 'xcoord', 'longitude|longitude', 'longitude | longitude'];
 const EXCLUDED_HEADERS_GEN = ['geometry', 'geom'];
 const EXCLUDED_HEADERS = EXCLUDED_HEADERS_LAT.concat(EXCLUDED_HEADERS_LNG).concat(EXCLUDED_HEADERS_GEN);
 
@@ -89,23 +76,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // GV Layers Refactoring - Obsolete (in config?)
   protected abstract override validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
-
-  /** ***************************************************************************************************************************
-   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {TypeOutfieldsType} The type of the field.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType {
-    const fieldDefinitions =
-      (this.getLayerMetadata(layerConfig.layerPath)?.source.featureInfo as unknown as TypeFeatureInfoLayerConfig) ||
-      layerConfig.source?.featureInfo;
-    const outFieldEntry = fieldDefinitions.outfields?.find((fieldDefinition) => fieldDefinition.name === fieldName);
-    return outFieldEntry?.type || 'string';
-  }
 
   /** ***************************************************************************************************************************
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
@@ -177,11 +147,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             // Convert the CSV to features
             features = AbstractGeoViewVector.convertCsv(this.mapId, xhr.responseText, layerConfig as VectorLayerEntryConfig);
           } else if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
+            // Get oid field
+            const oidField = AbstractGeoViewVector.#getEsriOidField(layerConfig);
+
             // Fetch the features text array
             const esriFeaturesArray = await AbstractGeoViewVector.getEsriFeatures(
               layerConfig.layerPath,
               url as string,
               JSON.parse(xhr.responseText).count,
+              oidField,
               this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount as number | undefined
             );
 
@@ -208,8 +182,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
                is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
             */
           if (features) {
+            // Get oid field
+            const oidField = AbstractGeoViewVector.#getEsriOidField(layerConfig);
+
             features.forEach((feature) => {
-              const featureId = feature.get('OBJECTID') ? feature.get('OBJECTID') : getUid(feature);
+              const featureId = feature.get(oidField) ? feature.get(oidField) : getUid(feature);
               feature.setId(featureId);
             });
             // If there's no feature info, build it from features
@@ -269,6 +246,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string} layerPath - The layer path of the layer.
    * @param {string} url - The base url for the service.
    * @param {number} featureCount - The number of features in the layer.
+   * @param {string} oidField - The unique identifier field name.
    * @param {number} maxRecordCount - The max features per query from the service.
    * @param {number} featureLimit - The maximum number of features to fetch per query.
    * @param {number} queryLimit - The maximum number of queries to run at once.
@@ -282,18 +260,21 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerPath: string,
     url: string,
     featureCount: number,
+    oidField: string,
     maxRecordCount?: number,
     featureLimit: number = 500,
     queryLimit: number = 10
   ): Promise<string[]> {
     // Update url
+    // TODO: Performance - Check if we should add &maxAllowableOffset=10 to the url. It creates small sliver but download size if 18mb compare to 50mb for outlier-election-2019
+    // TODO.CONT: Download time is 90 seconds compare to 130 seconds. It may worth the loss of precision...
     const baseUrl = url.replace('&where=1%3D1&returnCountOnly=true', `&outfields=*&geometryPrecision=1`);
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
 
     // Create array of url's to call
     const urlArray: string[] = [];
     for (let i = 0; i < featureCount; i += featureFetchLimit) {
-      urlArray.push(`${baseUrl}&where=OBJECTID+<=+${i + featureFetchLimit}&resultOffset=${i}`);
+      urlArray.push(`${baseUrl}&where=${oidField}+<=+${i + featureFetchLimit}&resultOffset=${i}`);
     }
 
     const promises: Promise<string>[] = [];
@@ -331,53 +312,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration used by the source.
    * @param {VectorSource} vectorSource The source configuration for the vector layer.
    *
-   * @returns {VectorLayer<Feature>} The vector layer created.
+   * @returns {VectorSource<Feature<Geometry>>} The vector layer created.
    */
   // GV Layers Refactoring - Obsolete (this is bridging between config and layers, okay)
-  protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource): VectorLayer<Feature> {
-    // Get the style label
-    const label = layerConfig.layerName || layerConfig.layerId;
-
+  protected createVectorLayer(
+    layerConfig: VectorLayerEntryConfig,
+    vectorSource: VectorSource
+  ): VectorLayer<VectorSource<Feature<Geometry>>> {
     // GV Time to request an OpenLayers layer!
+    // TODO: There may be some additional enhancements to be done now that we can notice how emitLayerRequesting and emitLayerCreation are getting "close" to each other.
+    // TODO.CONT: This whole will be removed when migration to config api... do we invest time in it?
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source: vectorSource });
 
     // If any response
-    let olLayer: VectorLayer<Feature> | undefined;
+    let olLayer: VectorLayer<VectorSource<Feature<Geometry>>> | undefined;
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
-      olLayer = requestResult[0] as VectorLayer<Feature>;
-    }
-
-    // If no olLayer was obtained
-    if (!olLayer) {
-      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
-      // Create the vector layer options.
-      const layerOptions: VectorLayerOptions<Feature, VectorSource> = {
-        properties: { layerConfig },
-        source: vectorSource,
-        style: (feature) => {
-          return AbstractGVVector.calculateStyleForFeature(
-            this,
-            feature,
-            label,
-            layerConfig.layerPath,
-            layerConfig.filterEquation,
-            layerConfig.legendFilterIsOff
-          );
-        },
-      };
-
-      if (layerConfig.initialSettings?.extent !== undefined) layerOptions.extent = layerConfig.initialSettings.extent;
-      if (layerConfig.initialSettings?.maxZoom !== undefined) layerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-      if (layerConfig.initialSettings?.minZoom !== undefined) layerOptions.minZoom = layerConfig.initialSettings.minZoom;
-      if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
-
-      // Create the OpenLayer layer
-      olLayer = new VectorLayer(layerOptions);
-
-      // Hook the loaded event
-      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'features');
-    }
+      olLayer = requestResult[0] as VectorLayer<VectorSource<Feature<Geometry>>>;
+    } else throw new Error('Error on layerRequesting event');
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });
@@ -386,143 +338,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
     return olLayer;
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features stored in the layer.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  protected override async getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    try {
-      // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
-      const layer = this.getOLLayer(layerPath) as VectorLayer<Feature>;
-      const features = layer.getSource()!.getFeatures();
-      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
-      return arrayOfFeatureInfoEntries;
-    } catch (error) {
-      // Log
-      logger.logError('abstract-geoview-vector.getAllFeatureInfo()\n', error);
-      return null;
-    }
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided Pixel.
-   *
-   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
-   * @param {string} layerPath - The layer path to the layer's configuration.
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table or null if an error occured.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  protected override getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    try {
-      // Get the layer source
-      const layerSource = this.getOLLayer(layerPath)?.get('source');
-
-      // Prepare a filter by layer to know on which layer we want to query features
-      const layerFilter = (layerCandidate: BaseLayer): boolean => {
-        // We know it's the right layer to query on if the source is the same as the current layer
-        const candidateSource = layerCandidate.get('source');
-        return layerSource && candidateSource && layerSource === candidateSource;
-      };
-
-      // Query the map using the layer filter and a hit tolerance
-      const features = this.getMapViewer().map.getFeaturesAtPixel(location, { hitTolerance: this.hitTolerance, layerFilter }) as Feature[];
-
-      // Format and return the features
-      return this.formatFeatureInfoResult(features, this.getLayerConfig(layerPath) as VectorLayerEntryConfig);
-    } catch (error) {
-      // Log
-      logger.logError('abstract-geoview-vector.getFeatureInfoAtPixel()\n', error);
-      return Promise.resolve(null);
-    }
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided projected coordinate.
-   *
-   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
-   * @param {string} layerPath - The layer path to the layer's configuration.
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  protected override getFeatureInfoAtCoordinate(
-    location: Coordinate,
-    layerPath: string
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    // Redirect to getFeatureInfoAtPixel
-    return this.getFeatureInfoAtPixel(this.getMapViewer().map.getPixelFromCoordinate(location), layerPath);
-  }
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided longitude latitude.
-   *
-   * @param {Coordinate} lnglat - The coordinate that will be used by the query.
-   * @param {string} layerPath - The layer path to the layer's configuration.
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  protected override getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    // Convert Coordinates LngLat to map projection
-    const projCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
-
-    // Redirect to getFeatureInfoAtPixel
-    return this.getFeatureInfoAtPixel(this.getMapViewer().map.getPixelFromCoordinate(projCoordinate), layerPath);
-  }
-
-  /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
-   *
-   * @param {string} layerPath The Layer path to the layer's configuration.
-   *
-   * @returns {Extent | undefined} The new layer bounding box.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  override getBounds(layerPath: string): Extent | undefined {
-    const layer = this.getOLLayer(layerPath) as VectorLayer<Feature> | undefined;
-    const layerBounds = layer?.getSource()?.getExtent();
-
-    // Return the calculated layer bounds
-    return layerBounds;
-  }
-
-  /**
-   * Gets the extent of an array of features.
-   * @param {string} layerPath - The layer path.
-   * @param {string[]} objectIds - The uids of the features to calculate the extent from.
-   * @returns {Promise<Extent | undefined>} The extent of the features, if available.
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  override getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
-    // Get array of features
-    const requestedFeatures = objectIds.map((id) => (this.getOLLayer(layerPath) as VectorLayer<Feature>).getSource()?.getFeatureById(id));
-
-    if (requestedFeatures) {
-      // Determine max extent from features
-      let calculatedExtent: Extent | undefined;
-      requestedFeatures.forEach((feature) => {
-        if (feature?.getGeometry()) {
-          const extent = feature.getGeometry()?.getExtent();
-          if (extent) {
-            // If calculatedExtent has not been defined, set it to extent
-            if (!calculatedExtent) calculatedExtent = extent;
-            else getMinOrMaxExtents(calculatedExtent, extent);
-          }
-        }
-      });
-
-      return Promise.resolve(calculatedExtent);
-    }
-    return Promise.resolve(undefined);
   }
 
   /**
@@ -535,88 +350,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const mapProjection: ProjectionLike = this.getMapViewer().getProjection().getCode();
 
     const format = new FormatGeoJSON();
-    const geoJsonStr = format.writeFeatures((this.getOLLayer(layerPath) as VectorLayer<Feature>).getSource()!.getFeatures(), {
-      dataProjection: 'EPSG:4326', // Output projection,
-      featureProjection: mapProjection,
-    });
+    const geoJsonStr = format.writeFeatures(
+      (this.getOLLayer(layerPath) as VectorLayer<VectorSource<Feature<Geometry>>>).getSource()!.getFeatures(),
+      {
+        dataProjection: 'EPSG:4326', // Output projection,
+        featureProjection: mapProjection,
+      }
+    );
 
     return JSON.parse(geoJsonStr);
-  }
-
-  /**
-   * Overrides when the layer gets in loaded status.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  override onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void {
-    // Call parent
-    super.onLoaded(layerConfig);
-
-    // Apply view filter immediately
-    this.applyViewFilter(layerConfig.layerPath, (layerConfig as VectorLayerEntryConfig).layerFilter || '');
-  }
-
-  /** ***************************************************************************************************************************
-   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
-   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-   * is done.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   * @param {string} filter A filter to be used in place of the getViewFilter value.
-   * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  applyViewFilter(layerPath: string, filter: string, combineLegendFilter: boolean = true): void {
-    // Log
-    logger.logTraceCore('ABSTRACT-GEOVIEW-VECTOR - applyViewFilter', layerPath);
-
-    const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
-    const olLayer = this.getOLLayer(layerPath);
-
-    let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
-    layerConfig.legendFilterIsOff = !combineLegendFilter;
-    if (combineLegendFilter) layerConfig.layerFilter = filter;
-
-    // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
-    // TODO: Standardize the regex across all layer types
-    // OLD REGEX, not working anymore, test before standardization
-    //   ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
-    //     /(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi
-    //   ),
-    const searchDateEntry = [
-      ...filterValueToUse.matchAll(
-        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi
-      ),
-    ];
-
-    searchDateEntry.reverse();
-    searchDateEntry.forEach((dateFound) => {
-      // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
-      const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-      const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
-      filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
-        dateFound.index! + dateFound[0].length
-      )}`;
-    });
-
-    try {
-      const filterEquation = analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
-      layerConfig.filterEquation = filterEquation;
-    } catch (error) {
-      throw new Error(
-        `Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${this.getLayerFilter(
-          layerPath
-        )}\ninternal filter = ${filterValueToUse}`
-      );
-    }
-
-    olLayer?.changed();
-
-    // Emit event
-    this.emitLayerFilterApplied({
-      layerPath,
-      filter: filterValueToUse,
-    });
   }
 
   /** ***************************************************************************************************************************
@@ -697,6 +439,25 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       if (matches[1].length && matches[1] !== separator) parsedData.push([]);
       parsedData[parsedData.length - 1].push(matches[2] !== undefined ? matches[2].replace(/""/g, '"') : matches[3]);
     }
+
+    // These characters are removed from the headers as they break the data table filtering (Issue #2693).
+    parsedData[0].forEach((header, i) => {
+      if (header.includes("'")) logger.logWarning("Header included illegal character (') replaced with (_)");
+      parsedData[0][i] = header.replaceAll("'", '_');
+      if (header.includes('/')) logger.logWarning('Header included illegal character (/) replaced with (|)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('/', '|');
+      if (header.includes('+')) logger.logWarning('Header included illegal character (+) replaced with (plus)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('+', 'plus');
+      if (header.includes('-')) logger.logWarning('Header included illegal character (-) replaced with (_)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('-', '_');
+      if (header.includes('*')) logger.logWarning('Header included illegal character (*) replaced with (x)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('*', 'x');
+      if (header.includes('(')) logger.logWarning('Header included illegal character (() replaced with ([)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('(', '[');
+      if (header.includes(')')) logger.logWarning('Header included illegal character ()) replaced with (])');
+      parsedData[0][i] = parsedData[0][i].replaceAll(')', ']');
+    });
+
     return parsedData;
   }
 
@@ -746,5 +507,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Set name field to first value
     if (!layerConfig.source.featureInfo.nameField)
       layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
+  }
+
+  /**
+   * Gets the Object ID field name from the layer configuration
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration object
+   * @returns {string} The name of the OID field if found, otherwise returns 'OBJECTID' as default
+   * @description Extracts the Object ID field name from the layer configuration. An OID (Object ID) is a
+   * standardized identifier used to uniquely identify features in a layer. If no OID field is specified
+   * in the configuration, it defaults to 'OBJECTID'.
+   * @private
+   */
+  // TODO: We should have this function in abstract-base-layer to be called like layerConfig.getEsriOidField() - issue 2699
+  // TODO.CONT: This should be rename without the esri. The oid type should be mandatory and if not present, we should crate one.
+  // TODO.CONT: We already create the internalGeoviewId but we should make this more officiel by assigning a type of oid
+  static #getEsriOidField(layerConfig: AbstractBaseLayerEntryConfig): string {
+    // Get oid field
+    return layerConfig.source?.featureInfo && (layerConfig.source.featureInfo as TypeFeatureInfoLayerConfig).outfields !== undefined
+      ? (layerConfig.source.featureInfo as TypeFeatureInfoLayerConfig).outfields.filter((field) => field.type === 'oid')[0]?.name
+      : 'OBJECTID';
   }
 }

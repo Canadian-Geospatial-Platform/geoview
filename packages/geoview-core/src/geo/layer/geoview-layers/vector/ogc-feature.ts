@@ -106,23 +106,6 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
-   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   *
-   * @param {string} fieldName field name for which we want to get the type.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
-   *
-   * @returns {'string' | 'date' | 'number'} The type of the field.
-   */
-  // GV Layers Refactoring - Obsolete (in layers)
-  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath);
-    const fieldEntryType = (fieldDefinitions[fieldName].type as string).split(':').slice(-1)[0] as string;
-    if (fieldEntryType === 'date') return 'date';
-    if (['int', 'number'].includes(fieldEntryType)) return 'number';
-    return 'string';
-  }
-
-  /** ***************************************************************************************************************************
    * This method reads the service metadata from the metadataAccessPath.
    *
    * @returns {Promise<void>} A promise that the execution is completed.

@@ -43,6 +43,7 @@ export function esriGetFieldType(
   if (!fieldDefinition) return 'string';
   const esriFieldType = fieldDefinition.type as string;
   if (esriFieldType === 'esriFieldTypeDate') return 'date';
+  if (esriFieldType === 'esriFieldTypeOID') return 'oid';
   if (
     ['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger', 'esriFieldTypeOID'].includes(
       esriFieldType
@@ -105,10 +106,15 @@ export function esriParseFeatureInfoEntries(records: TypeJsonObject[], geometryT
  * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
  * @param {string} url - An Esri url indicating a feature layer to query
  * @param {TypeStyleGeometry?} geometryType - The geometry type for the geometries in the layer being queried (used when geometries are returned)
+ * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
-export async function esriQueryRecordsByUrl(url: string, geometryType?: TypeStyleGeometry): Promise<TypeFeatureInfoEntryPartial[]> {
-  // TODO: Refactor - Suggestion to rework this function and the one in EsriDynamic.getFeatureInfoAtLongLat(), making
+export async function esriQueryRecordsByUrl(
+  url: string,
+  geometryType?: TypeStyleGeometry,
+  parseFeatureInfoEntries = true
+): Promise<TypeFeatureInfoEntryPartial[]> {
+  // TODO: Performance - Refactor - Suggestion to rework this function and the one in EsriDynamic.getFeatureInfoAtLongLat(), making
   // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this
   // TO.DO.CONT: one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
   // Query the data
@@ -120,8 +126,8 @@ export async function esriQueryRecordsByUrl(url: string, geometryType?: TypeStyl
       throw new Error(`Error code = ${respJson.error.code} ${respJson.error.message}` || '');
     }
 
-    // Return the array of TypeFeatureInfoEntryPartial
-    return esriParseFeatureInfoEntries(respJson.features, geometryType);
+    // Return the array of TypeFeatureInfoEntryPartial or the raw response features array
+    return parseFeatureInfoEntries ? esriParseFeatureInfoEntries(respJson.features, geometryType) : respJson.features;
   } catch (error) {
     // Log
     logger.logError('There is a problem with this query: ', url, error);
@@ -137,6 +143,8 @@ export async function esriQueryRecordsByUrl(url: string, geometryType?: TypeStyl
  * @param {string} fields - The list of field names to include in the output
  * @param {boolean} geometry - True to return the geometries in the output
  * @param {number} outSR - The spatial reference of the output geometries from the query
+ * @param {number} maxOffset - The max allowable offset value to simplify geometry
+ * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
 export function esriQueryRecordsByUrlObjectIds(
@@ -145,14 +153,19 @@ export function esriQueryRecordsByUrlObjectIds(
   objectIds: number[],
   fields: string,
   geometry: boolean,
-  outSR?: number
+  outSR?: number,
+  maxOffset?: number,
+  parseFeatureInfoEntries = true
 ): Promise<TypeFeatureInfoEntryPartial[]> {
+  // Offset
+  const offset = maxOffset !== undefined ? `&maxAllowableOffset=${maxOffset}` : '';
+
   // Query
   const oids = objectIds.join(',');
-  const url = `${layerUrl}/query?where=&objectIds=${oids}&outFields=${fields}&returnGeometry=${geometry}&outSR=${outSR}&geometryPrecision=1&f=json`;
+  const url = `${layerUrl}/query?&objectIds=${oids}&outFields=${fields}&returnGeometry=${geometry}&outSR=${outSR}&geometryPrecision=1${offset}&f=json`;
 
   // Redirect
-  return esriQueryRecordsByUrl(url, geometryType);
+  return esriQueryRecordsByUrl(url, geometryType, parseFeatureInfoEntries);
 }
 
 /**

@@ -1,9 +1,7 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { QueryType, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
-import { WMS } from '../geoview-layers/raster/wms';
 import { GVWMS } from '../gv-layers/raster/gv-wms';
 import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import {
@@ -23,31 +21,29 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
     return (
-      super.onRegisterLayerCheck(layer, layerPath) &&
+      super.onRegisterLayerCheck(layer) &&
       AbstractLayerSet.isQueryableType(layer) &&
-      !(layer instanceof WMS) &&
       !(layer instanceof GVWMS) &&
-      AbstractLayerSet.isSourceQueryable(layer, layerPath)
+      AbstractLayerSet.isSourceQueryable(layer)
     );
   }
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseLayer} layer - The layer
    */
-  protected override onRegisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): void {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  protected override onRegisterLayer(layer: AbstractBaseLayer): void {
     // Call parent
-    super.onRegisterLayer(layer, layerPath);
+    super.onRegisterLayer(layer);
 
     // Update the resultSet data
+    const layerPath = layer.getLayerPath();
     this.resultSet[layerPath].eventListenerEnabled = true;
     this.resultSet[layerPath].queryStatus = 'processed';
     this.resultSet[layerPath].features = [];
@@ -94,7 +90,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {QueryType} queryType - The query's type to perform
    * @returns {Promise<TypeAllFeatureInfoResultSet | void>} A promise which will hold the result of the query
    */
-  // TODO: (futur development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
+  // TODO: (future development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
   async queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeAllFeatureInfoResultSet | void> {
     // FIXME: Watch out for code reentrancy between queries!
     // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
@@ -107,12 +103,12 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
       if (!this.resultSet[layerPath].eventListenerEnabled) return Promise.resolve();
 
       // Get the layer config and layer associated with the layer path
-      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
+      const layer = this.layerApi.getGeoviewLayer(layerPath);
 
       // If layer was found
-      if (layer && (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer)) {
+      if (layer && layer instanceof AbstractGVLayer) {
         // If state is not queryable
-        if (!AbstractLayerSet.isStateQueryable(layer, layerPath)) return Promise.resolve();
+        if (!AbstractLayerSet.isStateQueryable(layer)) return Promise.resolve();
 
         // Flag processing
         this.resultSet[layerPath].queryStatus = 'processing';

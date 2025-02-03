@@ -102,7 +102,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * Overrides the fetching of the legend for an Esri image layer.
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
-  override async getLegend(): Promise<TypeLegend | null> {
+  override async onFetchLegend(): Promise<TypeLegend | null> {
     const layerConfig = this.getLayerConfig();
     try {
       if (!layerConfig) return null;
@@ -119,7 +119,7 @@ export class GVEsriImage extends AbstractGVRaster {
       if (!legendInfo) {
         const legend: TypeLegend = {
           type: CONST_LAYER_TYPES.ESRI_IMAGE,
-          styleConfig: this.getStyle(layerConfig.layerPath),
+          styleConfig: this.getStyle(),
           legend: null,
         };
         return legend;
@@ -152,12 +152,12 @@ export class GVEsriImage extends AbstractGVRaster {
 
       // TODO: Refactor - Find a better place to set the style than in a getter or rename this function like another TODO suggests
       // Set the style
-      this.setStyle(layerConfig.layerPath, styleConfig);
+      this.setStyle(styleConfig);
 
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
         styleConfig,
-        legend: await getLegendStyles(this.getStyle(layerConfig.layerPath)),
+        legend: await getLegendStyles(this.getStyle()),
       };
       return legend;
     } catch (error) {
@@ -173,8 +173,8 @@ export class GVEsriImage extends AbstractGVRaster {
     // Call parent
     super.onLoaded();
 
-    // Apply view filter immediately (no need to provide a layer path here so '' is sent (hybrid work))
-    this.applyViewFilter('', this.getLayerConfig().layerFilter || '');
+    // Apply view filter immediately
+    this.applyViewFilter(this.getLayerConfig().layerFilter || '');
   }
 
   /**
@@ -185,10 +185,9 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, combineLegendFilter?: boolean): void {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  applyViewFilter(filter: string, combineLegendFilter?: boolean): void {
     // Log
-    logger.logTraceCore('GV-ESRI-IMAGE - applyViewFilter', layerPath);
+    logger.logTraceCore('GV-ESRI-IMAGE - applyViewFilter', this.getLayerPath());
 
     const layerConfig = this.getLayerConfig();
     const olLayer = this.getOLLayer();
@@ -224,7 +223,6 @@ export class GVEsriImage extends AbstractGVRaster {
 
         // Emit event
         this.emitLayerFilterApplied({
-          layerPath,
           filter: filterValueToUse,
         });
       }
@@ -236,8 +234,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @returns {Extent | undefined} The layer bounding box.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getBounds(layerPath: string): Extent | undefined {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  override getBounds(): Extent | undefined {
     // Get the metadata extent
     const metadataExtent = this.getMetadataExtent();
 
@@ -255,7 +252,8 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 }
 
-interface TypeEsriImageLayerLegend {
+// Exported for use in ESRI Dynamic raster layers
+export interface TypeEsriImageLayerLegend {
   layers: {
     layerId: number | string;
     layerName: string;

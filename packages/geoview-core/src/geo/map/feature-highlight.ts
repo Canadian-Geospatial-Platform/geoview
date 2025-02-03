@@ -23,10 +23,10 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
  * @class FeatureHighlight
  */
 export class FeatureHighlight {
-  /** The vector source to use for the animation features */
+  /** The vector source to use for the highlight features */
   highlighSource: VectorSource = new VectorSource();
 
-  /** The hidden layer to display animations. */
+  /** The hidden layer to display highlight. */
   // GV It's public, to save an eslint warning, because even if it's not read in this class, it's actually important to instanciate per OpenLayer design.
   overlayLayer: VectorLayer;
 

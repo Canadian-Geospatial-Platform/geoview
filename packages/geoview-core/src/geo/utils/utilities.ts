@@ -22,6 +22,7 @@ import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
 
 import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
+import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 
 /**
  * Interface used for css style declarations
@@ -308,42 +309,17 @@ export function convertTypeFeatureStyleToOpenLayersStyle(style?: TypeFeatureStyl
   return getDefaultDrawingStyle(style?.strokeColor, style?.strokeWidth, style?.fillColor);
 }
 
-/**
- * Compare sets of extents of the same projection and return the smallest or largest set.
- * Extents must be in OpenLayers extent format - [minx, miny, maxx, maxy]
- *
- * @param {Extent} extentsA First set of extents
- * @param {Extent} extentsB Second set of extents
- * @param {string} minmax Decides whether to get smallest or largest extent
- * @returns {Extent} the smallest or largest set from the extents
- */
-export function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax = 'max'): Extent {
-  // TODO: Check - Obsolete function? Use getExtentUnion or getExtentIntersection
-  let bounds: Extent = [];
-  if (minmax === 'max')
-    bounds = [
-      Math.min(extentsA[0], extentsB[0]),
-      Math.min(extentsA[1], extentsB[1]),
-      Math.max(extentsA[2], extentsB[2]),
-      Math.max(extentsA[3], extentsB[3]),
-    ];
-  else if (minmax === 'min')
-    bounds = [
-      Math.max(extentsA[0], extentsB[0]),
-      Math.max(extentsA[1], extentsB[1]),
-      Math.min(extentsA[2], extentsB[2]),
-      Math.min(extentsA[3], extentsB[3]),
-    ];
-  return bounds;
-}
-
+// #region EXTENT
 /**
  * Returns the union of 2 extents.
- * @param {Extent} extentA First extent
- * @param {Extent} extentB Optional second extent
- * @returns {Extent} The union of the extents
+ * @param {Extent | undefined} extentA First extent
+ * @param {Extent | undefined} extentB Optional second extent
+ * @returns {Extent | undefined} The union of the extents
  */
-export function getExtentUnion(extentA: Extent, extentB?: Extent): Extent {
+export function getExtentUnion(extentA: Extent | undefined, extentB?: Extent | undefined): Extent | undefined {
+  // If no A, return B which may be undefined too
+  if (!extentA) return extentB;
+
   // If no B, return A
   if (!extentB) return extentA;
 
@@ -357,28 +333,17 @@ export function getExtentUnion(extentA: Extent, extentB?: Extent): Extent {
 }
 
 /**
- * Returns the union of 2 extents supporting the case where extentA might be undefined.
- * @param {Extent | undefined} extentA First extent or undefined
- * @param {Extent | undefined} extentB Optional second extent
- * @returns {Extent | undefined} The union of the extents
- */
-export function getExtentUnionMaybe(extentA: Extent | undefined, extentB?: Extent): Extent | undefined {
-  // If no A, return B which may be undefined too
-  if (!extentA) return extentB;
-
-  // Redirect
-  return getExtentUnion(extentA, extentB);
-}
-
-/**
  * Returns the intersection of 2 extents.
- * @param {Extent} extentA First extent
- * @param {Extent} extentB Optional second extent
- * @returns {Extent} The intersection of the extents
+ * @param {Extent | undefined} extentA First extent
+ * @param {Extent | undefined} extentB Optional second extent
+ * @returns {Extent | undefined} The intersection of the extents
  */
-export function getExtentIntersection(extentA: Extent, extentB?: Extent): Extent {
+export function getExtentIntersection(extentA: Extent | undefined, extentB?: Extent | undefined): Extent | undefined {
   // If no B, return A
   if (!extentB) return extentA;
+
+  // If no A, return B which may be undefined too
+  if (!extentA) return extentB;
 
   // Return the intersection of A and B
   return [
@@ -387,20 +352,6 @@ export function getExtentIntersection(extentA: Extent, extentB?: Extent): Extent
     Math.min(extentA[2], extentB[2]),
     Math.min(extentA[3], extentB[3]),
   ];
-}
-
-/**
- * Returns the intersection of 2 extents supporting the case where extentA might be undefined.
- * @param {Extent | undefined} extentA First extent or undefined
- * @param {Extent | undefined} extentB Optional second extent
- * @returns {Extent | undefined} The intersection of the extents
- */
-export function getExtentIntersectionMaybe(extentA: Extent | undefined, extentB?: Extent): Extent | undefined {
-  // If no A, return B which may be undefined too
-  if (!extentA) return extentB;
-
-  // Redirect
-  return getExtentIntersection(extentA, extentB);
 }
 
 /**
@@ -455,19 +406,19 @@ export function validateExtent(extent: Extent, code: string = 'EPSG:4326'): Exte
     'EPSG:3978': [-7192737.96, -3004297.73, 5183275.29, 4484204.83],
   };
 
-  // Replace any invalid entries with maximum value
-  const minX = extent[0] < maxExtents[code][0] || extent[0] === -Infinity || Number.isNaN(extent[0]) ? maxExtents[code][0] : extent[0];
-  const minY = extent[1] < maxExtents[code][1] || extent[1] === -Infinity || Number.isNaN(extent[1]) ? maxExtents[code][1] : extent[1];
-  const maxX = extent[2] > maxExtents[code][2] || extent[2] === Infinity || Number.isNaN(extent[2]) ? maxExtents[code][2] : extent[2];
-  const maxY = extent[3] > maxExtents[code][3] || extent[3] === Infinity || Number.isNaN(extent[3]) ? maxExtents[code][3] : extent[3];
+  let validatedExtent: Extent;
+  // In rare cases, services return 'NaN' as extents, not picked up by Number.isNan
+  if (typeof extent[0] !== 'number') validatedExtent = maxExtents[code];
+  else {
+    // Replace any invalid entries with maximum value
+    const minX = extent[0] < maxExtents[code][0] || extent[0] === -Infinity || Number.isNaN(extent[0]) ? maxExtents[code][0] : extent[0];
+    const minY = extent[1] < maxExtents[code][1] || extent[1] === -Infinity || Number.isNaN(extent[1]) ? maxExtents[code][1] : extent[1];
+    const maxX = extent[2] > maxExtents[code][2] || extent[2] === Infinity || Number.isNaN(extent[2]) ? maxExtents[code][2] : extent[2];
+    const maxY = extent[3] > maxExtents[code][3] || extent[3] === Infinity || Number.isNaN(extent[3]) ? maxExtents[code][3] : extent[3];
 
-  // Check the order
-  const validatedExtent: Extent = [
-    minX < maxX ? minX : maxX,
-    minY < maxY ? minY : maxY,
-    maxX > minX ? maxX : minX,
-    maxY > minY ? maxY : minY,
-  ];
+    // Check the order
+    validatedExtent = [minX < maxX ? minX : maxX, minY < maxY ? minY : maxY, maxX > minX ? maxX : minX, maxY > minY ? maxY : minY];
+  }
 
   return validatedExtent;
 }
@@ -483,6 +434,7 @@ export function validateExtentWhenDefined(extent: Extent | undefined, code: stri
   if (extent) return validateExtent(extent, code);
   return undefined;
 }
+// #endregion EXTENT
 
 /**
  * Gets the area of a given geometry
@@ -525,4 +477,25 @@ export function calculateDistance(coordinates: Coordinate[], inProj: string, out
   });
 
   return { total: Math.round((getLength(geom) / 1000) * 100) / 100, sections };
+}
+
+/**
+ * Get meters per pixel for different projections
+ * @param {TypeValidMapProjectionCodes} projection - The projection of the map
+ * @param {number} resolution - The resolution of the map
+ * @param {number?} lat - The latitude, only needed for Web Mercator
+ * @returns {number} Number representing meters per pixel
+ */
+export function getMetersPerPixel(projection: TypeValidMapProjectionCodes, resolution: number, lat?: number): number {
+  if (!resolution) return 0;
+
+  // Web Mercator needs latitude correction because of severe distortion at high latitudes
+  // At latitude 60°N, the scale distortion factor is about 2:1
+  if (projection === 3857 && lat !== undefined) {
+    const latitudeCorrection = Math.cos((lat * Math.PI) / 180);
+    return resolution * latitudeCorrection;
+  }
+
+  // LCC (and other meter-based projections) can use resolution directly
+  return resolution;
 }

@@ -265,7 +265,7 @@ export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'
 export type TypeLayerStatusSimplified = 'loading' | 'loaded' | 'error';
 
 // TODO: Refactor - Layers refactoring. After migration, can get rid of this type
-export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
+// TODO: NOW export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
 
 export type TypeEsriFormatParameter = 'png' | 'jpg' | 'gif' | 'svg';
 
@@ -403,7 +403,13 @@ export type GeoCoreLayerConfig = {
   // TO.DOCONT: I think it is working with other type of layer. Now having geocore not a layer type anymore, we should be able to overrides.
   // TO.DOCONT: For this we will need a little trick because when we create the config the setting are set at the root level and in our config it will take it from the layerID.
   // TO.DOCONT: There is refactor to do to make this work for all layer type. Global setting should be cascade to child of the root layer.
-  geoviewLayerName: string;
+  geoviewLayerName: string | undefined;
+
+  /** Initial settings to apply to the GeoCore layer at creation time. */
+  initialSettings?: TypeLayerInitialSettings;
+
+  /** The layer entries to use from the GeoCore layer. */
+  listOfLayerEntryConfig?: TypeLayerEntryConfig[];
 };
 
 /**

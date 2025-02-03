@@ -57,6 +57,14 @@ export class ConsoleLogger {
   // The interval in ms for the object trackers
   trackerInterval = 100;
 
+  // The number of logs - only for some log types
+  logCount = {
+    renderer: 0,
+    useCallback: 0,
+    useMemo: 0,
+    useEffect: 0,
+  };
+
   /**
    * Constructor
    * @param {number | number[]} logLevel - Indicate the level of detail for the ConsoleLogger. The higher the number, the more detailed the log.
@@ -101,7 +109,7 @@ export class ConsoleLogger {
     // Validate log active
     if (!LOG_ACTIVE) return;
     // Redirect
-    this.#logLevel(LOG_TRACE_RENDER, 'RENDR', 'plum', component, ...messages); // Not a typo, 5 characters for alignment
+    this.#logLevel(LOG_TRACE_RENDER, `RENDR - ${this.logCount.renderer++}`, 'plum', component, ...messages); // Not a typo, 5 characters for alignment
   }
 
   /**
@@ -114,7 +122,7 @@ export class ConsoleLogger {
     // Validate log active
     if (!LOG_ACTIVE) return;
     // Redirect
-    this.#logLevel(LOG_TRACE_USE_MEMO, 'U_MEM', 'orchid', useMemoFunction, ...messages);
+    this.#logLevel(LOG_TRACE_USE_MEMO, `U_MEM - ${this.logCount.useMemo++}`, 'orchid', useMemoFunction, ...messages);
   }
 
   /**
@@ -127,7 +135,7 @@ export class ConsoleLogger {
     // Validate log active
     if (!LOG_ACTIVE) return;
     // Redirect
-    this.#logLevel(LOG_TRACE_USE_CALLBACK, 'U_CLB', 'darkorchid', useCallbackFunction, ...messages);
+    this.#logLevel(LOG_TRACE_USE_CALLBACK, `U_CLB - ${this.logCount.useCallback++}`, 'darkorchid', useCallbackFunction, ...messages);
   }
 
   /**
@@ -140,7 +148,7 @@ export class ConsoleLogger {
     // Validate log active
     if (!LOG_ACTIVE) return;
     // Redirect
-    this.#logLevel(LOG_TRACE_USE_EFFECT, 'U_EFF', 'mediumorchid', useEffectFunction, ...messages);
+    this.#logLevel(LOG_TRACE_USE_EFFECT, `U_EFF - ${this.logCount.useEffect++}`, 'mediumorchid', useEffectFunction, ...messages);
   }
 
   /**
@@ -369,8 +377,9 @@ export class ConsoleLogger {
    */
   #logLevel(level: number, header: string, color: keyof ColorCode, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
-    // eslint-disable-next-line no-console
-    if (this.#checkLevel(level)) console.log(`%c${ConsoleLogger.#formatTime(new Date())} ${header}`, `color: ${color}`, ...messages);
+    if (this.#checkLevel(level))
+      // eslint-disable-next-line no-console
+      console.log(`%c${ConsoleLogger.#formatTime(new Date())} ${header}`, `color: ${color}`, ...messages);
   }
 
   /**

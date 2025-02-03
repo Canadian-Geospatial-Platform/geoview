@@ -132,9 +132,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     objectIds: string[],
     outfield?: string
   ): Promise<Extent | undefined> | undefined {
-    return MapEventProcessor.getMapViewerLayerAPI(mapId)
-      .getGeoviewLayerHybrid(layerPath)
-      ?.getExtentFromFeatures(layerPath, objectIds, outfield);
+    return MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.getExtentFromFeatures(objectIds, outfield);
   }
 
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
@@ -176,14 +174,18 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             iconDetails.push(iconDetailsEntry);
           } else {
             iconDetailsEntry.iconType = 'list';
-            iconDetailsEntry.iconList = styleRepresentation.arrayOfCanvas!.map((canvas, i) => {
-              const legendLayerListItem: TypeLegendItem = {
-                geometryType,
-                icon: canvas ? canvas.toDataURL() : null,
-                name: styleSettings.info[i].label,
-                isVisible: styleSettings.info[i].visible !== false,
-              };
-              return legendLayerListItem;
+            iconDetailsEntry.iconList = [];
+            styleRepresentation.arrayOfCanvas!.forEach((canvas, i) => {
+              // Check if there is already an entry for this label before adding it.
+              if (!iconDetailsEntry.iconList?.find((listItem) => listItem.name === styleSettings.info[i].label)) {
+                const legendLayerListItem: TypeLegendItem = {
+                  geometryType,
+                  icon: canvas ? canvas.toDataURL() : null,
+                  name: styleSettings.info[i].label,
+                  isVisible: styleSettings.info[i].visible !== false,
+                };
+                iconDetailsEntry.iconList?.push(legendLayerListItem);
+              }
             });
             if (styleRepresentation.defaultCanvas) {
               const legendLayerListItem: TypeLegendItem = {
@@ -247,14 +249,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       if (!layerConfig) return;
 
       // Get the layer
-      const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(entryLayerPath);
+      const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(entryLayerPath);
 
       // Interpret the layer name the best we can
       const layerName =
-        layer?.getLayerName(entryLayerPath) ||
-        layerConfig.layerName ||
-        layerConfig.geoviewLayerConfig.geoviewLayerName ||
-        layerConfig.layerPath;
+        layer?.getLayerName() || layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName || layerConfig.layerPath;
 
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -353,7 +352,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     createNewLegendEntries(2, layers);
 
     // Update the legend layers with the updated array, triggering the subscribe
-    this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    // Reorder the array so legend tab is in synch
+    const sortedLayers = layers.sort(
+      (a, b) =>
+        MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, a.layerPath) -
+        MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, b.layerPath)
+    );
+    this.sortLegendLayersChildren(mapId, sortedLayers);
+
+    this.getLayerState(mapId).setterActions.setLegendLayers(sortedLayers);
   }
   // #endregion
 
@@ -390,7 +397,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         foundLayer = layer;
       }
 
-      if (layerPath?.startsWith(layer.layerPath) && layer.children?.length > 0) {
+      if (layerPath.startsWith(`${layer.layerPath}/`) && layer.children?.length > 0) {
         const result: TypeLegendLayer | undefined = LegendEventProcessor.findLayerByPath(layer.children, layerPath);
         if (result) {
           foundLayer = result;
@@ -409,8 +416,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static deleteLayerFromLegendLayers(mapId: string, layerPath: string): void {
     // Get legend layers to pass to recursive function
     const curLayers = this.getLayerState(mapId).legendLayers;
+
     // Remove layer and children
     LegendEventProcessor.#deleteLayersFromLegendLayersAndChildren(mapId, curLayers, layerPath);
+
+    // Set updated legend layers after delete
+    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
   }
 
   /**
@@ -544,7 +555,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath);
     if (layer) {
       layer.opacity = opacity;
-      MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath)?.setOpacity(opacity, layerPath);
+      MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.setOpacity(opacity);
       if (isChild) {
         layer.opacityFromParent = opacity;
       }
@@ -631,6 +642,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Create sets for visible and invisible values for faster lookup
     const visibleValues = new Set(styleUnique.filter((style) => style.visible).map((style) => style.values.join(';')));
     const unvisibleValues = new Set(styleUnique.filter((style) => !style.visible).map((style) => style.values.join(';')));
+
+    // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
+    // TODO: The fields contain undefined, it should be empty. Check in new config api
+    // TODO: This is a workaround
+    if (uniqueValueStyle.fields[0] === undefined) uniqueValueStyle.fields.pop();
 
     // Filter features based on visibility
     return features.filter((feature) => {
@@ -735,4 +751,21 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       return matchingBreak ? matchingBreak.visible : classBreakStyle.info[classBreakStyle.info.length - 1].visible;
     });
   }
+
+  /**
+   * Sorts legend layers children recursively in given legend layers list.
+   * @param {string} mapId - The ID of the map.
+   * @param {TypeLegendLayer[]} legendLayerList - The list to sort.
+   */
+  static sortLegendLayersChildren = (mapId: string, legendLayerList: TypeLegendLayer[]): void => {
+    legendLayerList.forEach((legendLayer) => {
+      if (legendLayer.children.length)
+        legendLayer.children.sort(
+          (a, b) =>
+            MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, a.layerPath) -
+            MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, b.layerPath)
+        );
+      this.sortLegendLayersChildren(mapId, legendLayer.children);
+    });
+  };
 }

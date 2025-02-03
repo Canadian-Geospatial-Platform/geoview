@@ -102,7 +102,7 @@ export class GVImageStatic extends AbstractGVRaster {
    * Overrides the fetching of the legend for an Esri image layer.
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
-  override async getLegend(): Promise<TypeLegend | null> {
+  override async onFetchLegend(): Promise<TypeLegend | null> {
     const layerConfig = this.getLayerConfig();
     try {
       const legendImage = await GVImageStatic.#getLegendImage(layerConfig!);
@@ -142,8 +142,7 @@ export class GVImageStatic extends AbstractGVRaster {
    * @returns {Extent | undefined} The layer bounding box.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getBounds(layerPath: string): Extent | undefined {
-    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  override getBounds(): Extent | undefined {
     // Get the source projection
     const sourceProjection = this.getOLSource().getProjection() || undefined;
 

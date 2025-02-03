@@ -15,13 +15,14 @@ import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map
 
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';
-import { FeatureInfo } from './feature-info-new';
-import { LAYER_STATUS, TABS } from '@/core/utils/constant';
-import DetailsSkeleton from './details-skeleton';
+import { FeatureInfo } from './feature-info';
+import { FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
+import { DetailsSkeleton } from './details-skeleton';
 
 interface DetailsPanelType {
   fullWidth?: boolean;
 }
+
 /**
  * layers list
  *
@@ -29,37 +30,30 @@ interface DetailsPanelType {
  * @returns {JSX.Element} the layers list
  */
 export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Element {
-  // Log
   logger.logTraceRender('components/details/details-panel');
 
+  // Hooks
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // Get states and actions from store
+  // Store
   const mapId = useGeoViewMapId();
   const selectedLayerPath = useDetailsSelectedLayerPath();
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
   const mapClickCoordinates = useMapClickCoordinates();
-
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
-  // #region USE STATE SECTION ****************************************************************************************
-
-  // internal state
+  // States
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [selectedLayerPathLocal, setselectedLayerPathLocal] = useState<string>(selectedLayerPath);
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
-
   const prevLayerSelected = useRef<TypeLayerData>();
   const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>();
   const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
-
-  // #endregion
 
   // #region MAIN HOOKS SECTION ***************************************************************************************
 
@@ -69,33 +63,36 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    * @param {TypeFeatureInfoEntry} feature The feature to check
    * @returns {boolean} true if feature is in checkedFeatures
    */
+  // Create a memoized Set of checked feature IDs
+  const checkedFeaturesSet = useMemo(() => {
+    return new Set(checkedFeatures.map((feature) => (feature.geometry as TypeGeometry)?.ol_uid));
+  }, [checkedFeatures]);
+
+  // Modified isFeatureInCheckedFeatures using the Set for O(1) lookup
   const isFeatureInCheckedFeatures = useCallback(
     (feature: TypeFeatureInfoEntry): boolean => {
-      // Log
-      logger.logTraceUseCallback('DETAILS-PANEL - isFeatureInCheckedFeatures');
-
-      return checkedFeatures.some((checkedFeature) => {
-        return (checkedFeature.geometry as TypeGeometry)?.ol_uid === (feature.geometry as TypeGeometry)?.ol_uid;
-      });
+      return checkedFeaturesSet.has((feature.geometry as TypeGeometry)?.ol_uid);
     },
-    [checkedFeatures]
+    [checkedFeaturesSet]
   );
 
   /**
    * Clears the highlighed features when they are not checked.
    * @param {TypeFeatureInfoEntry[] | undefined | null} arrayToClear The array to clear of the unchecked features
    */
+  // Modified clearHighlightsUnchecked
   const clearHighlightsUnchecked = useCallback(
     (arrayToClear: TypeFeatureInfoEntry[] | undefined | null) => {
-      // Log
       logger.logTraceUseCallback('DETAILS-PANEL - clearHighlightsUnchecked');
 
-      // Clear any feature that's not currently checked
       arrayToClear?.forEach((feature) => {
-        if (!isFeatureInCheckedFeatures(feature)) removeHighlightedFeature(feature);
+        const featureId = (feature.geometry as TypeGeometry)?.ol_uid;
+        if (!checkedFeaturesSet.has(featureId)) {
+          removeHighlightedFeature(feature);
+        }
       });
     },
-    [isFeatureInCheckedFeatures, removeHighlightedFeature]
+    [checkedFeaturesSet, removeHighlightedFeature]
   );
 
   /**
@@ -137,7 +134,15 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
             layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath ?? ''}`,
           }) as LayerListEntry
       );
-    return layerListEntries;
+
+    // Split the layers list into two groups while preserving order
+    const layersWithFeatures = layerListEntries.filter((layer) => layer.numOffeatures && layer.numOffeatures > 0);
+    const layersWithoutFeatures = layerListEntries.filter((layer) => layer.numOffeatures === 0);
+
+    // Combine the lists (features first, then no features)
+    const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
+
+    return orderedLayerListEntries;
   }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel, mapId]);
 
   /**
@@ -291,7 +296,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
         // Log
         logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
         // None found, select none
-        //  TODO: Investigate infinte loop in AppBar for statement.
+        //  TODO: Investigate infinite loop in AppBar for statement.
         // setSelectedLayerPath('');
       }
     }
@@ -301,7 +306,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   // #endregion
 
   // #region EVENT HANDLERS SECTION ***********************************************************************************
-
   /**
    * Handles click to remove all features in right panel.
    */
@@ -348,7 +352,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     },
     [setSelectedLayerPath]
   );
-
   // #endregion
 
   // #region PROCESSING ***********************************************************************************************
@@ -414,20 +417,18 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   }, [mapClickCoordinates, memoLayersList]);
 
   /**
-   * Check all layers status is processing while querying
+   * Check all layers status is processed while querying
    */
-  const memoIsAllLayersQueryStatusProcessing = useMemo(() => {
+  const memoIsAllLayersQueryStatusProcessed = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DETAILS-PANEL - order layer status processing.');
+    logger.logTraceUseMemo('DETAILS-PANEL - AllLayersQueryStatusProcessed.');
 
     if (!arrayOfLayerDataBatch || arrayOfLayerDataBatch?.length === 0) return () => false;
 
-    return () => !!arrayOfLayerDataBatch?.every((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
+    return () => arrayOfLayerDataBatch?.every((layer) => layer.queryStatus === FEATURE_INFO_STATUS.PROCESSED);
   }, [arrayOfLayerDataBatch]);
 
   // #endregion
-
-  // #region RENDER SECTION *******************************************************************************************
 
   /**
    * Render the right panel content based on detail's layer and loading status.
@@ -435,10 +436,20 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    * @returns {JSX.Element | null} JSX.Element | null
    */
   const renderContent = (): JSX.Element | null => {
-    if (memoIsAllLayersQueryStatusProcessing()) {
+    // If there is no layer, return null for the guide to show
+    if ((memoLayersList && memoLayersList.length === 0) || selectedLayerPath === '') {
+      return null;
+    }
+
+    // Until process or something found for selected layerPath, return skeleton
+    if (!memoIsAllLayersQueryStatusProcessed() && !(memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0)) {
       return <DetailsSkeleton />;
     }
+
     if (memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0) {
+      // Get only the current feature
+      const currentFeature = memoSelectedLayerDataFeatures[currentFeatureIndex];
+
       return (
         <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
           <Grid container sx={sxClasses.rightPanelBtnHolder}>
@@ -486,10 +497,12 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
               </Box>
             </Grid>
           </Grid>
-          <FeatureInfo features={memoSelectedLayerData?.features} currentFeatureIndex={currentFeatureIndex} />
+          <FeatureInfo feature={currentFeature} />
         </Box>
       );
     }
+
+    // if no condition met, return null for Guide tab
     return null;
   };
 
@@ -505,6 +518,4 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
       {renderContent()}
     </Layout>
   );
-
-  // # endregion
 }

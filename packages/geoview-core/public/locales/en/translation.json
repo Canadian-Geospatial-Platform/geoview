@@ -110,6 +110,7 @@
     "errorServer": "source is not valid",
     "errorNotLoaded": "An error occured when loading the layer",
     "errorProj": "does not support current map projection",
+    "errorImageLoad": "Error loading source image for layer: __param__ at zoom level __param__",
     "only": "only",
     "opacity": "Opacity",
     "opacityMax": "Maximum from parent",
