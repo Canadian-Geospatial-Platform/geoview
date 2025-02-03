@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView Custom Legend Panel Schema",
+  "type": "object",
+  "version": "1.0",
+  "comments": "Configuration for GeoView Custom Legend package.",
+  "additionalProperties": false,
+  "properties": {
+    "isOpen": {
+      "description": "Specifies whether the legend panel is initially open or closed",
+      "type": "boolean",
+      "default": false
+    },
+    "legendItems": {
+      "description": "List of legend items to be displayed in the panel",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the legend item"
+          },
+          "title": {
+            "type": "string",
+            "description": "Display title for the legend item"
+          },
+          "symbolType": {
+            "type": "string",
+            "enum": ["point", "line", "polygon", "image"],
+            "description": "Type of symbol to display"
+          },
+          "symbolStyle": {
+            "type": "object",
+            "description": "Style properties for the symbol",
+            "properties": {
+              "color": {
+                "type": "string",
+                "description": "Color of the symbol (hex, rgb, or color name)"
+              },
+              "size": {
+                "type": "number",
+                "description": "Size of the symbol in pixels"
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Opacity of the symbol"
+              },
+              "imageUrl": {
+                "type": "string",
+                "description": "URL for image symbol type"
+              }
+            },
+            "required": ["color"]
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description for the legend item"
+          },
+          "isVisible": {
+            "type": "boolean",
+            "default": true,
+            "description": "Controls visibility of the legend item"
+          }
+        },
+        "required": ["id", "title", "symbolType", "symbolStyle"]
+      }
+    },
+    "position": {
+      "type": "string",
+      "enum": ["top-left", "top-right", "bottom-left", "bottom-right"],
+      "default": "bottom-right",
+      "description": "Position of the legend panel in the viewer"
+    },
+    "version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+    }
+  },
+  "required": ["legendItems", "version"]
+}
