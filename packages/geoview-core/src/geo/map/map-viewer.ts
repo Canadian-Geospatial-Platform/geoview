@@ -1543,6 +1543,7 @@ export class MapViewer {
     return extent;
   }
 
+  // TODO: Move to config API after refactor?
   /**
    * Creates a map config based on current map state.
    * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
@@ -1551,6 +1552,20 @@ export class MapViewer {
    */
   createMapConfigFromMapState(maintainGeocoreLayerNames: boolean = true): TypeMapFeaturesInstance | undefined {
     return MapEventProcessor.createMapConfigFromMapState(this.mapId, maintainGeocoreLayerNames);
+  }
+
+  // TODO: Move to config API after refactor?
+  /**
+   * Searches through a map config and replaces any matching layer names with their provided partner.
+   *
+   * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
+   * @param {TypeMapFeaturesInstance} mapConfig - The config to modify, or one created using the current map state if not provided.
+   * @returns {TypeMapFeaturesInstance} Map config with updated names.
+   */
+  replaceMapConfigLayerNames(namePairs: string[][], mapConfig?: TypeMapFeaturesConfig): TypeMapFeaturesInstance | undefined {
+    const mapConfigToUse = mapConfig || this.createMapConfigFromMapState();
+    if (mapConfigToUse) return MapEventProcessor.replaceMapConfigLayerNames(namePairs, mapConfigToUse);
+    return undefined;
   }
 
   // #region EVENTS
