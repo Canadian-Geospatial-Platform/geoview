@@ -30,7 +30,8 @@ export function OverviewMap(): JSX.Element {
   const hideOnZoom = useMapOverviewMapHideZoom();
   const displayLanguage = useAppDisplayLanguage();
 
-  const [visibility, setVisibility] = useState<boolean>(true);
+  // Reverse of what initial visibility should be so it is initially set properly
+  const [visibility, setVisibility] = useState<boolean>(!(zoomLevel > hideOnZoom));
 
   // hide on zoom
   useEffect(() => {
