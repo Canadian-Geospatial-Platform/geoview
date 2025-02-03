@@ -40,7 +40,7 @@ const ICON_BUTTON_BASE_PROPS = {
 const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackProps): JSX.Element | null {
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
   const iconData = useIconLayerSet(layerPath);
