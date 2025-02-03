@@ -35,7 +35,7 @@ export function OverviewMap(): JSX.Element {
   // hide on zoom
   useEffect(() => {
     logger.logTraceUseEffect('OVERVIEW-MAP - zoom level changed');
-    const shouldBeVisibile = zoomLevel < hideOnZoom;
+    const shouldBeVisibile = zoomLevel > hideOnZoom;
 
     if (shouldBeVisibile !== visibility) {
       setVisibility(shouldBeVisibile);
