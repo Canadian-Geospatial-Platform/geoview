@@ -146,7 +146,7 @@ export class Basemap {
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
 
   // #region OVERVIEW MAP
-  createOverviewMapControl(olMap: OLMap, toggleButton: HTMLDivElement): OLOverviewMap {
+  getOverviewMapControl(olMap: OLMap, toggleButton: HTMLDivElement): OLOverviewMap {
     if (this.overviewMapCtrl) {
       return this.overviewMapCtrl;
     }
@@ -225,9 +225,6 @@ export class Basemap {
     }
   }
 
-  getOverviewMap(): TypeBasemapProps | undefined {
-    return this.overviewMap;
-  }
   // #endregion
 
   // #region CREATE BASEMAPS

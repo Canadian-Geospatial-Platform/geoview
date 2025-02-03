@@ -49,7 +49,6 @@ import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 import { LegendEventProcessor } from './legend-event-processor';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -840,18 +839,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
-  static getOverviewMapBasemap(mapId: string): TypeBasemapProps | undefined {
-    return this.getMapViewer(mapId).basemap.getOverviewMap();
-  }
-
-  static createOverviewMapBasemap(mapId: string, div: HTMLDivElement): OLOverviewMap {
+  static getOverviewMapControl(mapId: string, div: HTMLDivElement): OLOverviewMap {
     const olMap = this.getMapViewer(mapId).map;
-    return this.getMapViewer(mapId).basemap.createOverviewMapControl(olMap, div);
-  }
-
-  static setOverviewMapCtrlMap(mapId: string, visible: boolean): void {
-    const viewer = this.getMapViewer(mapId);
-    viewer.basemap.setOverviewMapVisibility(visible, viewer.map);
+    return this.getMapViewer(mapId).basemap.getOverviewMapControl(olMap, div);
   }
 
   static resetBasemap(mapId: string): Promise<void> {

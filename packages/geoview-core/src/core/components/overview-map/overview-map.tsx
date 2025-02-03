@@ -30,7 +30,7 @@ export function OverviewMap(): JSX.Element {
   useEffect(() => {
     let root: Root | null = null;
     const toggleButton = document.createElement('div');
-    const overviewMapControl = MapEventProcessor.createOverviewMapBasemap(mapId, toggleButton);
+    const overviewMapControl = MapEventProcessor.getOverviewMapControl(mapId, toggleButton);
 
     const i18nInstance = i18n.cloneInstance({
       lng: displayLanguage,
