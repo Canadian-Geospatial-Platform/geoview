@@ -1553,6 +1553,19 @@ export class MapViewer {
     return MapEventProcessor.createMapConfigFromMapState(this.mapId, maintainGeocoreLayerNames);
   }
 
+  /**
+   * Searches through a map config and replaces any matching layer names with their provided partner.
+   *
+   * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
+   * @param {TypeMapFeaturesInstance} mapConfig - The config to modify, or one created using the current map state if not provided.
+   * @returns {TypeMapFeaturesInstance} Map config with updated names.
+   */
+  replaceMapConfigLayerNames(namePairs: string[][], mapConfig?: TypeMapFeaturesConfig): TypeMapFeaturesInstance | undefined {
+    const mapConfigToUse = mapConfig || this.createMapConfigFromMapState();
+    if (mapConfigToUse) return MapEventProcessor.replaceMapConfigLayerNames(namePairs, mapConfigToUse);
+    return undefined;
+  }
+
   // #region EVENTS
 
   /**

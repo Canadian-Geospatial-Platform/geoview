@@ -166,6 +166,20 @@
             </pre>
           </details>
         </li>
+        <li>
+          <button id="changeNames" style="margin: 10px">Change Names</button>
+          Updates the current map config, replacing some of the default layer names (from above) and refreshes the map.
+          Note: if the currently stored map config does not contain the default layers, the map will refresh with nothing changed.
+          To execute properly - Add Layers, Update State, Change Names - Update Names and Change Names again will change them back.
+          <details>
+            <summary>Code</summary>
+            <pre>
+              const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de localisation des stations', 'Perimeter'], ['Carte commémorative du Canada', 'Commemorative Map']];
+              cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
+              refreshMap();
+            </pre>
+          </details>
+        </li>
       </ul>
 
       <div class="selector">
@@ -345,6 +359,16 @@
           const uuidList = layerUuids.split('\n').join(',').split(',');
           addLayers(uuidList);
         }
+      });
+
+      // Change Names Button============================================================================================================
+      const changeNamesButton = document.getElementById('changeNames');
+
+      // add an event listener when a button is clicked
+      changeNamesButton.addEventListener('click', function () {
+        const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de localisation des stations', 'Perimeter'], ['Carte commémorative du Canada', 'Commemorative Map']];
+        cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
+        refreshMap();
       });
 
       // Add Layers Custom Button============================================================================================================

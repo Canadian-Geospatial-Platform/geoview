@@ -1310,6 +1310,46 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Searches through a map config and replaces any matching layer names with their provided partner.
+   *
+   * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
+   * @param {TypeMapFeaturesInstance} mapConfig - The config to modify.
+   * @returns {TypeMapFeaturesInstance} Map config with updated names.
+   */
+  static replaceMapConfigLayerNames(namePairs: string[][], mapConfig: TypeMapFeaturesInstance): TypeMapFeaturesInstance {
+    const pairsDict: Record<string, string> = {};
+    namePairs.forEach((pair) => {
+      [pairsDict[pair[1]], pairsDict[pair[0]]] = pair;
+    });
+
+    mapConfig.map.listOfGeoviewLayerConfig?.forEach((geoviewLayerConfig) => {
+      if (geoviewLayerConfig.geoviewLayerName && pairsDict[geoviewLayerConfig.geoviewLayerName])
+        // eslint-disable-next-line no-param-reassign
+        geoviewLayerConfig.geoviewLayerName = pairsDict[geoviewLayerConfig.geoviewLayerName];
+      if (geoviewLayerConfig.listOfLayerEntryConfig?.length)
+        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig);
+    });
+
+    return mapConfig;
+  }
+
+  /**
+   * Searches through a list of layer entry configs and replaces any matching layer names with their provided partner.
+   *
+   * @param {Record<string, string>} pairsDict -  The dict of name pairs. Presumably one english and one french name in each pair.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfigs - The layer entry configs to modify.
+   */
+  static #replaceLayerEntryConfigNames(pairsDict: Record<string, string>, listOfLayerEntryConfigs: TypeLayerEntryConfig[]): void {
+    listOfLayerEntryConfigs?.forEach((layerEntryConfig) => {
+      if (layerEntryConfig.layerName && pairsDict[layerEntryConfig.layerName])
+        // eslint-disable-next-line no-param-reassign
+        layerEntryConfig.layerName = pairsDict[layerEntryConfig.layerName];
+      if (layerEntryConfig.listOfLayerEntryConfig?.length)
+        this.#replaceLayerEntryConfigNames(pairsDict, layerEntryConfig.listOfLayerEntryConfig);
+    });
+  }
+
+  /**
    * Apply all available filters to layer.
    *
    * @param {string} mapId The map id.
