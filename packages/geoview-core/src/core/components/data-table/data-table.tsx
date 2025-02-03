@@ -364,7 +364,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           <Box
             component="img"
             alt={feature?.nameField ?? ''}
-            src={feature.featureIcon.toDataURL('image/webp', 0.5)}
+            src={feature.featureIcon.toDataURL('image/jpeg', 0.2)}
             className="layer-icon"
           />
         ),
