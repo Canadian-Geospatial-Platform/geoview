@@ -77,6 +77,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | 
 
     // Cleanup function to remove event listener
     return (): void => {
+      logger.logTraceUseEffectUnmount('OVERVIEW-MAP-TOGGLE - unmount');
       isCleanedUp = true;
       clearInterval(intervalId);
       const button = targetElement?.parentElement;

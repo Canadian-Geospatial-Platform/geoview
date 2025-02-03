@@ -213,13 +213,14 @@ export class Basemap {
 
     // Overview Map Control
     if (this.overviewMapCtrl) {
+      // switches to layers of the correct projection (important for vector tiles)
       this.overviewMapCtrl.getOverviewMap().setLayers(this.createOverviewMapLayers());
     }
   }
 
-  setOverviewMapVisibility(visible: boolean, viewer?: OLMap): void {
-    if (visible && viewer) {
-      this.overviewMapCtrl?.setMap(viewer);
+  setOverviewMapControlVisibility(olMap: OLMap, visible: boolean): void {
+    if (visible) {
+      this.overviewMapCtrl?.setMap(olMap);
     } else {
       this.overviewMapCtrl?.setMap(null);
     }
@@ -614,8 +615,9 @@ export class Basemap {
       this.defaultExtent = basemap?.defaultExtent;
 
       this.setBasemap(basemap);
-      await this.setOverviewMap();
+      return this.setOverviewMap();
     }
+    return Promise.resolve();
   }
 
   /**

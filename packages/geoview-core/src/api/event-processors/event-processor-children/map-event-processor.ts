@@ -844,6 +844,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapViewer(mapId).basemap.getOverviewMapControl(olMap, div);
   }
 
+  static setOverviewMapVisibility(mapId: string, visible: boolean): void {
+    const olMap = this.getMapViewer(mapId).map;
+    this.getMapViewer(mapId).basemap.setOverviewMapControlVisibility(olMap, visible);
+  }
+
   static resetBasemap(mapId: string): Promise<void> {
     // reset basemap will use the current display language and projection and recreate the basemap
     const language = AppEventProcessor.getDisplayLanguage(mapId);

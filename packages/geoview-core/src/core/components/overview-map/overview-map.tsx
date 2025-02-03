@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { createRoot, type Root } from 'react-dom/client';
 
@@ -11,6 +11,7 @@ import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useMapOverviewMapHideZoom, useMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
@@ -25,9 +26,25 @@ export function OverviewMap(): JSX.Element {
   // Log
   logger.logTraceRender('components/overview-map/overview-map');
   const mapId = useGeoViewMapId();
+  const zoomLevel = useMapZoom();
+  const hideOnZoom = useMapOverviewMapHideZoom();
   const displayLanguage = useAppDisplayLanguage();
 
+  const [visibility, setVisibility] = useState<boolean>(true);
+
+  // hide on zoom
   useEffect(() => {
+    logger.logTraceUseEffect('OVERVIEW-MAP - zoom level changed');
+    const shouldBeVisibile = zoomLevel < hideOnZoom;
+
+    if (shouldBeVisibile !== visibility) {
+      setVisibility(shouldBeVisibile);
+      MapEventProcessor.setOverviewMapVisibility(mapId, shouldBeVisibile);
+    }
+  }, [mapId, hideOnZoom, zoomLevel, visibility]);
+
+  useEffect(() => {
+    logger.logTraceUseEffect('OVERVIEW-MAP - mount');
     let root: Root | null = null;
     const toggleButton = document.createElement('div');
     const overviewMapControl = MapEventProcessor.getOverviewMapControl(mapId, toggleButton);
@@ -53,6 +70,7 @@ export function OverviewMap(): JSX.Element {
 
     // Cleanup
     return () => {
+      logger.logTraceUseEffectUnmount('OVERVIEW-MAP - unmount');
       clearTimeout(timeoutId);
       setTimeout(() => {
         if (root) {
