@@ -30,19 +30,23 @@ export function OverviewMap(): JSX.Element {
   const hideOnZoom = useMapOverviewMapHideZoom();
   const displayLanguage = useAppDisplayLanguage();
 
-  // Reverse of what initial visibility should be so it is initially set properly
   const [visibility, setVisibility] = useState<boolean>(!(zoomLevel > hideOnZoom));
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // hide on zoom
   useEffect(() => {
     logger.logTraceUseEffect('OVERVIEW-MAP - zoom level changed');
+
+    // Don't set the visibility until after the component is initialized
+    if (!isInitialized) return;
+
     const shouldBeVisibile = zoomLevel > hideOnZoom;
 
     if (shouldBeVisibile !== visibility) {
       setVisibility(shouldBeVisibile);
       MapEventProcessor.setOverviewMapVisibility(mapId, shouldBeVisibile);
     }
-  }, [mapId, hideOnZoom, zoomLevel, visibility]);
+  }, [mapId, hideOnZoom, zoomLevel, visibility, isInitialized]);
 
   useEffect(() => {
     logger.logTraceUseEffect('OVERVIEW-MAP - mount');
@@ -67,6 +71,9 @@ export function OverviewMap(): JSX.Element {
       );
       // Store the root reference for cleanup
       MapEventProcessor.setMapOverviewMapRoot(mapId, root);
+
+      // Set initialized to true after everything is set up
+      setIsInitialized(true);
     }, 0);
 
     // Cleanup
@@ -79,6 +86,7 @@ export function OverviewMap(): JSX.Element {
           root = null;
         }
       }, 0);
+      setIsInitialized(false);
     };
   }, [mapId, displayLanguage]);
 
