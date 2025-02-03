@@ -50,7 +50,7 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   return (
     <Box sx={HEADER_STYLES.container}>
@@ -84,7 +84,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
   const [checked, setChecked] = useState<boolean>(false);

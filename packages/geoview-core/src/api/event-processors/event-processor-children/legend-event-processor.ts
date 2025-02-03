@@ -416,8 +416,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static deleteLayerFromLegendLayers(mapId: string, layerPath: string): void {
     // Get legend layers to pass to recursive function
     const curLayers = this.getLayerState(mapId).legendLayers;
+
     // Remove layer and children
     LegendEventProcessor.#deleteLayersFromLegendLayersAndChildren(mapId, curLayers, layerPath);
+
+    // Set updated legend layers after delete
+    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
   }
 
   /**

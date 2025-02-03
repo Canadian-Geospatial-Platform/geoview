@@ -123,8 +123,9 @@
         </li>
         <li>
           <button id="changeLanguage" style="margin: 10px">Change Language</button>
-          Changes the language from french to english or english to french and reloads the map if it exists. Note: this will not change the
-          language of the layers, as they are loaded in the current state.
+          Changes the language from french to english or english to french and reloads the map if it exists. Note: this will change the
+          names of the layers, as maintainGeocoreLayerNames is set to false. In this case, we will lose any custom names, and they will 
+          have to be reinserted (in the new language). If set to true, the layer names will remain as they were.
           <details>
             <summary>Code</summary>
             <pre>
@@ -132,7 +133,7 @@
               const mapDiv = document.getElementById('Map1');
               if (mapDiv) {
                 mapDiv.setAttribute('data-lang', lang);
-                cgpv.api.maps.Map1.reloadWithCurrentState();
+                cgpv.api.maps.Map1.reloadWithCurrentState(false);
               }
             </pre>
           </details>
@@ -330,7 +331,7 @@
         const mapDiv = document.getElementById('Map1');
         if (mapDiv) {
           mapDiv.setAttribute('data-lang', lang);
-          cgpv.api.maps.Map1.reloadWithCurrentState();
+          cgpv.api.maps.Map1.reloadWithCurrentState(false);
         }
       });
 
@@ -383,7 +384,6 @@
         IAAC: 'f4c51eaa-a6ca-48b9-a1fc-b0651da20509',
         IAACConfig: [
           {
-            layerId: '0',
             entryType: 'group',
             layerName: 'IAAC Projects',
             listOfLayerEntryConfig: [

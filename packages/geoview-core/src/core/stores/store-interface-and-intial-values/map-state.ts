@@ -5,7 +5,7 @@ import { FitOptions } from 'ol/View'; // only for typing
 
 import { useStore } from 'zustand';
 import { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
-import { useGeoViewStore } from '@/core/stores/stores-managers';
+import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -926,4 +926,9 @@ export const useMapSize = (): [number, number] => useStore(useGeoViewStore(), (s
 export const useMapVisibleLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
 export const useMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
+// Getter function for one-time access, there is no subcription to modification
+export const getMapPointerPosition = (mapId: string): TypeMapMouseInfo | undefined =>
+  getGeoViewStore(mapId).getState().mapState.pointerPosition;
+
+// Store Actions
 export const useMapStoreActions = (): MapActions => useStore(useGeoViewStore(), (state) => state.mapState.actions);

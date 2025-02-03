@@ -290,7 +290,7 @@ export class MapViewer {
     // If map isn't static
     if (this.mapFeaturesConfig.map.interaction !== 'static') {
       // Register handlers on pointer move and map single click
-      this.map.on('pointermove', debounce(this.#handleMapPointerMove.bind(this), 10, { leading: true }).bind(this));
+      this.map.on('pointermove', debounce(this.#handleMapPointerMove.bind(this), 250, { leading: true }).bind(this));
       this.map.on('singleclick', debounce(this.#handleMapSingleClick.bind(this), 1000, { leading: true }).bind(this));
     }
 
@@ -1102,6 +1102,11 @@ export class MapViewer {
 
   // #region MAP ACTIONS
 
+  emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void {
+    // Emit the event
+    this.#emitMapSingleClick(clickCoordinates);
+  }
+
   /**
    * Loops through all geoview layers and refresh their respective source.
    * Use this function on projection change or other viewer modification who may affect rendering.
@@ -1247,9 +1252,11 @@ export class MapViewer {
 
   /**
    * Reload a map from a config object created using current map state. It first removes then recreates the map.
+   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   *                                              Set to false after a language change to update the layer names with the new language.
    */
-  reloadWithCurrentState(): void {
-    const currentMapConfig = this.createMapConfigFromMapState();
+  reloadWithCurrentState(maintainGeocoreLayerNames: boolean = true): void {
+    const currentMapConfig = this.createMapConfigFromMapState(maintainGeocoreLayerNames);
     this.reload(currentMapConfig).catch((error) => {
       // Log
       logger.logError(`Couldn't reload the map in map-viewer`, error);
@@ -1538,10 +1545,12 @@ export class MapViewer {
 
   /**
    * Creates a map config based on current map state.
+   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   *                                              Set to false after a language change to update the layer names with the new language.
    * @returns {TypeMapFeaturesInstance | undefined} Map config with current map state.
    */
-  createMapConfigFromMapState(): TypeMapFeaturesInstance | undefined {
-    return MapEventProcessor.createMapConfigFromMapState(this.mapId);
+  createMapConfigFromMapState(maintainGeocoreLayerNames: boolean = true): TypeMapFeaturesInstance | undefined {
+    return MapEventProcessor.createMapConfigFromMapState(this.mapId, maintainGeocoreLayerNames);
   }
 
   // #region EVENTS

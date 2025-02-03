@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useMemo, useCallback } from 'react';
+import { memo, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Coordinate } from 'ol/coordinate';
 import { useTheme } from '@mui/material/styles';
@@ -78,30 +78,30 @@ export const MousePosition = memo(function MousePosition(): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
-  const [positions, setPositions] = useState<string[]>(['', '', '']);
   const [positionMode, setPositionMode] = useState<number>(POSITION_MODES.DMS);
 
   // Store
   const expanded = useUIMapInfoExpanded();
   const pointerPosition = useMapPointerPosition();
 
-  /// Callbacks
+  // Format positions only when pointerPosition changes
+  const positions = useMemo(() => {
+    if (!pointerPosition) return ['', '', ''];
+
+    // Log too annoying
+    // logger.logTraceUseMemo('MOUSE-POSITION - pointerPosition', pointerPosition);
+
+    const { lnglat, projected } = pointerPosition;
+    const DMS = formatCoordinates(lnglat, true, t);
+    const DD = formatCoordinates(lnglat, false, t);
+
+    return [`${DMS.lng} | ${DMS.lat}`, `${DD.lng} | ${DD.lat}`, `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`];
+  }, [pointerPosition, t]);
+
+  // Callbacks
   const switchPositionMode = useCallback((): void => {
     setPositionMode((p) => (p + 1) % 3);
   }, []);
-
-  useEffect(() => {
-    // Log too annoying
-    // logger.logTraceUseEffect('MOUSE-POSITION - pointerPosition', pointerPosition);
-
-    if (pointerPosition !== undefined) {
-      const { lnglat, projected } = pointerPosition;
-      const DMS = formatCoordinates(lnglat, true, t);
-      const DD = formatCoordinates(lnglat, false, t);
-
-      setPositions([`${DMS.lng} | ${DMS.lat}`, `${DD.lng} | ${DD.lat}`, `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`]);
-    }
-  }, [pointerPosition, t]);
 
   // Memoized content
   const expandedContent = useMemo(

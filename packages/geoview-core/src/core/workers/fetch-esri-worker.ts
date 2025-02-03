@@ -1,5 +1,5 @@
 import { AbstractWorker } from './abstract-worker';
-import { QueryParams } from './fetch-esri-worker-script';
+import Worker, { QueryParams } from './fetch-esri-worker-script';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 
 /**
@@ -41,7 +41,7 @@ export class FetchEsriWorker extends AbstractWorker<FetchEsriWorkerType> {
    * Initializes the worker with the 'fetch-esri' script.
    */
   constructor() {
-    super('FetchEsriWorker', new Worker(new URL('./fetch-esri-worker-script.ts', import.meta.url)));
+    super('FetchEsriWorker', new Worker());
   }
 
   /**
