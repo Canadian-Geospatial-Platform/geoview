@@ -3,9 +3,12 @@ import axios, { AxiosResponse } from 'axios';
 import { Extent } from 'ol/extent';
 import { XYZ, OSM, VectorTile } from 'ol/source';
 import TileGrid from 'ol/tilegrid/TileGrid';
+import BaseLayer from 'ol/layer/Base';
 import TileLayer from 'ol/layer/Tile';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import MVT from 'ol/format/MVT';
+import OLMap from 'ol/Map';
+import { OverviewMap as OLOverviewMap } from 'ol/control';
 
 import { applyStyle } from 'ol-mapbox-style';
 
@@ -46,6 +49,9 @@ export class Basemap {
 
   // Default overview map layer
   overviewMap?: TypeBasemapProps;
+
+  // overview map control
+  overviewMapCtrl?: OLOverviewMap;
 
   // The basemap options passed from the map config
   basemapOptions: TypeBasemapOptions;
@@ -140,13 +146,82 @@ export class Basemap {
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
 
   // #region OVERVIEW MAP
+  createOverviewMapControl(olMap: OLMap, toggleButton: HTMLDivElement): OLOverviewMap {
+    if (this.overviewMapCtrl) {
+      return this.overviewMapCtrl;
+    }
+
+    const overviewMapControl = new OLOverviewMap({
+      className: 'ol-overviewmap ol-custom-overviewmap',
+      layers: this.createOverviewMapLayers(),
+      collapseLabel: toggleButton,
+      label: toggleButton,
+      collapsed: false,
+      rotateWithView: true,
+      tipLabel: '',
+    });
+
+    this.overviewMapCtrl = overviewMapControl;
+    olMap.removeControl(this.overviewMapCtrl);
+    olMap.addControl(this.overviewMapCtrl);
+    return overviewMapControl;
+  }
+
+  createOverviewMapLayers(): BaseLayer[] {
+    const newLayers: BaseLayer[] = [];
+    this.overviewMap?.layers.forEach((layer) => {
+      // create a tile layer for this basemap layer
+      let tileLayer;
+      if (layer.source instanceof VectorTile) {
+        tileLayer = new VectorTileLayer({
+          opacity: layer.opacity,
+          source: layer.source,
+          declutter: true,
+        });
+
+        const tileGrid = layer.source.getTileGrid();
+        if (tileGrid) {
+          applyStyle(tileLayer, layer.styleUrl, {
+            resolutions: tileGrid.getResolutions(),
+          }).catch((err) => logger.logError(err));
+        }
+      } else {
+        tileLayer = new TileLayer({
+          opacity: layer.opacity,
+          source: layer.source,
+        });
+      }
+
+      if (tileLayer) {
+        // add this layer to the basemap group
+        tileLayer.set(this.mapId, 'basemap');
+        newLayers.push(tileLayer as BaseLayer);
+      }
+    });
+    return newLayers;
+  }
+
   async setOverviewMap(): Promise<void> {
     const overviewMap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
 
+    // Overview Map Config
     if (overviewMap) this.overviewMap = overviewMap;
     else {
       // TODO: find a more centralized way to trap error and display message
       api.maps[this.mapId].notifications.showError('mapctrl.overviewmap.error');
+    }
+
+    // Overview Map Control
+    if (this.overviewMapCtrl) {
+      this.overviewMapCtrl.getOverviewMap().setLayers(this.createOverviewMapLayers());
+    }
+  }
+
+  setOverviewMapVisibility(visible: boolean, viewer?: OLMap): void {
+    if (visible && viewer) {
+      this.overviewMapCtrl?.setMap(viewer);
+    } else {
+      this.overviewMapCtrl?.setMap(null);
     }
   }
 

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { useTranslation } from 'react-i18next';
@@ -24,64 +25,76 @@ interface OverviewMapToggleProps {
  * @param {OverviewMapToggleProps} props overview map toggle properties
  * @returns {JSX.Element} returns the toggle icon button
  */
-export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
+export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | null {
   const { overviewMap } = props;
 
   const { t } = useTranslation<string>();
   const tooltipAndAria = t('mapctrl.overviewmap.toggle')!;
   const sxClasses = useMemo(() => getSxClasses(), []);
-  // internal state
-  const [status, setStatus] = useState(true);
-  const divRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [targetElement, setTargetElement] = useState<HTMLDivElement | null>(null);
+
+  const handleClick = useCallback((): void => {
+    const isCollapsed = overviewMap.getCollapsed();
+    setIsExpanded(!isCollapsed);
+
+    const overviewMapViewport = overviewMap.getOverviewMap().getTargetElement() as HTMLDivElement;
+
+    if (overviewMapViewport) {
+      if (!isCollapsed) {
+        overviewMapViewport.style.width = '150px';
+        overviewMapViewport.style.height = '150px';
+      } else {
+        overviewMapViewport.style.width = '40px';
+        overviewMapViewport.style.height = '40px';
+        overviewMapViewport.style.margin = '0px';
+      }
+    }
+  }, [overviewMap]);
 
   useEffect(() => {
-    // Log
     logger.logTraceUseEffect('OVERVIEW-MAP-TOGGLE - mount');
+    let isCleanedUp = false;
 
-    if (!divRef?.current) return () => {};
+    const intervalId = setInterval(() => {
+      if (isCleanedUp) return;
+      const overviewMapElement = overviewMap.getOverviewMap().getTargetElement();
+      if (!overviewMapElement) return;
 
-    const handleClick = (): void => {
-      const isCollapsed = overviewMap.getCollapsed();
+      const button = overviewMapElement.parentElement?.querySelector('button');
+      if (!button) return;
 
-      setStatus(!isCollapsed);
+      // Find the div inside the button
+      const buttonDiv = button.querySelector('div');
+      if (!buttonDiv) return;
 
-      const overviewMapViewport = overviewMap.getOverviewMap().getTargetElement() as HTMLElement;
-
-      if (overviewMapViewport) {
-        if (isCollapsed) {
-          overviewMapViewport.style.width = '40px';
-          overviewMapViewport.style.height = '40px';
-          overviewMapViewport.style.margin = '0px';
-        } else {
-          overviewMapViewport.style.width = '150px';
-          overviewMapViewport.style.height = '150px';
-        }
-      }
-    };
-
-    // get toggle button
-    const button = (divRef.current as HTMLElement).closest('button') as HTMLButtonElement;
-
-    if (button) {
+      // Found the button, clear interval and set up events
+      clearInterval(intervalId);
       button.setAttribute('aria-label', tooltipAndAria);
-      // listen to toggle event
       button.addEventListener('click', handleClick);
-    }
+      setTargetElement(buttonDiv);
+    }, 100);
 
     // Cleanup function to remove event listener
-    return () => {
-      button.removeEventListener('click', handleClick);
+    return (): void => {
+      isCleanedUp = true;
+      clearInterval(intervalId);
+      const button = targetElement?.parentElement;
+      if (button) {
+        button.removeEventListener('click', handleClick);
+      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [handleClick, tooltipAndAria, overviewMap, targetElement]);
 
-  return (
+  if (!targetElement) return null;
+
+  return createPortal(
     <Tooltip title={tooltipAndAria}>
-      <Box ref={divRef} sx={sxClasses.toggleBtnContainer}>
+      <Box sx={sxClasses.toggleBtnContainer}>
         <Box
           component="div"
           sx={sxClasses.toggleBtn}
-          className={status ? `minimapOpen` : `minimapClosed`}
+          className={isExpanded ? `minimapOpen` : `minimapClosed`}
           style={{
             margin: 0,
             padding: 0,
@@ -92,6 +105,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
           <ChevronLeftIcon />
         </Box>
       </Box>
-    </Tooltip>
+    </Tooltip>,
+    targetElement
   );
 }

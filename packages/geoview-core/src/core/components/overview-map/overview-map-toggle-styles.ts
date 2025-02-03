@@ -6,25 +6,26 @@ type SxClasses = Record<string, object>;
  * @returns {Object} the sx classes object
  */
 export const getSxClasses = (): SxClasses => ({
+  toggleBtnContainer: {
+    zIndex: 150,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
   toggleBtn: {
-    transform: 'rotate(45deg)',
     color: 'black',
     zIndex: 150,
-    '&:hover': {
-      cursor: 'pointer',
-    },
-
+    transform: 'rotate(45deg)',
+    transition: 'transform 0.3s ease',
+    cursor: 'pointer',
     '&.minimapOpen': {
       transform: 'rotate(-45deg)',
     },
     '&.minimapClosed': {
       transform: 'rotate(135deg)',
     },
-  },
-  toggleBtnContainer: {
-    zIndex: 150,
-    position: 'absolute',
-    top: 0,
-    right: 0,
+    '&:hover': {
+      opacity: 0.8,
+    },
   },
 });
