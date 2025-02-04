@@ -42,6 +42,10 @@
     {
       "packageName": "eslint-and-prettier-config",
       "projectFolder": "packages"
+    },
+    {
+      "packageName": "geoview-custom-legend-panel",
+      "projectFolder": "packages/geoview-custom-legend-panel"
     }
   ]
 }

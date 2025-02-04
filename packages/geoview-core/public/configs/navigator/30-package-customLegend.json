@@ -15,10 +15,10 @@
   "corePackages": [],
   "appBar": {
     "tabs": {
-      "core": ["customLegend"]
+      "core": ["custom-legend"]
     }
   },
-  "customLegend": {
+  "custom-legend": {
     "isOpen": true,
     "legendList": [
       {

@@ -278,7 +278,7 @@
             "data-table",
             "layers",
             "aoi-panel",
-            "customLegend"
+            "custom-legend"
           ],
           "description": "App bar tab to be selected at map load"
         },
