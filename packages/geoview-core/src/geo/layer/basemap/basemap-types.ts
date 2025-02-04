@@ -1,4 +1,4 @@
-import { OSM, XYZ } from 'ol/source';
+import { OSM, VectorTile, XYZ } from 'ol/source';
 import { Extent } from 'ol/extent';
 
 /** ******************************************************************************************************************************
@@ -27,7 +27,8 @@ export type TypeBasemapLayer = {
   basemapId: string;
   url?: string;
   jsonUrl?: string;
-  source: OSM | XYZ;
+  styleUrl?: string;
+  source: OSM | XYZ | VectorTile;
   type: string;
   opacity: number;
   resolutions: number[];
