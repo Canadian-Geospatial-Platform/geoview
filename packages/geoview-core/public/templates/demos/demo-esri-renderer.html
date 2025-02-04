@@ -119,7 +119,7 @@
         <tr>
           <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
           <td class="header-title">
-            <h1><strong>Sandbox Configuration</strong></h1>
+            <h1><strong>ESRI Renderer Style Configuration Demo</strong></h1>
           </td>
         </tr>
       </tbody>
@@ -180,18 +180,6 @@
       </tbody>
     </table>
   </div>
-  <div class="map-title-holder">
-    <h4 id="HLCONF1">Sanbox Map</h4>
-    <a class="ref-link" href="#top">Top</a>
-  </div>
-  <div id="mapSection">
-    <div id="sandboxMap"></div>
-  </div>
-  <p>This map loads it's configurations from the text area.</p>
-  <hr />
-
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
 
   <script src="codedoc.js"></script>
   
@@ -273,88 +261,6 @@
       messageObject.innerHTML = messageString;
     }
 
-    // Function used to create the string needed to display the error status of the different layerPath.
-    generateLayerPathErrorFlag = (listOfLayerEntryConfig, buffer = '', prefix = '') => {
-      listOfLayerEntryConfig.forEach((layer) => {
-        buffer = buffer ? `${buffer}\n` : '';
-        buffer = `${buffer}${layer?.getLayerPath?.() || layer.layerName}: ${layer?.getErrorDetectedFlag?.() ? 'ERROR' : 'Ok'}`;
-        if (layer.isLayerGroup) buffer = generateLayerPathErrorFlag(layer.listOfLayerEntryConfig, buffer, prefix ? `${prefix}.${layer.layerId}` : layer.layerId);
-      });
-      return buffer;
-    }
-
-    // Function used to compute and display execution time.
-    displayExecutionTime = (startTime, timeContainerId) => {
-      // Calculate the time span between now and start date
-      let timeSpan = new Date().getTime() - startTime;
-
-      const days = Math.floor(timeSpan / (1000 * 60 * 60 * 24));
-      timeSpan -= days * (1000 * 60 * 60 * 24);
-
-      const hours = Math.floor(timeSpan / (1000 * 60 * 60));
-      timeSpan -= hours * (1000 * 60 * 60);
-
-      const mins = Math.floor(timeSpan / (1000 * 60));
-      timeSpan -= mins * (1000 * 60);
-
-      const seconds = Math.floor(timeSpan / 1000);
-      timeSpan -= seconds * 1000;
-
-      // Let's say we always want seconds and milliseconds at least
-      let timeToDisplay = `${seconds} seconds, and ${timeSpan} ms`;
-      if (mins) timeToDisplay = `${mins} minutes, ${seconds} seconds, and ${timeSpan} ms`;
-      if (hours) timeToDisplay = `${hours} hours, ${mins} minutes, ${seconds} seconds, and ${timeSpan} ms`;
-
-      // display time in its container
-      document.getElementById(timeContainerId).innerHTML = `Execution time: ${timeToDisplay}`;
-    }
-
-    displayMapConfig = (mapConfig, tabId) => {
-      // Scan the layer structure to see if there is an eroneous layer.
-      const noErrorDetected = !mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
-        // Create a recursive function that scans the layer structure for erroneous sublayers. This function is used in the following line.
-        const subLayerError = (listOfLayerEntryConfig) => {
-          return listOfLayerEntryConfig.reduce((accumulator, subLayer) => {
-            if (subLayer.isLayerGroup) return accumulator || subLayer.getErrorDetectedFlag() || subLayerError(subLayer.listOfLayerEntryConfig);
-            return accumulator || subLayer.getErrorDetectedFlag();
-          }, false);
-        }
-        return accumulator || geoviewLayer.getErrorDetectedFlag() || subLayerError(geoviewLayer.listOfLayerEntryConfig);
-      }, false);
-
-      // Scan the layer structure to generate the raw metadata string.
-      geoviewLayerMetadataString = mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
-        // Create a recursive function that scans the layer structure for sublayers metadata. This function is used in the following line.
-        const subLayerMetadata = (listOfLayerEntryConfig) => {
-          return listOfLayerEntryConfig.reduce((accumulator, subLayer) => {
-            if (subLayer.isLayerGroup) return `${accumulator}\nLayer Group ${subLayer.layerId}\n${subLayerMetadata(subLayer.listOfLayerEntryConfig)}`;
-            return `${accumulator}\nLayer Leaf ${subLayer.layerId}\n${JSON.stringify(subLayer.getLayerMetadata(), undefined, 2)}`;
-          }, '');
-        }
-        const sublayerInfo = subLayerMetadata(geoviewLayer.listOfLayerEntryConfig);
-        const geoviewInfo = `Geoview Layer ${geoviewLayer.geoviewLayerId}\n${JSON.stringify(geoviewLayer.getServiceMetadata(), undefined, 2)}\n`;
-        return `${accumulator}\n${geoviewInfo}\n${sublayerInfo}`;
-      }, '');
-
-      // If no geoview and sub layer error was detected
-      if (noErrorDetected) printMessage(document.getElementById(`message${tabId}`), 'Map Config instance created and all layers are valid.');
-      else printMessage(document.getElementById(`message${tabId}`), 'Map Config instance created, but it contains invalid layers.', 'error');
-
-      // Set the global variables associated to the Element Display zone.
-      mapConfigString = mapConfig.serialize();
-      geoviewLayerString = mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
-        return `${accumulator}== ${geoviewLayer.geoviewLayerId} ===============================================================================================\n${geoviewLayer.serialize()}\n`;
-      }, '');
-      layerPathErrorFlag = mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
-        return `${accumulator}${generateLayerPathErrorFlag(geoviewLayer.listOfLayerEntryConfig, `geoviewLayerId ${geoviewLayer.geoviewLayerId}: ${geoviewLayer.getErrorDetectedFlag() ? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`)}\n\n`;
-      }, '');
-    }
-
-    // create snippets
-    // window.addEventListener('load', () => {
-    //   createCodeSnippet();
-    //   createConfigSnippet();
-    // });
   </script>
 </body>
 
