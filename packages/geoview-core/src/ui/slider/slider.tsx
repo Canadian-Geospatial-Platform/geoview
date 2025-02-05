@@ -7,7 +7,7 @@ import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './slider-style';
 import { generateId } from '@/core/utils/utilities';
-import { useEventListener } from '@/core/components/common/use-event-listener';
+import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 /**
  * Properties for the Slider

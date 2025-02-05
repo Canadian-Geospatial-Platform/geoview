@@ -1,4 +1,4 @@
-import { useState, MouseEvent, useMemo } from 'react';
+import { useState, MouseEvent, useMemo, memo, useCallback } from 'react';
 import Slider from '@mui/material/Slider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Box, HeightIcon, IconButton, Popover } from '@/ui';
@@ -10,24 +10,47 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 
+// Define static styles outside component
+const SLIDER_STYLES = {
+  '& input[type="range"]': {
+    WebkitAppearance: 'slider-vertical',
+  },
+} as const;
+
+const ANCHOR_ORIGIN = {
+  vertical: 'top',
+  horizontal: 'left',
+} as const;
+
+const TRANSFORM_ORIGIN = {
+  vertical: 'bottom',
+  horizontal: 'left',
+} as const;
+
 /**
  * Popover to resize the map container and footer panel.
  * @returns
  */
-export function ResizeFooterPanel(): JSX.Element {
-  const sxClasses = getSxClasses();
+export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/footer-bar/hooks/resize-footer-panel');
 
+  // Hooks
+  const sxClasses = useMemo(() => getSxClasses(), []);
+
+  // Store
+  const footerPanelResizeValue = useUIFooterPanelResizeValue();
+  const footerPanelResizeValues = useUIFooterPanelResizeValues();
+  const { setFooterPanelResizeValue } = useUIStoreActions();
+
+  // States
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+  // Get container
   const mapId = useGeoViewMapId();
   const mapElem = document.getElementById(`shell-${mapId}`);
 
-  // store state
-  const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const footerPanelResizeValues = useUIFooterPanelResizeValues();
-
-  const { setFooterPanelResizeValue } = useUIStoreActions();
-
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-
+  // Memoize marks calculation
   const marks = useMemo(() => {
     // Log
     logger.logTraceUseMemo('RESIZE-FOOTER-PANEL - marks', footerPanelResizeValues);
@@ -35,19 +58,23 @@ export function ResizeFooterPanel(): JSX.Element {
     return footerPanelResizeValues.map((value) => ({ value, label: `${value}%` }));
   }, [footerPanelResizeValues]);
 
-  const handleClick = (event: MouseEvent<HTMLButtonElement>): void => {
+  // Handlers
+  const handleClick = useCallback((event: MouseEvent<HTMLButtonElement>): void => {
     event.preventDefault();
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
-  const handleClose = (): void => {
+  const handleClose = useCallback((): void => {
     setAnchorEl(null);
-  };
+  }, []);
 
-  const handleOnSliderChange = (event: Event, value: number | number[]): void => {
-    setFooterPanelResizeValue(value as number);
-    handleClose();
-  };
+  const handleOnSliderChange = useCallback(
+    (event: Event, value: number | number[]): void => {
+      setFooterPanelResizeValue(value as number);
+      handleClose();
+    },
+    [handleClose, setFooterPanelResizeValue]
+  );
 
   const open = Boolean(anchorEl);
   return (
@@ -60,22 +87,12 @@ export function ResizeFooterPanel(): JSX.Element {
         anchorEl={anchorEl}
         onClose={handleClose}
         container={mapElem} // popover will be displayed when screen is in fullscreen mode.
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
+        anchorOrigin={ANCHOR_ORIGIN}
+        transformOrigin={TRANSFORM_ORIGIN}
       >
         <Box sx={sxClasses.slider}>
           <Slider
-            sx={{
-              '& input[type="range"]': {
-                WebkitAppearance: 'slider-vertical',
-              },
-            }}
+            sx={SLIDER_STYLES}
             orientation="vertical"
             value={footerPanelResizeValue}
             step={null} // so that slider jump to values based on marks array.
@@ -89,4 +106,4 @@ export function ResizeFooterPanel(): JSX.Element {
       </Popover>
     </>
   );
-}
+});

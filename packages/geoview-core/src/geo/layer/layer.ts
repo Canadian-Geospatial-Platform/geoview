@@ -1514,7 +1514,7 @@ export class LayerApi {
    * @param {string} layerPath - The path of the layer.
    * @param {boolean} newValue - The new value of visibility.
    */
-  setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): void {
+  setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Apply some visibility logic
     const curOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
     const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath);
@@ -1572,6 +1572,8 @@ export class LayerApi {
 
     // Redirect to processor so we can update the store with setterActions
     MapEventProcessor.setOrderedLayerInfoWithNoOrderChangeState(this.getMapId(), curOrderedLayerInfo);
+
+    return newVisibility;
   }
 
   /**

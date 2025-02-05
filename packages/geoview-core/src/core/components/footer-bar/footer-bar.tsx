@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { Box, Tabs, TypeTabs } from '@/ui';
 import { Plugin } from '@/api/plugin/plugin';
 import { getSxClasses } from './footer-bar-style';
-import { ResizeFooterPanel } from '@/core/components/resize-footer-panel/resize-footer-panel';
+import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
 import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
@@ -53,21 +53,23 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   // Log
   logger.logTraceRender('components/footer-bar/footer-bar');
 
+  // Set props
   const { api: footerBarApi } = props;
 
-  const mapId = useGeoViewMapId();
-
-  const theme = useTheme();
+  // Hooks
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
+  const theme = useTheme();
   const sxClasses = useMemo(
     () => getSxClasses(theme, isMapFullScreen, footerPanelResizeValue),
     [theme, isMapFullScreen, footerPanelResizeValue]
   );
 
+  // State & ref
   const tabsContainerRef = useRef<HTMLDivElement>();
 
-  // get store values and actions
+  // Store
+  const mapId = useGeoViewMapId();
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const selectedTab = useUIActiveFooterBarTabId();
@@ -75,7 +77,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const isCollapsed = useUIFooterBarIsCollapsed();
   const geoviewElement = useAppGeoviewHTMLElement();
   const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
-
   const { setFooterPanelResizeValue, setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } =
     useUIStoreActions();
 

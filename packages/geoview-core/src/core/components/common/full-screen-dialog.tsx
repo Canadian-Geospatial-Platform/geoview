@@ -27,7 +27,7 @@ export const FullScreenDialog = memo(function FullScreenDialog({
   ...dialogProps
 }: FullScreenDialogProps): JSX.Element {
   return (
-    <Dialog fullScreen maxWidth="xl" open={open} onClose={onClose} disablePortal {...dialogProps}>
+    <Dialog fullScreen maxWidth="xl" open={open} onClose={onClose} disablePortal {...dialogProps} sx={{ maxHeight: '100% !important' }}>
       <DialogContent sx={DIALOG_CONTENT_STYLES}>
         <IconButton onClick={onClose} color="primary" className="buttonFilledOutline" sx={CLOSE_BUTTON_STYLES}>
           <CloseIcon />

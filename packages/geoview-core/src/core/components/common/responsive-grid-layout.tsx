@@ -4,7 +4,6 @@ import { SxProps, useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
 import { Box, FullscreenIcon, ButtonGroup, Button } from '@/ui';
 import { ResponsiveGrid } from './responsive-grid';
-import { useFooterPanelHeight } from './use-footer-panel-height';
 import { getSxClasses } from './responsive-grid-layout-style';
 import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
@@ -358,24 +357,16 @@ const ResponsiveGridLayout = forwardRef(
         </ResponsiveGrid.Root>
         <ResponsiveGrid.Root>
           <ResponsiveGrid.Left
-            {...!fullWidth}
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
             fullWidth={fullWidth}
             aria-hidden={!isRightPanelVisible}
-            // sxProps={{
-            //   zIndex: isFullScreen ? 'unset' : 200,
-            //   maxHeight: isFullScreen ? `calc(${footerPanelResizeValue}vh - 40px)` : '580px', // maxHeight only when not fullscreen
-            //   height: isFullScreen ? `calc(${footerPanelResizeValue}vh - 40px)` : undefined, // height only when fullscreen (- padding)
-            //   overflowY: 'auto',
-            // }}
             sxProps={sxClasses.leftGridContentHeight as SxProps}
             className="responsive-layout-left-main"
           >
             {leftMain}
           </ResponsiveGrid.Left>
           <ResponsiveGrid.Right
-            {...!fullWidth}
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
             fullWidth={fullWidth}

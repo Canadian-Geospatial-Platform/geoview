@@ -4,10 +4,13 @@ import { Coordinate } from 'ol/coordinate';
 import { useTheme } from '@mui/material/styles';
 import { Box, Button, CheckIcon } from '@/ui';
 
-import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { coordFormatDMS } from '@/geo/utils/utilities';
 import { getSxClasses } from './mouse-position-style';
+
+interface MousePositionProps {
+  expanded: boolean;
+}
 
 interface FormattedCoordinates {
   lng: string;
@@ -68,7 +71,7 @@ const formatCoordinates = (lnglat: Coordinate, DMS: boolean, t: (key: string) =>
  * @returns {JSX.Element} the mouse position component
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
-export const MousePosition = memo(function MousePosition(): JSX.Element {
+export const MousePosition = memo(function MousePosition({ expanded }: MousePositionProps): JSX.Element {
   // Log too annoying
   // logger.logTraceRender('components/mouse-position/mouse-position');
 
@@ -81,7 +84,6 @@ export const MousePosition = memo(function MousePosition(): JSX.Element {
   const [positionMode, setPositionMode] = useState<number>(POSITION_MODES.DMS);
 
   // Store
-  const expanded = useUIMapInfoExpanded();
   const pointerPosition = useMapPointerPosition();
 
   // Format positions only when pointerPosition changes

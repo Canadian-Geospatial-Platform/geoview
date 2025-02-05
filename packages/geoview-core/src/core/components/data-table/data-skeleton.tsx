@@ -21,7 +21,7 @@ export default function DataSkeleton(): JSX.Element {
           </TableRow>
         </TableHead>
         <TableBody>
-          {[...Array(6).keys()].map((row) => (
+          {[...Array(20).keys()].map((row) => (
             <TableRow key={row} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
               {[...Array(5).keys()].map((value) => (
                 <TableCell sx={{ width: '20%' }} key={value}>
