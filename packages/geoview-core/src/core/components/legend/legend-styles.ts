@@ -8,7 +8,7 @@ type SxClasses = Record<string, object>;
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme, isFullScreen: boolean, footerPanelResizeValue: number): SxClasses => ({
+export const getSxClasses = (theme: Theme, isFullScreen?: boolean, footerPanelResizeValue?: number): SxClasses => ({
   container: {
     padding: '20px',
     display: 'flex',

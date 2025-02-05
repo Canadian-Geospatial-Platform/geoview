@@ -7,9 +7,12 @@ import { useTheme } from '@mui/material/styles';
 import { CheckIcon, Tooltip, Box, Button } from '@/ui';
 import { getSxClasses } from './scale-style';
 import { useMapInteraction, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+
+interface ScaleProps {
+  expanded: boolean;
+}
 
 interface TypeScale {
   scaleId: string;
@@ -32,7 +35,7 @@ const BOX_STYLES = { minWidth: 120 } as const;
  * @returns {JSX.Element} created scale element
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
-export const Scale = memo(function Scale(): JSX.Element {
+export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element {
   logger.logTraceRender('components/scale/scale');
 
   // Hooks
@@ -45,7 +48,6 @@ export const Scale = memo(function Scale(): JSX.Element {
 
   // Store
   const mapId = useGeoViewMapId();
-  const expanded = useUIMapInfoExpanded();
   const scale = useMapScale();
   const interaction = useMapInteraction();
 

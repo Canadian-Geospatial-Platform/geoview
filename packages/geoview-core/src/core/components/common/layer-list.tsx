@@ -1,7 +1,7 @@
 import { ReactNode, memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import { animated, useSpring } from '@react-spring/web';
+import { animated } from '@react-spring/web';
 import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography } from '@/ui';
 import { TypeFeatureInfoEntry, TypeQueryStatus, TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { getSxClasses } from './layer-list-style';

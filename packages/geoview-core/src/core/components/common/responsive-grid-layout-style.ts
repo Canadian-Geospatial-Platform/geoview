@@ -26,14 +26,13 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, footerPanel
   },
   rightGridContentHeight: {
     zIndex: isMapFullScreen ? 'unset' : 100, // should be is full screen fialog
-    '& > :first-child': {
+    '& > div:first-of-type': {
       maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : '580px', // maxHeight only when not fullscreen
       height: isMapFullScreen ? 'fit-content' : undefined, // height only when fullscreen (- padding)
       overflowY: 'auto',
     },
   },
   rightGridContent: {
-    height: '100%',
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
     borderRadius: '5px',
     backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
@@ -87,7 +86,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, footerPanel
     },
   },
   leftGridContentHeight: {
-    zIndex: isMapFullScreen ? 'unset' : 100, // should be is full screen fialog
+    zIndex: isMapFullScreen ? 'unset' : 100, // should be is full screen dialog
     maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : '580px', // maxHeight only when not fullscreen
     height: isMapFullScreen ? 'fit-content' : undefined, // height only when fullscreen (- padding)
     overflowY: 'auto',

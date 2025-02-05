@@ -736,9 +736,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setLegendCollapsed(layerPath, collapsed);
   }
 
-  static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): void {
+  static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean {
     // Redirect to layerAPI
-    this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
+    return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
   }
 
   static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {

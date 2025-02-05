@@ -8,7 +8,6 @@ import {
   useDataTableSelectedLayerPath,
   useDataTableAllFeaturesDataArray,
   useDataTableLayerSettings,
-  useDataTableTableHeight,
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -45,7 +44,6 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   const mapId = useGeoViewMapId();
   const layerData = useDataTableAllFeaturesDataArray();
-  const tableHeight = 'fit-content';
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
   const { setSelectedLayerPath } = useDataTableStoreActions();
@@ -231,7 +229,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
             .filter((data) => data.layerPath === selectedLayerPath)
             .map((data: MappedLayerDataType) => (
               <Box key={data.layerPath} ref={dataTableRef}>
-                <DataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} />
+                <DataTable data={data} layerPath={data.layerPath} />
               </Box>
             ))}
         </>

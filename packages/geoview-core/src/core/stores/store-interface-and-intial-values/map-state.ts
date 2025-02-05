@@ -74,7 +74,7 @@ export interface IMapState {
     reorderLayer: (layerPath: string, move: number) => void;
     resetBasemap: () => Promise<void>;
     setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
-    setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => void;
+    setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
     setZoom: (zoom: number, duration?: number) => void;
     setInteraction: (interaction: TypeInteraction) => void;
@@ -360,9 +360,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        * @param {string} layerPath - The path of the layer.
        * @param {boolean} [newValue] - The new value of visibility.
        */
-      setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean): void => {
+      setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean): boolean => {
         // Redirect to processor
-        MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, newValue);
+        return MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, newValue);
       },
 
       /**
