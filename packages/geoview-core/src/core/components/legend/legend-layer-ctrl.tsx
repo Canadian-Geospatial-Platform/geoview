@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -24,7 +24,7 @@ interface SecondaryControlsProps {
 }
 
 type ControlActions = {
-  handleToggleVisibility: (e: React.MouseEvent) => void;
+  handleToggleVisibility: (e: React.MouseEvent) => boolean;
   handleHighlightLayer: (e: React.MouseEvent) => void;
   handleZoomTo: (e: React.MouseEvent) => void;
 };
@@ -36,14 +36,15 @@ const styles = {
 
 // Custom hook for control actions
 const useControlActions = (layerPath: string): ControlActions => {
+  // Store
   const { setOrToggleLayerVisibility } = useMapStoreActions();
   const { setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
 
   return useMemo(
     () => ({
-      handleToggleVisibility: (e: React.MouseEvent): void => {
+      handleToggleVisibility: (e: React.MouseEvent): boolean => {
         e.stopPropagation();
-        setOrToggleLayerVisibility(layerPath);
+        return setOrToggleLayerVisibility(layerPath);
       },
       handleHighlightLayer: (e: React.MouseEvent): void => {
         e.stopPropagation();
@@ -82,6 +83,13 @@ const useSubtitle = (children: TypeLegendLayer[], items: TypeLegendItem[]): stri
 export function SecondaryControls({ layer, visibility }: SecondaryControlsProps): JSX.Element {
   logger.logTraceRender('components/legend/legend-layer-ctrl');
 
+  // Extract constant from layer prop
+  const { layerStatus, items, children } = layer;
+
+  // Component helper
+  const controls = useControlActions(layer.layerPath);
+  const subTitle = useSubtitle(children, items);
+
   // Hooks
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -92,12 +100,15 @@ export function SecondaryControls({ layer, visibility }: SecondaryControlsProps)
   // Is button disabled?
   const isLayerVisible = layer.controls?.visibility ?? false;
 
-  // Extract constant from layer prop
-  const { layerStatus, items, children } = layer;
-
-  // Component helper
-  const controls = useControlActions(layer.layerPath);
-  const subTitle = useSubtitle(children, items);
+  // State visibility button
+  // TODO: refactor - Manange some props on the state were they belong like here.
+  // TODO.CONT: Continue to encapsulate, because a change of visibility on a layer set the ordered layerInfo.
+  // TODO.CONT: This trigger re rendering of ALL legend element even if only the clicked control should be re-render
+  const [isVisible, setIsVisible] = useState(visibility);
+  const handleVisibilityChange = (e: React.MouseEvent): void => {
+    const newVisibility = controls.handleToggleVisibility(e);
+    setIsVisible(newVisibility);
+  };
 
   if (!['processed', 'loaded'].includes(layerStatus || 'error')) {
     return <Box />;
@@ -111,10 +122,10 @@ export function SecondaryControls({ layer, visibility }: SecondaryControlsProps)
           edge="end"
           tooltip="layers.toggleVisibility"
           className="buttonOutline"
-          onClick={controls.handleToggleVisibility}
+          onClick={handleVisibilityChange}
           disabled={!isLayerVisible}
         >
-          {visibility ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+          {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
         </IconButton>
         <IconButton tooltip="legend.highlightLayer" sx={styles.btnMargin} className="buttonOutline" onClick={controls.handleHighlightLayer}>
           {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}

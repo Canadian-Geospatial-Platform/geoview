@@ -355,7 +355,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   // #endregion
 
   // #region PROCESSING ***********************************************************************************************
-
   /**
    * Resets the currently selected feature index to 0 and keeps in reference the previously selected layer and
    * the previously selected feature index so that in the useEffect, later, the component can udpate
