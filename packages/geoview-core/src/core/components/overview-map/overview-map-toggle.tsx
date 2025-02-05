@@ -19,6 +19,14 @@ interface OverviewMapToggleProps {
   overviewMap: OLOverviewMap;
 }
 
+// Define static styles outside component
+const OVERVIEW_STYLES = {
+  margin: 0,
+  padding: 0,
+  height: 'initial',
+  minWidth: 'initial',
+} as const;
+
 /**
  * Create a toggle icon button
  *
@@ -26,14 +34,19 @@ interface OverviewMapToggleProps {
  * @returns {JSX.Element} returns the toggle icon button
  */
 export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | null {
+  // Component props
   const { overviewMap } = props;
 
+  // Hook
   const { t } = useTranslation<string>();
   const tooltipAndAria = t('mapctrl.overviewmap.toggle')!;
   const sxClasses = useMemo(() => getSxClasses(), []);
+
+  // State
   const [isExpanded, setIsExpanded] = useState(true);
   const [targetElement, setTargetElement] = useState<HTMLDivElement | null>(null);
 
+  // Handlers
   const handleClick = useCallback((): void => {
     const isCollapsed = overviewMap.getCollapsed();
     setIsExpanded(!isCollapsed);
@@ -92,17 +105,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | 
   return createPortal(
     <Tooltip title={tooltipAndAria}>
       <Box sx={sxClasses.toggleBtnContainer}>
-        <Box
-          component="div"
-          sx={sxClasses.toggleBtn}
-          className={isExpanded ? `minimapOpen` : `minimapClosed`}
-          style={{
-            margin: 0,
-            padding: 0,
-            height: 'initial',
-            minWidth: 'initial',
-          }}
-        >
+        <Box component="div" sx={sxClasses.toggleBtn} className={isExpanded ? `minimapOpen` : `minimapClosed`} style={OVERVIEW_STYLES}>
           <ChevronLeftIcon />
         </Box>
       </Box>
