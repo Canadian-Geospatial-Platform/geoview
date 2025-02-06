@@ -22,7 +22,7 @@ import { logger } from '@/core/utils/logger';
 export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
   const mapId = useGeoViewMapId();
-  const fileExportDefaultPrefixName = 'mapExport';
+  const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
 
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
@@ -136,8 +136,8 @@ export default function ExportModal(): JSX.Element {
           setIsLegendLoading(true);
           // remove hidden attribute from document legend, so that html-to-image can copy the legend container.
           const legendTab = document.getElementById(`shell-${mapId}-legend`) as HTMLElement;
-          // const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
-          // if (hasHiddenAttr) legendTab.removeAttribute('hidden');
+          const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
+          if (hasHiddenAttr) legendTab.removeAttribute('hidden');
           htmlToImage
             .toPng(legendContainer, { fontEmbedCSS: '' })
             .then((dataUrl) => {

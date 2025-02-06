@@ -182,7 +182,7 @@
     "exportBtn": "Download",
     "exportTitle": "Title",
     "approx": "approx",
-    "fileExportDefaultPrefixName": "mapExport"
+    "fileExportDefaultPrefixName": "map-export"
   },
   "geolocator": {
     "title": "Geolocator",

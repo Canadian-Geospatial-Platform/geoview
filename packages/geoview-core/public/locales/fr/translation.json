@@ -182,7 +182,7 @@
     "exportBtn": "Télécharger",
     "exportTitle": "Titre",
     "approx": "approx",
-    "fileExportDefaultPrefixName": "carteExport"
+    "fileExportDefaultPrefixName": "carte-export"
   },
   "geolocator": {
     "title": "Géolocalisation",
