@@ -1560,11 +1560,16 @@ export class MapViewer {
    *
    * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
    * @param {TypeMapFeaturesInstance} mapConfig - The config to modify, or one created using the current map state if not provided.
+   * @param {boolean} removeUnlisted - Whether or not names not provided should be removed from config.
    * @returns {TypeMapFeaturesInstance} Map config with updated names.
    */
-  replaceMapConfigLayerNames(namePairs: string[][], mapConfig?: TypeMapFeaturesConfig): TypeMapFeaturesInstance | undefined {
+  replaceMapConfigLayerNames(
+    namePairs: string[][],
+    mapConfig?: TypeMapFeaturesConfig,
+    removeUnlisted: boolean = false
+  ): TypeMapFeaturesInstance | undefined {
     const mapConfigToUse = mapConfig || this.createMapConfigFromMapState();
-    if (mapConfigToUse) return MapEventProcessor.replaceMapConfigLayerNames(namePairs, mapConfigToUse);
+    if (mapConfigToUse) return MapEventProcessor.replaceMapConfigLayerNames(namePairs, mapConfigToUse, removeUnlisted);
     return undefined;
   }
 

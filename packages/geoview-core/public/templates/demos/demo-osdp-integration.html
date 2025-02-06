@@ -226,6 +226,14 @@ const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de lo
 cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
         </pre>
       </details>
+      <button id="changeNamesAndRemove" style="margin: 10px" title="Replaces listed layer names with thei provided pair in the config, and removes any names that aren't listed">Change Names and Remove Unlisted</button>
+      <details>
+        <summary>Code</summary>
+        <pre>
+const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de localisation des stations', 'Perimeter'], ['Carte commémorative du Canada', 'Commemorative Map']];
+cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
+        </pre>
+      </details>
     </div>
     <br><br>
 
@@ -401,6 +409,20 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
             return result;
           }, []);
         cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
+        updateConfigTextArea();
+      });
+
+      // Change Names and Remove Button============================================================================================================
+      const changeNamesAndRemoveButton = document.getElementById('changeNamesAndRemove');
+
+      // add an event listener when a button is clicked
+      changeNamesAndRemoveButton.addEventListener('click', function () {
+        const pairs = document.getElementById('layerNames').value.replace(/\[|\]/g,'').split(',').map((name) => name.trim()).reduce((result, value, index, array) => {
+          if (index % 2 === 0)
+            result.push(array.slice(index, index + 2));
+            return result;
+          }, []);
+        cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
         updateConfigTextArea();
       });
 

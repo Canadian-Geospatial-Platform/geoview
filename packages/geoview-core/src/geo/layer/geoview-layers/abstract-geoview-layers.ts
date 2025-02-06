@@ -158,27 +158,31 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Set the list of layer entry configuration and initialize the registered layer object and register all layers to layer sets.
    *
-   * @param {TypeGeoviewLayer} mapLayerConfig The GeoView layer configuration options.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration options.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration
    * @private
    */
-  #setListOfLayerEntryConfig(mapLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+  #setListOfLayerEntryConfig(geoviewLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     if (listOfLayerEntryConfig.length === 0) return;
-    if (listOfLayerEntryConfig.length === 1) this.listOfLayerEntryConfig = listOfLayerEntryConfig;
-    else {
+    if (listOfLayerEntryConfig.length === 1) {
+      if (!listOfLayerEntryConfig[0].layerId) listOfLayerEntryConfig[0].layerId = this.getGeoviewLayerId();
+      this.listOfLayerEntryConfig = listOfLayerEntryConfig;
+    } else {
       const layerGroup = new GroupLayerEntryConfig({
         geoviewLayerConfig: listOfLayerEntryConfig[0].geoviewLayerConfig,
-        layerId: this.geoviewLayerId,
+        layerId: this.getGeoviewLayerId(),
         layerName: this.geoviewLayerName,
         isMetadataLayerGroup: false,
-        initialSettings: mapLayerConfig.initialSettings,
+        initialSettings: geoviewLayerConfig.initialSettings,
         listOfLayerEntryConfig,
       } as GroupLayerEntryConfig);
+
       this.listOfLayerEntryConfig = [layerGroup];
       layerGroup.listOfLayerEntryConfig.forEach((layerConfig) => {
         (layerConfig as AbstractBaseLayerEntryConfig).parentLayerConfig = layerGroup;
       });
     }
+
     this.listOfLayerEntryConfig[0].geoviewLayerConfig.listOfLayerEntryConfig = listOfLayerEntryConfig;
   }
 
