@@ -68,8 +68,7 @@ const ResponsiveGridLayout = forwardRef(
     const [isEnlarged, setIsEnlarged] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
 
-    // Custom hook for calculating the height of footer panel
-    // const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
+    // Ref for right panel
     const rightMainRef = useRef<HTMLDivElement>();
 
     // Expose imperative methods to parent component

@@ -75,10 +75,8 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
 
   // if focus trap gets focus, send focus to the exit button
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - focusItem', focusItem);
-
     if (id === focusItem.activeElementId) {
+      logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - focusItem', focusItem);
       setTimeout(() => document.getElementById(`${id}-exit-btn`)?.focus(), FOCUS_DELAY);
     }
   }, [focusItem, id]);

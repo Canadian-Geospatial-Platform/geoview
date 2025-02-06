@@ -4,7 +4,7 @@ import { Box, ListItemButton, Grid, Tooltip, Typography, ListItem } from '@/ui';
 import { GeoListItem } from './geolocator';
 import { getSxClassesList } from './geolocator-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
 
 type GeoListProps = {
@@ -70,7 +70,7 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
       title = _title.replace(regex, '<strong>$&</strong>');
     }
 
-    return <HtmlToReact extraOptions={{ component: 'span' }} itemOptions={{ component: 'span' }} htmlContent={`${title} ${province}`} />;
+    return <UseHtmlToReact extraOptions={{ component: 'span' }} itemOptions={{ component: 'span' }} htmlContent={`${title} ${province}`} />;
   }, []);
 
   const handleZoomToGeoLocator = (latLng: [number, number], bbox: [number, number, number, number]): void => {
