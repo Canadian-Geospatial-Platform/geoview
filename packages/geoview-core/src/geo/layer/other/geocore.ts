@@ -64,6 +64,9 @@ export class GeoCore {
         return newLayerConfig as TypeGeoviewLayerConfig[];
       }
 
+      // In case of simplified geocoreConfig being provided, just update geoviewLayerName
+      if (layerConfig?.geoviewLayerName) response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
+
       // For each found geochart associated with the Geocore UUIDs
       response.geocharts?.forEach((geochartConfig) => {
         // Add a GeoChart
