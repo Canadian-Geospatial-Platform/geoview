@@ -584,7 +584,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType as TypeGeoviewLayerType,
           extent,
           geometry: feature,
-          featureIcon: canvas,
+          featureIcon: canvas.toDataURL(),
           fieldInfo: {},
           nameField: layerConfig?.source?.featureInfo?.nameField || null,
         };

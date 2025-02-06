@@ -100,7 +100,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
     return {
       uid: feature.geometry ? (feature.geometry as TypeGeometry).ol_uid : null,
-      iconSrc: feature.featureIcon.toDataURL(),
+      iconSrc: feature.featureIcon,
       name: feature.nameField ? (feature.fieldInfo?.[feature.nameField]?.value as string) || '' : 'No name',
       extent: feature.extent,
       geometry: feature.geometry,

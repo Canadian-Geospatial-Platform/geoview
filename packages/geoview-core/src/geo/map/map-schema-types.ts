@@ -219,7 +219,7 @@ export type TypeFeatureInfoEntry = {
   geoviewLayerType: TypeGeoviewLayerType;
   extent: Extent | undefined;
   geometry: TypeGeometry | Feature | null;
-  featureIcon: HTMLCanvasElement;
+  featureIcon: string;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
   nameField: string | null;
 };

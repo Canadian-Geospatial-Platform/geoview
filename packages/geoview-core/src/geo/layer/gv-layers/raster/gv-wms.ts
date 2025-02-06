@@ -461,7 +461,7 @@ export class GVWMS extends AbstractGVRaster {
       geoviewLayerType: CONST_LAYER_TYPES.WMS,
       extent: [clickCoordinate[0], clickCoordinate[1], clickCoordinate[0], clickCoordinate[1]],
       geometry: null,
-      featureIcon: document.createElement('canvas'),
+      featureIcon: document.createElement('canvas').toDataURL(),
       fieldInfo: {},
       nameField: null,
     };

@@ -363,14 +363,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
     return (filterArray ?? []).map((feature) => {
       const featureInfo = {
-        ICON: (
-          <Box
-            component="img"
-            alt={feature?.nameField ?? ''}
-            src={feature.featureIcon.toDataURL('image/webp', 0.5)}
-            className="layer-icon"
-          />
-        ),
+        ICON: <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />,
         ZOOM: (
           <IconButton
             color="primary"
