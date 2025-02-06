@@ -37,7 +37,10 @@ export class GeoCore {
    * @param {GeoCoreLayerConfig} layerConfig the layer configuration
    * @returns {Promise<TypeGeoviewLayerConfig[]>} list of layer configurations to add to the map
    */
-  async createLayersFromUUID(uuid: string, layerConfig?: GeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig[]> {
+  async createLayersFromUUID(
+    uuid: string,
+    layerConfig?: GeoCoreLayerConfig | Record<'layerName', string>
+  ): Promise<TypeGeoviewLayerConfig[]> {
     // Get the map config
     const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.#mapId);
 
@@ -52,7 +55,7 @@ export class GeoCore {
       ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);
 
       // Use user supplied listOfLayerEntryConfig if provided
-      if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
+      if ((layerConfig as GeoCoreLayerConfig)?.listOfLayerEntryConfig || (layerConfig as GeoCoreLayerConfig)?.initialSettings) {
         const tempLayerConfig = { ...layerConfig } as unknown as TypeGeoviewLayerConfig;
         tempLayerConfig.metadataAccessPath = response.layers[0].metadataAccessPath;
         tempLayerConfig.geoviewLayerType = response.layers[0].geoviewLayerType;
@@ -63,6 +66,8 @@ export class GeoCore {
         const newLayerConfig = config.getValidMapConfig([tempLayerConfig]);
         return newLayerConfig as TypeGeoviewLayerConfig[];
       }
+      if ((layerConfig as Record<'layerName', string>)?.layerName)
+        response.layers[0].listOfLayerEntryConfig[0].layerName = (layerConfig as Record<'layerName', string>).layerName;
 
       // For each found geochart associated with the Geocore UUIDs
       response.geocharts?.forEach((geochartConfig) => {
