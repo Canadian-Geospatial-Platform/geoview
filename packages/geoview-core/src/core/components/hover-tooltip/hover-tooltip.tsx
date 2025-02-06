@@ -82,7 +82,7 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
     return {
       content: {
         value: (hoverFeatureInfo.fieldInfo?.value as string) || '',
-        icon: hoverFeatureInfo.featureIcon ? hoverFeatureInfo.featureIcon.toDataURL() : '',
+        icon: hoverFeatureInfo.featureIcon ? hoverFeatureInfo.featureIcon : '',
       },
       isVisible: true,
     };

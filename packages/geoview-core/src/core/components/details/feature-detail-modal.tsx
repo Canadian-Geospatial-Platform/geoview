@@ -67,7 +67,7 @@ export default function FeatureDetailModal(): JSX.Element {
       <DialogTitle>{t('details.featureDetailModalTitle')}</DialogTitle>
       <DialogContent>
         <Box display="flex" flexDirection="row" alignItems="center" pb={10}>
-          <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon.toDataURL().toString()} className="layer-icon" />
+          <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />
           <Typography sx={{ display: 'inline-block' }} component="div">
             {nameFieldValue}
           </Typography>

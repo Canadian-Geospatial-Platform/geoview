@@ -1,5 +1,5 @@
 import { Root } from 'react-dom/client';
-import { ScaleLine } from 'ol/control';
+import { ScaleLine, OverviewMap as OLOverviewMap } from 'ol/control';
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
@@ -49,7 +49,6 @@ import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 import { LegendEventProcessor } from './legend-event-processor';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -840,8 +839,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
-  static createOverviewMapBasemap(mapId: string): TypeBasemapProps | undefined {
-    return this.getMapViewer(mapId).basemap.getOverviewMap();
+  static getOverviewMapControl(mapId: string, div: HTMLDivElement): OLOverviewMap {
+    const olMap = this.getMapViewer(mapId).map;
+    return this.getMapViewer(mapId).basemap.getOverviewMapControl(olMap, div);
+  }
+
+  static setOverviewMapVisibility(mapId: string, visible: boolean): void {
+    const olMap = this.getMapViewer(mapId).map;
+    this.getMapViewer(mapId).basemap.setOverviewMapControlVisibility(olMap, visible);
   }
 
   static resetBasemap(mapId: string): Promise<void> {
@@ -1046,6 +1051,48 @@ export class MapEventProcessor extends AbstractEventProcessor {
   };
 
   /**
+   * Get all active filters for layer.
+   *
+   * @param {string} mapId The map id.
+   * @param {string} layerPath The path for the layer to get filters from.
+   */
+  static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    if (geoviewLayer) {
+      const initialFilter = this.getInitialFilter(mapId, layerPath);
+      const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
+      const sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+      return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
+    }
+    return undefined;
+  }
+
+  /**
+   * Apply all available filters to layer.
+   *
+   * @param {string} mapId The map id.
+   * @param {string} layerPath The path of the layer to apply filters to.
+   */
+  static applyLayerFilters(mapId: string, layerPath: string): void {
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    if (geoviewLayer) {
+      if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
+        const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+        if (filter) geoviewLayer.applyViewFilter(filter);
+      } else {
+        const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
+
+        // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
+        (geoviewLayer as AbstractGVVector | GVEsriDynamic).applyViewFilter(filters.join(' and '));
+      }
+    }
+  }
+
+  // #endregion
+
+  // #region CONFIG FROM MAP STATE
+
+  /**
    * Creates layer initial settings according to provided configs.
    * @param {ConfigBaseClass} layerEntryConfig - Layer entry config for the layer.
    * @param {TypeOrderedLayerInfo} orderedLayerInfo - Ordered layer info for the layer.
@@ -1079,14 +1126,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - Id of map.
    * @param {string} layerPath - Path of the layer to create config for.
    * @param {boolean} isGeocore - Indicates if it is a geocore layer.
-   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   * @param {boolean | 'hybrid'} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
    * @returns {TypeLayerEntryConfig} Entry config object.
    */
   static #createLayerEntryConfig(
     mapId: string,
     layerPath: string,
     isGeocore: boolean,
-    maintainGeocoreLayerNames: boolean
+    overrideGeocoreServiceNames: boolean | 'hybrid'
   ): TypeLayerEntryConfig {
     // Get needed info
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
@@ -1122,7 +1169,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           entryLayerPath.startsWith(`${layerPath}/`) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
       );
       sublayerPaths.forEach((sublayerPath) =>
-        listOfLayerEntryConfig.push(MapEventProcessor.#createLayerEntryConfig(mapId, sublayerPath, isGeocore, maintainGeocoreLayerNames))
+        listOfLayerEntryConfig.push(MapEventProcessor.#createLayerEntryConfig(mapId, sublayerPath, isGeocore, overrideGeocoreServiceNames))
       );
     }
 
@@ -1133,28 +1180,30 @@ export class MapEventProcessor extends AbstractEventProcessor {
       ? { ...(layerEntryConfig! as VectorLayerEntryConfig).source }
       : undefined;
 
+    // Only use feature info specified in original config, not drawn from services
+    if (source?.featureInfo) delete source?.featureInfo;
+    if (configLayerEntryConfig?.source?.featureInfo && source) source.featureInfo = configLayerEntryConfig.source.featureInfo;
+
     if (source?.dataAccessPath && isGeocore) source.dataAccessPath = '';
 
     const layerStyle =
-      legendLayerInfo!.styleConfig && (!isGeocore || (isGeocore && maintainGeocoreLayerNames)) ? legendLayerInfo!.styleConfig : undefined;
+      legendLayerInfo!.styleConfig && (!isGeocore || (isGeocore && overrideGeocoreServiceNames === true))
+        ? legendLayerInfo!.styleConfig
+        : undefined;
 
     // Construct layer entry config
     const newLayerEntryConfig = {
       layerId: layerEntryConfig!.layerId,
-      layerName: isGeocore && !maintainGeocoreLayerNames ? undefined : layerEntryConfig!.layerName,
+      layerName: isGeocore && overrideGeocoreServiceNames === false ? undefined : layerEntryConfig!.layerName,
       layerFilter: (configLayerEntryConfig as VectorLayerEntryConfig)?.layerFilter
         ? (configLayerEntryConfig as VectorLayerEntryConfig).layerFilter
         : undefined,
       initialSettings,
       layerStyle,
-      source,
       entryType: listOfLayerEntryConfig.length ? 'group' : undefined,
-      listOfLayerEntryConfig: listOfLayerEntryConfig.length ? listOfLayerEntryConfig : [],
+      source: listOfLayerEntryConfig.length ? undefined : source,
+      listOfLayerEntryConfig: listOfLayerEntryConfig.length ? listOfLayerEntryConfig : undefined,
     };
-
-    // Only use feature info specified in original config, not drawn from services
-    if (newLayerEntryConfig.source?.featureInfo) delete newLayerEntryConfig.source?.featureInfo;
-    if (configLayerEntryConfig?.source?.featureInfo) newLayerEntryConfig.source!.featureInfo = configLayerEntryConfig.source.featureInfo;
 
     return newLayerEntryConfig as unknown as TypeLayerEntryConfig;
   }
@@ -1163,10 +1212,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Creates a geoview layer config based on current layer state.
    * @param {string} mapId - Id of map.
    * @param {string} layerPath - Path of the layer to create config for.
-   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   * @param {boolean | "hybrid"} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
    * @returns {MapConfigLayerEntry} Geoview layer config object.
    */
-  static #createGeoviewLayerConfig(mapId: string, layerPath: string, maintainGeocoreLayerNames: boolean): MapConfigLayerEntry {
+  static #createGeoviewLayerConfig(mapId: string, layerPath: string, overrideGeocoreServiceNames: boolean | 'hybrid'): MapConfigLayerEntry {
     // Get needed info
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)!;
 
@@ -1191,9 +1240,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
     if (sublayerPaths.length)
       sublayerPaths.forEach((sublayerPath) =>
-        listOfLayerEntryConfig.push(MapEventProcessor.#createLayerEntryConfig(mapId, sublayerPath, isGeocore, maintainGeocoreLayerNames))
+        listOfLayerEntryConfig.push(MapEventProcessor.#createLayerEntryConfig(mapId, sublayerPath, isGeocore, overrideGeocoreServiceNames))
       );
-    else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(mapId, layerPath, isGeocore, maintainGeocoreLayerNames));
+    else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(mapId, layerPath, isGeocore, overrideGeocoreServiceNames));
 
     // Get initial settings
     const initialSettings = this.#getInitialSettings(layerEntryConfig!, orderedLayerInfo!, legendLayerInfo!);
@@ -1202,7 +1251,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const newGeoviewLayerConfig: MapConfigLayerEntry = isGeocore
       ? {
           geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
-          geoviewLayerName: !maintainGeocoreLayerNames ? undefined : geoviewLayerConfig.geoviewLayerName,
+          geoviewLayerName: overrideGeocoreServiceNames === false ? undefined : geoviewLayerConfig.geoviewLayerName,
           geoviewLayerType: 'geoCore',
           initialSettings,
           listOfLayerEntryConfig,
@@ -1225,9 +1274,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Creates a map config based on current map state.
    * @param {string} mapId - Id of map.
-   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   * @param {boolean | "hybrid"} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
    */
-  static createMapConfigFromMapState(mapId: string, maintainGeocoreLayerNames: boolean = true): TypeMapFeaturesInstance | undefined {
+  static createMapConfigFromMapState(
+    mapId: string,
+    overrideGeocoreServiceNames: boolean | 'hybrid' = true
+  ): TypeMapFeaturesInstance | undefined {
     const config = MapEventProcessor.getGeoViewMapConfig(mapId);
 
     if (config) {
@@ -1238,7 +1290,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // Build list of geoview layer configs
       const listOfGeoviewLayerConfig = layerOrder.map((layerPath) =>
-        this.#createGeoviewLayerConfig(mapId, layerPath, maintainGeocoreLayerNames)
+        this.#createGeoviewLayerConfig(mapId, layerPath, overrideGeocoreServiceNames)
       );
 
       // Get info for view
@@ -1310,42 +1362,43 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Apply all available filters to layer.
+   * Searches through a map config and replaces any matching layer names with their provided partner.
    *
-   * @param {string} mapId The map id.
-   * @param {string} layerPath The path of the layer to apply filters to.
+   * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
+   * @param {TypeMapFeaturesInstance} mapConfig - The config to modify.
+   * @returns {TypeMapFeaturesInstance} Map config with updated names.
    */
-  static applyLayerFilters(mapId: string, layerPath: string): void {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
-    if (geoviewLayer) {
-      if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
-        const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
-        if (filter) geoviewLayer.applyViewFilter(filter);
-      } else {
-        const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
+  static replaceMapConfigLayerNames(namePairs: string[][], mapConfig: TypeMapFeaturesInstance): TypeMapFeaturesInstance {
+    const pairsDict: Record<string, string> = {};
+    namePairs.forEach((pair) => {
+      [pairsDict[pair[1]], pairsDict[pair[0]]] = pair;
+    });
 
-        // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
-        (geoviewLayer as AbstractGVVector | GVEsriDynamic).applyViewFilter(filters.join(' and '));
-      }
-    }
+    mapConfig.map.listOfGeoviewLayerConfig?.forEach((geoviewLayerConfig) => {
+      if (geoviewLayerConfig.geoviewLayerName && pairsDict[geoviewLayerConfig.geoviewLayerName])
+        // eslint-disable-next-line no-param-reassign
+        geoviewLayerConfig.geoviewLayerName = pairsDict[geoviewLayerConfig.geoviewLayerName];
+      if (geoviewLayerConfig.listOfLayerEntryConfig?.length)
+        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig);
+    });
+
+    return mapConfig;
   }
 
   /**
-   * Get all active filters for layer.
+   * Searches through a list of layer entry configs and replaces any matching layer names with their provided partner.
    *
-   * @param {string} mapId The map id.
-   * @param {string} layerPath The path for the layer to get filters from.
+   * @param {Record<string, string>} pairsDict -  The dict of name pairs. Presumably one english and one french name in each pair.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfigs - The layer entry configs to modify.
    */
-  static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
-    if (geoviewLayer) {
-      const initialFilter = this.getInitialFilter(mapId, layerPath);
-      const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
-      const sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
-      return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
-    }
-    return undefined;
+  static #replaceLayerEntryConfigNames(pairsDict: Record<string, string>, listOfLayerEntryConfigs: TypeLayerEntryConfig[]): void {
+    listOfLayerEntryConfigs?.forEach((layerEntryConfig) => {
+      if (layerEntryConfig.layerName && pairsDict[layerEntryConfig.layerName])
+        // eslint-disable-next-line no-param-reassign
+        layerEntryConfig.layerName = pairsDict[layerEntryConfig.layerName];
+      if (layerEntryConfig.listOfLayerEntryConfig?.length)
+        this.#replaceLayerEntryConfigNames(pairsDict, layerEntryConfig.listOfLayerEntryConfig);
+    });
   }
-
   // #endregion
 }

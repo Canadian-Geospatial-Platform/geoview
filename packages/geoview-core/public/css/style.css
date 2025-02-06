@@ -226,6 +226,34 @@ table.state {
   color: green
 }
 
+.editor {
+  display: inline-flex;
+  gap: 10px;
+  font-family: monospace;
+  line-height: 21px;
+  background: #282a3a;
+  border-radius: 2px;
+  padding: 20px 10px;
+  height: 500px;
+  overflow-y: auto;
+}
+
+.line-numbers {
+  width: 20px;
+  text-align: right;
+  height: 9999px;
+}
+
+.line-numbers span {
+  counter-increment: linenumber;
+}
+
+.line-numbers span::before {
+  content: counter(linenumber);
+  display: block;
+  color: #506882;
+}
+
 @media only screen and (max-width: 767px) {
   body {
     padding: 2px; /* Adjust the value as needed */

@@ -162,7 +162,7 @@ export type TypeFeatureInfoResultSet = TypeResultSet<TypeFeatureInfoResultSetEnt
 export type TypeHoverFeatureInfo =
   | {
       geoviewLayerType: TypeGeoviewLayerType;
-      featureIcon: HTMLCanvasElement;
+      featureIcon: string;
       fieldInfo: TypeFieldEntry | undefined;
       nameField: string | null;
     }
