@@ -596,14 +596,26 @@ export class LayerApi {
     MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerInfo);
 
     const parsedLayerEntryConfig = layerEntryConfig ? JSON.parse(layerEntryConfig) : undefined;
-    const optionalConfig: GeoCoreLayerConfig | undefined = parsedLayerEntryConfig
-      ? {
-          geoviewLayerType: 'geoCore',
-          geoviewLayerId: uuid,
-          geoviewLayerName: parsedLayerEntryConfig.layerName,
-          listOfLayerEntryConfig: parsedLayerEntryConfig,
-        }
-      : undefined;
+    let optionalConfig: GeoCoreLayerConfig | undefined =
+      parsedLayerEntryConfig && (parsedLayerEntryConfig[0].listOfLayerEntryConfig || parsedLayerEntryConfig[0].initialSettings)
+        ? {
+            geoviewLayerType: 'geoCore',
+            geoviewLayerId: uuid,
+            geoviewLayerName: parsedLayerEntryConfig[0].geoviewLayerName,
+            listOfLayerEntryConfig: parsedLayerEntryConfig[0].geoviewLayerName
+              ? parsedLayerEntryConfig[0].listOfLayerEntryConfig
+              : parsedLayerEntryConfig,
+            initialSettings: parsedLayerEntryConfig[0].initialSettings,
+          }
+        : undefined;
+
+    // If a simplified config is provided, build a config with the layerName provided
+    if (!optionalConfig && parsedLayerEntryConfig && (parsedLayerEntryConfig[0].layerName || parsedLayerEntryConfig[0].geoviewLayerName))
+      optionalConfig = {
+        geoviewLayerType: 'geoCore',
+        geoviewLayerId: uuid,
+        geoviewLayerName: parsedLayerEntryConfig[0].geoviewLayerName || parsedLayerEntryConfig[0].layerName,
+      };
 
     // Create geocore layer configs and add
     const geoCoreGeoviewLayerInstance = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());

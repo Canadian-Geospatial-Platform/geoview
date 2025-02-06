@@ -52,7 +52,7 @@ export class GeoCore {
       ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);
 
       // Use user supplied listOfLayerEntryConfig if provided
-      if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
+      if ((layerConfig as GeoCoreLayerConfig)?.listOfLayerEntryConfig || (layerConfig as GeoCoreLayerConfig)?.initialSettings) {
         const tempLayerConfig = { ...layerConfig } as unknown as TypeGeoviewLayerConfig;
         tempLayerConfig.metadataAccessPath = response.layers[0].metadataAccessPath;
         tempLayerConfig.geoviewLayerType = response.layers[0].geoviewLayerType;
@@ -63,6 +63,9 @@ export class GeoCore {
         const newLayerConfig = config.getValidMapConfig([tempLayerConfig]);
         return newLayerConfig as TypeGeoviewLayerConfig[];
       }
+
+      // In case of simplified geocoreConfig being provided, just update geoviewLayerName
+      if (layerConfig?.geoviewLayerName) response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
 
       // For each found geochart associated with the Geocore UUIDs
       response.geocharts?.forEach((geochartConfig) => {
