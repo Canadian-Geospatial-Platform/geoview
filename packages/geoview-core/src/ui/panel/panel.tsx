@@ -5,7 +5,7 @@ import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import { useTheme } from '@mui/material/styles';
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { IconButton, CloseIcon, Box, TypePanelProps } from '..';
 import { logger } from '@/core/utils/logger';
 
@@ -149,7 +149,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
           />
 
           <CardContent sx={{ ...sxClasses.panelContentContainer, ...(panelStyles ? panelStyles.panelCardContent : {}) }}>
-            {typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}
+            {typeof panel.content === 'string' ? <UseHtmlToReact htmlContent={panel.content} /> : panel.content}
           </CardContent>
         </Card>
       </FocusTrapContainer>

@@ -21,7 +21,7 @@ const MAP_INFO_BASE_STYLES = {
   left: 0,
   right: 0,
   px: '1rem',
-  zIndex: 1000,
+  zIndex: 1500,
 } as const;
 
 const FLEX_STYLE = { flexGrow: 1, height: '100%' };

@@ -8,7 +8,7 @@ import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-inti
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { handleEscapeKey } from '@/core/utils/utilities';
 
 interface NavbarPanelButtonType {
@@ -82,7 +82,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
             <DialogTitle sx={sxClasses.popoverTitle}>{t(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
             <DialogContent>
               {buttonPanel.panel?.convertHtmlContent ? (
-                <HtmlToReact htmlContent={buttonPanel.panel?.content as string} />
+                <UseHtmlToReact htmlContent={buttonPanel.panel?.content as string} />
               ) : (
                 buttonPanel.panel?.content
               )}

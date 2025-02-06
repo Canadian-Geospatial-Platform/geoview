@@ -12,7 +12,7 @@ import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/l
 import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
 
 import { useTheme } from '@mui/material/styles';
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
 import {
   MaterialReactTable,
@@ -152,7 +152,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
 
       // convert string to react component.
       return (typeof cellValue === 'string' && cellValue.length) || typeof cellValue === 'number' ? (
-        <HtmlToReact htmlContent={cellValue.toString()} itemOptions={{ tabIndex: 0 }} />
+        <UseHtmlToReact htmlContent={cellValue.toString()} itemOptions={{ tabIndex: 0 }} />
       ) : (
         cellValue
       );

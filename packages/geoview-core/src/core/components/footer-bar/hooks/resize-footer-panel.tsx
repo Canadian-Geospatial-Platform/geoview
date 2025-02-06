@@ -3,11 +3,7 @@ import Slider from '@mui/material/Slider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Box, HeightIcon, IconButton, Popover } from '@/ui';
 import { getSxClasses } from './resize-footer-panel-style';
-import {
-  useUIFooterPanelResizeValue,
-  useUIStoreActions,
-  useUIFooterPanelResizeValues,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIFooterPanelResizeValue, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 
 // Define static styles outside component
@@ -27,6 +23,7 @@ const TRANSFORM_ORIGIN = {
   horizontal: 'left',
 } as const;
 
+const RESIZE_VALUES = [35, 50, 100];
 /**
  * Popover to resize the map container and footer panel.
  * @returns
@@ -40,7 +37,6 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
 
   // Store
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const { setFooterPanelResizeValue } = useUIStoreActions();
 
   // States
@@ -53,10 +49,10 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
   // Memoize marks calculation
   const marks = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('RESIZE-FOOTER-PANEL - marks', footerPanelResizeValues);
+    logger.logTraceUseMemo('RESIZE-FOOTER-PANEL - marks', RESIZE_VALUES);
 
-    return footerPanelResizeValues.map((value) => ({ value, label: `${value}%` }));
-  }, [footerPanelResizeValues]);
+    return RESIZE_VALUES.map((value) => ({ value, label: `${value}%` }));
+  }, []);
 
   // Handlers
   const handleClick = useCallback((event: MouseEvent<HTMLButtonElement>): void => {
@@ -99,8 +95,8 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
             valueLabelDisplay="off"
             marks={marks}
             onChange={handleOnSliderChange}
-            min={footerPanelResizeValues[0]}
-            max={footerPanelResizeValues[footerPanelResizeValues.length - 1]}
+            min={RESIZE_VALUES[0]}
+            max={RESIZE_VALUES[RESIZE_VALUES.length - 1]}
           />
         </Box>
       </Popover>

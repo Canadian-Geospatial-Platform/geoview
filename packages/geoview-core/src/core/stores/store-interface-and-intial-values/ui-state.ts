@@ -29,7 +29,6 @@ export interface IUIState {
   hiddenTabs: string[];
   navBarComponents: TypeNavBarProps;
   footerPanelResizeValue: number;
-  footerPanelResizeValues: number[];
   footerBarIsCollapsed: boolean;
   selectedFooterLayerListItemId: string;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
@@ -79,7 +78,6 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     hiddenTabs: ['time-slider', 'geochart'],
     navBarComponents: [],
     footerPanelResizeValue: 35,
-    footerPanelResizeValues: [35, 50, 100],
     footerBarIsCollapsed: false,
     selectedFooterLayerListItemId: '',
 
@@ -261,7 +259,6 @@ export const useUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>
 export const useUICorePackagesComponents = (): TypeMapCorePackages =>
   useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
 export const useUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
-export const useUIFooterPanelResizeValues = (): number[] => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValues);
 export const useUIHiddenTabs = (): string[] => useStore(useGeoViewStore(), (state) => state.uiState.hiddenTabs);
 export const useUINavbarComponents = (): TypeNavBarProps => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 export const useUIFooterBarIsCollapsed = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.footerBarIsCollapsed);
