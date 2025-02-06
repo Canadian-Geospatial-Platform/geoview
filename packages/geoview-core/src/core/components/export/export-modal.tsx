@@ -67,11 +67,9 @@ export default function ExportModal(): JSX.Element {
         .toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white, fontEmbedCSS: '' })
         .then((dataUrl) => {
           setIsMapExporting(false);
-          if (exportTitle.trim() !== '') {
-            exportPNG(dataUrl, `${fileExportDefaultPrefixName} - ${exportTitle}`);
-          } else {
-            exportPNG(dataUrl, fileExportDefaultPrefixName);
-          }
+
+          exportPNG(dataUrl, `${fileExportDefaultPrefixName} - ${exportTitle !== '' ? exportTitle.trim() : mapId}`);
+
           setActiveAppBarTab(legendId, 'legend', false, false);
           disableFocusTrap();
         })
