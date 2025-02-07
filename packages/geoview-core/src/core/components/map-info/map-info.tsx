@@ -1,4 +1,4 @@
-import { memo, MutableRefObject, useEffect, useMemo, useRef } from 'react';
+import { memo, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
 
@@ -9,7 +9,6 @@ import { MapInfoExpandButton } from './map-info-expand-button';
 import { MapInfoRotationButton } from './map-info-rotation-button';
 import { MapInfoFixNorthSwitch } from './map-info-fixnorth-switch';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
@@ -19,10 +18,10 @@ const MAP_INFO_BASE_STYLES = {
   alignItems: 'center',
   position: 'absolute',
   bottom: 0,
-  left: 0,
+  left: '64px',
   right: 0,
   px: '1rem',
-  zIndex: 200,
+  zIndex: 1500,
 } as const;
 
 const FLEX_STYLE = { flexGrow: 1, height: '100%' };
@@ -41,9 +40,11 @@ export const MapInfo = memo(function MapInfo(): JSX.Element {
   const mapInfoRef = useRef<HTMLDivElement>();
 
   // Store
-  const expanded = useUIMapInfoExpanded();
   const interaction = useMapInteraction(); // Static map, do not display mouse position or rotation controls
   const mapId = useGeoViewMapId(); // Element id for panel height (expanded)
+
+  // State
+  const [expanded, setExpanded] = useState(false);
 
   // Memoize values
   const containerStyles = useMemo(
@@ -81,21 +82,26 @@ export const MapInfo = memo(function MapInfo(): JSX.Element {
     };
   }, [mapInfoRef, mapId]);
 
+  const handleExpand = useCallback((value: boolean) => {
+    logger.logTraceUseCallback('MAP INFO - expand', value);
+    setExpanded(value);
+  }, []);
+
   return (
     <Box ref={mapInfoRef as MutableRefObject<HTMLDivElement>} id={`${mapId}-mapInfo`} sx={containerStyles}>
-      <MapInfoExpandButton />
+      <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />
       <Attribution />
       {interaction === 'dynamic' && (
         <>
           <div className={`${mapId}-mapInfo-flex`} style={FLEX_STYLE} />
-          <MousePosition />
+          <MousePosition expanded={expanded} />
         </>
       )}
-      <Scale />
+      <Scale expanded={expanded} />
       <div className={`${mapId}-mapInfo-flex`} style={FLEX_STYLE} />
       {interaction === 'dynamic' && (
         <>
-          <MapInfoFixNorthSwitch />
+          <MapInfoFixNorthSwitch expanded={expanded} />
           <MapInfoRotationButton />
         </>
       )}

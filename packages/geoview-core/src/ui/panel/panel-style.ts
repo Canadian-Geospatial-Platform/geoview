@@ -64,9 +64,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     position: 'relative',
     flexBasis: 'auto',
     overflow: 'hidden',
-    overflowY: 'auto',
+    overflowY: 'hidden',
     boxSizing: 'border-box',
-    marginBottom: 16,
+    marginBottom: '16px',
     '&:last-child': {
       paddingBottom: 0,
     },

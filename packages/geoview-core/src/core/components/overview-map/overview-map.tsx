@@ -25,11 +25,14 @@ import { Box } from '@/ui/layout';
 export function OverviewMap(): JSX.Element {
   // Log
   logger.logTraceRender('components/overview-map/overview-map');
+
+  // Store
   const mapId = useGeoViewMapId();
   const zoomLevel = useMapZoom();
   const hideOnZoom = useMapOverviewMapHideZoom();
   const displayLanguage = useAppDisplayLanguage();
 
+  // State
   const [visibility, setVisibility] = useState<boolean>(!(zoomLevel > hideOnZoom));
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -41,7 +44,6 @@ export function OverviewMap(): JSX.Element {
     if (!isInitialized) return;
 
     const shouldBeVisibile = zoomLevel > hideOnZoom;
-
     if (shouldBeVisibile !== visibility) {
       setVisibility(shouldBeVisibile);
       MapEventProcessor.setOverviewMapVisibility(mapId, shouldBeVisibile);
@@ -50,6 +52,7 @@ export function OverviewMap(): JSX.Element {
 
   useEffect(() => {
     logger.logTraceUseEffect('OVERVIEW-MAP - mount');
+
     let root: Root | null = null;
     const toggleButton = document.createElement('div');
     const overviewMapControl = MapEventProcessor.getOverviewMapControl(mapId, toggleButton);

@@ -26,13 +26,13 @@ import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeOutfieldsType, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { CONST_LAYER_TYPES } from '../../geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeEsriImageLayerLegend } from './gv-esri-image';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
-import { GeometryApi } from '../../geometry/geometry';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];

@@ -7,7 +7,12 @@ import { SxStyles } from '@/ui/style/types';
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme): SxStyles => ({
+export const getSxClasses = (theme: Theme, isFullScreen: boolean, footerPanelResizeValue: number): SxStyles => ({
+  tabContent: {
+    maxHeight: isFullScreen ? `calc(${footerPanelResizeValue}vh - 40px)` : '660px', // maxHeight only when not fullscreen
+    height: isFullScreen ? `calc(${footerPanelResizeValue}vh - 40px)` : undefined, // height only when fullscreen (- padding)
+    overflowY: 'auto',
+  },
   tabsContainer: {
     position: 'relative',
     background: theme.palette.geoViewColor.bgColor.dark[50],

@@ -12,7 +12,7 @@ import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/l
 import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
 
 import { useTheme } from '@mui/material/styles';
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
 import {
   MaterialReactTable,
@@ -36,8 +36,8 @@ import TopToolbar from './top-toolbar';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useAppDisplayLanguage, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIFooterPanelResizeValue, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -55,11 +55,10 @@ import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-l
  * @param {DataTableProps} data map data which will be used to build data table.
  * @param {string} mapId id of the map.
  * @param {string} layerKey key of the layer.
- * @param {string} tableHeight Height of the container which contains all rows.
  * @returns {JSX.Element} Data table as react element.
  */
 
-function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): JSX.Element {
+function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
@@ -73,6 +72,8 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   const { getExtentFromFeatures } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
+  const isMapFullScreen = useAppFullscreenActive();
+  const footerPanelResizeValue = useUIFooterPanelResizeValue();
 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
@@ -151,7 +152,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
       // convert string to react component.
       return (typeof cellValue === 'string' && cellValue.length) || typeof cellValue === 'number' ? (
-        <HtmlToReact htmlContent={cellValue.toString()} itemOptions={{ tabIndex: 0 }} />
+        <UseHtmlToReact htmlContent={cellValue.toString()} itemOptions={{ tabIndex: 0 }} />
       ) : (
         cellValue
       );
@@ -396,6 +397,18 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.features, handleZoomIn]);
 
+  // TODO: The table is triggering many useless callback. With max-height of 5000px, it is slower to create but faster scroll.
+  // TODO.CONT: The x scroll is at the bottom, this is not good. We can set at the top with CSS below.
+  // TODO.CONT: It looks like we have circular dependencies, lack of useMemo to avoid rendering, callback not need like lightbox (only for images but render alll the time), ...
+  // transform: 'rotateX(180deg)',
+  //   '& .MuiTable-root': {  // Target the MUI table root specifically
+  //     transform: 'rotateX(180deg)',
+  //   }
+  // TODO: The right panel fullscreen button is incredibly slow...
+  // TODO: There is the error below
+  // hook.js:608 Warning: A component is changing a controlled input to be uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen.
+  // Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components Error Component Stack
+
   let useTable: MRTTableInstance<ColumnsType> | null = null;
   // Create the Material React Table
   useTable = useMaterialReactTable({
@@ -448,7 +461,11 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     enableColumnVirtualization: true,
     enablePagination: false,
     enableRowVirtualization: true,
-    muiTableContainerProps: { sx: { maxHeight: tableHeight } },
+    muiTableContainerProps: {
+      sx: {
+        maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 240px)` : '475px', // TODO: set 475px when not in full screen. Even FS should use the footerPanelResizeValue
+      },
+    },
     rowVirtualizerInstanceRef,
     columnVirtualizerInstanceRef,
     rowVirtualizerOptions: { overscan: 5 },
