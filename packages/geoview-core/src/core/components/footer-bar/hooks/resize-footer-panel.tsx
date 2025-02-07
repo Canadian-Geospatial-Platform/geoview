@@ -46,13 +46,8 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
   const mapId = useGeoViewMapId();
   const mapElem = document.getElementById(`shell-${mapId}`);
 
-  // Memoize marks calculation
-  const marks = useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('RESIZE-FOOTER-PANEL - marks', RESIZE_VALUES);
-
-    return RESIZE_VALUES.map((value) => ({ value, label: `${value}%` }));
-  }, []);
+  // Marks calculation
+  const marks = RESIZE_VALUES.map((value) => ({ value, label: `${value}%` }));
 
   // Handlers
   const handleClick = useCallback((event: MouseEvent<HTMLButtonElement>): void => {

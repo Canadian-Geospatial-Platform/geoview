@@ -8,7 +8,7 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GitHubIcon } from '@/ui/icons';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { FocusTrapContainer } from '../../common';
+import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 

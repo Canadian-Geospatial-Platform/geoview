@@ -83,6 +83,7 @@ export const MapInfo = memo(function MapInfo(): JSX.Element {
   }, [mapInfoRef, mapId]);
 
   const handleExpand = useCallback((value: boolean) => {
+    logger.logTraceUseCallback('MAP INFO - expand', value);
     setExpanded(value);
   }, []);
 

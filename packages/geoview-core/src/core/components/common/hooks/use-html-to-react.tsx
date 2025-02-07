@@ -1,7 +1,7 @@
 import { CSSProperties, ReactNode } from 'react';
 import parse from 'html-react-parser';
 import { Box } from '@/ui/layout';
-import { logger } from '../../../utils/logger';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Interface used for custom html elements

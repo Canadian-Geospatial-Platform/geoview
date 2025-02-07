@@ -54,6 +54,7 @@ const NotificationItem = memo(function NotificationItem({
   sxClasses: SxStyles;
 }) {
   const handleRemove = useCallback(() => {
+    logger.logTraceUseCallback('NOTIFICATION - remove', notification.key);
     onRemove(notification.key);
   }, [notification.key, onRemove]);
 
@@ -168,11 +169,13 @@ export default memo(function Notifications(): JSX.Element {
 
   // Handlers
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    logger.logTraceUseCallback('NOTIFICATION - open');
     setAnchorEl(event.currentTarget);
     setOpen((prev) => !prev);
   }, []);
 
   const handleClickAway = useCallback(() => {
+    logger.logTraceUseCallback('NOTIFICATION - close');
     if (open) setOpen(false);
   }, [open]);
 

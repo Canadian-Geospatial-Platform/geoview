@@ -117,6 +117,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabs', tabsList, memoTabs);
 
     const allTabs = { ...tabsList, ...memoTabs };
+
+    // TODO: Use the indexValue coming from the tab to order so custom tab can be place anywhere
     // inject guide tab at last position of tabs.
     return Object.keys({ ...tabsList, ...{ guide: {} } }).map((tab, index) => {
       return {
@@ -139,7 +141,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     // NOTE: we need prevState because of an async nature of adding plugins.
     setTabsList((prevState: Record<string, Tab>) => {
-      return { ...newTab, ...prevState };
+      return { ...prevState, ...newTab };
     });
   }, []);
 

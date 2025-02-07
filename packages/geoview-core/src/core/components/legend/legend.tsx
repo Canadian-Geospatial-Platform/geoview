@@ -77,14 +77,15 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   const layersList = useDebounceLayerLegendLayers();
 
   // Memoize breakpoint values
-  const breakpoints = useMemo(
-    () => ({
+  const breakpoints = useMemo(() => {
+    logger.logTraceUseMemo('LEGEND - breakpoints', theme.breakpoints.values);
+
+    return {
       sm: theme.breakpoints.values.sm,
       md: theme.breakpoints.values.md,
       lg: theme.breakpoints.values.lg,
-    }),
-    [theme.breakpoints.values.sm, theme.breakpoints.values.md, theme.breakpoints.values.lg]
-  );
+    };
+  }, [theme.breakpoints.values]);
 
   /**
    * Get the size of list based on window size.

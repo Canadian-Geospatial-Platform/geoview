@@ -64,13 +64,14 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // ? useRef, if not mapElementStore is undefined - happen because the value is used inside an event listener
   const mapElementRef = useRef(mapElementStore);
   useEffect(() => {
-    logger.logTraceUseCallback('FOCUS-TRAP - mapElementRef', mapElementStore);
+    logger.logTraceUseEffect('FOCUS-TRAP - mapElementRef', mapElementStore);
     mapElementRef.current = mapElementStore;
   }, [mapElementStore]);
 
   // Use shellElementRef.current instead of querying DOM multiple times
   const shellElementRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
+    logger.logTraceUseEffect('FOCUS-TRAP - shellElementRef');
     shellElementRef.current = geoviewElement.querySelector('.geoview-shell') as HTMLElement;
   }, [geoviewElement]);
 
@@ -83,6 +84,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const handleScrolling = useCallback((evt: KeyboardEvent): void => {
     if (mapElementRef.current === document.activeElement) {
       if (evt.code === 'Space') {
+        logger.logTraceUseCallback('FOCUS-TRAP - handleScrolling', evt.code);
         evt.preventDefault();
       }
     }
@@ -96,6 +98,13 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // Initialize the handlers object
   useEffect(() => {
+    logger.logTraceUseEffect('FOCUS-TRAP - handlers', handlers.current);
+
+    // The handlers.current ref pattern is being used to break circular dependencies.
+    // The circular dependency occurs because:
+    // - handleKeyDown needs to call exit
+    // - exit needs to remove the handleKeyDown event listener
+    // - If we used useCallback, each function would need to depend on the other
     handlers.current = {
       exit: () => {
         setActiveTrapGeoView(false);
@@ -106,6 +115,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         }
         document.removeEventListener('keydown', handleScrolling);
 
+        // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
         setTimeout(() => document.getElementById(`toplink-${focusTrapId}`)?.focus(), FOCUS_DELAY);
         setCrosshairActive(false);
       },
@@ -123,22 +133,26 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // Create memoized functions that use the handlers
   const exitFocus = useCallback(() => {
+    logger.logTraceUseCallback('FOCUS-TRAP - exitFocus');
     handlers.current?.exit();
   }, []);
 
   const handleExit = useCallback((evt: KeyboardEvent) => {
+    logger.logTraceUseCallback('FOCUS-TRAP - handleExit', evt.code);
     handlers.current?.handleKeyDown(evt);
   }, []);
 
   // Set focus trap function
   const setFocusTrap = useCallback(() => {
     if (shellElementRef.current) {
+      logger.logTraceUseCallback('FOCUS TRAP - setFocusTrap');
       const mapHTMLElement = shellElementRef.current;
 
       setActiveTrapGeoView(true);
       mapHTMLElement.classList.add('map-focus-trap');
       mapHTMLElement.addEventListener('keydown', handleExit);
 
+      // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
       setTimeout(() => document.getElementById(`mapTargetElement-${mapId}`)?.focus(), FOCUS_DELAY);
       setCrosshairActive(true);
     }
@@ -146,6 +160,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // Handle button clicks
   const handleEnable = useCallback((): void => {
+    logger.logTraceUseCallback('FOCUS-TRAP - handleEnable');
+
     setOpen(false);
     setFocusTrap();
     document.getElementById(`mapTargetElement-${mapId}`)!.style.border = BORDER_STYLE;
@@ -153,6 +169,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   const handleSkip = useCallback((): void => {
     setOpen(false);
+
+    // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
     setTimeout(() => document.getElementById(navigationLinkRef.current!)?.focus(), FOCUS_DELAY);
   }, []);
 

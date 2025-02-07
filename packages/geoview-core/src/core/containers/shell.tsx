@@ -98,6 +98,7 @@ export function Shell(props: ShellProps): JSX.Element {
    * @param {MapComponentPayload} payload The map component being added
    */
   const handleMapAddComponent = useCallback((sender: MapViewer, event: MapComponentAddedEvent): void => {
+    logger.logTraceUseCallback('SHELL - handleMapAddComponent');
     setComponents((tempComponents) => ({
       ...tempComponents,
       [event.mapComponentId]: event.component,
@@ -110,6 +111,7 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleMapRemoveComponent = useCallback(
     (sender: MapViewer, event: MapComponentRemovedEvent) => {
+      logger.logTraceUseCallback('SHELL - handleMapRemoveComponent');
       const tempComponents: Record<string, JSX.Element> = { ...components };
       delete tempComponents[event.mapComponentId];
 
@@ -126,6 +128,7 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleModalOpen = useCallback(
     (sender: ModalApi, event: ModalEvent) => {
+      logger.logTraceUseCallback('SHELL - handleModalOpen', event.modalId);
       setModalProps(mapViewer.modal.modals[event.modalId]);
       setModalOpen(true);
     },
@@ -137,6 +140,7 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleModalClose = useCallback((sender: ModalApi, event: ModalEvent): void => {
+    logger.logTraceUseCallback('SHELL - handleModalClose', event.modalId);
     setModalOpen(false);
   }, []);
 
@@ -145,6 +149,8 @@ export function Shell(props: ShellProps): JSX.Element {
    * @param {SnackBarOpenEvent} payload The snackbar information to open
    */
   const handleSnackBarOpen = useCallback((sender: Notifications, payload: SnackBarOpenEvent): void => {
+    logger.logTraceUseCallback('SHELL - handleSnackBarOpen', payload);
+
     // create button
     const myButton = payload.button?.label ? (
       <Button type="icon" onClick={payload.button.action}>

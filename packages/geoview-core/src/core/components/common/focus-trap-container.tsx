@@ -77,6 +77,8 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
   useEffect(() => {
     if (id === focusItem.activeElementId) {
       logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - focusItem', focusItem);
+
+      // SetTimeout with a delay of 0 to force the rendering
       setTimeout(() => document.getElementById(`${id}-exit-btn`)?.focus(), FOCUS_DELAY);
     }
   }, [focusItem, id]);
