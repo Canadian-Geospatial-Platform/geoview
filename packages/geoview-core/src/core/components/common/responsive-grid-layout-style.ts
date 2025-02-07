@@ -27,7 +27,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, footerPanel
   rightGridContentHeight: {
     zIndex: isMapFullScreen ? 'unset' : 100, // should be is full screen fialog
     '& > div:first-of-type': {
-      maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : '580px', // maxHeight only when not fullscreen
+      maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : '585px', // maxHeight only when not fullscreen
       height: isMapFullScreen ? 'fit-content' : undefined, // height only when fullscreen (- padding)
       overflowY: 'auto',
     },
@@ -87,7 +87,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, footerPanel
   },
   leftGridContentHeight: {
     zIndex: isMapFullScreen ? 'unset' : 100, // should be is full screen dialog
-    maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : '580px', // maxHeight only when not fullscreen
+    maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : '585px', // maxHeight only when not fullscreen
     height: isMapFullScreen ? 'fit-content' : undefined, // height only when fullscreen (- padding)
     overflowY: 'auto',
   },

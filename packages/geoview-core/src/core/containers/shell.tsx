@@ -222,9 +222,9 @@ export function Shell(props: ShellProps): JSX.Element {
           <CircularProgress isLoaded={!circularProgressActive} />
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             {mapLoaded && <AppBar api={mapViewer.appBarApi} />}
+            <MapInfo />
             <Box sx={sxClasses.mapContainer} ref={mapContainerRef}>
               <Map viewer={mapViewer} />
-              <MapInfo />
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
             <Snackbar

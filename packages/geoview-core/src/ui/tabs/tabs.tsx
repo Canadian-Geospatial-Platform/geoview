@@ -91,7 +91,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     shellContainer,
     tabs,
     rightButtons,
-    selectedTab,
+    selectedTab = 0,
     activeTrap,
     onToggleCollapse,
     onSelectedTabChanged,
@@ -251,7 +251,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
               variant="scrollable"
               scrollButtons
               allowScrollButtonsMobile
-              value={selectedTab}
+              value={Math.max(0, selectedTab)}
               onChange={handleChange}
               aria-label="basic tabs"
               ScrollButtonComponent={CustomScrollButton}
