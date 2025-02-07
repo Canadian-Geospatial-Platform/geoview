@@ -77,6 +77,8 @@ export const useMapResize = ({
 
   // Set initial height
   useEffect(() => {
+    logger?.logTraceUseEffect('USE MAP RESIZE - set initial height');
+
     if (mapContainerRef.current && mapShellContainerRef.current) {
       const height = geoviewElement?.dataset?.height ?? `${geoviewElement?.clientHeight}px`;
       setOrigHeight(height);
@@ -118,6 +120,7 @@ export const useMapResize = ({
       footerPanelResizeValue,
       origHeight,
     });
+    logger?.logTraceUseEffect('USE MAP RESIZE - resize and fullscreen changes', styles);
 
     if (styles) {
       Object.assign(mapContainerRef.current.style, styles);

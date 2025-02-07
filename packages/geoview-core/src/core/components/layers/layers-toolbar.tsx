@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
+import { useCallback, useEffect, useRef } from 'react';
 import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, VisibilityOutlinedIcon, Button } from '@/ui';
 import {
   useLayerStoreActions,
@@ -7,10 +8,12 @@ import {
   useLayerLegendLayers,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLayersViewDisplayState } from './types';
+import { logger } from '@/core/utils/logger';
 
 export function LayersToolbar(): JSX.Element {
   const theme = useTheme();
   const { t } = useTranslation<string>();
+  const addButtonRef = useRef<HTMLButtonElement>(null);
 
   const layerToolbarStyle = {
     padding: '8px 18px 4px 8px',
@@ -22,9 +25,30 @@ export function LayersToolbar(): JSX.Element {
   const legendLayers = useLayerLegendLayers();
   const { setDisplayState } = useLayerStoreActions();
 
-  const handleSetDisplayState = (dispState: TypeLayersViewDisplayState): void => {
-    setDisplayState(dispState);
-  };
+  const handleSetDisplayState = useCallback(
+    (dispState: TypeLayersViewDisplayState): void => {
+      setDisplayState(dispState);
+    },
+    [setDisplayState]
+  );
+
+  useEffect(() => {
+    // If there are no layers, automatically click the add button
+    if (legendLayers.length === 0) {
+      logger.logTraceUseEffect('LAYERS TOOLBAR - click add');
+
+      // Set the display state directly
+      handleSetDisplayState('add');
+
+      // Use setTimeout to ensure the button click happens after initial render
+      setTimeout(() => {
+        if (addButtonRef.current) {
+          const buttonElement = addButtonRef.current;
+          buttonElement.click();
+        }
+      }, 0);
+    }
+  }, [handleSetDisplayState, legendLayers.length]);
 
   return (
     <Box id="layers-toolbar" sx={layerToolbarStyle}>
@@ -42,6 +66,7 @@ export function LayersToolbar(): JSX.Element {
           {t('general.view')}
         </Button>
         <Button
+          ref={addButtonRef}
           makeResponsive
           type="text"
           size="small"

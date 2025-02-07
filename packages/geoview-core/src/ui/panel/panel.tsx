@@ -1,4 +1,4 @@
-import { useRef, useEffect, KeyboardEvent } from 'react';
+import { useRef, useEffect, KeyboardEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Card from '@mui/material/Card';
@@ -46,7 +46,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   // Get the theme
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   const mapSize = useMapSize();
 
