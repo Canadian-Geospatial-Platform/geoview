@@ -1,4 +1,5 @@
 import { Root } from 'react-dom/client';
+import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
@@ -13,7 +14,6 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 export declare class MapEventProcessor extends AbstractEventProcessor {
     #private;
     /**
@@ -195,7 +195,8 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @return {void}
      */
     static removeOrderedLayerInfo(mapId: string, layerPath: string, removeSublayers?: boolean): void;
-    static createOverviewMapBasemap(mapId: string): TypeBasemapProps | undefined;
+    static getOverviewMapControl(mapId: string, div: HTMLDivElement): OLOverviewMap;
+    static setOverviewMapVisibility(mapId: string, visible: boolean): void;
     static resetBasemap(mapId: string): Promise<void>;
     static setBasemap(mapId: string, basemapOptions: TypeBasemapOptions): Promise<void>;
     static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void;
@@ -239,11 +240,12 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static getPixelFromCoordinate: (mapId: string, coord: Coordinate) => [number, number];
     static setClickMarkerOnPosition: (mapId: string, position: number[]) => void;
     /**
-     * Creates a map config based on current map state.
-     * @param {string} mapId - Id of map.
-     * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+     * Get all active filters for layer.
+     *
+     * @param {string} mapId The map id.
+     * @param {string} layerPath The path for the layer to get filters from.
      */
-    static createMapConfigFromMapState(mapId: string, maintainGeocoreLayerNames?: boolean): TypeMapFeaturesInstance | undefined;
+    static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined;
     /**
      * Apply all available filters to layer.
      *
@@ -252,10 +254,17 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      */
     static applyLayerFilters(mapId: string, layerPath: string): void;
     /**
-     * Get all active filters for layer.
-     *
-     * @param {string} mapId The map id.
-     * @param {string} layerPath The path for the layer to get filters from.
+     * Creates a map config based on current map state.
+     * @param {string} mapId - Id of map.
+     * @param {boolean | "hybrid"} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
      */
-    static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined;
+    static createMapConfigFromMapState(mapId: string, overrideGeocoreServiceNames?: boolean | 'hybrid'): TypeMapFeaturesInstance | undefined;
+    /**
+     * Searches through a map config and replaces any matching layer names with their provided partner.
+     *
+     * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
+     * @param {TypeMapFeaturesInstance} mapConfig - The config to modify.
+     * @returns {TypeMapFeaturesInstance} Map config with updated names.
+     */
+    static replaceMapConfigLayerNames(namePairs: string[][], mapConfig: TypeMapFeaturesInstance): TypeMapFeaturesInstance;
 }

@@ -27,4 +27,5 @@ export declare class GVVectorTiles extends AbstractGVVectorTile {
      * @returns {TypeOutfieldsType} The type of the field.
      */
     protected getFieldType(fieldName: string): TypeOutfieldsType;
+    changeStyle(styleUrl: string): Promise<void>;
 }

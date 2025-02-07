@@ -1,4 +1,7 @@
 import { Extent } from 'ol/extent';
+import BaseLayer from 'ol/layer/Base';
+import OLMap from 'ol/Map';
+import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@config/types/map-schema-types';
 import { EventDelegateBase } from '@/app';
 import { TypeJsonObject } from '@/core/types/global-types';
@@ -19,6 +22,7 @@ export declare class Basemap {
     defaultResolutions?: number[];
     defaultExtent?: Extent;
     overviewMap?: TypeBasemapProps;
+    overviewMapCtrl?: OLOverviewMap;
     basemapOptions: TypeBasemapOptions;
     mapId: string;
     /**
@@ -31,8 +35,10 @@ export declare class Basemap {
      * Basemap list
      */
     basemapsList: TypeJsonObject;
+    getOverviewMapControl(olMap: OLMap, toggleButton: HTMLDivElement): OLOverviewMap;
+    createOverviewMapLayers(): BaseLayer[];
     setOverviewMap(): Promise<void>;
-    getOverviewMap(): TypeBasemapProps | undefined;
+    setOverviewMapControlVisibility(olMap: OLMap, visible: boolean): void;
     /**
      * Create the core basemap and add the layers to it.
      * @param {TypeBasemapOptions} basemapOptions - Basemap options.

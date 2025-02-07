@@ -359,11 +359,19 @@ export declare class MapViewer {
     convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent;
     /**
      * Creates a map config based on current map state.
-     * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
-     *                                              Set to false after a language change to update the layer names with the new language.
+     * @param {BooleanExpression} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+     *                                                         Set to false after a language change to update the layer names with the new language.
      * @returns {TypeMapFeaturesInstance | undefined} Map config with current map state.
      */
-    createMapConfigFromMapState(maintainGeocoreLayerNames?: boolean): TypeMapFeaturesInstance | undefined;
+    createMapConfigFromMapState(overrideGeocoreServiceNames?: boolean | 'hybrid'): TypeMapFeaturesInstance | undefined;
+    /**
+     * Searches through a map config and replaces any matching layer names with their provided partner.
+     *
+     * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
+     * @param {TypeMapFeaturesInstance} mapConfig - The config to modify, or one created using the current map state if not provided.
+     * @returns {TypeMapFeaturesInstance} Map config with updated names.
+     */
+    replaceMapConfigLayerNames(namePairs: string[][], mapConfig?: TypeMapFeaturesConfig): TypeMapFeaturesInstance | undefined;
     /**
      * Registers a map init event callback.
      * @param {MapInitDelegate} callback - The callback to be executed whenever the event is emitted
