@@ -10,7 +10,7 @@ import { LayerListEntry } from '.';
 export interface TypeIconStackProps {
   layerPath: string;
   onIconClick?: () => void;
-  onStackIconClick?: (e: React.KeyboardEvent<HTMLElement>) => void;
+  onStackIconClick?: (event: React.KeyboardEvent<HTMLElement>) => void;
 }
 
 interface LayerIconProps {

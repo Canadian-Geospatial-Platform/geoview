@@ -465,7 +465,7 @@ export class LayerApi {
           ) {
             this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
             // Remove geoCore ordered layer info placeholder
-            if (MapEventProcessor.getMapOrderedLayerInfoForLayer(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId))
+            if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId))
               MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId, false);
 
             return false;
@@ -632,7 +632,7 @@ export class LayerApi {
     // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
     if (geoviewLayerConfig.geoviewLayerId in this.#geoviewLayers) {
       // Remove geoCore ordered layer info placeholder
-      if (MapEventProcessor.getMapOrderedLayerInfoForLayer(this.getMapId(), geoviewLayerConfig.geoviewLayerId))
+      if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId))
         MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId, false);
 
       this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
@@ -1047,7 +1047,7 @@ export class LayerApi {
         const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
 
         // Get the number of layers
-        const numberOfLayers = MapEventProcessor.getMapLayerAndChildrenOrderedInfo(this.getMapId(), parentLayerPath).length;
+        const numberOfLayers = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(this.getMapId(), parentLayerPath).length;
 
         // If the map index of the parent has been set
         if (parentLayerIndex !== -1) {
@@ -1508,7 +1508,7 @@ export class LayerApi {
     const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath);
     // Determine the outcome of the new visibility based on parameters
     const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
-    const layerInfos = MapEventProcessor.getMapLayerAndChildrenOrderedInfo(this.getMapId(), layerPath, curOrderedLayerInfo);
+    const layerInfos = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(this.getMapId(), layerPath, curOrderedLayerInfo);
 
     layerInfos.forEach((layerInfo: TypeOrderedLayerInfo) => {
       if (layerInfo) {

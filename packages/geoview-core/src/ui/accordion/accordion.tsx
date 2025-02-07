@@ -60,13 +60,13 @@ export function Accordion(props: AccordionProps): ReactNode {
   };
 
   const handleTransitionEnd = useCallback(
-    (index: number) => (e: React.TransitionEvent) => {
+    (index: number) => (event: React.TransitionEvent) => {
       if (!expandedStates[index] && showLoadingIcon) {
         const updatedStates = [...transitionStates];
         updatedStates[index] = true;
         setTransitionStates(updatedStates);
 
-        if (e.propertyName === 'height') {
+        if (event.propertyName === 'height') {
           const resetStates = [...transitionStates];
           resetStates[index] = false;
           setTransitionStates(resetStates);

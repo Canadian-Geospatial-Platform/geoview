@@ -5,10 +5,9 @@ import { useDebounceLayerLegendLayers } from '@/core/components/legend/hooks/use
 import { LayersList } from './layers-list';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
 import { logger } from '@/core/utils/logger';
-import { TypeLegendLayer } from '@/core/components/layers/types';
 
 interface LeftPanelProps {
-  showLayerDetailsPanel: (layer: TypeLegendLayer) => void;
+  showLayerDetailsPanel: (layerId: string) => void;
   isLayoutEnlarged: boolean;
 }
 

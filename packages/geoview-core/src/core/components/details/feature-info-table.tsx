@@ -75,8 +75,8 @@ export const FeatureItem = memo(function FeatureItem({
         src={item}
         tabIndex={0}
         onClick={() => onInitLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
-        onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === 'Enter') {
+        onKeyDown={(event: React.KeyboardEvent) => {
+          if (event.key === 'Enter') {
             onInitLightBox(featureInfoItem.value as string, `${index}_${featureInfoItem.alias}`, index);
           }
         }}

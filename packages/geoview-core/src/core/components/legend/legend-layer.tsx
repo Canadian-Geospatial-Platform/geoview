@@ -1,8 +1,14 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material';
 import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
-import { useLayerStoreActions, useMapStoreActions } from '@/core/stores/';
+import {
+  useGeoViewMapId,
+  useLayerStoreActions,
+  useMapStoreActions,
+  useSelectorLayerLegendCollapsed,
+  useSelectorLayerVisibility,
+} from '@/core/stores/';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '../common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';
@@ -18,7 +24,7 @@ interface LegendLayerHeaderProps {
   layer: TypeLegendLayer;
   isCollapsed: boolean;
   isVisible: boolean;
-  onExpandClick: (e: React.MouseEvent) => void;
+  onExpandClick: (event: React.MouseEvent) => void;
 }
 
 // Constant style outside of render
@@ -39,7 +45,7 @@ const LegendLayerHeader = memo(
           primary={layer.layerName}
           className="layerTitle"
           disableTypography
-          secondary={<SecondaryControls layer={layer} visibility={isVisible} />}
+          secondary={<SecondaryControls layer={layer} isVisible={isVisible} />}
         />
       </Tooltip>
       {(layer.children?.length > 1 || layer.items?.length > 1) && (
@@ -62,14 +68,13 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Stores
+  const mapId = useGeoViewMapId();
   const { initLightBox, LightBoxComponent } = useLightBox();
-  const { getLegendCollapsedFromOrderedLayerInfo, getVisibilityFromOrderedLayerInfo, setLegendCollapsed } = useMapStoreActions();
+  const { setLegendCollapsed } = useMapStoreActions();
   const { getLayerStatus } = useLayerStoreActions();
-  const isVisible = getVisibilityFromOrderedLayerInfo(layer.layerPath);
+  const isVisible = useSelectorLayerVisibility(mapId, layer.layerPath);
+  const isCollapsed = useSelectorLayerLegendCollapsed(mapId, layer.layerPath);
   const layerStatus = getLayerStatus(layer.layerPath);
-
-  // State
-  const [isCollapsed, setIsCollapsed] = useState(getLegendCollapsedFromOrderedLayerInfo(layer.layerPath));
 
   // Create a new layer object with updated status (no useMemo to ensure updates in inner child)
   const currentLayer = {
@@ -81,15 +86,14 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   };
 
   const handleExpandGroupClick = useCallback(
-    (e: React.MouseEvent): void => {
+    (event: React.MouseEvent): void => {
       // Log
-      logger.logTraceUseCallback('LEGEND_LAYER - handleExpandGroupClick', layer.layerPath);
+      logger.logTraceUseCallback('LEGEND-LAYER - handleExpandGroupClick', layer.layerPath);
 
-      e.stopPropagation();
-      setIsCollapsed(!getLegendCollapsedFromOrderedLayerInfo(layer.layerPath));
+      event.stopPropagation();
       setLegendCollapsed(layer.layerPath); // store value
     },
-    [getLegendCollapsedFromOrderedLayerInfo, layer.layerPath, setLegendCollapsed]
+    [layer.layerPath, setLegendCollapsed]
   );
 
   return (

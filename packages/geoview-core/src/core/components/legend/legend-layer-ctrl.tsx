@@ -17,16 +17,17 @@ import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types'
 import { useMapStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
+import { TypeLayerControls } from '@/api/config/types/map-schema-types';
 
 interface SecondaryControlsProps {
   layer: TypeLegendLayer;
-  visibility: boolean; // Visibility come from store ordered layer info array
+  isVisible: boolean; // Visibility come from store ordered layer info array
 }
 
 type ControlActions = {
-  handleToggleVisibility: (e: React.MouseEvent) => void;
-  handleHighlightLayer: (e: React.MouseEvent) => void;
-  handleZoomTo: (e: React.MouseEvent) => void;
+  handleToggleVisibility: (event: React.MouseEvent) => void;
+  handleHighlightLayer: (event: React.MouseEvent) => void;
+  handleZoomTo: (event: React.MouseEvent) => void;
 };
 
 // Constant style outside of render
@@ -41,16 +42,16 @@ const useControlActions = (layerPath: string): ControlActions => {
 
   return useMemo(
     () => ({
-      handleToggleVisibility: (e: React.MouseEvent): void => {
-        e.stopPropagation();
+      handleToggleVisibility: (event: React.MouseEvent): void => {
+        event.stopPropagation();
         setOrToggleLayerVisibility(layerPath);
       },
-      handleHighlightLayer: (e: React.MouseEvent): void => {
-        e.stopPropagation();
+      handleHighlightLayer: (event: React.MouseEvent): void => {
+        event.stopPropagation();
         setHighlightLayer(layerPath);
       },
-      handleZoomTo: (e: React.MouseEvent): void => {
-        e.stopPropagation();
+      handleZoomTo: (event: React.MouseEvent): void => {
+        event.stopPropagation();
         zoomToLayerExtent(layerPath).catch((error) => {
           logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
         });
@@ -79,9 +80,13 @@ const useSubtitle = (children: TypeLegendLayer[], items: TypeLegendItem[]): stri
 };
 
 // SecondaryControls component (no memo to force re render from layers panel modifications)
-export function SecondaryControls({ layer, visibility }: SecondaryControlsProps): JSX.Element {
+export function SecondaryControls({ layer, isVisible }: SecondaryControlsProps): JSX.Element {
+  // Extract constant from layer prop
+  const { layerPath, layerStatus, items, children } = layer;
+  const layerControls: TypeLayerControls | undefined = layer.controls;
+
   // Log
-  logger.logTraceRender('components/legend/legend-layer-ctrl');
+  logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath, isVisible);
 
   // Hooks
   const theme = useTheme();
@@ -91,13 +96,10 @@ export function SecondaryControls({ layer, visibility }: SecondaryControlsProps)
   const highlightedLayer = useLayerHighlightedLayer();
 
   // Is button disabled?
-  const isLayerVisible = layer.controls?.visibility ?? false;
-
-  // Extract constant from layer prop
-  const { layerStatus, items, children } = layer;
+  const isLayerVisibleCapable = layerControls?.visibility ?? false;
 
   // Component helper
-  const controls = useControlActions(layer.layerPath);
+  const controls = useControlActions(layerPath);
   const subTitle = useSubtitle(children, items);
 
   if (!['processed', 'loaded'].includes(layerStatus || 'error')) {
@@ -113,12 +115,12 @@ export function SecondaryControls({ layer, visibility }: SecondaryControlsProps)
           tooltip="layers.toggleVisibility"
           className="buttonOutline"
           onClick={controls.handleToggleVisibility}
-          disabled={!isLayerVisible}
+          disabled={!isLayerVisibleCapable}
         >
-          {visibility ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+          {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
         </IconButton>
         <IconButton tooltip="legend.highlightLayer" sx={styles.btnMargin} className="buttonOutline" onClick={controls.handleHighlightLayer}>
-          {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
+          {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
         <IconButton tooltip="legend.zoomTo" className="buttonOutline" onClick={controls.handleZoomTo}>
           <ZoomInSearchIcon />

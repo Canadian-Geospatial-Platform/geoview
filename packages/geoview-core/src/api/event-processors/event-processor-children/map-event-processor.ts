@@ -556,8 +556,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The path of the layer to get.
    * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
    */
-  static getMapOrderedLayerInfoForLayer(mapId: string, layerPath: string): TypeOrderedLayerInfo | undefined {
-    return this.getMapStateProtected(mapId).orderedLayerInfo.find((orderedLayerInfo) => orderedLayerInfo.layerPath === layerPath);
+  static findMapLayerFromOrderedInfo(
+    mapId: string,
+    layerPath: string,
+    orderedLayerInfo: TypeOrderedLayerInfo[] = this.getMapStateProtected(mapId).orderedLayerInfo
+  ): TypeOrderedLayerInfo | undefined {
+    return orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
   }
 
   /**
@@ -567,14 +571,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The array of ordered layer info to search, default is current ordered layer info.
    * @returns {TypeOrderedLayerInfo[] | undefined} The ordered layer info of the layer and its children.
    */
-  static getMapLayerAndChildrenOrderedInfo(
+  static findMapLayerAndChildrenFromOrderedInfo(
     mapId: string,
     layerPath: string,
     orderedLayerInfo: TypeOrderedLayerInfo[] = this.getMapStateProtected(mapId).orderedLayerInfo
   ): TypeOrderedLayerInfo[] {
-    return orderedLayerInfo.filter(
-      (info: TypeOrderedLayerInfo) => info.layerPath.startsWith(`${layerPath}/`) || info.layerPath === layerPath
-    );
+    return orderedLayerInfo.filter((layer) => layer.layerPath.startsWith(`${layerPath}/`) || layer.layerPath === layerPath);
   }
 
   static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number {
@@ -770,7 +772,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
     const pathToSearch = layerPathToReplace || layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, pathToSearch);
-    const replacedLayers = this.getMapLayerAndChildrenOrderedInfo(mapId, pathToSearch);
+    const replacedLayers = this.findMapLayerAndChildrenFromOrderedInfo(mapId, pathToSearch);
     const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
 
@@ -1137,7 +1139,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   ): TypeLayerEntryConfig {
     // Get needed info
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
-    const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfoForLayer(mapId, layerPath);
+    const orderedLayerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath);
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
 
     // Get original layerEntryConfig from map config
@@ -1220,7 +1222,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)!;
 
     const { geoviewLayerConfig } = layerEntryConfig;
-    const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfoForLayer(mapId, layerPath);
+    const orderedLayerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath);
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
 
     // Check if the layer is a geocore layers

@@ -1,13 +1,15 @@
 import { useEffect, useState, KeyboardEvent } from 'react';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
-import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { logger } from '@/core/utils/logger';
+import { useMapStoreActions, useSelectorLayerVisibility } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { logger } from '@/core/utils/logger';
 
 interface DeleteUndoButtonProps {
-  layer: TypeLegendLayer;
+  layerPath: string;
+  layerId: string;
+  layerRemovable: boolean;
 }
 
 interface UndoButtonProps {
@@ -48,24 +50,26 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/delete-undo-button/DeleteUndoButton');
 
-  const { layer } = props;
+  const { layerPath, layerId, layerRemovable } = props;
 
   const [progress, setProgress] = useState(10);
   const [inUndoState, setInUndoState] = useState(false);
 
   // get store actions
+  const mapId = useGeoViewMapId();
   const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
-  const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
+  const { setOrToggleLayerVisibility } = useMapStoreActions();
   const { setSelectedFooterLayerListItemId } = useUIStoreActions();
+  const isVisible = useSelectorLayerVisibility(mapId, layerPath);
 
   const handleDeleteClick = (): void => {
-    if (getVisibilityFromOrderedLayerInfo(layer.layerPath)) setOrToggleLayerVisibility(layer.layerPath);
+    if (isVisible) setOrToggleLayerVisibility(layerPath);
     setInUndoState(true);
     setLayerDeleteInProgress(true);
   };
 
   const handleUndoClick = (): void => {
-    setOrToggleLayerVisibility(layer.layerPath);
+    setOrToggleLayerVisibility(layerPath);
     setInUndoState(false);
     setLayerDeleteInProgress(false);
   };
@@ -74,7 +78,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleDeleteClick();
-      setSelectedFooterLayerListItemId(layer.layerId);
+      setSelectedFooterLayerListItemId(layerId);
     }
   };
 
@@ -98,7 +102,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
 
   useEffect(() => {
     if (progress === 100) {
-      deleteLayer(layer.layerPath);
+      deleteLayer(layerPath);
       setInUndoState(false);
     }
     return undefined;
@@ -119,7 +123,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   }, [inUndoState]);
 
   // Never hide the remove icon, so user can remove forever loading/processing layers.
-  if (!inUndoState && layer.controls?.remove !== false && !getLayerDeleteInProgress()) {
+  if (!inUndoState && layerRemovable && !getLayerDeleteInProgress()) {
     return (
       <IconButton onClick={handleDeleteClick} edge="end" size="small" onKeyDown={(e) => handleDeleteKeyDown(e)}>
         <DeleteOutlineIcon color="error" />

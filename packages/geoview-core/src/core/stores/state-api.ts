@@ -114,7 +114,7 @@ export class StateApi {
     let startingIndex = -1;
     for (let i = 0; i < orderedLayers.length; i++) if (orderedLayers[i].layerPath === layerPath) startingIndex = i;
     const layerInfo = orderedLayers[startingIndex];
-    const movedLayers = MapEventProcessor.getMapLayerAndChildrenOrderedInfo(mapId, layerPath, orderedLayers);
+    const movedLayers = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(mapId, layerPath, orderedLayers);
     orderedLayers.splice(startingIndex, movedLayers.length);
     let nextIndex = startingIndex;
     const pathLength = layerInfo.layerPath.split('/').length;

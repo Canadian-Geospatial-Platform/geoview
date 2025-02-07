@@ -21,8 +21,8 @@ interface FeatureHeaderProps {
   name: string;
   hasGeometry: boolean;
   checked: boolean;
-  onCheckChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onZoomIn: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onCheckChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onZoomIn: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 // Constants outside component to prevent recreating every render
@@ -128,8 +128,8 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
   // Event Handlers
   const handleFeatureSelectedChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      e.stopPropagation();
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      event.stopPropagation();
       if (!feature) return;
 
       if (!checked) {
@@ -142,8 +142,8 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   );
 
   const handleZoomIn = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>): void => {
-      e.stopPropagation();
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      event.stopPropagation();
       if (!featureData?.extent) return;
 
       const center = getCenter(featureData.extent);
