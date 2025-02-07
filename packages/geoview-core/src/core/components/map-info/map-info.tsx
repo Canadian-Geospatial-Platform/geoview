@@ -18,7 +18,7 @@ const MAP_INFO_BASE_STYLES = {
   alignItems: 'center',
   position: 'absolute',
   bottom: 0,
-  left: 0,
+  left: '64px',
   right: 0,
   px: '1rem',
   zIndex: 1500,
