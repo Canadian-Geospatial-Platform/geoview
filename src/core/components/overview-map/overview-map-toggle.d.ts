@@ -14,5 +14,5 @@ interface OverviewMapToggleProps {
  * @param {OverviewMapToggleProps} props overview map toggle properties
  * @returns {JSX.Element} returns the toggle icon button
  */
-export declare function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element;
+export declare function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | null;
 export {};

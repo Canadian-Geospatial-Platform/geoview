@@ -3,7 +3,7 @@ import Geometry from 'ol/geom/Geometry';
 import { Style } from 'ol/style';
 import { Color } from 'ol/color';
 import { Extent } from 'ol/extent';
-import XYZ from 'ol/source/XYZ';
+import { XYZ, OSM, VectorTile } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
 import { Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
@@ -84,7 +84,7 @@ export declare function getDefaultDrawingStyle(strokeColor?: Color | string, str
  *
  * @returns {TileLayer<XYZ>} return the created basemap
  */
-export declare function createEmptyBasemap(): TileLayer<XYZ>;
+export declare function createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile>;
 /** ***************************************************************************************************************************
  * This method gets the legend styles used by the the layer as specified by the style configuration.
  *

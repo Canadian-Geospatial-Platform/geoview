@@ -1,7 +1,7 @@
 import { CV_CONFIG_GEOCORE_TYPE } from '@config/types/config-constants';
 import { TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
-import { AbstractGeoviewLayerConfig, EntryConfigBaseClass, TypeDisplayLanguage, TypeGeoviewLayerType } from '@config/types/map-schema-types';
+import { AbstractGeoviewLayerConfig, EntryConfigBaseClass, TypeDisplayLanguage, TypeGeoviewLayerType, TypeLayerStyleConfig } from '@config/types/map-schema-types';
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
  * @exports
@@ -116,4 +116,10 @@ export declare class ConfigApi {
      * @static
      */
     static createMetadataLayerTree(serviceAccessString: string, layerType: TypeGeoviewLayerType, listOfLayerId?: TypeJsonArray, language?: TypeDisplayLanguage): Promise<EntryConfigBaseClass[]>;
+    /**
+     * Returns the ESRI Renderer as a Style Config
+     * @param {string} input The input renderer to be converted to a GeoView Style
+     * @returns {TypeLayerStyleConfig} The converted style
+     */
+    static getStyleFromESRIRenderer(input: string): TypeLayerStyleConfig | undefined;
 }

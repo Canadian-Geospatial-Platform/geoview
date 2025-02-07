@@ -21,6 +21,7 @@ export declare abstract class Projection {
         102184: string;
         102190: string;
         WM: string;
+        3857: string;
         4269: string;
         LNGLAT: string;
         CRS84: string;
