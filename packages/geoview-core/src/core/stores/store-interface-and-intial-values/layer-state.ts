@@ -344,17 +344,20 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * Sets the selected layer path.
        * @param {string} layerPath - The layer path to set as selected.
        */
-      setSelectedLayerPath: (layerPath: string): void => {
+      setSelectedLayerPath: (layerPath: string | null): void => {
+        let theLayerPath: string | null = layerPath;
+        if (layerPath && layerPath.length === 0) theLayerPath = null;
         const curLayers = get().layerState.legendLayers;
-        const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath);
+        const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath || '');
         set({
           layerState: {
             ...get().layerState,
-            selectedLayerPath: layerPath,
+            selectedLayerPath: theLayerPath,
             selectedLayer: layer as TypeLegendLayer,
           },
         });
       },
+
       setSelectedLayerSortingArrowId: (arrowId: string) => {
         set({
           layerState: {

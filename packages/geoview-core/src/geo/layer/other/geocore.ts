@@ -86,7 +86,7 @@ export class GeoCore {
       logger.logError(`Failed to get the GeoView layer from UUID ${uuid}`, error);
 
       // Remove geoCore ordered layer info placeholder
-      if (MapEventProcessor.getMapOrderedLayerInfoForLayer(this.#mapId, uuid))
+      if (MapEventProcessor.findMapLayerFromOrderedInfo(this.#mapId, uuid))
         MapEventProcessor.removeOrderedLayerInfo(this.#mapId, uuid, false);
 
       // TODO: find a more centralized way to trap error and display message

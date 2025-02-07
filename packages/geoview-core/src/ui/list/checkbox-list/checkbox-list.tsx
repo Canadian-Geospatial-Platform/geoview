@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 import { Typography } from '@mui/material';
@@ -70,9 +70,9 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
    * Helper function to stop propagation on click of the right-side content
    * @param e React.MouseEvent<HTMLElement> The mouse click event
    */
-  const handleClickContent = (e: React.MouseEvent<HTMLElement>): void => {
-    e.stopPropagation();
-  };
+  const handleClickContent = useCallback((event: React.MouseEvent<HTMLElement>): void => {
+    event.stopPropagation();
+  }, []);
 
   // Effect triggered when the checked values changes
   useEffect(() => {
@@ -102,7 +102,7 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
             <Typography sx={sxClasses.typography} variant="body2" noWrap component="ul">
               {item.display}
             </Typography>
-            <Box sx={sxClasses.boxcontent} className="Checkbox-content-root" onClick={(e) => handleClickContent(e)}>
+            <Box sx={sxClasses.boxcontent} className="Checkbox-content-root" onClick={handleClickContent}>
               {item.contentRight}
             </Box>
           </ListItem>

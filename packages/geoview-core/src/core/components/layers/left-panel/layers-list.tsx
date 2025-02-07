@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
-import { useGeoViewMapId, useLayerStoreActions, useMapStoreActions } from '@/core/stores';
+import { useGeoViewMapId, useLayerStoreActions, useSelectorLayerPathOrder } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { TABS } from '@/core/utils/constant';
@@ -11,7 +11,7 @@ import { TABS } from '@/core/utils/constant';
 interface LayerListProps {
   depth: number;
   layersList: TypeLegendLayer[];
-  showLayerDetailsPanel: (layer: TypeLegendLayer) => void;
+  showLayerDetailsPanel: (layerId: string) => void;
   isLayoutEnlarged: boolean;
 }
 
@@ -23,12 +23,15 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   const mapId = useGeoViewMapId();
-  const { getIndexFromOrderedLayerInfo } = useMapStoreActions();
+  const layerPathOrder = useSelectorLayerPathOrder();
   const { sortLegendLayersChildren } = useLayerStoreActions();
 
-  const sortedLayers = layersList.sort((a, b) =>
-    getIndexFromOrderedLayerInfo(a.layerPath) > getIndexFromOrderedLayerInfo(b.layerPath) ? 1 : -1
-  );
+  const sortedLayers = layersList.sort((a, b) => {
+    return layerPathOrder.indexOf(a.layerPath) - layerPathOrder.indexOf(b.layerPath);
+  });
+
+  // TODO: Check - This sort should likely happen elsewhere than in a rendering component
+  // TO.DOCONT: (the fact that the rendering component exists or not in the ui shouldn't have to do with the order state from store)
   sortLegendLayersChildren(sortedLayers);
 
   const textToSlug = (text: string): string => {
