@@ -89,6 +89,7 @@ const config = {
     }
   },
   output: {
+    globalObject: 'self',
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     chunkFilename: '[name].js',
@@ -151,6 +152,27 @@ const config = {
       {
         test: /\.md$/,
         use: ['html-loader', 'markdown-loader'],
+      },
+      {
+        test: /\-worker-script\.(js|ts)$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'worker-loader',
+            options: {
+              inline: 'fallback',
+              filename: 'workers/[name].worker.js',
+            },
+          },
+          {
+            loader: 'babel-loader',
+            options: {
+              plugins: ['lodash', '@babel/transform-runtime'],
+              presets: ['@babel/preset-env', '@babel/preset-typescript'],
+            },
+          },
+        ],
+        type: 'javascript/auto',
       },
     ],
   },

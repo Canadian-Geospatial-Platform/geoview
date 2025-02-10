@@ -7,6 +7,7 @@ import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './slider-style';
 import { generateId } from '@/core/utils/utilities';
+import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 /**
  * Properties for the Slider
@@ -222,6 +223,7 @@ export function Slider(props: SliderProps): JSX.Element {
       }
     }
   }, [checkOverlap, containerId]);
+  useEventListener<Window>('resize', removeLabelOverlap, window);
 
   useEffect(() => {
     // Log
@@ -230,17 +232,6 @@ export function Slider(props: SliderProps): JSX.Element {
     // Update it internally when the parent has updated the value
     setValue(parentValue);
   }, [parentValue]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('UI.SLIDER - window resize');
-
-    window.addEventListener('resize', removeLabelOverlap);
-
-    return () => {
-      window.removeEventListener('resize', removeLabelOverlap);
-    };
-  }, [removeLabelOverlap]);
 
   // Add this new effect to handle slider value changes
   useLayoutEffect(() => {

@@ -1,16 +1,15 @@
-import React, { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref, useEffect, useRef } from 'react';
+import React, { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material/styles';
+import { SxProps, useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
 import { Box, FullscreenIcon, ButtonGroup, Button } from '@/ui';
 import { ResponsiveGrid } from './responsive-grid';
-import { useFooterPanelHeight } from './use-footer-panel-height';
 import { getSxClasses } from './responsive-grid-layout-style';
 import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIFooterPanelResizeValue, useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { handleEscapeKey } from '@/core/utils/utilities';
@@ -49,20 +48,27 @@ const ResponsiveGridLayout = forwardRef(
     }: ResponsiveGridLayoutProps,
     ref: Ref<ResponsiveGridLayoutExposedMethods>
   ) => {
-    const theme = useTheme();
-    const sxClasses = getSxClasses(theme);
+    // Hooks
     const { t } = useTranslation<string>();
-    const guide = useAppGuide();
+    const theme = useTheme();
     const isMapFullScreen = useAppFullscreenActive();
+    const footerPanelResizeValue = useUIFooterPanelResizeValue();
+    const sxClasses = useMemo(
+      () => getSxClasses(theme, isMapFullScreen, footerPanelResizeValue),
+      [theme, isMapFullScreen, footerPanelResizeValue]
+    );
+
+    // Store
+    const guide = useAppGuide();
     const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
 
+    // States
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
     const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [isEnlarged, setIsEnlarged] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
 
-    // Custom hook for calculating the height of footer panel
-    const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
+    // Ref for right panel
     const rightMainRef = useRef<HTMLDivElement>();
 
     // Expose imperative methods to parent component
@@ -303,7 +309,7 @@ const ResponsiveGridLayout = forwardRef(
 
     return (
       <Box ref={ref}>
-        <ResponsiveGrid.Root sx={{ pt: 8, pb: 0 }} ref={panelTitleRef}>
+        <ResponsiveGrid.Root sx={{ pt: 8, pb: 0 }}>
           {!fullWidth && (
             <ResponsiveGrid.Left
               isRightPanelVisible={isRightPanelVisible}
@@ -350,22 +356,20 @@ const ResponsiveGridLayout = forwardRef(
         </ResponsiveGrid.Root>
         <ResponsiveGrid.Root>
           <ResponsiveGrid.Left
-            {...(!fullWidth && { ref: leftPanelRef })}
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
             fullWidth={fullWidth}
             aria-hidden={!isRightPanelVisible}
-            sxProps={{ zIndex: isFullScreen ? 'unset' : 200 }}
+            sxProps={sxClasses.leftGridContentHeight as SxProps}
             className="responsive-layout-left-main"
           >
             {leftMain}
           </ResponsiveGrid.Left>
           <ResponsiveGrid.Right
-            {...(!fullWidth && { ref: rightPanelRef })}
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
             fullWidth={fullWidth}
-            sxProps={{ zIndex: isFullScreen ? 'unset' : 100 }}
+            sxProps={sxClasses.rightGridContentHeight as SxProps}
             className="responsive-layout-right-main"
           >
             {renderRightContent()}

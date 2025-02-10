@@ -464,6 +464,10 @@ export class LayerApi {
             configToCreateIndex > configToTestIndex
           ) {
             this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
+            // Remove geoCore ordered layer info placeholder
+            if (MapEventProcessor.getMapOrderedLayerInfoForLayer(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId))
+              MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId, false);
+
             return false;
           }
         }
@@ -574,9 +578,10 @@ export class LayerApi {
   /**
    * Adds a Geoview Layer by GeoCore UUID.
    * @param {string} uuid - The GeoCore UUID to add to the map
+   * @param {string} layerEntryConfig - The optional layer configuration
    * @returns {Promise<void>} A promise which resolves when done adding
    */
-  async addGeoviewLayerByGeoCoreUUID(uuid: string): Promise<void> {
+  async addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<void> {
     // Add a place holder to the ordered layer info array
     const layerInfo: TypeOrderedLayerInfo = {
       layerPath: uuid,
@@ -585,14 +590,36 @@ export class LayerApi {
       hoverable: true,
       legendCollapsed: false,
     };
-    // TODO: Check - Shouldn't we wait for the layer to actually be retrieved positively from
-    // TO.DOCONT: Geocore, before adding ordered layer information? What if the
-    // TO.DOCONT: fetch (createLayersFromUUID) fails, will there be garbage in layer info?
+
+    // GV: This is here as a placeholder so that the layers will appear in the proper order,
+    // GV: regardless of how quickly we get the response. It is removed if the layer fails.
     MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerInfo);
+
+    const parsedLayerEntryConfig = layerEntryConfig ? JSON.parse(layerEntryConfig) : undefined;
+    let optionalConfig: GeoCoreLayerConfig | undefined =
+      parsedLayerEntryConfig && (parsedLayerEntryConfig[0].listOfLayerEntryConfig || parsedLayerEntryConfig[0].initialSettings)
+        ? {
+            geoviewLayerType: 'geoCore',
+            geoviewLayerId: uuid,
+            geoviewLayerName: parsedLayerEntryConfig[0].geoviewLayerName,
+            listOfLayerEntryConfig: parsedLayerEntryConfig[0].geoviewLayerName
+              ? parsedLayerEntryConfig[0].listOfLayerEntryConfig
+              : parsedLayerEntryConfig,
+            initialSettings: parsedLayerEntryConfig[0].initialSettings,
+          }
+        : undefined;
+
+    // If a simplified config is provided, build a config with the layerName provided
+    if (!optionalConfig && parsedLayerEntryConfig && (parsedLayerEntryConfig[0].layerName || parsedLayerEntryConfig[0].geoviewLayerName))
+      optionalConfig = {
+        geoviewLayerType: 'geoCore',
+        geoviewLayerId: uuid,
+        geoviewLayerName: parsedLayerEntryConfig[0].geoviewLayerName || parsedLayerEntryConfig[0].layerName,
+      };
 
     // Create geocore layer configs and add
     const geoCoreGeoviewLayerInstance = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
-    const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
+    const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid, optionalConfig);
     layers.forEach((geoviewLayerConfig) => {
       // Redirect
       this.addGeoviewLayer(geoviewLayerConfig);
@@ -615,8 +642,13 @@ export class LayerApi {
     ConfigValidation.validateListOfGeoviewLayerConfig(this.mapViewer.getDisplayLanguage(), [geoviewLayerConfig]);
 
     // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
-    if (geoviewLayerConfig.geoviewLayerId in this.#geoviewLayers) this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
-    else {
+    if (geoviewLayerConfig.geoviewLayerId in this.#geoviewLayers) {
+      // Remove geoCore ordered layer info placeholder
+      if (MapEventProcessor.getMapOrderedLayerInfoForLayer(this.getMapId(), geoviewLayerConfig.geoviewLayerId))
+        MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId, false);
+
+      this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
+    } else {
       // Process the addition of the layer
       return this.#addGeoviewLayerStep2(geoviewLayerConfig);
     }
@@ -685,6 +717,12 @@ export class LayerApi {
         // Log
         logger.logDebug(`Layer entry config processed for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
 
+        const selectedLayerPath =
+          this.mapViewer.mapFeaturesConfig.footerBar?.selectedLayersLayerPath ||
+          this.mapViewer.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
+        if (selectedLayerPath && event.config.layerPath.startsWith(selectedLayerPath))
+          LegendEventProcessor.setSelectedLayersTabLayer(this.getMapId(), selectedLayerPath as string);
+
         // GV Do we need to register a layer entry config here? Leave the note for now
         // this.registerLayerConfigInit(layerConfig);
       });
@@ -703,10 +741,17 @@ export class LayerApi {
           gvLayer.onIndividualLayerLoaded((sender, payload) => {
             // Log
             logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
+
+            const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), payload.layerPath);
+            // Ensure that the layer bounds are set when the layer is loaded
+            if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), payload.layerPath);
+
             this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
           });
+
           return gvLayer.getOLLayer();
         }
+
         throw new Error('Error, no corresponding GV layer');
       });
 
@@ -1469,7 +1514,7 @@ export class LayerApi {
    * @param {string} layerPath - The path of the layer.
    * @param {boolean} newValue - The new value of visibility.
    */
-  setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): void {
+  setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Apply some visibility logic
     const curOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
     const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath);
@@ -1527,6 +1572,8 @@ export class LayerApi {
 
     // Redirect to processor so we can update the store with setterActions
     MapEventProcessor.setOrderedLayerInfoWithNoOrderChangeState(this.getMapId(), curOrderedLayerInfo);
+
+    return newVisibility;
   }
 
   /**
@@ -1627,9 +1674,11 @@ export class LayerApi {
       // Get the layer
       const layer = this.getGeoviewLayer(layerConfig.layerPath) as AbstractGVLayer;
 
-      // Get the bounds of the layer
-      const calculatedBounds = layer.getBounds();
-      if (calculatedBounds) bounds.push(calculatedBounds);
+      if (layer) {
+        // Get the bounds of the layer
+        const calculatedBounds = layer.getBounds();
+        if (calculatedBounds) bounds.push(calculatedBounds);
+      }
     } else {
       // Is a group
       layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => {

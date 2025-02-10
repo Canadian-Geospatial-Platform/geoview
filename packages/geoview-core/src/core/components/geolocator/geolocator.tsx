@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBarUI, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
 import { StyledInputField, getSxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
-import { useActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
@@ -44,7 +44,7 @@ export function Geolocator(): JSX.Element {
   const displayLanguage = useAppDisplayLanguage();
   const geolocatorServiceURL = useAppGeolocatorServiceURL();
   const { setActiveAppBarTab } = useUIStoreActions();
-  const { tabGroup, isOpen } = useActiveAppBarTab();
+  const { tabGroup, isOpen } = useUIActiveAppBarTab();
   const activeTrapGeoView = useUIActiveTrapGeoView();
 
   const displayLanguageRef = useRef(displayLanguage);

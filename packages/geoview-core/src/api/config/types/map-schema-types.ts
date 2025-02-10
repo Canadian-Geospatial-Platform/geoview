@@ -46,6 +46,7 @@ export type TypeFooterBarProps = {
   };
   collapsed: boolean;
   selectedTab: TypeValidFooterBarTabsCoreProps;
+  selectedLayersLayerPath: string;
 };
 
 /** Supported app bar values. */
@@ -69,6 +70,7 @@ export type TypeAppBarProps = {
   };
   collapsed: boolean;
   selectedTab: TypeValidAppBarCoreProps;
+  selectedLayersLayerPath: string;
 };
 
 /** Overview map options. Default none. */
@@ -500,7 +502,7 @@ export type TypeOutfields = {
 };
 
 /** The types supported by the outfields object. */
-export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url';
+export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url' | 'oid';
 
 export type codedValueType = {
   type: 'codedValue';

@@ -50,7 +50,7 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   return (
     <Box sx={HEADER_STYLES.container}>
@@ -69,7 +69,7 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
         <Tooltip title={t('details.keepFeatureSelected')} placement="top" enterDelay={1000}>
           <Checkbox disabled={!hasGeometry} onChange={onCheckChange} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
         </Tooltip>
-        <IconButton color="primary" onClick={onZoomIn} className="buttonOutline">
+        <IconButton color="primary" disabled={!hasGeometry} onClick={onZoomIn} className="buttonOutline">
           <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
             <ZoomInSearchIcon />
           </Tooltip>
@@ -80,11 +80,11 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
 });
 
 export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
-  logger.logTraceRender('components/details/feature-info');
+  logger.logTraceRender('components/details/feature-info', feature);
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
   const [checked, setChecked] = useState<boolean>(false);
@@ -100,7 +100,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
     return {
       uid: feature.geometry ? (feature.geometry as TypeGeometry).ol_uid : null,
-      iconSrc: feature.featureIcon.toDataURL(),
+      iconSrc: feature.featureIcon,
       name: feature.nameField ? (feature.fieldInfo?.[feature.nameField]?.value as string) || '' : 'No name',
       extent: feature.extent,
       geometry: feature.geometry,
@@ -186,7 +186,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
       <FeatureHeader
         iconSrc={featureData.iconSrc}
         name={featureData.name}
-        hasGeometry={!!featureData.geometry}
+        hasGeometry={!!featureData.geometry && !!featureData.extent}
         checked={checked}
         onCheckChange={handleFeatureSelectedChange}
         onZoomIn={handleZoomIn}

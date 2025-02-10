@@ -5,7 +5,7 @@ import linkifyHtml from 'linkify-html';
 
 import { CardMedia, Box, Grid } from '@/ui';
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '@/core/utils/utilities';
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
 import { TypeFieldEntry } from '@/geo/map/map-schema-types';
 import { getSxClasses } from './details-style';
@@ -40,7 +40,7 @@ export const FeatureItem = memo(function FeatureItem({
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   const linkifyOptions = useMemo(
     () => ({
@@ -60,7 +60,7 @@ export const FeatureItem = memo(function FeatureItem({
   if (alias === 'html') {
     return (
       <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
-        <HtmlToReact htmlContent={sanitizeHtmlContent(item)} />
+        <UseHtmlToReact htmlContent={sanitizeHtmlContent(item)} />
       </Box>
     );
   }
@@ -86,7 +86,7 @@ export const FeatureItem = memo(function FeatureItem({
 
   return (
     <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
-      <HtmlToReact htmlContent={sanitizeHtmlContent(linkifyHtml(item.toString(), linkifyOptions))} />
+      <UseHtmlToReact htmlContent={sanitizeHtmlContent(linkifyHtml(item.toString(), linkifyOptions))} />
     </Box>
   );
 });
@@ -158,7 +158,7 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({ featureInfoList
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
   const { initLightBox, LightBoxComponent } = useLightBox();

@@ -41,8 +41,8 @@ import {
   TypeValidVersions,
 } from '@config/types/map-schema-types';
 
-import { logger } from '@/core//utils/logger';
-import { ConfigApi } from '../../config-api';
+import { logger } from '@/core/utils/logger';
+import { ConfigApi } from '@/api/config/config-api';
 
 // ========================
 // #region CLASS HEADER

@@ -10,7 +10,7 @@ import { Box, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } f
 
 import { animated } from '@react-spring/web';
 import { TypeJsonObject } from '@/core/types/global-types';
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
 
 import { CloseIcon, IconButton } from '..';
@@ -190,7 +190,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
                   if (typeof action.content === 'string') {
                     return (
                       <Fragment key={action.actionId}>
-                        <HtmlToReact
+                        <UseHtmlToReact
                           extraOptions={{ id: action.actionId as TypeJsonObject } as TypeJsonObject}
                           htmlContent={action.content}
                         />
@@ -219,7 +219,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
             className={`${sxClasses.content} ${contentTextClassName && contentTextClassName}`}
             style={contentTextStyle}
           >
-            {typeof modal.content === 'string' ? <HtmlToReact htmlContent={modal.content} /> : modal.content}
+            {typeof modal.content === 'string' ? <UseHtmlToReact htmlContent={modal.content} /> : modal.content}
           </Box>
         </DialogContent>
         {modal.footer?.actions && modal.footer?.actions.length >= 1 ? (
@@ -228,7 +228,10 @@ export function Modal(props: TypeDialogProps): JSX.Element {
               if (typeof action.content === 'string') {
                 return (
                   <Fragment key={action.actionId}>
-                    <HtmlToReact extraOptions={{ id: action.actionId as TypeJsonObject } as TypeJsonObject} htmlContent={action.content} />
+                    <UseHtmlToReact
+                      extraOptions={{ id: action.actionId as TypeJsonObject } as TypeJsonObject}
+                      htmlContent={action.content}
+                    />
                   </Fragment>
                 );
               }

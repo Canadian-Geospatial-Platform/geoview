@@ -72,7 +72,8 @@
         "string",
         "number",
         "date",
-        "url"
+        "url",
+        "oid"
       ]
     },
     "TypeFeatureInfoNotQueryable": {
@@ -1912,6 +1913,10 @@
             ""
           ],
           "description": "Footer tab to be selected at map load"
+        },
+        "selectedLayersLayerPath": {
+          "type": "string",
+          "description": "Layerpath of layer to be selected at map load"
         }
       },
       "required": [
@@ -1966,6 +1971,10 @@
             "guide"
           ],
           "description": "App bar tab to be selected at map load"
+        },
+        "selectedLayersLayerPath": {
+          "type": "string",
+          "description": "Layerpath of layer to be selected at map load"
         }
       },
       "required": [

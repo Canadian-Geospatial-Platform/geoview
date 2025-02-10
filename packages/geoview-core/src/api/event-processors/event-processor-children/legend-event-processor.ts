@@ -416,8 +416,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static deleteLayerFromLegendLayers(mapId: string, layerPath: string): void {
     // Get legend layers to pass to recursive function
     const curLayers = this.getLayerState(mapId).legendLayers;
+
     // Remove layer and children
     LegendEventProcessor.#deleteLayersFromLegendLayersAndChildren(mapId, curLayers, layerPath);
+
+    // Set updated legend layers after delete
+    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
   }
 
   /**
@@ -638,6 +642,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Create sets for visible and invisible values for faster lookup
     const visibleValues = new Set(styleUnique.filter((style) => style.visible).map((style) => style.values.join(';')));
     const unvisibleValues = new Set(styleUnique.filter((style) => !style.visible).map((style) => style.values.join(';')));
+
+    // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
+    // TODO: The fields contain undefined, it should be empty. Check in new config api
+    // TODO: This is a workaround
+    if (uniqueValueStyle.fields[0] === undefined) uniqueValueStyle.fields.pop();
 
     // Filter features based on visibility
     return features.filter((feature) => {

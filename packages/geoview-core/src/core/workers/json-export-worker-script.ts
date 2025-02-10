@@ -137,9 +137,9 @@ const worker = {
     try {
       sourceCRS = projectionInfo.sourceCRS;
       targetCRS = projectionInfo.targetCRS;
-      logger.logTrace('init', `Worker initialized with sourceCRS: ${sourceCRS}, targetCRS: ${targetCRS}`);
+      logger.logTrace('init worker', `Worker initialized with sourceCRS: ${sourceCRS}, targetCRS: ${targetCRS}`);
     } catch (error) {
-      logger.logError('init', error);
+      logger.logError('init worker', error);
     }
   },
 
@@ -151,7 +151,7 @@ const worker = {
    */
   process(chunk: TypeWorkerExportChunk[], isFirst: boolean): string {
     try {
-      logger.logTrace('process', `Processing chunk of ${chunk.length} items`);
+      logger.logTrace('process worker', `Processing chunk of ${chunk.length} items`);
       let result = '';
       if (isFirst) {
         result += '{"type":"FeatureCollection","features":[';
@@ -171,10 +171,10 @@ const worker = {
 
       result += processedChunk.join(',');
 
-      logger.logTrace('process', `Finished processing`);
+      logger.logTrace('process worker', `Finished processing`);
       return result;
     } catch (error) {
-      logger.logError('process', error);
+      logger.logError('process worker', error);
       return '';
     }
   },

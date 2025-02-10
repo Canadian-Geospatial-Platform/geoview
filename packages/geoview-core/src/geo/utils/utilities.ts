@@ -7,7 +7,7 @@ import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL, getLength as getLengthOL } from 'ol/sphere';
 import { Extent } from 'ol/extent';
-import XYZ from 'ol/source/XYZ';
+import { XYZ, OSM, VectorTile } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
 import { LineString, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
@@ -22,6 +22,7 @@ import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
 
 import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
+import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 
 /**
  * Interface used for css style declarations
@@ -204,7 +205,7 @@ export function getDefaultDrawingStyle(strokeColor?: Color | string, strokeWidth
  *
  * @returns {TileLayer<XYZ>} return the created basemap
  */
-export function createEmptyBasemap(): TileLayer<XYZ> {
+export function createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile> {
   // create empty tilelayer to use as initial basemap while we load basemap
   const emptyBasemap: TypeBasemapLayer = {
     basemapId: 'empty',
@@ -308,6 +309,7 @@ export function convertTypeFeatureStyleToOpenLayersStyle(style?: TypeFeatureStyl
   return getDefaultDrawingStyle(style?.strokeColor, style?.strokeWidth, style?.fillColor);
 }
 
+// #region EXTENT
 /**
  * Returns the union of 2 extents.
  * @param {Extent | undefined} extentA First extent
@@ -404,19 +406,19 @@ export function validateExtent(extent: Extent, code: string = 'EPSG:4326'): Exte
     'EPSG:3978': [-7192737.96, -3004297.73, 5183275.29, 4484204.83],
   };
 
-  // Replace any invalid entries with maximum value
-  const minX = extent[0] < maxExtents[code][0] || extent[0] === -Infinity || Number.isNaN(extent[0]) ? maxExtents[code][0] : extent[0];
-  const minY = extent[1] < maxExtents[code][1] || extent[1] === -Infinity || Number.isNaN(extent[1]) ? maxExtents[code][1] : extent[1];
-  const maxX = extent[2] > maxExtents[code][2] || extent[2] === Infinity || Number.isNaN(extent[2]) ? maxExtents[code][2] : extent[2];
-  const maxY = extent[3] > maxExtents[code][3] || extent[3] === Infinity || Number.isNaN(extent[3]) ? maxExtents[code][3] : extent[3];
+  let validatedExtent: Extent;
+  // In rare cases, services return 'NaN' as extents, not picked up by Number.isNan
+  if (typeof extent[0] !== 'number') validatedExtent = maxExtents[code];
+  else {
+    // Replace any invalid entries with maximum value
+    const minX = extent[0] < maxExtents[code][0] || extent[0] === -Infinity || Number.isNaN(extent[0]) ? maxExtents[code][0] : extent[0];
+    const minY = extent[1] < maxExtents[code][1] || extent[1] === -Infinity || Number.isNaN(extent[1]) ? maxExtents[code][1] : extent[1];
+    const maxX = extent[2] > maxExtents[code][2] || extent[2] === Infinity || Number.isNaN(extent[2]) ? maxExtents[code][2] : extent[2];
+    const maxY = extent[3] > maxExtents[code][3] || extent[3] === Infinity || Number.isNaN(extent[3]) ? maxExtents[code][3] : extent[3];
 
-  // Check the order
-  const validatedExtent: Extent = [
-    minX < maxX ? minX : maxX,
-    minY < maxY ? minY : maxY,
-    maxX > minX ? maxX : minX,
-    maxY > minY ? maxY : minY,
-  ];
+    // Check the order
+    validatedExtent = [minX < maxX ? minX : maxX, minY < maxY ? minY : maxY, maxX > minX ? maxX : minX, maxY > minY ? maxY : minY];
+  }
 
   return validatedExtent;
 }
@@ -432,6 +434,7 @@ export function validateExtentWhenDefined(extent: Extent | undefined, code: stri
   if (extent) return validateExtent(extent, code);
   return undefined;
 }
+// #endregion EXTENT
 
 /**
  * Gets the area of a given geometry
@@ -474,4 +477,25 @@ export function calculateDistance(coordinates: Coordinate[], inProj: string, out
   });
 
   return { total: Math.round((getLength(geom) / 1000) * 100) / 100, sections };
+}
+
+/**
+ * Get meters per pixel for different projections
+ * @param {TypeValidMapProjectionCodes} projection - The projection of the map
+ * @param {number} resolution - The resolution of the map
+ * @param {number?} lat - The latitude, only needed for Web Mercator
+ * @returns {number} Number representing meters per pixel
+ */
+export function getMetersPerPixel(projection: TypeValidMapProjectionCodes, resolution: number, lat?: number): number {
+  if (!resolution) return 0;
+
+  // Web Mercator needs latitude correction because of severe distortion at high latitudes
+  // At latitude 60°N, the scale distortion factor is about 2:1
+  if (projection === 3857 && lat !== undefined) {
+    const latitudeCorrection = Math.cos((lat * Math.PI) / 180);
+    return resolution * latitudeCorrection;
+  }
+
+  // LCC (and other meter-based projections) can use resolution directly
+  return resolution;
 }

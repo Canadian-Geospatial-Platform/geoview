@@ -48,19 +48,24 @@ export class GeoCore {
       // Get the GV config from UUID and await
       const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid]);
 
+      // Validate the generated Geoview Layer Config
+      ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);
+
       // Use user supplied listOfLayerEntryConfig if provided
       if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
         const tempLayerConfig = { ...layerConfig } as unknown as TypeGeoviewLayerConfig;
         tempLayerConfig.metadataAccessPath = response.layers[0].metadataAccessPath;
         tempLayerConfig.geoviewLayerType = response.layers[0].geoviewLayerType;
+        // Use the name from the first layer if none is provided in the config
+        if (!tempLayerConfig.geoviewLayerName) tempLayerConfig.geoviewLayerName = response.layers[0].geoviewLayerName;
 
         const config = new Config(this.#displayLanguage);
         const newLayerConfig = config.getValidMapConfig([tempLayerConfig]);
         return newLayerConfig as TypeGeoviewLayerConfig[];
       }
 
-      // Validate the generated Geoview Layer Config
-      ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);
+      // In case of simplified geocoreConfig being provided, just update geoviewLayerName
+      if (layerConfig?.geoviewLayerName) response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
 
       // For each found geochart associated with the Geocore UUIDs
       response.geocharts?.forEach((geochartConfig) => {
@@ -71,7 +76,11 @@ export class GeoCore {
       return response.layers;
     } catch (error) {
       // Log
-      logger.logError(`Failed to get the GeoView layer from UUI ${uuid}`, error);
+      logger.logError(`Failed to get the GeoView layer from UUID ${uuid}`, error);
+
+      // Remove geoCore ordered layer info placeholder
+      if (MapEventProcessor.getMapOrderedLayerInfoForLayer(this.#mapId, uuid))
+        MapEventProcessor.removeOrderedLayerInfo(this.#mapId, uuid, false);
 
       // TODO: find a more centralized way to trap error and display message
       api.maps[this.#mapId].notifications.showError('validation.layer.loadfailed', [error as TypeJsonValue, this.#mapId]);
