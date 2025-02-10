@@ -736,9 +736,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setLegendCollapsed(layerPath, collapsed);
   }
 
-  static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): void {
+  static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean {
     // Redirect to layerAPI
-    this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
+    return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
   }
 
   static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {
@@ -1090,6 +1090,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   // #endregion
 
+  // TODO: Move this section to config API after refactor
   // #region CONFIG FROM MAP STATE
 
   /**
@@ -1366,9 +1367,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
    *
    * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
    * @param {TypeMapFeaturesInstance} mapConfig - The config to modify.
+   * @param {boolean} removeUnlisted - Remove any layer name that doesn't appear in namePairs.
    * @returns {TypeMapFeaturesInstance} Map config with updated names.
    */
-  static replaceMapConfigLayerNames(namePairs: string[][], mapConfig: TypeMapFeaturesInstance): TypeMapFeaturesInstance {
+  static replaceMapConfigLayerNames(
+    namePairs: string[][],
+    mapConfig: TypeMapFeaturesInstance,
+    removeUnlisted: boolean = false
+  ): TypeMapFeaturesInstance {
     const pairsDict: Record<string, string> = {};
     namePairs.forEach((pair) => {
       [pairsDict[pair[1]], pairsDict[pair[0]]] = pair;
@@ -1378,8 +1384,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if (geoviewLayerConfig.geoviewLayerName && pairsDict[geoviewLayerConfig.geoviewLayerName])
         // eslint-disable-next-line no-param-reassign
         geoviewLayerConfig.geoviewLayerName = pairsDict[geoviewLayerConfig.geoviewLayerName];
+      // eslint-disable-next-line no-param-reassign
+      else if (removeUnlisted) geoviewLayerConfig.geoviewLayerName = '';
       if (geoviewLayerConfig.listOfLayerEntryConfig?.length)
-        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig);
+        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig, removeUnlisted);
     });
 
     return mapConfig;
@@ -1390,14 +1398,21 @@ export class MapEventProcessor extends AbstractEventProcessor {
    *
    * @param {Record<string, string>} pairsDict -  The dict of name pairs. Presumably one english and one french name in each pair.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfigs - The layer entry configs to modify.
+   * @param {boolean} removeUnlisted - Remove any layer name that doesn't appear in namePairs.
    */
-  static #replaceLayerEntryConfigNames(pairsDict: Record<string, string>, listOfLayerEntryConfigs: TypeLayerEntryConfig[]): void {
+  static #replaceLayerEntryConfigNames(
+    pairsDict: Record<string, string>,
+    listOfLayerEntryConfigs: TypeLayerEntryConfig[],
+    removeUnlisted: boolean
+  ): void {
     listOfLayerEntryConfigs?.forEach((layerEntryConfig) => {
       if (layerEntryConfig.layerName && pairsDict[layerEntryConfig.layerName])
         // eslint-disable-next-line no-param-reassign
         layerEntryConfig.layerName = pairsDict[layerEntryConfig.layerName];
+      // eslint-disable-next-line no-param-reassign
+      else if (removeUnlisted) layerEntryConfig.layerName = '';
       if (layerEntryConfig.listOfLayerEntryConfig?.length)
-        this.#replaceLayerEntryConfigNames(pairsDict, layerEntryConfig.listOfLayerEntryConfig);
+        this.#replaceLayerEntryConfigNames(pairsDict, layerEntryConfig.listOfLayerEntryConfig, removeUnlisted);
     });
   }
   // #endregion

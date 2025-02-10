@@ -8,7 +8,7 @@ import { Box, Stepper as MaterialStepper, Step, StepButton, StepContent, StepLab
 
 import { Button } from '@/ui/button/button';
 
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { getSxClasses } from './custom-stepper-style';
 
 /**
@@ -212,7 +212,7 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
                 )}
                 {orientation === 'vertical' && (
                   <StepContent>
-                    {typeof step.description === 'string' ? <HtmlToReact htmlContent={step.description} /> : step.description}
+                    {typeof step.description === 'string' ? <UseHtmlToReact htmlContent={step.description} /> : step.description}
                   </StepContent>
                 )}
                 {buttonedLabels && <StepButton onClick={handleStep(index)}>{step.label}</StepButton>}

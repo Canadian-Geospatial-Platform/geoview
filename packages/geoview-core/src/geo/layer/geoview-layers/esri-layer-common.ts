@@ -90,7 +90,7 @@ export function commonValidateListOfLayerEntryConfig(
     if (layerEntryIsGroupLayer(layerConfig)) {
       // Use the layer name from the metadata if it exists and there is no existing name.
       if (!layerConfig.layerName)
-        layerConfig.layerName = layer.metadata!.layers[layerConfig.layerId].name
+        layerConfig.layerName = layer.metadata!.layers[layerConfig.layerId]?.name
           ? (layer.metadata!.layers[layerConfig.layerId].name as string)
           : '';
 

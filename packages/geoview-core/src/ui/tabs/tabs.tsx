@@ -1,4 +1,4 @@
-import { SyntheticEvent, ReactNode, useState, useEffect, useMemo, MouseEvent, useCallback, useRef } from 'react';
+import { SyntheticEvent, ReactNode, useState, useEffect, useMemo, MouseEvent, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -10,9 +10,11 @@ import {
   BoxProps,
   Box,
   SelectChangeEvent,
+  TabScrollButton,
+  TabScrollButtonProps,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
 
 import { Select, TypeMenuItemProps } from '@/ui/select/select';
@@ -64,6 +66,19 @@ export interface TypeTabsProps {
   containerType?: TypeContainerBox;
 }
 
+// Define scroll button component outside of Tabs
+const CustomScrollButton = memo(function CustomScrollButton({ direction, ...props }: TabScrollButtonProps) {
+  return (
+    <TabScrollButton
+      {...props}
+      direction={direction}
+      sx={{
+        display: props.disabled ? 'none' : 'flex',
+      }}
+    />
+  );
+});
+
 /**
  * Create a tabs ui
  *
@@ -76,7 +91,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     shellContainer,
     tabs,
     rightButtons,
-    selectedTab,
+    selectedTab = 0,
     activeTrap,
     onToggleCollapse,
     onSelectedTabChanged,
@@ -92,7 +107,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   // internal state
   // boolean value in state reflects when tabs will be collapsed state, then value needs to false.
   const [value, setValue] = useState<number | boolean>(0);
@@ -226,6 +241,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sxMerged: any = { ...sxClasses.panel, visibility: TabContentVisibilty };
 
+  const visibleTabs = useMemo(() => tabs.filter((tab) => !hiddenTabs.includes(tab.id)), [tabs, hiddenTabs]);
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
       <Grid container id="footerbar-header" sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100], width: '100%' }}>
@@ -235,12 +251,14 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
               variant="scrollable"
               scrollButtons
               allowScrollButtonsMobile
-              value={value}
+              value={Math.max(0, selectedTab)}
               onChange={handleChange}
               aria-label="basic tabs"
+              ScrollButtonComponent={CustomScrollButton}
               {...tabsProps}
             >
-              {tabs.map((tab) => {
+              {visibleTabs.map((tab) => {
+                const originalIndex = tabs.findIndex((singleTab) => singleTab.id === tab.id);
                 return (
                   <MaterialTab
                     label={t(tab.label)}
@@ -249,9 +267,10 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                     iconPosition="start"
                     id={tab.id}
                     onClick={handleClick}
-                    sx={hiddenTabs.includes(tab.id) ? { display: 'none' } : sxClasses.tab}
+                    sx={sxClasses.tab}
                     aria-controls={`${shellContainer?.id ?? ''}-${tab.id}`}
                     tabIndex={0}
+                    value={originalIndex}
                     {...tabProps}
                   />
                 );
@@ -290,7 +309,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
               containerType={containerType}
               ref={tabPanelRef}
             >
-              {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
+              {typeof tab?.content === 'string' ? <UseHtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
             </TabPanel>
           ) : (
             ''
