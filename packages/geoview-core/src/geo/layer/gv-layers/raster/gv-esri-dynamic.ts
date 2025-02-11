@@ -74,24 +74,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // TODO.CONT: We can use the layers and layersDef parameters to set what should be visible.
     // TODO.CONT: layers=show:layerId ; layerDefs={ "layerId": "layer def" }
     // TODO.CONT: There is no allowableOffset on esri dynamic to speed up. We will need to see what can be done for layers in wrong projection
-    // TODO.CONT: We may try to use the service projection imageLayerOptions.source?.updateParams({ imageSR: 3978 }); and let OL project on the fly
-    // TODO.CONT: from some test, it reduce time by half
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
       source: olSource,
       properties: { layerConfig },
     };
 
-    // TODO: Performance - For testing purpose on projection and performance
-    if (layerConfig.geoviewLayerConfig.geoviewLayerId === '6c343726-1e92-451a-876a-76e17d398a1c') {
-      imageLayerOptions.source?.updateParams({ imageSR: 3978 });
-    }
-    if (layerConfig.geoviewLayerConfig.geoviewLayerId === 'e2424b6c-db0c-4996-9bc0-2ca2e6714d71') {
-      imageLayerOptions.source?.updateParams({ imageSR: 3857 });
-    }
-    if (layerConfig.geoviewLayerConfig.geoviewLayerId === '1dcd28aa-99da-4f62-b157-15631379b170') {
-      imageLayerOptions.source?.updateParams({ imageSR: 4269 });
-    }
+    // Set the image spatial reference to the service source - performance is better when open layers does the conversion
+    const sourceSr = layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;
+    if (sourceSr) imageLayerOptions.source?.updateParams({ imageSR: sourceSr });
 
     // Init the layer options with initial settings
     AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
