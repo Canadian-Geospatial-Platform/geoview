@@ -126,6 +126,7 @@ function addLayers(layers) {
               <option value="Airborne Radioactivity">Airborne Radioactivity</option>
               <option value="IAAC">IAAC</option>
               <option value="CESI">CESI</option>
+              <option value="DFO">DFO</option>
             </select>
           </div>
   
@@ -522,6 +523,12 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
                 layerId: '7',
               },
             ],
+          },
+        ],
+        DFO: 'db177a8c-5d7d-49eb-8290-31e6a45d786c',
+        DFOConfig: [
+          {
+            layerName: 'Critical Habitat for Aquatic Species at Risk - Canada'
           },
         ],
       };
