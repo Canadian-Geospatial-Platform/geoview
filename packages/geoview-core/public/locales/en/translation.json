@@ -181,8 +181,8 @@
     "cancelBtn": "Cancel",
     "exportBtn": "Download",
     "exportTitle": "Title",
-    "approx": "approx",
-    "fileExportDefaultPrefixName": "map-export"
+    "fileExportDefaultPrefixName": "map-export",
+    "approx": "approx"
   },
   "geolocator": {
     "title": "Geolocator",
