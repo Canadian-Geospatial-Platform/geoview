@@ -64,8 +64,13 @@ export class GeoCore {
         return newLayerConfig as TypeGeoviewLayerConfig[];
       }
 
-      // In case of simplified geocoreConfig being provided, just update geoviewLayerName
-      if (layerConfig?.geoviewLayerName) response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
+      // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
+      // TODO refactor: this is a terrible patch to get it to work the way OSDP wants, should be changed after refactor
+      if (layerConfig?.geoviewLayerName) {
+        response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
+        if (response.layers[0].listOfLayerEntryConfig.length === 1)
+          response.layers[0].listOfLayerEntryConfig[0].layerName = layerConfig.geoviewLayerName;
+      }
 
       // For each found geochart associated with the Geocore UUIDs
       response.geocharts?.forEach((geochartConfig) => {
