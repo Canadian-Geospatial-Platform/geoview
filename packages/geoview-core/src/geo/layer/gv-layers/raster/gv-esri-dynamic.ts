@@ -346,7 +346,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
         `&imageDisplay=${size[0]},${size[1]},96` +
         `&layers=visible:${layerConfig.layerId}` +
-        `&layerDefs=${layerDefs}` +
+        `&layerDefs=${encodeURI(layerDefs)}` +
         `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
         `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
