@@ -17,7 +17,7 @@ import { logger } from '@/core/utils/logger';
 /**
  * Export modal window component to export the viewer information in a PNG file
  *
- * @returns {JSX.Element} the export modal component 
+ * @returns {JSX.Element} the export modal component
  */
 export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
@@ -68,7 +68,7 @@ export default function ExportModal(): JSX.Element {
         .then((dataUrl) => {
           setIsMapExporting(false);
 
-          exportPNG(dataUrl, `${fileExportDefaultPrefixName} - ${exportTitle !== '' ? exportTitle.trim() : mapId}`);
+          exportPNG(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`);
 
           setActiveAppBarTab(legendId, 'legend', false, false);
           disableFocusTrap();
