@@ -7,7 +7,7 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { getXMLHttpRequest } from '@/core/utils/utilities';
+import { getXMLHttpRequest, getZoomFromScale } from '@/core/utils/utilities';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
@@ -341,8 +341,8 @@ export function commonProcessInitialSettings(
   if (layerConfig.initialSettings?.states?.visible === undefined)
     layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
   // GV TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
-  // GV if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
-  // GV if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
+  if (layerConfig.minScale === undefined && layerMetadata.minScale !== 0) layerConfig.minScale = layerMetadata.minScale as number;
+  if (layerConfig.maxScale === undefined && layerMetadata.maxScale !== 0) layerConfig.maxScale = layerMetadata.maxScale as number;
 
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
@@ -362,6 +362,23 @@ export function commonProcessInitialSettings(
         Projection.PROJECTION_NAMES.LNGLAT
       );
       layerConfig.initialSettings!.bounds = latlonExtent;
+    }
+  }
+
+  // Set zoom limits for max / min zooms
+  // ! Note: minScale is actually the maxZoom and maxScale is actually the minZoom
+  // ! As the scale gets smaller, the zoom gets larger
+  if (layerConfig.minScale) {
+    const maxScaleZoomLevel = getZoomFromScale(layer.mapId, layerConfig.minScale);
+    if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
+      layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
+    }
+  }
+
+  if (layerConfig.maxScale) {
+    const minScaleZoomLevel = getZoomFromScale(layer.mapId, layerConfig.maxScale);
+    if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
+      layerConfig.initialSettings.minZoom = minScaleZoomLevel;
     }
   }
 
