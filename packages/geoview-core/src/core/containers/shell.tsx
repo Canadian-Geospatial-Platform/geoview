@@ -82,12 +82,12 @@ export function Shell(props: ShellProps): JSX.Element {
   const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`) as HTMLElement;
 
   // Ref for container height
-  const { mapContainerRef, mapShellContainerRef } = useMapResize({
+  const { mapShellContainerRef } = useMapResize({
     isMapFullScreen,
     isFooterBarCollapsed,
     footerPanelResizeValue,
     mapLoaded,
-    isFooterbar: !!geoviewConfig?.footerBar,
+    isFooterBar: !!geoviewConfig?.footerBar,
     geoviewElement,
     footerTabContainer,
   });
@@ -223,7 +223,7 @@ export function Shell(props: ShellProps): JSX.Element {
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             {mapLoaded && <AppBar api={mapViewer.appBarApi} />}
             <MapInfo />
-            <Box sx={sxClasses.mapContainer} ref={mapContainerRef}>
+            <Box sx={sxClasses.mapContainer}>
               <Map viewer={mapViewer} />
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
