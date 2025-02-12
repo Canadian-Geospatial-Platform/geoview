@@ -78,8 +78,9 @@ if (!document.getElementById('Map1')) {
 
       <div>
         <button id="changeLanguage" style="margin: 10px" title="Changes the div language setting from french to english or english to french.">Change <code>data-lang</code> Attribute</button>
-        Note: Will not effect the map until reloaded.
-        <details style="margin-left: 30px;">
+        <p style="margin: 10px;margin-top: 0px;">Currently: <i id="dataLang">fr</i></p>
+        <p style="margin: 10px;margin-top: 0px;">Note: Will not effect the map until reloaded.</p>
+        <details style="margin-left: 30px;margin-top: 10px;">
           <summary>Code</summary>
           <pre>
 lang = lang === 'fr' ? 'en' : 'fr';
@@ -125,6 +126,7 @@ function addLayers(layers) {
               <option value="Airborne Radioactivity">Airborne Radioactivity</option>
               <option value="IAAC">IAAC</option>
               <option value="CESI">CESI</option>
+              <option value="DFO">DFO</option>
             </select>
           </div>
   
@@ -382,6 +384,7 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
       // add an event listener when a button is clicked
       changeLanguageButton.addEventListener('click', function () {
         lang = lang === 'fr' ? 'en' : 'fr';
+        document.getElementById('dataLang').innerHTML = lang;
         const mapDiv = document.getElementById('Map1');
         if (mapDiv) mapDiv.setAttribute('data-lang', lang);
       });
@@ -520,6 +523,12 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
                 layerId: '7',
               },
             ],
+          },
+        ],
+        DFO: 'db177a8c-5d7d-49eb-8290-31e6a45d786c',
+        DFOConfig: [
+          {
+            layerName: 'Critical Habitat for Aquatic Species at Risk - Canada'
           },
         ],
       };
