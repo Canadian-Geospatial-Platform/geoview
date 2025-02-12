@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { animated } from '@react-spring/web';
-import { Theme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
+import { getSxClasses } from '../../common/layer-list-style';
 import {
   Collapse,
   IconButton,
@@ -27,6 +28,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useMapStoreActions,
+  useMapZoom,
   useSelectorLayerLegendCollapsed,
   useSelectorLayerVisibility,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -55,6 +57,9 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
 
   const { t } = useTranslation<string>();
 
+  const theme = useTheme();
+  const classes = getSxClasses(theme);
+
   // Get store states
   const { setSelectedLayerPath, setSelectedLayerSortingArrowId } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, setLegendCollapsed, reorderLayer } = useMapStoreActions();
@@ -65,6 +70,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   const datatableSettings = useDataTableLayerSettings();
   const selectedLayerSortingArrowId = useSelectedLayerSortingArrowId();
   const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
+  const mapZoom = useMapZoom();
 
   useDataTableStoreActions();
 
@@ -78,6 +84,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   // const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layer.layerPath);
   // const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layer.layerPath);
   // const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layer.layerPath);
+  const [inVisibleRange, setInVisibleRange] = useState(true);
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(
@@ -249,7 +256,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
               sx={{
                 marginLeft: '0.4rem',
                 height: '1.5rem',
-                backgroundColor: (theme: Theme) => theme.palette.geoViewColor.bgColor.dark[300],
+                backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
               }}
               variant="middle"
               flexItem
@@ -434,7 +441,23 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
         listItems[0]?.focus();
       }
     }
-  }, [displayState, selectedFooterLayerListItemId.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayState]);
+
+  // Check if the layer is within it's visible scale range
+  useEffect(() => {
+    if (!layer.maxZoom && !layer.minZoom) return;
+
+    if (layer.maxZoom && layer.maxZoom < mapZoom) {
+      setInVisibleRange(false);
+      return;
+    }
+    if (layer.minZoom && layer.minZoom > mapZoom) {
+      setInVisibleRange(false);
+      return;
+    }
+    setInVisibleRange(true);
+  }, [mapZoom, layer]);
 
   const AnimatedPaper = animated(Paper);
 
@@ -445,7 +468,8 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
           <ListItemButton
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
             tabIndex={-1}
-            sx={{ minHeight: '4.51rem' }}
+            sx={{ minHeight: '4.51rem', ...(!inVisibleRange && classes.outOfRange) }}
+            className={!inVisibleRange ? 'out-of-range' : ''}
           >
             <LayerIcon layer={layer} />
             <ListItemText
