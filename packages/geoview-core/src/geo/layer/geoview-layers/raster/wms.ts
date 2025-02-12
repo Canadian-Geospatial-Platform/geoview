@@ -13,7 +13,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { api, WMS_PROXY_URL } from '@/app';
+import { api, WMS_PROXY_URL, getZoomFromScale } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -379,8 +379,6 @@ export class WMS extends AbstractGeoViewRaster {
       if (layer.BoundingBox === undefined) layer.BoundingBox = parentLayer.BoundingBox;
       if (layer.Dimension === undefined) layer.Dimension = parentLayer.Dimension;
       if (layer.Attribution === undefined) layer.Attribution = parentLayer.Attribution;
-      if (layer.MaxScaleDenominator === undefined) layer.MaxScaleDenominator = parentLayer.MaxScaleDenominator;
-      if (layer.MaxScaleDenominator === undefined) layer.MaxScaleDenominator = parentLayer.MaxScaleDenominator;
       // Table 7 — Inheritance of Layer properties specified in the standard with 'add' behaviour.
       // AuthorityURL inheritance is not implemented in the following code.
       if (parentLayer.Style) {
@@ -636,17 +634,43 @@ export class WMS extends AbstractGeoViewRaster {
         }
         if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
         MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
-        // TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
-        // if (layerConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
-        //   layerConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
-        // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
-        //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
+
+        // TODO Since web map runs mostly in zoom levels, may not need Scale limits
+        // Set Min/Max Scale Limits
+        if (
+          layerCapabilities.MinScaleDenominator !== undefined &&
+          (layerConfig.minScale === undefined || layerConfig.minScale > (layerCapabilities.MinScaleDenominator as unknown as number))
+        )
+          layerConfig.minScale = layerCapabilities.MinScaleDenominator as number;
+        if (
+          layerCapabilities.MaxScaleDenominator !== undefined &&
+          (layerConfig.maxScale === undefined || layerConfig.maxScale < (layerCapabilities.MaxScaleDenominator as unknown as number))
+        )
+          layerConfig.maxScale = layerCapabilities.MaxScaleDenominator as number;
 
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox)
           layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
 
+        // Set zoom limits for max / min zooms
+        // ! Note: minScale is actually the maxZoom and maxScale is actually the minZoom
+        // ! As the scale gets smaller, the zoom gets larger
+        if (layerConfig.minScale) {
+          const maxScaleZoomLevel = getZoomFromScale(this.mapId, layerConfig.minScale);
+          if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
+            layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
+          }
+        }
+
+        if (layerConfig.maxScale) {
+          const minScaleZoomLevel = getZoomFromScale(this.mapId, layerConfig.maxScale);
+          if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
+            layerConfig.initialSettings.minZoom = minScaleZoomLevel;
+          }
+        }
+
+        // Set time dimension
         if (layerCapabilities.Dimension) {
           const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
             (dimension) => dimension.name === 'time'

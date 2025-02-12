@@ -986,6 +986,10 @@ export class LayerApi {
    * @returns A new GV Layer which is kept track of in LayerApi and initialized
    */
   #createGVGroupLayer(mapId: string, olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig): GVGroupLayer | undefined {
+    // Set extreme zoom settings to group layer so sub layers can load
+    olLayerGroup.setMaxZoom(50);
+    olLayerGroup.setMinZoom(0);
+
     // Create the GV Group Layer
     const gvGroupLayer = new GVGroupLayer(mapId, olLayerGroup, layerConfig);
 

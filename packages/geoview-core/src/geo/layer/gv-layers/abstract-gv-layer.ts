@@ -220,11 +220,21 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Overridable method called when the layer has been loaded correctly
    */
   protected onLoaded(): void {
+    const layerConfig = this.getLayerConfig();
     // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
-    this.getLayerConfig().layerStatus = 'loaded';
+    layerConfig.layerStatus = 'loaded';
 
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
-    this.setVisible(this.getLayerConfig().initialSettings?.states?.visible !== false);
+    this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+
+    // Set the zoom levels here to prevent the layer being stuck endlessly loading
+    if (layerConfig.initialSettings.maxZoom && layerConfig.initialSettings.maxZoom !== 0) {
+      this.setMaxZoom(layerConfig.initialSettings.maxZoom);
+    }
+
+    if (layerConfig.initialSettings.minZoom && layerConfig.initialSettings.minZoom !== 0) {
+      this.setMinZoom(layerConfig.initialSettings.minZoom);
+    }
 
     // Emit event
     this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
@@ -665,10 +675,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     if (layerConfig.initialSettings?.className !== undefined) layerOptions.className = layerConfig.initialSettings.className;
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.extent !== undefined) layerOptions.extent = layerConfig.initialSettings.extent;
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.maxZoom !== undefined) layerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.minZoom !== undefined) layerOptions.minZoom = layerConfig.initialSettings.minZoom;
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
   }
