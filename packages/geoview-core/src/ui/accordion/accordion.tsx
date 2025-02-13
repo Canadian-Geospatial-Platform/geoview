@@ -1,4 +1,4 @@
-import { useState, useCallback, ReactNode, CSSProperties } from 'react';
+import { useState, useCallback, ReactNode, CSSProperties, memo } from 'react';
 
 import {
   Box,
@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { ExpandMoreIcon, LoopIcon } from '@/ui';
 import { generateId } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Properties for the Accordion element
@@ -21,11 +22,17 @@ interface AccordionProps {
   showLoadingIcon: boolean;
 }
 
+interface AccordionState {
+  expanded: boolean;
+  transition: boolean;
+}
+
 export type AccordionItem = {
   title: string;
   content: ReactNode;
 };
 
+// Constant style define outside main component
 const sxClasses = {
   loadingIcon: {
     animation: 'rotate 1s infinite linear',
@@ -40,56 +47,96 @@ const sxClasses = {
   },
 };
 
+// Define AccordionExpandIcon outside of the main component
+const AccordionExpandIcon = memo(function AccordionExpandIcon({
+  showLoadingIcon,
+  isTransitioning,
+}: {
+  showLoadingIcon: boolean;
+  isTransitioning: boolean;
+}) {
+  if (showLoadingIcon && isTransitioning) {
+    return <LoopIcon sx={sxClasses.loadingIcon} />;
+  }
+  return <ExpandMoreIcon />;
+});
+
 /**
  * Create a customized Material UI Fade
  *
  * @param {AccordionProps} props the properties passed to the Fade element
  * @returns {JSX.Element} the created Fade element
  */
-export function Accordion(props: AccordionProps): ReactNode {
+export const Accordion = memo(function Accordion(props: AccordionProps): ReactNode {
+  logger.logTraceRender('ui/accordions/accordion)');
+
+  // Get const from props
   const { id, sx, items, className, defaultExpanded = false, showLoadingIcon = false } = props;
 
-  // internal state
-  const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(items.length).fill(defaultExpanded));
-  const [transitionStates, setTransitionStates] = useState<boolean[]>(Array(items.length).fill(false));
+  // State
+  const [accordionStates, setAccordionStates] = useState<AccordionState[]>(
+    Array(items.length).fill({ expanded: defaultExpanded, transition: false })
+  );
 
-  const handleAccordionChange = (index: number) => (event: React.SyntheticEvent, expanded: boolean) => {
-    const updatedStates = [...expandedStates];
-    updatedStates[index] = expanded;
-    setExpandedStates(updatedStates);
-  };
+  // Handle accordion expansion/collapse
+  const handleAccordionChange = useCallback(
+    (index: number) => (event: React.SyntheticEvent, expanded: boolean) => {
+      setAccordionStates((prev) => {
+        const updatedStates = [...prev];
+        updatedStates[index] = {
+          ...updatedStates[index],
+          expanded,
+        };
+        return updatedStates;
+      });
+    },
+    []
+  );
 
+  // Handle transition states
   const handleTransitionEnd = useCallback(
     (index: number) => (e: React.TransitionEvent) => {
-      if (!expandedStates[index] && showLoadingIcon) {
-        const updatedStates = [...transitionStates];
-        updatedStates[index] = true;
-        setTransitionStates(updatedStates);
+      if (!accordionStates[index].expanded && showLoadingIcon) {
+        // Set transition to true when accordion starts closing
+        setAccordionStates((prev) => {
+          const updatedStates = [...prev];
+          updatedStates[index] = {
+            ...updatedStates[index],
+            transition: true,
+          };
+          return updatedStates;
+        });
 
+        // Reset transition state after height animation completes
         if (e.propertyName === 'height') {
-          const resetStates = [...transitionStates];
-          resetStates[index] = false;
-          setTransitionStates(resetStates);
+          setAccordionStates((prev) => {
+            const updatedStates = [...prev];
+            updatedStates[index] = {
+              ...updatedStates[index],
+              transition: false,
+            };
+            return updatedStates;
+          });
         }
       }
     },
-    [expandedStates, showLoadingIcon, transitionStates]
+    [accordionStates, showLoadingIcon]
   );
 
   return (
     <Box id={generateId(id)} sx={sx} className="accordion-group">
-      {items.map((item: AccordionItem, idx: number) => (
+      {items.map((item: AccordionItem, index: number) => (
         <MaterialAccordion
           // eslint-disable-next-line react/no-array-index-key
-          key={idx}
+          key={`accordion-${index}`}
           className={className}
-          expanded={expandedStates[idx]}
-          onChange={handleAccordionChange(idx)}
-          onTransitionEnd={handleTransitionEnd(idx)}
+          expanded={accordionStates[index].expanded}
+          onChange={handleAccordionChange(index)}
+          onTransitionEnd={handleTransitionEnd(index)}
         >
           <MaterialAccordionSummary
-            expandIcon={showLoadingIcon && transitionStates[idx] ? <LoopIcon sx={sxClasses.loadingIcon} /> : <ExpandMoreIcon />}
-            aria-controls={`accordion-panel-${idx}-a-content`}
+            expandIcon={<AccordionExpandIcon showLoadingIcon={showLoadingIcon} isTransitioning={accordionStates[index].transition} />}
+            aria-controls={`accordion-panel-${index}-a-content`}
           >
             <div>{item.title}</div>
           </MaterialAccordionSummary>
@@ -98,7 +145,7 @@ export function Accordion(props: AccordionProps): ReactNode {
       ))}
     </Box>
   );
-}
+});
 
 /**
  * Example of usage

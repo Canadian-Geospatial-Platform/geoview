@@ -1,17 +1,21 @@
+import { memo, useMemo } from 'react';
 import { AppBar as MaterialAppBar, AppBarProps } from '@mui/material';
 import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
+import { logger } from '@/core/utils/logger';
+
 /**
  * Create a AppBar component
  *
  * @param {AppBarProps} props AppBar properties
  * @returns {JSX.Element} returns AppBar component
  */
-export function AppBarUI(props: AppBarProps): JSX.Element {
-  // TODO: Refactor - If we want this named 'AppBar' we have to rename the one in Geoview components.
-  // TO.DOCONT: Otherwise there's a conflicting name via export * from '@/ui'; in external-types.ts
+export const AppBarUI = memo(function AppBarUI(props: AppBarProps): JSX.Element {
+  logger.logTraceRender('ui/appbar/appbar');
+
+  // Named AppBarUI because there's a conflicting (with core component) name via export * from '@/ui'; in external-types.ts
   const fadeInAnimation = useFadeIn();
-  const AnimatedAppBar = animated(MaterialAppBar);
+  const AnimatedAppBar = useMemo(() => animated(MaterialAppBar), []);
 
   return <AnimatedAppBar style={fadeInAnimation} {...props} />;
-}
+});

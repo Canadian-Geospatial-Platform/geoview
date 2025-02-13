@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { Button as MaterialButton, Fade, Tooltip, useMediaQuery } from '@mui/material';
 
 import { TypeButtonProps } from '@/ui/panel/panel-types';
+import { logger } from '@/core/utils/logger';
 
 export type ButtonProps = {
   makeResponsive?: boolean;
@@ -17,6 +18,9 @@ export type ButtonProps = {
  * @returns {JSX.Element} the new UI element
  */
 function MaterialBtn(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element {
+  logger.logTraceRender('ui/button/button');
+
+  // Get constant from props
   const {
     id,
     sx,
@@ -38,8 +42,8 @@ function MaterialBtn(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Eleme
     'aria-label': ariaLabel,
   } = props;
 
+  // Hooks
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
   const mobileView = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -79,3 +83,4 @@ function MaterialBtn(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Eleme
 
 // Export the Button  using forwardRef so that passing ref is permitted and functional in the react standards
 export const Button = forwardRef(MaterialBtn);
+export const Button = memo(forwardRef(MaterialBtn)) as typeof MUIAutocomplete;

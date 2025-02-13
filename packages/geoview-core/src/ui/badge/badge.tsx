@@ -1,4 +1,6 @@
+import { memo } from 'react';
 import { Badge as MaterialBadge, BadgeProps } from '@mui/material';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create a badge component
@@ -6,6 +8,8 @@ import { Badge as MaterialBadge, BadgeProps } from '@mui/material';
  * @param {BadgeProps} props badge properties
  * @returns {JSX.Element} returns badge component
  */
-export function Badge(props: BadgeProps): JSX.Element {
+export const Badge = memo(function Badge(props: BadgeProps): JSX.Element {
+  logger.logTraceRender('ui/badge/badge');
+
   return <MaterialBadge {...props} />;
-}
+});
