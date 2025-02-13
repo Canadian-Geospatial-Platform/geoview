@@ -34,15 +34,7 @@ export const useMapResize = ({
 
     const height = geoviewElement?.dataset?.height ?? `${geoviewElement?.clientHeight}px`;
     setOrigHeight(height);
-
-    // Update mapDiv height to accomodate the footerbar
-    if (isFooterBar) {
-      Object.assign(geoviewElement.style, {
-        height: 'fit-content',
-        transition: 'height 0.2s ease-out 0.2s',
-      });
-    }
-  }, [geoviewElement, isFooterBar]);
+  }, [geoviewElement]);
 
   /**
    * Update map height when toggling fullscreen and changing footer panel size
@@ -77,6 +69,16 @@ export const useMapResize = ({
     mapShellContainerRef.current.style.visibility = visibility;
     mapShellContainerRef.current.style.height = containerHeight;
   }, [footerTabContainer, footerPanelResizeValue, isFooterBarCollapsed, isMapFullScreen, origHeight]);
+
+  useEffect(() => {
+    // Update mapDiv height to accomodate the footerbar
+    if (mapLoaded && isFooterBar) {
+      Object.assign(geoviewElement.style, {
+        height: 'fit-content',
+        transition: 'height 0.2s ease-out 0.2s',
+      });
+    }
+  }, [geoviewElement, isFooterBar, mapLoaded]);
 
   return { mapShellContainerRef };
 };
