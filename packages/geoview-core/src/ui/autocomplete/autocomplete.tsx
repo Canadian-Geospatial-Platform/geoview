@@ -1,5 +1,6 @@
+import { forwardRef, memo, Ref } from 'react';
 import { Autocomplete as MaterialAutocomplete, AutocompleteProps, FormControl } from '@mui/material';
-import { forwardRef, Ref } from 'react';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Customized Material UI Autocomplete properties
@@ -25,6 +26,9 @@ function MUIAutocomplete<
   DisableClearable extends boolean | undefined = undefined,
   FreeSolo extends boolean | undefined = undefined,
 >(props: TypeAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>, ref: Ref<HTMLElement>): JSX.Element {
+  logger.logTraceRender('ui/autocomplete/autocomplete');
+
+  // Get constant from props
   const { fullWidth, ...autoCompleteProps } = props;
 
   return (
@@ -35,4 +39,4 @@ function MUIAutocomplete<
 }
 
 // Export the Autocomplete  using forwardRef so that passing ref is permitted and functional in the react standards
-export const Autocomplete = forwardRef(MUIAutocomplete);
+export const Autocomplete = memo(forwardRef(MUIAutocomplete)) as typeof MUIAutocomplete;
