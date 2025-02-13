@@ -127,6 +127,7 @@ function addLayers(layers) {
               <option value="IAAC">IAAC</option>
               <option value="CESI">CESI</option>
               <option value="DFO">DFO</option>
+              <option value="landCover">Land Cover 2010</option>
             </select>
           </div>
   
@@ -531,6 +532,19 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
             layerName: 'Critical Habitat for Aquatic Species at Risk - Canada'
           },
         ],
+        landCover: 'c688b87f-e85f-4842-b0e1-a8f79ebf1133',
+        landCoverConfig: [
+          {
+            "layerId": "landcover-2010",
+            "layerName": "2010 Land Cover of Canada",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": false
+                }
+            }
+          }
+        ]
       };
 
 
