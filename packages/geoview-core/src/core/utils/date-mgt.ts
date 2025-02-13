@@ -390,7 +390,7 @@ export abstract class DateMgt {
     const rangeItem = this.createRangeOGC(dimensionObject.values);
     const timeDimension: TimeDimension = {
       field: dimensionObject.name,
-      default: dimensionObject.default,
+      default: dimensionObject.default || rangeItem.range[0],
       unitSymbol: dimensionObject.unitSymbol || '',
       range: rangeItem,
       nearestValues: dimensionObject.nearestValues !== false ? 'absolute' : 'discrete',
