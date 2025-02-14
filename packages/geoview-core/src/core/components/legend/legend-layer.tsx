@@ -10,7 +10,7 @@ import {
   useSelectorLayerVisibility,
 } from '@/core/stores/';
 import { useLightBox } from '@/core/components/common';
-import { LayerIcon } from '../common/layer-icon';
+import { LayerIcon } from '@/core/components/common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';
 import { CollapsibleContent } from './legend-layer-container';
 import { getSxClasses } from './legend-styles';

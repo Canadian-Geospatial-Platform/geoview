@@ -5,7 +5,7 @@ import {
   TypeLayerEntryType,
   TypeLayerStyleConfig,
   TypeVectorSourceFormats,
-} from '../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { TimeDimension } from '@/core/utils/date-mgt';
 
 export abstract class LayerMockup {

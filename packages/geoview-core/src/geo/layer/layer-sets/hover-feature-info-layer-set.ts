@@ -2,9 +2,9 @@ import debounce from 'lodash/debounce';
 
 import { Coordinate } from 'ol/coordinate';
 import { logger } from '@/core/utils/logger';
-import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
-import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
-import { GVWMS } from '../gv-layers/raster/gv-wms';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';

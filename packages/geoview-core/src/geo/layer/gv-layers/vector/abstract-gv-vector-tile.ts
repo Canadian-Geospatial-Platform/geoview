@@ -2,7 +2,7 @@ import VectorTile from 'ol/source/VectorTile';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import { Extent } from 'ol/extent';
 
-import { AbstractGVLayer } from '../abstract-gv-layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { validateExtent } from '@/geo/utils/utilities';
 
 /**

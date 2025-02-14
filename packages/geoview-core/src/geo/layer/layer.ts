@@ -45,6 +45,20 @@ import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { GeoViewLayerCreatedTwiceError, GeoViewLayerNotCreatedError } from '@/geo/layer/exceptions/layer-exceptions';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
+import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
+import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
+import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
+import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
+import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
+import { GVCSV } from '@/geo/layer/gv-layers/vector/gv-csv';
+import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { getExtentUnion } from '@/geo/utils/utilities';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
@@ -55,20 +69,6 @@ import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { AbstractBaseLayer } from './gv-layers/abstract-base-layer';
-import { AbstractGVLayer } from './gv-layers/abstract-gv-layer';
-import { GVEsriDynamic } from './gv-layers/raster/gv-esri-dynamic';
-import { GVEsriImage } from './gv-layers/raster/gv-esri-image';
-import { GVImageStatic } from './gv-layers/raster/gv-image-static';
-import { GVWMS } from './gv-layers/raster/gv-wms';
-import { GVXYZTiles } from './gv-layers/tile/gv-xyz-tiles';
-import { GVEsriFeature } from './gv-layers/vector/gv-esri-feature';
-import { GVGeoJSON } from './gv-layers/vector/gv-geojson';
-import { GVOGCFeature } from './gv-layers/vector/gv-ogc-feature';
-import { GVVectorTiles } from './gv-layers/vector/gv-vector-tiles';
-import { GVWFS } from './gv-layers/vector/gv-wfs';
-import { GVCSV } from './gv-layers/vector/gv-csv';
-import { GVGroupLayer } from './gv-layers/gv-group-layer';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
@@ -80,12 +80,12 @@ import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
-// import { LayerMockup } from './layer-mockup';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+// import { LayerMockup } from './layer-mockup';
 
 export type GeoViewLayerAddedResult = {
   layer: AbstractGeoViewLayer;
@@ -166,7 +166,7 @@ export class LayerApi {
   static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
 
   // Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up
-  static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
+  static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = true;
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside

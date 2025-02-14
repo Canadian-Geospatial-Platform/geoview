@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Drawer as MaterialDrawer, DrawerProps, Box } from '@mui/material';
 
-import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
-import { getSxClasses } from './drawer-style';
+import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '@/ui';
 import { logger } from '@/core/utils/logger';
+import { getSxClasses } from './drawer-style';
 
 /**
  * Drawer Properties

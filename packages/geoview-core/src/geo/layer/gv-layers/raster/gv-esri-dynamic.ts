@@ -22,7 +22,7 @@ import {
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
 } from '@/geo/map/map-schema-types';
-import { esriGetFieldType, esriGetFieldDomain } from '../utils';
+import { esriGetFieldType, esriGetFieldDomain } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeOutfieldsType, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';

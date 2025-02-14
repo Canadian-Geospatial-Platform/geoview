@@ -16,7 +16,7 @@ import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useDebounceLayerLegendLayers } from './hooks/use-legend-debounce';
-import { useEventListener } from '../common/hooks/use-event-listener';
+import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 interface LegendType {
   fullWidth?: boolean;

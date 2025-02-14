@@ -21,7 +21,7 @@ import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-la
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
 
-import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
+import { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 
 /**

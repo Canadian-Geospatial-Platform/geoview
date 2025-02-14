@@ -6,8 +6,8 @@ import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor
 import { GeoChartStoreByLayerPath, TypeGeochartResultSetEntry } from './store-interface-and-intial-values/geochart-state';
 import { TypeOrderedLayerInfo } from './store-interface-and-intial-values/map-state';
 import { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
-import { TypeLegendLayer } from '../components/layers/types';
-import { logger } from '../utils/logger';
+import { TypeLegendLayer } from '@/core/components/layers/types';
+import { logger } from '@/core/utils/logger';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 
 /**

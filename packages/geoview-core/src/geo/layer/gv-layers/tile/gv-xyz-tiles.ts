@@ -5,7 +5,7 @@ import { Extent } from 'ol/extent';
 
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from './abstract-gv-tile';
-import { featureInfoGetFieldType } from '../utils';
+import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
 import { validateExtent } from '@/geo/utils/utilities';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 

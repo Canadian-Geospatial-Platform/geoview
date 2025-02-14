@@ -4,9 +4,9 @@ import { logger } from '@/core/utils/logger';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { AbstractGVLayer, LayerStyleChangedEvent } from '../gv-layers/abstract-gv-layer';
-import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
-import { LayerApi } from '../layer';
+import { AbstractGVLayer, LayerStyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { LayerApi } from '@/geo/layer';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing

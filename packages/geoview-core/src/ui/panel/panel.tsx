@@ -6,7 +6,7 @@ import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import { useTheme } from '@mui/material/styles';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-import { IconButton, CloseIcon, Box, TypePanelProps } from '..';
+import { IconButton, CloseIcon, Box, TypePanelProps } from '@/ui';
 import { logger } from '@/core/utils/logger';
 
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
