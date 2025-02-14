@@ -34,6 +34,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       this.geoviewLayerConfig.metadataAccessPath &&
       !this.geoviewLayerConfig.metadataAccessPath?.startsWith(WMS_PROXY_URL) &&
       !this.geoviewLayerConfig.metadataAccessPath.includes('datacube.services.geo.ca') &&
+      !this.geoviewLayerConfig.metadataAccessPath.includes('services.geo.ca') &&
+      !this.geoviewLayerConfig.metadataAccessPath.includes('cdtk.geogc.ca') &&
       // Weird case that also fails with proxy
       !(
         this.geoviewLayerConfig.metadataAccessPath.includes('maps-cartes.ec.gc.ca/arcgis/services/') &&
@@ -50,7 +52,9 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     if (
       this.source.dataAccessPath &&
       !this.source.dataAccessPath.startsWith(WMS_PROXY_URL) &&
-      !this.source.dataAccessPath.includes('datacube.services.geo.ca')
+      !this.source.dataAccessPath.includes('datacube.services.geo.ca') &&
+      !this.source.dataAccessPath.includes('services.geo.ca') &&
+      !this.source.dataAccessPath.includes('cdtk.geogc.ca')
     )
       this.source.dataAccessPath = `${WMS_PROXY_URL}${this.source.dataAccessPath}`;
 
