@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { Fragment, CSSProperties, ReactNode } from 'react';
+import { Fragment, CSSProperties, ReactNode, useMemo, memo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -11,11 +11,12 @@ import { Box, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } f
 import { animated } from '@react-spring/web';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-import { logger } from '@/core/utils/logger';
 
-import { CloseIcon, IconButton } from '..';
-import { getSxClasses } from './modal-style';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { CloseIcon } from '@/ui/icons/index';
+import { getSxClasses } from '@/ui/modal/modal-style';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Customized Material UI Dialog Properties
@@ -120,10 +121,10 @@ export interface ModalActionsType {
  * @param {TypeDialogProps} props the properties passed to the Dialog element
  * @returns {JSX.Element} the created Dialog element
  */
-export function Modal(props: TypeDialogProps): JSX.Element {
-  // Log
-  logger.logTraceRender('ui/modal/modal', props);
+export const Modal = memo(function Modal(props: TypeDialogProps): JSX.Element {
+  logger.logTraceRender('ui/modal/modal');
 
+  // Get constnt from props
   const {
     modalId,
     modalProps,
@@ -145,10 +146,10 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     'aria-describedby': ariaDescribedBy,
   } = props;
 
+  // Hooks
   const { t } = useTranslation();
-
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const fadeInAnimation = useFadeIn();
   const AnimatedDialog = animated(Dialog);
 
@@ -158,7 +159,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
    * @param { TypeModalProps } modal the object with modal properties
    * @returns { JSX.Element } JSX for the newly created / updated modal
    */
-  const createdModalJSXReturner = (modal: TypeModalProps): JSX.Element => {
+  const createdModal = (modal: TypeModalProps): JSX.Element => {
     const CustomDialog = withStyles({
       dialogContent: {
         width: modal.width,
@@ -246,7 +247,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   };
 
   return (
-    (modalProps && createdModalJSXReturner(modalProps)) || (
+    (modalProps && createdModal(modalProps)) || (
       <Dialog
         open={open}
         sx={sxClasses.dialog}
@@ -271,4 +272,4 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       </Dialog>
     )
   );
-}
+});

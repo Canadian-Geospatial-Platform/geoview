@@ -1,10 +1,9 @@
-/* eslint-disable react/require-default-props */
-import { CSSProperties } from 'react';
-
+import { CSSProperties, useMemo } from 'react';
 import { SxProps, Theme, useTheme } from '@mui/material/styles';
 import { CircularProgress as MaterialCircularProgress, CircularProgressProps, Box, Fade } from '@mui/material';
 
-import { getSxClasses } from './circular-progress-style';
+import { getSxClasses } from '@/ui/circular-progress/circular-progress-style';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Circular Progress Properties
@@ -22,10 +21,14 @@ interface TypeCircularProgressProps extends CircularProgressProps {
  * @returns {JSX.Element} the created Circular Progress element
  */
 export function CircularProgress(props: TypeCircularProgressProps): JSX.Element {
+  logger.logTraceRender('ui/circular-progress/circular-progress');
+
+  // Get constant from props
   const { style = {}, isLoaded, sx = {}, ...rest } = props;
 
+  // Hook
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   const sxMerged = { ...sxClasses.loading, ...sx };
   return (

@@ -81,6 +81,8 @@ export const Accordion = memo(function Accordion(props: AccordionProps): ReactNo
   // Handle accordion expansion/collapse
   const handleAccordionChange = useCallback(
     (index: number) => (event: React.SyntheticEvent, expanded: boolean) => {
+      logger.logTraceUseCallback('UI.ACCORDION - change collapse', expanded);
+
       setAccordionStates((prev) => {
         const updatedStates = [...prev];
         updatedStates[index] = {
@@ -96,6 +98,8 @@ export const Accordion = memo(function Accordion(props: AccordionProps): ReactNo
   // Handle transition states
   const handleTransitionEnd = useCallback(
     (index: number) => (e: React.TransitionEvent) => {
+      logger.logTraceUseCallback('UI.ACCORDION - transition end');
+
       if (!accordionStates[index].expanded && showLoadingIcon) {
         // Set transition to true when accordion starts closing
         setAccordionStates((prev) => {

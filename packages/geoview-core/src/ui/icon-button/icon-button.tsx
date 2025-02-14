@@ -1,8 +1,20 @@
+import { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Fade, IconButton as MaterialIconButton, Tooltip, TooltipProps, IconButtonProps } from '@mui/material';
 
-import { Fade, IconButton as MaterialIconButton, Tooltip } from '@mui/material';
+import { logger } from '@/core/utils/logger';
 
-import { TypeIconButtonProps } from './icon-button-types';
+/**
+ * Properties for the icon button
+ */
+export interface TypeIconButtonProps extends IconButtonProps {
+  children?: ReactNode;
+  tooltip?: string;
+  tooltipPlacement?: TooltipProps['placement'];
+  tabIndex?: number;
+  iconRef?: RefObject<HTMLButtonElement>;
+  visible?: boolean;
+}
 
 /**
  * Create a customized Material UI Icon Button
@@ -11,6 +23,9 @@ import { TypeIconButtonProps } from './icon-button-types';
  * @returns {JSX.Element} the created Icon Button element
  */
 export function IconButton(props: TypeIconButtonProps): JSX.Element {
+  logger.logTraceRender('ui/icon-button/icon-button');
+
+  // Get constant from props
   const {
     sx,
     className,
@@ -29,6 +44,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
     ...rest
   } = props;
 
+  // Hooks
   const { t } = useTranslation<string>();
 
   function getMaterialIconButton(): JSX.Element {

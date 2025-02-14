@@ -1,7 +1,8 @@
-import { Ref, forwardRef } from 'react';
+import { Ref, forwardRef, memo } from 'react';
 import { ButtonGroup as MaterialButtonGroup, ButtonGroupProps } from '@mui/material';
 import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Create a customized Material UI button group
@@ -11,8 +12,12 @@ import { useFadeIn } from '@/core/utils/useSpringAnimations';
  * @returns {JSX.Element} the created Button Group element
  */
 function ButtonGroupElement(props: ButtonGroupProps, ref: Ref<HTMLDivElement>): JSX.Element {
+  logger.logTraceRender('ui/button-group/button-group');
+
+  // Get constant from props
   const { children, ...otherProps } = props;
 
+  // Hook
   const fadeInAnimation = useFadeIn();
   const AnimatedButtonGroup = animated(MaterialButtonGroup);
 
@@ -24,4 +29,4 @@ function ButtonGroupElement(props: ButtonGroupProps, ref: Ref<HTMLDivElement>): 
 }
 
 // Export the Button Group using forwardRef so that passing ref is permitted and functional in the react standards
-export const ButtonGroup = forwardRef(ButtonGroupElement);
+export const ButtonGroup = memo(forwardRef(ButtonGroupElement));

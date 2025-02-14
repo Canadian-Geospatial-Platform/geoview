@@ -3,10 +3,12 @@ import { Avatar as MaterialAvatar, AvatarProps } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a customized Material UI Avatar
+ * Create a customized Material UI Avatar component.
+ * This is a simple wrapper around MaterialAvatar that maintains
+ * full compatibility with Material-UI's Avatar props.
  *
- * @param {AvatarProps} props the properties passed to the Avatar element
- * @returns {JSX.Element} the created Avatar element
+ * @param {AvatarProps} props - All valid Material-UI Avatar props
+ * @returns {JSX.Element} The Avatar component
  */
 export const Avatar = memo(function Avatar(props: AvatarProps): JSX.Element {
   logger.logTraceRender('ui/avatar/avatar');
