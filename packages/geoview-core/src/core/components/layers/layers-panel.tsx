@@ -29,12 +29,15 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
-  const showLayerDetailsPanel = (layerId: string): void => {
-    responsiveLayoutRef.current?.setIsRightPanelVisible(true);
-    responsiveLayoutRef.current?.setRightPanelFocus();
-    // set the focus item when layer item clicked.
-    setSelectedFooterLayerListItemId(`${layerId}`);
-  };
+  const showLayerDetailsPanel = useCallback(
+    (layerId: string): void => {
+      responsiveLayoutRef.current?.setIsRightPanelVisible(true);
+      responsiveLayoutRef.current?.setRightPanelFocus();
+      // set the focus item when layer item clicked.
+      setSelectedFooterLayerListItemId(`${layerId}`);
+    },
+    [setSelectedFooterLayerListItemId]
+  );
 
   const leftPanel = (): JSX.Element => {
     return (

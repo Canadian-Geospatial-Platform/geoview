@@ -53,15 +53,15 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
     return sxClasses.oddDepthList;
   };
 
-  const legendItems = sortedLayers.map((details, index) => {
+  const legendItems = sortedLayers.map((layer, index) => {
     const isFirst = index === 0;
     const isLast = index === sortedLayers.length - 1;
 
     return (
       <SingleLayer
-        key={textToSlug(`layerKey-${index}-${details.layerPath}`)}
+        key={textToSlug(`layerKey-${index}-${layer.layerPath}`)}
         depth={depth}
-        layer={{ ...details, layerId: `${mapId}-${TABS.LAYERS}-${details.layerPath}` }}
+        layer={{ ...layer, layerId: `${mapId}-${TABS.LAYERS}-${layer.layerPath}` }}
         showLayerDetailsPanel={showLayerDetailsPanel}
         index={index}
         isFirst={isFirst}

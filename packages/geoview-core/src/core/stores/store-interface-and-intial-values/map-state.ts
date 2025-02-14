@@ -895,7 +895,6 @@ export const useMapVisibleLayers = (): string[] => useStore(useGeoViewStore(), (
 export const useMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
 // Getter function for one-time access, there is no subcription to modification
-// TODO: Check - Should likely be renamed/reviewed to be a "useMapPointerPosition" or moved elsewhere than here in map-state
 export const getMapPointerPosition = (mapId: string): TypeMapMouseInfo | undefined =>
   getGeoViewStore(mapId).getState().mapState.pointerPosition;
 
