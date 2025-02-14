@@ -1,13 +1,12 @@
 import { Root, createRoot } from 'react-dom/client';
 
-import i18n from 'i18next';
-
 import sanitizeHtml from 'sanitize-html';
 
 import { TypeDisplayLanguage } from '@config/types/map-schema-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
+import i18n from '@/core/translation/i18n';
 import { TypeGuideObject } from '../stores/store-interface-and-intial-values/app-state';
 
 /**

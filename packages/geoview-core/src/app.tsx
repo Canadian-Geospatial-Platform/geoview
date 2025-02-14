@@ -22,6 +22,7 @@ import { TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
+import i18n from '@/core/translation/i18n';
 import { logger } from '@/core/utils/logger';
 import { removeCommentsFromJSON } from '@/core/utils/utilities';
 
@@ -150,6 +151,9 @@ async function renderMap(mapElement: Element): Promise<void> {
   const config = new Config(lang);
   const configObj = config.initializeMapConfig(configuration.mapId, configuration!.map!.listOfGeoviewLayerConfig!);
   configuration.map.listOfGeoviewLayerConfig = configObj!;
+
+  // Set the i18n language to the language specified in the config
+  await i18n.changeLanguage(lang);
 
   // if valid config was provided - mapId is now part of config
   if (configuration) {

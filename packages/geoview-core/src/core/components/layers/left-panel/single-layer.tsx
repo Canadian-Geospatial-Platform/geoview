@@ -206,7 +206,7 @@ export function SingleLayer({
   // Get layer description
   const memoLayerDescription = useMemo((): JSX.Element | string | null => {
     // Log
-    logger.logTraceUseMemo('SINGLE-LAYER - memoLayerDescription');
+    logger.logTraceUseMemo('SINGLE-LAYER - memoLayerDescription', layer.layerPath, layer.layerStatus);
 
     if (layer.layerStatus === 'error') {
       return t('legend.layerError');

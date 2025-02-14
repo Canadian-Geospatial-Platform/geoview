@@ -9,6 +9,7 @@ import { MapEventProcessor } from './map-event-processor';
 import { SnackbarType } from '@/core/utils/notifications';
 import { logger } from '@/core/utils/logger';
 import { api } from '@/app';
+import i18n from '@/core/translation/i18n';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -116,14 +117,32 @@ export class AppEventProcessor extends AbstractEventProcessor {
     this.getAppState(mapId).setterActions.setCrosshairActive(isActive);
   }
 
-  static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): Promise<[void, void]> {
-    this.getAppState(mapId).setterActions.setDisplayLanguage(lang);
-    // reload the basemap from new language
-    const promiseResetBasemap = MapEventProcessor.resetBasemap(mapId);
-    // load guide in new language
-    const promiseSetGuide = AppEventProcessor.setGuide(mapId);
-    // Return promise of both promises to resolve
-    return Promise.all([promiseResetBasemap, promiseSetGuide]);
+  static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): Promise<void> {
+    // Return a new promise of void when all will be done instead of promise of array of voids
+    return new Promise((resolve, reject) => {
+      // Change language in i18n for the useTranslation used by the ui components
+      const promiseChangeLanguage = i18n.changeLanguage(lang);
+
+      this.getAppState(mapId).setterActions.setDisplayLanguage(lang);
+
+      // reload the basemap from new language
+      const promiseResetBasemap = MapEventProcessor.resetBasemap(mapId);
+
+      // load guide in new language
+      const promiseSetGuide = AppEventProcessor.setGuide(mapId);
+
+      // When all promises are done
+      Promise.all([promiseChangeLanguage, promiseResetBasemap, promiseSetGuide])
+        .then(() => {
+          // Now resolve
+          resolve();
+        })
+        .catch((error) => {
+          // Log and reject
+          logger.logPromiseFailed('inner promise in app-event-processor.setDisplayLanguage', error);
+          reject();
+        });
+    });
   }
 
   static setDisplayTheme(mapId: string, theme: TypeDisplayTheme): void {
