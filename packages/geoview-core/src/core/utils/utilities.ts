@@ -11,7 +11,7 @@ import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values
  * Return proper language Geoview localized values from map i18n instance
  *
  * @param {string} localizedKey - The localize key to read the message from
- * @param {string} language - The language to get the message in
+ * @param {TypeDisplayLanguage} language - The language to get the message in
  * @returns {string} The translated message with values replaced
  */
 export function getLocalizedMessage(localizedKey: string, language: TypeDisplayLanguage): string {
@@ -70,10 +70,10 @@ export function getScriptAndAssetURL(): string {
 
 /**
  * Generate a unique id if an id was not provided
- * @param {string} id - An id to return if it was already passed
+ * @param {string?} id - An id to return if it was already passed
  * @returns {string} The generated id
  */
-export function generateId(id?: string | null): string {
+export function generateId(id?: string): string {
   return id !== null && id !== undefined && id.length > 0
     ? id
     : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
