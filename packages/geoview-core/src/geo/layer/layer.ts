@@ -166,7 +166,7 @@ export class LayerApi {
   static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
 
   // Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up
-  static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = true;
+  static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
