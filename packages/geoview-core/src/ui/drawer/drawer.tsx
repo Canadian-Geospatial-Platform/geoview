@@ -1,10 +1,16 @@
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 import { Drawer as MaterialDrawer, DrawerProps, Box } from '@mui/material';
 
+<<<<<<< HEAD
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '@/ui';
+=======
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { ChevronLeftIcon, ChevronRightIcon } from '@/ui/icons/index';
+import { getSxClasses } from '@/ui/drawer/drawer-style';
+>>>>>>> 68dffce95 (continue fix ui)
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './drawer-style';
 
@@ -12,7 +18,6 @@ import { getSxClasses } from './drawer-style';
  * Drawer Properties
  */
 export interface TypeDrawerProps extends DrawerProps {
-  // eslint-disable-next-line react/require-default-props
   status?: boolean;
 }
 
@@ -22,24 +27,30 @@ export interface TypeDrawerProps extends DrawerProps {
  * @param {TypeDrawerProps} props the properties passed to the Drawer element
  * @returns {JSX.Element} the created Drawer element
  */
-export function Drawer(props: TypeDrawerProps): JSX.Element {
+export const Drawer = memo(function Drawer(props: TypeDrawerProps): JSX.Element {
+  logger.logTraceRender('ui/drawer/drawer');
+
+  // Get constant from props
   const { variant, status, className, style, children, ...rest } = props;
 
+  // Hooks
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // internal component state
+  // State
   const [open, setOpen] = useState(false);
 
-  const openCloseDrawer = (drawerStatus: boolean): void => {
-    setOpen(drawerStatus);
-  };
+  // Memoize toggle handler
+  const handleDrawerToggle = useCallback((drawerStatus: boolean): void => {
+    logger.logTraceUseCallback('UI.DRAWER - handleDrawerToggle', drawerStatus);
 
+    setOpen(drawerStatus);
+  }, []);
+
+  // Update open state when status prop changes
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DRAWER - status', status);
+    logger.logTraceUseEffect('UI.DRAWER - status', status);
 
     // set status from props if passed in
     if (status !== undefined) {
@@ -62,7 +73,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
           tooltip={open ? t('general.close')! : t('general.open')!}
           tooltipPlacement="right"
           onClick={() => {
-            openCloseDrawer(!open);
+            handleDrawerToggle(!open);
           }}
           size="large"
         >
@@ -72,4 +83,4 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
       {children !== undefined && children}
     </MaterialDrawer>
   );
-}
+});

@@ -429,14 +429,21 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     key={`panel-${index.toString()}`}
                     panel={buttonPanel.panel}
                     button={buttonPanel.button}
+<<<<<<< HEAD
                     onPanelOpened={buttonPanel.onPanelOpened}
                     onPanelClosed={hideClickMarker}
                     handleKeyDown={(event: KeyboardEvent) =>
                       handleEscapeKey(event.key, tabId, isFocusTrapped, () => {
+=======
+                    handleOpen={buttonPanel.handleOpen}
+                    handleClose={hideClickMarker}
+                    handleKeyDown={(e: KeyboardEvent) =>
+                      handleEscapeKey(e.key, tabId, isFocusTrapped, () => {
+>>>>>>> 68dffce95 (continue fix ui)
                         handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '');
                       })
                     }
-                    onGeneralCloseClicked={() => handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '')}
+                    handleGeneralClose={() => handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '')}
                   />
                 );
               }

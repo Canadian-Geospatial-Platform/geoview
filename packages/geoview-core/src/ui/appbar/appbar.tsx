@@ -5,10 +5,12 @@ import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a AppBar component
+ * Create a customized Material UI App Bar component.
+ * This is a simple wrapper around MaterialAppBar that maintains
+ * full compatibility with Material-UI's AppBar props.
  *
- * @param {AppBarProps} props AppBar properties
- * @returns {JSX.Element} returns AppBar component
+ * @param {AppBarProps} props - All valid Material-UI AppBar props
+ * @returns {JSX.Element} The AppBar component
  */
 export const AppBarUI = memo(function AppBarUI(props: AppBarProps): JSX.Element {
   logger.logTraceRender('ui/appbar/appbar');

@@ -32,23 +32,24 @@ export function LayersToolbar(): JSX.Element {
     [setDisplayState]
   );
 
-  useEffect(() => {
+ // useEffect(() => {
     // If there are no layers, automatically click the add button
     if (legendLayers.length === 0) {
       logger.logTraceUseEffect('LAYERS TOOLBAR - click add');
 
-      // Set the display state directly
-      handleSetDisplayState('add');
+        // Set the display state directly
+      //  handleSetDisplayState('view');
 
       // Use setTimeout to ensure the button click happens after initial render
-      setTimeout(() => {
-        if (addButtonRef.current) {
-          const buttonElement = addButtonRef.current;
-          buttonElement.click();
+      // setTimeout(() => {
+      
+        if (addButtonRef.current !== null) {
+          setTimeout(() => addButtonRef!.current.click(), 5000);
+          // buttonElement.click();
         }
-      }, 0);
+     //  }, 5000);
     }
-  }, [handleSetDisplayState, legendLayers.length]);
+ // }, [handleSetDisplayState, legendLayers.length]);
 
   return (
     <Box id="layers-toolbar" sx={layerToolbarStyle}>

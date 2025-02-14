@@ -81,6 +81,8 @@ export const Accordion = memo(function Accordion(props: AccordionProps): ReactNo
   // Handle accordion expansion/collapse
   const handleAccordionChange = useCallback(
     (index: number) => (event: React.SyntheticEvent, expanded: boolean) => {
+      logger.logTraceUseCallback('UI.ACCORDION - change collapse', expanded);
+
       setAccordionStates((prev) => {
         const updatedStates = [...prev];
         updatedStates[index] = {
@@ -95,11 +97,27 @@ export const Accordion = memo(function Accordion(props: AccordionProps): ReactNo
 
   // Handle transition states
   const handleTransitionEnd = useCallback(
+<<<<<<< HEAD
     (index: number) => (event: React.TransitionEvent) => {
       if (!expandedStates[index] && showLoadingIcon) {
         const updatedStates = [...transitionStates];
         updatedStates[index] = true;
         setTransitionStates(updatedStates);
+=======
+    (index: number) => (e: React.TransitionEvent) => {
+      logger.logTraceUseCallback('UI.ACCORDION - transition end');
+
+      if (!accordionStates[index].expanded && showLoadingIcon) {
+        // Set transition to true when accordion starts closing
+        setAccordionStates((prev) => {
+          const updatedStates = [...prev];
+          updatedStates[index] = {
+            ...updatedStates[index],
+            transition: true,
+          };
+          return updatedStates;
+        });
+>>>>>>> 68dffce95 (continue fix ui)
 
         if (event.propertyName === 'height') {
           const resetStates = [...transitionStates];

@@ -1,7 +1,7 @@
 import { generateId } from '@/core/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 
-import { TypeModalProps } from './modal';
+import { TypeModalProps } from '@/ui/modal/modal';
 
 /**
  * Class used to handle creating a new modal
@@ -46,18 +46,28 @@ export class ModalApi {
   /**
    * Function that deletes the modal by the id specified
    *
-   * @param { string } id of the modal that is to be deleted
+   * @param { string } modalId of the modal that is to be deleted
    */
   deleteModal = (modalId: string): void => {
     if (!Object.keys(this.modals)) return;
     delete this.modals[modalId];
   };
+  /**
+   * Function that open the modal by the id specified
+   *
+   * @param { string } modalId of the modal that is to be deleted
+   */
 
   openModal = (modalId: string): void => {
     this.modals[modalId].active = true;
     this.#emitModalOpened({ modalId });
   };
 
+  /**
+   * Function that close the modal by the id specified
+   *
+   * @param { string } modalId of the modal that is to be deleted
+   */
   closeModal = (modalId: string): void => {
     this.modals[modalId].active = false;
     this.#emitModalClosed({ modalId });

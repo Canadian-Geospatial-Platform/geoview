@@ -1,11 +1,14 @@
-/* eslint-disable react/require-default-props */
-import { ReactNode } from 'react';
-
+import { memo, ReactNode } from 'react';
 import { Card as MaterialCard, CardContent as MaterialCardContent, CardHeader as MaterialCardHeader, CardProps } from '@mui/material';
+import { logger } from '@/core/utils/logger';
+
+// Define valid heading elements
+type HeadingElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
 export interface TypeCardProps extends CardProps {
   title?: string;
   contentCard?: ReactNode;
+  headerComponent?: HeadingElement;
 }
 
 /**
@@ -14,14 +17,16 @@ export interface TypeCardProps extends CardProps {
  * @param {TypeCardProps} props the properties passed to the Card element
  * @returns {JSX.Element} the created Card element
  */
+export const Card = memo(function Card(props: TypeCardProps): JSX.Element {
+  logger.logTraceRender('ui/card/card');
 
-// TODO - KenChase MaterialCardHeader component is hard-coded as h3. It should be passed as a prop
-export function Card(props: TypeCardProps): JSX.Element {
-  const { title, contentCard, ...rest } = props;
+  // Get constant from props
+  const { title, contentCard, headerComponent = 'h3', ...rest } = props;
+
   return (
     <MaterialCard {...rest}>
-      <MaterialCardHeader title={title} component="h3" disableTypography />
+      <MaterialCardHeader title={title} component={headerComponent} disableTypography />
       <MaterialCardContent>{contentCard}</MaterialCardContent>
     </MaterialCard>
   );
-}
+});
