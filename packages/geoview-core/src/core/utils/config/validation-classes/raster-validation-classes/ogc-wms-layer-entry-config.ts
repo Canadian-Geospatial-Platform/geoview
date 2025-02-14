@@ -33,7 +33,12 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     if (
       this.geoviewLayerConfig.metadataAccessPath &&
       !this.geoviewLayerConfig.metadataAccessPath?.startsWith(WMS_PROXY_URL) &&
-      !this.geoviewLayerConfig.metadataAccessPath.includes('datacube.services.geo.ca')
+      !this.geoviewLayerConfig.metadataAccessPath.includes('datacube.services.geo.ca') &&
+      // Weird case that also fails with proxy
+      !(
+        this.geoviewLayerConfig.metadataAccessPath.includes('maps-cartes.ec.gc.ca/arcgis/services/') &&
+        this.geoviewLayerConfig.metadataAccessPath.includes('MapServer/WMSServer')
+      )
     )
       this.geoviewLayerConfig.metadataAccessPath = `${WMS_PROXY_URL}${this.geoviewLayerConfig.metadataAccessPath}`;
 
@@ -41,7 +46,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     if (!this.source) this.source = {};
 
     // Append all WMS links with proxy url to avoid CORS issues
-    // TODO: Currently datacube layers are not working with the proxy, this should not be the case. Check and remove exception when possible
+    // TODO: Currently datacube layers and some other layers are not working with the proxy, this should not be the case. Check and remove exception when possible
     if (
       this.source.dataAccessPath &&
       !this.source.dataAccessPath.startsWith(WMS_PROXY_URL) &&
