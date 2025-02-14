@@ -81,8 +81,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
     };
 
     // Set the image spatial reference to the service source - performance is better when open layers does the conversion
+    // Older versions of ArcGIS Server are not properly converted, so this is only used for version 10.8+
+    const version = layerConfig.getLayerMetadata()?.currentVersion as number;
     const sourceSr = layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;
-    if (sourceSr) imageLayerOptions.source?.updateParams({ imageSR: sourceSr });
+    if (sourceSr && version && version >= 10.8) imageLayerOptions.source?.updateParams({ imageSR: sourceSr });
 
     // Init the layer options with initial settings
     AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
@@ -346,7 +348,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
         `&imageDisplay=${size[0]},${size[1]},96` +
         `&layers=visible:${layerConfig.layerId}` +
-        `&layerDefs=${layerDefs}` +
+        `&layerDefs=${encodeURI(layerDefs)}` +
         `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
         `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
