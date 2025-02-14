@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { SingleLayer } from './single-layer';
-import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
 import { useGeoViewMapId, useLayerStoreActions, useSelectorLayerPathOrder } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { TABS } from '@/core/utils/constant';
+import { SingleLayer } from './single-layer';
+import { getSxClasses } from './left-panel-styles';
 
 interface LayerListProps {
   depth: number;

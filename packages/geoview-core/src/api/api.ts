@@ -12,7 +12,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import * as GeoUtilities from '@/geo/utils/utilities';
 
 import { initMapDivFromFunctionCall } from '@/app';
-import EventHelper, { EventDelegateBase } from './events/event-helper';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 
 /**
  * Class used to handle api calls (events, functions etc...)

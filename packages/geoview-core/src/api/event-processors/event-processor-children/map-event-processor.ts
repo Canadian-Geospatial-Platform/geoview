@@ -39,18 +39,18 @@ import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 
-import { AppEventProcessor } from './app-event-processor';
-import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { DataTableEventProcessor } from './data-table-event-processor';
-import { TimeSliderEventProcessor } from './time-slider-event-processor';
-import { UIEventProcessor } from './ui-event-processor';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
+import { TypeLegendLayer } from '@/core/components/layers/types';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
+import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
+import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { LegendEventProcessor } from './legend-event-processor';
-import { TypeLegendLayer } from '@/core/components/layers/types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
