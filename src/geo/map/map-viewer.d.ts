@@ -369,9 +369,10 @@ export declare class MapViewer {
      *
      * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
      * @param {TypeMapFeaturesInstance} mapConfig - The config to modify, or one created using the current map state if not provided.
+     * @param {boolean} removeUnlisted - Whether or not names not provided should be removed from config.
      * @returns {TypeMapFeaturesInstance} Map config with updated names.
      */
-    replaceMapConfigLayerNames(namePairs: string[][], mapConfig?: TypeMapFeaturesConfig): TypeMapFeaturesInstance | undefined;
+    replaceMapConfigLayerNames(namePairs: string[][], mapConfig?: TypeMapFeaturesConfig, removeUnlisted?: boolean): TypeMapFeaturesInstance | undefined;
     /**
      * Registers a map init event callback.
      * @param {MapInitDelegate} callback - The callback to be executed whenever the event is emitted

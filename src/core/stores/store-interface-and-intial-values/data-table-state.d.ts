@@ -8,7 +8,6 @@ export interface IDataTableState {
     selectedFeature: TypeFeatureInfoEntry | null;
     selectedLayerPath: string;
     tableFilters: Record<string, string>;
-    tableHeight: string;
     actions: {
         addOrUpdateTableFilter(layerPath: string, filter: string): void;
         applyMapFilters: (filterStrings: string) => void;
@@ -21,7 +20,6 @@ export interface IDataTableState {
         setRowsFilteredEntry: (rows: number, layerPath: string) => void;
         setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
         setSelectedLayerPath: (layerPath: string) => void;
-        setTableHeight: (tableHeight: string) => void;
         setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
         triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeAllFeatureInfoResultSet | void>;
     };
@@ -37,7 +35,6 @@ export interface IDataTableState {
         setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
         setSelectedLayerPath: (layerPath: string) => void;
         setTableFilters(newTableFilters: Record<string, string>): void;
-        setTableHeight: (tableHeight: string) => void;
         setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
     };
 }
@@ -67,7 +64,6 @@ export declare const useDataTableAllFeaturesDataArray: () => TypeAllFeatureInfoR
 export declare const useDataTableFilters: () => Record<string, string>;
 export declare const useDataTableSelectedLayerPath: () => string;
 export declare const useDataTableLayerSettings: () => Record<string, IDataTableSettings>;
-export declare const useDataTableTableHeight: () => string;
 export declare const useDataTableSelectedFeature: () => TypeFeatureInfoEntry | null;
 export declare const useDataTableStoreActions: () => DataTableActions;
 export {};

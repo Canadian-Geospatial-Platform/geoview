@@ -16,10 +16,8 @@ export interface IUIState {
     corePackagesComponents: TypeMapCorePackages;
     focusItem: FocusItemProps;
     hiddenTabs: string[];
-    mapInfoExpanded: boolean;
     navBarComponents: TypeNavBarProps;
     footerPanelResizeValue: number;
-    footerPanelResizeValues: number[];
     footerBarIsCollapsed: boolean;
     selectedFooterLayerListItemId: string;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
@@ -32,7 +30,6 @@ export interface IUIState {
         setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean, isFocusTrapped: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
-        setMapInfoExpanded: (expanded: boolean) => void;
         setFooterBarIsCollapsed: (collapsed: boolean) => void;
         setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
     };
@@ -44,7 +41,6 @@ export interface IUIState {
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
         setHiddenTabs: (hiddenTabs: string[]) => void;
-        setMapInfoExpanded: (expanded: boolean) => void;
         setFooterBarIsCollapsed: (collapsed: boolean) => void;
         setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
     };
@@ -67,9 +63,7 @@ export declare const useUIActiveTrapGeoView: () => boolean;
 export declare const useUIAppbarComponents: () => TypeValidAppBarCoreProps[];
 export declare const useUICorePackagesComponents: () => TypeMapCorePackages;
 export declare const useUIFooterPanelResizeValue: () => number;
-export declare const useUIFooterPanelResizeValues: () => number[];
 export declare const useUIHiddenTabs: () => string[];
-export declare const useUIMapInfoExpanded: () => boolean;
 export declare const useUINavbarComponents: () => TypeNavBarProps;
 export declare const useUIFooterBarIsCollapsed: () => boolean;
 export declare const useUISelectedFooterLayerListItemId: () => string;

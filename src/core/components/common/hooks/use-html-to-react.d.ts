@@ -15,5 +15,5 @@ interface HtmlToReactProps {
  * @param {HtmlToReactProps} props the properties to pass to the converted component
  * @returns {JSX.Element} returns the converted JSX component
  */
-export declare function HtmlToReact({ htmlContent, className, style, extraOptions, itemOptions }: HtmlToReactProps): JSX.Element;
+export declare function UseHtmlToReact({ htmlContent, className, style, extraOptions, itemOptions }: HtmlToReactProps): JSX.Element;
 export {};

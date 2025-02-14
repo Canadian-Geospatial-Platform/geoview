@@ -226,7 +226,7 @@ export declare class LayerApi {
      * @param {string} layerPath - The path of the layer.
      * @param {boolean} newValue - The new value of visibility.
      */
-    setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): void;
+    setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean;
     /**
      * Renames a layer.
      *
