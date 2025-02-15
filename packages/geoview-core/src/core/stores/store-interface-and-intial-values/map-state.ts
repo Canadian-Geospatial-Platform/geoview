@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Coordinate } from 'ol/coordinate'; // only for typing
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent'; // only for Typing
@@ -17,6 +18,7 @@ import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { TypePointMarker } from '@/api/config/types/map-schema-types';
 import { TypeHoverFeatureInfo } from './feature-info-state';
 import { CV_MAP_CENTER } from '@/api/config/types/config-constants';
+import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
 
@@ -879,8 +881,6 @@ export const useMapHoverFeatureInfo = (): TypeHoverFeatureInfo => useStore(useGe
 export const useMapLoaded = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapNorthArrow = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
 export const useMapNorthArrowElement = (): TypeNorthArrow => useStore(useGeoViewStore(), (state) => state.mapState.northArrowElement);
-// TODO: Clean up - Obsolete use to delete line when confirmed
-// export const useMapOrderedLayerInfo = (): TypeOrderedLayerInfo[] => useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo);
 export const useMapOverviewMap = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.overviewMap);
 export const useMapOverviewMapHideZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.overviewMapHideZoom);
 export const useMapPointerPosition = (): TypeMapMouseInfo | undefined =>
@@ -915,8 +915,16 @@ export const useSelectorLayerLegendCollapsed = (mapId: string, layerPath: string
 export const useSelectorLayerPathOrder = (): string[] => {
   // Hook
   const orderedLayerInfo = useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo);
-  // Redirect
-  return orderedLayerInfo.map((layer) => layer.layerPath);
+
+  // Compute a dependency string based on the ordered layerPath values
+  const layerPathsKey = orderedLayerInfo.map((layer) => layer.layerPath).join('|||');
+
+  // Only re-create the array if the layerPathsKey changes
+  return useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('MAP-STATE - useSelectorLayerPathOrder', layerPathsKey); // Purposely use the 'layerPathsKey' variable to fix the linter warning in the dependency array of the useMemo
+    return orderedLayerInfo.map((layer) => layer.layerPath);
+  }, [orderedLayerInfo, layerPathsKey]);
 };
 
 // Store Actions

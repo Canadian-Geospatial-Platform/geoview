@@ -745,7 +745,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {
     // Redirect
-    this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo([...curOrderedLayerInfo]);
+    this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo(curOrderedLayerInfo);
   }
 
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
