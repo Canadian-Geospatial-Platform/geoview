@@ -263,7 +263,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     if (geoviewLayer instanceof WMS || geoviewLayer instanceof GVWMS) {
       if (filtering) {
         const newValue = DateMgt.formatDateToISO(values[0]);
-        filter = `${field}=date '${newValue}'`;
+        if (newValue !== 'Invalid DateZ') filter = `${field}=date '${newValue}'`;
+        else filter = '';
       } else {
         filter = `${field}=date '${defaultValue}'`;
       }
