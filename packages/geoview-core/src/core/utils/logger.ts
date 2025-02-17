@@ -6,10 +6,10 @@ import { getItemAsNumber, getItemAsNumberOrNumberArraySetValue } from './localSt
 export const LOG_TRACE_DETAILED = 1;
 // For tracing useEffect unmounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
-// For tracing rendering. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
-export const LOG_TRACE_RENDER = 3;
 // For tracing useCallback. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
-export const LOG_TRACE_USE_CALLBACK = 4;
+export const LOG_TRACE_USE_CALLBACK = 3;
+// For tracing rendering. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
+export const LOG_TRACE_RENDER = 4;
 // For tracing useMemo. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_MEMO = 5;
 // For tracing useEffect mounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
