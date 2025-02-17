@@ -85,7 +85,7 @@ import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-// import { LayerMockup } from './layer-mockup';
+// import { LayerMockup } from '@/geo/layer/layer-mockup';
 
 export type GeoViewLayerAddedResult = {
   layer: AbstractGeoViewLayer;
