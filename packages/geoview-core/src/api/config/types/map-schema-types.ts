@@ -29,7 +29,15 @@ export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' |
 export type TypeNavBarProps = TypeValidNavBarProps[];
 
 /** Supported footer bar tabs */
-export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
+export type TypeValidFooterBarTabsCoreProps =
+  | 'legend'
+  | 'layers'
+  | 'details'
+  | 'data-table'
+  | 'time-slider'
+  | 'geochart'
+  | 'guide'
+  | 'footer-custom-legend';
 
 /** Footer bar tabs custom definition. */
 export type TypeFooterBarTabsCustomProps = {

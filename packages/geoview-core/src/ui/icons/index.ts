@@ -25,6 +25,7 @@ export {
   ClearAll as ClearFiltersIcon,
   Close as CloseIcon,
   CropOriginal as AoiIcon,
+  LegendToggle as CustomLegendIcon,
   Delete as DeleteIcon,
   DeleteOutline as DeleteOutlineIcon,
   Details as DetailsIcon,

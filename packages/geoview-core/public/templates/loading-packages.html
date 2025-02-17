@@ -128,6 +128,24 @@
           cgpv.api.plugin.addPlugin('aoi-panel', 'mapWM', window.geoviewPlugins['aoi-panel'], {
             mapId: 'mapWM',
           });
+          // get load legend panel button element
+        var loadLegendPanelBtn = document.getElementById('load-legend-panel-btn');
+
+// add event handler to the load legend panel button
+        loadLegendPanelBtn.addEventListener('click', function (e) {
+          if (!window?.geoviewPlugins) window.geoviewPlugins = {};
+          cgpv.api.plugin.addPlugin('custom-legend', 'mapWM', window.geoviewPlugins['custom-legend'], {
+            mapId: 'mapWM',
+          });
+        });
+
+// get unload legend panel button element
+var unloadLegendPanelBtn = document.getElementById('unload-legend-btn');
+
+// add event handler to the unload legend panel button
+unloadLegendPanelBtn.addEventListener('click', function (e) {
+  cgpv.api.plugin.removePlugin('custom-legend', 'mapWM');
+});
         });
 
         // get unload aoi panel button element
