@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react';
-import {
-  useLayerDisplayState,
-  useLayerLegendLayers,
-  useLayerStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapOrderedLayerInfo, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { LayersList } from './layers-list';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
 import { logger } from '@/core/utils/logger';
@@ -22,12 +17,9 @@ export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanel
 
   // get from the store
   const legendLayers = useLayerLegendLayers();
-  const displayState = useLayerDisplayState();
   const orderedLayerInfo = useMapOrderedLayerInfo();
-  const mapConfig = useGeoViewConfig();
 
   const { getIndexFromOrderedLayerInfo } = useMapStoreActions();
-  const { setDisplayState } = useLayerStoreActions();
   const [orderedLegendLayers, setOrderedLegendLayers] = useState<TypeLegendLayer[]>([]);
 
   useEffect(() => {
@@ -37,18 +29,7 @@ export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanel
     setOrderedLegendLayers(sortedLayers);
   }, [orderedLayerInfo, legendLayers, getIndexFromOrderedLayerInfo]);
 
-  useEffect(() => {
-    /**
-     * NOTE: 2 Scenarios exist now, when no layers exist on map and
-     * when layers exist but legend doesn't exist in map configuration.
-     * then only we need to show `add` layer component.
-     */
-    if (displayState !== 'add' && !legendLayers.length && mapConfig?.footerBar?.tabs.core.includes('legend')) {
-      setDisplayState('add');
-    }
-  }, [displayState, legendLayers, setDisplayState, mapConfig]);
-
-  if (displayState === 'add') {
+  if (legendLayers.length === 0) {
     return <AddNewLayer />;
   }
 

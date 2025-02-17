@@ -1,19 +1,24 @@
-import { forwardRef } from 'react';
-
+import { forwardRef, memo, Ref } from 'react';
 import { ListItemText as MaterialListItemText, ListItemTextProps } from '@mui/material';
 
 const typographyProps = {
-  fontSize: 14,
-  noWrap: true,
+  primary: {
+    fontSize: 14,
+    noWrap: true,
+  },
 };
 
 /**
- * Create a customized Material UI List Item Text
+ * Create a customized Material UI List Item Text component.
+ * This is a simple wrapper around MaterialListItemText that maintains
+ * full compatibility with Material-UI's List Item Text props.
  *
- * @param {ListItemTextProps} props the properties passed to the List Item element
- * @returns {JSX.Element} the created List Item element
+ * @param {ListItemTextProps} props - All valid Material-UI List Item Text props
+ * @returns {JSX.Element} The List Item Text component
  */
-// eslint-disable-next-line react/display-name
-export const ListItemText = forwardRef((props: ListItemTextProps, ref): JSX.Element => {
-  return <MaterialListItemText ref={ref} {...props} primaryTypographyProps={typographyProps} />;
-});
+function MUIListItemText(props: ListItemTextProps, ref: Ref<HTMLDivElement>): JSX.Element {
+  return <MaterialListItemText ref={ref} {...props} slotProps={typographyProps} />;
+}
+
+// Export the List Item Text using forwardRef so that passing ref is permitted and functional in the react standards
+export const ListItemText = memo(forwardRef<HTMLDivElement, ListItemTextProps>(MUIListItemText));

@@ -1,7 +1,7 @@
 import { TypeJsonObject, toJsonObject, AnySchemaObject, Cast } from 'geoview-core/src/core/types/global-types';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { AoiIcon } from 'geoview-core/src/ui/icons';
-import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
+import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button';
 import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
 import { AoiPanel } from './aoi-panel';
 import schema from '../schema.json';

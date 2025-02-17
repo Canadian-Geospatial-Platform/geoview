@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, VisibilityOutlinedIcon, Button } from '@/ui';
 import {
   useLayerStoreActions,
@@ -27,29 +27,12 @@ export function LayersToolbar(): JSX.Element {
 
   const handleSetDisplayState = useCallback(
     (dispState: TypeLayersViewDisplayState): void => {
+      logger.logTraceUseCallback('LAYER TOOLBAR - handleSetDisplayState', dispState);
+
       setDisplayState(dispState);
     },
     [setDisplayState]
   );
-
- // useEffect(() => {
-    // If there are no layers, automatically click the add button
-    if (legendLayers.length === 0) {
-      logger.logTraceUseEffect('LAYERS TOOLBAR - click add');
-
-        // Set the display state directly
-      //  handleSetDisplayState('view');
-
-      // Use setTimeout to ensure the button click happens after initial render
-      // setTimeout(() => {
-      
-        if (addButtonRef.current !== null) {
-          setTimeout(() => addButtonRef!.current.click(), 5000);
-          // buttonElement.click();
-        }
-     //  }, 5000);
-    }
- // }, [handleSetDisplayState, legendLayers.length]);
 
   return (
     <Box id="layers-toolbar" sx={layerToolbarStyle}>

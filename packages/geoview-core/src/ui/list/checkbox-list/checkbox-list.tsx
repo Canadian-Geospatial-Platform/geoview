@@ -8,8 +8,10 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 
-import { getSxClasses } from './checkbox-list-style';
+import { getSxClasses } from '@/ui/list/checkbox-list/checkbox-list-style';
 import { logger } from '@/core/utils/logger';
+
+// TODO: Not use in any component... do we keep???
 
 /**
  * CheckboxList main Props

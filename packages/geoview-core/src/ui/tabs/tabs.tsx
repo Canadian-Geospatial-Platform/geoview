@@ -18,8 +18,8 @@ import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react
 import { logger } from '@/core/utils/logger';
 
 import { Select, TypeMenuItemProps } from '@/ui/select/select';
-import { getSxClasses } from './tabs-style';
-import { TabPanel } from './tab-panel';
+import { getSxClasses } from '@/ui/tabs/tabs-style';
+import { TabPanel } from '@/ui/tabs/tab-panel';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIHiddenTabs } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TypeContainerBox } from '@/core/types/global-types';
@@ -104,17 +104,20 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     isCollapsed,
   } = props;
 
+  // Hooks
+  // TODO: refactor - language values should be pass as props
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  // internal state
+
+  // State
   // boolean value in state reflects when tabs will be collapsed state, then value needs to false.
   const [value, setValue] = useState<number | boolean>(0);
   const [tabPanels, setTabPanels] = useState([tabs[0]]);
-  const tabPanelRef = useRef<HTMLDivElement>();
+  const tabPanelRef = useRef<HTMLDivElement | null>(null);
 
-  // get store values and actions
+  // TODO: refactor - Should decouple from store and values pass as props
+  // Store
   const mapSize = useMapSize();
   const hiddenTabs = useUIHiddenTabs();
 
@@ -128,6 +131,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const updateTabPanel = useCallback(
     (tabValue: number): void => {
+      logger.logTraceUseCallback('UI.TABS - updateTabPanel', tabValue);
+
       // Update panel refs when tab value is changed.
       // handle no tab when mobile dropdown is displayed.
       if (typeof tabValue === 'string') {
@@ -156,6 +161,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const handleChange = useCallback(
     (event: SyntheticEvent<Element, Event>, newValue: number): void => {
+      logger.logTraceUseCallback('UI.TABS - handleChange', newValue);
+
       updateTabPanel(newValue);
     },
     [updateTabPanel]
@@ -167,6 +174,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const handleClick = useCallback(
     (e: MouseEvent<HTMLDivElement>): void => {
+      logger.logTraceUseCallback('UI.TABS - handleClick', e);
+
       // Get the tab (if already created to extract the value, set -1 if tab does not exist)
       // We need this information to know if we create, switch or collapse a tab
       const { id } = e.target as HTMLDivElement;
@@ -185,8 +194,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   );
 
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('TABS - selectedTab', selectedTab);
+    logger.logTraceUseEffect('UI.TABS - selectedTab', selectedTab);
+
     // If a selected tab is defined
     if (selectedTab !== undefined) {
       const newPanels = [...tabPanels];
@@ -214,6 +223,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   }, [tabs, t]);
 
   useEffect(() => {
+    logger.logTraceUseEffect('UI.TABS - mapSize', mapSize);
+
     // show/hide mobile dropdown when screen size change.
     if (mapSize[0] < theme.breakpoints.values.sm) {
       setShowMobileDropdown(true);
@@ -223,6 +234,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   }, [mapSize, theme.breakpoints.values.sm]);
 
   useEffect(() => {
+    logger.logTraceUseEffect('UI.TABS - isCollapsed', isCollapsed);
+
     const tabPanel = tabPanelRef?.current;
     const handleFooterbarEscapeKey = (e: KeyboardEvent): void => {
       if (!isCollapsed) {
@@ -280,6 +293,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
             <Box sx={sxClasses.mobileDropdown}>
               <Select
                 labelId="footerBarDropdownLabel"
+                label=""
                 formControlProps={{ size: 'small' }}
                 id="footerBarDropdown"
                 fullWidth

@@ -296,7 +296,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         set({
           layerState: {
             ...get().layerState,
-            displayState: curState === newDisplayState ? 'view' : newDisplayState,
+            displayState: curState === newDisplayState ? 'view' : newDisplayState, // Act as a toggle to get back to view
           },
         });
       },

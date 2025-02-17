@@ -17,4 +17,4 @@ function MUICheckbox(props: CheckboxProps, ref: Ref<HTMLButtonElement>): JSX.Ele
 }
 
 // Export the Button  using forwardRef so that passing ref is permitted and functional in the react standards
-export const Checkbox = memo(forwardRef(MUICheckbox));
+export const Checkbox = memo(forwardRef<HTMLButtonElement, CheckboxProps>(MUICheckbox));
