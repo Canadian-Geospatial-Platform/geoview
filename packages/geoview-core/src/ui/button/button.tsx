@@ -43,6 +43,7 @@ function MaterialBtn(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Eleme
   } = props;
 
   // Hooks
+  // TODO: Should we pass value as props and decouple from translation
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const mobileView = useMediaQuery(theme.breakpoints.down('md'));

@@ -128,7 +128,7 @@ export const Panel = memo(function Panel(props: TypePanelAppProps): JSX.Element 
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
           ref={panelRef as React.MutableRefObject<null>}
-          onKeyDown={(e: KeyboardEvent) => handleKeyDown?.(e)}
+          onKeyDown={(event: KeyboardEvent) => handleKeyDown?.(event)}
           {...{ 'data-id': button.id }}
           {...rest}
         >

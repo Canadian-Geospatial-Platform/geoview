@@ -97,7 +97,7 @@ export const Accordion = memo(function Accordion(props: AccordionProps): ReactNo
 
   // Handle transition states
   const handleTransitionEnd = useCallback(
-    (index: number) => (e: React.TransitionEvent) => {
+    (index: number) => (event: React.TransitionEvent) => {
       logger.logTraceUseCallback('UI.ACCORDION - transition end');
 
       if (!accordionStates[index].expanded && showLoadingIcon) {
@@ -112,7 +112,7 @@ export const Accordion = memo(function Accordion(props: AccordionProps): ReactNo
         });
 
         // Reset transition state after height animation completes
-        if (e.propertyName === 'height') {
+        if (event.propertyName === 'height') {
           setAccordionStates((prev) => {
             const updatedStates = [...prev];
             updatedStates[index] = {

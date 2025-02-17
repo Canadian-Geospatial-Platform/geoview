@@ -72,8 +72,8 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
    * Helper function to stop propagation on click of the right-side content
    * @param e React.MouseEvent<HTMLElement> The mouse click event
    */
-  const handleClickContent = (e: React.MouseEvent<HTMLElement>): void => {
-    e.stopPropagation();
+  const handleClickContent = (event: React.MouseEvent<HTMLElement>): void => {
+    event.stopPropagation();
   };
 
   // Effect triggered when the checked values changes

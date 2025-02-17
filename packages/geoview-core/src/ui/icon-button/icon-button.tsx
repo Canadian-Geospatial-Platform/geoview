@@ -45,6 +45,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
   } = props;
 
   // Hooks
+  // TODO: pass label as props for decoupling
   const { t } = useTranslation<string>();
 
   function getMaterialIconButton(): JSX.Element {

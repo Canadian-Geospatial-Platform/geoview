@@ -9,7 +9,7 @@ interface TypeCardMediaProps extends CardMediaProps {
   alt: string;
   cardComponent?: 'img' | 'video';
   click?(): void;
-  keyDown?(e: React.KeyboardEvent): void;
+  keyDown?(event: React.KeyboardEvent): void;
 }
 
 // Define constant styles outside component to prevent recreation

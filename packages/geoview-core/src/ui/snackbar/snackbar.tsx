@@ -32,7 +32,7 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) 
 export function Snackbar(props: SnackBarProps): JSX.Element {
   logger.logTraceRender('ui/snackbar/snackbar', props);
 
-  // Get constnat from props
+  // Get constant from props
   const { snackBarId, open, message, type, button, onClose, ...rest } = props;
 
   // Hooks

@@ -173,12 +173,12 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * If the panel is collapsed when tab is clicked, expand the panel
    */
   const handleClick = useCallback(
-    (e: MouseEvent<HTMLDivElement>): void => {
-      logger.logTraceUseCallback('UI.TABS - handleClick', e);
+    (event: MouseEvent<HTMLDivElement>): void => {
+      logger.logTraceUseCallback('UI.TABS - handleClick', event);
 
       // Get the tab (if already created to extract the value, set -1 if tab does not exist)
       // We need this information to know if we create, switch or collapse a tab
-      const { id } = e.target as HTMLDivElement;
+      const { id } = event.target as HTMLDivElement;
       const tab = tabPanels.filter((item) => item !== undefined && item.id === id);
       const index = tab.length > 0 ? tab[0].value : -1;
 
@@ -237,9 +237,9 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     logger.logTraceUseEffect('UI.TABS - isCollapsed', isCollapsed);
 
     const tabPanel = tabPanelRef?.current;
-    const handleFooterbarEscapeKey = (e: KeyboardEvent): void => {
+    const handleFooterbarEscapeKey = (event: KeyboardEvent): void => {
       if (!isCollapsed) {
-        handleEscapeKey(e.key, tabs[selectedTab ?? 0]?.id, true, () => {
+        handleEscapeKey(event.key, tabs[selectedTab ?? 0]?.id, true, () => {
           onCloseKeyboard?.();
         });
       }
@@ -301,7 +301,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 inputLabel={{ id: 'footerBarDropdownLabel' }}
                 menuItems={mobileTabsDropdownValues}
                 value={value}
-                onChange={(e: SelectChangeEvent<unknown>) => updateTabPanel(e.target.value as number)}
+                onChange={(event: SelectChangeEvent<unknown>) => updateTabPanel(event.target.value as number)}
                 {...(shellContainer ? { MenuProps: { container: shellContainer } } : {})}
               />
             </Box>
