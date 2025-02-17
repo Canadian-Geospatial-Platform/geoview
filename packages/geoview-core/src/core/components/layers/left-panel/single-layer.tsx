@@ -77,8 +77,8 @@ export function SingleLayer({
 
   useDataTableStoreActions();
 
-  const isVisible = useSelectorLayerVisibility(mapId, layer.layerPath);
-  const legendExpanded = !useSelectorLayerLegendCollapsed(mapId, layer.layerPath);
+  const isVisible = useSelectorLayerVisibility(layer.layerPath);
+  const legendExpanded = !useSelectorLayerLegendCollapsed(layer.layerPath);
 
   // TODO: I think we should favor using this pattern here, with the store, instead of working with the whole 'layer' object from the props
   // const layerLegendQueryStatus: string | undefined = useSelectorLayerLegendQueryStatus(layer.layerPath);

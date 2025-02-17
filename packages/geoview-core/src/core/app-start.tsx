@@ -53,7 +53,7 @@ function AppStart(props: AppStartProps): JSX.Element {
     return { mapId };
   }, [mapId]);
 
-  // GV get store values by id because context is not set.... it is the only 2 atomic selector by id
+  // GV get store values by id because context is not set.... it is the only atomic selector by id
   // once context is define, map id is available
   const theme = useAppDisplayThemeById(mapId);
 

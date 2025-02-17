@@ -2,13 +2,7 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material';
 import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
-import {
-  useGeoViewMapId,
-  useMapStoreActions,
-  useSelectorLayerLegendCollapsed,
-  useSelectorLayerStatus,
-  useSelectorLayerVisibility,
-} from '@/core/stores/';
+import { useMapStoreActions, useSelectorLayerLegendCollapsed, useSelectorLayerStatus, useSelectorLayerVisibility } from '@/core/stores/';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';
@@ -68,11 +62,10 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Stores
-  const mapId = useGeoViewMapId();
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { setLegendCollapsed } = useMapStoreActions();
-  const isVisible = useSelectorLayerVisibility(mapId, layer.layerPath);
-  const isCollapsed = useSelectorLayerLegendCollapsed(mapId, layer.layerPath);
+  const isVisible = useSelectorLayerVisibility(layer.layerPath);
+  const isCollapsed = useSelectorLayerLegendCollapsed(layer.layerPath);
   const layerStatus = useSelectorLayerStatus(layer.layerPath);
 
   // TODO: Check - Probably don't do that as it creates a new layer object and new items and new children, etc causing multiple re-renderings

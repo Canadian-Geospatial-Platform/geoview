@@ -220,8 +220,8 @@ export function Geolocator(): JSX.Element {
     if (!geolocatorRef?.current) return () => {};
 
     const geolocator = geolocatorRef.current;
-    const handleGeolocatorEscapeKey = (e: KeyboardEvent): void => {
-      handleEscapeKey(e.key, '', false, () => resetSearch());
+    const handleGeolocatorEscapeKey = (event: KeyboardEvent): void => {
+      handleEscapeKey(event.key, '', false, () => resetSearch());
     };
     geolocator.addEventListener('keydown', handleGeolocatorEscapeKey);
 

@@ -32,10 +32,10 @@ import {
   esriQueryRecordsByUrl,
   esriQueryRelatedRecordsByUrl,
 } from '@/geo/layer/gv-layers/utils';
-import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
-import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
-import { EsriImage } from './raster/esri-image';
+import { EsriDynamic, geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { EsriFeature, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 

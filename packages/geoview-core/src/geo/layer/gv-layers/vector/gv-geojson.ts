@@ -5,7 +5,7 @@ import Feature from 'ol/Feature';
 import VectorLayer from 'ol/layer/Vector';
 
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
-import { AbstractGVVector } from './abstract-gv-vector';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { Projection } from '@/geo/utils/projection';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';

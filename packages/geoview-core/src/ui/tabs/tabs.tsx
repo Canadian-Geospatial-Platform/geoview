@@ -224,9 +224,9 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   useEffect(() => {
     const tabPanel = tabPanelRef?.current;
-    const handleFooterbarEscapeKey = (e: KeyboardEvent): void => {
+    const handleFooterbarEscapeKey = (event: KeyboardEvent): void => {
       if (!isCollapsed) {
-        handleEscapeKey(e.key, tabs[selectedTab ?? 0]?.id, true, () => {
+        handleEscapeKey(event.key, tabs[selectedTab ?? 0]?.id, true, () => {
           onCloseKeyboard?.();
         });
       }

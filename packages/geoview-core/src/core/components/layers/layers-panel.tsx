@@ -31,6 +31,10 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
 
   const showLayerDetailsPanel = useCallback(
     (layerId: string): void => {
+      // Log
+      logger.logTraceUseCallback('LAYERS-PANEL - showLayerDetailsPanel');
+
+      // Set the visibility and focus
       responsiveLayoutRef.current?.setIsRightPanelVisible(true);
       responsiveLayoutRef.current?.setRightPanelFocus();
       // set the focus item when layer item clicked.

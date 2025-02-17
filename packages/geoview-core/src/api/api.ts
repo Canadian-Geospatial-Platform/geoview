@@ -96,8 +96,8 @@ export class API {
     }
 
     // Add event listener for when tab pressed
-    document.addEventListener('keyup', (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+    document.addEventListener('keyup', (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
 
       // get array of map elements
       const elements: Element[] = Array.from(document.getElementsByClassName('geoview-map'));

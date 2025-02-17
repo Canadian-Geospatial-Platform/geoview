@@ -71,6 +71,10 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
    * @param e React.MouseEvent<HTMLElement> The mouse click event
    */
   const handleClickContent = useCallback((event: React.MouseEvent<HTMLElement>): void => {
+    // Log
+    logger.logTraceUseCallback('CHECKBOX-LIST - handleClickContent');
+
+    // Stop propagation
     event.stopPropagation();
   }, []);
 

@@ -3,7 +3,6 @@ import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } fr
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapStoreActions, useSelectorLayerVisibility } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 interface DeleteUndoButtonProps {
@@ -15,7 +14,7 @@ interface DeleteUndoButtonProps {
 interface UndoButtonProps {
   progressValue: number;
   onUndo: () => void;
-  handleKeyDown: (e: KeyboardEvent) => void;
+  handleKeyDown: (event: KeyboardEvent) => void;
 }
 
 function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
@@ -56,11 +55,10 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   const [inUndoState, setInUndoState] = useState(false);
 
   // get store actions
-  const mapId = useGeoViewMapId();
   const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
   const { setOrToggleLayerVisibility } = useMapStoreActions();
   const { setSelectedFooterLayerListItemId } = useUIStoreActions();
-  const isVisible = useSelectorLayerVisibility(mapId, layerPath);
+  const isVisible = useSelectorLayerVisibility(layerPath);
 
   const handleDeleteClick = (): void => {
     if (isVisible) setOrToggleLayerVisibility(layerPath);
@@ -74,19 +72,19 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     setLayerDeleteInProgress(false);
   };
 
-  const handleDeleteKeyDown = (e: KeyboardEvent): void => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
+  const handleDeleteKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
       handleDeleteClick();
       setSelectedFooterLayerListItemId(layerId);
     }
   };
 
-  const handleUndoDeleteKeyDown = (e: KeyboardEvent): void => {
-    if (e.key === 'Enter') {
+  const handleUndoDeleteKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === 'Enter') {
       handleUndoClick();
       setSelectedFooterLayerListItemId('');
-      e.preventDefault();
+      event.preventDefault();
     }
   };
 
