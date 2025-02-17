@@ -197,10 +197,10 @@ export class WMS extends AbstractGeoViewRaster {
         // If network issue such as CORS
         // We're going to change the metadata url to use a proxy
         const newProxiedMetadataUrl = `${WMS_PROXY_URL}${url}`;
-        // Callback about it
-        callbackNewMetadataUrl?.(WMS_PROXY_URL);
         // Try again with the proxy this time
         response = await fetch(newProxiedMetadataUrl);
+        // Callback about it
+        callbackNewMetadataUrl?.(WMS_PROXY_URL);
       }
 
       const capabilitiesString = await response.text();
@@ -235,10 +235,10 @@ export class WMS extends AbstractGeoViewRaster {
         // If network issue such as CORS
         // We're going to change the metadata url to use a proxy
         const newProxiedMetadataUrl = `${WMS_PROXY_URL}${metadataUrl}`;
-        // Callback about it
-        callbackNewMetadataUrl?.(WMS_PROXY_URL);
         // Try again with the proxy this time
         response = await fetch(newProxiedMetadataUrl);
+        // Callback about it
+        callbackNewMetadataUrl?.(WMS_PROXY_URL);
       }
 
       const capabilitiesString = await response.text();
