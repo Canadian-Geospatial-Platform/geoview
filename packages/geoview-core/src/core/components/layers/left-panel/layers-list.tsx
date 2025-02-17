@@ -62,7 +62,6 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
           layer={layer}
           depth={depth}
           showLayerDetailsPanel={showLayerDetailsPanel}
-          index={index}
           isFirst={isFirst}
           isLast={isLast}
           isLayoutEnlarged={isLayoutEnlarged}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
-import { animated, useSpring } from '@react-spring/web';
+import { animated } from '@react-spring/web';
 import { Theme } from '@mui/material/styles';
 import {
   Collapse,
@@ -44,21 +44,12 @@ interface SingleLayerProps {
   layer: TypeLegendLayer;
   depth: number;
   showLayerDetailsPanel: (layerId: string) => void;
-  index: number;
   isFirst: boolean;
   isLast: boolean;
   isLayoutEnlarged: boolean;
 }
 
-export function SingleLayer({
-  depth,
-  layer,
-  showLayerDetailsPanel,
-  index,
-  isFirst,
-  isLast,
-  isLayoutEnlarged,
-}: SingleLayerProps): JSX.Element {
+export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLast, isLayoutEnlarged }: SingleLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/single-layer', layer.layerPath);
 
@@ -87,12 +78,6 @@ export function SingleLayer({
   // const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layer.layerPath);
   // const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layer.layerPath);
   // const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layer.layerPath);
-
-  const listItemSpring = useSpring({
-    delay: index * 150 + (depth * 150) / 2,
-    from: { opacity: 0.1 },
-    to: { opacity: 1 },
-  });
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(
@@ -447,7 +432,7 @@ export function SingleLayer({
   const AnimatedPaper = animated(Paper);
 
   return (
-    <AnimatedPaper className={memoContainerClass} style={listItemSpring} data-layer-depth={depth}>
+    <AnimatedPaper className={memoContainerClass} data-layer-depth={depth}>
       <Tooltip title={layer.layerName} placement="top" enterDelay={1000} arrow>
         <ListItem id={layer.layerId} key={layer.layerName} divider tabIndex={0} onKeyDown={handleListItemKeyDown}>
           <ListItemButton
