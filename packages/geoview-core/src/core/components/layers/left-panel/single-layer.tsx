@@ -80,6 +80,14 @@ export function SingleLayer({
   const isVisible = useSelectorLayerVisibility(mapId, layer.layerPath);
   const legendExpanded = !useSelectorLayerLegendCollapsed(mapId, layer.layerPath);
 
+  // TODO: I think we should favor using this pattern here, with the store, instead of working with the whole 'layer' object from the props
+  // const layerLegendQueryStatus: string | undefined = useSelectorLayerLegendQueryStatus(layer.layerPath);
+  // const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layer.layerPath);
+  // const layerName: string | undefined = useSelectorLayerName(layer.layerPath);
+  // const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layer.layerPath);
+  // const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layer.layerPath);
+  // const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layer.layerPath);
+
   const listItemSpring = useSpring({
     delay: index * 150 + (depth * 150) / 2,
     from: { opacity: 0.1 },

@@ -4,9 +4,9 @@ import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useGeoViewMapId,
-  useLayerStoreActions,
   useMapStoreActions,
   useSelectorLayerLegendCollapsed,
+  useSelectorLayerStatus,
   useSelectorLayerVisibility,
 } from '@/core/stores/';
 import { useLightBox } from '@/core/components/common';
@@ -71,11 +71,11 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   const mapId = useGeoViewMapId();
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { setLegendCollapsed } = useMapStoreActions();
-  const { getLayerStatus } = useLayerStoreActions();
   const isVisible = useSelectorLayerVisibility(mapId, layer.layerPath);
   const isCollapsed = useSelectorLayerLegendCollapsed(mapId, layer.layerPath);
-  const layerStatus = getLayerStatus(layer.layerPath);
+  const layerStatus = useSelectorLayerStatus(layer.layerPath);
 
+  // TODO: Check - Probably don't do that as it creates a new layer object and new items and new children, etc causing multiple re-renderings
   // Create a new layer object with updated status (no useMemo to ensure updates in inner child)
   const currentLayer = {
     ...layer,

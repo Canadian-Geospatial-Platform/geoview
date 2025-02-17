@@ -3,9 +3,10 @@ import { useTheme } from '@mui/material/styles';
 import { Box, CircularProgressBase, ErrorIcon, GroupWorkOutlinedIcon, IconButton, BrowserNotSupportedIcon } from '@/ui';
 
 import { TypeLegendLayer } from '@/core/components/layers/types';
-import { getSxClasses } from './layer-icon-style';
+import { getSxClasses } from '@/core/components/common/layer-icon-style';
+import { LayerListEntry } from '@/core/components/common/layer-list';
 import { useIconLayerSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { LayerListEntry } from '.';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeIconStackProps {
   layerPath: string;
@@ -54,8 +55,11 @@ const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconC
     [iconData]
   );
 
-  const renderSingleIcon = useCallback(
-    (): JSX.Element => (
+  const renderSingleIcon = useCallback((): JSX.Element => {
+    // Log
+    logger.logTraceUseCallback('LAYER-ICON - renderSingleIcon');
+
+    return (
       <IconButton {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreview} onClick={iconImage === 'no data' ? undefined : onIconClick}>
         {iconImage === 'no data' ? (
           <BrowserNotSupportedIcon />
@@ -65,12 +69,14 @@ const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconC
           </Box>
         )}
       </IconButton>
-    ),
-    [iconImage, onIconClick, sxClasses.iconPreview, sxClasses.legendIcon, sxClasses.maxIconImg]
-  );
+    );
+  }, [iconImage, onIconClick, sxClasses.iconPreview, sxClasses.legendIcon, sxClasses.maxIconImg]);
 
-  const renderStackedIcons = useCallback(
-    (): JSX.Element => (
+  const renderStackedIcons = useCallback((): JSX.Element => {
+    // Log
+    logger.logTraceUseCallback('LAYER-ICON - renderStackedIcons');
+
+    return (
       <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyDown={onStackIconClick} aria-hidden="true">
         <IconButton {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreviewStacked}>
           <Box sx={sxClasses.legendIconTransparent}>
@@ -81,23 +87,25 @@ const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconC
           <Box sx={sxClasses.legendIcon}>{iconImage && <Box component="img" alt="icon" src={iconImage} sx={sxClasses.maxIconImg} />}</Box>
         </IconButton>
       </Box>
-    ),
-    [
-      iconImage,
-      iconImageStacked,
-      onIconClick,
-      onStackIconClick,
-      sxClasses.iconPreviewHoverable,
-      sxClasses.iconPreviewStacked,
-      sxClasses.legendIcon,
-      sxClasses.legendIconTransparent,
-      sxClasses.maxIconImg,
-      sxClasses.stackIconsBox,
-    ]
-  );
+    );
+  }, [
+    iconImage,
+    iconImageStacked,
+    onIconClick,
+    onStackIconClick,
+    sxClasses.iconPreviewHoverable,
+    sxClasses.iconPreviewStacked,
+    sxClasses.legendIcon,
+    sxClasses.legendIconTransparent,
+    sxClasses.maxIconImg,
+    sxClasses.stackIconsBox,
+  ]);
 
-  const renderNoDataIcon = useCallback(
-    (): JSX.Element => (
+  const renderNoDataIcon = useCallback((): JSX.Element => {
+    // Log
+    logger.logTraceUseCallback('LAYER-ICON - renderNoDataIcon');
+
+    return (
       <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyDown={onStackIconClick} aria-hidden="true">
         <IconButton {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreviewStacked}>
           <Box sx={sxClasses.legendIconTransparent}>
@@ -105,9 +113,8 @@ const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconC
           </Box>
         </IconButton>
       </Box>
-    ),
-    [onIconClick, onStackIconClick, sxClasses.iconPreviewStacked, sxClasses.legendIconTransparent, sxClasses.stackIconsBox]
-  );
+    );
+  }, [onIconClick, onStackIconClick, sxClasses.iconPreviewStacked, sxClasses.legendIconTransparent, sxClasses.stackIconsBox]);
 
   if (numOfIcons === 1) return renderSingleIcon();
   if (numOfIcons && numOfIcons > 0) return renderStackedIcons();

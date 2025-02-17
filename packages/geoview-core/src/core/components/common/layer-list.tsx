@@ -77,7 +77,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
         {layer.layerFeatures} {layer?.mapFilteredIcon ?? ''}
       </>
     );
-  }, [layer, t]);
+  }, [layer.layerFeatures, layer.layerStatus, layer?.mapFilteredIcon, layer.queryStatus, t]);
 
   /**
    * Handle layer click when mouse enter is pressed.
