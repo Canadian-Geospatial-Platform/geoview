@@ -124,7 +124,7 @@ export interface ModalActionsType {
 export const Modal = memo(function Modal(props: TypeDialogProps): JSX.Element {
   logger.logTraceRender('ui/modal/modal');
 
-  // Get constnt from props
+  // Get constant from props
   const {
     modalId,
     modalProps,
@@ -147,6 +147,7 @@ export const Modal = memo(function Modal(props: TypeDialogProps): JSX.Element {
   } = props;
 
   // Hooks
+  // TODO: remove coupling with translation, pass as props
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
