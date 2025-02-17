@@ -1,13 +1,20 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo, Ref } from 'react';
 import { Typography as MaterialTypography, TypographyProps } from '@mui/material';
+import { logger } from '@/core/utils/logger';
 
 /**
- * Create a Material UI Typography component
+ * Create a customized Material UI Typography component.
+ * This is a simple wrapper around MaterialTypography that maintains
+ * full compatibility with Material-UI's Typography props.
  *
- * @param {TypographyProps} props custom typography properties
- * @returns {JSX.Element} the auto complete ui component
+ * @param {TypographyProps} props - All valid Material-UI Typography props
+ * @returns {JSX.Element} The Typography component
  */
-// eslint-disable-next-line react/display-name
-export const Typography = forwardRef((props: TypographyProps, ref): JSX.Element => {
-  return <MaterialTypography ref={ref as React.RefObject<HTMLElement>} {...props} />;
-});
+function MUITypography(props: TypographyProps, ref: Ref<HTMLElement>): JSX.Element {
+  logger.logTraceRender('ui/typography/typography', props);
+
+  return <MaterialTypography ref={ref} {...props} />;
+}
+
+// Export the Typography using forwardRef so that passing ref is permitted and functional in the react standards
+export const Typography = memo(forwardRef<HTMLElement, TypographyProps>(MUITypography));

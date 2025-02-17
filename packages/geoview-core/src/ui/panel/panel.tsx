@@ -6,11 +6,6 @@ import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import { useTheme } from '@mui/material/styles';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-<<<<<<< HEAD
-import { IconButton, CloseIcon, Box, TypePanelProps } from '@/ui';
-import { logger } from '@/core/utils/logger';
-=======
->>>>>>> 68dffce95 (continue fix ui)
 
 import { Box } from '@/ui/layout/index';
 import { TypePanelProps } from '@/ui/panel/panel-types';

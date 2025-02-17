@@ -1,5 +1,5 @@
 import { CONST_PANEL_TYPES, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
+import { TypeIconButtonProps } from '@/ui/icon-button/icon-button';
 
 import { generateId } from '@/core/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';

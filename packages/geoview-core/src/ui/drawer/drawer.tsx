@@ -4,13 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Drawer as MaterialDrawer, DrawerProps, Box } from '@mui/material';
 
-<<<<<<< HEAD
-import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '@/ui';
-=======
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/ui/icons/index';
 import { getSxClasses } from '@/ui/drawer/drawer-style';
->>>>>>> 68dffce95 (continue fix ui)
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './drawer-style';
 

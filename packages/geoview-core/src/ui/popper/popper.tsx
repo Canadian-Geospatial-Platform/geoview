@@ -1,38 +1,45 @@
-import React, { useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { Popper as MaterialPopper, PopperProps } from '@mui/material';
-import { animated, useSpring, easings } from '@react-spring/web';
+import { animated } from '@react-spring/web';
+import { useFadeIn } from '@/core/utils/useSpringAnimations';
+import { logger } from '@/core/utils/logger';
 
 interface EnhancedPopperProps extends PopperProps {
-  // eslint-disable-next-line react/require-default-props
   onClose?: () => void;
   handleKeyDown?: (key: string, callbackFn: () => void) => void;
 }
 
 /**
- * Create a popover component
+ * Create a customized Material UI Popper component.
+ * This is a simple wrapper around MaterialPopper that maintains
+ * full compatibility with Material-UI's Popper props.
  *
- * @param {EnhancedPopperProps} props popover properties
- * @returns {JSX.Element} returns popover component
+ * @param {EnhancedPopperProps} props - All valid Material-UI Popper props
+ * @returns {JSX.Element} The Popper component
  */
-/* eslint-disable-next-line react/function-component-definition */
-export const Popper: React.FC<EnhancedPopperProps> = ({ open, onClose, handleKeyDown, ...restProps }) => {
+export const Popper = memo(function Popper({ open, onClose, handleKeyDown, ...props }: EnhancedPopperProps): JSX.Element {
+  logger.logTraceRender('ui/popper/popper');
+
+  // Hooks
+  const fadeInAnimation = useFadeIn();
+  const AnimatedPopper = animated(MaterialPopper);
+
+  // Ref
   const popperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    logger.logTraceUseEffect('UI.POPPER - handleKeyDown/onClose');
+
     const onKeyDown = (event: KeyboardEvent): void => {
       handleKeyDown?.(event.key, () => open && onClose?.());
     };
+
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
     };
   }, [open, onClose, handleKeyDown]);
 
-  const springProps = useSpring({
-    config: { duration: 250, easing: easings.easeInExpo },
-    opacity: open ? 1 : 0,
-  });
-  const AnimatedPopper = animated(MaterialPopper);
-
-  return <AnimatedPopper sx={{ zIndex: '2000' }} style={springProps} {...restProps} open={open} ref={popperRef} />;
-};
+  // TODO: style - manage z-index in theme
+  return <AnimatedPopper sx={{ zIndex: '2000' }} style={fadeInAnimation} {...props} open={open} ref={popperRef} />;
+});

@@ -29,4 +29,4 @@ function ButtonGroupElement(props: ButtonGroupProps, ref: Ref<HTMLDivElement>): 
 }
 
 // Export the Button Group using forwardRef so that passing ref is permitted and functional in the react standards
-export const ButtonGroup = memo(forwardRef(ButtonGroupElement));
+export const ButtonGroup = memo(forwardRef<HTMLDivElement, ButtonGroupProps>(ButtonGroupElement));

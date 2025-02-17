@@ -94,4 +94,4 @@ function MaterialBtn(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Eleme
 }
 
 // Export the Button  using forwardRef so that passing ref is permitted and functional in the react standards
-export const Button = memo(forwardRef(MaterialBtn));
+export const Button = memo(forwardRef<HTMLButtonElement, ButtonProps>(MaterialBtn));

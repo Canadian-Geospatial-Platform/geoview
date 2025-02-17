@@ -6,9 +6,8 @@ import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { TypeBasemapOptions } from '@/api/config/types/map-schema-types';
 import { MapIcon } from '@/ui';
 import { TypePanelProps } from '@/ui/panel/panel-types';
-import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
+import { TypeIconButtonProps, IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
-import { IconButton } from '@/ui/icon-button/icon-button';
 import { BlockIcon, PublicIcon, SatelliteIcon, SignpostIcon } from '@/ui/icons';
 
 const basemapChoiceOptions: Record<string, TypeBasemapOptions> = {

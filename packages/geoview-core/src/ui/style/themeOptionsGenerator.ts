@@ -1,6 +1,7 @@
 import { ThemeOptions } from '@mui/material';
-import { IGeoViewColors } from './types';
-import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from './default';
+import { IGeoViewColors } from '@/ui/style/types';
+import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from '@/ui/style/default';
+import { logger } from '@/core/utils/logger';
 
 // this function is fixing tooltips not appearing in fullscreen mode, #1685
 // https://github.com/mui/material-ui/issues/15618#issuecomment-1893503162
@@ -81,6 +82,8 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
 });
 
 export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions => {
+  logger.logTraceCore('ui/style/themeOptionsGenerator - generateThemeOptions', geoViewColors);
+
   const themeOptions: ThemeOptions = {
     palette: {
       geoViewColor: geoViewColors,

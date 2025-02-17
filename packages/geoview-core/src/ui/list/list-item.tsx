@@ -1,5 +1,6 @@
 import { ListItem as MaterialListItem, ListItemProps } from '@mui/material';
-import React from 'react';
+import React, { forwardRef, memo, Ref } from 'react';
+import { logger } from '@/core/utils/logger';
 
 const sxClasses = {
   listItem: {
@@ -9,12 +10,17 @@ const sxClasses = {
 };
 
 /**
- * Create a customized Material UI List Item
+ * Create a customized Material UI List Item component.
+ * This is a simple wrapper around MaterialListItem that maintains
+ * full compatibility with Material-UI's List Item props.
  *
- * @param {TypeListItemProps} props the properties passed to the List Item element
- * @returns {JSX.Element} the created List Item element
+ * @param {ListItemProps} props - All valid Material-UI List Item props
+ * @returns {JSX.Element} The List Item component
  */
-export const ListItem = React.forwardRef<HTMLLIElement, ListItemProps>((props, ref) => {
+function MUIListItem(props: ListItemProps, ref: Ref<HTMLLIElement>): JSX.Element {
+  logger.logTraceRender('ui/list/list-item', props);
+
+  // Get constant from props
   const { children } = props;
 
   return (
@@ -22,6 +28,7 @@ export const ListItem = React.forwardRef<HTMLLIElement, ListItemProps>((props, r
       {children !== undefined && children}
     </MaterialListItem>
   );
-});
+}
 
-ListItem.displayName = 'ListItem';
+// Export the List Item using forwardRef so that passing ref is permitted and functional in the react standards
+export const ListItem = memo(forwardRef<HTMLLIElement, ListItemProps>(MUIListItem));

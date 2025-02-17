@@ -12,14 +12,9 @@ import { animated } from '@react-spring/web';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
-<<<<<<< HEAD
-import { CloseIcon, IconButton } from '@/ui';
-import { getSxClasses } from './modal-style';
-=======
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { CloseIcon } from '@/ui/icons/index';
 import { getSxClasses } from '@/ui/modal/modal-style';
->>>>>>> 68dffce95 (continue fix ui)
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
 

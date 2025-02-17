@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useMemo } from 'react';
 
 import { Alert as MaterialAlert, AlertProps, Snackbar as MaterialSnackbar } from '@mui/material';
 
@@ -28,28 +28,43 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) 
  * - severity: 'success', 'warning', 'error', 'info'
  * @param {SnackBarProps} props the snackbar properties
  */
+// GV: The message is almost always new, we do not memo
 export function Snackbar(props: SnackBarProps): JSX.Element {
-  // Log
   logger.logTraceRender('ui/snackbar/snackbar', props);
 
-  // Read props
+  // Get constnat from props
   const { snackBarId, open, message, type, button, onClose, ...rest } = props;
 
+  // Hooks
   const fadeInAnimation = useFadeIn();
   const AnimatedSnackbar = animated(MaterialSnackbar);
+
+  // Memoize static styles and props
+  const memoSnackbarStyles = useMemo(
+    () => ({
+      position: 'absolute',
+      bottom: '40px!important',
+    }),
+    []
+  );
+
+  // Memoize static snackbar props
+  const memoSnackbarProps = useMemo(
+    () => ({
+      anchorOrigin: { vertical: 'bottom' as const, horizontal: 'center' as const },
+      autoHideDuration: 6000,
+    }),
+    []
+  );
 
   return (
     <AnimatedSnackbar
       style={fadeInAnimation}
-      sx={{
-        position: 'absolute',
-        bottom: '40px!important',
-      }}
+      sx={memoSnackbarStyles}
       id={snackBarId}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       open={open}
-      autoHideDuration={6000}
       onClose={() => onClose?.()}
+      {...memoSnackbarProps}
       {...rest}
     >
       <Alert onClose={() => onClose?.()} severity={type} sx={{ width: '100%' }}>

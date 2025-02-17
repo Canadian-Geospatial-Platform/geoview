@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import {
   Stepper as MaterialStepper,
   Step,
@@ -10,7 +11,8 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import { getSxClasses } from './stepper-style';
+import { getSxClasses } from '@/ui/stepper/stepper-style';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Custom MUI Stepper Props
@@ -35,11 +37,15 @@ interface TypeStep {
  * @param {TypeStepperProps} props custom stepper properties
  * @returns {JSX.Element} the auto complete ui component
  */
-export function Stepper(props: TypeStepperProps): JSX.Element {
+export const Stepper = memo(function Stepper(props: TypeStepperProps): JSX.Element {
+  logger.logTraceRender('ui/stepper/stepper', props);
+
+  // Get constant from props
   const { steps, ...stepperProps } = props;
 
+  // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   return (
     <MaterialStepper sx={sxClasses.stepper} {...stepperProps}>
@@ -60,4 +66,4 @@ export function Stepper(props: TypeStepperProps): JSX.Element {
         })}
     </MaterialStepper>
   );
-}
+});
