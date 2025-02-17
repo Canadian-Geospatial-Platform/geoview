@@ -142,7 +142,8 @@
         "details",
         "data-table",
         "time-slider",
-        "geochart"
+        "geochart",
+        "footer-custom-legend"
       ]
     },
     "TypeFooterBarTabsCustomProps": {
@@ -235,8 +236,7 @@
         "guide",
         "data-table",
         "layers",
-        "aoi-panel",
-        "legend-panel"
+        "aoi-panel"
       ]
     },
     "TypeAppBarProps": {

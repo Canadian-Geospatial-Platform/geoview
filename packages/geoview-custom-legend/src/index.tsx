@@ -1,13 +1,13 @@
+/* eslint-disable react/jsx-no-undef */
 import { TypeJsonObject, toJsonObject, AnySchemaObject, Cast } from 'geoview-core/src/core/types/global-types';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
 import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
+import { HubOutlinedIcon } from 'geoview-core/src/ui/icons';
 import schema from '../schema.json';
-import defaultConfig from '../default-config-custom-legend-panel.json';
+import defaultConfig from '../default-config-custom-legend.json';
+import { LegendPanel } from './custom-legend';
 
-/**
- * Create a class for the plugin instance
- */
 class LegendPanelPlugin extends AppBarPlugin {
   /**
    * Return the package schema
@@ -28,54 +28,57 @@ class LegendPanelPlugin extends AppBarPlugin {
   }
 
   /**
-   * translations object to inject to the viewer translations
+   * Translations object to inject into the viewer translations
    */
   translations = toJsonObject({
     en: {
       LegendPanel: {
-        title: 'Legend',
+        title: 'Custom Legend',
       },
     },
     fr: {
       LegendPanel: {
-        title: 'Légende',
+        title: 'Légende Personnalisée',
       },
     },
   });
 
   override onCreateButtonProps(): TypeIconButtonProps {
-    // Button props
     return {
       id: 'custom-legend',
       tooltip: 'LegendPanel.title',
       tooltipPlacement: 'right',
-      children: <span>L</span>,
+      children: <HubOutlinedIcon />,
       visible: true,
     };
   }
 
   override onCreateContentProps(): TypePanelProps {
-    // Panel props
     return {
       title: 'LegendPanel.title',
-      icon: <span>L</span>,
+      icon: <HubOutlinedIcon />,
       width: 350,
       status: this.configObj?.isOpen as boolean,
     };
   }
 
   override onCreateContent = (): JSX.Element => {
-    return <div>Legend Panel Content</div>;
+    console.log('LegendPanel config:', this.configObj);
+
+    // Ensure config exists and legendList is an array
+    const config = this.configObj || {};
+    const finalConfig = { isOpen: false, legendList: [], ...config }; // Use default config if needed
+
+    return <LegendPanel config={finalConfig} />;
   };
 
   /**
-   * Function called when the plugin is removed, used for clean up
+   * Function called when the plugin is removed, used for clean-up
    */
   override onRemoved(): void {}
 }
 
 export default LegendPanelPlugin;
 
-// Keep a reference to the Legend Panel Plugin as part of the geoviewPlugins property stored in the window object
 window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins.customLegend = Cast<LegendPanelPlugin>(LegendPanelPlugin);
+window.geoviewPlugins['custom-legend'] = Cast<LegendPanelPlugin>(LegendPanelPlugin);

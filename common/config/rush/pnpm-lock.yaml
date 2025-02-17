@@ -437,7 +437,7 @@ importers:
         specifier: ^3.0.8
         version: 3.0.8(webpack@5.98.0)
 
-  ../../packages/geoview-custom-legend-panel:
+  ../../packages/geoview-custom-legend:
     dependencies:
       '@emotion/react':
         specifier: ^11.13.3

@@ -1,11 +1,11 @@
 {
-  "name": "geoview-custom-legend-panel",
+  "name": "geoview-custom-legend",
   "version": "1.0.0",
   "description": "A custom legend panel for the geoview project",
   "main": "src/index.tsx",
   "keywords": [
     "react",
-    "custom-legend-panel"
+    "custom-legend"
   ],
   "author": "Ahmed-yacin Farah ",
   "license": "MIT",
@@ -28,4 +28,5 @@
   "resolutions": {
     "@types/react": "^18.2.0"
   }
+
 }

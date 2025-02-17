@@ -20,6 +20,10 @@
   },
   "projects": [
     {
+      "packageName": "geoview-custom-legend",
+      "projectFolder": "packages/geoview-custom-legend"
+    },
+    {
       "packageName": "geoview-aoi-panel",
       "projectFolder": "packages/geoview-aoi-panel"
     },
@@ -42,10 +46,6 @@
     {
       "packageName": "eslint-and-prettier-config",
       "projectFolder": "packages"
-    },
-    {
-      "packageName": "geoview-custom-legend-panel",
-      "projectFolder": "packages/geoview-custom-legend-panel"
     }
   ]
 }
