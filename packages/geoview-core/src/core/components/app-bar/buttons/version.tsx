@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Typography, Box, Link, Theme, SvgIcon, ClickAwayListener, Paper } from '@mui/material';
+import { Typography, Box, Link, Theme, SvgIcon, ClickAwayListener, Paper, useTheme } from '@mui/material';
 
 import { GITHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
 import { GeoCaIcon, IconButton, Popper, CloseIcon } from '@/ui';
@@ -8,9 +8,11 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GitHubIcon } from '@/ui/icons';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { FocusTrapContainer } from '../../common';
+import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
+import { logger } from '@/core/utils/logger';
+import { SxStyles } from '@/ui/style/types';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -29,62 +31,67 @@ export type TypeAppVersion = {
   timestamp: string;
 };
 
-export default function Version(): JSX.Element {
-  const { t } = useTranslation<string>();
+const getSxClasses = (theme: Theme): SxStyles => ({
+  versionInfoPanel: {
+    width: '200px',
+    backgroundColor: theme.palette.geoViewColor.bgColor.light[200],
+    borderRadius: '5px',
+    boxShadow: 2,
+    marginLeft: '15px',
+    '& a': {
+      color: theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.geoViewColor.primary.light[300],
+      textDecoration: 'underLine',
+    },
+  },
+  versionHeading: {
+    display: 'flex',
+    alignItems: 'center',
+    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}}`,
+  },
+  versionsInfoTitle: {
+    fontSize: theme.palette.geoViewFontSize.default,
+    fontWeight: '700',
+    padding: '20px',
+    color: theme.palette.geoViewColor.textColor.main,
+    marginBottom: '10px',
+  },
+  versionInfoContent: {
+    padding: '20px',
+    gap: '5px',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+});
 
-  const mapId = useGeoViewMapId();
+export default function Version(): JSX.Element {
+  // Hooks
+  const { t } = useTranslation<string>();
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  // Store
   const interaction = useMapInteraction();
   const activeTrapGeoView = useUIActiveTrapGeoView();
 
+  // Get container
+  const mapId = useGeoViewMapId();
   const mapElem = document.getElementById(`shell-${mapId}`);
 
+  // State
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+  // Handlers
+  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    logger.logTraceUseCallback('VERSION - open');
     setAnchorEl(event.currentTarget);
-    setOpen(!open);
-  };
+    setOpen((prev) => !prev);
+  }, []);
 
-  const handleClickAway = (): void => {
-    if (open) {
-      setOpen(false);
-      setAnchorEl(null);
-    }
-  };
-
-  const sxClasses = {
-    versionInfoPanel: {
-      width: '200px',
-      backgroundColor: (theme: Theme) => theme.palette.geoViewColor.bgColor.light[200],
-      borderRadius: '5px',
-      boxShadow: 2,
-      marginLeft: '15px',
-      '& a': {
-        color: (theme: Theme) =>
-          theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.geoViewColor.primary.light[300],
-        textDecoration: 'underLine',
-      },
-    },
-    versionHeading: {
-      display: 'flex',
-      alignItems: 'center',
-      borderBottom: (theme: Theme) => `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}}`,
-    },
-    versionsInfoTitle: {
-      fontSize: (theme: Theme) => theme.palette.geoViewFontSize.default,
-      fontWeight: '700',
-      padding: '20px',
-      color: (theme: Theme) => theme.palette.geoViewColor.textColor.main,
-      marginBottom: '10px',
-    },
-    versionInfoContent: {
-      padding: '20px',
-      gap: '5px',
-      display: 'flex',
-      flexDirection: 'column',
-    },
-  };
+  const handleClickAway = useCallback(() => {
+    logger.logTraceUseCallback('VERSION - close');
+    if (open) setOpen(false);
+  }, [open]);
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
@@ -93,7 +100,7 @@ export default function Version(): JSX.Element {
           id="version-button"
           tooltip="appbar.version"
           tooltipPlacement="bottom-end"
-          onClick={handleClick}
+          onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
           aria-label="appbar.version"
         >
@@ -108,8 +115,18 @@ export default function Version(): JSX.Element {
           placement="right-end"
           onClose={handleClickAway}
           container={mapElem}
+          modifiers={[
+            {
+              name: 'eventListeners',
+              options: { scroll: false, resize: true },
+            },
+          ]}
+          sx={{
+            position: 'fixed',
+            pointerEvents: 'auto',
+            zIndex: theme.zIndex.modal + 100,
+          }}
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
-          disablePortal
         >
           <FocusTrapContainer id={`${mapId}-version`} open={open && activeTrapGeoView}>
             <Paper sx={sxClasses.versionInfoPanel}>

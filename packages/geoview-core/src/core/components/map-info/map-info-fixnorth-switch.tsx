@@ -5,7 +5,6 @@ import { useMediaQuery } from '@mui/material';
 
 import { Switch, Box } from '@/ui';
 import { Projection } from '@/geo/utils/projection';
-import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   useMapFixNorth,
   useMapNorthArrow,
@@ -13,6 +12,10 @@ import {
   useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+
+interface MapInfoFixNorthSwitchProps {
+  expanded: boolean;
+}
 
 // Constants outside component to prevent recreating every render
 const BOX_STYLES = {
@@ -44,7 +47,7 @@ const NorthSwitch = memo(function NorthSwitch({
  * @returns {JSX.Element} the fix north switch
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
-export const MapInfoFixNorthSwitch = memo(function MapInfoFixNorthSwitch(): JSX.Element {
+export const MapInfoFixNorthSwitch = memo(function MapInfoFixNorthSwitch({ expanded }: MapInfoFixNorthSwitchProps): JSX.Element {
   logger.logTraceRender('components/map-info/map-info-fixnorth-switch');
 
   // Hooks
@@ -53,7 +56,6 @@ export const MapInfoFixNorthSwitch = memo(function MapInfoFixNorthSwitch(): JSX.
   const deviceSizeMedUp = useMediaQuery(theme.breakpoints.down('md'));
 
   // Store
-  const expanded = useUIMapInfoExpanded();
   const isNorthEnable = useMapNorthArrow();
   const isFixNorth = useMapFixNorth();
   const mapProjection = useMapProjection();

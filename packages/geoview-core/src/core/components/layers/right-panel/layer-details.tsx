@@ -123,17 +123,18 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   };
 
   function renderItemCheckbox(item: TypeLegendItem): JSX.Element | null {
-    // no checkbox for simple style layers
-    if (
-      layerDetails.styleConfig?.LineString?.type === 'simple' ||
-      layerDetails.styleConfig?.MultiLineString?.type === 'simple' ||
-      layerDetails.styleConfig?.Point?.type === 'simple' ||
-      layerDetails.styleConfig?.MultiPoint?.type === 'simple' ||
-      layerDetails.styleConfig?.Polygon?.type === 'simple' ||
-      layerDetails.styleConfig?.MultiPolygon?.type === 'simple'
-    ) {
+    // First check if styleConfig exists
+    if (!layerDetails.styleConfig) {
       return null;
     }
+
+    // No checkbox for simple style layers
+    if (layerDetails.styleConfig[item.geometryType]?.type === 'simple') return null;
+
+    // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
+    // For these layers, we need to disable checkboxes
+    if (layerDetails.styleConfig[item.geometryType]?.fields[0] === undefined) return null;
+
     if (!layerDetails.canToggle) {
       return (
         <IconButton disabled tooltip="layers.visibilityIsAlways">
@@ -177,6 +178,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             key={`${item.name}/${layerDetails.items.indexOf(item)}`}
             alignItems="center"
             justifyItems="stretch"
+            sx={{ display: 'flex', flexWrap: 'nowrap' }}
           >
             <Grid size={{ xs: 'auto' }}>{renderItemCheckbox(item)}</Grid>
             <Grid size={{ xs: 'auto' }} sx={{ display: 'flex' }}>
@@ -353,20 +355,23 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           </Box>
           <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} variant="middle" />
           {layerDetails.layerAttribution &&
-            layerDetails.layerAttribution!.map((attribution) => {
-              return (
-                <Typography
-                  sx={{
-                    marginTop: '10px',
-                    color: theme.palette.geoViewColor.textColor.light[200],
-                    fontSize: theme.palette.geoViewFontSize.sm,
-                    textAlign: 'center',
-                  }}
-                  key={generateId()}
-                >
-                  {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
-                </Typography>
-              );
+            layerDetails.layerAttribution.map((attribution) => {
+              if (attribution) {
+                return (
+                  <Typography
+                    sx={{
+                      marginTop: '10px',
+                      color: theme.palette.geoViewColor.textColor.light[200],
+                      fontSize: theme.palette.geoViewFontSize.sm,
+                      textAlign: 'center',
+                    }}
+                    key={generateId()}
+                  >
+                    {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
+                  </Typography>
+                );
+              }
+              return null;
             })}
         </>
       )}

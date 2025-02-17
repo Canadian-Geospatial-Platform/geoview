@@ -219,7 +219,7 @@ export type TypeFeatureInfoEntry = {
   geoviewLayerType: TypeGeoviewLayerType;
   extent: Extent | undefined;
   geometry: TypeGeometry | Feature | null;
-  featureIcon: HTMLCanvasElement;
+  featureIcon: string;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
   nameField: string | null;
 };
@@ -403,7 +403,7 @@ export type GeoCoreLayerConfig = {
   // TO.DOCONT: I think it is working with other type of layer. Now having geocore not a layer type anymore, we should be able to overrides.
   // TO.DOCONT: For this we will need a little trick because when we create the config the setting are set at the root level and in our config it will take it from the layerID.
   // TO.DOCONT: There is refactor to do to make this work for all layer type. Global setting should be cascade to child of the root layer.
-  geoviewLayerName: string;
+  geoviewLayerName: string | undefined;
 
   /** Initial settings to apply to the GeoCore layer at creation time. */
   initialSettings?: TypeLayerInitialSettings;

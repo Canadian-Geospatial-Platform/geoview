@@ -5,13 +5,12 @@ import { useTheme } from '@mui/material/styles';
 import { Box, Tabs, TypeTabs } from '@/ui';
 import { Plugin } from '@/api/plugin/plugin';
 import { getSxClasses } from './footer-bar-style';
-import { ResizeFooterPanel } from '@/core/components/resize-footer-panel/resize-footer-panel';
+import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
 import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   useUIActiveFooterBarTabId,
   useUIFooterPanelResizeValue,
-  useUIFooterPanelResizeValues,
   useUIStoreActions,
   useUIActiveTrapGeoView,
   useUIFooterBarIsCollapsed,
@@ -38,6 +37,7 @@ import { isElementInViewport } from '@/core/utils/utilities';
 interface Tab {
   icon: ReactNode;
   content: ReactNode;
+  label?: string;
 }
 
 type FooterBarProps = {
@@ -53,28 +53,30 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   // Log
   logger.logTraceRender('components/footer-bar/footer-bar');
 
+  // Set props
   const { api: footerBarApi } = props;
 
-  const mapId = useGeoViewMapId();
-
+  // Hooks
+  const isMapFullScreen = useAppFullscreenActive();
+  const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(
+    () => getSxClasses(theme, isMapFullScreen, footerPanelResizeValue),
+    [theme, isMapFullScreen, footerPanelResizeValue]
+  );
 
+  // State & ref
   const tabsContainerRef = useRef<HTMLDivElement>();
 
-  // get store values and actions
-  const isMapFullScreen = useAppFullscreenActive();
+  // Store
+  const mapId = useGeoViewMapId();
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
-  const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const selectedTab = useUIActiveFooterBarTabId();
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const isCollapsed = useUIFooterBarIsCollapsed();
   const geoviewElement = useAppGeoviewHTMLElement();
   const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
-
-  const { setFooterPanelResizeValue, setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } =
-    useUIStoreActions();
+  const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } = useUIStoreActions();
 
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
@@ -115,43 +117,19 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabs', tabsList, memoTabs);
 
     const allTabs = { ...tabsList, ...memoTabs };
+
+    // TODO: Use the indexValue coming from the tab to order so custom tab can be place anywhere
     // inject guide tab at last position of tabs.
     return Object.keys({ ...tabsList, ...{ guide: {} } }).map((tab, index) => {
       return {
         id: `${tab}`,
         value: index,
-        label: `${camelCase(tab)}.title`,
+        label: allTabs[tab].label ? allTabs[tab].label : `${camelCase(tab)}.title`,
         icon: allTabs[tab]?.icon ?? '',
-        content: allTabs[tab]?.content ?? '',
+        content: <Box sx={sxClasses.tabContent}>{allTabs[tab]?.content ?? ''}</Box>,
       } as TypeTabs;
     });
-  }, [memoTabs, tabsList]);
-
-  /**
-   * Calculate resize values from popover values defined in store.
-   */
-  const memoTabHeight = useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('FOOTER-BAR - memoResizeValues', footerPanelResizeValue, footerPanelResizeValues);
-
-    return footerPanelResizeValues.reduce(
-      (acc, curr) => {
-        const windowHeight = window.screen.height;
-        let tabHeight = windowHeight - (windowHeight * footerPanelResizeValue) / 100;
-
-        if (curr === footerPanelResizeValues[0]) {
-          tabHeight = (windowHeight * footerPanelResizeValue) / 100;
-        }
-        if (curr === footerPanelResizeValues[footerPanelResizeValues.length - 1]) {
-          tabHeight = windowHeight;
-        }
-
-        acc[curr] = tabHeight;
-        return acc;
-      },
-      {} as Record<number, number>
-    );
-  }, [footerPanelResizeValue, footerPanelResizeValues]);
+  }, [memoTabs, tabsList, sxClasses]);
 
   /**
    * Add a tab
@@ -159,7 +137,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const handleAddTab = useCallback((sender: FooterBarApi, event: FooterTabCreatedEvent) => {
     // Log
     logger.logTraceUseCallback('FOOTER-BAR - handleAddTab', event);
-    const newTab = { [event.tab.id]: { icon: event.tab.icon, content: event.tab.content } } as Record<string, Tab>;
+    const newTab = { [event.tab.id]: { icon: event.tab.icon, label: event.tab.label, content: event.tab.content } } as Record<string, Tab>;
 
     // NOTE: we need prevState because of an async nature of adding plugins.
     setTabsList((prevState: Record<string, Tab>) => {
@@ -282,25 +260,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       footerBarApi.offFooterTabRemoved(handleRemoveTab);
     };
   }, [footerBarApi, handleAddTab, handleRemoveTab]);
-
-  /**
-   * Update footer panel height when switch to fullscreen
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('FOOTER-TABS - isMapFullScreen', isMapFullScreen, isCollapsed);
-
-    if (isMapFullScreen && tabsContainerRef.current && !isCollapsed) {
-      const tabHeight = memoTabHeight[footerPanelResizeValue];
-      tabsContainerRef.current.style.height = `${tabHeight}px`;
-    }
-
-    if (!isMapFullScreen && tabsContainerRef.current) {
-      tabsContainerRef.current.style.height = 'fit-content';
-      setFooterPanelResizeValue(footerPanelResizeValues[0]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMapFullScreen, footerPanelResizeValue, memoTabHeight, isCollapsed]);
 
   /**
    * Create default tabs from configuration parameters (similar logic as in app-bar).

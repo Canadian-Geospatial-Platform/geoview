@@ -88,7 +88,14 @@ export function commonValidateListOfLayerEntryConfig(
     const { layerPath } = layerConfig;
 
     if (layerEntryIsGroupLayer(layerConfig)) {
+      // Use the layer name from the metadata if it exists and there is no existing name.
+      if (!layerConfig.layerName)
+        layerConfig.layerName = layer.metadata!.layers[layerConfig.layerId]?.name
+          ? (layer.metadata!.layers[layerConfig.layerId].name as string)
+          : '';
+
       layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+
       if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
         layer.layerLoadError.push({
           layer: layerPath,
@@ -96,6 +103,7 @@ export function commonValidateListOfLayerEntryConfig(
         });
         layerConfig.layerStatus = 'error';
       }
+
       return;
     }
 
@@ -201,6 +209,7 @@ export function commonGetFieldType(
   if (!fieldDefinition) return 'string';
   const esriFieldType = fieldDefinition.type as string;
   if (esriFieldType === 'esriFieldTypeDate') return 'date';
+  if (esriFieldType === 'esriFieldTypeOID') return 'oid';
   if (
     ['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger', 'esriFieldTypeOID'].includes(
       esriFieldType
@@ -346,14 +355,17 @@ export function commonProcessInitialSettings(
     ] as Extent;
 
     // Transform to latlon extent
-    const latlonExtent = Projection.transformExtentFromObj(
-      layerExtent,
-      layerMetadata.extent.spatialReference,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
-    layerConfig.initialSettings!.bounds = latlonExtent;
+    if (layerExtent) {
+      const latlonExtent = Projection.transformExtentFromObj(
+        layerExtent,
+        layerMetadata.extent.spatialReference,
+        Projection.PROJECTION_NAMES.LNGLAT
+      );
+      layerConfig.initialSettings!.bounds = latlonExtent;
+    }
   }
-  layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds);
+
+  layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
 }
 
 /** ***************************************************************************************************************************

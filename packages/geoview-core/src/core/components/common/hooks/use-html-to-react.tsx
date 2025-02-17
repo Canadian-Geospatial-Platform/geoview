@@ -1,6 +1,7 @@
 import { CSSProperties, ReactNode } from 'react';
 import parse from 'html-react-parser';
 import { Box } from '@/ui/layout';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Interface used for custom html elements
@@ -19,7 +20,10 @@ interface HtmlToReactProps {
  * @param {HtmlToReactProps} props the properties to pass to the converted component
  * @returns {JSX.Element} returns the converted JSX component
  */
-export function HtmlToReact({ htmlContent, className, style, extraOptions, itemOptions = {} }: HtmlToReactProps): JSX.Element {
+export function UseHtmlToReact({ htmlContent, className, style, extraOptions, itemOptions = {} }: HtmlToReactProps): JSX.Element {
+  // Log
+  logger.logTraceRender('core/containers/use-html-to-react');
+
   // the html-react-parser can return 2 type in an array or not, make sure we have an array
   const parsed = parse(htmlContent) as string | Array<string | TrustedHTML>;
   const items = typeof parsed === 'string' || typeof parsed === 'object' ? [parsed] : parsed;

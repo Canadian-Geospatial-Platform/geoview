@@ -1,11 +1,11 @@
-import { useRef, useEffect, KeyboardEvent } from 'react';
+import { useRef, useEffect, KeyboardEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import { useTheme } from '@mui/material/styles';
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { IconButton, CloseIcon, Box, TypePanelProps } from '..';
 import { logger } from '@/core/utils/logger';
 
@@ -13,8 +13,6 @@ import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 import { getSxClasses } from './panel-style';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { FocusTrapContainer } from '@/core/components/common';
 
 /**
@@ -46,12 +44,9 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  const mapId = useGeoViewMapId();
-  const mapInfoExpanded = useUIMapInfoExpanded();
-
   // Get the theme
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   const mapSize = useMapSize();
 
@@ -64,6 +59,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const panelContainerStyles = {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
     width: open ? panelWidth : 0,
+    height: `calc(100%  - 3rem)`,
     maxWidth: panel?.width ?? 400,
     [theme.breakpoints.down('sm')]: {
       width: 'calc(100% - 64px)',
@@ -112,18 +108,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     }
   }, [mapSize, panelGroupName, open]);
 
-  /**
-   * Update the height of the panel when the mapInfo is expanded
-   */
-  useEffect(() => {
-    const mapInfo = document.getElementById(`${mapId}-mapInfo`);
-
-    if (panelContainerRef.current && open && mapInfo) {
-      const mapInfoHeight = mapInfoExpanded ? '6rem' : '3rem';
-      panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight})`;
-    }
-  }, [mapInfoExpanded, mapSize, open, mapId]);
-
   return (
     <Box sx={panelContainerStyles} ref={panelContainerRef}>
       <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap">
@@ -165,7 +149,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
           />
 
           <CardContent sx={{ ...sxClasses.panelContentContainer, ...(panelStyles ? panelStyles.panelCardContent : {}) }}>
-            {typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}
+            {typeof panel.content === 'string' ? <UseHtmlToReact htmlContent={panel.content} /> : panel.content}
           </CardContent>
         </Card>
       </FocusTrapContainer>

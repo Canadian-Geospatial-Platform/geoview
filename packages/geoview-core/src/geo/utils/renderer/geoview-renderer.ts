@@ -1580,6 +1580,23 @@ export async function getFeatureCanvas(
     if (style[geometryType]) {
       const styleSettings = style[geometryType]!;
       const { type } = styleSettings;
+
+      // TODO: Performance #2688 - Wrap the style processing in a Promise to prevent blocking, Use requestAnimationFrame to process style during next frame
+      // Wrap the style processing in a Promise to prevent blocking
+      // return new Promise((resolve) => {
+      //   // Use requestAnimationFrame to process style during next frame
+      //   requestAnimationFrame(() => {
+      //     const processedStyle = processStyle[type][geometryType].call(
+      //       '',
+      //       styleSettings,
+      //       feature as Feature,
+      //       filterEquation,
+      //       legendFilterIsOff
+      //     );
+      //     resolve(processedStyle);
+      //   });
+      // });
+
       const featureStyle = processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
       if (featureStyle) {
         if (geometryType === 'Point') {

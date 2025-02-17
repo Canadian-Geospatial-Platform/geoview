@@ -23,10 +23,10 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
  * @class FeatureHighlight
  */
 export class FeatureHighlight {
-  /** The vector source to use for the animation features */
+  /** The vector source to use for the highlight features */
   highlighSource: VectorSource = new VectorSource();
 
-  /** The hidden layer to display animations. */
+  /** The hidden layer to display highlight. */
   // GV It's public, to save an eslint warning, because even if it's not read in this class, it's actually important to instanciate per OpenLayer design.
   overlayLayer: VectorLayer;
 
@@ -154,8 +154,6 @@ export class FeatureHighlight {
       const featureUid = getUid(feature.geometry);
       this.#styleHighlightedFeature(newFeature, featureUid);
     } else if (geometry instanceof MultiPoint) {
-      const { height, width } = feature.featureIcon;
-      const radius = Math.min(height, width) / 2 - 2 < 7 ? 7 : Math.min(height, width) / 2 - 2;
       const coordinates: Coordinate[] = geometry.getCoordinates();
       const featureUid = getUid(feature.geometry);
 
@@ -166,7 +164,7 @@ export class FeatureHighlight {
         this.#styleHighlightedFeature(newFeature, id);
         const radStyle = new Style({
           image: new CircleStyle({
-            radius,
+            radius: 10,
             stroke: new Stroke({ color: this.#highlightColor, width: 1.25 }),
             fill: this.#highlightFill,
           }),
@@ -184,8 +182,6 @@ export class FeatureHighlight {
         this.#styleHighlightedFeature(newFeature, id);
       }
     } else if (feature.extent) {
-      const { height, width } = feature.featureIcon;
-      const radius = Math.min(height, width) / 2 - 2 < 7 ? 7 : Math.min(height, width) / 2 - 2;
       const center = getCenter(feature.extent);
       const newPoint = new Point(center);
       const newFeature = new Feature(newPoint);
@@ -193,7 +189,7 @@ export class FeatureHighlight {
       this.#styleHighlightedFeature(newFeature, featureUid);
       const radStyle = new Style({
         image: new CircleStyle({
-          radius,
+          radius: 10,
           stroke: new Stroke({ color: this.#highlightColor, width: 1.25 }),
           fill: this.#highlightFill,
         }),

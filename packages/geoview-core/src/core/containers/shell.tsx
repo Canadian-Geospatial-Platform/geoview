@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, Fragment, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -22,7 +22,6 @@ import {
   useUIActiveFocusItem,
   useUIActiveTrapGeoView,
   useUIFooterPanelResizeValue,
-  useUIFooterPanelResizeValues,
   useUIFooterBarIsCollapsed,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import ExportModal from '@/core/components/export/export-modal';
@@ -34,15 +33,11 @@ import { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/g
 
 import { FocusTrapDialog } from './focus-trap';
 import { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
+import { useMapResize } from './use-map-resize';
 
 type ShellProps = {
   mapViewer: MapViewer;
 };
-
-interface ShellContainerCssProperties {
-  mapVisibility: string;
-  mapHeight: number;
-}
 
 /**
  * Create a shell component to wrap the map and other components not inside the map
@@ -53,31 +48,27 @@ export function Shell(props: ShellProps): JSX.Element {
   // Log
   logger.logTraceRender('core/containers/shell');
 
+  // Get const props
   const { mapViewer } = props;
   const { mapId } = mapViewer;
 
+  // Hooks
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
-  const sxClasses = getShellSxClasses(theme);
+  const sxClasses = useMemo(() => getShellSxClasses(theme), [theme]);
 
-  const [origHeight, setOrigHeight] = useState<string>('0');
-
-  // render additional components if added by api
+  // State render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
   const [modalProps, setModalProps] = useState<TypeModalProps>();
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-  const mapShellContainerRef = useRef<HTMLElement | null>(null);
-  const mapContainerRef = useRef<HTMLElement | null>(null);
-
-  // snackbar state
+  // State snackbar
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarType, setSnackbarType] = useState<SnackbarType>('info');
   const [snackbarButton, setSnackbarButton] = useState<JSX.Element>();
 
-  // get values from the store
+  // Store
   const mapLoaded = useMapLoaded();
   const circularProgressActive = useAppCircularProgressActive();
   const activeTrapGeoView = useUIActiveTrapGeoView();
@@ -86,21 +77,33 @@ export function Shell(props: ShellProps): JSX.Element {
   const focusItem = useUIActiveFocusItem();
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const isFooterBarCollapsed = useUIFooterBarIsCollapsed();
   const geoviewElement = useAppGeoviewHTMLElement();
-  const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`);
+  const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`) as HTMLElement;
 
+  // Ref for container height
+  const { mapShellContainerRef } = useMapResize({
+    isMapFullScreen,
+    isFooterBarCollapsed,
+    footerPanelResizeValue,
+    mapLoaded,
+    isFooterBar: !!geoviewConfig?.footerBar,
+    geoviewElement,
+    footerTabContainer,
+  });
+
+  // #region Handlers
   /**
    * Handles when a component is being added to the map
    * @param {MapComponentPayload} payload The map component being added
    */
-  const handleMapAddComponent = (sender: MapViewer, event: MapComponentAddedEvent): void => {
+  const handleMapAddComponent = useCallback((sender: MapViewer, event: MapComponentAddedEvent): void => {
+    logger.logTraceUseCallback('SHELL - handleMapAddComponent');
     setComponents((tempComponents) => ({
       ...tempComponents,
       [event.mapComponentId]: event.component,
     }));
-  };
+  }, []);
 
   /**
    * Handles when a component is being removed from the map
@@ -108,6 +111,7 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleMapRemoveComponent = useCallback(
     (sender: MapViewer, event: MapComponentRemovedEvent) => {
+      logger.logTraceUseCallback('SHELL - handleMapRemoveComponent');
       const tempComponents: Record<string, JSX.Element> = { ...components };
       delete tempComponents[event.mapComponentId];
 
@@ -124,6 +128,7 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleModalOpen = useCallback(
     (sender: ModalApi, event: ModalEvent) => {
+      logger.logTraceUseCallback('SHELL - handleModalOpen', event.modalId);
       setModalProps(mapViewer.modal.modals[event.modalId]);
       setModalOpen(true);
     },
@@ -134,15 +139,18 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles when the modal needs to close (only 1 at a time is allowed)
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleModalClose = (sender: ModalApi, event: ModalEvent): void => {
+  const handleModalClose = useCallback((sender: ModalApi, event: ModalEvent): void => {
+    logger.logTraceUseCallback('SHELL - handleModalClose', event.modalId);
     setModalOpen(false);
-  };
+  }, []);
 
   /**
    * Handles when a SnackBar needs to open
    * @param {SnackBarOpenEvent} payload The snackbar information to open
    */
-  const handleSnackBarOpen = (sender: Notifications, payload: SnackBarOpenEvent): void => {
+  const handleSnackBarOpen = useCallback((sender: Notifications, payload: SnackBarOpenEvent): void => {
+    logger.logTraceUseCallback('SHELL - handleSnackBarOpen', payload);
+
     // create button
     const myButton = payload.button?.label ? (
       <Button type="icon" onClick={payload.button.action}>
@@ -157,7 +165,7 @@ export function Shell(props: ShellProps): JSX.Element {
 
     // show the snackbar
     setSnackbarOpen(true);
-  };
+  }, []);
 
   /**
    * Handles when a SnackBar needs to close
@@ -172,111 +180,9 @@ export function Shell(props: ShellProps): JSX.Element {
     setSnackbarOpen(false);
   }, []);
 
-  /**
-   * Calculate resize values for map based on popover values defined in store.
-   */
-  const memoMapResizeValues = useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('SHELL - memoMapResizeValues', footerPanelResizeValue, footerPanelResizeValues);
+  // #endregion Handlers
 
-    return footerPanelResizeValues.reduce(
-      (acc, curr) => {
-        const windowHeight = window.screen.height;
-        let values: [string, number] = ['visible', windowHeight - (windowHeight * footerPanelResizeValue) / 100];
-        if (curr === footerPanelResizeValues[footerPanelResizeValues.length - 1]) {
-          values = ['hidden', 0];
-        }
-
-        acc[curr] = {
-          mapVisibility: values[0],
-          mapHeight: values[1],
-        };
-        return acc;
-      },
-      {} as Record<number, ShellContainerCssProperties>
-    );
-  }, [footerPanelResizeValue, footerPanelResizeValues]);
-
-  /**
-   * Set the map height based on mapDiv
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('SHELL - setOrigHeight geoviewElement', geoviewElement);
-
-    if (mapContainerRef.current && mapShellContainerRef.current) {
-      // NOTE: grab height from data attribute of parent div, if not present then grab client height
-      const height = geoviewElement!.dataset?.height ?? `${geoviewElement!.clientHeight}px`;
-      setOrigHeight(height);
-    }
-  }, [geoviewElement]);
-
-  /**
-   * Update map height when switch on/off the fullscreen
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('SHELL - footerPanelResizeValue.isMapFullScreen.memoMapResizeValues', footerPanelResizeValue, isMapFullScreen);
-
-    if (mapLoaded && isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current && !isFooterBarCollapsed) {
-      const { mapVisibility, mapHeight } = memoMapResizeValues[footerPanelResizeValue];
-      mapContainerRef.current.style.visibility = mapVisibility;
-      mapContainerRef.current.style.minHeight = `${mapHeight}px`;
-      mapShellContainerRef.current.style.visibility = mapVisibility;
-      mapShellContainerRef.current.style.minHeight = `${mapHeight}px`;
-
-      mapContainerRef.current.style.height = `${mapHeight}px`;
-      mapShellContainerRef.current.style.height = `${mapHeight}px`;
-    }
-
-    // Reset the map references with default heights.
-    if (mapLoaded && !isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current) {
-      mapContainerRef.current.style.visibility = 'visible';
-      mapContainerRef.current.style.minHeight = origHeight;
-      mapContainerRef.current.style.height = origHeight;
-
-      mapShellContainerRef.current.style.visibility = 'visible';
-      mapShellContainerRef.current.style.minHeight = origHeight;
-      mapShellContainerRef.current.style.height = origHeight;
-      mapShellContainerRef.current.style.zIndex = '0';
-
-      // Update mapDiv height to accomodate the footbar
-      if (geoviewConfig!.footerBar) {
-        geoviewElement.style.height = 'fit-content';
-        geoviewElement.style.transition = 'height 0.2s ease-out 0.2s';
-      }
-    }
-  }, [
-    footerPanelResizeValue,
-    isMapFullScreen,
-    memoMapResizeValues,
-    origHeight,
-    mapLoaded,
-    isFooterBarCollapsed,
-    geoviewElement,
-    geoviewConfig,
-  ]);
-
-  /**
-   * Update the map after footer panel is collapsed.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('SHELL - isFooterBarCollapsed.isMapFullScreen', isFooterBarCollapsed, isMapFullScreen);
-
-    if (isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current) {
-      const tabHeight = footerTabContainer?.clientHeight ?? 0;
-
-      mapShellContainerRef.current.style.visibility = 'visible';
-      mapShellContainerRef.current.style.zIndex = '-1';
-      mapContainerRef.current.style.visibility = 'visible';
-      mapContainerRef.current.style.minHeight = `${window.screen.height - tabHeight}px`;
-      mapContainerRef.current.style.height = `${window.screen.height - tabHeight}px`;
-      mapShellContainerRef.current.style.minHeight = `${window.screen.height - tabHeight}px`;
-      mapShellContainerRef.current.style.height = `${window.screen.height - tabHeight}px`;
-    }
-  }, [isFooterBarCollapsed, isMapFullScreen, mapId, footerTabContainer]);
-
+  // Mount component
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('SHELL - mount');
@@ -303,7 +209,7 @@ export function Shell(props: ShellProps): JSX.Element {
       mapViewer.modal.offModalOpened(handleModalOpen);
       mapViewer.notifications.offSnackbarOpen(handleSnackBarOpen);
     };
-  }, [mapViewer, handleMapRemoveComponent, handleModalOpen]);
+  }, [mapViewer, handleMapRemoveComponent, handleModalOpen, handleSnackBarOpen, handleModalClose, handleMapAddComponent]);
 
   return (
     <Box sx={sxClasses.all}>
@@ -316,9 +222,9 @@ export function Shell(props: ShellProps): JSX.Element {
           <CircularProgress isLoaded={!circularProgressActive} />
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             {mapLoaded && <AppBar api={mapViewer.appBarApi} />}
-            <Box sx={sxClasses.mapContainer} ref={mapContainerRef}>
+            <MapInfo />
+            <Box sx={sxClasses.mapContainer}>
               <Map viewer={mapViewer} />
-              <MapInfo />
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
             <Snackbar

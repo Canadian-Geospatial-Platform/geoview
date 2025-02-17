@@ -19,6 +19,7 @@ import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
+import { WMS_PROXY_URL } from '@/app';
 
 /**
  * Manages a WMS layer.
@@ -353,17 +354,45 @@ export class GVWMS extends AbstractGVRaster {
 
       if (queryUrl) {
         queryUrl = queryUrl.toLowerCase().startsWith('http:') ? `https${queryUrl.slice(4)}` : queryUrl;
+
         axios
           .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })
           .then((response) => {
+            // Text response means something went wrong
             if (response.data.type === 'text/xml') {
               resolve(null);
             }
+
+            // Expected response, return it as image
             resolve(readImage(Cast<Blob>(response.data)));
           })
-          .catch(() => resolve(null));
+          .catch((error) => {
+            /** For some layers the layer loads fine through the proxy, but fetching the legend fails
+             * We try the fetch first without the proxy and if we get a network error, try again with the proxy.
+             */
+            if (error.code === 'ERR_NETWORK') {
+              // Try appending link with proxy url to avoid CORS issues
+              queryUrl = `${WMS_PROXY_URL}${queryUrl}`;
+
+              axios
+                .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })
+                .then((response) => {
+                  // Text response means something went wrong
+                  if (response.data.type === 'text/xml') {
+                    resolve(null);
+                  }
+
+                  // Expected response, return it as image
+                  resolve(readImage(Cast<Blob>(response.data)));
+                })
+                .catch(() => resolve(null));
+              // Not a CORS issue, return null
+            } else resolve(null);
+          });
+        // No URL to query
       } else resolve(null);
     });
+
     return promisedImage;
   }
 
@@ -432,7 +461,7 @@ export class GVWMS extends AbstractGVRaster {
       geoviewLayerType: CONST_LAYER_TYPES.WMS,
       extent: [clickCoordinate[0], clickCoordinate[1], clickCoordinate[0], clickCoordinate[1]],
       geometry: null,
-      featureIcon: document.createElement('canvas'),
+      featureIcon: document.createElement('canvas').toDataURL(),
       fieldInfo: {},
       nameField: null,
     };

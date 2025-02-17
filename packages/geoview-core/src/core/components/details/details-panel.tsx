@@ -22,6 +22,7 @@ import { DetailsSkeleton } from './details-skeleton';
 interface DetailsPanelType {
   fullWidth?: boolean;
 }
+
 /**
  * layers list
  *
@@ -34,7 +35,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
   const mapId = useGeoViewMapId();
@@ -133,7 +134,15 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
             layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath ?? ''}`,
           }) as LayerListEntry
       );
-    return layerListEntries;
+
+    // Split the layers list into two groups while preserving order
+    const layersWithFeatures = layerListEntries.filter((layer) => layer.numOffeatures && layer.numOffeatures > 0);
+    const layersWithoutFeatures = layerListEntries.filter((layer) => layer.numOffeatures === 0);
+
+    // Combine the lists (features first, then no features)
+    const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
+
+    return orderedLayerListEntries;
   }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel, mapId]);
 
   /**
@@ -287,7 +296,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
         // Log
         logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
         // None found, select none
-        //  TODO: Investigate infinte loop in AppBar for statement.
+        //  TODO: Investigate infinite loop in AppBar for statement.
         // setSelectedLayerPath('');
       }
     }
@@ -346,7 +355,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   // #endregion
 
   // #region PROCESSING ***********************************************************************************************
-
   /**
    * Resets the currently selected feature index to 0 and keeps in reference the previously selected layer and
    * the previously selected feature index so that in the useEffect, later, the component can udpate

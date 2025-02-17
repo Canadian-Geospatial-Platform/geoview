@@ -34,6 +34,7 @@ export abstract class Projection {
     102184: 'EPSG:102184', // TODO: Minor - The official name of this projection is ESRI:102184 (not EPSG:102184). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     102190: 'EPSG:102190', // TODO: Minor - The official name of this projection is ESRI:102190 (not EPSG:102190). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     WM: 'EPSG:3857',
+    3857: 'EPSG:3857',
     4269: 'EPSG:4269',
     LNGLAT: 'EPSG:4326',
     CRS84: 'CRS:84', // Supporting CRS:84 which is equivalent to 4326 except it's long-lat, whereas the 4326 standard is lat-long.
@@ -150,6 +151,10 @@ export abstract class Projection {
    * @returns The new extent transformed in the destination projection.
    */
   static transformExtentFromProj(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent {
+    // This is included for certain outliers.
+    // TODO Refactor: invalid extents should be handled before this point, test and remove - 5a65ad7c-561a-466a-8375-8d876624df9d
+    if (typeof extent[0] !== 'number')
+      return olTransformExtent([-180, 90, 180, 90], Projection.PROJECTION_NAMES.LNGLAT, destination, stops);
     // Project
     return olTransformExtent(extent, source, destination, stops);
   }
