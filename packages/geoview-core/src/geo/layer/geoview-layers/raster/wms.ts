@@ -101,6 +101,7 @@ export class WMS extends AbstractGeoViewRaster {
     const metadataUrl = this.metadataAccessPath;
 
     // If the metadata url ends with .xml
+    // GV Not checking if 'includes' .xml, because an url like 'my_url/metadata.xml?request=GetCapabilities' shouldn't exist.
     if (metadataUrl.toLowerCase().endsWith('.xml')) {
       // XML metadata is a special case that does not use GetCapabilities to get the metadata
       await this.#fetchXmlServiceMetadata(metadataUrl, (proxyUsed: string) => {
