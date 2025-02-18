@@ -1,7 +1,7 @@
 import { AnySchemaObject } from 'ajv';
 import React from 'react';
 import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
-import { API } from '../api';
+import { API } from '@/api';
 
 /** ******************************************************************************************************************************
  * interface used when creating the actual plugin.

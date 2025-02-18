@@ -10,7 +10,6 @@ import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from '@/core
 import { Typography } from '@/ui/typography/typography';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { TypeLegendLayer } from './types';
 
 interface TypeLayersPanel {
   containerType?: TypeContainerBox;
@@ -30,12 +29,19 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
-  const showLayerDetailsPanel = (layer: TypeLegendLayer): void => {
-    responsiveLayoutRef.current?.setIsRightPanelVisible(true);
-    responsiveLayoutRef.current?.setRightPanelFocus();
-    // set the focus item when layer item clicked.
-    setSelectedFooterLayerListItemId(`${layer.layerId}`);
-  };
+  const showLayerDetailsPanel = useCallback(
+    (layerId: string): void => {
+      // Log
+      logger.logTraceUseCallback('LAYERS-PANEL - showLayerDetailsPanel');
+
+      // Set the visibility and focus
+      responsiveLayoutRef.current?.setIsRightPanelVisible(true);
+      responsiveLayoutRef.current?.setRightPanelFocus();
+      // set the focus item when layer item clicked.
+      setSelectedFooterLayerListItemId(`${layerId}`);
+    },
+    [setSelectedFooterLayerListItemId]
+  );
 
   const leftPanel = (): JSX.Element => {
     return (

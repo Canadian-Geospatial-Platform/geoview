@@ -14,10 +14,10 @@ import {
   rangeDomainType,
   TypeLayerStyleSettings,
 } from '@/geo/map/map-schema-types';
-import { esriGetFieldType, esriGetFieldDomain } from '../utils';
+import { esriGetFieldType, esriGetFieldDomain } from '@/geo/layer/gv-layers/utils';
 import { validateExtent } from '@/geo/utils/utilities';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { AbstractGVRaster } from './abstract-gv-raster';
+import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 

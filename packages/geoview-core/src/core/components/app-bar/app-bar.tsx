@@ -431,8 +431,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     button={buttonPanel.button}
                     onPanelOpened={buttonPanel.onPanelOpened}
                     onPanelClosed={hideClickMarker}
-                    handleKeyDown={(e: KeyboardEvent) =>
-                      handleEscapeKey(e.key, tabId, isFocusTrapped, () => {
+                    handleKeyDown={(event: KeyboardEvent) =>
+                      handleEscapeKey(event.key, tabId, isFocusTrapped, () => {
                         handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '');
                       })
                     }

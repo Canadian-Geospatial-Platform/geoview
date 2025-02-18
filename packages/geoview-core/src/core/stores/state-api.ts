@@ -6,8 +6,8 @@ import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor
 import { GeoChartStoreByLayerPath, TypeGeochartResultSetEntry } from './store-interface-and-intial-values/geochart-state';
 import { TypeOrderedLayerInfo } from './store-interface-and-intial-values/map-state';
 import { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
-import { TypeLegendLayer } from '../components/layers/types';
-import { logger } from '../utils/logger';
+import { TypeLegendLayer } from '@/core/components/layers/types';
+import { logger } from '@/core/utils/logger';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 
 /**
@@ -114,7 +114,7 @@ export class StateApi {
     let startingIndex = -1;
     for (let i = 0; i < orderedLayers.length; i++) if (orderedLayers[i].layerPath === layerPath) startingIndex = i;
     const layerInfo = orderedLayers[startingIndex];
-    const movedLayers = MapEventProcessor.getMapLayerAndChildrenOrderedInfo(mapId, layerPath, orderedLayers);
+    const movedLayers = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(mapId, layerPath, orderedLayers);
     orderedLayers.splice(startingIndex, movedLayers.length);
     let nextIndex = startingIndex;
     const pathLength = layerInfo.layerPath.split('/').length;
@@ -128,6 +128,10 @@ export class StateApi {
 
     // Redirect
     MapEventProcessor.setMapOrderedLayerInfo(mapId, orderedLayers);
+
+    // Reorder the legend layers, because the order layer info has changed
+    LegendEventProcessor.reorderLegendLayers(mapId);
+
     // Emit event
     this.#emitLayersReordered({ orderedLayers });
   }

@@ -13,13 +13,13 @@ import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-
 import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
-import { LayerApi } from '@/geo/layer/layer';
-import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GVEsriDynamic } from '../gv-layers/raster/gv-esri-dynamic';
-import { AbstractGVVector } from '../gv-layers/vector/abstract-gv-vector';
-import { GVWMS } from '../gv-layers/raster/gv-wms';
-import { AbstractBaseLayer, LayerNameChangedEvent } from '../gv-layers/abstract-base-layer';
+import { LayerApi } from '@/geo/layer/layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { AbstractBaseLayer, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { logger } from '@/core/utils/logger';
 
 /**

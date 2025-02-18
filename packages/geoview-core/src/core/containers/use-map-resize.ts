@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { logger } from '../utils/logger';
+import { logger } from '@/core/utils/logger';
 
 // #region USE MAP RESIZE
 interface UseMapResizeProps {

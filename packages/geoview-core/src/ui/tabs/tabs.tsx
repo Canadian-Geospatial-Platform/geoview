@@ -67,6 +67,7 @@ export interface TypeTabsProps {
 }
 
 // Define scroll button component outside of Tabs
+// TODO: Unmemoize this component, probably, because it's in 'ui' folder
 const CustomScrollButton = memo(function CustomScrollButton({ direction, ...props }: TabScrollButtonProps) {
   return (
     <TabScrollButton
@@ -224,9 +225,9 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   useEffect(() => {
     const tabPanel = tabPanelRef?.current;
-    const handleFooterbarEscapeKey = (e: KeyboardEvent): void => {
+    const handleFooterbarEscapeKey = (event: KeyboardEvent): void => {
       if (!isCollapsed) {
-        handleEscapeKey(e.key, tabs[selectedTab ?? 0]?.id, true, () => {
+        handleEscapeKey(event.key, tabs[selectedTab ?? 0]?.id, true, () => {
           onCloseKeyboard?.();
         });
       }

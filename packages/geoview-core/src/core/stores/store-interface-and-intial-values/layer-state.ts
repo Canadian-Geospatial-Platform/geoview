@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 // this esLint is used in many places for findLayerByPath function. It is why we keep it global...
+import { useMemo } from 'react';
 import { useStore } from 'zustand';
 
 import { FitOptions } from 'ol/View';
@@ -23,6 +24,8 @@ import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { TypeLayerControls } from '@/api/config/types/map-schema-types';
+import { logger } from '@/core/utils/logger';
 
 // #region INTERFACES & TYPES
 
@@ -44,7 +47,6 @@ export interface ILayerState {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
     getLayerDeleteInProgress: () => boolean;
-    getLayerStatus: (layerPath: string) => TypeLayerStatus;
     refreshLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -163,20 +165,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * Get the LayerDeleteInProgress state.
        */
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
-
-      /**
-       * Gets the layer status in the store which correspond to the layer path
-       * @param {string} layerPath - The layer path of the bounds to get
-       * @returns {TypeLayerStatus | undefined} The status or undefined
-       */
-      getLayerStatus: (layerPath: string): TypeLayerStatus | undefined => {
-        const curLayers = get().layerState.legendLayers;
-
-        // If the layer is not found, it is because it is deleted, return error status
-        return LegendEventProcessor.findLayerByPath(curLayers, layerPath) !== undefined
-          ? LegendEventProcessor.findLayerByPath(curLayers, layerPath)!.layerStatus
-          : 'error';
-      },
 
       /**
        * Refresh layer and set states to original values.
@@ -344,17 +332,20 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * Sets the selected layer path.
        * @param {string} layerPath - The layer path to set as selected.
        */
-      setSelectedLayerPath: (layerPath: string): void => {
+      setSelectedLayerPath: (layerPath: string | null): void => {
+        let theLayerPath: string | null = layerPath;
+        if (layerPath && layerPath.length === 0) theLayerPath = null;
         const curLayers = get().layerState.legendLayers;
-        const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath);
+        const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath || '');
         set({
           layerState: {
             ...get().layerState,
-            selectedLayerPath: layerPath,
+            selectedLayerPath: theLayerPath,
             selectedLayer: layer as TypeLegendLayer,
           },
         });
       },
+
       setSelectedLayerSortingArrowId: (arrowId: string) => {
         set({
           layerState: {
@@ -420,4 +411,57 @@ export const useIconLayerSet = (layerPath: string): string[] => {
     return layer.icons.map((item) => item.iconImage).filter((d) => d !== null) as string[];
   }
   return [];
+};
+
+export const useSelectorLayerName = (layerPath: string): string | undefined => {
+  // Hook
+  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+  // Redirect
+  return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.layerName;
+};
+
+export const useSelectorLayerStatus = (layerPath: string): TypeLayerStatus | undefined => {
+  // Hook
+  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+  // Redirect
+  return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.layerStatus;
+};
+
+export const useSelectorLayerLegendQueryStatus = (layerPath: string): string | undefined => {
+  // Hook
+  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+  // Redirect
+  return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.legendQueryStatus;
+};
+
+export const useSelectorLayerControls = (layerPath: string): TypeLayerControls | undefined => {
+  // Hook
+  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+  // Redirect
+  return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.controls;
+};
+
+export const useSelectorLayerChildren = (layerPath: string): TypeLegendLayer[] | undefined => {
+  // Hook
+  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+
+  // Find the children
+  const children = LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.children;
+
+  // Compute a dependency string based on the children layerPath values
+  const childrenKey = (children || []).map((child) => child.layerPath).join('|||');
+
+  // Only re-create the array if the childrenKey changes
+  return useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('LAYER-STATE - useSelectorLayerChildren', childrenKey); // Purposely use the 'childrenKey' variable to fix the linter warning in the dependency array of the useMemo
+    return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.children;
+  }, [legendLayers, layerPath, childrenKey]);
+};
+
+export const useSelectorLayerItems = (layerPath: string): TypeLegendItem[] | undefined => {
+  // Hook
+  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+  // Redirect
+  return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.items;
 };

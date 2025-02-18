@@ -1,10 +1,10 @@
 import React, { createElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMapBasemapOptions, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { MapIcon } from '@/ui';
 import { logger } from '@/core/utils/logger';
+import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { TypeBasemapOptions } from '@/api/config/types/map-schema-types';
-import NavbarPanelButton from '../nav-bar-panel-button';
+import { MapIcon } from '@/ui';
 import { TypePanelProps } from '@/ui/panel/panel-types';
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 import { List, ListItem } from '@/ui/list';

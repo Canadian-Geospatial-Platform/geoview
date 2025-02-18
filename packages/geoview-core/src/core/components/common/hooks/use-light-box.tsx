@@ -23,6 +23,7 @@ interface UseLightBoxReturnType {
 }
 
 // Memoized base component with props
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
   isLightBoxOpen,
   slides,

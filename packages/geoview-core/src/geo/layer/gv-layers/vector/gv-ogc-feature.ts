@@ -1,5 +1,5 @@
 import VectorSource from 'ol/source/Vector';
-import { AbstractGVVector } from './abstract-gv-vector';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 

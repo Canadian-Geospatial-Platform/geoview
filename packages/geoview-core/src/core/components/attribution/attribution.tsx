@@ -58,7 +58,7 @@ export const Attribution = memo(function Attribution(): JSX.Element {
   };
 
   // Memoize values
-  const attributionContent = useMemo(
+  const memoAttributionContent = useMemo(
     () => mapAttribution.map((attribution) => <Typography key={attribution}>{attribution}</Typography>),
     [mapAttribution]
   );
@@ -96,7 +96,7 @@ export const Attribution = memo(function Attribution(): JSX.Element {
         }}
         onClose={handleClosePopover}
       >
-        <Box sx={BOX_STYLES}>{attributionContent}</Box>
+        <Box sx={BOX_STYLES}>{memoAttributionContent}</Box>
       </Popover>
     </>
   );

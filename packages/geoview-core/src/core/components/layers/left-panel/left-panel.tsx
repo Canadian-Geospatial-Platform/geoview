@@ -1,18 +1,13 @@
-import { useEffect, useState } from 'react';
-import {
-  useLayerDisplayState,
-  useLayerLegendLayers,
-  useLayerStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useMapOrderedLayerInfo, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useEffect } from 'react';
+import { useLayerDisplayState, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
+import { useDebounceLayerLegendLayers } from '@/core/components/legend/hooks/use-legend-debounce';
 import { LayersList } from './layers-list';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
 import { logger } from '@/core/utils/logger';
-import { TypeLegendLayer } from '@/core/components/layers/types';
 
 interface LeftPanelProps {
-  showLayerDetailsPanel: (layer: TypeLegendLayer) => void;
+  showLayerDetailsPanel: (layerId: string) => void;
   isLayoutEnlarged: boolean;
 }
 
@@ -21,21 +16,11 @@ export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanel
   logger.logTraceRender('components/layers/left-panel/left-panel');
 
   // get from the store
-  const legendLayers = useLayerLegendLayers();
+  const legendLayers = useDebounceLayerLegendLayers();
   const displayState = useLayerDisplayState();
-  const orderedLayerInfo = useMapOrderedLayerInfo();
   const mapConfig = useGeoViewConfig();
 
-  const { getIndexFromOrderedLayerInfo } = useMapStoreActions();
   const { setDisplayState } = useLayerStoreActions();
-  const [orderedLegendLayers, setOrderedLegendLayers] = useState<TypeLegendLayer[]>([]);
-
-  useEffect(() => {
-    const sortedLayers = legendLayers.sort((a, b) =>
-      getIndexFromOrderedLayerInfo(a.layerPath) > getIndexFromOrderedLayerInfo(b.layerPath) ? 1 : -1
-    );
-    setOrderedLegendLayers(sortedLayers);
-  }, [orderedLayerInfo, legendLayers, getIndexFromOrderedLayerInfo]);
 
   useEffect(() => {
     /**
@@ -46,18 +31,13 @@ export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanel
     if (displayState !== 'add' && !legendLayers.length && mapConfig?.footerBar?.tabs.core.includes('legend')) {
       setDisplayState('add');
     }
-  }, [displayState, legendLayers, setDisplayState, mapConfig]);
+  }, [displayState, legendLayers.length, mapConfig?.footerBar?.tabs.core, setDisplayState]);
 
   if (displayState === 'add') {
     return <AddNewLayer />;
   }
 
   return (
-    <LayersList
-      layersList={orderedLegendLayers}
-      depth={0}
-      showLayerDetailsPanel={showLayerDetailsPanel}
-      isLayoutEnlarged={isLayoutEnlarged}
-    />
+    <LayersList layersList={legendLayers} depth={0} showLayerDetailsPanel={showLayerDetailsPanel} isLayoutEnlarged={isLayoutEnlarged} />
   );
 }

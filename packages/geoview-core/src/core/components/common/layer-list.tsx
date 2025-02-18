@@ -6,6 +6,7 @@ import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography } from 
 import { TypeFeatureInfoEntry, TypeQueryStatus, TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
+import { logger } from '@/core/utils/logger';
 
 export interface LayerListEntry {
   content?: string | ReactNode;
@@ -35,6 +36,7 @@ interface LayerListItemProps {
 }
 
 // Memoizes entire component, preventing re-renders if props haven't changed
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onListItemClick }: LayerListItemProps) {
   // Hooks
   const { t } = useTranslation<string>();
@@ -76,18 +78,21 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
         {layer.layerFeatures} {layer?.mapFilteredIcon ?? ''}
       </>
     );
-  }, [layer, t]);
+  }, [layer.layerFeatures, layer.layerStatus, layer?.mapFilteredIcon, layer.queryStatus, t]);
 
   /**
    * Handle layer click when mouse enter is pressed.
    */
   const handleLayerKeyDown = useCallback(
-    (e: React.KeyboardEvent, selectedLayer: LayerListEntry): void => {
-      if (e.key === 'Enter' && !isDisabled) {
+    (event: React.KeyboardEvent, selectedLayer: LayerListEntry): void => {
+      // Log
+      logger.logTraceUseCallback('LAYER-LIST - handleLayerKeyDown');
+
+      if (event.key === 'Enter' && !isDisabled) {
         onListItemClick(selectedLayer);
         // NOTE: did this, bcz when enter is clicked, tab component `handleClick` function is fired,
         // to avoid this we have do prevent default so that it doesn't probagate to the parent elements.
-        e.preventDefault();
+        event.preventDefault();
       }
     },
     [isDisabled, onListItemClick]
@@ -140,6 +145,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
  * @returns {JSX.Element}
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 export const LayerList = memo(function LayerList({ layerList, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();

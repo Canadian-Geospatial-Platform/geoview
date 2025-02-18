@@ -14,7 +14,7 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { GeometryApi } from '../geometry/geometry';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 /**
  * Returns the type of the specified field.

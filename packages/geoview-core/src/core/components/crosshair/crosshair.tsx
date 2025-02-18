@@ -8,7 +8,7 @@ import { CrosshairIcon } from './crosshair-icon';
 import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { getMapPointerPosition, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { useEventListener } from '../common/hooks/use-event-listener';
+import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { useGeoViewMapId } from '@/app';
 
 type CrosshairProps = {
