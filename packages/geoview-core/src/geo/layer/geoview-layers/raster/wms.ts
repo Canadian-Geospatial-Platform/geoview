@@ -100,7 +100,7 @@ export class WMS extends AbstractGeoViewRaster {
   protected override async fetchServiceMetadata(): Promise<void> {
     const metadataUrl = this.metadataAccessPath;
 
-    // If the metadata url has a .xml? somewhere
+    // If the metadata url ends with .xml
     if (metadataUrl.toLowerCase().endsWith('.xml')) {
       // XML metadata is a special case that does not use GetCapabilities to get the metadata
       await this.#fetchXmlServiceMetadata(metadataUrl, (proxyUsed: string) => {
