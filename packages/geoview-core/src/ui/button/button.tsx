@@ -1,4 +1,4 @@
-import { forwardRef, memo, Ref, useCallback } from 'react';
+import { forwardRef, Ref, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -17,7 +17,7 @@ export type ButtonProps = {
  * @param {ButtonProps} props the properties of the Button UI element
  * @returns {JSX.Element} the new UI element
  */
-function MaterialBtn(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element {
+function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element {
   logger.logTraceRender('ui/button/button');
 
   // Get constant from props
@@ -95,4 +95,4 @@ function MaterialBtn(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Eleme
 }
 
 // Export the Button  using forwardRef so that passing ref is permitted and functional in the react standards
-export const Button = memo(forwardRef<HTMLButtonElement, ButtonProps>(MaterialBtn));
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(ButtonUI);

@@ -1,23 +1,56 @@
-import { memo, useMemo } from 'react';
 import { AppBar as MaterialAppBar, AppBarProps } from '@mui/material';
 import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
 
+// Outside component - no need for props
+const AnimatedAppBar = animated(MaterialAppBar);
+
 /**
- * Create a customized Material UI App Bar component.
- * This is a simple wrapper around MaterialAppBar that maintains
- * full compatibility with Material-UI's AppBar props.
+ * A customized Material-UI AppBar component with fade-in animation support.
  *
- * @param {AppBarProps} props - All valid Material-UI AppBar props
- * @returns {JSX.Element} The AppBar component
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <AppBarUI>
+ *   <Toolbar>
+ *     <Typography variant="h6">My App</Typography>
+ *   </Toolbar>
+ * </AppBarUI>
+ *
+ * // With custom styling
+ * <AppBarUI
+ *   sx={{
+ *     backgroundColor: 'custom.main',
+ *     boxShadow: 'none'
+ *   }}
+ * >
+ *   <Toolbar>
+ *     <IconButton>
+ *       <MenuIcon />
+ *     </IconButton>
+ *   </Toolbar>
+ * </AppBarUI>
+ * ```
+ *
+ * @param {AppBarUIProps} props - The properties for the AppBar component
+ * @returns {JSX.Element} A rendered AppBar component with fade-in animation
+ *
+ * @note For performance optimization in cases of frequent parent re-renders,
+ * consider wrapping this component with React.memo at the consumption level:
+ * ```tsx
+ * const MemoizedAppBar = memo(AppBarUI);
+ * ```
+ *
+ * @see {@link https://mui.com/material-ui/api/app-bar/}
  */
-export const AppBarUI = memo(function AppBarUI(props: AppBarProps): JSX.Element {
+function AppBarUI1(props: AppBarProps): JSX.Element {
   logger.logTraceRender('ui/appbar/appbar');
 
-  // Named AppBarUI because there's a conflicting (with core component) name via export * from '@/ui'; in external-types.ts
   const fadeInAnimation = useFadeIn();
-  const AnimatedAppBar = useMemo(() => animated(MaterialAppBar), []);
-
   return <AnimatedAppBar style={fadeInAnimation} {...props} />;
-});
+}
+
+// Named AppBarUI because there's a conflicting (with core component) name via export * from '@/ui'; in external-types.ts
+export const AppBarUI = AppBarUI1;

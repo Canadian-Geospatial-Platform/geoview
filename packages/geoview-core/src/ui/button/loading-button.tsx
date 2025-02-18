@@ -1,21 +1,62 @@
-import { memo, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { LoadingButton as MaterialLoadingButton, LoadingButtonProps } from '@mui/lab';
 import { logger } from '@/core/utils/logger';
 
-interface LoadingButtonType extends LoadingButtonProps {
+/**
+ * Properties for the LoadingButton component extending Material-UI's LoadingButtonProps
+ */
+interface LoadingButtonPropsExtend extends LoadingButtonProps {
+  /** Content to be rendered inside the LoadingButton */
   children: ReactNode;
 }
 
 /**
- * Create a customized Material UI Loading Button component.
- * This is a simple wrapper around MaterialLoadingButton that maintains
- * full compatibility with Material-UI's Loading Button props.
+ * A customized Material-UI Loading Button component.
  *
- * @param {LoadingButtonProps} props - All valid Material-UI Badge props + children
- * @returns {JSX.Element} The Loading Button component
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <LoadingButton>
+ *   Click Me
+ * </LoadingButton>
+ *
+ * // With loading state
+ * <LoadingButton
+ *   loading [[1]](https://getbootstrap.com/docs/3.3/javascript/)
+ *   loadingPosition="start"
+ *   startIcon={<SaveIcon />}
+ * >
+ *   Saving
+ * </LoadingButton>
+ *
+ * // With custom styling
+ * <LoadingButton
+ *   loading={isLoading}
+ *   variant="contained"
+ *   sx={{
+ *     minWidth: 120
+ *   }}
+ * >
+ *   Submit
+ * </LoadingButton>
+ * ```
+ *
+ * @param {LoadingButtonPropsExtend} props - The properties for the LoadingButton component
+ * @returns {JSX.Element} A rendered LoadingButton component
+ *
+ * @note For performance optimization in cases of frequent parent re-renders,
+ * consider wrapping this component with React.memo at the consumption level:
+ * ```tsx
+ * const MemoizedLoadingButton = memo(LoadingButton);
+ * ```
+ *
+ * @see {@link https://mui.com/material-ui/api/loading-button/}
  */
-export const LoadingButton = memo(function LoadingButton({ children, ...rest }: LoadingButtonType): JSX.Element {
+function LoadingButtonUI({ children, ...rest }: LoadingButtonPropsExtend): JSX.Element {
   logger.logTraceRender('ui/button/loading-button');
 
   return <MaterialLoadingButton {...rest}>{children}</MaterialLoadingButton>;
-});
+}
+
+export const LoadingButton = LoadingButtonUI;

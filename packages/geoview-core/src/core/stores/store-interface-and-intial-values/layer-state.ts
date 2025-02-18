@@ -280,11 +280,13 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * @param {TypeLayersViewDisplayState} newDisplayState - The display state to set.
        */
       setDisplayState: (newDisplayState: TypeLayersViewDisplayState): void => {
-        const curState = get().layerState.displayState;
+        // Act as a toggle to get back to view - force to add when no layers
+        const newState = get().layerState.displayState === newDisplayState ? 'view' : newDisplayState;
+        const finalState = get().layerState.legendLayers.length === 0 ? 'add' : newState;
         set({
           layerState: {
             ...get().layerState,
-            displayState: curState === newDisplayState ? 'view' : newDisplayState, // Act as a toggle to get back to view
+            displayState: finalState,
           },
         });
       },

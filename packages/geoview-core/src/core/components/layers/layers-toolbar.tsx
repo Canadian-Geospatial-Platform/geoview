@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, VisibilityOutlinedIcon, Button } from '@/ui';
 import {
   useLayerStoreActions,
@@ -33,6 +33,10 @@ export function LayersToolbar(): JSX.Element {
     },
     [setDisplayState]
   );
+
+  useEffect((): void => {
+    if (displayState !== 'add' && legendLayers.length === 0) setDisplayState('add');
+  }, [displayState, legendLayers.length, setDisplayState]);
 
   return (
     <Box id="layers-toolbar" sx={layerToolbarStyle}>
