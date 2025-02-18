@@ -36,6 +36,7 @@ interface LayerListItemProps {
 }
 
 // Memoizes entire component, preventing re-renders if props haven't changed
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onListItemClick }: LayerListItemProps) {
   // Hooks
   const { t } = useTranslation<string>();
@@ -144,6 +145,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
  * @returns {JSX.Element}
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 export const LayerList = memo(function LayerList({ layerList, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();

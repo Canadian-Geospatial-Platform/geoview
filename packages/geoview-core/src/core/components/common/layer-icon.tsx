@@ -38,6 +38,7 @@ const ICON_BUTTON_BASE_PROPS = {
  * @returns {JSX.Element} the icon stack item
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackProps): JSX.Element | null {
   // Hooks
   const theme = useTheme();
@@ -124,6 +125,7 @@ const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconC
   return null;
 });
 
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 export const LayerIcon = memo(function LayerIcon({ layer }: LayerIconProps): JSX.Element {
   const isError = layer.layerStatus === 'error' || ('queryStatus' in layer && layer.queryStatus === 'error');
 

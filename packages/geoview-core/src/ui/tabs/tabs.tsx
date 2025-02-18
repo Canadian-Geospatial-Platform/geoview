@@ -67,6 +67,7 @@ export interface TypeTabsProps {
 }
 
 // Define scroll button component outside of Tabs
+// TODO: Unmemoize this component, probably, because it's in 'ui' folder
 const CustomScrollButton = memo(function CustomScrollButton({ direction, ...props }: TabScrollButtonProps) {
   return (
     <TabScrollButton
