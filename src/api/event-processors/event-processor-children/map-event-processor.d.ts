@@ -159,7 +159,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setMapOrderedLayerInfo(mapId: string, orderedLayerInfo: TypeOrderedLayerInfo[]): void;
     static setMapLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void;
     static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed?: boolean): void;
-    static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): void;
+    static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean;
     static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void;
     static reorderLayer(mapId: string, layerPath: string, move: number): void;
     /**
@@ -264,7 +264,8 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      *
      * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
      * @param {TypeMapFeaturesInstance} mapConfig - The config to modify.
+     * @param {boolean} removeUnlisted - Remove any layer name that doesn't appear in namePairs.
      * @returns {TypeMapFeaturesInstance} Map config with updated names.
      */
-    static replaceMapConfigLayerNames(namePairs: string[][], mapConfig: TypeMapFeaturesInstance): TypeMapFeaturesInstance;
+    static replaceMapConfigLayerNames(namePairs: string[][], mapConfig: TypeMapFeaturesInstance, removeUnlisted?: boolean): TypeMapFeaturesInstance;
 }

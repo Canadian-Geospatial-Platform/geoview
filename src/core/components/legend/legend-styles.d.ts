@@ -6,5 +6,5 @@ type SxClasses = Record<string, object>;
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export declare const getSxClasses: (theme: Theme) => SxClasses;
+export declare const getSxClasses: (theme: Theme, isFullScreen?: boolean, footerPanelResizeValue?: number) => SxClasses;
 export {};

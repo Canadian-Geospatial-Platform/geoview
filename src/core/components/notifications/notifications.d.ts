@@ -7,8 +7,9 @@ export type NotificationDetailsType = {
 };
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 /**
- * Notification PNG Button component
+ * Notification main component
  *
- * @returns {JSX.Element} the notification button
+ * @returns {JSX.Element} the notification component
  */
-export default function Notifications(): JSX.Element;
+declare const _default: import("react").NamedExoticComponent<object>;
+export default _default;

@@ -59,7 +59,7 @@ export interface IMapState {
         reorderLayer: (layerPath: string, move: number) => void;
         resetBasemap: () => Promise<void>;
         setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
-        setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => void;
+        setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
         setMapKeyboardPanInteractions: (panDelta: number) => void;
         setZoom: (zoom: number, duration?: number) => void;
         setInteraction: (interaction: TypeInteraction) => void;
