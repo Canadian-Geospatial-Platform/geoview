@@ -149,8 +149,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    * @override @async
    */
   override async fetchServiceMetadata(): Promise<void> {
-    const metadataAccessPathIsXmlFile = this.metadataAccessPath.slice(-4).toLowerCase() === '.xml';
-    if (metadataAccessPathIsXmlFile) {
+    if (this.metadataAccessPath.toLowerCase().endsWith('.xml')) {
       // XML metadata is a special case that does not use GetCapabilities to get the metadata
       await this.#fetchXmlServiceMetadata(this.metadataAccessPath);
     } else {

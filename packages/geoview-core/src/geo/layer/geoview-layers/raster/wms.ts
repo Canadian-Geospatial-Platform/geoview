@@ -101,8 +101,7 @@ export class WMS extends AbstractGeoViewRaster {
     const metadataUrl = this.metadataAccessPath;
 
     // If the metadata url has a .xml? somewhere
-    const metadataAccessPathIsXmlFile = metadataUrl.includes('.xml?');
-    if (metadataAccessPathIsXmlFile) {
+    if (metadataUrl.toLowerCase().endsWith('.xml')) {
       // XML metadata is a special case that does not use GetCapabilities to get the metadata
       await this.#fetchXmlServiceMetadata(metadataUrl, (proxyUsed: string) => {
         // A Proxy had to be used to fetch the service metadata, update the layer config with it
