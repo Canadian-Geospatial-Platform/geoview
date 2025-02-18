@@ -1,20 +1,42 @@
-import { forwardRef, memo, Ref } from 'react';
+import { forwardRef, Ref } from 'react';
 import { Checkbox as MaterialCheckbox, CheckboxProps } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a customized Material UI Checkbox component.
- * This is a simple wrapper around MaterialCheckbox that maintains
- * full compatibility with Material-UI's Checkbox props.
+ * A customized Material UI Checkbox component.
  *
- * @param {CheckboxProps} props - All valid Material-UI Checkbox props
- * @returns {JSX.Element} The Checkbox component
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Checkbox />
+ *
+ * // Controlled checkbox
+ * <Checkbox
+ *   checked={checked}
+ *   onChange={(e) => setChecked(e.target.checked)}
+ * />
+ *
+ * // With label and color
+ * <Checkbox
+ *   color="primary"
+ *   defaultChecked
+ * />
+ *
+ * @param {CheckboxProps} props - The properties for the Checkbox component
+ * @param {Ref<HTMLButtonElement>} ref - The ref forwarded to the underlying MaterialCheckbox
+ * @returns {JSX.Element} A rendered Checkbox component
+ *
+ * @note For performance optimization in cases of frequent parent re-renders,
+ * consider wrapping this component with React.memo at the consumption level.
+ *
+ * @see {@link https://mui.com/material-ui/react-checkbox/}
  */
-function MUICheckbox(props: CheckboxProps, ref: Ref<HTMLButtonElement>): JSX.Element {
+function CheckboxUI(props: CheckboxProps, ref: Ref<HTMLButtonElement>): JSX.Element {
   logger.logTraceRender('ui/checkbox/checkbox');
 
   return <MaterialCheckbox ref={ref} {...props} />;
 }
 
 // Export the Button  using forwardRef so that passing ref is permitted and functional in the react standards
-export const Checkbox = memo(forwardRef<HTMLButtonElement, CheckboxProps>(MUICheckbox));
+export const Checkbox = forwardRef<HTMLButtonElement, CheckboxProps>(CheckboxUI);

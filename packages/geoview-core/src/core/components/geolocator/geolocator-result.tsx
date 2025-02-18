@@ -189,7 +189,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               size="small"
               edge="end"
               color="inherit"
-              tooltip="geolocator.clearFilters"
+              tooltip={t('geolocator.clearFilters') as string}
               onClick={handleClearFilters}
               disabled={!geoLocationData.length}
             >

@@ -431,7 +431,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             <IconButton
               className="buttonOutline"
               aria-label={getLocalizedMessage('timeSlider.slider.back', displayLanguage) as string}
-              tooltip="timeSlider.slider.back"
+              tooltip={getLocalizedMessage('timeSlider.slider.back', displayLanguage) as string}
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
               onClick={() => handleBack()}
@@ -446,7 +446,11 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                   ? (getLocalizedMessage('timeSlider.slider.pauseAnimation', displayLanguage) as string)
                   : (getLocalizedMessage('timeSlider.slider.playAnimation', displayLanguage) as string)
               }
-              tooltip={isPlaying ? 'timeSlider.slider.pauseAnimation' : 'timeSlider.slider.playAnimation'}
+              tooltip={
+                isPlaying
+                  ? (getLocalizedMessage('timeSlider.slider.pauseAnimation', displayLanguage) as string)
+                  : (getLocalizedMessage('timeSlider.slider.playAnimation', displayLanguage) as string)
+              }
               tooltipPlacement="top"
               disabled={!filtering}
               onClick={() => handlePlay()}
@@ -457,7 +461,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             <IconButton
               className="buttonOutline"
               aria-label={getLocalizedMessage('timeSlider.slider.forward', displayLanguage) as string}
-              tooltip="timeSlider.slider.forward"
+              tooltip={getLocalizedMessage('timeSlider.slider.forward', displayLanguage) as string}
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
               onClick={() => handleForward()}
@@ -468,7 +472,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             <IconButton
               className="buttonOutline"
               aria-label={getLocalizedMessage('timeSlider.slider.changeDirection', displayLanguage) as string}
-              tooltip="timeSlider.slider.changeDirection"
+              tooltip={getLocalizedMessage('timeSlider.slider.changeDirection', displayLanguage) as string}
               tooltipPlacement="top"
               onClick={() => handleReverse()}
             >

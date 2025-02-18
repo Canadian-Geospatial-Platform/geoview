@@ -1,6 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { Fragment, CSSProperties, ReactNode, useMemo, memo } from 'react';
-
+import { Fragment, CSSProperties, ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ClassNameMap } from '@mui/styles';
@@ -19,9 +18,10 @@ import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Customized Material UI Dialog Properties
+ * Properties for the Modal component extending Material-UI's DialogProps
  */
-interface TypeDialogProps extends Omit<DialogProps, 'title'> {
+
+interface DialogPropsExtend extends Omit<DialogProps, 'title'> {
   modalId: string;
   modalProps?: TypeModalProps;
 
@@ -116,12 +116,56 @@ export interface ModalActionsType {
 }
 
 /**
- * Create a customized Material UI Dialog
+ * Create a customized Material UI Modal component.
+ * This component extends the Material-UI Dialog to provide enhanced modal functionality
+ * with support for headers, content, and footer actions.
  *
- * @param {TypeDialogProps} props the properties passed to the Dialog element
- * @returns {JSX.Element} the created Dialog element
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Modal
+ *   modalId="basic-modal"
+ *   open={isOpen}
+ *   title="Modal Title"
+ *   contentModal={<div>Modal content</div>}
+ * />
+ *
+ * // With custom header and footer actions
+ * <Modal
+ *   modalId="custom-modal"
+ *   modalProps={{
+ *     header: {
+ *       title: "Custom Header",
+ *       actions: [{ actionId: "close", content: <CloseButton /> }]
+ *     },
+ *     content: "Modal content",
+ *     footer: {
+ *       actions: [
+ *         { actionId: "cancel", content: <Button>Cancel</Button> },
+ *         { actionId: "save", content: <Button>Save</Button> }
+ *       ]
+ *     }
+ *   }}
+ *   open={isOpen}
+ * />
+ *
+ * // With custom styling
+ * <Modal
+ *   modalId="styled-modal"
+ *   className="custom-modal"
+ *   contentClassName="modal-content"
+ *   open={isOpen}
+ *   title="Styled Modal"
+ * />
+ * ```
+ *
+ * @param {DialogPropsExtend} props - The properties passed to the Modal element
+ * @returns {JSX.Element} The Modal component
+ *
+ * @see {@link https://mui.com/material-ui/react-dialog/|Material-UI Dialog}
  */
-export const Modal = memo(function Modal(props: TypeDialogProps): JSX.Element {
+function ModalUI(props: DialogPropsExtend): JSX.Element {
   logger.logTraceRender('ui/modal/modal');
 
   // Get constant from props
@@ -273,4 +317,6 @@ export const Modal = memo(function Modal(props: TypeDialogProps): JSX.Element {
       </Dialog>
     )
   );
-});
+}
+
+export const Modal = ModalUI;

@@ -1,4 +1,4 @@
-import { Ref, forwardRef, useMemo, memo } from 'react';
+import { Ref, forwardRef, useMemo } from 'react';
 import {
   FormControl,
   InputLabel,
@@ -46,7 +46,7 @@ export interface TypeMenuItemProps {
  * @param {TypeSelectProps} props custom select properties
  * @returns {JSX.Element} the auto complete ui component
  */
-function MUISelect(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element {
+function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element {
   logger.logTraceRender('ui/select/select');
 
   // Get constant from props
@@ -125,5 +125,5 @@ function MUISelect(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Elemen
   );
 }
 
-// Memoize the entire Select component
-export const Select = memo(forwardRef<HTMLDivElement, TypeSelectProps>(MUISelect));
+// Export the Select using forwardRef so that passing ref is permitted and functional in the react standards
+export const Select = forwardRef<HTMLDivElement, TypeSelectProps>(SelectUI);

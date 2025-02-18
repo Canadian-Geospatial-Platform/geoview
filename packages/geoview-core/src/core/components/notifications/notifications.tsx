@@ -234,7 +234,7 @@ export default memo(function Notifications(): JSX.Element {
         <Badge badgeContent={notificationsCount > 99 ? '99+' : notificationsCount} color="error">
           <IconButton
             id="notification"
-            tooltip="appbar.notifications"
+            tooltip={t('appbar.notifications') as string}
             aria-label={t('appbar.notifications') as string}
             tooltipPlacement="bottom-end"
             onClick={handleOpenPopover}

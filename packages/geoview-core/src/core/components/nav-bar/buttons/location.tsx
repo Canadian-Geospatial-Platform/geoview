@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material/styles';
-
+import { useTranslation } from 'react-i18next';
 import { IconButton, EmojiPeopleIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -15,6 +15,7 @@ export default function Location(): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/buttons/location');
 
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -48,7 +49,13 @@ export default function Location(): JSX.Element {
   };
 
   return (
-    <IconButton id="location" tooltip="mapnav.location" tooltipPlacement="left" onClick={handleZoomToMe} sx={sxClasses.navButton}>
+    <IconButton
+      id="location"
+      tooltip={t('mapnav.location') as string}
+      tooltipPlacement="left"
+      onClick={handleZoomToMe}
+      sx={sxClasses.navButton}
+    >
       <EmojiPeopleIcon />
     </IconButton>
   );

@@ -1,5 +1,4 @@
-import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode, useCallback, useRef, useMemo, memo } from 'react';
-
+import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode, useCallback, useRef, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider } from '@mui/material';
 import { Mark } from '@mui/base';
@@ -52,7 +51,7 @@ type SliderProps = {
  * @param {TypeSliderProps} props the properties passed to the slider element
  * @returns {JSX.Element} the created Slider element
  */
-export const Slider = memo(function Slider(props: SliderProps): JSX.Element {
+function SliderUI(props: SliderProps): JSX.Element {
   logger.logTraceRender('ui/slider/slider');
 
   // Get constant from props
@@ -238,7 +237,7 @@ export const Slider = memo(function Slider(props: SliderProps): JSX.Element {
   }, [parentValue]);
 
   useEffect(() => {
-    logger.logTraceUseEffect('UI.SLIDER - foscus when mount');
+    logger.logTraceUseEffect('UI.SLIDER - focus when mount');
 
     // Focus the slider when the component mounts
     focusSlider();
@@ -273,4 +272,6 @@ export const Slider = memo(function Slider(props: SliderProps): JSX.Element {
       onKeyDown={handleKeyDown}
     />
   );
-});
+}
+
+export const Slider = SliderUI;

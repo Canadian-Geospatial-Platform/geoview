@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 
 import { TypeJsonValue } from '@/core/types/global-types';
-import { TypeIconButtonProps } from '@/ui/icon-button/icon-button';
+import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
 /** ******************************************************************************************************************************
  * Interface used to initialize a button panel.
@@ -107,11 +107,11 @@ export type TypeButtonPanel = {
   /** Panel props. */
   panel?: TypePanelProps;
   /** Button used by the panel. */
-  button: TypeIconButtonProps;
+  button: IconButtonPropsExtend;
   /** Group name. */
   groupName?: string;
   /** callback triggered when a panel is fully opened */
-  handleOpen?: () => void;
+  onHandleOpen?: () => void;
   // TODO: Check - Why handleOpen here and in TypePanelAppProps? Acts as a bridge, why?
 };
 

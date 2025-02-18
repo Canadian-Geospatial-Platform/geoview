@@ -21,7 +21,7 @@ export class ModalApi {
   /**
    * Function that creates the modal
    *
-   * @param { TypeModalProps } modal the modal object of type TypeModalProps
+   * @param { TypeModalProps } modal - The modal object of type TypeModalProps
    */
   createModal = (modal: TypeModalProps): string | undefined => {
     if (!modal.content) return undefined;
@@ -46,7 +46,7 @@ export class ModalApi {
   /**
    * Function that deletes the modal by the id specified
    *
-   * @param { string } modalId of the modal that is to be deleted
+   * @param { string } modalId - The id of the modal that is to be deleted
    */
   deleteModal = (modalId: string): void => {
     if (!Object.keys(this.modals)) return;
@@ -55,7 +55,7 @@ export class ModalApi {
   /**
    * Function that open the modal by the id specified
    *
-   * @param { string } modalId of the modal that is to be deleted
+   * @param { string } modalId - The id of the modal that is to be deleted
    */
 
   openModal = (modalId: string): void => {
@@ -66,7 +66,7 @@ export class ModalApi {
   /**
    * Function that close the modal by the id specified
    *
-   * @param { string } modalId of the modal that is to be deleted
+   * @param { string } modalId - The id of the modal that is to be deleted
    */
   closeModal = (modalId: string): void => {
     this.modals[modalId].active = false;

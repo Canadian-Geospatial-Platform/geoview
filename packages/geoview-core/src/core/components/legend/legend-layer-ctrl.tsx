@@ -90,6 +90,7 @@ export function SecondaryControls({ layer, isVisible }: SecondaryControlsProps):
   logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath, isVisible);
 
   // Hooks
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
@@ -113,17 +114,22 @@ export function SecondaryControls({ layer, isVisible }: SecondaryControlsProps):
       <Box sx={sxClasses.subtitle}>
         <IconButton
           edge="end"
-          tooltip="layers.toggleVisibility"
+          tooltip={t('layers.toggleVisibility') as string}
           className="buttonOutline"
           onClick={controls.handleToggleVisibility}
           disabled={!isLayerVisibleCapable}
         >
           {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
         </IconButton>
-        <IconButton tooltip="legend.highlightLayer" sx={styles.btnMargin} className="buttonOutline" onClick={controls.handleHighlightLayer}>
+        <IconButton
+          tooltip={t('legend.highlightLayer') as string}
+          sx={styles.btnMargin}
+          className="buttonOutline"
+          onClick={controls.handleHighlightLayer}
+        >
           {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
-        <IconButton tooltip="legend.zoomTo" className="buttonOutline" onClick={controls.handleZoomTo}>
+        <IconButton tooltip={t('legend.zoomTo') as string} className="buttonOutline" onClick={controls.handleZoomTo}>
           <ZoomInSearchIcon />
         </IconButton>
       </Box>

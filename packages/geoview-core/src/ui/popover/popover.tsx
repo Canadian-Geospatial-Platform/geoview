@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Popover as MaterialPopover, PopoverProps } from '@mui/material';
 import { ARROW_KEYS_WITH_SPACE } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
@@ -13,13 +13,54 @@ const handleKeyDown = (event: KeyboardEvent): void => {
 
 /**
  * Create a customized Material UI Popover component.
- * This is a simple wrapper around MaterialPopover that maintains
- * full compatibility with Material-UI's Popover props.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Popover
+ *   open={isOpen}
+ *   anchorEl={anchorElement}
+ *   onClose={handleClose}
+ * >
+ *   <Typography>Popover content</Typography>
+ * </Popover>
+ *
+ * // With positioning
+ * <Popover
+ *   open={isOpen}
+ *   anchorEl={anchorElement}
+ *   anchorOrigin={{
+ *     vertical: 'bottom',
+ *     horizontal: 'center',
+ *   }}
+ *   transformOrigin={{
+ *     vertical: 'top',
+ *     horizontal: 'center',
+ *   }}
+ * >
+ *   <Box p={2}>Positioned content</Box>
+ * </Popover>
+ *
+ * // With custom styling
+ * <Popover
+ *   open={isOpen}
+ *   anchorEl={anchorElement}
+ *   className="custom-popover"
+ *   PaperProps={{
+ *     sx: { p: 2 }
+ *   }}
+ * >
+ *   <Typography>Styled content</Typography>
+ * </Popover>
+ * ```
  *
  * @param {PopoverProps} props - All valid Material-UI Popover props
  * @returns {JSX.Element} The Popover component
+ *
+ * @see {@link https://mui.com/material-ui/react-popover/|Material-UI Popover}
  */
-export const Popover = memo(function Popover(props: PopoverProps): JSX.Element {
+function PopoverUI(props: PopoverProps): JSX.Element {
   logger.logTraceRender('ui/popover/popover');
 
   // Get constant from props
@@ -35,4 +76,6 @@ export const Popover = memo(function Popover(props: PopoverProps): JSX.Element {
     };
   }, [open]);
   return <MaterialPopover {...props} />;
-});
+}
+
+export const Popover = PopoverUI;

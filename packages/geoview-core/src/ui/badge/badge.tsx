@@ -40,10 +40,7 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} A rendered Badge component
  *
  * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level:
- * ```tsx
- * const MemoizedBadge = memo(Badge);
- * ```
+ * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/api/badge/}
  */

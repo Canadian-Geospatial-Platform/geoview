@@ -137,7 +137,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     if (!layerDetails.canToggle) {
       return (
-        <IconButton disabled tooltip="layers.visibilityIsAlways">
+        <IconButton disabled tooltip={t('layers.visibilityIsAlways') as string}>
           {' '}
           <CheckBoxIcon color="disabled" />{' '}
         </IconButton>
@@ -218,7 +218,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderDetailsButton(): JSX.Element {
     if (layerDetails.controls?.table !== false)
       return (
-        <IconButton id="table-details" tooltip="legend.tableDetails" className="buttonOutline" onClick={handleOpenTable}>
+        <IconButton id="table-details" tooltip={t('legend.tableDetails') as string} className="buttonOutline" onClick={handleOpenTable}>
           <TableViewIcon />
         </IconButton>
       );
@@ -233,7 +233,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (layerDetails.controls?.highlight !== false)
       return (
         <IconButton
-          tooltip="legend.highlightLayer"
+          tooltip={t('legend.highlightLayer') as string}
           onClick={handleHighlightLayer}
           className={highlightedLayer === layerDetails.layerPath ? 'buttonOutline active' : 'buttonOutline'}
         >
@@ -250,7 +250,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderZoomButton(): JSX.Element {
     if (layerDetails.controls?.zoom !== false)
       return (
-        <IconButton tooltip="legend.zoomTo" onClick={handleZoomTo} className="buttonOutline" disabled={layerDetails.bounds === undefined}>
+        <IconButton
+          tooltip={t('legend.zoomTo') as string}
+          onClick={handleZoomTo}
+          className="buttonOutline"
+          disabled={layerDetails.bounds === undefined}
+        >
           <ZoomInSearchIcon />
         </IconButton>
       );
@@ -265,7 +270,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
         {isDataTableVisible && datatableSettings[layerDetails.layerPath] && renderDetailsButton()}
-        <IconButton tooltip="legend.refreshLayer" className="buttonOutline" onClick={handleRefreshLayer}>
+        <IconButton tooltip={t('legend.refreshLayer') as string} className="buttonOutline" onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
         {renderHighlightButton()}

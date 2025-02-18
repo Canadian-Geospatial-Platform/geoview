@@ -1,7 +1,9 @@
-import { memo } from 'react';
 import { LinearProgress as LinearProgressBar } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
+/**
+ * Properties for the Progress Bar component extending Material-UI's LinearProgressProps
+ */
 interface ProgressbarProps {
   className?: string;
   variant?: 'determinate' | 'indeterminate' | 'buffer' | 'query';
@@ -9,25 +11,39 @@ interface ProgressbarProps {
 }
 
 /**
- * Create a customized Material UI Linear Progres Bar component.
- * This is a simple wrapper around MaterialLinearProgress that maintains
- * full compatibility with Material-UI's Progress Bar props.
+ * Create a customized Material UI Linear Progress Bar component.
  *
- * @param {ProgressbarProps} props - All valid Material-UI Progress Bar props
- * @returns {JSX.Element} The ProgressBar component
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <ProgressBar />
+ *
+ * // With determinate value
+ * <ProgressBar
+ *   variant="determinate"
+ *   value={75}
+ * />
+ *
+ * // With custom styling
+ * <ProgressBar
+ *   className="custom-progress"
+ *   variant="buffer"
+ * />
+ *
+ * // Indeterminate loading
+ * <ProgressBar variant="indeterminate" />
+ * ```
+ *
+ * @param {ProgressbarProps} props - The properties passed to the Progress Bar element
+ * @returns {JSX.Element} The Progress Bar component
+ *
+ * @see {@link https://mui.com/material-ui/react-progress/}
  */
-export const ProgressBar = memo(function ProgressBar({
-  className = '',
-  variant = 'indeterminate',
-  value = 0,
-  ...props
-}: ProgressbarProps): JSX.Element {
+function ProgressBarUI({ className = '', variant = 'indeterminate', value = 0, ...props }: ProgressbarProps): JSX.Element {
   logger.logTraceRender('ui/linear-progress/linear-progress');
 
   return <LinearProgressBar variant={variant} value={value} className={className} {...props} />;
-});
+}
 
-/**
- * Example of usage by application code
- * <ProgressBar variant='determinate' value={progress}></ProgressBar>
- */
+export const ProgressBar = ProgressBarUI;

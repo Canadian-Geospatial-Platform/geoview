@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -8,22 +8,55 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/ui/icons/index';
 import { getSxClasses } from '@/ui/drawer/drawer-style';
 import { logger } from '@/core/utils/logger';
-import { getSxClasses } from './drawer-style';
 
 /**
- * Drawer Properties
+ * Properties for the Drawer component extending Material-UI's DrawerProps
  */
-export interface TypeDrawerProps extends DrawerProps {
+export interface DrawerPropsExtend extends DrawerProps {
   status?: boolean;
 }
 
 /**
- * Create a customized Material UI Drawer
+ * Create a customized Material UI Drawer component.
  *
- * @param {TypeDrawerProps} props the properties passed to the Drawer element
- * @returns {JSX.Element} the created Drawer element
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Drawer>
+ *   <List>
+ *     <ListItem>Content</ListItem>
+ *   </List>
+ * </Drawer>
+ *
+ * // With controlled state
+ * <Drawer
+ *   status={isOpen}
+ *   variant="permanent"
+ * >
+ *   <List>
+ *     <ListItem>Drawer content</ListItem>
+ *   </List>
+ * </Drawer>
+ *
+ * // With custom styling
+ * <Drawer
+ *   className="custom-drawer"
+ *   style={{ width: 240 }}
+ * >
+ *   <div>Drawer content</div>
+ * </Drawer>
+ * ```
+ *
+ * @param {DrawerPropsExtend} props - The properties passed to the Drawer element
+ * @returns {JSX.Element} The Drawer component
+ *
+ * @note For performance optimization in cases of frequent parent re-renders,
+ * consider wrapping this component with React.memo at the consumption level.
+ *
+ * @see {@link https://mui.com/material-ui/react-drawer/}
  */
-export const Drawer = memo(function Drawer(props: TypeDrawerProps): JSX.Element {
+function DrawerUI(props: DrawerPropsExtend): JSX.Element {
   logger.logTraceRender('ui/drawer/drawer');
 
   // Get constant from props
@@ -79,4 +112,6 @@ export const Drawer = memo(function Drawer(props: TypeDrawerProps): JSX.Element 
       {children !== undefined && children}
     </MaterialDrawer>
   );
-});
+}
+
+export const Drawer = DrawerUI;

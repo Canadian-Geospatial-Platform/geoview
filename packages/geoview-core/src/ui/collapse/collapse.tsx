@@ -1,16 +1,52 @@
-import { memo } from 'react';
 import { Collapse as MaterialCollapse, CollapseProps } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
  * Create a customized Material UI Collapse component.
- * This is a simple wrapper around MaterialCollapse that maintains
- * full compatibility with Material-UI's Collapse props.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Collapse in={open}>
+ *   <div>Collapsible content</div>
+ * </Collapse>
+ *
+ * // With timeout
+ * <Collapse
+ *   in={open}
+ *   timeout={300}
+ * >
+ *   <Card>Collapsible card</Card>
+ * </Collapse>
+ *
+ * // With unmount on exit
+ * <Collapse
+ *   in={open}
+ *   unmountOnExit
+ * >
+ *   <Typography>Content unmounts when collapsed</Typography>
+ * </Collapse>
+ *
+ * // With custom styling
+ * <Collapse
+ *   in={open}
+ *   className="custom-collapse"
+ *   style={{ marginTop: 16 }}
+ * >
+ *   <div>Styled collapse content</div>
+ * </Collapse>
+ * ```
  *
  * @param {CollapseProps} props - All valid Material-UI Collapse props
  * @returns {JSX.Element} The Collapse component
+ *
+ * @note For performance optimization in cases of frequent parent re-renders,
+ * consider wrapping this component with React.memo at the consumption level.
+ *
+ * @see {@link https://mui.com/material-ui/react-collapse/|Material-UI Collapse}
  */
-export const Collapse = memo(function Collapse(props: CollapseProps): JSX.Element {
+function CollapseUI(props: CollapseProps): JSX.Element {
   logger.logTraceRender('ui/collapse/collapse', props);
 
   // Get constant from props
@@ -31,4 +67,6 @@ export const Collapse = memo(function Collapse(props: CollapseProps): JSX.Elemen
       {children !== undefined && children}
     </MaterialCollapse>
   );
-});
+}
+
+export const Collapse = CollapseUI;

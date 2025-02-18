@@ -37,13 +37,11 @@ export interface AutocompletePropsExtend<
  * ```
  *
  * @param {AutocompletePropsExtend} props - The properties for the Autocomplete component
+ * @param {Ref<HTMLElement>} ref - The ref forwarded to the underlying MaterialAutocomplete
  * @returns {JSX.Element} A rendered Autocomplete component
  *
  * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level:
- * ```tsx
- * const MemoizedAutocomplete = memo(Autocomplete);
- * ```
+ * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/react-autocomplete/}
  */

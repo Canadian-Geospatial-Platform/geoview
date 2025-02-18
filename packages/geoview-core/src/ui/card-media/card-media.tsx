@@ -1,11 +1,11 @@
+import { useCallback } from 'react';
 import { CardMedia as MaterialCardMedia, CardMediaProps } from '@mui/material';
-import { memo, useCallback } from 'react';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Properties for the Card Media
+ * Properties for the Card Media component extending Material-UI's CardMediaProps
  */
-interface TypeCardMediaProps extends CardMediaProps {
+export interface CardMediaPropsExtend extends CardMediaProps {
   alt: string;
   cardComponent?: 'img' | 'video';
   click?(): void;
@@ -21,12 +21,58 @@ const DEFAULT_STYLES = {
 } as const;
 
 /**
- * Create a customized Material UI Card Media
+ * A customized Material UI Card Media component with keyboard accessibility support.
  *
- * @param {TypeCardMediaProps} props the properties passed to the Card Media element
- * @returns {JSX.Element} the created Card Media element
+ * @component
+ * @example
+ * ```tsx
+ * // Basic image usage
+ * <CardMedia
+ *   component="img"
+ *   src="/path/to/image.jpg"
+ *   alt="Description of image"
+ * />
+ *
+ * // With click handler
+ * <CardMedia
+ *   src="/path/to/image.jpg"
+ *   alt="Clickable image"
+ *   click={() => handleImageClick()}
+ * />
+ *
+ * // Video component
+ * <CardMedia
+ *   cardComponent="video"
+ *   src="/path/to/video.mp4"
+ *   alt="Video description"
+ * />
+ *
+ * // GeoView implementation with lighbox
+ * <CardMedia
+ *   key={generateId()}
+ *   sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
+ *   alt={`${alias} ${index}`}
+ *   className={`returnLightboxFocusItem-${index}`}
+ *   src={item}
+ *   tabIndex={0}
+ *   onClick={() => onInitLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
+ *   onKeyDown={(event: React.KeyboardEvent) => {
+ *   if (event.key === 'Enter') {
+ *      onInitLightBox(featureInfoItem.value as string, `${index}_${featureInfoItem.alias}`, index);
+ *    }
+ *   }}
+ * />
+ * ```
+ *
+ * @param {CardMediaPropsExtend} props - The properties for the Card Media element
+ * @returns {JSX.Element} A rendered Card Media element
+ *
+ * @note For performance optimization in cases of frequent parent re-renders,
+ * consider wrapping this component with React.memo at the consumption level.
+ *
+ * @see {@link https://mui.com/material-ui/react-card/#media}
  */
-export const CardMedia = memo(function CardMedia(props: TypeCardMediaProps): JSX.Element {
+function CardMediaUI(props: CardMediaPropsExtend): JSX.Element {
   logger.logTraceRender('ui/card-media/card-media');
 
   // Get constant from props
@@ -69,4 +115,6 @@ export const CardMedia = memo(function CardMedia(props: TypeCardMediaProps): JSX
       {...rest}
     />
   );
-});
+}
+
+export const CardMedia = CardMediaUI;

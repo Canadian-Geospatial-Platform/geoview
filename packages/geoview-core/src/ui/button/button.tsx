@@ -1,6 +1,4 @@
 import { forwardRef, Ref, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-
 import { useTheme } from '@mui/material/styles';
 import { Button as MaterialButton, Tooltip, useMediaQuery } from '@mui/material';
 
@@ -12,10 +10,48 @@ export type ButtonProps = {
 } & TypeButtonProps;
 
 /**
- * Create a customized Material UI button
+ * A customized Material-UI Button component with tooltip and responsive support.
  *
- * @param {ButtonProps} props the properties of the Button UI element
- * @returns {JSX.Element} the new UI element
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Button>
+ *   Click Me
+ * </Button>
+ *
+ * // With tooltip and icon
+ * <Button
+ *   tooltip="Add item"
+ *   tooltipPlacement="left"
+ *   startIcon={<AddIcon />}
+ * >
+ *   Add
+ * </Button>
+ *
+ * // Responsive button with variant, function and translation
+ * <Button
+ *    makeResponsive
+ *    type="text"
+ *    disabled={!legendLayers.length}
+ *    size="small"
+ *    tooltip={t('legend.sortLayers')!}
+ *    variant={displayState === 'order' ? 'contained' : 'outlined'}
+ *    startIcon={<HandleIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+ *    onClick={() => handleSetDisplayState('order')}
+ * >
+ *    {t('legend.sort')}
+ * </Button>
+ * ```
+ *
+ * @param {ButtonProps} props - The properties for the Button component
+ * @param {Ref<HTMLButtonElement>} ref - The ref forwarded to the underlying MaterialButton
+ * @returns {JSX.Element} A rendered Button component
+ *
+ * @note For performance optimization in cases of frequent parent re-renders,
+ * consider wrapping this component with React.memo at the consumption level.
+ *
+ * @see {@link https://mui.com/material-ui/api/button/}
  */
 function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element {
   logger.logTraceRender('ui/button/button');
@@ -43,8 +79,6 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
   } = props;
 
   // Hooks
-  // TODO: Should we pass value as props and decouple from translation
-  const { t } = useTranslation<string>();
   const theme = useTheme();
   const mobileView = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -60,7 +94,7 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
     [disabled, onClick]
   );
 
-  function getMaterialButton(): JSX.Element {
+  function createButtonUI(): JSX.Element {
     return (
       <MaterialButton
         fullWidth={fullWidth}
@@ -85,11 +119,12 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
   }
 
   if (disabled) {
-    return getMaterialButton();
+    return createButtonUI();
   }
+
   return (
-    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement}>
-      {getMaterialButton()}
+    <Tooltip title={tooltip || ''} placement={tooltipPlacement}>
+      {createButtonUI()}
     </Tooltip>
   );
 }

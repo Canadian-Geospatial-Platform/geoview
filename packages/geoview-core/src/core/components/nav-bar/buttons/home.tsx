@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
 import { IconButton, HomeIcon } from '@/ui';
@@ -14,10 +15,12 @@ export default function Home(): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/buttons/home');
 
+  // Hooks
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // get store actions
+  // Store actions
   const { zoomToInitialExtent } = useMapStoreActions();
 
   /**
@@ -31,7 +34,7 @@ export default function Home(): JSX.Element {
   };
 
   return (
-    <IconButton id="home" tooltip="mapnav.home" tooltipPlacement="left" onClick={handleZoom} sx={sxClasses.navButton}>
+    <IconButton id="home" tooltip={t('mapnav.home')!} tooltipPlacement="left" onClick={handleZoom} sx={sxClasses.navButton}>
       <HomeIcon />
     </IconButton>
   );

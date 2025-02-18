@@ -1,6 +1,7 @@
-import { useRef, useEffect, KeyboardEvent, useMemo, memo } from 'react';
+import { useRef, useEffect, KeyboardEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+// TODO: reuse our own custom ui
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
@@ -10,7 +11,7 @@ import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react
 import { Box } from '@/ui/layout/index';
 import { TypePanelProps } from '@/ui/panel/panel-types';
 import { CloseIcon } from '@/ui/icons/index';
-import { IconButton, TypeIconButtonProps } from '@/ui/icon-button/icon-button';
+import { IconButton, IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { getSxClasses } from '@/ui/panel/panel-style';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
@@ -22,16 +23,16 @@ import { logger } from '@/core/utils/logger';
  */
 export type TypePanelAppProps = {
   panel: TypePanelProps;
-  button: TypeIconButtonProps;
+  button: IconButtonPropsExtend;
 
   // Callback when the user clicked the general close button
-  handleGeneralClose?: () => void;
+  onHandleGeneralClose?: () => void;
   // Callback when the panel has completed opened (and transitioned in)
-  handleOpen?: () => void;
+  onHandleOpen?: () => void;
   // Callback when the panel has been closed
-  handleClose?: () => void;
+  onHandleClose?: () => void;
   // Callback when the panel has been closed by escape key
-  handleKeyDown?: (event: KeyboardEvent) => void;
+  onHandleKeyDown?: (event: KeyboardEvent) => void;
 };
 
 /**
@@ -40,11 +41,11 @@ export type TypePanelAppProps = {
  *
  * @returns {JSX.Element} the created Panel element
  */
-export const Panel = memo(function Panel(props: TypePanelAppProps): JSX.Element {
+function PanelUI(props: TypePanelAppProps): JSX.Element {
   logger.logTraceRender('ui/panel/panel');
 
   // Get constant from props
-  const { panel, button, handleOpen, handleClose, handleGeneralClose, handleKeyDown, ...rest } = props;
+  const { panel, button, onHandleOpen, onHandleClose, onHandleGeneralClose, onHandleKeyDown, ...rest } = props;
   const { status: open = false, isFocusTrapped = false, panelStyles, panelGroupName } = panel;
 
   // Hooks
@@ -89,15 +90,15 @@ export const Panel = memo(function Panel(props: TypePanelAppProps): JSX.Element 
 
       // Wait the transition period (+50 ms just to be sure of shenanigans)
       setTimeout(() => {
-        handleOpen?.();
+        onHandleOpen?.();
       }, theme.transitions.duration.standard + 50);
     } else {
       // Wait the transition period (+50 ms just to be sure of shenanigans)
       setTimeout(() => {
-        handleClose?.();
+        onHandleClose?.();
       }, theme.transitions.duration.standard + 50);
     }
-  }, [open, theme.transitions.duration.standard, handleOpen, handleClose]);
+  }, [open, theme.transitions.duration.standard, onHandleOpen, onHandleClose]);
 
   /**
    * Update the width of data table and layers panel when window is resize based on mapsize
@@ -128,7 +129,7 @@ export const Panel = memo(function Panel(props: TypePanelAppProps): JSX.Element 
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
           ref={panelRef as React.MutableRefObject<null>}
-          onKeyDown={(event: KeyboardEvent) => handleKeyDown?.(event)}
+          onKeyDown={(event: KeyboardEvent) => onHandleKeyDown?.(event)}
           {...{ 'data-id': button.id }}
           {...rest}
         >
@@ -146,7 +147,7 @@ export const Panel = memo(function Panel(props: TypePanelAppProps): JSX.Element 
                   tooltipPlacement="right"
                   aria-label={t('general.close')!}
                   size="small"
-                  onClick={() => handleGeneralClose?.()}
+                  onClick={() => onHandleGeneralClose?.()}
                   iconRef={closeBtnRef}
                   className="cgpv-panel-close"
                 >
@@ -165,4 +166,6 @@ export const Panel = memo(function Panel(props: TypePanelAppProps): JSX.Element 
       </FocusTrapContainer>
     </Box>
   );
-});
+}
+
+export const Panel = PanelUI;

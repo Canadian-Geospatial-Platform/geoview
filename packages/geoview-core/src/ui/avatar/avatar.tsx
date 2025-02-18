@@ -5,7 +5,7 @@ import { logger } from '@/core/utils/logger';
 /**
  * Properties for the Avatar component extending Material-UI's AvatarProps
  */
-interface AvatarPropsExtend extends AvatarProps {
+export interface AvatarPropsExtend extends AvatarProps {
   /** Content to be rendered inside the Avatar */
   children?: React.ReactNode;
 }
@@ -41,10 +41,7 @@ interface AvatarPropsExtend extends AvatarProps {
  * @returns {JSX.Element} A rendered Avatar component
  *
  * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level:
- * ```tsx
- * const MemoizedAvatar = memo(Avatar);
- * ```
+ * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/api/avatar/}
  */

@@ -5,7 +5,7 @@ import { logger } from '@/core/utils/logger';
 /**
  * Properties for the LoadingButton component extending Material-UI's LoadingButtonProps
  */
-interface LoadingButtonPropsExtend extends LoadingButtonProps {
+export interface LoadingButtonPropsExtend extends LoadingButtonProps {
   /** Content to be rendered inside the LoadingButton */
   children: ReactNode;
 }
@@ -46,10 +46,7 @@ interface LoadingButtonPropsExtend extends LoadingButtonProps {
  * @returns {JSX.Element} A rendered LoadingButton component
  *
  * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level:
- * ```tsx
- * const MemoizedLoadingButton = memo(LoadingButton);
- * ```
+ * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/api/loading-button/}
  */

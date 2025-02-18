@@ -1,5 +1,5 @@
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-import { TypeIconButtonProps } from '@/ui/icon-button/icon-button';
+import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { generateId } from '@/core/utils/utilities';
@@ -101,13 +101,17 @@ export class NavBarApi {
   /**
    * Creates either a button or a button panel on the nav-bar
    *
-   * @param {TypeIconButtonProps} buttonProps - Button properties
+   * @param {IconButtonPropsExtend} buttonProps - Button properties
    * @param {TypePanelProps | undefined} panelProps - Optional panel properties
    * @param {string} groupName - The group to place the button / panel in
    * @returns {TypeButtonPanel | null} The created button / button panel
    * @private
    */
-  #createButtonPanel(buttonProps: TypeIconButtonProps, panelProps: TypePanelProps | undefined, groupName: string): TypeButtonPanel | null {
+  #createButtonPanel(
+    buttonProps: IconButtonPropsExtend,
+    panelProps: TypePanelProps | undefined,
+    groupName: string
+  ): TypeButtonPanel | null {
     if (buttonProps) {
       // generate an id if not provided
       const buttonPanelId = generateId(buttonProps.id);
@@ -120,7 +124,7 @@ export class NavBarApi {
         this.buttons[group] = {};
       }
 
-      const button: TypeIconButtonProps = {
+      const button: IconButtonPropsExtend = {
         ...buttonProps,
         id: buttonPanelId,
         visible: !buttonProps.visible ? true : buttonProps.visible,
@@ -148,12 +152,12 @@ export class NavBarApi {
   /**
    * Creates a nav-bar button panel
    *
-   * @param {TypeIconButtonProps} buttonProps - Button properties
+   * @param {IconButtonPropsExtend} buttonProps - Button properties
    * @param {TypePanelProps} panelProps - Panel properties
    * @param {string} groupName - Group name to add the button panel to
    * @returns {TypeButtonPanel | null} The created button panel
    */
-  createNavbarButtonPanel(buttonProps: TypeIconButtonProps, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null {
+  createNavbarButtonPanel(buttonProps: IconButtonPropsExtend, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null {
     return this.#createButtonPanel(buttonProps, panelProps, groupName);
   }
 
@@ -164,7 +168,7 @@ export class NavBarApi {
    * @param {string} groupName - Group name to add button to
    * @returns {TypeButtonPanel | null} The created button
    */
-  createNavbarButton(buttonProps: TypeIconButtonProps, groupName: string): TypeButtonPanel | null {
+  createNavbarButton(buttonProps: IconButtonPropsExtend, groupName: string): TypeButtonPanel | null {
     return this.#createButtonPanel(buttonProps, undefined, groupName);
   }
 

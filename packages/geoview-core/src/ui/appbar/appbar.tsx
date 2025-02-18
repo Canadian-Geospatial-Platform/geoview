@@ -38,10 +38,7 @@ const AnimatedAppBar = animated(MaterialAppBar);
  * @returns {JSX.Element} A rendered AppBar component with fade-in animation
  *
  * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level:
- * ```tsx
- * const MemoizedAppBar = memo(AppBarUI);
- * ```
+ * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/api/app-bar/}
  */

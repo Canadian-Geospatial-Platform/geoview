@@ -1,23 +1,67 @@
-import React, { memo, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Popper as MaterialPopper, PopperProps } from '@mui/material';
 import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
 
-interface EnhancedPopperProps extends PopperProps {
+/**
+ * Properties for the Popper component extending Material-UI's PopperProps
+ */
+interface PopperPropsExtend extends PopperProps {
   onClose?: () => void;
   handleKeyDown?: (key: string, callbackFn: () => void) => void;
 }
 
 /**
  * Create a customized Material UI Popper component.
- * This is a simple wrapper around MaterialPopper that maintains
- * full compatibility with Material-UI's Popper props.
  *
- * @param {EnhancedPopperProps} props - All valid Material-UI Popper props
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Popper
+ *   open={isOpen}
+ *   anchorEl={anchorElement}
+ * >
+ *   <Paper>
+ *     <Typography>Popper content</Typography>
+ *   </Paper>
+ * </Popper>
+ *
+ * // With placement and keyboard handling
+ * <Popper
+ *   open={isOpen}
+ *   anchorEl={anchorElement}
+ *   placement="bottom-start"
+ *   onClose={handleClose}
+ *   handleKeyDown={(key, callback) => {
+ *     if (key === 'Escape') callback();
+ *   }}
+ * >
+ *   <Box p={2}>Interactive content</Box>
+ * </Popper>
+ *
+ * // With custom styling
+ * <Popper
+ *   open={isOpen}
+ *   anchorEl={anchorElement}
+ *   sx={{
+ *     zIndex: 'tooltip',
+ *     '& .MuiPaper-root': {
+ *       p: 2
+ *     }
+ *   }}
+ * >
+ *   <Typography>Styled content</Typography>
+ * </Popper>
+ * ```
+ *
+ * @param {PopperPropsExtend} props - The properties passed to the Popper element
  * @returns {JSX.Element} The Popper component
+ *
+ * @see {@link https://mui.com/material-ui/react-popper/|Material-UI Popper}
  */
-export const Popper = memo(function Popper({ open, onClose, handleKeyDown, ...props }: EnhancedPopperProps): JSX.Element {
+function PopperUI({ open, onClose, handleKeyDown, ...props }: PopperPropsExtend): JSX.Element {
   logger.logTraceRender('ui/popper/popper');
 
   // Hooks
@@ -42,4 +86,6 @@ export const Popper = memo(function Popper({ open, onClose, handleKeyDown, ...pr
 
   // TODO: style - manage z-index in theme
   return <AnimatedPopper sx={{ zIndex: '2000' }} style={fadeInAnimation} {...props} open={open} ref={popperRef} />;
-});
+}
+
+export const Popper = PopperUI;

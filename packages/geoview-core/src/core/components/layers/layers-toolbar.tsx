@@ -46,7 +46,7 @@ export function LayersToolbar(): JSX.Element {
           type="text"
           disabled={!legendLayers.length}
           size="small"
-          tooltip="general.view"
+          tooltip={t('general.view')!}
           variant={displayState === 'view' ? 'contained' : 'outlined'}
           startIcon={<VisibilityOutlinedIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('view')}
@@ -58,7 +58,7 @@ export function LayersToolbar(): JSX.Element {
           makeResponsive
           type="text"
           size="small"
-          tooltip="legend.addLayer"
+          tooltip={t('legend.addLayer')!}
           variant={displayState === 'add' ? 'contained' : 'outlined'}
           startIcon={<AddCircleOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('add')}
@@ -70,7 +70,7 @@ export function LayersToolbar(): JSX.Element {
           type="text"
           disabled={!legendLayers.length}
           size="small"
-          tooltip="legend.sortLayers"
+          tooltip={t('legend.sortLayers')!}
           variant={displayState === 'order' ? 'contained' : 'outlined'}
           startIcon={<HandleIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('order')}
@@ -82,7 +82,7 @@ export function LayersToolbar(): JSX.Element {
           type="text"
           disabled={!legendLayers.length}
           size="small"
-          tooltip="legend.removeLayer"
+          tooltip={t('legend.removeLayer')!}
           variant={displayState === 'remove' ? 'contained' : 'outlined'}
           startIcon={<DeleteOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('remove')}

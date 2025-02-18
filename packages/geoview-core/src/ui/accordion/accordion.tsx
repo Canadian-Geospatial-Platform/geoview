@@ -13,7 +13,7 @@ import { logger } from '@/core/utils/logger';
 /**
  * Properties for the Accordion element
  */
-interface AccordionProps {
+export interface AccordionProps {
   /** Unique identifier for the accordion */
   id: string;
   /** Custom styles using CSS properties */
@@ -116,10 +116,7 @@ const AccordionExpandIcon = memo(function AccordionExpandIcon({
  * @returns {JSX.Element} A rendered accordion component
  *
  * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level:
- * ```tsx
- * const MemoizedAccordion = memo(Accordion);
- * ```
+ * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link AccordionItem} for the structure of individual accordion items
  * @see {@link https://mui.com/material-ui/react-accordion/}
