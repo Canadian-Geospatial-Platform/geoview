@@ -27,28 +27,16 @@ export function LayersToolbar(): JSX.Element {
 
   const handleSetDisplayState = useCallback(
     (dispState: TypeLayersViewDisplayState): void => {
+      logger.logTraceUseCallback('LAYER TOOLBAR - handleSetDisplayState', dispState);
+
       setDisplayState(dispState);
     },
     [setDisplayState]
   );
 
-  useEffect(() => {
-    // If there are no layers, automatically click the add button
-    if (legendLayers.length === 0) {
-      logger.logTraceUseEffect('LAYERS TOOLBAR - click add');
-
-      // Set the display state directly
-      handleSetDisplayState('add');
-
-      // Use setTimeout to ensure the button click happens after initial render
-      setTimeout(() => {
-        if (addButtonRef.current) {
-          const buttonElement = addButtonRef.current;
-          buttonElement.click();
-        }
-      }, 0);
-    }
-  }, [handleSetDisplayState, legendLayers.length]);
+  useEffect((): void => {
+    if (displayState !== 'add' && legendLayers.length === 0) setDisplayState('add');
+  }, [displayState, legendLayers.length, setDisplayState]);
 
   return (
     <Box id="layers-toolbar" sx={layerToolbarStyle}>
@@ -58,7 +46,7 @@ export function LayersToolbar(): JSX.Element {
           type="text"
           disabled={!legendLayers.length}
           size="small"
-          tooltip="general.view"
+          tooltip={t('general.view')!}
           variant={displayState === 'view' ? 'contained' : 'outlined'}
           startIcon={<VisibilityOutlinedIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('view')}
@@ -70,7 +58,7 @@ export function LayersToolbar(): JSX.Element {
           makeResponsive
           type="text"
           size="small"
-          tooltip="legend.addLayer"
+          tooltip={t('legend.addLayer')!}
           variant={displayState === 'add' ? 'contained' : 'outlined'}
           startIcon={<AddCircleOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('add')}
@@ -82,7 +70,7 @@ export function LayersToolbar(): JSX.Element {
           type="text"
           disabled={!legendLayers.length}
           size="small"
-          tooltip="legend.sortLayers"
+          tooltip={t('legend.sortLayers')!}
           variant={displayState === 'order' ? 'contained' : 'outlined'}
           startIcon={<HandleIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('order')}
@@ -94,7 +82,7 @@ export function LayersToolbar(): JSX.Element {
           type="text"
           disabled={!legendLayers.length}
           size="small"
-          tooltip="legend.removeLayer"
+          tooltip={t('legend.removeLayer')!}
           variant={displayState === 'remove' ? 'contained' : 'outlined'}
           startIcon={<DeleteOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('remove')}

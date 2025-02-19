@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, MouseEvent, useMemo, memo, useCallback } from 'react';
 import Slider from '@mui/material/Slider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -33,6 +34,7 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
   logger.logTraceRender('components/footer-bar/hooks/resize-footer-panel');
 
   // Hooks
+  const { t } = useTranslation<string>();
   const sxClasses = useMemo(() => getSxClasses(), []);
 
   // Store
@@ -70,7 +72,7 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
   const open = Boolean(anchorEl);
   return (
     <>
-      <IconButton onClick={(e) => handleClick(e)} tooltip="footerBar.resizeTooltip">
+      <IconButton onClick={(e) => handleClick(e)} tooltip={t('footerBar.resizeTooltip') as string}>
         <HeightIcon />
       </IconButton>
       <Popover

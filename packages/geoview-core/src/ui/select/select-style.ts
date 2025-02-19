@@ -7,7 +7,7 @@ import { SxStyles } from '@/ui/style/types';
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-// TODO: Refactor Note - No theme when an external component (e.g. GeoChart) uses a CGPV UI component. I had to add the "?" to support when no theme are set (no map).
+// TODO: style - Refactor Note - No theme when an external component (e.g. GeoChart) uses a CGPV UI component. I had to add the "?" to support when no theme are set (no map).
 export const getSxClasses = (theme: Theme): SxStyles => ({
   formControl: {
     fontSize: theme.palette.geoViewFontSize?.sm,

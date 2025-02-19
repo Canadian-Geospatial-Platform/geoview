@@ -1,26 +1,66 @@
-import { forwardRef, Ref } from 'react';
-import { useTranslation } from 'react-i18next';
-
+import { forwardRef, Ref, useCallback } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Button as MaterialButton, Fade, Tooltip, useMediaQuery } from '@mui/material';
+import { Button as MaterialButton, Tooltip, useMediaQuery } from '@mui/material';
 
 import { TypeButtonProps } from '@/ui/panel/panel-types';
+import { logger } from '@/core/utils/logger';
 
 export type ButtonProps = {
   makeResponsive?: boolean;
 } & TypeButtonProps;
 
 /**
- * Create a customized Material UI button
+ * A customized Material-UI Button component with tooltip and responsive support.
  *
- * @param {ButtonProps} props the properties of the Button UI element
- * @returns {JSX.Element} the new UI element
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Button>
+ *   Click Me
+ * </Button>
+ *
+ * // With tooltip and icon
+ * <Button
+ *   tooltip="Add item"
+ *   tooltipPlacement="left"
+ *   startIcon={<AddIcon />}
+ * >
+ *   Add
+ * </Button>
+ *
+ * // Responsive button with variant, function and translation
+ * <Button
+ *    makeResponsive
+ *    type="text"
+ *    disabled={!legendLayers.length}
+ *    size="small"
+ *    tooltip={t('legend.sortLayers')!}
+ *    variant={displayState === 'order' ? 'contained' : 'outlined'}
+ *    startIcon={<HandleIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+ *    onClick={() => handleSetDisplayState('order')}
+ * >
+ *    {t('legend.sort')}
+ * </Button>
+ * ```
+ *
+ * @param {ButtonProps} props - The properties for the Button component
+ * @param {Ref<HTMLButtonElement>} ref - The ref forwarded to the underlying MaterialButton
+ * @returns {JSX.Element} A rendered Button component
+ *
+ * @note For performance optimization in cases of frequent parent re-renders,
+ * consider wrapping this component with React.memo at the consumption level.
+ *
+ * @see {@link https://mui.com/material-ui/api/button/}
  */
-function MaterialBtn(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element {
+function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element {
+  logger.logTraceRender('ui/button/button');
+
+  // Get constant from props
   const {
     id,
     sx,
-    variant,
+    variant = 'text',
     tooltip,
     tooltipPlacement,
     onClick,
@@ -31,28 +71,39 @@ function MaterialBtn(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Eleme
     disableRipple = false,
     startIcon,
     endIcon,
-    size,
+    size = 'medium',
     makeResponsive,
     fullWidth,
     onKeyDown,
     'aria-label': ariaLabel,
   } = props;
 
-  const { t } = useTranslation<string>();
-
+  // Hooks
   const theme = useTheme();
   const mobileView = useMediaQuery(theme.breakpoints.down('md'));
 
-  function getMaterialButton(): JSX.Element {
+  // Memoize click handler
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      logger.logTraceUseCallback('UI.BUTTON - click');
+
+      if (!disabled && onClick) {
+        onClick(event);
+      }
+    },
+    [disabled, onClick]
+  );
+
+  function createButtonUI(): JSX.Element {
     return (
       <MaterialButton
         fullWidth={fullWidth}
         id={id}
-        size={size || 'medium'}
+        size={size}
         sx={sx}
         variant={variant || 'text'}
-        className={`${className || ''}`}
-        onClick={onClick}
+        className={className}
+        onClick={handleClick}
         autoFocus={autoFocus}
         disabled={disabled}
         disableRipple={disableRipple}
@@ -68,14 +119,15 @@ function MaterialBtn(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Eleme
   }
 
   if (disabled) {
-    return getMaterialButton();
+    return createButtonUI();
   }
+
   return (
-    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
-      {getMaterialButton()}
+    <Tooltip title={tooltip || ''} placement={tooltipPlacement}>
+      {createButtonUI()}
     </Tooltip>
   );
 }
 
 // Export the Button  using forwardRef so that passing ref is permitted and functional in the react standards
-export const Button = forwardRef(MaterialBtn);
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(ButtonUI);

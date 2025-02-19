@@ -307,14 +307,20 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
 
     if (isLayerAlwaysVisible) {
       return (
-        <IconButton edge="end" size="small" tooltip="layers.visibilityIsAlways" className="buttonOutline" disabled>
+        <IconButton edge="end" size="small" tooltip={t('layers.visibilityIsAlways') as string} className="buttonOutline" disabled>
           <VisibilityOutlinedIcon color="disabled" />
         </IconButton>
       );
     }
 
     return (
-      <IconButton edge="end" size="small" onClick={handleToggleVisibility} tooltip="layers.toggleVisibility" className="buttonOutline">
+      <IconButton
+        edge="end"
+        size="small"
+        onClick={handleToggleVisibility}
+        tooltip={t('layers.toggleVisibility') as string}
+        className="buttonOutline"
+      >
         {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
       </IconButton>
     );
@@ -327,6 +333,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     layer.layerId,
     layer.layerPath,
     layer.layerStatus,
+    t,
   ]);
 
   // Memoize the arrow buttons component section
@@ -341,7 +348,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
           edge="end"
           size="small"
           onClick={handleExpandGroupClick}
-          tooltip="layers.toggleCollapse"
+          tooltip={t('layers.toggleCollapse') as string}
           className="buttonOutline"
         >
           {legendExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
@@ -350,7 +357,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     }
 
     return null;
-  }, [handleExpandGroupClick, layer.children?.length, legendExpanded]);
+  }, [handleExpandGroupClick, layer.children?.length, legendExpanded, t]);
 
   // Memoize the collapse component section
   const memoCollapse = useMemo((): JSX.Element | null => {

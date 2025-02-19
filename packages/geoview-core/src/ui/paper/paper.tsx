@@ -1,15 +1,53 @@
+import { forwardRef, Ref } from 'react';
 import { Paper as MaterialPaper, PaperProps } from '@mui/material';
-import { animated } from '@react-spring/web';
-import { useFadeIn } from '@/core/utils/useSpringAnimations';
-/**
- * Create a paper component
- *
- * @param {PaperProps} props paper properties
- * @returns {JSX.Element} returns paper component
- */
-export function Paper(props: PaperProps): JSX.Element {
-  const fadeInAnimation = useFadeIn();
-  const AnimatedPaper = animated(MaterialPaper);
+import { logger } from '@/core/utils/logger';
 
-  return <AnimatedPaper style={fadeInAnimation} {...props} />;
+/**
+ * Create a customized Material UI Paper component.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Paper>
+ *   <Typography>Content</Typography>
+ * </Paper>
+ *
+ * // With elevation
+ * <Paper elevation={3}>
+ *   <Typography>Elevated content</Typography>
+ * </Paper>
+ *
+ * // With custom styling
+ * <Paper
+ *   sx={{
+ *     p: 2,
+ *     backgroundColor: 'background.paper'
+ *   }}
+ * >
+ *   <Typography>Styled content</Typography>
+ * </Paper>
+ *
+ * // Square variant
+ * <Paper
+ *   variant="outlined"
+ *   square
+ * >
+ *   <Typography>Square paper</Typography>
+ * </Paper>
+ * ```
+ *
+ * @param {PaperProps} props - All valid Material-UI Paper props
+ * @param {Ref<HTMLDivElement>} ref - Reference to the paper element
+ * @returns {JSX.Element} The Paper component
+ *
+ * @see {@link https://mui.com/material-ui/react-paper/}
+ */
+function MUIPaper(props: PaperProps, ref: Ref<HTMLDivElement>): JSX.Element {
+  logger.logTraceRender('ui/paper/paper');
+
+  return <MaterialPaper ref={ref} {...props} />;
 }
+
+// Export the Paper using forwardRef so that passing ref is permitted and functional in the react standards
+export const Paper = forwardRef<HTMLDivElement, PaperProps>(MUIPaper);

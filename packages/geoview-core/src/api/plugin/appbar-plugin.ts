@@ -1,7 +1,7 @@
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { AbstractPlugin } from './abstract-plugin';
 import { TypeWindow } from '@/core/types/global-types';
-import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
+import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
 /** ******************************************************************************************************************************
  * AppBar Plugin abstract class.
@@ -11,16 +11,16 @@ export abstract class AppBarPlugin extends AbstractPlugin {
   buttonPanel?: TypeButtonPanel;
 
   // Store the button props
-  buttonProps?: TypeIconButtonProps;
+  buttonProps?: IconButtonPropsExtend;
 
   // Store the panel props
   panelProps?: TypePanelProps;
 
   /**
    * Overridable function to create app bar button props content
-   * @returns TypeIconButtonProps The app bar button props content
+   * @returns IconButtonPropsExtend The app bar button props content
    */
-  onCreateButtonProps(): TypeIconButtonProps {
+  onCreateButtonProps(): IconButtonPropsExtend {
     // Override this to create the button props..
 
     // Fetch cgpv

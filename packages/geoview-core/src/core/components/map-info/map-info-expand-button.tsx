@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react';
-
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
 import { logger } from '@/core/utils/logger';
@@ -39,6 +39,7 @@ export const MapInfoExpandButton = memo(function MapInfoExpandButton({ onExpand,
   logger.logTraceRender('components/map-info/mmap-info-expand-button');
 
   // Hooks
+  const { t } = useTranslation<string>();
   const theme = useTheme();
 
   const buttonStyles = {
@@ -52,7 +53,7 @@ export const MapInfoExpandButton = memo(function MapInfoExpandButton({ onExpand,
 
   return (
     <Box sx={BOX_STYLES}>
-      <IconButton aria-label={TOOLTIP_KEY} tooltip={TOOLTIP_KEY} onClick={handleClick} sx={buttonStyles}>
+      <IconButton aria-label={t(TOOLTIP_KEY) as string} tooltip={t(TOOLTIP_KEY) as string} onClick={handleClick} sx={buttonStyles}>
         <ExpandIcon expanded={expanded} />
       </IconButton>
     </Box>
