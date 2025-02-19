@@ -306,11 +306,13 @@ export class LayerApi {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
    * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
    */
-  static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[] {
+  generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[] {
     const newOrderedLayerInfos: TypeOrderedLayerInfo[] = [];
 
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
       const subLayerPath = layerPath.endsWith(`/${layerEntryConfig.layerId}`) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
+      const zoom = this.mapViewer.getView().getZoom();
+
       const layerInfo: TypeOrderedLayerInfo = {
         layerPath: subLayerPath,
         visible: layerEntryConfig.initialSettings?.states?.visible !== false,
@@ -321,6 +323,9 @@ export class LayerApi {
           layerEntryConfig.initialSettings?.states?.legendCollapsed !== undefined
             ? layerEntryConfig.initialSettings?.states?.legendCollapsed
             : false,
+        inVisibleRange:
+          (!layerEntryConfig.initialSettings?.maxZoom || !zoom || layerEntryConfig.initialSettings.maxZoom >= zoom) &&
+          (!layerEntryConfig.initialSettings?.minZoom || !zoom || layerEntryConfig.initialSettings.minZoom < zoom),
       };
       newOrderedLayerInfos.push(layerInfo);
       if (layerEntryConfig.listOfLayerEntryConfig?.length) {
@@ -335,6 +340,7 @@ export class LayerApi {
         const layerPath = `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${
           (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
         }`;
+        const zoom = this.mapViewer.getView().getZoom();
         const layerInfo: TypeOrderedLayerInfo = {
           layerPath,
           legendCollapsed:
@@ -342,6 +348,9 @@ export class LayerApi {
               ? geoviewLayerConfig.initialSettings?.states?.legendCollapsed
               : false,
           visible: geoviewLayerConfig.initialSettings?.states?.visible !== false,
+          inVisibleRange:
+            (!geoviewLayerConfig.initialSettings?.maxZoom || !zoom || geoviewLayerConfig.initialSettings.maxZoom >= zoom) &&
+            (!geoviewLayerConfig.initialSettings?.minZoom || !zoom || geoviewLayerConfig.initialSettings.minZoom < zoom),
         };
         newOrderedLayerInfos.push(layerInfo);
         (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.forEach((layerEntryConfig) => {
@@ -404,7 +413,7 @@ export class LayerApi {
           promise.value.forEach((geoviewLayerConfig) => {
             try {
               // Generate array of layer order information
-              const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+              const layerInfos = this.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
               orderedLayerInfos.push(...layerInfos);
 
               // Add it
@@ -589,6 +598,7 @@ export class LayerApi {
       queryable: true,
       hoverable: true,
       legendCollapsed: false,
+      inVisibleRange: true,
     };
 
     // GV: This is here as a placeholder so that the layers will appear in the proper order,

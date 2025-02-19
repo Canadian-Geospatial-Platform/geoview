@@ -7,6 +7,8 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   tileGrid!: TypeTileGrid;
 
+  styleUrl?: string;
+
   /**
    * The class constructor.
    * @param {VectorTilesLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.

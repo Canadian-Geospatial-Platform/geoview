@@ -433,6 +433,36 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setZoom(mapId: string, zoom: number): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setZoom(zoom);
+
+    // Set ordered layer info for layers if they are inVisibleRange
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
+    const { legendLayers } = LegendEventProcessor.getState(mapId).layerState;
+
+    // Get zoom constraints from legend layers and children
+    const zoomConstraints = new Map<string, { maxZoom?: number; minZoom?: number }>();
+    const processLayer = (layer: TypeLegendLayer): void => {
+      if (layer.maxZoom || layer.minZoom) {
+        zoomConstraints.set(layer.layerPath, { maxZoom: layer.maxZoom, minZoom: layer.minZoom });
+      }
+
+      // Process children
+      if (layer.children) {
+        layer.children.forEach((child) => processLayer(child));
+      }
+    };
+    legendLayers.forEach((layer) => processLayer(layer));
+
+    // Create new orderedLayerInfo
+    const newOrderedLayerInfo = orderedLayerInfo.map((layer) => {
+      const constraints = zoomConstraints.get(layer.layerPath);
+      const inVisibleRange = zoom
+        ? (!constraints?.maxZoom || zoom <= constraints.maxZoom) && (!constraints?.minZoom || zoom >= constraints.minZoom)
+        : true;
+
+      return { ...layer, inVisibleRange };
+    });
+
+    this.setOrderedLayerInfoWithNoOrderChangeState(mapId, newOrderedLayerInfo);
   }
 
   static setIsMouseInsideMap(mapId: string, inside: boolean): void {
@@ -598,6 +628,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const info = this.getMapStateProtected(mapId).orderedLayerInfo;
     const pathInfo = info.find((item) => item.layerPath === layerPath);
     return pathInfo?.visible !== false;
+  }
+
+  static getMapInVisibleRangeFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
+    // Get visibility of a layer
+    const info = this.getMapStateProtected(mapId).orderedLayerInfo;
+    const pathInfo = info.find((item) => item.layerPath === layerPath);
+    return pathInfo?.inVisibleRange !== false;
   }
 
   static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void {
@@ -793,7 +830,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     index?: number
   ): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
-    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+    const newOrderedLayerInfo = this.getMapViewerLayerAPI(mapId).generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     if (!index) orderedLayerInfo.unshift(...newOrderedLayerInfo);
     else orderedLayerInfo.splice(index, 0, ...newOrderedLayerInfo);
 

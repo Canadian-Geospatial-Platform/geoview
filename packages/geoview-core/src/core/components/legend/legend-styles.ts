@@ -94,6 +94,13 @@ export const getSxClasses = (theme: Theme, isFullScreen?: boolean, footerPanelRe
         },
       },
     },
+    '& .outOfRange': {
+      backgroundColor: `${theme.palette.grey[200]}`,
+      '& .layerTitle': {
+        color: `${theme.palette.grey[600]}`,
+        fontStyle: 'italic',
+      },
+    },
   },
   collapsibleContainer: {
     width: '100%',

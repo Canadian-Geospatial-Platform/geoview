@@ -71,6 +71,7 @@ export interface IMapState {
   actions: {
     createBasemapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
+    getInVisibleRangeFromOrderedLayerInfo: (layerPath: string) => boolean;
     showClickMarker: (marker: TypeClickMarker) => void;
     hideClickMarker: () => void;
     highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
@@ -232,6 +233,16 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       getPixelFromCoordinate: (coord: Coordinate): [number, number] => {
         // Redirect to processor and return the result
         return MapEventProcessor.getPixelFromCoordinate(get().mapId, coord);
+      },
+
+      /**
+       * Retrieves the inVisibleRange from ordered layer information.
+       * @param {string} layerPath - The path of the layer.
+       * @returns {boolean} The visibility of the layer.
+       */
+      getInVisibleRangeFromOrderedLayerInfo: (layerPath: string): boolean => {
+        // Redirect to processor and return the result
+        return MapEventProcessor.getMapInVisibleRangeFromOrderedLayerInfo(get().mapId, layerPath);
       },
 
       /**
@@ -889,6 +900,7 @@ export interface TypeOrderedLayerInfo {
   layerPath: string;
   queryable?: boolean;
   visible: boolean;
+  inVisibleRange: boolean;
   legendCollapsed: boolean;
 }
 

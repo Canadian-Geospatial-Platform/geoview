@@ -71,7 +71,6 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   const datatableSettings = useDataTableLayerSettings();
   const selectedLayerSortingArrowId = useSelectedLayerSortingArrowId();
   const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
-  const mapZoom = useMapZoom();
 
   useDataTableStoreActions();
 
@@ -443,22 +442,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [displayState]);
-
-  // Check if the layer is within it's visible scale range
-  useEffect(() => {
-    if (!layer.maxZoom && !layer.minZoom) return;
-
-    if (layer.maxZoom && layer.maxZoom < mapZoom) {
-      setInVisibleRange(false);
-      return;
-    }
-    if (layer.minZoom && layer.minZoom > mapZoom) {
-      setInVisibleRange(false);
-      return;
-    }
-    setInVisibleRange(true);
-  }, [mapZoom, layer]);
+  }, [legendLayers, displayState]);
 
   const AnimatedPaper = animated(Paper);
 
