@@ -42,21 +42,6 @@
           {
             "layerId": "4",
             "layerName": "Limited by Zoom - Water Quality",
-            "initialSettings": {
-              "minZoom": 5
-            }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "uniqueValueId",
-        "geoviewLayerName": "uniqueValue",
-        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
-        "geoviewLayerType": "esriDynamic",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "4",
-            "layerName": "Limited by Zoom - Water Quality",
             "entryType": "group",
             "initialSettings": {
               "minZoom": 3
@@ -65,7 +50,7 @@
               {
                 "layerId": "5",
                 "initialSettings": {
-                  "minZoom": 4
+                  "minZoom": 5
                 }
               },
               {
