@@ -86,7 +86,7 @@ const CustomScrollButton = memo(function CustomScrollButton({ direction, ...prop
  * @param {TypeTabsProps} props properties for the tabs ui
  * @returns {JSX.Element} returns the tabs ui
  */
-export function Tabs(props: TypeTabsProps): JSX.Element {
+function TabsUI(props: TypeTabsProps): JSX.Element {
   const {
     // NOTE: need this shellContainer, so that mobile dropdown can be rendered on top fullscreen window.
     shellContainer,
@@ -334,3 +334,5 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     </Grid>
   );
 }
+
+export const Tabs = TabsUI;

@@ -1,16 +1,36 @@
-import React, { forwardRef, memo, Ref } from 'react';
+import React, { forwardRef, Ref } from 'react';
 import { Tooltip as MaterialTooltip, TooltipProps } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
  * Create a customized Material UI Tooltip component.
- * This is a simple wrapper around MaterialTooltip that maintains
- * full compatibility with Material-UI's Tooltip props.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Tooltip title="Help text">
+ *   <Button>Hover me</Button>
+ * </Tooltip>
+ *
+ * // With placement
+ * <Tooltip
+ *   title="Top placement"
+ *   placement="top"
+ * >
+ *   <IconButton>
+ *     <InfoIcon />
+ *   </IconButton>
+ * </Tooltip>
+ * ```
  *
  * @param {TooltipProps} props - All valid Material-UI Tooltip props
+ * @param {Ref<HTMLElement>} ref - Reference to the underlying HTML element
  * @returns {JSX.Element} The Tooltip component
+ *
+ * @see {@link https://mui.com/material-ui/react-tooltip/}
  */
-function MUITooltip(props: TooltipProps, ref: Ref<HTMLElement>): JSX.Element {
+function TooltipUI(props: TooltipProps, ref: Ref<HTMLElement>): JSX.Element {
   logger.logTraceRender('ui/Tooltip/Tooltip', props);
 
   // TODO: open issue about this behavior in the Material-UI GitHub repository (multiple tooltip)
@@ -18,4 +38,4 @@ function MUITooltip(props: TooltipProps, ref: Ref<HTMLElement>): JSX.Element {
 }
 
 // Export the Tooltip using forwardRef so that passing ref is permitted and functional in the react standards
-export const Tooltip = memo(forwardRef<HTMLElement, TooltipProps>(MUITooltip));
+export const Tooltip = forwardRef<HTMLElement, TooltipProps>(TooltipUI);

@@ -1,6 +1,9 @@
+// GV: THIS UI COMPONENT IS NOT USE
 import { useState, useEffect, useCallback } from 'react';
 
 import { useTheme } from '@mui/material/styles';
+
+// TODO: reuse our own ui component
 import { Typography } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -10,8 +13,6 @@ import Box from '@mui/material/Box';
 
 import { getSxClasses } from '@/ui/list/checkbox-list/checkbox-list-style';
 import { logger } from '@/core/utils/logger';
-
-// TODO: Not use in any component... do we keep???
 
 /**
  * CheckboxList main Props
@@ -37,7 +38,7 @@ export type CheckboxListItem = {
  * @param props Main props for the component
  * @returns JSX.Element The Component
  */
-export function CheckboxList(props: CheckboxListProps): JSX.Element {
+function CheckboxListUI(props: CheckboxListProps): JSX.Element {
   const { listItems, checkedValues, multiselect, onChecked = null } = props;
 
   const theme = useTheme();
@@ -117,3 +118,5 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
     </List>
   );
 }
+
+export const CheckboxList = CheckboxListUI;

@@ -26,13 +26,13 @@ export type TypePanelAppProps = {
   button: IconButtonPropsExtend;
 
   // Callback when the user clicked the general close button
-  onHandleGeneralClose?: () => void;
+  onGeneralClose?: () => void;
   // Callback when the panel has completed opened (and transitioned in)
-  onHandleOpen?: () => void;
+  onOpen?: () => void;
   // Callback when the panel has been closed
-  onHandleClose?: () => void;
+  onClose?: () => void;
   // Callback when the panel has been closed by escape key
-  onHandleKeyDown?: (event: KeyboardEvent) => void;
+  onKeyDown?: (event: KeyboardEvent) => void;
 };
 
 /**
@@ -45,7 +45,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   logger.logTraceRender('ui/panel/panel');
 
   // Get constant from props
-  const { panel, button, onHandleOpen, onHandleClose, onHandleGeneralClose, onHandleKeyDown, ...rest } = props;
+  const { panel, button, onOpen, onClose, onGeneralClose, onKeyDown, ...rest } = props;
   const { status: open = false, isFocusTrapped = false, panelStyles, panelGroupName } = panel;
 
   // Hooks
@@ -90,15 +90,15 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
 
       // Wait the transition period (+50 ms just to be sure of shenanigans)
       setTimeout(() => {
-        onHandleOpen?.();
+        onOpen?.();
       }, theme.transitions.duration.standard + 50);
     } else {
       // Wait the transition period (+50 ms just to be sure of shenanigans)
       setTimeout(() => {
-        onHandleClose?.();
+        onClose?.();
       }, theme.transitions.duration.standard + 50);
     }
-  }, [open, theme.transitions.duration.standard, onHandleOpen, onHandleClose]);
+  }, [open, theme.transitions.duration.standard, onOpen, onClose]);
 
   /**
    * Update the width of data table and layers panel when window is resize based on mapsize
@@ -129,7 +129,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
           ref={panelRef as React.MutableRefObject<null>}
-          onKeyDown={(event: KeyboardEvent) => onHandleKeyDown?.(event)}
+          onKeyDown={(event: KeyboardEvent) => onKeyDown?.(event)}
           {...{ 'data-id': button.id }}
           {...rest}
         >
@@ -147,7 +147,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
                   tooltipPlacement="right"
                   aria-label={t('general.close')!}
                   size="small"
-                  onClick={() => onHandleGeneralClose?.()}
+                  onClick={() => onGeneralClose?.()}
                   iconRef={closeBtnRef}
                   className="cgpv-panel-close"
                 >

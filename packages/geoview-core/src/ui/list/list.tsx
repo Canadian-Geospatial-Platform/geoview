@@ -1,4 +1,4 @@
-import React, { forwardRef, memo, Ref } from 'react';
+import { forwardRef, Ref } from 'react';
 import MaterialList from '@mui/material/List';
 import { ListProps } from '@mui/material';
 import { logger } from '@/core/utils/logger';
@@ -21,9 +21,10 @@ const sxClasses = {
  * Create a customized Material UI List
  *
  * @param {TypeListProps} props the properties passed to the List element
+ * @param {Ref<HTMLUListElement>} ref - Reference to the underlying lu list element
  * @returns {JSX.Element} the created List element
  */
-function MUIList(props: TypeListProps, ref: Ref<HTMLUListElement>): JSX.Element {
+function ListUI(props: TypeListProps, ref: Ref<HTMLUListElement>): JSX.Element {
   logger.logTraceRender('ui/list/list', props);
 
   // Get constant from props
@@ -44,4 +45,4 @@ function MUIList(props: TypeListProps, ref: Ref<HTMLUListElement>): JSX.Element 
 }
 
 // Export the List using forwardRef so that passing ref is permitted and functional in the react standards
-export const List = memo(forwardRef<HTMLUListElement, TypeListProps>(MUIList));
+export const List = forwardRef<HTMLUListElement, TypeListProps>(ListUI);

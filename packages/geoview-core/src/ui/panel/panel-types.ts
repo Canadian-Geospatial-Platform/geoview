@@ -111,7 +111,7 @@ export type TypeButtonPanel = {
   /** Group name. */
   groupName?: string;
   /** callback triggered when a panel is fully opened */
-  onHandleOpen?: () => void;
+  onOpen?: () => void;
   // TODO: Check - Why handleOpen here and in TypePanelAppProps? Acts as a bridge, why?
 };
 

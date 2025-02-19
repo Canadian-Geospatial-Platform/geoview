@@ -1,4 +1,3 @@
-import { memo } from 'react';
 import { ListItemButton as MaterialListItemButton, ListItemButtonProps } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
@@ -10,7 +9,7 @@ import { logger } from '@/core/utils/logger';
  * @param {ListItemButtonProps} props - All valid Material-UI List Item Button props
  * @returns {JSX.Element} The List Item Button component
  */
-export const ListItemButton = memo(function ListItemButton(props: ListItemButtonProps): JSX.Element {
+function ListItemButtonUI(props: ListItemButtonProps): JSX.Element {
   logger.logTraceRender('ui/list/list-item-button', props);
 
   // Get constant from props
@@ -21,4 +20,6 @@ export const ListItemButton = memo(function ListItemButton(props: ListItemButton
       {children !== undefined && children}
     </MaterialListItemButton>
   );
-});
+}
+
+export const ListItemButton = ListItemButtonUI;

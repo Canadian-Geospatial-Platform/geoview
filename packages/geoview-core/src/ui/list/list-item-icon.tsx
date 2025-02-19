@@ -1,4 +1,3 @@
-import { memo } from 'react';
 import { ListItemIcon as MaterialListItemIcon, ListItemIconProps } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
@@ -10,7 +9,7 @@ import { logger } from '@/core/utils/logger';
  * @param {ListItemIconProps} props - All valid Material-UI List Item Icon props
  * @returns {JSX.Element} The List Item Icon component
  */
-export const ListItemIcon = memo(function ListItemIcon(props: ListItemIconProps): JSX.Element {
+function ListItemIconUI(props: ListItemIconProps): JSX.Element {
   logger.logTraceRender('ui/list/list-item-icon', props);
 
   /// Get constant from props
@@ -21,4 +20,6 @@ export const ListItemIcon = memo(function ListItemIcon(props: ListItemIconProps)
       {children !== undefined && children}
     </MaterialListItemIcon>
   );
-});
+}
+
+export const ListItemIcon = ListItemIconUI;
