@@ -19,6 +19,7 @@ interface LegendLayerHeaderProps {
   layer: TypeLegendLayer;
   isCollapsed: boolean;
   isVisible: boolean;
+  inVisibleRange: boolean;
   tooltip: string;
   onExpandClick: (event: React.MouseEvent) => void;
 }
@@ -32,8 +33,8 @@ const styles = {
 
 // Extracted Header Component
 const LegendLayerHeader = memo(
-  ({ layer, isCollapsed, isVisible, tooltip, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
-    <ListItem key={layer.layerName} divider onClick={onExpandClick}>
+  ({ layer, isCollapsed, isVisible, inVisibleRange, tooltip, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
+    <ListItem key={layer.layerName} divider onClick={onExpandClick} className={!inVisibleRange ? 'outOfRange' : ''}>
       <LayerIcon layer={layer} />
       <Tooltip title={layer.layerName} placement="top">
         <ListItemText
@@ -66,9 +67,10 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
 
   // Stores
   const { initLightBox, LightBoxComponent } = useLightBox();
-  const { setLegendCollapsed } = useMapStoreActions();
+  const { setLegendCollapsed, getInVisibleRangeFromOrderedlayerInfo } = useMapStoreActions();
   const isVisible = useSelectorLayerVisibility(layer.layerPath);
   const isCollapsed = useSelectorLayerLegendCollapsed(layer.layerPath);
+  const inVisibleRange = getInVisibleRangeFromOrderedlayerInfo(layer.layerPath);
   const layerStatus = useSelectorLayerStatus(layer.layerPath);
 
   // TODO: Check - Probably don't do that as it creates a new layer object and new items and new children, etc causing multiple re-renderings
@@ -99,6 +101,7 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
           layer={currentLayer}
           isCollapsed={isCollapsed}
           isVisible={isVisible}
+          inVisibleRange={inVisibleRange}
           tooltip={t('layers.toggleCollapse') as string}
           onExpandClick={handleExpandGroupClick}
         />

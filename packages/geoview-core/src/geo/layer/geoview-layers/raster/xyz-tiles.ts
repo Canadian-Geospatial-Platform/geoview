@@ -13,10 +13,11 @@ import {
   TypeGeoviewLayerConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { Cast, toJsonObject } from '@/core/types/global-types';
+import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { getZoomFromScale } from '@/app';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -142,6 +143,22 @@ export class XYZTiles extends AbstractGeoViewRaster {
         return;
       }
 
+      // ESRI MapServer Implementation
+      if (Array.isArray(this.metadata?.layers)) {
+        const metadataLayerList = this.metadata.layers;
+        const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.id.toString() === layerConfig.layerId);
+        if (!foundEntry) {
+          this.layerLoadError.push({
+            layer: layerPath,
+            loggerMessage: `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+          });
+          // eslint-disable-next-line no-param-reassign
+          layerConfig.layerStatus = 'error';
+          return;
+        }
+        return;
+      }
+
       throw new Error(
         `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
       );
@@ -214,20 +231,49 @@ export class XYZTiles extends AbstractGeoViewRaster {
   protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    const newLayerConfig = layerConfig;
 
     if (this.metadata) {
-      const metadataLayerConfigFound = Cast<XYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
-        (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
-      );
+      let metadataLayerConfigFound: XYZTilesLayerEntryConfig | TypeJsonObject | undefined;
+      if (this.metadata?.listOfLayerEntryConfig) {
+        metadataLayerConfigFound = Cast<XYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
+          (metadataLayerConfig) => metadataLayerConfig.layerId === newLayerConfig.layerId
+        );
+      }
+
+      // For ESRI MapServer XYZ Tiles
+      if (this.metadata?.layers) {
+        metadataLayerConfigFound = (this.metadata?.layers as TypeJsonArray).find(
+          (metadataLayerConfig) => metadataLayerConfig.id.toString() === newLayerConfig.layerId
+        );
+      }
+
       // metadataLayerConfigFound can not be undefined because we have already validated the config exist
-      this.setLayerMetadata(layerConfig.layerPath, toJsonObject(metadataLayerConfigFound));
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound!.source);
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+      this.setLayerMetadata(newLayerConfig.layerPath, toJsonObject(metadataLayerConfigFound));
+      newLayerConfig.source = defaultsDeep(newLayerConfig.source, metadataLayerConfigFound!.source);
+      newLayerConfig.initialSettings = defaultsDeep(newLayerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
+      newLayerConfig.initialSettings.extent = validateExtentWhenDefined(newLayerConfig.initialSettings.extent);
+
+      // Set zoom limits for max / min zooms
+      newLayerConfig.maxScale = metadataLayerConfigFound?.maxScale as number;
+      newLayerConfig.maxScale = metadataLayerConfigFound?.maxScale as number;
+
+      // ! Note: minScale is actually the maxZoom and maxScale is actually the minZoom
+      // ! As the scale gets smaller, the zoom gets larger
+      if (metadataLayerConfigFound?.minScale) {
+        const maxScaleZoomLevel = getZoomFromScale(this.mapId, metadataLayerConfigFound.minScale as number);
+        if (maxScaleZoomLevel && (!newLayerConfig.initialSettings.maxZoom || maxScaleZoomLevel > newLayerConfig.initialSettings.maxZoom)) {
+          newLayerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
+        }
+      }
+
+      if (metadataLayerConfigFound?.maxScale) {
+        const minScaleZoomLevel = getZoomFromScale(this.mapId, metadataLayerConfigFound.maxScale as number);
+        if (minScaleZoomLevel && (!newLayerConfig.initialSettings.minZoom || minScaleZoomLevel < newLayerConfig.initialSettings.minZoom)) {
+          newLayerConfig.initialSettings.minZoom = minScaleZoomLevel;
+        }
+      }
     }
-    return Promise.resolve(layerConfig);
+    return Promise.resolve(newLayerConfig);
   }
 }
