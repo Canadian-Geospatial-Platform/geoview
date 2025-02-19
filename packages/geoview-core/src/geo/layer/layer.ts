@@ -306,12 +306,14 @@ export class LayerApi {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
    * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
    */
-  generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[] {
+  static generateArrayOfLayerOrderInfo(
+    geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig,
+    zoom: number | undefined
+  ): TypeOrderedLayerInfo[] {
     const newOrderedLayerInfos: TypeOrderedLayerInfo[] = [];
 
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
       const subLayerPath = layerPath.endsWith(`/${layerEntryConfig.layerId}`) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
-      const zoom = this.mapViewer.getView().getZoom();
 
       const layerInfo: TypeOrderedLayerInfo = {
         layerPath: subLayerPath,
@@ -340,7 +342,6 @@ export class LayerApi {
         const layerPath = `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${
           (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
         }`;
-        const zoom = this.mapViewer.getView().getZoom();
         const layerInfo: TypeOrderedLayerInfo = {
           layerPath,
           legendCollapsed:
@@ -413,7 +414,10 @@ export class LayerApi {
           promise.value.forEach((geoviewLayerConfig) => {
             try {
               // Generate array of layer order information
-              const layerInfos = this.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+              const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(
+                geoviewLayerConfig,
+                MapEventProcessor.getMapViewer(this.getMapId()).getView().getZoom()
+              );
               orderedLayerInfos.push(...layerInfos);
 
               // Add it

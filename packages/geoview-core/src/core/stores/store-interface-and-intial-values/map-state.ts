@@ -71,7 +71,6 @@ export interface IMapState {
   actions: {
     createBasemapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
-    getInVisibleRangeFromOrderedLayerInfo: (layerPath: string) => boolean;
     showClickMarker: (marker: TypeClickMarker) => void;
     hideClickMarker: () => void;
     highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
@@ -233,16 +232,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       getPixelFromCoordinate: (coord: Coordinate): [number, number] => {
         // Redirect to processor and return the result
         return MapEventProcessor.getPixelFromCoordinate(get().mapId, coord);
-      },
-
-      /**
-       * Retrieves the inVisibleRange from ordered layer information.
-       * @param {string} layerPath - The path of the layer.
-       * @returns {boolean} The visibility of the layer.
-       */
-      getInVisibleRangeFromOrderedLayerInfo: (layerPath: string): boolean => {
-        // Redirect to processor and return the result
-        return MapEventProcessor.getMapInVisibleRangeFromOrderedLayerInfo(get().mapId, layerPath);
       },
 
       /**
@@ -949,6 +938,15 @@ export const useSelectorLayerVisibility = (layerPath: string): boolean => {
   const orderedLayerInfo = useStore(geoviewStore, (state) => state.mapState.orderedLayerInfo);
   // Redirect
   return MapEventProcessor.findMapLayerFromOrderedInfo(geoviewStore.getState().mapId, layerPath, orderedLayerInfo)?.visible || false;
+};
+
+export const useSelectorLayerInVisibleRange = (layerPath: string): boolean => {
+  // Get the store
+  const geoviewStore = useGeoViewStore();
+  // Hook
+  const orderedLayerInfo = useStore(geoviewStore, (state) => state.mapState.orderedLayerInfo);
+  // Redirect
+  return MapEventProcessor.findMapLayerFromOrderedInfo(geoviewStore.getState().mapId, layerPath, orderedLayerInfo)?.inVisibleRange || false;
 };
 
 export const useSelectorLayerLegendCollapsed = (layerPath: string): boolean => {

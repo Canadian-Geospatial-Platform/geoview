@@ -810,7 +810,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const pathToSearch = layerPathToReplace || layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, pathToSearch);
     const replacedLayers = this.findMapLayerAndChildrenFromOrderedInfo(mapId, pathToSearch);
-    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig, this.getMapViewer(mapId).getView().getZoom());
     orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
 
     // Redirect
@@ -830,7 +830,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     index?: number
   ): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
-    const newOrderedLayerInfo = this.getMapViewerLayerAPI(mapId).generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig, this.getMapViewer(mapId).getView().getZoom());
     if (!index) orderedLayerInfo.unshift(...newOrderedLayerInfo);
     else orderedLayerInfo.splice(index, 0, ...newOrderedLayerInfo);
 

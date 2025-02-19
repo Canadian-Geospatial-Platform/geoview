@@ -443,7 +443,7 @@ export abstract class AbstractLayerSet {
    */
   protected static isInVisibleRange(mapId: string, layer: AbstractBaseLayer): boolean {
     // Return false when false or undefined
-    return MapEventProcessor.getMapOrderedLayerInfoForLayer(mapId, layer.getLayerPath())?.inVisibleRange ?? false;
+    return MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layer.getLayerPath())?.inVisibleRange ?? false;
   }
 
   /**

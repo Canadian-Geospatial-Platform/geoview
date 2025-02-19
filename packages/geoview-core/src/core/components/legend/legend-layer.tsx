@@ -3,7 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
-import { useMapStoreActions, useSelectorLayerLegendCollapsed, useSelectorLayerStatus, useSelectorLayerVisibility } from '@/core/stores/';
+import {
+  useMapStoreActions,
+  useSelectorLayerLegendCollapsed,
+  useSelectorLayerStatus,
+  useSelectorLayerVisibility,
+  useSelectorLayerInVisibleRange,
+} from '@/core/stores/';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';
@@ -67,10 +73,10 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
 
   // Stores
   const { initLightBox, LightBoxComponent } = useLightBox();
-  const { setLegendCollapsed, getInVisibleRangeFromOrderedlayerInfo } = useMapStoreActions();
+  const { setLegendCollapsed } = useMapStoreActions();
   const isVisible = useSelectorLayerVisibility(layer.layerPath);
   const isCollapsed = useSelectorLayerLegendCollapsed(layer.layerPath);
-  const inVisibleRange = getInVisibleRangeFromOrderedlayerInfo(layer.layerPath);
+  const inVisibleRange = useSelectorLayerInVisibleRange(layer.layerPath);
   const layerStatus = useSelectorLayerStatus(layer.layerPath);
 
   // TODO: Check - Probably don't do that as it creates a new layer object and new items and new children, etc causing multiple re-renderings
@@ -105,12 +111,14 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
           tooltip={t('layers.toggleCollapse') as string}
           onExpandClick={handleExpandGroupClick}
         />
-        <CollapsibleContent
-          layer={currentLayer}
-          legendExpanded={!isCollapsed}
-          initLightBox={initLightBox}
-          LegendLayerComponent={LegendLayer}
-        />
+        {inVisibleRange && (
+          <CollapsibleContent
+            layer={currentLayer}
+            legendExpanded={!isCollapsed}
+            initLightBox={initLightBox}
+            LegendLayerComponent={LegendLayer}
+          />
+        )}
       </Box>
       <LightBoxComponent />
     </>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { animated } from '@react-spring/web';
@@ -29,9 +29,9 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useMapStoreActions,
-  useMapZoom,
   useSelectorLayerLegendCollapsed,
   useSelectorLayerVisibility,
+  useSelectorLayerInVisibleRange,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
@@ -75,6 +75,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   useDataTableStoreActions();
 
   const isVisible = useSelectorLayerVisibility(layer.layerPath);
+  const inVisibleRange = useSelectorLayerInVisibleRange(layer.layerPath);
   const legendExpanded = !useSelectorLayerLegendCollapsed(layer.layerPath);
 
   // TODO: I think we should favor using this pattern here, with the store, instead of working with the whole 'layer' object from the props
@@ -84,7 +85,6 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   // const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layer.layerPath);
   // const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layer.layerPath);
   const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layer.layerPath);
-  const [inVisibleRange, setInVisibleRange] = useState(true);
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(
@@ -442,7 +442,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [legendLayers, displayState]);
+  }, [displayState]);
 
   const AnimatedPaper = animated(Paper);
 
