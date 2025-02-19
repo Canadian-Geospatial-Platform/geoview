@@ -91,6 +91,13 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         },
       },
     },
+    '& .outOfRange': {
+      backgroundColor: `${theme.palette.grey[200]}`,
+      '& .layerTitle': {
+        color: `${theme.palette.grey[600]}`,
+        fontStyle: 'italic',
+      },
+    },
   },
   collapsibleContainer: {
     width: '100%',

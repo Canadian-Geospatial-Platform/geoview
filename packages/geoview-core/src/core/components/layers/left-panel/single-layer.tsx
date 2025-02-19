@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { animated, useSpring } from '@react-spring/web';
@@ -27,7 +27,7 @@ import {
   useSelectedLayerSortingArrowId,
   useLayerLegendLayers,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useMapStoreActions, useMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
@@ -73,6 +73,7 @@ export function SingleLayer({
     getLegendCollapsedFromOrderedLayerInfo,
     setLegendCollapsed,
     reorderLayer,
+    getInVisibleRangeFromOrderedLayerInfo,
   } = useMapStoreActions();
 
   const mapId = useGeoViewMapId();
@@ -82,12 +83,11 @@ export function SingleLayer({
   const selectedLayerSortingArrowId = useSelectedLayerSortingArrowId();
   const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
   const legendLayers = useLayerLegendLayers();
-  const mapZoom = useMapZoom();
 
   useDataTableStoreActions();
 
   const legendExpanded = !getLegendCollapsedFromOrderedLayerInfo(layer.layerPath);
-  const [inVisibleRange, setInVisibleRange] = useState(true);
+  const inVisibleRange = getInVisibleRangeFromOrderedLayerInfo(layer.layerPath);
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = (startingLayer: TypeLegendLayer): boolean => {
@@ -355,21 +355,6 @@ export function SingleLayer({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [legendLayers, displayState]);
-
-  // Check if the layer is within it's visible scale range
-  useEffect(() => {
-    if (!layer.maxZoom && !layer.minZoom) return;
-
-    if (layer.maxZoom && layer.maxZoom < mapZoom) {
-      setInVisibleRange(false);
-      return;
-    }
-    if (layer.minZoom && layer.minZoom > mapZoom) {
-      setInVisibleRange(false);
-      return;
-    }
-    setInVisibleRange(true);
-  }, [mapZoom, layer]);
 
   const AnimatedPaper = animated(Paper);
 

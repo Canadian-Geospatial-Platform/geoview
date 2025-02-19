@@ -100,7 +100,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    */
   #getOrderedLayerPaths(): string[] {
     // Get the map layer order
-    const mapLayerOrder = this.layerApi.mapViewer.getMapLayerOrderInfo();
+    const mapLayerOrder = this.layerApi.mapViewer.getMapLayerOrderInfo().filter((layer) => layer.inVisibleRange);
     const resultSetLayers = new Set(Object.keys(this.resultSet));
 
     // Filter and order the layers that are in our resultSet

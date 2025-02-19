@@ -18,6 +18,7 @@ interface LegendLayerHeaderProps {
   layer: TypeLegendLayer;
   isCollapsed: boolean;
   isVisible: boolean;
+  inVisibleRange: boolean;
   onExpandClick: (e: React.MouseEvent) => void;
 }
 
@@ -30,8 +31,8 @@ const styles = {
 
 // Extracted Header Component
 const LegendLayerHeader = memo(
-  ({ layer, isCollapsed, isVisible, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
-    <ListItem key={layer.layerName} divider onClick={onExpandClick}>
+  ({ layer, isCollapsed, isVisible, inVisibleRange, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
+    <ListItem key={layer.layerName} divider onClick={onExpandClick} className={!inVisibleRange ? 'outOfRange' : ''}>
       <LayerIcon layer={layer} />
       <Tooltip title={layer.layerName} placement="top">
         <ListItemText
@@ -62,9 +63,15 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
 
   // Stores
   const { initLightBox, LightBoxComponent } = useLightBox();
-  const { getLegendCollapsedFromOrderedLayerInfo, getVisibilityFromOrderedLayerInfo, setLegendCollapsed } = useMapStoreActions();
+  const {
+    getLegendCollapsedFromOrderedLayerInfo,
+    getVisibilityFromOrderedLayerInfo,
+    setLegendCollapsed,
+    getInVisibleRangeFromOrderedLayerInfo,
+  } = useMapStoreActions();
   const { getLayerStatus } = useLayerStoreActions();
   const isVisible = getVisibilityFromOrderedLayerInfo(layer.layerPath);
+  const inVisibleRange = getInVisibleRangeFromOrderedLayerInfo(layer.layerPath);
   const layerStatus = getLayerStatus(layer.layerPath);
 
   // State
@@ -91,7 +98,13 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   return (
     <>
       <Box sx={sxClasses.legendLayerListItem}>
-        <LegendLayerHeader layer={currentLayer} isCollapsed={isCollapsed} isVisible={isVisible} onExpandClick={handleExpandGroupClick} />
+        <LegendLayerHeader
+          layer={currentLayer}
+          isCollapsed={isCollapsed}
+          isVisible={isVisible}
+          inVisibleRange={inVisibleRange}
+          onExpandClick={handleExpandGroupClick}
+        />
         <CollapsibleContent
           layer={currentLayer}
           legendExpanded={!isCollapsed}

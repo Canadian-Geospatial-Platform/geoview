@@ -137,6 +137,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         // If state is not queryable
         if (!AbstractLayerSet.isStateQueryable(layer)) return;
 
+        // If state is not in visible range
+        if (!AbstractLayerSet.isInVisibleRange(this.getMapId(), layer)) return;
+
         // Flag processing
         this.resultSet[layerPath].features = undefined;
         this.resultSet[layerPath].queryStatus = 'processing';
