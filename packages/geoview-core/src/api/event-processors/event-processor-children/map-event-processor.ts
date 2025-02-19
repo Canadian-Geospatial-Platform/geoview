@@ -1337,6 +1337,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         overviewMap: config.overviewMap,
         components: config.components,
         corePackages: config.corePackages,
+        corePackagesConfig: config.corePackagesConfig,
         externalPackages: config.externalPackages,
         serviceUrls: config.serviceUrls,
         schemaVersionUsed: config.schemaVersionUsed,

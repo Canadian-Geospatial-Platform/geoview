@@ -871,7 +871,7 @@ export class MapViewer {
    * @param status - Toggle fullscreen or exit fullscreen status
    * @param {HTMLElement} element - The element to toggle fullscreen on
    */
-  static setFullscreen(status: boolean, element: TypeHTMLElement): void {
+  setFullscreen(status: boolean, element: TypeHTMLElement): void {
     // TODO: Refactor - For reusability, this function should be static and moved to a browser-utilities class
     // TO.DOCONT: If we want to keep a function here, in MapViewer, it should just be a redirect to the browser-utilities'
     // enter fullscreen
@@ -895,6 +895,25 @@ export class MapViewer {
 
     // exit fullscreen
     if (!status) {
+      // Store current extent before exiting fullscreen
+      const currentExtent = this.getView().calculateExtent();
+      const currentZoom = this.getView().getZoom();
+
+      // Create one-time listener for handleMapChangeSize completion
+      const handleSizeChangeOnce = (): void => {
+        // Set the zoom level and extent after internal size change is complete
+        this.setZoomLevel(currentZoom!);
+        this.getView().fit(currentExtent, {
+          size: this.map.getSize(),
+        });
+
+        // Remove the listener
+        this.map.un('change:size', handleSizeChangeOnce);
+      };
+
+      // Listen to our internal mapChangeSize event
+      this.map.on('change:size', handleSizeChangeOnce);
+
       if (document.exitFullscreen) {
         document.exitFullscreen().catch((error) => {
           // Log
@@ -910,6 +929,16 @@ export class MapViewer {
         /* Firefox */
         (document as TypeDocument).mozCancelFullScreen();
       }
+
+      // Use a small timeout to let the map container resize first
+      setTimeout(() => {
+        this.setZoomLevel(currentZoom!);
+
+        // Fit to the stored extent
+        this.getView().fit(currentExtent, {
+          size: this.map.getSize(),
+        });
+      }, 1000);
     }
   }
 

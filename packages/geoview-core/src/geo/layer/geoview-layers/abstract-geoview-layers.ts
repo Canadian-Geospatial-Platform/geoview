@@ -165,7 +165,6 @@ export abstract class AbstractGeoViewLayer {
   #setListOfLayerEntryConfig(geoviewLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     if (listOfLayerEntryConfig.length === 0) return;
     if (listOfLayerEntryConfig.length === 1) {
-      if (!listOfLayerEntryConfig[0].layerId) listOfLayerEntryConfig[0].layerId = this.getGeoviewLayerId();
       this.listOfLayerEntryConfig = listOfLayerEntryConfig;
     } else {
       const layerGroup = new GroupLayerEntryConfig({

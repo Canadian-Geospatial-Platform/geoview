@@ -4,7 +4,6 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { NotificationDetailsType } from '@/core/components';
 import { TypeHTMLElement } from '@/core/types/global-types';
 import { createGuideObject } from '@/core/utils/utilities';
-import { MapViewer } from '@/geo/map/map-viewer';
 import { MapEventProcessor } from './map-event-processor';
 import { SnackbarType } from '@/core/utils/notifications';
 import { logger } from '@/core/utils/logger';
@@ -151,7 +150,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
 
   static setFullscreen(mapId: string, active: boolean, element?: TypeHTMLElement): void {
     this.getAppState(mapId).setterActions.setFullScreenActive(active);
-    if (element !== undefined) MapViewer.setFullscreen(active, element);
+    if (element !== undefined) MapEventProcessor.getMapViewer(mapId).setFullscreen(active, element);
   }
 
   static setCircularProgress(mapId: string, active: boolean): void {
