@@ -171,7 +171,7 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
       enableRotation: true,
       rotation: 0,
       minZoom: 0,
-      maxZoom: 50,
+      maxZoom: 20,
       maxExtent: CV_MAP_EXTENTS[3978],
       projection: 3978,
     },

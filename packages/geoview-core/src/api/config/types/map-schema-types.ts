@@ -194,12 +194,12 @@ export type TypeViewSettings = {
   maxExtent?: Extent;
   /**
    * The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
-   * Domain = [0..50].
+   * Domain = [0..20].
    */
   minZoom?: number;
   /**
    * The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
-   * Domain = [0..50].
+   * Domain = [0..20].
    */
   maxZoom?: number;
   /**
