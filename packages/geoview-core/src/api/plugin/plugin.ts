@@ -122,29 +122,32 @@ export abstract class Plugin {
            */
           const configUrl = document.getElementById(mapId)?.getAttribute('data-config-url');
 
-          // function to check if there is an inline config
+          // Function to check if there is an inline config
           const getInlineConfig = (configs: Array<{ [key: string]: TypeJsonObject }>): TypeJsonObject | undefined => {
             // Find first object in array that has the 'plugin' key
             const configObj = configs.find((config) => pluginId in config);
             return configObj?.[pluginId];
           };
 
-          // check if there is a corePackageConfig for the plugin
+          // Check if there is a corePackageConfig for the plugin
           const viewer = MapEventProcessor.getMapViewer(mapId);
           const configObj = viewer.mapFeaturesConfig.corePackagesConfig
             ? getInlineConfig(viewer.mapFeaturesConfig.corePackagesConfig as Array<{ [key: string]: TypeJsonObject }>)
             : undefined;
 
           // If there is an inline config use it, if not try to read the file config associated with map config
-          if (configObj) pluginConfigObj = configObj;
-          else if (configUrl) {
+          if (configObj) {
+            logger.logTraceCore('Plugin - addPlugin inline config', configObj);
+            pluginConfigObj = configObj;
+          } else if (configUrl) {
             const configPath = `${configUrl.split('.json')[0]}-${pluginId}.json`;
 
             try {
-              // try to find get the custom config from the config path
+              // Try to find the custom config from the config path
               const result = await (await fetch(configPath)).json();
 
               if (result) {
+                logger.logTraceCore('Plugin - addPlugin file config', result);
                 pluginConfigObj = result;
               }
             } catch (error) {
