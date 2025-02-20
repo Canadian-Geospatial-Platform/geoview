@@ -897,12 +897,10 @@ export class MapViewer {
     if (!status) {
       // Store current extent before exiting fullscreen
       const currentExtent = this.getView().calculateExtent();
-      const currentZoom = this.getView().getZoom();
 
       // Create one-time listener for handleMapChangeSize completion
       const handleSizeChangeOnce = (): void => {
-        // Set the zoom level and extent after internal size change is complete
-        this.setZoomLevel(currentZoom!);
+        // Set the extent after internal size change is complete
         this.getView().fit(currentExtent, {
           size: this.map.getSize(),
         });
@@ -929,16 +927,6 @@ export class MapViewer {
         /* Firefox */
         (document as TypeDocument).mozCancelFullScreen();
       }
-
-      // Use a small timeout to let the map container resize first
-      setTimeout(() => {
-        this.setZoomLevel(currentZoom!);
-
-        // Fit to the stored extent
-        this.getView().fit(currentExtent, {
-          size: this.map.getSize(),
-        });
-      }, 1000);
     }
   }
 
