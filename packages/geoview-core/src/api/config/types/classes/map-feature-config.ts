@@ -237,11 +237,11 @@ export class MapFeatureConfig {
       : CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed!;
     const minZoom = this.map.viewSettings.minZoom!;
     this.map.viewSettings.minZoom =
-      !Number.isNaN(minZoom) && minZoom >= 0 && minZoom <= 50 ? minZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.minZoom;
+      !Number.isNaN(minZoom) && minZoom >= 0 && minZoom <= 20 ? minZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.minZoom;
 
     const maxZoom = this.map.viewSettings.maxZoom!;
     this.map.viewSettings.maxZoom =
-      !Number.isNaN(maxZoom) && maxZoom >= 0 && maxZoom <= 50 ? maxZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.maxZoom;
+      !Number.isNaN(maxZoom) && maxZoom >= 0 && maxZoom <= 20 ? maxZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.maxZoom;
 
     if (this.map.viewSettings.initialView!.zoomAndCenter) this.#validateMaxExtent();
     this.#logModifs(providedMapConfig);

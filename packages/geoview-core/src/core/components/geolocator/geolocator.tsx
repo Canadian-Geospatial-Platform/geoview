@@ -3,16 +3,16 @@ import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBarUI, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
-import { StyledInputField, getSxClasses } from './geolocator-style';
-import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { useUIActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { GeolocatorResult } from './geolocator-result';
-import { logger } from '@/core/utils/logger';
+import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
+import { StyledInputField, getSxClasses } from '@/core/components/geolocator/geolocator-style';
+import { cleanPostalCode, getDecimalDegreeItem } from '@/core/components/geolocator/utilities';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { FocusTrapContainer } from '@/core/components/common';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 
 export interface GeoListItem {
   key: string;
@@ -24,69 +24,38 @@ export interface GeoListItem {
   category: string;
 }
 
+const MIN_SEARCH_LENGTH = 3;
+const DEBOUNCE_DELAY = 500;
+
 export function Geolocator(): JSX.Element {
   // Log
   logger.logTraceRender('components/geolocator/geolocator');
 
+  // Hooks
   const { t } = useTranslation();
-
   const theme = useTheme();
-  const mapId = useGeoViewMapId();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // internal state
+  // State
   const [data, setData] = useState<GeoListItem[]>();
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
 
-  // get store values
+  // Store
+  const mapId = useGeoViewMapId();
   const displayLanguage = useAppDisplayLanguage();
   const geolocatorServiceURL = useAppGeolocatorServiceURL();
   const { setActiveAppBarTab } = useUIStoreActions();
   const { tabGroup, isOpen } = useUIActiveAppBarTab();
   const activeTrapGeoView = useUIActiveTrapGeoView();
 
+  // Refs
   const displayLanguageRef = useRef(displayLanguage);
   const geolocatorRef = useRef<HTMLDivElement>();
   const abortControllerRef = useRef<AbortController | null>(null);
   const fetchTimerRef = useRef<NodeJS.Timeout | undefined>();
   const searchInputRef = useRef<HTMLInputElement>();
-  const MIN_SEARCH_LENGTH = 3;
-
-  /**
-   * Checks if search term is decimal degree coordinate and return geo list item.
-   * @param {string} searchTerm search term user searched.
-   * @returns GeoListItem | null
-   */
-  const getDecimalDegreeItem = (searchTerm: string): GeoListItem | null => {
-    const latLngRegDD = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
-
-    if (!latLngRegDD.test(searchTerm)) {
-      return null;
-    }
-
-    // remove extra spaces and delimiters (the filter). convert string numbers to floaty numbers
-    const coords = searchTerm
-      .split(/[\s|,|;|]/)
-      .filter((n) => !Number.isNaN(n) && n !== '')
-      .map((n) => parseFloat(n));
-
-    // apply buffer to create bbox from point coordinates
-    const buff = 0.015; // degrees
-    const boundingBox: [number, number, number, number] = [coords[1] - buff, coords[0] - buff, coords[1] + buff, coords[0] + buff];
-
-    // prep the lat/long result that needs to be generated along with name based results
-    return {
-      key: 'coordinates',
-      name: `${coords[0]},${coords[1]}`,
-      lat: coords[0],
-      lng: coords[1],
-      bbox: boundingBox,
-      province: '',
-      category: 'Latitude/Longitude',
-    };
-  };
 
   /**
    * Send fetch call to the service for given search term.
@@ -96,6 +65,9 @@ export function Geolocator(): JSX.Element {
   const getGeolocations = useCallback(
     async (searchTerm: string): Promise<void> => {
       try {
+        // eslint-disable-next-line no-param-reassign
+        searchTerm = cleanPostalCode(searchTerm);
+
         setIsLoading(true);
         // Abort any pending requests
         if (abortControllerRef.current) {
@@ -164,7 +136,7 @@ export function Geolocator(): JSX.Element {
       // Log
       logger.logPromiseFailed('getGeolocations in deRequest in Geolocator', errorInside);
     });
-  }, OL_ZOOM_DURATION);
+  }, DEBOUNCE_DELAY);
 
   /**
    * Debounce the get geolocation service request
@@ -229,7 +201,7 @@ export function Geolocator(): JSX.Element {
     return () => {
       geolocator.removeEventListener('keydown', handleGeolocatorEscapeKey);
     };
-  }, [mapId, resetSearch]);
+  }, [resetSearch]);
 
   useEffect(() => {
     return () => {
@@ -266,7 +238,14 @@ export function Geolocator(): JSX.Element {
 
   // Update the ref whenever displayLanguage changes
   useEffect(() => {
+    logger.logTraceUseEffect('GEOLOCATOR - change language', displayLanguage, searchValue);
+
+    // Set language and redo request
     displayLanguageRef.current = displayLanguage;
+    doRequest(searchValue);
+
+    // Only listen to change in language to request new bvalue with updated language
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayLanguage]);
 
   return (
