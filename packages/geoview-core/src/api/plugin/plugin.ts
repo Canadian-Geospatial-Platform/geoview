@@ -130,10 +130,10 @@ export abstract class Plugin {
           };
 
           // check if there is a corePackageConfig for the plugin
-          const configObj =
-            props && props.viewer.mapFeaturesConfig.corePackagesConfig
-              ? getInlineConfig(props.viewer.mapFeaturesConfig.corePackagesConfig as Array<{ [key: string]: TypeJsonObject }>)
-              : undefined;
+          const viewer = MapEventProcessor.getMapViewer(mapId);
+          const configObj = viewer.mapFeaturesConfig.corePackagesConfig
+            ? getInlineConfig(viewer.mapFeaturesConfig.corePackagesConfig as Array<{ [key: string]: TypeJsonObject }>)
+            : undefined;
 
           // If there is an inline config use it, if not try to read the file config associated with map config
           if (configObj) pluginConfigObj = configObj;
