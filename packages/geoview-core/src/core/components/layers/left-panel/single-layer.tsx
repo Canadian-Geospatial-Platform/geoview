@@ -59,7 +59,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
-  const classes = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Get store states
   const { setSelectedLayerPath, setSelectedLayerSortingArrowId } = useLayerStoreActions();
@@ -441,8 +441,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
         listItems[0]?.focus();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [displayState]);
+  }, [displayState, selectedFooterLayerListItemId.length]);
 
   const AnimatedPaper = animated(Paper);
 
@@ -453,7 +452,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
           <ListItemButton
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
             tabIndex={-1}
-            sx={{ minHeight: '4.51rem', ...(!inVisibleRange && classes.outOfRange) }}
+            sx={{ minHeight: '4.51rem', ...(!inVisibleRange && sxClasses.outOfRange) }}
             className={!inVisibleRange ? 'out-of-range' : ''}
           >
             <LayerIcon layer={layer} />

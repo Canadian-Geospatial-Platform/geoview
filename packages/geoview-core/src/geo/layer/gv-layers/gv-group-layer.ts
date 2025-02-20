@@ -19,6 +19,10 @@ export class GVGroupLayer extends AbstractBaseLayer {
   public constructor(mapId: string, olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig) {
     super(mapId, layerConfig);
     this.olLayer = olLayerGroup;
+
+    // Set extreme zoom settings to group layer so sub layers can load
+    this.olLayer.setMaxZoom(50);
+    this.olLayer.setMinZoom(0);
   }
 
   /**

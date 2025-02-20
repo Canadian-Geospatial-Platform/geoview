@@ -228,11 +228,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
 
     // Set the zoom levels here to prevent the layer being stuck endlessly loading
-    if (layerConfig.initialSettings.maxZoom && layerConfig.initialSettings.maxZoom !== 0) {
+    if (layerConfig.initialSettings.maxZoom) {
       this.setMaxZoom(layerConfig.initialSettings.maxZoom);
     }
 
-    if (layerConfig.initialSettings.minZoom && layerConfig.initialSettings.minZoom !== 0) {
+    if (layerConfig.initialSettings.minZoom) {
       this.setMinZoom(layerConfig.initialSettings.minZoom);
     }
 

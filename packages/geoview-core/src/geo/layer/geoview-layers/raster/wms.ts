@@ -635,6 +635,7 @@ export class WMS extends AbstractGeoViewRaster {
         if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
         MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
 
+        // TODO Add Scale and Zoom level changes to config
         // TODO Since web map runs mostly in zoom levels, may not need Scale limits
         // Set Min/Max Scale Limits
         if (
@@ -654,8 +655,8 @@ export class WMS extends AbstractGeoViewRaster {
           layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
 
         // Set zoom limits for max / min zooms
-        // ! Note: minScale is actually the maxZoom and maxScale is actually the minZoom
-        // ! As the scale gets smaller, the zoom gets larger
+        // GV Note: minScale is actually the maxZoom and maxScale is actually the minZoom
+        // GV As the scale gets smaller, the zoom gets larger
         if (layerConfig.minScale) {
           const maxScaleZoomLevel = getZoomFromScale(this.mapId, layerConfig.minScale);
           if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {

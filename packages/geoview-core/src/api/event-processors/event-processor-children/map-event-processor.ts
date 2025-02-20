@@ -430,6 +430,23 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (getAppCrosshairsActive(mapId)) this.getMapViewer(mapId).emitMapSingleClick(clickCoordinates);
   }
 
+  static setInVisibleRange(mapId: string, layerPath: string): void {
+    const { orderedLayerInfo, zoom } = this.getMapStateProtected(mapId);
+    const legendLayer = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
+
+    if (!legendLayer) return;
+
+    const { minZoom, maxZoom } = legendLayer;
+    const inVisibleRange = zoom ? (!maxZoom || zoom <= maxZoom) && (!minZoom || zoom > minZoom) : true;
+
+    const orderedLayer = orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
+
+    if (orderedLayer && orderedLayer.inVisibleRange !== inVisibleRange) {
+      orderedLayer.inVisibleRange = inVisibleRange;
+      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
+    }
+  }
+
   static setZoom(mapId: string, zoom: number): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setZoom(zoom);
@@ -810,7 +827,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const pathToSearch = layerPathToReplace || layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, pathToSearch);
     const replacedLayers = this.findMapLayerAndChildrenFromOrderedInfo(mapId, pathToSearch);
-    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig, this.getMapViewer(mapId).getView().getZoom());
+    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
 
     // Redirect
@@ -830,7 +847,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     index?: number
   ): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
-    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig, this.getMapViewer(mapId).getView().getZoom());
+    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     if (!index) orderedLayerInfo.unshift(...newOrderedLayerInfo);
     else orderedLayerInfo.splice(index, 0, ...newOrderedLayerInfo);
 

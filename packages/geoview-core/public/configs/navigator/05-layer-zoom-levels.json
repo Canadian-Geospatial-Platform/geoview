@@ -44,13 +44,13 @@
             "layerName": "Limited by Zoom - Water Quality",
             "entryType": "group",
             "initialSettings": {
-              "minZoom": 3
+              "minZoom": 5
             },
             "listOfLayerEntryConfig": [
               {
                 "layerId": "5",
                 "initialSettings": {
-                  "minZoom": 5
+                  "minZoom": 7
                 }
               },
               {

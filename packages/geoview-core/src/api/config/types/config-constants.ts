@@ -66,7 +66,7 @@ export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   IMAGE_STATIC: 'https://cgpv/schema#/definitions/ImageStaticLayerEntryConfig',
   GEOPACKAGE: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
   XYZ_TILES: 'https://cgpv/schema#/definitions/TileLayerEntryConfig',
-  VECTOR_TILES: 'Thttps://cgpv/schema#/definitions/TileLayerEntryConfig',
+  VECTOR_TILES: 'https://cgpv/schema#/definitions/TileLayerEntryConfig',
   OGC_FEATURE: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
   CSV: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
 };

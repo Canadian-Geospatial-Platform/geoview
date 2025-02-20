@@ -111,14 +111,12 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
           tooltip={t('layers.toggleCollapse') as string}
           onExpandClick={handleExpandGroupClick}
         />
-        {inVisibleRange && (
-          <CollapsibleContent
-            layer={currentLayer}
-            legendExpanded={!isCollapsed}
-            initLightBox={initLightBox}
-            LegendLayerComponent={LegendLayer}
-          />
-        )}
+        <CollapsibleContent
+          layer={currentLayer}
+          legendExpanded={!isCollapsed}
+          initLightBox={initLightBox}
+          LegendLayerComponent={LegendLayer}
+        />
       </Box>
       <LightBoxComponent />
     </>

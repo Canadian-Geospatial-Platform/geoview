@@ -306,10 +306,7 @@ export class LayerApi {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
    * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
    */
-  static generateArrayOfLayerOrderInfo(
-    geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig,
-    zoom: number | undefined
-  ): TypeOrderedLayerInfo[] {
+  static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[] {
     const newOrderedLayerInfos: TypeOrderedLayerInfo[] = [];
 
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
@@ -325,9 +322,7 @@ export class LayerApi {
           layerEntryConfig.initialSettings?.states?.legendCollapsed !== undefined
             ? layerEntryConfig.initialSettings?.states?.legendCollapsed
             : false,
-        inVisibleRange:
-          (!layerEntryConfig.initialSettings?.maxZoom || !zoom || layerEntryConfig.initialSettings.maxZoom >= zoom) &&
-          (!layerEntryConfig.initialSettings?.minZoom || !zoom || layerEntryConfig.initialSettings.minZoom < zoom),
+        inVisibleRange: true,
       };
       newOrderedLayerInfos.push(layerInfo);
       if (layerEntryConfig.listOfLayerEntryConfig?.length) {
@@ -349,9 +344,7 @@ export class LayerApi {
               ? geoviewLayerConfig.initialSettings?.states?.legendCollapsed
               : false,
           visible: geoviewLayerConfig.initialSettings?.states?.visible !== false,
-          inVisibleRange:
-            (!geoviewLayerConfig.initialSettings?.maxZoom || !zoom || geoviewLayerConfig.initialSettings.maxZoom >= zoom) &&
-            (!geoviewLayerConfig.initialSettings?.minZoom || !zoom || geoviewLayerConfig.initialSettings.minZoom < zoom),
+          inVisibleRange: true,
         };
         newOrderedLayerInfos.push(layerInfo);
         (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.forEach((layerEntryConfig) => {
@@ -414,10 +407,7 @@ export class LayerApi {
           promise.value.forEach((geoviewLayerConfig) => {
             try {
               // Generate array of layer order information
-              const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(
-                geoviewLayerConfig,
-                MapEventProcessor.getMapViewer(this.getMapId()).getView().getZoom()
-              );
+              const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
               orderedLayerInfos.push(...layerInfos);
 
               // Add it
@@ -1000,10 +990,6 @@ export class LayerApi {
    * @returns A new GV Layer which is kept track of in LayerApi and initialized
    */
   #createGVGroupLayer(mapId: string, olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig): GVGroupLayer | undefined {
-    // Set extreme zoom settings to group layer so sub layers can load
-    olLayerGroup.setMaxZoom(50);
-    olLayerGroup.setMinZoom(0);
-
     // Create the GV Group Layer
     const gvGroupLayer = new GVGroupLayer(mapId, olLayerGroup, layerConfig);
 
@@ -1012,6 +998,14 @@ export class LayerApi {
 
     // Return the GV Group Layer
     return gvGroupLayer;
+  }
+
+  #setLayerInVisibleRange(layerConfig: TypeLayerEntryConfig): void {
+    if (layerConfig.listOfLayerEntryConfig) {
+      layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => this.#setLayerInVisibleRange(subLayerConfig));
+    }
+
+    MapEventProcessor.setInVisibleRange(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
@@ -1041,6 +1035,9 @@ export class LayerApi {
     if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
       // Add the OpenLayers layer to the map officially
       this.mapViewer.map.addLayer(geoviewLayer.olRootLayer!);
+
+      // Set in visible range property for all newly added layers
+      geoviewLayer.listOfLayerEntryConfig.forEach((layer) => this.#setLayerInVisibleRange(layer));
     }
 
     // Log
