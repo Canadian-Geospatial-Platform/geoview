@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
@@ -18,6 +19,7 @@ interface LegendLayerHeaderProps {
   layer: TypeLegendLayer;
   isCollapsed: boolean;
   isVisible: boolean;
+  tooltip: string;
   onExpandClick: (event: React.MouseEvent) => void;
 }
 
@@ -30,7 +32,7 @@ const styles = {
 
 // Extracted Header Component
 const LegendLayerHeader = memo(
-  ({ layer, isCollapsed, isVisible, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
+  ({ layer, isCollapsed, isVisible, tooltip, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
     <ListItem key={layer.layerName} divider onClick={onExpandClick}>
       <LayerIcon layer={layer} />
       <Tooltip title={layer.layerName} placement="top">
@@ -43,7 +45,7 @@ const LegendLayerHeader = memo(
         />
       </Tooltip>
       {(layer.children?.length > 1 || layer.items?.length > 1) && (
-        <IconButton className="buttonOutline" edge="end" size="small" tooltip="layers.toggleCollapse">
+        <IconButton className="buttonOutline" edge="end" size="small" tooltip={tooltip}>
           {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
       )}
@@ -58,6 +60,7 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   logger.logTraceRender('components/legend/legend-layer');
 
   // Hooks
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
@@ -92,7 +95,13 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   return (
     <>
       <Box sx={sxClasses.legendLayerListItem}>
-        <LegendLayerHeader layer={currentLayer} isCollapsed={isCollapsed} isVisible={isVisible} onExpandClick={handleExpandGroupClick} />
+        <LegendLayerHeader
+          layer={currentLayer}
+          isCollapsed={isCollapsed}
+          isVisible={isVisible}
+          tooltip={t('layers.toggleCollapse') as string}
+          onExpandClick={handleExpandGroupClick}
+        />
         <CollapsibleContent
           layer={currentLayer}
           legendExpanded={!isCollapsed}

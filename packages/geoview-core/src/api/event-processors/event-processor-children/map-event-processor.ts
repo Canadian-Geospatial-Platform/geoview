@@ -990,6 +990,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     let extent: Extent = CV_MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
 
+    // TODO: Use the values store in state. Use the new store function to set initial view values
+    // TODO.CONT: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2662
     // Transform center coordinates and update options if zoomAndCenter are in config
     if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter) {
       [options.maxZoom] = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter!;
@@ -1337,6 +1339,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         overviewMap: config.overviewMap,
         components: config.components,
         corePackages: config.corePackages,
+        corePackagesConfig: config.corePackagesConfig,
         externalPackages: config.externalPackages,
         serviceUrls: config.serviceUrls,
         schemaVersionUsed: config.schemaVersionUsed,

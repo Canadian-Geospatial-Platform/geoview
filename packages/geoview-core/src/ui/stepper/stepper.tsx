@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   Stepper as MaterialStepper,
   Step,
@@ -10,12 +11,13 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import { getSxClasses } from './stepper-style';
+import { getSxClasses } from '@/ui/stepper/stepper-style';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Custom MUI Stepper Props
  */
-interface TypeStepperProps extends StepperProps {
+interface StepperPropsExtend extends StepperProps {
   steps: (TypeStep | null)[];
 }
 
@@ -30,16 +32,65 @@ interface TypeStep {
 }
 
 /**
- * Create a Material UI Stepper component
+ * Create a customized Material UI Stepper component.
+ * This component provides a step-by-step interface with configurable
+ * labels and content for each step.
  *
- * @param {TypeStepperProps} props custom stepper properties
- * @returns {JSX.Element} the auto complete ui component
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Stepper
+ *   activeStep={1}
+ *   steps={[
+ *     {
+ *       stepLabel: { label: 'Step 1' },
+ *       stepContent: { children: 'Content for step 1' }
+ *     },
+ *     {
+ *       stepLabel: { label: 'Step 2' },
+ *       stepContent: { children: 'Content for step 2' }
+ *     }
+ *   ]}
+ * />
+ *
+ * // With custom styling and optional step
+ * <Stepper
+ *   activeStep={0}
+ *   orientation="vertical"
+ *   steps={[
+ *     {
+ *       id: "step1",
+ *       stepLabel: {
+ *         label: 'First Step',
+ *         optional: <Typography variant="caption">Optional</Typography>
+ *       },
+ *       stepContent: { children: 'Step content' },
+ *       props: { sx: { my: 1 } }
+ *     },
+ *     null,  // Skip this step
+ *     {
+ *       stepLabel: { label: 'Final Step' },
+ *       stepContent: { children: 'Final content' }
+ *     }
+ *   ]}
+ * />
+ * ```
+ *
+ * @param {StepperPropsExtend} props - The properties passed to the Stepper element
+ * @returns {JSX.Element} The Stepper component
+ *
+ * @see {@link https://mui.com/material-ui/react-stepper/}
  */
-export function Stepper(props: TypeStepperProps): JSX.Element {
+function StepperUI(props: StepperPropsExtend): JSX.Element {
+  logger.logTraceRender('ui/stepper/stepper', props);
+
+  // Get constant from props
   const { steps, ...stepperProps } = props;
 
+  // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   return (
     <MaterialStepper sx={sxClasses.stepper} {...stepperProps}>
@@ -61,3 +112,5 @@ export function Stepper(props: TypeStepperProps): JSX.Element {
     </MaterialStepper>
   );
 }
+
+export const Stepper = StepperUI;

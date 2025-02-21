@@ -459,8 +459,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
                   .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
                 <IconButton
                   sx={{ marginLeft: '1.25rem', [theme.breakpoints.down('sm')]: { display: 'none' } }}
-                  aria-label="clear-all-features"
-                  tooltip="details.clearAllfeatures"
+                  aria-label={t('details.clearAllfeatures') as string}
+                  tooltip={t('details.clearAllfeatures') as string}
                   tooltipPlacement="top"
                   onClick={() => handleClearAllHighlights()}
                   className="buttonOutline"
@@ -473,8 +473,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
             <Grid size={{ xs: 6 }}>
               <Box sx={{ textAlign: 'right', marginRight: '1.625rem' }}>
                 <IconButton
-                  aria-label="backward"
-                  tooltip="details.previousFeatureBtn"
+                  aria-label={t('details.previousFeatureBtn') as string}
+                  tooltip={t('details.previousFeatureBtn') as string}
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(-1)}
                   disabled={currentFeatureIndex <= 0}
@@ -484,8 +484,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
                 </IconButton>
                 <IconButton
                   sx={{ marginLeft: '1.25rem' }}
-                  aria-label="forward"
-                  tooltip="details.nextFeatureBtn"
+                  aria-label={t('details.nextFeatureBtn') as string}
+                  tooltip={t('details.nextFeatureBtn') as string}
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(1)}
                   disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData!.features!.length}

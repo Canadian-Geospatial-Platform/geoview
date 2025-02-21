@@ -37,6 +37,9 @@
         "corePackages": {
           "$ref": "#/definitions/TypeMapCorePackages"
         },
+        "corePackagesConfig": {
+          "$ref": "#/definitions/TypeCorePackagesConfig"
+        },
         "externalPackages": {
           "$ref": "#/definitions/TypeExternalPackages"
         },
@@ -340,6 +343,13 @@
         "$ref": "#/definitions/TypeValidMapCorePackageProps"
       },
       "default": [],
+      "minItems": 0
+    },
+    "TypeCorePackagesConfig": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "description": "Core packages configuration (optional, can be in another file).",
       "minItems": 0
     },
     "TypeExternalPackagesProps": {

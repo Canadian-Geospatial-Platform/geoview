@@ -18,12 +18,13 @@ import {
   Paper,
   Typography,
 } from '@/ui';
-import { TypeLegendLayer } from '@/core/components/layers/types';
+import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useLayerStoreActions,
   useLayerDisplayState,
   useLayerSelectedLayerPath,
   useSelectedLayerSortingArrowId,
+  useSelectorLayerItems,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useMapStoreActions,
@@ -77,7 +78,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   // const layerName: string | undefined = useSelectorLayerName(layer.layerPath);
   // const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layer.layerPath);
   // const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layer.layerPath);
-  // const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layer.layerPath);
+  const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layer.layerPath);
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(
@@ -212,8 +213,8 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       return t('legend.subLayersCount').replace('{count}', layer.children.length.toString());
     }
 
-    const count = layer.items.filter((d) => d.isVisible !== false).length;
-    const totalCount = layer.items.length;
+    const count = layerItems.filter((d) => d.isVisible !== false).length;
+    const totalCount = layerItems.length;
 
     let itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
 
@@ -230,7 +231,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       );
     }
     return itemsLengthDesc;
-  }, [datatableSettings, layer.children.length, layer.items, layer.layerPath, layer.layerStatus, t]);
+  }, [datatableSettings, layerItems, layer.children.length, layer.layerPath, layer.layerStatus, t]);
 
   // Memoize the EditModeButtons component section
   const memoEditModeButtons = useMemo((): JSX.Element | null => {
@@ -307,14 +308,20 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
 
     if (isLayerAlwaysVisible) {
       return (
-        <IconButton edge="end" size="small" tooltip="layers.visibilityIsAlways" className="buttonOutline" disabled>
+        <IconButton edge="end" size="small" tooltip={t('layers.visibilityIsAlways') as string} className="buttonOutline" disabled>
           <VisibilityOutlinedIcon color="disabled" />
         </IconButton>
       );
     }
 
     return (
-      <IconButton edge="end" size="small" onClick={handleToggleVisibility} tooltip="layers.toggleVisibility" className="buttonOutline">
+      <IconButton
+        edge="end"
+        size="small"
+        onClick={handleToggleVisibility}
+        tooltip={t('layers.toggleVisibility') as string}
+        className="buttonOutline"
+      >
         {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
       </IconButton>
     );
@@ -327,6 +334,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     layer.layerId,
     layer.layerPath,
     layer.layerStatus,
+    t,
   ]);
 
   // Memoize the arrow buttons component section
@@ -341,7 +349,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
           edge="end"
           size="small"
           onClick={handleExpandGroupClick}
-          tooltip="layers.toggleCollapse"
+          tooltip={t('layers.toggleCollapse') as string}
           className="buttonOutline"
         >
           {legendExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
@@ -350,7 +358,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     }
 
     return null;
-  }, [handleExpandGroupClick, layer.children?.length, legendExpanded]);
+  }, [handleExpandGroupClick, layer.children?.length, legendExpanded, t]);
 
   // Memoize the collapse component section
   const memoCollapse = useMemo((): JSX.Element | null => {

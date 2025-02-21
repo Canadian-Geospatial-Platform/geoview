@@ -69,10 +69,15 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
         <Tooltip title={t('details.keepFeatureSelected')} placement="top" enterDelay={1000}>
           <Checkbox disabled={!hasGeometry} onChange={onCheckChange} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
         </Tooltip>
-        <IconButton color="primary" disabled={!hasGeometry} onClick={onZoomIn} className="buttonOutline">
-          <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
-            <ZoomInSearchIcon />
-          </Tooltip>
+        <IconButton
+          color="primary"
+          tooltip={t('details.zoomTo') as string}
+          tooltipPlacement="top"
+          disabled={!hasGeometry}
+          onClick={onZoomIn}
+          className="buttonOutline"
+        >
+          <ZoomInSearchIcon />
         </IconButton>
       </Box>
     </Box>
@@ -186,7 +191,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
       <FeatureHeader
         iconSrc={featureData.iconSrc}
         name={featureData.name}
-        hasGeometry={!!featureData.geometry && !!featureData.extent}
+        hasGeometry={!!featureData.geometry && !!featureData.extent && !featureData.extent.includes(Infinity)}
         checked={checked}
         onCheckChange={handleFeatureSelectedChange}
         onZoomIn={handleZoomIn}

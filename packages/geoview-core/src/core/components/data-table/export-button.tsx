@@ -6,7 +6,7 @@ import { ExportToCsv, Options } from 'export-to-csv';
 
 import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 
-import { IconButton, DownloadIcon, Tooltip, Menu, MenuItem } from '@/ui';
+import { IconButton, DownloadIcon, Menu, MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { ColumnsType } from './data-table-types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -107,10 +107,8 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
 
   return (
     <>
-      <IconButton onClick={handleClick} className="buttonOutline">
-        <Tooltip title={t('dataTable.exportBtn')} placement="bottom" enterDelay={100}>
-          <DownloadIcon />
-        </Tooltip>
+      <IconButton onClick={handleClick} tooltip={t('dataTable.exportBtn') as string} className="buttonOutline">
+        <DownloadIcon />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem onClick={handleExportData}>{t('dataTable.downloadAsCSV')}</MenuItem>

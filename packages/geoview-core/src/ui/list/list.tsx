@@ -1,8 +1,7 @@
-/* eslint-disable react/require-default-props */
+import { forwardRef, Ref } from 'react';
 import MaterialList from '@mui/material/List';
-
 import { ListProps } from '@mui/material';
-import React from 'react';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Properties for the List UI
@@ -15,7 +14,6 @@ const sxClasses = {
   list: {
     padding: 0,
     width: '100%',
-    // maxWidth: 350, // for testing panel width
   },
 };
 
@@ -23,9 +21,13 @@ const sxClasses = {
  * Create a customized Material UI List
  *
  * @param {TypeListProps} props the properties passed to the List element
+ * @param {Ref<HTMLUListElement>} ref - Reference to the underlying lu list element
  * @returns {JSX.Element} the created List element
  */
-export const List = React.forwardRef<HTMLUListElement, TypeListProps>((props: TypeListProps, ref): JSX.Element => {
+function ListUI(props: TypeListProps, ref: Ref<HTMLUListElement>): JSX.Element {
+  logger.logTraceRender('ui/list/list', props);
+
+  // Get constant from props
   const { children, className, style, type, sx, ...rest } = props;
 
   return (
@@ -40,6 +42,7 @@ export const List = React.forwardRef<HTMLUListElement, TypeListProps>((props: Ty
       {children !== undefined && children}
     </MaterialList>
   );
-});
+}
 
-List.displayName = 'List';
+// Export the List using forwardRef so that passing ref is permitted and functional in the react standards
+export const List = forwardRef<HTMLUListElement, TypeListProps>(ListUI);

@@ -60,7 +60,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
         <IconButton
           key={buttonPanel.button.id}
           id={buttonPanel.button.id}
-          tooltip={buttonPanel.button.tooltip}
+          tooltip={t(buttonPanel.button.tooltip!) as string}
           tooltipPlacement={buttonPanel.button.tooltipPlacement}
           sx={sxClasses.navButton}
           onClick={(e) => handleClick(e)}

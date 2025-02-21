@@ -1,10 +1,11 @@
-import { Autocomplete as MaterialAutocomplete, AutocompleteProps, FormControl } from '@mui/material';
 import { forwardRef, Ref } from 'react';
+import { Autocomplete as MaterialAutocomplete, AutocompleteProps, FormControl } from '@mui/material';
+import { logger } from '@/core/utils/logger';
 
 /**
- * Customized Material UI Autocomplete properties
+ * Properties for the Autocomplete component extending Material-UI's AutocompleteProps
  */
-export interface TypeAutocompleteProps<
+export interface AutocompletePropsExtend<
   T,
   Multiple extends boolean | undefined = undefined,
   DisableClearable extends boolean | undefined = undefined,
@@ -14,17 +15,45 @@ export interface TypeAutocompleteProps<
 }
 
 /**
- * Create a Material UI Autocomplete component
+ * A customized Material-UI Autocomplete component with enhanced functionality.
  *
- * @param {TypeAutocompleteProps} props custom autocomplete properties
- * @returns {JSX.Element} the auto complete ui component
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Autocomplete
+ *   options={['Option 1', 'Option 2']}
+ *   fullWidth
+ * />
+ *
+ * // With objects
+ * <Autocomplete
+ *   options={[
+ *     { id: 1, label: 'Item 1' },
+ *     { id: 2, label: 'Item 2' }
+ *   ]}
+ *   getOptionLabel={(option) => option.label}
+ * />
+ * ```
+ *
+ * @param {AutocompletePropsExtend} props - The properties for the Autocomplete component
+ * @param {Ref<HTMLElement>} ref - The ref forwarded to the underlying MaterialAutocomplete
+ * @returns {JSX.Element} A rendered Autocomplete component
+ *
+ * @note For performance optimization in cases of frequent parent re-renders,
+ * consider wrapping this component with React.memo at the consumption level.
+ *
+ * @see {@link https://mui.com/material-ui/react-autocomplete/}
  */
-function MUIAutocomplete<
+function AutocompleteUI<
   T,
   Multiple extends boolean | undefined = undefined,
   DisableClearable extends boolean | undefined = undefined,
   FreeSolo extends boolean | undefined = undefined,
->(props: TypeAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>, ref: Ref<HTMLElement>): JSX.Element {
+>(props: AutocompletePropsExtend<T, Multiple, DisableClearable, FreeSolo>, ref: Ref<HTMLElement>): JSX.Element {
+  logger.logTraceRender('ui/autocomplete/autocomplete');
+
+  // Get constant from props
   const { fullWidth, ...autoCompleteProps } = props;
 
   return (
@@ -34,5 +63,5 @@ function MUIAutocomplete<
   );
 }
 
-// Export the Autocomplete  using forwardRef so that passing ref is permitted and functional in the react standards
-export const Autocomplete = forwardRef(MUIAutocomplete);
+// Export the Autocomplete using forwardRef so that passing ref is permitted and functional in the react standards
+export const Autocomplete = forwardRef(AutocompleteUI) as typeof AutocompleteUI;

@@ -8,7 +8,7 @@ import {
   ListItem,
   Panel,
   IconButton,
-  TypeIconButtonProps,
+  IconButtonPropsExtend,
   QuestionMarkIcon,
   InfoOutlinedIcon,
   HubOutlinedIcon,
@@ -305,8 +305,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
     }
     appBarConfigTabs
       .filter((tab) => CV_DEFAULT_APPBAR_TABS_ORDER.includes(tab) && memoPanels[tab])
-      .map((tab): [TypeIconButtonProps, TypePanelProps, string] => {
-        const button: TypeIconButtonProps = {
+      .map((tab): [IconButtonPropsExtend, TypePanelProps, string] => {
+        const button: IconButtonPropsExtend = {
           id: `AppbarPanelButton${capitalize(tab)}`,
           tooltip: t(`${camelCase(tab)}.title`)!,
           tooltipPlacement: 'bottom',
@@ -367,8 +367,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     <ListItem>
                       <IconButton
                         id={buttonPanel.button.id}
-                        aria-label={buttonPanel.button.tooltip}
-                        tooltip={buttonPanel.button.tooltip}
+                        aria-label={t(buttonPanel.button.tooltip!) as string}
+                        tooltip={t(buttonPanel.button.tooltip!) as string}
                         tooltipPlacement="right"
                         className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
                         size="small"
@@ -429,14 +429,14 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     key={`panel-${index.toString()}`}
                     panel={buttonPanel.panel}
                     button={buttonPanel.button}
-                    onPanelOpened={buttonPanel.onPanelOpened}
-                    onPanelClosed={hideClickMarker}
-                    handleKeyDown={(event: KeyboardEvent) =>
+                    onOpen={buttonPanel.onOpen}
+                    onClose={hideClickMarker}
+                    onKeyDown={(event: KeyboardEvent) =>
                       handleEscapeKey(event.key, tabId, isFocusTrapped, () => {
                         handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '');
                       })
                     }
-                    onGeneralCloseClicked={() => handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '')}
+                    onGeneralClose={() => handleGeneralCloseClicked(buttonPanel.button?.id ?? '', buttonPanel?.groupName ?? '')}
                   />
                 );
               }

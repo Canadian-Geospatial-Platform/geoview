@@ -280,11 +280,13 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * @param {TypeLayersViewDisplayState} newDisplayState - The display state to set.
        */
       setDisplayState: (newDisplayState: TypeLayersViewDisplayState): void => {
-        const curState = get().layerState.displayState;
+        // Act as a toggle to get back to view - force to add when no layers
+        const newState = get().layerState.displayState === newDisplayState ? 'view' : newDisplayState;
+        const finalState = get().layerState.legendLayers.length === 0 ? 'add' : newState;
         set({
           layerState: {
             ...get().layerState,
-            displayState: curState === newDisplayState ? 'view' : newDisplayState,
+            displayState: finalState,
           },
         });
       },
@@ -459,9 +461,22 @@ export const useSelectorLayerChildren = (layerPath: string): TypeLegendLayer[] |
   }, [legendLayers, layerPath, childrenKey]);
 };
 
-export const useSelectorLayerItems = (layerPath: string): TypeLegendItem[] | undefined => {
+export const useSelectorLayerItems = (layerPath: string): TypeLegendItem[] => {
   // Hook
   const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
-  // Redirect
-  return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.items;
+
+  // Find the items
+  const items = LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.items;
+
+  // Compute a dependency string based on the items values
+  const itemsKey = (items || []).map((item) => `${item.name}|${item.isVisible}|${item.icon}`).join('|||');
+
+  // Return a new array reference when items change
+  return useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('LAYER-STATE - useSelectorLayerItems', itemsKey); // Using itemsKey in log to satisfy linter
+
+    // Create a new array with spread operator to force new reference
+    return items ? [...items] : [];
+  }, [items, itemsKey]);
 };
