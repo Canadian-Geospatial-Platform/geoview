@@ -21,7 +21,6 @@ import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vecto
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { AbstractBaseLayer, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { logger } from '@/core/utils/logger';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * A class to hold a set of layers associated with a value of any type.
@@ -438,12 +437,12 @@ export abstract class AbstractLayerSet {
 
   /**
    * Checks if the layer is in visible range.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractGVLayer} layer - The layer
    * @returns {boolean} True if the state is queryable or undefined
    */
-  protected static isInVisibleRange(mapId: string, layer: AbstractBaseLayer): boolean {
+  protected static isInVisibleRange(mapId: string, layer: AbstractGVLayer): boolean {
     // Return false when false or undefined
-    return MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layer.getLayerPath())?.inVisibleRange ?? false;
+    return layer.getInVisibleRange() ?? false;
   }
 
   /**

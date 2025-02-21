@@ -2,11 +2,11 @@ import { Root, createRoot } from 'react-dom/client';
 import sanitizeHtml from 'sanitize-html';
 
 import { TypeDisplayLanguage } from '@config/types/map-schema-types';
+import View from 'ol/View';
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Return proper language Geoview localized values from map i18n instance
@@ -555,12 +555,11 @@ export function isElementInViewport(el: Element): boolean {
 
 /**
  * Convert a map scale to zoom level
- * @param mapId The mapId to get the view from
+ * @param view The view for converting the scale
  * @param targetScale The desired scale (e.g. 50000 for 1:50,000)
  * @returns number representing the closest zoom level for the given scale
  */
-export const getZoomFromScale = (mapId: string, targetScale: number): number | undefined => {
-  const view = MapEventProcessor.getMapViewer(mapId).map.getView();
+export const getZoomFromScale = (view: View, targetScale: number): number | undefined => {
   const projection = view.getProjection();
   const mpu = projection.getMetersPerUnit();
   const dpi = 25.4 / 0.28; // OpenLayers default DPI
@@ -580,12 +579,11 @@ export const getZoomFromScale = (mapId: string, targetScale: number): number | u
 
 /**
  * Convert a map scale to zoom level
- * @param mapId The mapId to get the view from
+ * @param view The view for converting the zoom
  * @param zoom The desired zoom (e.g. 50000 for 1:50,000)
  * @returns number representing the closest scale for the given zoom number
  */
-export const getScaleFromZoom = (mapId: string, zoom: number): number | undefined => {
-  const view = MapEventProcessor.getMapViewer(mapId).map.getView();
+export const getScaleFromZoom = (view: View, zoom: number): number | undefined => {
   const projection = view.getProjection();
   const mpu = projection.getMetersPerUnit();
   if (!mpu) return undefined;
@@ -602,9 +600,9 @@ export const getScaleFromZoom = (mapId: string, zoom: number): number | undefine
 
 /**
  * Get map scale for Web Mercator or Lambert Conformal Conic projections
- * @param mapId The mapId to get the view from
+ * @param view The view to get the current scale from
  * @returns number representing scale (e.g. 50000 for 1:50,000)
  */
-export const getMapScale = (mapId: string): number | undefined => {
-  return getScaleFromZoom(mapId, MapEventProcessor.getMapViewer(mapId).getView().getZoom() || 0);
+export const getMapScale = (view: View): number | undefined => {
+  return getScaleFromZoom(view, view.getZoom() || 0);
 };

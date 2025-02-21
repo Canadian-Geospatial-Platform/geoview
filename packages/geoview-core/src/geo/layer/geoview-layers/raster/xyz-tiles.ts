@@ -233,6 +233,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
     if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
     const newLayerConfig = layerConfig;
 
+    // TODO Need to see why the metadata isn't handled properly for ESRI XYZ tiles.
+    // GV Possibly caused by a difference between OGC and ESRI XYZ Tiles, but only have ESRI XYZ Tiles as example currently
+    // GV Also, might be worth checking out OGCMapTile for this? https://openlayers.org/en/latest/examples/ogc-map-tiles-geographic.html
+    // GV Seems like it can deal with less specificity in the url and can handle the x y z internally?
     if (this.metadata) {
       let metadataLayerConfigFound: XYZTilesLayerEntryConfig | TypeJsonObject | undefined;
       if (this.metadata?.listOfLayerEntryConfig) {
@@ -260,15 +264,16 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       // ! Note: minScale is actually the maxZoom and maxScale is actually the minZoom
       // ! As the scale gets smaller, the zoom gets larger
+      const mapView = this.getMapViewer().getView();
       if (metadataLayerConfigFound?.minScale) {
-        const maxScaleZoomLevel = getZoomFromScale(this.mapId, metadataLayerConfigFound.minScale as number);
+        const maxScaleZoomLevel = getZoomFromScale(mapView, metadataLayerConfigFound.minScale as number);
         if (maxScaleZoomLevel && (!newLayerConfig.initialSettings.maxZoom || maxScaleZoomLevel > newLayerConfig.initialSettings.maxZoom)) {
           newLayerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
         }
       }
 
       if (metadataLayerConfigFound?.maxScale) {
-        const minScaleZoomLevel = getZoomFromScale(this.mapId, metadataLayerConfigFound.maxScale as number);
+        const minScaleZoomLevel = getZoomFromScale(mapView, metadataLayerConfigFound.maxScale as number);
         if (minScaleZoomLevel && (!newLayerConfig.initialSettings.minZoom || minScaleZoomLevel < newLayerConfig.initialSettings.minZoom)) {
           newLayerConfig.initialSettings.minZoom = minScaleZoomLevel;
         }

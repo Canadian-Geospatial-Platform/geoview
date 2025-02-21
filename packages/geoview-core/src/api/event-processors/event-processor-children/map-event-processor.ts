@@ -635,23 +635,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get legend status of a layer
-    const info = this.getMapStateProtected(mapId).orderedLayerInfo;
-    const pathInfo = info.find((item) => item.layerPath === layerPath);
-    return pathInfo?.legendCollapsed !== false;
+    return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.legendCollapsed !== false;
   }
 
   static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get visibility of a layer
-    const info = this.getMapStateProtected(mapId).orderedLayerInfo;
-    const pathInfo = info.find((item) => item.layerPath === layerPath);
-    return pathInfo?.visible !== false;
+    return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.visible !== false;
   }
 
   static getMapInVisibleRangeFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
-    // Get visibility of a layer
-    const info = this.getMapStateProtected(mapId).orderedLayerInfo;
-    const pathInfo = info.find((item) => item.layerPath === layerPath);
-    return pathInfo?.inVisibleRange !== false;
+    // Get inVisibleRange of a layer
+    return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.inVisibleRange !== false;
   }
 
   static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void {

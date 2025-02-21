@@ -368,15 +368,16 @@ export function commonProcessInitialSettings(
   // Set zoom limits for max / min zooms
   // GV Note: minScale is actually the maxZoom and maxScale is actually the minZoom
   // GV As the scale gets smaller, the zoom gets larger
+  const mapView = layer.getMapViewer().getView();
   if (layerConfig.minScale) {
-    const maxScaleZoomLevel = getZoomFromScale(layer.mapId, layerConfig.minScale);
+    const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
     if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
       layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
     }
   }
 
   if (layerConfig.maxScale) {
-    const minScaleZoomLevel = getZoomFromScale(layer.mapId, layerConfig.maxScale);
+    const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
     if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
       layerConfig.initialSettings.minZoom = minScaleZoomLevel;
     }

@@ -10,6 +10,12 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
  * @class GVGroupLayer
  */
 export class GVGroupLayer extends AbstractBaseLayer {
+  /** Max zoom constant */
+  static readonly MAX_ZOOM = 50;
+
+  /** Min zoom constant */
+  static readonly MIN_ZOOM = 0;
+
   /**
    * Constructs a Group layer to manage an OpenLayer Group Layer.
    * @param {string} mapId - The map id
@@ -21,8 +27,8 @@ export class GVGroupLayer extends AbstractBaseLayer {
     this.olLayer = olLayerGroup;
 
     // Set extreme zoom settings to group layer so sub layers can load
-    this.olLayer.setMaxZoom(50);
-    this.olLayer.setMinZoom(0);
+    this.olLayer.setMaxZoom(GVGroupLayer.MAX_ZOOM);
+    this.olLayer.setMinZoom(GVGroupLayer.MIN_ZOOM);
   }
 
   /**
