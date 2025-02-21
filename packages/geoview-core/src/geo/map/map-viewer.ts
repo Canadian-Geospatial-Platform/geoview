@@ -872,8 +872,6 @@ export class MapViewer {
    * @param {HTMLElement | undefined} element - The element to toggle fullscreen on
    */
   setFullscreen(status: boolean, element: TypeHTMLElement | undefined): void {
-    logger.logDebug('TEST3', status);
-
     // TODO: Refactor - For reusability, this function should be static and moved to a browser-utilities class
     // TO.DOCONT: If we want to keep a function here, in MapViewer, it should just be a redirect to the browser-utilities'
     // enter fullscreen
