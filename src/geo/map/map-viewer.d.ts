@@ -130,9 +130,9 @@ export declare class MapViewer {
      * set fullscreen / exit fullscreen
      *
      * @param status - Toggle fullscreen or exit fullscreen status
-     * @param {HTMLElement} element - The element to toggle fullscreen on
+     * @param {HTMLElement | undefined} element - The element to toggle fullscreen on
      */
-    static setFullscreen(status: boolean, element: TypeHTMLElement): void;
+    setFullscreen(status: boolean, element: TypeHTMLElement | undefined): void;
     /**
      * Set map to either dynamic or static
      *

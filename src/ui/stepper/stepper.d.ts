@@ -2,7 +2,7 @@ import { StepperProps, StepLabelProps, StepContentProps, StepProps } from '@mui/
 /**
  * Custom MUI Stepper Props
  */
-interface TypeStepperProps extends StepperProps {
+interface StepperPropsExtend extends StepperProps {
     steps: (TypeStep | null)[];
 }
 /**
@@ -15,10 +15,56 @@ interface TypeStep {
     props?: StepProps;
 }
 /**
- * Create a Material UI Stepper component
+ * Create a customized Material UI Stepper component.
+ * This component provides a step-by-step interface with configurable
+ * labels and content for each step.
  *
- * @param {TypeStepperProps} props custom stepper properties
- * @returns {JSX.Element} the auto complete ui component
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Stepper
+ *   activeStep={1}
+ *   steps={[
+ *     {
+ *       stepLabel: { label: 'Step 1' },
+ *       stepContent: { children: 'Content for step 1' }
+ *     },
+ *     {
+ *       stepLabel: { label: 'Step 2' },
+ *       stepContent: { children: 'Content for step 2' }
+ *     }
+ *   ]}
+ * />
+ *
+ * // With custom styling and optional step
+ * <Stepper
+ *   activeStep={0}
+ *   orientation="vertical"
+ *   steps={[
+ *     {
+ *       id: "step1",
+ *       stepLabel: {
+ *         label: 'First Step',
+ *         optional: <Typography variant="caption">Optional</Typography>
+ *       },
+ *       stepContent: { children: 'Step content' },
+ *       props: { sx: { my: 1 } }
+ *     },
+ *     null,  // Skip this step
+ *     {
+ *       stepLabel: { label: 'Final Step' },
+ *       stepContent: { children: 'Final content' }
+ *     }
+ *   ]}
+ * />
+ * ```
+ *
+ * @param {StepperPropsExtend} props - The properties passed to the Stepper element
+ * @returns {JSX.Element} The Stepper component
+ *
+ * @see {@link https://mui.com/material-ui/react-stepper/}
  */
-export declare function Stepper(props: TypeStepperProps): JSX.Element;
+declare function StepperUI(props: StepperPropsExtend): JSX.Element;
+export declare const Stepper: typeof StepperUI;
 export {};

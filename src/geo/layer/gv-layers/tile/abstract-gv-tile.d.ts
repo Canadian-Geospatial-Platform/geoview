@@ -1,7 +1,7 @@
 import BaseTileLayer from 'ol/layer/BaseTile';
 import TileSource from 'ol/source/Tile';
 import LayerRenderer from 'ol/renderer/Layer';
-import { AbstractGVLayer } from '../abstract-gv-layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 /**
  * Abstract Geoview Layer managing an OpenLayer tile type layer.
  */

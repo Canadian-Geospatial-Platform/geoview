@@ -1,6 +1,5 @@
-import { TypeLegendLayer } from '@/core/components/layers/types';
 interface LeftPanelProps {
-    showLayerDetailsPanel: (layer: TypeLegendLayer) => void;
+    showLayerDetailsPanel: (layerId: string) => void;
     isLayoutEnlarged: boolean;
 }
 export declare function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanelProps): JSX.Element;

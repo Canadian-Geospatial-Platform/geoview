@@ -1,5 +1,5 @@
 import { Vector as VectorSource } from 'ol/source';
-import { AbstractGVVector } from './abstract-gv-vector';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /**

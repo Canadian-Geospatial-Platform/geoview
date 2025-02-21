@@ -4,8 +4,8 @@ import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-
 import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { LayerApi } from '@/geo/layer/layer';
-import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
-import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 /**
  * A class to hold a set of layers associated with a value of any type.
  * Layers are added/removed to the layer-set via the registerOrUnregisterLayer function.

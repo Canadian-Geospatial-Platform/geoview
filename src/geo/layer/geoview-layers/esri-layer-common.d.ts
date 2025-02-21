@@ -3,9 +3,9 @@ import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { TypeFeatureInfoEntryPartial, TypeLayerEntryConfig, TypeStyleGeometry, codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
-import { EsriDynamic } from './raster/esri-dynamic';
-import { EsriFeature } from './vector/esri-feature';
-import { EsriImage } from './raster/esri-image';
+import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /** ***************************************************************************************************************************

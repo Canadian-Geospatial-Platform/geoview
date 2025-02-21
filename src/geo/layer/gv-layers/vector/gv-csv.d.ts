@@ -1,6 +1,6 @@
 import { Vector as VectorSource } from 'ol/source';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
-import { AbstractGVVector } from './abstract-gv-vector';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 /**
  * Manages a CSV Feature layer.
  *

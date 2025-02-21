@@ -9,12 +9,12 @@ import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-i
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { AbstractBaseLayer } from './gv-layers/abstract-base-layer';
-import { AbstractGVLayer } from './gv-layers/abstract-gv-layer';
 import { TypeLegendItem } from '@/core/components/layers/types';
 export type GeoViewLayerAddedResult = {
     layer: AbstractGeoViewLayer;

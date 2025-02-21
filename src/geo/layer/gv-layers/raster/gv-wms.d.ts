@@ -6,7 +6,7 @@ import { Extent } from 'ol/extent';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
-import { AbstractGVRaster } from './abstract-gv-raster';
+import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 /**
  * Manages a WMS layer.

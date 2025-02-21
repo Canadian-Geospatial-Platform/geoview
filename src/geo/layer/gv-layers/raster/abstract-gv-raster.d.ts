@@ -3,7 +3,7 @@ import ImageSource from 'ol/source/Image';
 import LayerRenderer from 'ol/renderer/Layer';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
-import { AbstractGVLayer } from '../abstract-gv-layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 /**
  * Abstract Geoview Layer managing an OpenLayer raster type layer.
  */

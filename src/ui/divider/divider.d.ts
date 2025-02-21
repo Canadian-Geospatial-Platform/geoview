@@ -1,18 +1,42 @@
 import { SxProps, Theme } from '@mui/material/styles';
 import { DividerProps } from '@mui/material';
 /**
- * Properties for the Divider
+ * Properties for the Divider component extending Material-UI's DividerProps
  */
-interface TypeDividerProps extends DividerProps {
+export interface DividerPropsExtend extends DividerProps {
     orientation?: 'horizontal' | 'vertical';
     grow?: boolean;
     sx?: SxProps<Theme>;
 }
 /**
- * Create a customized Material UI Divider
+ * Create a customized Material UI Divider component.
  *
- * @param {TypeDividerProps} props the properties passed to the Divider element
- * @returns {JSX.Element} the created Divider element
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Divider />
+ *
+ * // Vertical divider
+ * <Divider orientation="vertical" />
+ *
+ * // Growing divider
+ * <Divider grow />
+ *
+ * // With custom styling
+ * <Divider
+ *   sx={{
+ *     borderColor: 'primary.main',
+ *     margin: 2
+ *   }}
+ * />
+ * ```
+ *
+ * @param {DividerPropsExtend} props - The properties passed to the Divider element
+ * @returns {JSX.Element} The Divider component
+ *
+ * @see {@link https://mui.com/material-ui/react-divider/}
  */
-export declare function Divider(props: TypeDividerProps): JSX.Element;
+declare function DividerUI(props: DividerPropsExtend): JSX.Element;
+export declare const Divider: typeof DividerUI;
 export {};

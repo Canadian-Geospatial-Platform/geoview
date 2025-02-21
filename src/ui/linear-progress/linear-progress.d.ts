@@ -1,27 +1,41 @@
 /**
- * Properties for the Accordion element
+ * Properties for the Progress Bar component extending Material-UI's LinearProgressProps
  */
 interface ProgressbarProps {
     className?: string;
-    /**
-     * The variant to use.
-     */
     variant?: 'determinate' | 'indeterminate' | 'buffer' | 'query';
-    /**
-     * The value of the progress indicator for the determinate and buffer variants.
-     * Value between 0 and 100.
-     */
     value?: number;
 }
 /**
- * Create a customized Progress bar UI
+ * Create a customized Material UI Linear Progress Bar component.
  *
- * @param {ProgressbarProps} props the properties passed to the element
- * @returns {JSX.Element} the created element
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <ProgressBar />
+ *
+ * // With determinate value
+ * <ProgressBar
+ *   variant="determinate"
+ *   value={75}
+ * />
+ *
+ * // With custom styling
+ * <ProgressBar
+ *   className="custom-progress"
+ *   variant="buffer"
+ * />
+ *
+ * // Indeterminate loading
+ * <ProgressBar variant="indeterminate" />
+ * ```
+ *
+ * @param {ProgressbarProps} props - The properties passed to the Progress Bar element
+ * @returns {JSX.Element} The Progress Bar component
+ *
+ * @see {@link https://mui.com/material-ui/react-progress/}
  */
-export declare function ProgressBar({ className, variant, value, ...rest }: ProgressbarProps): JSX.Element;
+declare function ProgressBarUI({ className, variant, value, ...props }: ProgressbarProps): JSX.Element;
+export declare const ProgressBar: typeof ProgressBarUI;
 export {};
-/**
- * Example of usage by application code
- * <ProgressBar variant='determinate' value={progress}></ProgressBar>
- */

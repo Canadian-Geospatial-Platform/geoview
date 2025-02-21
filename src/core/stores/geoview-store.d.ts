@@ -1,12 +1,13 @@
-import { IAppState } from './store-interface-and-intial-values/app-state';
-import { IFeatureInfoState } from './store-interface-and-intial-values/feature-info-state';
-import { ILayerState } from './store-interface-and-intial-values/layer-state';
-import { IMapState } from './store-interface-and-intial-values/map-state';
-import { IDataTableState } from './store-interface-and-intial-values/data-table-state';
-import { ITimeSliderState } from './store-interface-and-intial-values/time-slider-state';
-import { IGeochartState } from './store-interface-and-intial-values/geochart-state';
-import { ISwiperState } from './store-interface-and-intial-values/swiper-state';
-import { IUIState } from './store-interface-and-intial-values/ui-state';
+import { UseBoundStore, Mutate, StoreApi } from 'zustand';
+import { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { IFeatureInfoState } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { ILayerState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { IMapState } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { IDataTableState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { ITimeSliderState } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { IGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import { ISwiperState } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import { IUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 export type TypeSetStore = (partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>), replace?: false | undefined) => void;
 export type TypeGetStore = () => IGeoviewState;
@@ -26,16 +27,8 @@ export interface IGeoviewState {
 }
 export declare const geoviewStoreDefinition: (set: TypeSetStore, get: TypeGetStore) => IGeoviewState;
 export declare const geoviewStoreDefinitionWithSubscribeSelector: import("zustand").StateCreator<IGeoviewState, [], [["zustand/subscribeWithSelector", never]]>;
-declare const fakeStore: import("zustand").UseBoundStore<Omit<import("zustand").StoreApi<IGeoviewState>, "subscribe"> & {
-    subscribe: {
-        (listener: (selectedState: IGeoviewState, previousSelectedState: IGeoviewState) => void): () => void;
-        <U>(selector: (state: IGeoviewState) => U, listener: (selectedState: U, previousSelectedState: U) => void, options?: {
-            equalityFn?: ((a: U, b: U) => boolean) | undefined;
-            fireImmediately?: boolean;
-        } | undefined): () => void;
-    };
-}>;
-export type GeoviewStoreType = typeof fakeStore;
+type SubscribeWithSelectorMiddleware = [['zustand/subscribeWithSelector', never]];
+export type GeoviewStoreType = UseBoundStore<Mutate<StoreApi<IGeoviewState>, SubscribeWithSelectorMiddleware>>;
 export declare const useGeoViewMapId: () => string;
 export declare const useGeoViewConfig: () => TypeMapFeaturesConfig | undefined;
 export {};

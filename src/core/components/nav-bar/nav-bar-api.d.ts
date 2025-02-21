@@ -1,5 +1,5 @@
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
+import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { EventDelegateBase } from '@/api/events/event-helper';
 /**
  * Class to manage buttons on the nav-bar
@@ -40,12 +40,12 @@ export declare class NavBarApi {
     /**
      * Creates a nav-bar button panel
      *
-     * @param {TypeIconButtonProps} buttonProps - Button properties
+     * @param {IconButtonPropsExtend} buttonProps - Button properties
      * @param {TypePanelProps} panelProps - Panel properties
      * @param {string} groupName - Group name to add the button panel to
      * @returns {TypeButtonPanel | null} The created button panel
      */
-    createNavbarButtonPanel(buttonProps: TypeIconButtonProps, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null;
+    createNavbarButtonPanel(buttonProps: IconButtonPropsExtend, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null;
     /**
      * Creates a new nav-bar button that will trigger a callback when clicked
      *
@@ -53,7 +53,7 @@ export declare class NavBarApi {
      * @param {string} groupName - Group name to add button to
      * @returns {TypeButtonPanel | null} The created button
      */
-    createNavbarButton(buttonProps: TypeIconButtonProps, groupName: string): TypeButtonPanel | null;
+    createNavbarButton(buttonProps: IconButtonPropsExtend, groupName: string): TypeButtonPanel | null;
     /**
      * Gets a button panel from the nav-bar by using its id
      *

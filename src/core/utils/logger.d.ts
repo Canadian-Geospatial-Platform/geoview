@@ -1,7 +1,7 @@
 export declare const LOG_TRACE_DETAILED = 1;
 export declare const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
-export declare const LOG_TRACE_RENDER = 3;
-export declare const LOG_TRACE_USE_CALLBACK = 4;
+export declare const LOG_TRACE_USE_CALLBACK = 3;
+export declare const LOG_TRACE_RENDER = 4;
 export declare const LOG_TRACE_USE_MEMO = 5;
 export declare const LOG_TRACE_USE_EFFECT = 6;
 export declare const LOG_TRACE_CORE_STORE_SUBSCRIPTION = 8;

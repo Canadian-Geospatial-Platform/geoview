@@ -14,7 +14,7 @@ import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeLayerStyleConfig, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType } from '@/geo/map/map-schema-types';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { AbstractBaseLayer } from './abstract-base-layer';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.

@@ -3,6 +3,7 @@ import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/c
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeFeatureInfoEntryPartial, TypeLayerStatus, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
 import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerControls } from '@/api/config/types/map-schema-types';
 type LayerActions = ILayerState['actions'];
 export interface ILayerState {
     highlightedLayer: string;
@@ -19,7 +20,6 @@ export interface ILayerState {
         getLayer: (layerPath: string) => TypeLegendLayer | undefined;
         getLayerBounds: (layerPath: string) => number[] | undefined;
         getLayerDeleteInProgress: () => boolean;
-        getLayerStatus: (layerPath: string) => TypeLayerStatus;
         refreshLayer: (layerPath: string) => void;
         setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
         setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -69,4 +69,10 @@ export declare const useSelectedLayerSortingArrowId: () => string;
 export declare const useLayerStoreActions: () => LayerActions;
 export declare const useSelectedLayer: () => TypeLegendLayer | undefined;
 export declare const useIconLayerSet: (layerPath: string) => string[];
+export declare const useSelectorLayerName: (layerPath: string) => string | undefined;
+export declare const useSelectorLayerStatus: (layerPath: string) => TypeLayerStatus | undefined;
+export declare const useSelectorLayerLegendQueryStatus: (layerPath: string) => string | undefined;
+export declare const useSelectorLayerControls: (layerPath: string) => TypeLayerControls | undefined;
+export declare const useSelectorLayerChildren: (layerPath: string) => TypeLegendLayer[] | undefined;
+export declare const useSelectorLayerItems: (layerPath: string) => TypeLegendItem[];
 export {};

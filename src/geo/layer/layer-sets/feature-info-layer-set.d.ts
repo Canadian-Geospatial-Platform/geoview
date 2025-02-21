@@ -1,8 +1,8 @@
 import { Coordinate } from 'ol/coordinate';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeResultSet } from '@/geo/map/map-schema-types';
-import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
-import { EventType, AbstractLayerSet, PropagationType } from './abstract-layer-set';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { EventType, AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureInfoResultSet, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 /**

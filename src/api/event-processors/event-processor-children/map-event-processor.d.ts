@@ -9,9 +9,9 @@ import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer'
 import { TypeFeatureInfoEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 export declare class MapEventProcessor extends AbstractEventProcessor {
@@ -116,7 +116,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @param {string} layerPath - The path of the layer to get.
      * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
      */
-    static getMapOrderedLayerInfoForLayer(mapId: string, layerPath: string): TypeOrderedLayerInfo | undefined;
+    static findMapLayerFromOrderedInfo(mapId: string, layerPath: string, orderedLayerInfo?: TypeOrderedLayerInfo[]): TypeOrderedLayerInfo | undefined;
     /**
      * Gets the ordered layer info for one layer and its children.
      * @param {string} mapId - The map id.
@@ -124,7 +124,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The array of ordered layer info to search, default is current ordered layer info.
      * @returns {TypeOrderedLayerInfo[] | undefined} The ordered layer info of the layer and its children.
      */
-    static getMapLayerAndChildrenOrderedInfo(mapId: string, layerPath: string, orderedLayerInfo?: TypeOrderedLayerInfo[]): TypeOrderedLayerInfo[];
+    static findMapLayerAndChildrenFromOrderedInfo(mapId: string, layerPath: string, orderedLayerInfo?: TypeOrderedLayerInfo[]): TypeOrderedLayerInfo[];
     static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number;
     static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
     static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
