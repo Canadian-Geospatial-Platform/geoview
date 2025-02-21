@@ -1,0 +1,36 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "maxExtent": [-180, -50, 180, 89],
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "472ef86d-7f7c-423b-a7d2-b6f92b79fd6d",
+        "geoviewLayerType": "geoCore"
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

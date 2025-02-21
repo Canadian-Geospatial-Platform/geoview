@@ -24,14 +24,14 @@ import { logger } from '@/core/utils/logger';
 interface GeolocatorFiltersType {
   geoLocationData: GeoListItem[];
   searchValue: string;
-  error: Error | null;
+  error: boolean;
 }
 
 /**
  * Component to display filters and geo location result.
- * @param {GeoListItem[]} geoLocationData data to be displayed in result
- * @param {string} searchValue search value entered by the user.
- * @param {Error} error error thrown api call.
+ * @param {GeoListItem[]} geoLocationData - The data to be displayed in result
+ * @param {string} searchValue - The search value entered by the user.
+ * @param {boolean} error - If there is an error thrown api call.
  * @returns {JSX.Element}
  */
 export function GeolocatorResult({ geoLocationData, searchValue, error }: GeolocatorFiltersType): JSX.Element {
