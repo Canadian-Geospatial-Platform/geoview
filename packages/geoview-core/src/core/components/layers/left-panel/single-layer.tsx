@@ -18,12 +18,13 @@ import {
   Paper,
   Typography,
 } from '@/ui';
-import { TypeLegendLayer } from '@/core/components/layers/types';
+import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useLayerStoreActions,
   useLayerDisplayState,
   useLayerSelectedLayerPath,
   useSelectedLayerSortingArrowId,
+  useSelectorLayerItems,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useMapStoreActions,
@@ -77,7 +78,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   // const layerName: string | undefined = useSelectorLayerName(layer.layerPath);
   // const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layer.layerPath);
   // const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layer.layerPath);
-  // const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layer.layerPath);
+  const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layer.layerPath);
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(
@@ -212,8 +213,8 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       return t('legend.subLayersCount').replace('{count}', layer.children.length.toString());
     }
 
-    const count = layer.items.filter((d) => d.isVisible !== false).length;
-    const totalCount = layer.items.length;
+    const count = layerItems.filter((d) => d.isVisible !== false).length;
+    const totalCount = layerItems.length;
 
     let itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
 
@@ -230,7 +231,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       );
     }
     return itemsLengthDesc;
-  }, [datatableSettings, layer.children.length, layer.items, layer.layerPath, layer.layerStatus, t]);
+  }, [datatableSettings, layerItems, layer.children.length, layer.layerPath, layer.layerStatus, t]);
 
   // Memoize the EditModeButtons component section
   const memoEditModeButtons = useMemo((): JSX.Element | null => {

@@ -26,6 +26,7 @@
   "navBar": ["zoom", "fullscreen", "home"],
   "components": [],
   "corePackages": [],
+  "corePackagesConfig": [],
   "externalPackages": [],
   "serviceUrls": {
     "geocoreUrl": "https://geocore.api.geo.ca",

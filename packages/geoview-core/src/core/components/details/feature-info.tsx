@@ -191,7 +191,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
       <FeatureHeader
         iconSrc={featureData.iconSrc}
         name={featureData.name}
-        hasGeometry={!!featureData.geometry && !!featureData.extent}
+        hasGeometry={!!featureData.geometry && !!featureData.extent && !featureData.extent.includes(Infinity)}
         checked={checked}
         onCheckChange={handleFeatureSelectedChange}
         onZoomIn={handleZoomIn}

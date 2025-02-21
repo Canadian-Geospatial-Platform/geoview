@@ -27,6 +27,7 @@ import {
   TypeGlobalSettings,
   TypeOutfields,
   TypeOutfieldsType,
+  TypeCorePackagesConfig,
 } from '@config/types/map-schema-types';
 
 import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -507,6 +508,8 @@ export type TypeMapFeaturesInstance = {
   components?: TypeMapComponents; //! config
   /** List of core packages. */
   corePackages?: TypeMapCorePackages; //! config
+  /** List of core packages. */
+  corePackagesConfig?: TypeCorePackagesConfig; //! config
   /** List of external packages. */
   externalPackages?: TypeExternalPackages; //! config
   /**

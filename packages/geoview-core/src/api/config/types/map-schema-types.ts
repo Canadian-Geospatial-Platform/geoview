@@ -91,6 +91,14 @@ export type TypeValidMapCorePackageProps = 'swiper';
  */
 export type TypeMapCorePackages = TypeValidMapCorePackageProps[];
 
+/**
+ * Core packages config to initialize on viewer load. The schema for those are on their own package.
+ * NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json)
+ * OR inline with this parameter
+ * Default = [].
+ */
+export type TypeCorePackagesConfig = [];
+
 /** External package objexct definition. */
 export type TypeExternalPackagesProps = {
   /** External Package name. The name must be identical to the window external package object to load. */

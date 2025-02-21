@@ -34,6 +34,7 @@ import {
   TypeMapComponents,
   TypeMapConfig,
   TypeMapCorePackages,
+  TypeCorePackagesConfig,
   TypeNavBarProps,
   TypeOverviewMapProps,
   TypeServiceUrls,
@@ -89,6 +90,9 @@ export class MapFeatureConfig {
 
   /** List of core packages. */
   corePackages?: TypeMapCorePackages;
+
+  /** List of core packages config. */
+  corePackagesConfig?: TypeCorePackagesConfig;
 
   /** List of external packages. */
   externalPackages?: TypeExternalPackages;
@@ -161,6 +165,9 @@ export class MapFeatureConfig {
     );
     this.components = [...((userMapFeatureConfig.components || CV_DEFAULT_MAP_FEATURE_CONFIG.components) as TypeMapComponents)];
     this.corePackages = [...((userMapFeatureConfig.corePackages || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages) as TypeMapCorePackages)];
+    this.corePackagesConfig = [
+      ...((userMapFeatureConfig.corePackagesConfig || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig) as TypeCorePackagesConfig),
+    ];
     this.externalPackages = [
       ...((userMapFeatureConfig.externalPackages || CV_DEFAULT_MAP_FEATURE_CONFIG.externalPackages) as TypeExternalPackages),
     ];

@@ -189,6 +189,7 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
   components: ['north-arrow', 'overview-map'],
   appBar: { tabs: { core: ['geolocator'] } },
   corePackages: [],
+  corePackagesConfig: [],
   overviewMap: { hideOnZoom: 0 },
   externalPackages: [],
   serviceUrls: {
