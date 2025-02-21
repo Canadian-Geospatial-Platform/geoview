@@ -654,6 +654,120 @@ export class GeometryApi {
   }
 
   /**
+   * Get the coordinates of a specific feature
+   * @param {string} featureId the id of the feature
+   * @param {number} projection optional, transform the coordinates to the provided projection.
+   *   Otherwise, uses the map's projection by default
+   * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} the coordinates of the feature
+   */
+  getFeatureCoords(featureId: string, projection?: number): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined {
+    const feature = this.getGeometry(featureId);
+    const featureGeometry = feature?.getGeometry();
+    let coords;
+
+    if (
+      featureGeometry &&
+      (featureGeometry instanceof Point ||
+        featureGeometry instanceof MultiPoint ||
+        featureGeometry instanceof LineString ||
+        featureGeometry instanceof MultiLineString ||
+        featureGeometry instanceof Polygon ||
+        featureGeometry instanceof MultiPolygon)
+    ) {
+      coords = featureGeometry.getCoordinates();
+    } else if (featureGeometry && featureGeometry instanceof Circle) {
+      coords = featureGeometry.getCenter();
+    }
+
+    if (coords && projection) {
+      const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection];
+      const mapProjectionCode = mapProjection.getCode();
+      const transformProjection = `EPSG:${projection}`;
+      coords = GeometryApi.transformCoordinates(coords, mapProjectionCode, transformProjection);
+    }
+
+    return coords;
+  }
+
+  /**
+   * Allows for a feature's coordinates to be updated programatically.
+   * @param {string} featureId the id of the feature to return
+   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The new coordinates for the feature
+   * @param {number} projection optional, the projection of the coordinates, assumes 4326 if not specified
+   */
+  setFeatureCoords(
+    featureId: string,
+    coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][],
+    projection?: number
+  ): void {
+    const feature = this.getGeometry(featureId);
+    const featureGeometry = feature.getGeometry();
+    const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection].getCode();
+    const coordsProjection = `EPSG:${projection || 4326}`;
+    const projectedCoordinates = GeometryApi.transformCoordinates(coordinates, coordsProjection, mapProjection);
+
+    // Check if coordinates are valid, and transform the projection to match the map's projection
+    if (projectedCoordinates) {
+      if (featureGeometry instanceof Point) {
+        featureGeometry.setCoordinates(projectedCoordinates);
+      } else if (
+        (featureGeometry instanceof MultiPoint || featureGeometry instanceof LineString) &&
+        GeometryApi.isArrayOfCoordinates(projectedCoordinates)
+      ) {
+        featureGeometry.setCoordinates(projectedCoordinates);
+      } else if (
+        (featureGeometry instanceof MultiLineString || featureGeometry instanceof Polygon) &&
+        GeometryApi.isArrayOfArrayOfCoordinates(projectedCoordinates)
+      ) {
+        featureGeometry.setCoordinates(projectedCoordinates);
+      } else if (featureGeometry instanceof MultiPolygon && GeometryApi.isArrayOfArrayOfArrayOfCoordinates(projectedCoordinates)) {
+        featureGeometry.setCoordinates(projectedCoordinates);
+      } else if (featureGeometry instanceof Circle) {
+        if (GeometryApi.isCoordinates(projectedCoordinates)) {
+          featureGeometry.setCenter(projectedCoordinates);
+        }
+      } else {
+        throw new Error(`Unable to set coordinates for feature ${featureId}`);
+      }
+    } else {
+      throw new Error(`Unable to set coordinates for feature ${featureId}`);
+    }
+  }
+
+  /**
+   * Transform coordinates between two projections
+   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} coordinates the coordinates to transform
+   * @param {string} startProjection the current projection of the coordinates.
+   *   Note: the value should include 'EPSG:' then the projection  number.
+   * @param {string} endProjection the transformed projection of the coordinates.
+   *   Note: the value should include 'EPSG:' then the projection  number.
+   * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} the transformed coordinates
+   */
+  static transformCoordinates(
+    coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined,
+    startProjection: string,
+    endProjection: string
+  ): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined {
+    let projectedCoordinates;
+
+    if (coordinates && GeometryApi.isCoordinates(coordinates)) {
+      projectedCoordinates = Projection.transform(coordinates, startProjection, endProjection);
+    } else if (coordinates && GeometryApi.isArrayOfCoordinates(coordinates)) {
+      projectedCoordinates = coordinates.map((coord) => Projection.transform(coord, startProjection, endProjection));
+    } else if (coordinates && GeometryApi.isArrayOfArrayOfCoordinates(coordinates)) {
+      projectedCoordinates = coordinates.map((coordArray) =>
+        coordArray.map((coord) => Projection.transform(coord, startProjection, endProjection))
+      );
+    } else if (coordinates && GeometryApi.isArrayOfArrayOfArrayOfCoordinates(coordinates)) {
+      projectedCoordinates = coordinates.map((coordArrayArray) =>
+        coordArrayArray.map((coordArray) => coordArray.map((coord) => Projection.transform(coord, startProjection, endProjection)))
+      );
+    }
+
+    return projectedCoordinates;
+  }
+
+  /**
    * Creates a Geometry given a geometry type and coordinates expected in any logical format.
    * @param {TypeStyleGeometry} geometryType - The geometry type to create
    * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to use to create the geometry
