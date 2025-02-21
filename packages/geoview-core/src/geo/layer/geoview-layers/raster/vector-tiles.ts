@@ -200,13 +200,18 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // TODO: Refactor - Layers refactoring. What is this doing? See how we can do this in the new layers. Can it be done before?
     const resolutions = sourceOptions.tileGrid.getResolutions();
 
-    if (this.metadata?.defaultStyles)
-      applyStyle(olLayer, `${this.metadataAccessPath}${this.metadata.defaultStyles}/root.json`, {
+    let appliedStyle = layerConfig.styleUrl || (this.metadata?.defaultStyles as string);
+
+    if (appliedStyle) {
+      if (!appliedStyle.endsWith('/root.json')) appliedStyle = `${appliedStyle}/root.json`;
+
+      applyStyle(olLayer, appliedStyle, {
         resolutions: resolutions?.length ? resolutions : [],
       }).catch((error) => {
         // Log
         logger.logPromiseFailed('applyStyle in processOneLayerEntry in VectorTiles', error);
       });
+    }
 
     return Promise.resolve(olLayer);
   }

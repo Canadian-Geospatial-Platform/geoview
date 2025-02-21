@@ -7,7 +7,6 @@ import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
-import { logger } from '@/core/utils/logger';
 
 /**
  * Manages a Vector Tiles layer.
@@ -34,10 +33,6 @@ export class GVVectorTiles extends AbstractGVVectorTile {
     // Create and set the OpenLayer layer
     const declutter = true;
     this.olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
-
-    if (layerConfig.styleUrl) {
-      this.changeStyle(layerConfig.styleUrl).catch((err) => logger.logError(err));
-    }
   }
 
   /**
