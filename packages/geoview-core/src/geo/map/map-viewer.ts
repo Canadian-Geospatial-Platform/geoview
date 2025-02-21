@@ -869,13 +869,15 @@ export class MapViewer {
    * set fullscreen / exit fullscreen
    *
    * @param status - Toggle fullscreen or exit fullscreen status
-   * @param {HTMLElement} element - The element to toggle fullscreen on
+   * @param {HTMLElement | undefined} element - The element to toggle fullscreen on
    */
-  setFullscreen(status: boolean, element: TypeHTMLElement): void {
+  setFullscreen(status: boolean, element: TypeHTMLElement | undefined): void {
+    logger.logDebug('TEST3', status);
+
     // TODO: Refactor - For reusability, this function should be static and moved to a browser-utilities class
     // TO.DOCONT: If we want to keep a function here, in MapViewer, it should just be a redirect to the browser-utilities'
     // enter fullscreen
-    if (status) {
+    if (status && element) {
       if (element.requestFullscreen) {
         element.requestFullscreen().catch((error) => {
           // Log
@@ -895,22 +897,32 @@ export class MapViewer {
 
     // exit fullscreen
     if (!status) {
-      // Store current extent before exiting fullscreen
+      // Store the extent before any size changes occur
       const currentExtent = this.getView().calculateExtent();
+      const currentZoom = this.getView().getZoom();
 
-      // Create one-time listener for handleMapChangeSize completion
-      const handleSizeChangeOnce = (): void => {
-        // Set the extent after internal size change is complete
-        this.getView().fit(currentExtent, {
-          size: this.map.getSize(),
+      // Add one-time size change listener only when we are zoomed out to keep the bottom
+      // extent so the viewer does not zoom center Canada
+      if (currentZoom! < 4.5)
+        this.map.once('change:size', () => {
+          // Update map size first
+          this.map.updateSize();
+
+          // Calculate the new center to focus on bottom portion
+          const width = currentExtent[2] - currentExtent[0];
+          const height = currentExtent[3] - currentExtent[1];
+
+          // Calculate center point that will show bottom of previous extent
+          const centerX = currentExtent[0] + width / 2;
+          const centerY = currentExtent[1] - height / 2;
+
+          // Set the new center and zoom
+          this.getView().setCenter([centerX, centerY]);
+          this.getView().setZoom(currentZoom!);
+
+          // Force render
+          this.map.renderSync();
         });
-
-        // Remove the listener
-        this.map.un('change:size', handleSizeChangeOnce);
-      };
-
-      // Listen to our internal mapChangeSize event
-      this.map.on('change:size', handleSizeChangeOnce);
 
       if (document.exitFullscreen) {
         document.exitFullscreen().catch((error) => {

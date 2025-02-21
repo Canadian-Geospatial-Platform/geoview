@@ -78,8 +78,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   // const layerName: string | undefined = useSelectorLayerName(layer.layerPath);
   // const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layer.layerPath);
   // const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layer.layerPath);
-  // const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layer.layerPath);
-  const layerItems: TypeLegendItem[] = useSelectorLayerItems(layer.layerPath);
+  const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layer.layerPath);
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(

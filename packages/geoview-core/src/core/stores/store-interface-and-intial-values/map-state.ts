@@ -5,7 +5,14 @@ import { Extent } from 'ol/extent'; // only for Typing
 import { FitOptions } from 'ol/View'; // only for typing
 
 import { useStore } from 'zustand';
-import { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
+import {
+  TypeBasemapOptions,
+  TypeHighlightColors,
+  TypeInteraction,
+  TypeMapViewSettings,
+  TypeValidMapProjectionCodes,
+  TypeZoomAndCenter,
+} from '@config/types/map-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
@@ -40,6 +47,7 @@ export interface IMapState {
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
   isMouseInsideMap: boolean;
   initialFilters: Record<string, string>;
+  initialView: TypeMapViewSettings;
   interaction: TypeInteraction;
   mapExtent: Extent | undefined;
   mapLoaded: boolean;
@@ -95,6 +103,7 @@ export interface IMapState {
     setMapLoaded: (mapLoaded: boolean) => void;
     setAttribution: (attribution: string[]) => void;
     setInitialFilters: (filters: Record<string, string>) => void;
+    setInitialView: (view: TypeZoomAndCenter | Extent) => void;
     setInteraction: (interaction: TypeInteraction) => void;
     setIsMouseInsideMap: (isMouseInsideMap: boolean) => void;
     setZoom: (zoom: number) => void;
@@ -147,6 +156,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     highlightedFeatures: [],
     hoverFeatureInfo: undefined,
     initialFilters: {},
+    initialView: {
+      zoomAndCenter: [3.5, CV_MAP_CENTER[3857] as [number, number]],
+    },
     interaction: 'static',
     isMouseInsideMap: false,
     mapExtent: undefined,
@@ -184,6 +196,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           currentProjection: geoviewConfig.map.viewSettings.projection,
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
           featureHighlightColor: geoviewConfig.map.highlightColor || 'black',
+          initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, CV_MAP_CENTER[3857] as [number, number]] },
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.maxExtent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
@@ -535,6 +548,24 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
+       * Sets the initial view of the map.
+       * @param {TypeZoomAndCenter | Extent} view - The view extent or zoom&center.
+       */
+      setInitialView: (view: TypeZoomAndCenter | Extent): void => {
+        const viewType = get().mapState.initialView;
+
+        if (view.length === 2) viewType.zoomAndCenter = view as TypeZoomAndCenter;
+        else viewType.extent = view as Extent;
+
+        set({
+          mapState: {
+            ...get().mapState,
+            initialView: viewType,
+          },
+        });
+      },
+
+      /**
        * Sets the interaction of the map.
        * @param {TypeInteraction} interaction - The interaction type.
        */
@@ -875,6 +906,7 @@ export const useMapFeatureHighlightColor = (): TypeHighlightColors =>
   useStore(useGeoViewStore(), (state) => state.mapState.featureHighlightColor);
 export const useMapFixNorth = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInitialFilters = (): Record<string, string> => useStore(useGeoViewStore(), (state) => state.mapState.initialFilters);
+export const useMapInitialView = (): TypeMapViewSettings => useStore(useGeoViewStore(), (state) => state.mapState.initialView);
 export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
 export const useMapIsMouseInsideMap = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.isMouseInsideMap);
 export const useMapHoverFeatureInfo = (): TypeHoverFeatureInfo => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
