@@ -596,9 +596,6 @@ export class MapViewer {
       logger.logError('Failed in #checkLayerResultSetReady', error);
     });
 
-    // Start checking for map layers processed
-    this.#checkMapLayersProcessed();
-
     // Check how load in milliseconds has it been processing thus far
     const elapsedMilliseconds = Date.now() - this.#checkMapReadyStartTime!;
 
@@ -662,6 +659,9 @@ export class MapViewer {
         }
       });
     }
+
+    // Start checking for map layers processed after the onMapLayersLoaded is define!
+    this.#checkMapLayersProcessed();
   }
 
   /**
