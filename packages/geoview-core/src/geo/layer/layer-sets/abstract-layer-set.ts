@@ -440,7 +440,7 @@ export abstract class AbstractLayerSet {
    * @param {AbstractGVLayer} layer - The layer
    * @returns {boolean} True if the state is queryable or undefined
    */
-  protected static isInVisibleRange(mapId: string, layer: AbstractGVLayer): boolean {
+  protected static isInVisibleRange(layer: AbstractGVLayer): boolean {
     // Return false when false or undefined
     return layer.getInVisibleRange() ?? false;
   }

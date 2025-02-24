@@ -447,39 +447,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
-  static setZoom(mapId: string, zoom: number): void {
+  static setZoom(mapId: string, zoom: number, orderedLayerInfo?: TypeOrderedLayerInfo[]): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setZoom(zoom);
 
-    // Set ordered layer info for layers if they are inVisibleRange
-    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
-    const { legendLayers } = LegendEventProcessor.getState(mapId).layerState;
-
-    // Get zoom constraints from legend layers and children
-    const zoomConstraints = new Map<string, { maxZoom?: number; minZoom?: number }>();
-    const processLayer = (layer: TypeLegendLayer): void => {
-      if (layer.maxZoom || layer.minZoom) {
-        zoomConstraints.set(layer.layerPath, { maxZoom: layer.maxZoom, minZoom: layer.minZoom });
-      }
-
-      // Process children
-      if (layer.children) {
-        layer.children.forEach((child) => processLayer(child));
-      }
-    };
-    legendLayers.forEach((layer) => processLayer(layer));
-
-    // Create new orderedLayerInfo
-    const newOrderedLayerInfo = orderedLayerInfo.map((layer) => {
-      const constraints = zoomConstraints.get(layer.layerPath);
-      const inVisibleRange = zoom
-        ? (!constraints?.maxZoom || zoom <= constraints.maxZoom) && (!constraints?.minZoom || zoom >= constraints.minZoom)
-        : true;
-
-      return { ...layer, inVisibleRange };
-    });
-
-    this.setOrderedLayerInfoWithNoOrderChangeState(mapId, newOrderedLayerInfo);
+    if (orderedLayerInfo) {
+      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
+    }
   }
 
   static setIsMouseInsideMap(mapId: string, inside: boolean): void {
