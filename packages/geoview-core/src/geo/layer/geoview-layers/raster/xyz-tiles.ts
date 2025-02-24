@@ -259,11 +259,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
       newLayerConfig.initialSettings.extent = validateExtentWhenDefined(newLayerConfig.initialSettings.extent);
 
       // Set zoom limits for max / min zooms
+      // TODO Some XYZ tiles may have min/maxScaleDenominator properties. Is this handled?
       newLayerConfig.maxScale = metadataLayerConfigFound?.maxScale as number;
-      newLayerConfig.maxScale = metadataLayerConfigFound?.maxScale as number;
+      newLayerConfig.minScale = metadataLayerConfigFound?.minScale as number;
 
-      // ! Note: minScale is actually the maxZoom and maxScale is actually the minZoom
-      // ! As the scale gets smaller, the zoom gets larger
+      // GV Note: minScale is actually the maxZoom and maxScale is actually the minZoom
+      // GV As the scale gets smaller, the zoom gets larger
       const mapView = this.getMapViewer().getView();
       if (metadataLayerConfigFound?.minScale) {
         const maxScaleZoomLevel = getZoomFromScale(mapView, metadataLayerConfigFound.minScale as number);
