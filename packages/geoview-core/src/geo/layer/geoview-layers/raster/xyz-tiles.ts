@@ -260,14 +260,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       // Set zoom limits for max / min zooms
       newLayerConfig.maxScale =
-        (metadataLayerConfigFound?.maxScale as number) ||
-        ((metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number) ||
-        undefined;
+        (metadataLayerConfigFound?.maxScale as number) || ((metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number);
 
       newLayerConfig.minScale =
-        (metadataLayerConfigFound?.minScale as number) ||
-        ((metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number) ||
-        undefined;
+        (metadataLayerConfigFound?.minScale as number) || ((metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number);
 
       // GV Note: minScale is actually the maxZoom and maxScale is actually the minZoom
       // GV As the scale gets smaller, the zoom gets larger
