@@ -5,7 +5,7 @@ import * as Utilities from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { MapViewer } from '@/geo/map/map-viewer';
 import * as GeoUtilities from '@/geo/utils/utilities';
-import { EventDelegateBase } from './events/event-helper';
+import { EventDelegateBase } from '@/api/events/event-helper';
 /**
  * Class used to handle api calls (events, functions etc...)
  *

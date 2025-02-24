@@ -1,6 +1,6 @@
 import { Coordinate } from 'ol/coordinate';
-import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
-import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 /**

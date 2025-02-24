@@ -2,7 +2,7 @@ import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import { Extent } from 'ol/extent';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { AbstractGVTile } from './abstract-gv-tile';
+import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /**
  * Manages a Tile<XYZ> layer.

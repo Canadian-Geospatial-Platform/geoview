@@ -31,5 +31,6 @@ type SliderProps = {
  * @param {TypeSliderProps} props the properties passed to the slider element
  * @returns {JSX.Element} the created Slider element
  */
-export declare function Slider(props: SliderProps): JSX.Element;
+declare function SliderUI(props: SliderProps): JSX.Element;
+export declare const Slider: typeof SliderUI;
 export {};

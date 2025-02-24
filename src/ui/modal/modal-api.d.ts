@@ -1,5 +1,5 @@
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeModalProps } from './modal';
+import { TypeModalProps } from '@/ui/modal/modal';
 /**
  * Class used to handle creating a new modal
  *
@@ -12,16 +12,26 @@ export declare class ModalApi {
     /**
      * Function that creates the modal
      *
-     * @param { TypeModalProps } modal the modal object of type TypeModalProps
+     * @param { TypeModalProps } modal - The modal object of type TypeModalProps
      */
     createModal: (modal: TypeModalProps) => string | undefined;
     /**
      * Function that deletes the modal by the id specified
      *
-     * @param { string } id of the modal that is to be deleted
+     * @param { string } modalId - The id of the modal that is to be deleted
      */
     deleteModal: (modalId: string) => void;
+    /**
+     * Function that open the modal by the id specified
+     *
+     * @param { string } modalId - The id of the modal that is to be deleted
+     */
     openModal: (modalId: string) => void;
+    /**
+     * Function that close the modal by the id specified
+     *
+     * @param { string } modalId - The id of the modal that is to be deleted
+     */
     closeModal: (modalId: string) => void;
     /**
      * Registers a modal opened event handler.

@@ -1,8 +1,2 @@
 import { PaperProps } from '@mui/material';
-/**
- * Create a paper component
- *
- * @param {PaperProps} props paper properties
- * @returns {JSX.Element} returns paper component
- */
-export declare function Paper(props: PaperProps): JSX.Element;
+export declare const Paper: import("react").ForwardRefExoticComponent<Omit<PaperProps, "ref"> & import("react").RefAttributes<HTMLDivElement>>;

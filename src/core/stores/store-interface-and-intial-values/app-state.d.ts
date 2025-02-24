@@ -20,7 +20,7 @@ export interface IAppState {
         addMessage: (type: SnackbarType, message: string, param?: string[]) => void;
         addNotification: (notif: NotificationDetailsType) => void;
         setCrosshairActive: (active: boolean) => void;
-        setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<[void, void]>;
+        setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<void>;
         setDisplayTheme: (theme: TypeDisplayTheme) => void;
         setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => void;
         removeNotification: (key: string) => void;

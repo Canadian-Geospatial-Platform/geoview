@@ -40,7 +40,7 @@ export declare class AppEventProcessor extends AbstractEventProcessor {
     static removeNotification(mapId: string, key: string): void;
     static removeAllNotifications(mapId: string): void;
     static setAppIsCrosshairActive(mapId: string, isActive: boolean): void;
-    static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): Promise<[void, void]>;
+    static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): Promise<void>;
     static setDisplayTheme(mapId: string, theme: TypeDisplayTheme): void;
     static setFullscreen(mapId: string, active: boolean, element?: TypeHTMLElement): void;
     static setCircularProgress(mapId: string, active: boolean): void;

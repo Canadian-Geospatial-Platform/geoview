@@ -1,16 +1,16 @@
 import { KeyboardEvent } from 'react';
-import { TypePanelProps } from '..';
-import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
+import { TypePanelProps } from '@/ui/panel/panel-types';
+import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 /**
  * Interface for panel properties
  */
 export type TypePanelAppProps = {
     panel: TypePanelProps;
-    button: TypeIconButtonProps;
-    onGeneralCloseClicked?: () => void;
-    onPanelOpened?: () => void;
-    onPanelClosed?: () => void;
-    handleKeyDown?: (event: KeyboardEvent) => void;
+    button: IconButtonPropsExtend;
+    onGeneralClose?: () => void;
+    onOpen?: () => void;
+    onClose?: () => void;
+    onKeyDown?: (event: KeyboardEvent) => void;
 };
 /**
  * Create a panel with a header title, icon and content
@@ -18,4 +18,6 @@ export type TypePanelAppProps = {
  *
  * @returns {JSX.Element} the created Panel element
  */
-export declare function Panel(props: TypePanelAppProps): JSX.Element;
+declare function PanelUI(props: TypePanelAppProps): JSX.Element;
+export declare const Panel: typeof PanelUI;
+export {};

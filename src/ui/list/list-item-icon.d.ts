@@ -1,8 +1,12 @@
 import { ListItemIconProps } from '@mui/material';
 /**
- * Create a customized Material UI List Item
+ * Create a customized Material UI List Item Icon component.
+ * This is a simple wrapper around MaterialListItemIcon that maintains
+ * full compatibility with Material-UI's List Item Icon props.
  *
- * @param {ListItemProps} props the properties passed to the List Item element
- * @returns {JSX.Element} the created List Item element
+ * @param {ListItemIconProps} props - All valid Material-UI List Item Icon props
+ * @returns {JSX.Element} The List Item Icon component
  */
-export declare function ListItemIcon(props: ListItemIconProps): JSX.Element;
+declare function ListItemIconUI(props: ListItemIconProps): JSX.Element;
+export declare const ListItemIcon: typeof ListItemIconUI;
+export {};

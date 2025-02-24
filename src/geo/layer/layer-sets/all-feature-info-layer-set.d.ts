@@ -1,6 +1,6 @@
 import { QueryType } from '@/geo/map/map-schema-types';
-import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
-import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { TypeAllFeatureInfoResultSet, TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing

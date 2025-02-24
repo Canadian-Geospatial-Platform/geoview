@@ -20,4 +20,6 @@ export type CheckboxListItem = {
  * @param props Main props for the component
  * @returns JSX.Element The Component
  */
-export declare function CheckboxList(props: CheckboxListProps): JSX.Element;
+declare function CheckboxListUI(props: CheckboxListProps): JSX.Element;
+export declare const CheckboxList: typeof CheckboxListUI;
+export {};

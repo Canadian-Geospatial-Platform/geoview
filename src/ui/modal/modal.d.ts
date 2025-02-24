@@ -1,9 +1,9 @@
 import { CSSProperties, ReactNode } from 'react';
 import { DialogProps } from '@mui/material';
 /**
- * Customized Material UI Dialog Properties
+ * Properties for the Modal component extending Material-UI's DialogProps
  */
-interface TypeDialogProps extends Omit<DialogProps, 'title'> {
+interface DialogPropsExtend extends Omit<DialogProps, 'title'> {
     modalId: string;
     modalProps?: TypeModalProps;
     className?: string;
@@ -58,10 +58,55 @@ export interface ModalActionsType {
     content?: ReactNode;
 }
 /**
- * Create a customized Material UI Dialog
+ * Create a customized Material UI Modal component.
+ * This component extends the Material-UI Dialog to provide enhanced modal functionality
+ * with support for headers, content, and footer actions.
  *
- * @param {TypeDialogProps} props the properties passed to the Dialog element
- * @returns {JSX.Element} the created Dialog element
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Modal
+ *   modalId="basic-modal"
+ *   open={isOpen}
+ *   title="Modal Title"
+ *   contentModal={<div>Modal content</div>}
+ * />
+ *
+ * // With custom header and footer actions
+ * <Modal
+ *   modalId="custom-modal"
+ *   modalProps={{
+ *     header: {
+ *       title: "Custom Header",
+ *       actions: [{ actionId: "close", content: <CloseButton /> }]
+ *     },
+ *     content: "Modal content",
+ *     footer: {
+ *       actions: [
+ *         { actionId: "cancel", content: <Button>Cancel</Button> },
+ *         { actionId: "save", content: <Button>Save</Button> }
+ *       ]
+ *     }
+ *   }}
+ *   open={isOpen}
+ * />
+ *
+ * // With custom styling
+ * <Modal
+ *   modalId="styled-modal"
+ *   className="custom-modal"
+ *   contentClassName="modal-content"
+ *   open={isOpen}
+ *   title="Styled Modal"
+ * />
+ * ```
+ *
+ * @param {DialogPropsExtend} props - The properties passed to the Modal element
+ * @returns {JSX.Element} The Modal component
+ *
+ * @see {@link https://mui.com/material-ui/react-dialog/|Material-UI Dialog}
  */
-export declare function Modal(props: TypeDialogProps): JSX.Element;
+declare function ModalUI(props: DialogPropsExtend): JSX.Element;
+export declare const Modal: typeof ModalUI;
 export {};

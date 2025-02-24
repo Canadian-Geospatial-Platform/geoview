@@ -5,7 +5,7 @@ import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { TypeFeatureInfoEntry, rangeDomainType, codedValueType } from '@/geo/map/map-schema-types';
-import { AbstractGVRaster } from './abstract-gv-raster';
+import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeJsonObject } from '@/api/config/types/config-types';

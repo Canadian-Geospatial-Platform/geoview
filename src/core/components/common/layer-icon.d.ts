@@ -1,9 +1,9 @@
 import { TypeLegendLayer } from '@/core/components/layers/types';
-import { LayerListEntry } from '.';
+import { LayerListEntry } from '@/core/components/common/layer-list';
 export interface TypeIconStackProps {
     layerPath: string;
     onIconClick?: () => void;
-    onStackIconClick?: (e: React.KeyboardEvent<HTMLElement>) => void;
+    onStackIconClick?: (event: React.KeyboardEvent<HTMLElement>) => void;
 }
 interface LayerIconProps {
     layer: TypeLegendLayer | LayerListEntry;

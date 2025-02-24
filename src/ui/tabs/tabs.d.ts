@@ -43,5 +43,6 @@ export interface TypeTabsProps {
  * @param {TypeTabsProps} props properties for the tabs ui
  * @returns {JSX.Element} returns the tabs ui
  */
-export declare function Tabs(props: TypeTabsProps): JSX.Element;
+declare function TabsUI(props: TypeTabsProps): JSX.Element;
+export declare const Tabs: typeof TabsUI;
 export {};

@@ -12,6 +12,7 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     protected static getLayerState(mapId: string): ILayerState;
     static setSelectedLayersTabLayer(mapId: string, layerPath: string): void;
+    static reorderLegendLayers(mapId: string): void;
     /**
      * Gets a specific state.
      * @param {string} mapId - The mapId

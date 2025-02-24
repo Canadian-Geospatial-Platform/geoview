@@ -7,7 +7,7 @@ import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeStyleGeometry } from '@/geo/map/map-schema-types';
-import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './geometry-types';
+import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from '@/geo/layer/geometry/geometry-types';
 /**
  * Store a group of features
  */
