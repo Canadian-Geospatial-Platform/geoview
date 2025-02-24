@@ -259,22 +259,28 @@ export class XYZTiles extends AbstractGeoViewRaster {
       newLayerConfig.initialSettings.extent = validateExtentWhenDefined(newLayerConfig.initialSettings.extent);
 
       // Set zoom limits for max / min zooms
-      // TODO Some XYZ tiles may have min/maxScaleDenominator properties. Is this handled?
-      newLayerConfig.maxScale = metadataLayerConfigFound?.maxScale as number;
-      newLayerConfig.minScale = metadataLayerConfigFound?.minScale as number;
+      newLayerConfig.maxScale =
+        (metadataLayerConfigFound?.maxScale as number) ||
+        ((metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number) ||
+        undefined;
+
+      newLayerConfig.minScale =
+        (metadataLayerConfigFound?.minScale as number) ||
+        ((metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number) ||
+        undefined;
 
       // GV Note: minScale is actually the maxZoom and maxScale is actually the minZoom
       // GV As the scale gets smaller, the zoom gets larger
       const mapView = this.getMapViewer().getView();
-      if (metadataLayerConfigFound?.minScale) {
-        const maxScaleZoomLevel = getZoomFromScale(mapView, metadataLayerConfigFound.minScale as number);
+      if (newLayerConfig?.minScale) {
+        const maxScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.minScale as number);
         if (maxScaleZoomLevel && (!newLayerConfig.initialSettings.maxZoom || maxScaleZoomLevel > newLayerConfig.initialSettings.maxZoom)) {
           newLayerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
         }
       }
 
-      if (metadataLayerConfigFound?.maxScale) {
-        const minScaleZoomLevel = getZoomFromScale(mapView, metadataLayerConfigFound.maxScale as number);
+      if (newLayerConfig?.maxScale) {
+        const minScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.maxScale as number);
         if (minScaleZoomLevel && (!newLayerConfig.initialSettings.minZoom || minScaleZoomLevel < newLayerConfig.initialSettings.minZoom)) {
           newLayerConfig.initialSettings.minZoom = minScaleZoomLevel;
         }
