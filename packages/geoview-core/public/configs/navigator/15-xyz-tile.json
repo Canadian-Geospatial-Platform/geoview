@@ -26,12 +26,15 @@
       {
         "geoviewLayerId": "xyzTilesLYR2",
         "geoviewLayerName": "GNOSIS_Blue_Marble",
-        "metadataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad/{z}/{y}/{x}.jpg",
+        "metadataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad",
         "geoviewLayerType": "xyzTiles",
         "listOfLayerEntryConfig": [
           {
             "layerId": "blueMarble",
-            "layerName": "GNOSIS Blue Marble"
+            "layerName": "GNOSIS Blue Marble",
+            "source": {
+              "dataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad/{z}/{y}/{x}.jpg"
+            }
           }
         ]
       } 
