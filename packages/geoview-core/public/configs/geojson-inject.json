@@ -1,0 +1,65 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "layerIds": [
+          "geojsonLYR1/blank.json"
+        ]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata_genericBlank_featureInfo5_20250217.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "blank.json"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 5
+  },
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "export",
+        "basemap-panel",
+        "legend",
+        "layers",
+        "details",
+        "guide"
+      ]
+    }
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home"
+  ],
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "data-table"
+      ]
+    },
+    "collapsed": true
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

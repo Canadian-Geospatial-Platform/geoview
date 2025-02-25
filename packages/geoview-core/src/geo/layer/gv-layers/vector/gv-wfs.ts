@@ -37,7 +37,7 @@ export class GVWFS extends AbstractGVVector {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  override getFieldType(fieldName: string): TypeOutfieldsType {
     const fieldDefinitions = this.getLayerConfig().getLayerMetadata() as TypeJsonArray;
     const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';
