@@ -430,15 +430,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (getAppCrosshairsActive(mapId)) this.getMapViewer(mapId).emitMapSingleClick(clickCoordinates);
   }
 
-  static setInVisibleRange(mapId: string, layerPath: string): void {
-    const { orderedLayerInfo, zoom } = this.getMapStateProtected(mapId);
-    const legendLayer = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
-
-    if (!legendLayer) return;
-
-    const { minZoom, maxZoom } = legendLayer;
-    const inVisibleRange = zoom ? (!maxZoom || zoom <= maxZoom) && (!minZoom || zoom > minZoom) : true;
-
+  static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const orderedLayer = orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
 
     if (orderedLayer && orderedLayer.inVisibleRange !== inVisibleRange) {

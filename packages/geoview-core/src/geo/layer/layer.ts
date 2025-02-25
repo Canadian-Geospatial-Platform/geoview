@@ -1005,7 +1005,10 @@ export class LayerApi {
       layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => this.#setLayerInVisibleRange(subLayerConfig));
     }
 
-    MapEventProcessor.setInVisibleRange(this.getMapId(), layerConfig.layerPath);
+    const zoom = this.mapViewer.getView().getZoom();
+    const { maxZoom, minZoom } = layerConfig.initialSettings;
+    const inVisibleRange = (!maxZoom || zoom! <= maxZoom) && (!minZoom || zoom! > minZoom);
+    MapEventProcessor.setLayerInVisibleRange(this.getMapId(), layerConfig.layerPath, inVisibleRange);
   }
 
   /**
