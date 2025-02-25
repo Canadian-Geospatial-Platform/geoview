@@ -204,7 +204,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   }, [tabGroup, isOpen, setSelectedLayerPath, appBarComponents]);
 
   /**
-   * Check if layer sttaus is processing while querying
+   * Check if layer status is processing while querying
    */
   const memoIsLayerQueryStatusProcessing = useMemo(() => {
     // Log

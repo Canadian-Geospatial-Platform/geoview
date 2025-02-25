@@ -125,7 +125,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  override getFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return esriGetFieldType(this.getLayerConfig(), fieldName);
   }
@@ -135,7 +135,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string} fieldName - The field name for which we want to get the domain.
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected override getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
+  override getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Redirect
     return esriGetFieldDomain(this.getLayerConfig(), fieldName);
   }
@@ -144,7 +144,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * Overrides the get all feature information for all the features stored in the layer.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override async getAllFeatureInfo(): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  override async getAllFeatureInfo(): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
@@ -188,7 +188,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         // Format and return the result
         // Not having geometry have an effect on the style as it use the geometry to define wich one to use
         // The formatFeatureInfoResult (abstact-geoview-layer) / getFeatureCanvas (geoview-renderer) use geometry stored in style
-        return this.formatFeatureInfoResult(features, layerConfig);
+        return this.formatFeatureInfoResult(features);
       }
 
       // Error
@@ -400,7 +400,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // TODO.CONT: geometry assignement must not be in an async function.
       // Transform the features in an OL feature - at this point, there is no geometry associated with the feature
       const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results }) as Feature<Geometry>[];
-      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
+      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features);
 
       // If geometry is needed, use web worker to query and assign geometry later
       if (queryGeometry)

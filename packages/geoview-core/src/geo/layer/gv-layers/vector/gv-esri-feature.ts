@@ -37,7 +37,7 @@ export class GVEsriFeature extends AbstractGVVector {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  override getFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return esriGetFieldType(this.getLayerConfig(), fieldName);
   }
@@ -47,7 +47,7 @@ export class GVEsriFeature extends AbstractGVVector {
    * @param {string} fieldName - The field name for which we want to get the domain.
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected override getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
+  override getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Redirect
     return esriGetFieldDomain(this.getLayerConfig(), fieldName);
   }

@@ -36,7 +36,7 @@ export class GVOGCFeature extends AbstractGVVector {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  override getFieldType(fieldName: string): TypeOutfieldsType {
     const fieldDefinitions = this.getLayerConfig().getLayerMetadata()!;
     const fieldEntryType = (fieldDefinitions[fieldName].type as string).split(':').slice(-1)[0] as string;
     if (fieldEntryType === 'date') return 'date';

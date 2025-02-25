@@ -43,53 +43,7 @@
       id="LYR1"
       class="geoview-map"
       data-lang="en"
-      data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'projection': 3857,
-            'maxExtent': [-170, -90, 170, 90]
-          },
-          'basemapOptions': {
-            'basemapId': 'transport',
-            'shaded': false,
-            'labeled': false
-          },
-          'listOfGeoviewLayerConfig': [
-            {
-              'geoviewLayerId': 'geojsonLYR1',
-              'geoviewLayerName': 'GeoJSON Sample',
-              'geoviewLayerType': 'GeoJSON',
-              'metadataAccessPath': './datasets/geojson/metadata-blank.meta',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'blank.json'
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'uniqueValueId',
-              'geoviewLayerName': 'dummy layer',
-              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
-              'geoviewLayerType': 'esriFeature',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '0'
-                }
-              ]
-            }
-          ]
-        },
-        'components': ['overview-map'],
-        'overviewMap': {'hideOnZoom': 7},
-        'footerBar': {
-          'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
-          }
-        },
-        'corePackages': [],
-        'theme': 'geo.ca'
-        }"
+      data-config-url="./configs/geojson-inject.json"
     ></div>
     <hr />
     <div>
@@ -124,14 +78,13 @@
           {
             type: 'Feature',
             properties: {
-              Red: 92,
-              Green:
+              program: 'GEP',
+              project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              Blue: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              Yellow:
+              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              Orange: 75,
-              creationDate: '15/02/2022T05:00:00-05:00',
+              geo_scope: '????',
             },
             geometry: {
               type: 'Point',
@@ -141,12 +94,13 @@
           {
             type: 'Feature',
             properties: {
-              Red: 553,
-              Green: 54,
-              Blue: 32.3,
-              Yellow: 5.43,
-              Orange: 55,
-              creationDate: '07/01/2020T12:00:00-05:00',
+              program: 'GGN',
+              project_id:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              geo_scope: '????',
             },
             geometry: {
               type: 'Point',
@@ -156,12 +110,13 @@
           {
             type: 'Feature',
             properties: {
-              Red: 255,
-              Green: 255,
-              Blue: 32.3,
-              Yellow: 5.43,
-              Orange: 55,
-              creationDate: '15/02/2019T17:00:00-05:00',
+              program: 'GGP',
+              project_id:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              geo_scope: '????',
             },
             geometry: {
               type: 'Point',
@@ -180,7 +135,7 @@
       var addPoints2Button = document.getElementById('Add-points2');
 
       const points2 =
-        '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"data":"92;43.54;12.3;66;75","label":"Red;Green;Blue;Yellow;Orange","creationDate":"14/01/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-141,52]}},{"type":"Feature","properties":{"data":"92;43.54;12.3;66;75","label":"Red;Green;Blue;Yellow;Orange","creationDate":"16/02/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-141,83]}},{"type":"Feature","properties":{"data":"553;54;32;5.43;55","label":"Red;Green;Blue;Yellow;Orange;","creationDate":"19/08/2022T14:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-53,83]}},{"type":"Feature","properties":{"data":"255;255;255;5.43;55","label":"Red;Green;Blue;Yellow;Orange;","creationDate":"30/10/2022T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-53,49]}},{"type":"Feature","properties":{"Red":92,"Green":"1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Blue":"2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Yellow":"3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END","Orange":75,"creationDate":"15/02/2022T05:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-100,57]}},{"type":"Feature","properties":{"Red":553,"Green":54,"Blue":32.3,"Yellow":5.43,"Orange":55,"creationDate":"07/01/2020T12:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-113,55]}},{"type":"Feature","properties":{"Red":255,"Green":255,"Blue":32.3,"Yellow":5.43,"Orange":55,"creationDate":"15/02/2019T17:00:00-05:00"},"geometry":{"type":"Point","coordinates":[-72.33, 46.33]}}]}';
+        '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"program":"MarineGeo","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-141,52]}},{"type":"Feature","properties":{"program":"NHCCGP","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-141,83]}},{"type":"Feature","properties":{"program":"TGI","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-53,83]}},{"type":"Feature","properties":{"program":"two","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-53,49]}},{"type":"Feature","properties":{"program":"two","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-100,57]}},{"type":"Feature","properties":{"program":"two","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-113,55]}},{"type":"Feature","properties":{"program":"two","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-72.33, 46.33]}}]}';
 
       // add an event listener when a button is clicked
       addPoints2Button.addEventListener('click', () => {
@@ -197,12 +152,13 @@
           {
             type: 'Feature',
             properties: {
-              Red: 92,
-              Green: 40,
-              Blue: 86,
-              Yellow: 22,
-              Orange: 75,
-              creationDate: '15/02/2022T05:00:00-05:00',
+              program: 'CMGD',
+              project_id:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              geo_scope: '????',
             },
             geometry: {
               type: 'Point',
@@ -212,12 +168,13 @@
           {
             type: 'Feature',
             properties: {
-              Red: 553,
-              Green: 54,
-              Blue: 32.3,
-              Yellow: 5.43,
-              Orange: 55,
-              creationDate: '07/01/2020T12:00:00-05:00',
+              program: 'EGP',
+              project_id:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              geo_scope: '????',
             },
             geometry: {
               type: 'Point',
@@ -227,12 +184,13 @@
           {
             type: 'Feature',
             properties: {
-              Red: 255,
-              Green: 255,
-              Blue: 32.3,
-              Yellow: 5.43,
-              Orange: 55,
-              creationDate: '15/02/2019T17:00:00-05:00',
+              program: 'EGP2024',
+              project_id:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              geo_scope: '????',
             },
             geometry: {
               type: 'Point',

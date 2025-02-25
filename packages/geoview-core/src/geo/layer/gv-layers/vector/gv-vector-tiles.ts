@@ -49,7 +49,7 @@ export class GVVectorTiles extends AbstractGVVectorTile {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  override getFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }

@@ -9,9 +9,6 @@ import { shared as iconImageCache } from 'ol/style/IconImageCache';
 
 import { TimeDimension, DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
@@ -23,13 +20,14 @@ import {
   QueryType,
   TypeStyleGeometry,
 } from '@/geo/map/map-schema-types';
-import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
+import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
+import { FormatFeatureInfoWorker } from '@/core/workers/format-feature-info-worker';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -273,7 +271,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       const layerConfig = this.getLayerConfig();
 
       // If the layer is not queryable
-      // GV: This should always be set by now. There were instances where that was not happeneing, recheck once config API is being used
+      // GV: This should always be set by now. There were instances where that was not happening, recheck once config API is being used
       if (layerConfig.source?.featureInfo?.queryable === false) {
         logger.logWarning(`Layer at path ${layerConfig.layerPath} is not queryable`);
         return null;
@@ -402,7 +400,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
-  protected getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
+  getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Log - REMOVED as it is trigger for every row of data table, just enable for debuggin purpose
     // logger.logWarning(`getFieldDomain is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
     return null;
@@ -414,7 +412,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    *
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected getFieldType(fieldName: string): TypeOutfieldsType {
+  getFieldType(fieldName: string): TypeOutfieldsType {
     // Log
     logger.logWarning(`getFieldType is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
     return 'string';
@@ -504,7 +502,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {TypeOutfieldsType} fieldType - The field type.
    * @returns {string | number | Date} The formatted value of the field.
    */
-  protected getFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType): string | number | Date {
+  getFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType): string | number | Date {
     const fieldValue = feature.get(fieldName);
     let returnValue: string | number | Date;
     if (fieldType === 'date') {
@@ -527,115 +525,21 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Converts the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
    * @param {Feature[]} features - The array of features to convert.
-   * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The layer configuration.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The Array of feature information.
    */
-  protected async formatFeatureInfoResult(
-    features: Feature[],
-    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected async formatFeatureInfoResult(features: Feature[]): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+    if (!features.length) return [];
+
+    const worker = new FormatFeatureInfoWorker();
     try {
-      if (!features.length) return [];
-
-      const outfields = layerConfig?.source?.featureInfo?.outfields;
-
-      // Loop on the features to build the array holding the promises for their canvas
-      const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement }>[] = [];
-      features.forEach((featureNeedingItsCanvas) => {
-        promisedAllCanvasFound.push(
-          new Promise((resolveCanvas) => {
-            // GV: Callback function was added by PR #1997 and removed by #2590
-            // The PR added an AsyncSemaphore with a callback on geoview renderer to be able to fetch an image with a dataurl from the kernel function geoview-renderer.getFeatureCanvas()
-
-            // GV: Call the function with layerConfig.legendFilterIsOff = true to force the feature to get is canvas
-            // GV: If we don't, it will create canvas only for visible elements and because tables are stored feature will never get its canvas
-            getFeatureCanvas(featureNeedingItsCanvas, this.getStyle()!, layerConfig.filterEquation, true, true)
-              .then((canvas) => {
-                resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
-              })
-              .catch((error) => {
-                // Log
-                logger.logPromiseFailed(
-                  'getFeatureCanvas in featureNeedingItsCanvas loop in formatFeatureInfoResult in AbstractGVLayer',
-                  error
-                );
-              });
-          })
-        );
-      });
-
-      // Hold a dictionary built on the fly for the field domains
-      const dictFieldDomains: { [fieldName: string]: codedValueType | rangeDomainType | null } = {};
-      // Hold a dictionary build on the fly for the field types
-      const dictFieldTypes: { [fieldName: string]: TypeOutfieldsType } = {};
-
-      // Loop on the promised feature infos
-      let featureKeyCounter = 0;
-      let fieldKeyCounter = 0;
-      const queryResult: TypeFeatureInfoEntry[] = [];
-      const arrayOfFeatureInfo = await Promise.all(promisedAllCanvasFound);
-      arrayOfFeatureInfo.forEach(({ feature, canvas }) => {
-        let extent;
-        if (feature.getGeometry()) extent = feature.getGeometry()!.getExtent();
-
-        const featureInfoEntry: TypeFeatureInfoEntry = {
-          // feature key for building the data-grid
-          featureKey: featureKeyCounter++,
-          geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType as TypeGeoviewLayerType,
-          extent,
-          geometry: feature,
-          featureIcon: canvas.toDataURL(),
-          fieldInfo: {},
-          nameField: layerConfig?.source?.featureInfo?.nameField || null,
-        };
-
-        const featureFields = feature.getKeys();
-        featureFields.forEach((fieldName) => {
-          if (fieldName !== 'geometry') {
-            // Calculate the field domain if not already calculated
-            if (!(fieldName in dictFieldDomains)) {
-              // Calculate it
-              dictFieldDomains[fieldName] = this.getFieldDomain(fieldName);
-            }
-            const fieldDomain = dictFieldDomains[fieldName];
-
-            // Calculate the field type if not already calculated
-            if (!(fieldName in dictFieldTypes)) {
-              dictFieldTypes[fieldName] = this.getFieldType(fieldName);
-            }
-            const fieldType = dictFieldTypes[fieldName];
-            const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
-            if (fieldEntry) {
-              featureInfoEntry.fieldInfo[fieldEntry.name] = {
-                fieldKey: fieldKeyCounter++,
-                value:
-                  // If fieldName is the alias for the entry, we will not get a value, so we try the fieldEntry name.
-                  this.getFieldValue(feature, fieldName, fieldEntry!.type as 'string' | 'number' | 'date') ||
-                  this.getFieldValue(feature, fieldEntry.name, fieldEntry!.type as 'string' | 'number' | 'date'),
-                dataType: fieldEntry!.type,
-                alias: fieldEntry!.alias,
-                domain: fieldDomain,
-              };
-            } else if (!outfields) {
-              featureInfoEntry.fieldInfo[fieldName] = {
-                fieldKey: fieldKeyCounter++,
-                value: this.getFieldValue(feature, fieldName, fieldType),
-                dataType: fieldType,
-                alias: fieldName,
-                domain: fieldDomain,
-              };
-            }
-          }
-        });
-
-        queryResult.push(featureInfoEntry);
-      });
-
-      return queryResult;
+      await worker.init();
+      return await worker.process(features, this);
     } catch (error) {
       // Log
       logger.logError(error);
       return [];
+    } finally {
+      worker.terminate();
     }
   }
 

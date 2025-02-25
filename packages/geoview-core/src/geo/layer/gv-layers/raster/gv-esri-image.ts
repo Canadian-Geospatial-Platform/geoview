@@ -82,7 +82,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
+  override getFieldType(fieldName: string): TypeOutfieldsType {
     // TODO: Refactor - Layers refactoring. Is this function really valid for an esri-image? Remove?
     // Redirect
     return esriGetFieldType(this.getLayerConfig(), fieldName);
@@ -93,7 +93,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param {string} fieldName - The field name for which we want to get the domain.
    * @returns {codedValueType | rangeDomainType | null} The domain of the field.
    */
-  protected override getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
+  override getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Redirect
     return esriGetFieldDomain(this.getLayerConfig(), fieldName);
   }
