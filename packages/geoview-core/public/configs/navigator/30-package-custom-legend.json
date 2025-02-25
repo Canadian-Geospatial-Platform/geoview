@@ -16,57 +16,7 @@
     {
       "id": "custom-legend",
       "config": {
-        "isOpen": true,
-        "legendList": [
-          {
-            "id": "layer1",
-            "name": "Layer 1",
-            "opacity": 1,
-            "visibility": true,
-            "symbology": [
-              {
-                "icon": "path/to/icon1.png",
-                "label": "Icon 1"
-              }
-            ],
-            "additionalProperties": {
-              "extent": [0, 0, 100, 100],
-              "otherProperty": "value"
-            }
-          },
-          {
-            "id": "layer2",
-            "name": "Layer 2",
-            "opacity": 0.8,
-            "visibility": true,
-            "symbology": [
-              {
-                "icon": "path/to/icon2.png",
-                "label": "Icon 2"
-              }
-            ],
-            "additionalProperties": {
-              "extent": [50, 50, 200, 200],
-              "otherProperty": "value"
-            }
-          },
-          {
-            "id": "dynamicLayer",
-            "name": "Dynamic Layer",
-            "opacity": 0.6,
-            "visibility": true,
-            "symbology": [
-              {
-                "icon": "path/to/dynamic-icon.png",
-                "label": "Dynamic Icon"
-              }
-            ],
-            "additionalProperties": {
-              "extent": [100, 100, 300, 300],
-              "otherProperty": "value"
-            }
-          }
-        ]
+        "isOpen": true
       }
     }
   ],

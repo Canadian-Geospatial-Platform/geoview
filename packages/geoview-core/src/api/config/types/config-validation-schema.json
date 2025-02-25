@@ -139,8 +139,7 @@
         "details",
         "data-table",
         "time-slider",
-        "geochart",
-        "footer-custom-legend"
+        "geochart"
       ]
     },
     "TypeFooterBarTabsCustomProps": {

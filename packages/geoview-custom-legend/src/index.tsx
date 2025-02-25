@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-undef */
 import { TypeJsonObject, toJsonObject, AnySchemaObject, Cast } from 'geoview-core/src/core/types/global-types';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
@@ -9,22 +8,17 @@ import defaultConfig from '../default-config-custom-legend.json';
 import { LegendPanel } from './custom-legend';
 
 class LegendPanelPlugin extends AppBarPlugin {
-  /**
-   * Return the package schema
-   *
-   * @returns {AnySchemaObject} the package schema
-   */
-  override schema(): AnySchemaObject {
-    return schema;
+  override schema() {
+    throw new Error('Method not implemented.');
+  }
+
+  override defaultConfig() {
+    throw new Error('Method not implemented.');
   }
 
   /**
-   * Return the default config for this package
-   *
-   * @returns {TypeJsonObject} the default config
-   */
-  override defaultConfig(): TypeJsonObject {
-    return toJsonObject(defaultConfig);
+   * Return the package schema
+
   }
 
   /**
