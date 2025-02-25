@@ -73,6 +73,7 @@ export {
   Menu as MenuIcon,
   MoreHoriz as MoreHorizIcon,
   MoreVert as MoreVertIcon,
+  MultipleStop as ProjectionIcon,
   Opacity as OpacityIcon,
   OpenInBrowser as OpenInBrowserIcon,
   Pause as PauseIcon,

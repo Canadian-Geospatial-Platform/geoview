@@ -84,6 +84,7 @@ export interface IMapState {
     setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
     setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
+    setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
     setZoom: (zoom: number, duration?: number) => void;
     setInteraction: (interaction: TypeInteraction) => void;
     setRotation: (rotation: number) => void;
@@ -357,6 +358,17 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       setMapKeyboardPanInteractions: (panDelta: number): void => {
         // Redirect to processor
         MapEventProcessor.setMapKeyboardPanInteractions(get().mapId, panDelta);
+      },
+
+      /**
+       * Sets the projection of the map.
+       * @param {TypeValidMapProjectionCodes} projectionCode - The projection.
+       */
+      setProjection: (projectionCode: TypeValidMapProjectionCodes): void => {
+        // Redirect to processor
+        MapEventProcessor.setProjection(get().mapId, projectionCode).catch((error) => {
+          logger.logError('Map-State Failed to set projection', error);
+        });
       },
 
       /**

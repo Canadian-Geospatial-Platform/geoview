@@ -21,6 +21,7 @@
     "overview-map",
     "north-arrow"
   ],
+  "navBar": ["home", "projection"],
   "footerBar": {
     "tabs": {
       "core": [

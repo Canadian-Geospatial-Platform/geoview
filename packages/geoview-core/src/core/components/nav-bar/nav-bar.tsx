@@ -10,6 +10,7 @@ import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
 import Location from './buttons/location';
+import Projection from './buttons/projection';
 import { ButtonGroup, Box, IconButton } from '@/ui';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
@@ -22,7 +23,7 @@ type NavBarProps = {
   api: NavBarApi;
 };
 
-type DefaultNavbar = 'fullScreen' | 'location' | 'home' | 'zoomIn' | 'zoomOut' | 'basemapSelect';
+type DefaultNavbar = 'fullScreen' | 'location' | 'home' | 'zoomIn' | 'zoomOut' | 'basemapSelect' | 'projection';
 type NavbarButtonGroup = Record<string, TypeButtonPanel | DefaultNavbar>;
 type NavButtonGroups = Record<string, NavbarButtonGroup>;
 
@@ -48,6 +49,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
     location: <Location />,
     home: <Home />,
     basemapSelect: <BasemapSelect />,
+    projection: <Projection />,
     zoomIn: <ZoomIn />,
     zoomOut: <ZoomOut />,
   };
@@ -78,6 +80,10 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
     if (navBarComponents.includes('basemap-select')) {
       displayButtons = { ...displayButtons, basemapSelect: 'basemapSelect' };
+    }
+
+    if (navBarComponents.includes('projection')) {
+      displayButtons = { ...displayButtons, projection: 'projection' };
     }
 
     setButtonPanelGroups({
