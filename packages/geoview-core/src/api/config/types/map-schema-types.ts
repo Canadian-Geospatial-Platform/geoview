@@ -23,7 +23,7 @@ export { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select';
+export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection';
 
 /** Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home', 'basemap-select]. */
 export type TypeNavBarProps = TypeValidNavBarProps[];
