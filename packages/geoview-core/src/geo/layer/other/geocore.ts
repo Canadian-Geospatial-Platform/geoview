@@ -8,7 +8,6 @@ import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
-import { TypeJsonValue } from '@/core/types/global-types';
 import { api } from '@/app';
 
 /**
@@ -90,7 +89,7 @@ export class GeoCore {
         MapEventProcessor.removeOrderedLayerInfo(this.#mapId, uuid, false);
 
       // TODO: find a more centralized way to trap error and display message
-      api.maps[this.#mapId].notifications.showError('validation.layer.loadfailed', [error as TypeJsonValue, this.#mapId]);
+      api.maps[this.#mapId].notifications.showError('validation.layer.loadfailed', [`GeoCore - ${uuid}`]);
       throw error;
     }
   }

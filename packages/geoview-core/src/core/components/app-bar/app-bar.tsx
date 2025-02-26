@@ -11,7 +11,7 @@ import {
   IconButtonPropsExtend,
   QuestionMarkIcon,
   InfoOutlinedIcon,
-  HubOutlinedIcon,
+  LegendIcon,
   StorageIcon,
   SearchIcon,
   LayersOutlinedIcon,
@@ -111,7 +111,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
       guide: { icon: <QuestionMarkIcon />, content: <Guide fullWidth /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
-      legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
+      legend: { icon: <LegendIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.APP_BAR} /> },
     } as unknown as Record<string, GroupPanelType>;

@@ -140,11 +140,16 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
       )}
       <Divider />
       <Box sx={{ maxHeight: mapSize![1] - 240, overflowY: 'auto' }}>
+        {error && (
+          <Typography component="p" sx={{ p: 10, fontSize: theme.palette.geoViewFontSize.md }}>
+            {t('error.geolocator.noService')}
+          </Typography>
+        )}
         {!!memoFilteredData.length && <GeoList geoListItems={memoFilteredData} searchValue={searchValue} />}
-        {(!memoFilteredData.length || error) && (
+        {!memoFilteredData.length && searchValue.length >= 3 && (
           <Box sx={{ p: 10 }}>
             <Typography component="p" sx={{ fontSize: theme.palette.geoViewFontSize.md }}>
-              {t('geolocator.errorMessage')} <b>{searchValue}</b>
+              {t('geolocator.noResult')} <b>{searchValue}</b>
             </Typography>
             {!!(province.length || category.length) && (
               <List sx={sxClasses.filterListError}>
