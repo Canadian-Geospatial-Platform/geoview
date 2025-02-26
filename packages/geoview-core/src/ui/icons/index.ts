@@ -107,3 +107,5 @@ export {
   ZoomIn as ZoomInSearchIcon,
   ZoomOut as ZoomOutSearchIcon,
 } from '@mui/icons-material';
+
+export { LegendIcon } from '@/ui/svg/svg-icon';

@@ -247,7 +247,7 @@ export class Basemap {
   ): Promise<null | TypeBasemapLayer> {
     const resolutions: number[] = [];
     let minZoom = 0;
-    let maxZoom = 17;
+    let maxZoom = 23;
     let extent: Extent = [0, 0, 0, 0];
     let origin: number[] = [];
     let urlProj = 0;
@@ -384,7 +384,7 @@ export class Basemap {
     let defaultExtent: Extent | undefined;
     let defaultResolutions: number[] | undefined;
     let minZoom = 0;
-    let maxZoom = 17;
+    let maxZoom = 23;
 
     // Check if projection is provided for the basemap creation
     const projectionCode = projection === undefined ? MapEventProcessor.getMapState(this.mapId).currentProjection : projection;

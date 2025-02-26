@@ -105,7 +105,7 @@ export const useGeolocator = (): UseGeolocatorReturn => {
         const newAbortController = new AbortController();
         abortControllerRef.current = newAbortController;
 
-        const currentUrl = `${geolocatorServiceURL}fg&lang=${displayLanguageRef.current}`;
+        const currentUrl = `${geolocatorServiceURL}&lang=${displayLanguageRef.current}`;
         const response = await fetch(`${currentUrl}&q=${encodeURIComponent(`${cleanSearchTerm}*`)}`, {
           signal: abortControllerRef.current.signal,
         });

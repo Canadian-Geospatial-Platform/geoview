@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, Fragment } from 'react';
+import { useCallback, useEffect, useRef, useState, Fragment, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -27,6 +27,19 @@ type DefaultNavbar = 'fullScreen' | 'location' | 'home' | 'zoomIn' | 'zoomOut' |
 type NavbarButtonGroup = Record<string, TypeButtonPanel | DefaultNavbar>;
 type NavButtonGroups = Record<string, NavbarButtonGroup>;
 
+const defaultNavbar: Record<DefaultNavbar, JSX.Element> = {
+  fullScreen: <Fullscreen />,
+  location: <Location />,
+  home: <Home />,
+  basemapSelect: <BasemapSelect />,
+  projection: <Projection />,
+  zoomIn: <ZoomIn />,
+  zoomOut: <ZoomOut />,
+};
+const defaultButtonGroups: NavButtonGroups = {
+  zoom: { zoomIn: 'zoomIn', zoomOut: 'zoomOut' },
+};
+
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
@@ -36,29 +49,18 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   const { api: navBarApi } = props;
 
+  // Hooks
   const { t } = useTranslation();
-
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // get the expand or collapse from store
+  // Store
   const navBarComponents = useUINavbarComponents();
 
-  const defaultNavbar: Record<DefaultNavbar, JSX.Element> = {
-    fullScreen: <Fullscreen />,
-    location: <Location />,
-    home: <Home />,
-    basemapSelect: <BasemapSelect />,
-    projection: <Projection />,
-    zoomIn: <ZoomIn />,
-    zoomOut: <ZoomOut />,
-  };
-
-  // internal state
+  // State
   const navBarRef = useRef<HTMLDivElement>(null);
-  const defaultButtonGroups: NavButtonGroups = {
-    zoom: { zoomIn: 'zoomIn', zoomOut: 'zoomOut' },
-  };
+
+  // Ref
   const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>(defaultButtonGroups);
 
   useEffect(() => {

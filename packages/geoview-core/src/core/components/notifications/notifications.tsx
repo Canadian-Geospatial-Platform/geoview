@@ -281,7 +281,7 @@ export default memo(function Notifications(): JSX.Element {
                   notificationsList
                 ) : (
                   <Typography component="div" sx={{ padding: '10px 15px' }}>
-                    {t('appbar.no_notifications_available')}
+                    {t('appbar.noNotificationsAvailable')}
                   </Typography>
                 )}
               </Box>

@@ -1,5 +1,4 @@
-import { createElement, ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
+import { createElement, ReactNode, useCallback } from 'react';
 import { useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
@@ -7,44 +6,40 @@ import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types
 import { TypePanelProps } from '@/ui/panel/panel-types';
 import { IconButtonPropsExtend, IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
-import { ProjectionIcon, SatelliteIcon, SignpostIcon } from '@/ui/icons';
+import { ProjectionIcon, PublicIcon } from '@/ui/icons';
 
 const projectionChoiceOptions: {
   [key: string]: {
     code: TypeValidMapProjectionCodes;
+    name: string;
   };
 } = {
-  '3978': { code: 3978 },
-  '3857': { code: 3857 },
+  '3857': { code: 3857, name: 'Web Mercator' },
+  '3978': { code: 3978, name: 'LCC' },
 };
 
 /**
  * Create a projection select button to open the select panel, and set panel content
  * @returns {JSX.Element} the created basemap select button
  */
-export default function BasemapSelect(): JSX.Element {
+export default function Projection(): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/buttons/projection');
-
-  // Hook
-  const { t } = useTranslation<string>();
 
   // Store
   const projection = useMapProjection();
   const { setProjection } = useMapStoreActions();
 
   /**
-   * Handles basemap selection and updates basemap
-   * @returns {JSX.Element} the created basemap select button
+   * Handles map projection choice
+   * @param {TypeValidMapProjectionCodes} projectionCode the projection code to switch to
    */
-  const handleChoice = (projectionCode: TypeValidMapProjectionCodes): void => {
-    // setSelectedBasemap(basemapChoice);
-    // createBasemapFromOptions(basemapChoice === 'default' ? configBasemapOptions : basemapChoiceOptions[basemapChoice]).catch((error) => {
-    //   // Log
-    //   logger.logPromiseFailed('setBaseMap in basemaps.ts', error);
-    // });
-    setProjection(projectionCode);
-  };
+  const handleChoice = useCallback(
+    (projectionCode: TypeValidMapProjectionCodes): void => {
+      setProjection(projectionCode);
+    },
+    [setProjection]
+  );
 
   /**
    * Render buttons in navbar panel.
@@ -52,33 +47,33 @@ export default function BasemapSelect(): JSX.Element {
    */
   const renderButtons = (): ReactNode => {
     return (
-      <List key="basemapButtons">
+      <List key="projectionButtons">
         <ListItem>
           <IconButton
-            id="button-transport"
-            aria-label={t('basemaps.transport') as string}
-            tooltip={t('basemaps.transport') as string}
+            id="button-wm"
+            aria-label={projectionChoiceOptions['3857'].name}
+            tooltip={projectionChoiceOptions['3857'].name}
             tooltipPlacement="left"
             size="small"
             onClick={() => handleChoice(projectionChoiceOptions['3857'].code)}
             disabled={projection === 3857}
           >
-            <SignpostIcon />
-            {t('basemaps.transport')}
+            <PublicIcon />
+            {projectionChoiceOptions['3857'].name}
           </IconButton>
         </ListItem>
         <ListItem>
           <IconButton
-            id="button-imagery"
-            aria-label={t('basemaps.imagery') as string}
-            tooltip={t('basemaps.imagery') as string}
+            id="button-lcc"
+            aria-label={projectionChoiceOptions['3978'].name}
+            tooltip={projectionChoiceOptions['3978'].name}
             tooltipPlacement="left"
             size="small"
-            onClick={() => handleChoice(projectionChoiceOptions['3857'].code)}
+            onClick={() => handleChoice(projectionChoiceOptions['3978'].code)}
             disabled={projection === 3978}
           >
-            <SatelliteIcon />
-            {t('basemaps.imagery')}
+            <PublicIcon />
+            {projectionChoiceOptions['3978'].name}
           </IconButton>
         </ListItem>
       </List>
@@ -87,13 +82,13 @@ export default function BasemapSelect(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
-    tooltip: 'mapnav.basemap',
+    tooltip: 'mapnav.projection',
     children: createElement(ProjectionIcon),
     tooltipPlacement: 'left',
   };
 
   const panel: TypePanelProps = {
-    title: 'projection',
+    title: 'Projection',
     icon: createElement(ProjectionIcon),
     content: renderButtons(),
     width: 'flex',

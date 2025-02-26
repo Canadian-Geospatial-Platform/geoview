@@ -265,7 +265,7 @@ export class MapViewer {
         zoom: mapViewSettings.initialView?.zoomAndCenter ? mapViewSettings.initialView?.zoomAndCenter[0] : 3.5,
         extent: extentProjected || undefined,
         minZoom: mapViewSettings.minZoom || 0,
-        maxZoom: mapViewSettings.maxZoom || 17,
+        maxZoom: mapViewSettings.maxZoom || 23,
         rotation: mapViewSettings.rotation || 0,
       }),
       controls: [],
