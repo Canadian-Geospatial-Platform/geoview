@@ -10,8 +10,8 @@ import { FocusTrapContainer } from '@/core/components/common';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 // import { handleEscapeKey } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { useGeolocator } from './hooks/use-geolocator';
-import { GeolocatorBar } from './geolocator-bar';
+import { useGeolocator } from '@/core/components/geolocator/hooks/use-geolocator';
+import { GeolocatorBar } from '@/core/components/geolocator/geolocator-bar';
 
 export interface GeoListItem {
   key: string;

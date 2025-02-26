@@ -123,6 +123,8 @@ export const useGeolocator = (): UseGeolocatorReturn => {
         setIsLoading(false);
         clearTimeout(fetchTimerRef.current);
       }
+
+      return Promise.resolve();
     },
     [geolocatorServiceURL]
   );
@@ -149,9 +151,9 @@ export const useGeolocator = (): UseGeolocatorReturn => {
     displayLanguageRef.current = displayLanguage;
     getGeolocations(searchValue);
 
-    // Only listen to change in language to request new value with updated language
+    // Only listen to change in language and getGeolocations to request new value with updated language
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [displayLanguage]);
+  }, [displayLanguage, getGeolocations]);
 
   return {
     data,

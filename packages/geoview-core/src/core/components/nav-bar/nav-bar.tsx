@@ -57,10 +57,10 @@ export function NavBar(props: NavBarProps): JSX.Element {
   // Store
   const navBarComponents = useUINavbarComponents();
 
-  // State
+  // Ref
   const navBarRef = useRef<HTMLDivElement>(null);
 
-  // Ref
+  // State
   const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>(defaultButtonGroups);
 
   useEffect(() => {
