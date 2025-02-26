@@ -9,7 +9,12 @@ import {
   useDetailsSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates, useMapInVisibleRangeLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapStoreActions,
+  useMapVisibleLayers,
+  useMapClickCoordinates,
+  useMapInVisibleRangeLayers,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map-schema-types';
 
