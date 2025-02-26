@@ -1,0 +1,54 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "6c343726-1e92-451a-876a-76e17d398a1c",
+        "geoviewLayerName": "Canadian Protected and Conserved Areas Database (CPCAD)",
+        "metadataAccessPath": "",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+			"layerName": "Protected and conserved area"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "91219d24-e877-4c8a-8bd2-b2b662e573e0",
+        "geoviewLayerName": "Priority Places For Species at Risk (Terrestrial): Projects",
+        "metadataAccessPath": "",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+			"layerName": "Priority Places: Projects"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["north-arrow", "overview-map"],
+  "overviewMap": { "hideOnZoom": 6 },
+  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "export"]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

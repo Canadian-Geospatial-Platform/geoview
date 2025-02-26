@@ -42,7 +42,7 @@
     <a href="https://osdp-psdo.canada.ca/en/learn-about/air">Original RAMP Air</a><br />
 
     <div class="map-title-holder">
-      <h4 id="HMap1">Air Quality</h4>
+      <h4 id="HMap1">Air Quality (English)</h4>
     </div>
     <button class="collapsible active">Layers Status</button>
     <pre id="HMap1-state" class="panel map-title-holder"></pre>
@@ -50,59 +50,19 @@
       id="Map1"
       class="geoview-map"
       data-lang="en"
-      data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'projection': 3978
-          },
-          'basemapOptions': {
-            'basemapId': 'transport',
-            'shaded': true,
-            'labeled': true
-          },
-          'listOfGeoviewLayerConfig': [
-            {
-              'geoviewLayerId': 'LYR1',
-              'geoviewLayerName': 'Air pollutant emissions',
-              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
-              'geoviewLayerType': 'esriDynamic',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '17',
-                  'initialSettings': { 'states': {'opacity': 0.5} }
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'LYR2',
-              'geoviewLayerName': 'Air Quality',
-              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
-              'geoviewLayerType': 'esriDynamic',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '27'
-                }
-              ]
-            }
-          ]
-        },
-        'components': ['north-arrow', 'overview-map'],
-        'overviewMap': {'hideOnZoom': 6},
-        'navBar': ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
-        'appBar': {
-          'tabs': {
-            'core': ['geolocator', 'export']
-          }
-        },
-        'footerBar': {
-          'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
-          }
-        },
-        'corePackages': [],
-        'theme': 'geo.ca'
-        }"
+      data-config-url="./configs/OSDP/osdp-air_en.json"
+    ></div>
+
+    <div class="map-title-holder">
+      <h4 id="HMap2">Air Quality (French)</h4>
+    </div>
+    <button class="collapsible active">Layers Status</button>
+    <pre id="HMap2-state" class="panel map-title-holder"></pre>
+    <div
+      id="Map2"
+      class="geoview-map"
+      data-lang="fr"
+      data-config-url="./configs/OSDP/osdp-air_fr.json"
     ></div>
 
     <script src="codedoc.js"></script>
@@ -111,6 +71,9 @@
       cgpv.init((mapId) => {
         if (mapId === 'Map1') {
           listenToLegendLayerSetChanges('HMap1-state', 'Map1');
+        }
+        if (mapId === 'Map2') {
+          listenToLegendLayerSetChanges('HMap2-state', 'Map2');
         }
       });
 

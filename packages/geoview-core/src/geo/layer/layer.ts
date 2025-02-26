@@ -428,7 +428,9 @@ export class LayerApi {
                       (error as GeoViewLayerCreatedTwiceError).geoviewLayerId,
                     ]);
                   } else {
-                    this.mapViewer.notifications.showError('validation.layer.genericError', [this.getMapId()]);
+                    this.mapViewer.notifications.showError('validation.layer.loadfailed', [
+                      geoviewLayerConfig.geoviewLayerName || geoviewLayerConfig.geoviewLayerId,
+                    ]);
                   }
                 });
               } else {
@@ -442,7 +444,9 @@ export class LayerApi {
               logger.logError(error);
 
               // TODO: Use a generic error message
-              this.mapViewer.notifications.showError('validation.layer.genericError', [this.getMapId()]);
+              this.mapViewer.notifications.showError('validation.layer.loadfailed', [
+                geoviewLayerConfig.geoviewLayerName || geoviewLayerConfig.geoviewLayerId,
+              ]);
             }
           });
         });
