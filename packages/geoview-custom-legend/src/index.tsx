@@ -1,42 +1,65 @@
+import { JSX } from 'react';
 import { TypeJsonObject, toJsonObject, AnySchemaObject, Cast } from 'geoview-core/src/core/types/global-types';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
 import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
 import { HubOutlinedIcon } from 'geoview-core/src/ui/icons';
-import schema from '../schema.json';
-import defaultConfig from '../default-config-custom-legend.json';
 import { LegendPanel } from './custom-legend';
 
+/**
+ * Create a plugin to show a custom legend panel
+ */
 class LegendPanelPlugin extends AppBarPlugin {
-  override schema() {
-    throw new Error('Method not implemented.');
-  }
+  button = true;
 
-  override defaultConfig() {
-    throw new Error('Method not implemented.');
+  panel = true;
+
+  /**
+   * Plugin schema
+   */
+  schema(): AnySchemaObject {
+    return {
+      type: 'object',
+      properties: {
+        enabled: {
+          type: 'boolean',
+        },
+        isOpen: {
+          type: 'boolean',
+        },
+      },
+    };
   }
 
   /**
-   * Return the package schema
-
+   * Default configuration
+   */
+  defaultConfig(): TypeJsonObject {
+    return toJsonObject({
+      enabled: true,
+      isOpen: false,
+    });
   }
 
   /**
-   * Translations object to inject into the viewer translations
+   * Translation strings
    */
   translations = toJsonObject({
     en: {
       LegendPanel: {
-        title: 'Custom Legend',
+        title: 'Legend',
       },
     },
     fr: {
       LegendPanel: {
-        title: 'Légende Personnalisée',
+        title: 'Légende',
       },
     },
   });
 
+  /**
+   * Return button props
+   */
   override onCreateButtonProps(): TypeIconButtonProps {
     return {
       id: 'custom-legend',
@@ -47,6 +70,9 @@ class LegendPanelPlugin extends AppBarPlugin {
     };
   }
 
+  /**
+   * Return panel props
+   */
   override onCreateContentProps(): TypePanelProps {
     return {
       title: 'LegendPanel.title',
@@ -56,23 +82,16 @@ class LegendPanelPlugin extends AppBarPlugin {
     };
   }
 
-  override onCreateContent = (): JSX.Element => {
-    console.log('LegendPanel config:', this.configObj);
-
-    // Ensure config exists and legendList is an array
-    const config = this.configObj || {};
-    const finalConfig = { isOpen: false, legendList: [], ...config }; // Use default config if needed
-
-    return <LegendPanel config={finalConfig} />;
-  };
-
   /**
-   * Function called when the plugin is removed, used for clean-up
+   * Return panel content
    */
-  override onRemoved(): void {}
+  override onCreateContent = (): JSX.Element => {
+    return <LegendPanel mapId={this.api} />;
+  };
 }
 
-export default LegendPanelPlugin;
-
+// Register the plugin
 window.geoviewPlugins = window.geoviewPlugins || {};
 window.geoviewPlugins['custom-legend'] = Cast<LegendPanelPlugin>(LegendPanelPlugin);
+
+export default LegendPanelPlugin;

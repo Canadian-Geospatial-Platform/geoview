@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "isOpen": {
+      "type": "boolean"
+    },
+    "legendList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "legendTitle": {
+            "type": "string"
+          },
+          "iconUrl": {
+            "type": "string"
+          },
+          "layerId": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "boolean"
+          }
+        },
+        "required": ["legendTitle", "layerId"]
+      }
+    },
+    "version": {
+      "type": "string"
+    }
+  },
+  "required": ["id", "legendList"]
+}

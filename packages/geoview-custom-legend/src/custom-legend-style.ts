@@ -1,25 +1,18 @@
-import { CSSProperties } from 'react';
+import { Theme } from '@mui/material';
 
-export const getSxClasses = (): { legendButton: CSSProperties; legendPanel: CSSProperties } => ({
-  legendButton: {
-    padding: '8px',
-    cursor: 'pointer',
-    backgroundColor: '#fff',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
+export const getSxClasses = (theme: Theme) => ({
+  legendCard: {
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  legendPanel: {
-    position: 'absolute' as const, // Type assertion for position property
-    right: '10px',
-    top: '50px',
-    backgroundColor: '#fff',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
+    flexDirection: 'column',
+    gap: '8px',
     padding: '16px',
-    minWidth: '200px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: '4px',
+    boxShadow: theme.shadows[1],
+  },
+  legendIcon: {
+    width: '24px',
+    height: '24px',
+    objectFit: 'contain',
   },
 });

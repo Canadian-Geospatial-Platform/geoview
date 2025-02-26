@@ -1,7 +1,7 @@
 {
+  "id": "custom-legend",
+  "enabled": true,
   "isOpen": false,
-  "legendList": [
-  ],
-  "version": "1.0"
+  "legendList": [],
+  "version": "1.0.0"
 }
-
