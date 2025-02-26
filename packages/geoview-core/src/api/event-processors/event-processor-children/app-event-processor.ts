@@ -59,24 +59,25 @@ export class AppEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Adds a snackbar message.
+   * Adds a snackbar message (optional add to notification).
    * @param {SnackbarType} type - The type of message.
    * @param {string} message - The message.
    * @param {string} param - Optional param to replace in the string if it is a key
+   * @param {boolean} notification - True if we add the message to notification panel (default false)
    */
-  static addMessage(mapId: string, type: SnackbarType, message: string, param?: string[]): void {
+  static addMessage(mapId: string, type: SnackbarType, message: string, param?: string[], notification = false): void {
     switch (type) {
       case 'info':
-        api.maps[mapId].notifications.showMessage(message, param, false);
+        api.maps[mapId].notifications.showMessage(message, param, notification);
         break;
       case 'success':
-        api.maps[mapId].notifications.showSuccess(message, param, false);
+        api.maps[mapId].notifications.showSuccess(message, param, notification);
         break;
       case 'warning':
-        api.maps[mapId].notifications.showWarning(message, param, false);
+        api.maps[mapId].notifications.showWarning(message, param, notification);
         break;
       case 'error':
-        api.maps[mapId].notifications.showError(message, param, false);
+        api.maps[mapId].notifications.showError(message, param, notification);
         break;
       default:
         break;
@@ -84,7 +85,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
   }
 
   static async addNotification(mapId: string, notif: NotificationDetailsType): Promise<void> {
-    // because notification is called before map is created, we use the async
+    // Because notification is called before map is created, we use the async
     // version of getAppStateAsync
     const appState = await this.getAppStateAsync(mapId);
     const curNotifications = appState.notifications;
@@ -129,6 +130,9 @@ export class AppEventProcessor extends AbstractEventProcessor {
 
       // load guide in new language
       const promiseSetGuide = AppEventProcessor.setGuide(mapId);
+
+      // Remove all previous notifications to ensure there is no mix en and fr
+      AppEventProcessor.removeAllNotifications(mapId);
 
       // When all promises are done
       Promise.all([promiseChangeLanguage, promiseResetBasemap, promiseSetGuide])

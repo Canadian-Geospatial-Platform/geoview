@@ -1,3 +1,5 @@
+import { SvgIcon, SvgIconProps } from '@mui/material';
+
 // ? I doubt we want to define an explicit type for this?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function GeoCaIcon(): any {
@@ -19,5 +21,20 @@ export function GeoCaIcon(): any {
         fill="#52c62a"
       />
     </svg>
+  );
+}
+
+export function LegendIcon(props: SvgIconProps): JSX.Element {
+  return (
+    <SvgIcon {...props}>
+      <g transform="translate(-8.246 -7.922)">
+        <rect width="5.961" height="5.961" transform="translate(10 16.942)" />
+        <path d="M2.981,0,5.961,5.961H0Z" transform="translate(10 8)" />
+        <line x2="10.059" transform="translate(20.432 10.608)" stroke="currentColor" strokeWidth="2" />
+        <line x2="10.059" transform="translate(20.432 20.295)" stroke="currentColor" strokeWidth="2" />
+        <line x2="10.059" transform="translate(20.432 29.237)" stroke="currentColor" strokeWidth="2" />
+        <circle cx="2.981" cy="2.981" r="2.981" transform="translate(10 25.883)" />
+      </g>
+    </SvgIcon>
   );
 }

@@ -136,13 +136,16 @@ export const CV_VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<str
 
 // extents and center for each projection
 export const CV_MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
-  3857: [-170, 35, -20, 84],
+  3857: [-180, 0, 80, 84],
   3978: [-135, 25, -50, 89],
 };
 export const CV_MAP_CENTER: Record<TypeValidMapProjectionCodes, number[]> = {
-  3857: [-90, 55],
+  3857: [-90, 67],
   3978: [-90, 60],
 };
+
+// valid zoom levels from each projection
+export const CV_VALID_ZOOM_LEVELS: number[] = [0, 20];
 
 /**
  *  Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are
@@ -170,8 +173,8 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
       },
       enableRotation: true,
       rotation: 0,
-      minZoom: 0,
-      maxZoom: 50,
+      minZoom: CV_VALID_ZOOM_LEVELS[0],
+      maxZoom: CV_VALID_ZOOM_LEVELS[1],
       maxExtent: CV_MAP_EXTENTS[3978],
       projection: 3978,
     },

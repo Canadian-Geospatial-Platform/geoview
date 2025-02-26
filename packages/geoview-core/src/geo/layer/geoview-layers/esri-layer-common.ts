@@ -85,7 +85,7 @@ export function commonValidateListOfLayerEntryConfig(
 ): void {
   listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
     if (layerConfig.layerStatus === 'error') return;
-    const { layerPath } = layerConfig;
+    const { layerPath, layerName } = layerConfig;
 
     if (layerEntryIsGroupLayer(layerConfig)) {
       // Use the layer name from the metadata if it exists and there is no existing name.
@@ -99,6 +99,7 @@ export function commonValidateListOfLayerEntryConfig(
       if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
         layer.layerLoadError.push({
           layer: layerPath,
+          layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
           loggerMessage: `Empty layer group (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
         });
         layerConfig.layerStatus = 'error';
@@ -113,6 +114,7 @@ export function commonValidateListOfLayerEntryConfig(
     if (Number.isNaN(esriIndex)) {
       layer.layerLoadError.push({
         layer: layerPath,
+        layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
         loggerMessage: `ESRI layerId must be a number (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
       });
       layerConfig.layerStatus = 'error';
@@ -126,6 +128,7 @@ export function commonValidateListOfLayerEntryConfig(
     if (esriIndex === -1) {
       layer.layerLoadError.push({
         layer: layerPath,
+        layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
         loggerMessage: `ESRI layerId not found (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
       });
       layerConfig.layerStatus = 'error';

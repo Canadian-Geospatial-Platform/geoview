@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SelectChangeEvent, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { getSxClasses } from './geolocator-style';
 import {
   Box,
   Divider,
@@ -15,140 +14,81 @@ import {
   TypeMenuItemProps,
   Typography,
 } from '@/ui';
-import { GeoListItem } from './geolocator';
-import GeoList from './geo-list';
+import { GeoListItem } from '@/core/components/geolocator/geolocator';
+import { GeoList } from '@/core/components/geolocator/geo-list';
+import { createMenuItems } from '@/core/components/geolocator/utilities';
+import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 
 interface GeolocatorFiltersType {
   geoLocationData: GeoListItem[];
   searchValue: string;
-  error: Error | null;
+  error: boolean;
 }
 
 /**
  * Component to display filters and geo location result.
- * @param {GeoListItem[]} geoLocationData data to be displayed in result
- * @param {string} searchValue search value entered by the user.
- * @param {Error} error error thrown api call.
+ * @param {GeoListItem[]} geoLocationData - The data to be displayed in result
+ * @param {string} searchValue - The search value entered by the user.
+ * @param {boolean} error - If there is an error thrown api call.
  * @returns {JSX.Element}
  */
 export function GeolocatorResult({ geoLocationData, searchValue, error }: GeolocatorFiltersType): JSX.Element {
+  // Log
+  logger.logTraceRender('components/geolocator/geolocator-result');
+
+  // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
+  // State
   const [province, setProvince] = useState<string>('');
   const [category, setCategory] = useState<string>('');
-  const [data, setData] = useState<GeoListItem[]>(geoLocationData);
 
-  // get store values
+  // Store
+  // TODO: style - we should not base length on map size value, parent should adjust
   const mapSize = useMapSize();
 
   /**
    * Clear all filters.
    */
   const handleClearFilters = (): void => {
-    if (province || category) {
-      setProvince('');
-      setCategory('');
-      setData(geoLocationData);
-    }
+    setProvince('');
+    setCategory('');
   };
 
   /**
-   * Reduce provinces from api response data i.e. geoLocationData and return transform into MenuItem
+   * Reduce provinces from api response data i.e. geoLocationData
    */
-  const provinces: TypeMenuItemProps[] = useMemo(() => {
-    // Log
+  const memoProvinces: TypeMenuItemProps[] = useMemo(() => {
     logger.logTraceUseMemo('GEOLOCATOR-RESULT - provinces', geoLocationData);
-
-    const provincesList = geoLocationData
-      .reduce((acc, curr) => {
-        if (curr.province && !acc.includes(curr.province)) {
-          acc.push(curr.province);
-        }
-        return acc;
-      }, [] as string[])
-      .sort();
-    // added empty string for resetting the filter
-    return ['', ...new Set(provincesList)].map((typeItem: string) => {
-      return {
-        type: 'item',
-        item: { value: !typeItem.length ? '' : typeItem, children: !typeItem.length ? t('geolocator.noFilter') : typeItem },
-      };
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geoLocationData]);
+    return createMenuItems(geoLocationData, 'province', t('geolocator.noFilter'));
+  }, [geoLocationData, t]);
 
   /**
    * Reduce categories from api response data i.e. geoLocationData
    */
-  const categories: TypeMenuItemProps[] = useMemo(() => {
-    // Log
+  const memoCategories: TypeMenuItemProps[] = useMemo(() => {
     logger.logTraceUseMemo('GEOLOCATOR-RESULT - categories', geoLocationData);
+    return createMenuItems(geoLocationData, 'category', t('geolocator.noFilter'));
+  }, [geoLocationData, t]);
 
-    const locationData = geoLocationData
-      .reduce((acc, curr) => {
-        if (curr.category) {
-          acc.push(curr.category);
-        }
-        return acc;
-      }, [] as string[])
-      .sort();
-    // added empty string for resetting the filter
-    return ['', ...new Set(locationData)].map((typeItem: string) => {
-      return {
-        type: 'item',
-        item: { value: !typeItem.length ? '' : typeItem, children: !typeItem.length ? t('geolocator.noFilter') : typeItem },
-      };
+  // Filter data with memo
+  const memoFilteredData = useMemo(() => {
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - filtering data', {
+      total: geoLocationData.length,
+      province,
+      category,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geoLocationData]);
-
-  // Cache the filter data
-  const memoFilterData = useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('GEOLOCATOR-RESULT - memoFilterData', geoLocationData, province, category);
 
     return geoLocationData.filter((item) => {
-      let result = true;
-      if (province.length && !category.length) {
-        result = item.province.toLowerCase() === province.toLowerCase();
-      } else if (province.length && category.length) {
-        result = item.province.toLowerCase() === province.toLowerCase() && item.category.toLowerCase() === category.toLowerCase();
-      } else if (!province.length && category.length) {
-        result = item.category.toLowerCase() === category.toLowerCase();
-      }
-      return result;
+      const matchProvince = !province || item.province === province;
+      const matchCategory = !category || item.category === category;
+      return matchProvince && matchCategory;
     });
-  }, [category, geoLocationData, province]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('GEOLOCATOR-RESULT - geoLocationData', geoLocationData);
-
-    setData(geoLocationData);
-  }, [geoLocationData]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('GEOLOCATOR-RESULT - geoLocationData province category', memoFilterData);
-
-    // update result list after setting the province and type.
-    setData(memoFilterData);
-  }, [memoFilterData]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('GEOLOCATOR-RESULT - geoLocationData reset', geoLocationData);
-
-    // Reset the filters when no result found.
-    if (!geoLocationData.length) {
-      setProvince('');
-      setCategory('');
-    }
-  }, [geoLocationData]);
+  }, [geoLocationData, province, category]);
 
   return (
     <Paper component="div" elevation={4} square sx={{ width: 350 }}>
@@ -161,10 +101,10 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               id="provinceGeolocatorFilters"
               fullWidth
               value={province ?? ''}
-              onChange={(e: SelectChangeEvent<unknown>) => setProvince(e.target.value as string)}
+              onChange={(event: SelectChangeEvent<unknown>) => setProvince(event.target.value as string)}
               label={t('geolocator.province')}
               inputLabel={{ id: 'geolocationProvinceFilter' }}
-              menuItems={provinces}
+              menuItems={memoProvinces}
               disabled={!geoLocationData.length}
               variant="standard"
             />
@@ -176,10 +116,10 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               formControlProps={{ variant: 'standard', size: 'small' }}
               value={category ?? ''}
               fullWidth
-              onChange={(e: SelectChangeEvent<unknown>) => setCategory(e.target.value as string)}
+              onChange={(event: SelectChangeEvent<unknown>) => setCategory(event.target.value as string)}
               label={t('geolocator.category')}
               inputLabel={{ id: 'geolocationCategoryFilter' }}
-              menuItems={categories}
+              menuItems={memoCategories}
               disabled={!geoLocationData.length}
               variant="standard"
             />
@@ -200,11 +140,16 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
       )}
       <Divider />
       <Box sx={{ maxHeight: mapSize![1] - 240, overflowY: 'auto' }}>
-        {!!data.length && <GeoList geoListItems={data} searchValue={searchValue} />}
-        {(!data.length || error) && (
+        {error && (
+          <Typography component="p" sx={{ p: 10, fontSize: theme.palette.geoViewFontSize.md }}>
+            {t('error.geolocator.noService')}
+          </Typography>
+        )}
+        {!!memoFilteredData.length && <GeoList geoListItems={memoFilteredData} searchValue={searchValue} />}
+        {!memoFilteredData.length && searchValue.length >= 3 && (
           <Box sx={{ p: 10 }}>
             <Typography component="p" sx={{ fontSize: theme.palette.geoViewFontSize.md }}>
-              {t('geolocator.errorMessage')} <b>{searchValue}</b>
+              {t('geolocator.noResult')} <b>{searchValue}</b>
             </Typography>
             {!!(province.length || category.length) && (
               <List sx={sxClasses.filterListError}>
