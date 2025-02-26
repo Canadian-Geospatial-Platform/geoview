@@ -11,7 +11,7 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
  */
 export class GVGroupLayer extends AbstractBaseLayer {
   /** Max zoom constant */
-  static readonly MAX_ZOOM = 50;
+  static readonly MAX_ZOOM = 23;
 
   /** Min zoom constant */
   static readonly MIN_ZOOM = 0;

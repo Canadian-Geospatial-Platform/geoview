@@ -12,8 +12,8 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { api, WMS_PROXY_URL, getZoomFromScale } from '@/app';
+import { getZoomFromScale, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { api, WMS_PROXY_URL } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -636,18 +636,19 @@ export class WMS extends AbstractGeoViewRaster {
         MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
 
         // TODO Add Scale and Zoom level changes to config
-        // TODO Since web map runs mostly in zoom levels, may not need Scale limits
+        // TODO Since web map runs mostly in zoom levels, may not need Scale limits. Just hold them locally until converted
         // Set Min/Max Scale Limits
+        // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
         if (
-          layerCapabilities.MinScaleDenominator !== undefined &&
-          (layerConfig.minScale === undefined || layerConfig.minScale > (layerCapabilities.MinScaleDenominator as unknown as number))
+          layerCapabilities.MinScaleDenominator &&
+          (!layerConfig.maxScale! || layerConfig.maxScale >= (layerCapabilities.MinScaleDenominator as unknown as number))
         )
-          layerConfig.minScale = layerCapabilities.MinScaleDenominator as number;
+          layerConfig.maxScale = layerCapabilities.MinScaleDenominator as number;
         if (
-          layerCapabilities.MaxScaleDenominator !== undefined &&
-          (layerConfig.maxScale === undefined || layerConfig.maxScale < (layerCapabilities.MaxScaleDenominator as unknown as number))
+          layerCapabilities.MaxScaleDenominator &&
+          (!layerConfig.minScale || layerConfig.minScale < (layerCapabilities.MaxScaleDenominator as unknown as number))
         )
-          layerConfig.maxScale = layerCapabilities.MaxScaleDenominator as number;
+          layerConfig.minScale = layerCapabilities.MaxScaleDenominator as number;
 
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
@@ -655,18 +656,16 @@ export class WMS extends AbstractGeoViewRaster {
           layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
 
         // Set zoom limits for max / min zooms
-        // GV Note: minScale is actually the maxZoom and maxScale is actually the minZoom
-        // GV As the scale gets smaller, the zoom gets larger
         const mapView = this.getMapViewer().getView();
-        if (layerConfig.minScale) {
-          const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+        if (layerConfig.maxScale) {
+          const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
           if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
             layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
           }
         }
 
-        if (layerConfig.maxScale) {
-          const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+        if (layerConfig.minScale) {
+          const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
           if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
             layerConfig.initialSettings.minZoom = minScaleZoomLevel;
           }

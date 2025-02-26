@@ -16,8 +16,8 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
-import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { api, getZoomFromScale } from '@/app';
+import { getZoomFromScale, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { api } from '@/app';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';

@@ -14,10 +14,9 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { getZoomFromScale, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { getZoomFromScale } from '@/app';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -260,10 +259,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       // Set zoom limits for max / min zooms
       newLayerConfig.maxScale =
-        (metadataLayerConfigFound?.maxScale as number) || ((metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number);
+        (metadataLayerConfigFound?.maxScale as number) || ((metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number);
 
       newLayerConfig.minScale =
-        (metadataLayerConfigFound?.minScale as number) || ((metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number);
+        (metadataLayerConfigFound?.minScale as number) || ((metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number);
 
       // GV Note: minScale is actually the maxZoom and maxScale is actually the minZoom
       // GV As the scale gets smaller, the zoom gets larger

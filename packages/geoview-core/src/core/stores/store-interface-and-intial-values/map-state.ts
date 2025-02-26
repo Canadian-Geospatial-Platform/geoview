@@ -64,6 +64,7 @@ export interface IMapState {
   scale: TypeScaleInfo;
   size: [number, number];
   visibleLayers: string[];
+  inVisibleRangeLayers: string[];
   zoom: number;
 
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
@@ -82,7 +83,6 @@ export interface IMapState {
     resetBasemap: () => Promise<void>;
     setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
     setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
-    setLayerInVisibleRange: (layerPath: string, newValue: boolean) => void;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
     setZoom: (zoom: number, duration?: number) => void;
     setInteraction: (interaction: TypeInteraction) => void;
@@ -127,6 +127,7 @@ export interface IMapState {
     setFixNorth: (ifFix: boolean) => void;
     setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]) => void;
     setVisibleLayers: (newOrder: string[]) => void;
+    setInVisibleRangeLayers: (newOrder: string[]) => void;
     setOrderedLayerInfo: (newOrderedLayerInfo: TypeOrderedLayerInfo[]) => void;
     setHoverable: (layerPath: string, hoverable: boolean) => void;
     setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
@@ -181,6 +182,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     } as TypeScaleInfo,
     size: [0, 0] as [number, number],
     visibleLayers: [],
+    inVisibleRangeLayers: [],
     zoom: 0,
 
     /**
@@ -346,16 +348,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean): boolean => {
         // Redirect to processor
         return MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, newValue);
-      },
-
-      /**
-       * Sets or toggles the visibility of a layer.
-       * @param {string} layerPath - The path of the layer.
-       * @param {boolean} [newValue] - The new value of visibility.
-       */
-      setLayerInVisibleRange: (layerPath: string, newValue: boolean): void => {
-        // Redirect to processor
-        MapEventProcessor.setLayerInVisibleRange(get().mapId, layerPath, newValue);
       },
 
       /**
@@ -785,6 +777,19 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
+       * Sets the in visible range layers of the map.
+       * @param {string[]} inVisibleRangeLayers - The layers in their visible range
+       */
+      setInVisibleRangeLayers: (inVisibleRangeLayers: string[]): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            inVisibleRangeLayers,
+          },
+        });
+      },
+
+      /**
        * Sets the ordered layer information of the map.
        * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The ordered layer information.
        */
@@ -936,6 +941,7 @@ export const useMapRotation = (): number => useStore(useGeoViewStore(), (state) 
 export const useMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(), (state) => state.mapState.scale);
 export const useMapSize = (): [number, number] => useStore(useGeoViewStore(), (state) => state.mapState.size);
 export const useMapVisibleLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
+export const useMapInVisibleRangeLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.inVisibleRangeLayers);
 export const useMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
 // Getter function for one-time access, there is no subcription to modification

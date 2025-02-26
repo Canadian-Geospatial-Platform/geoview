@@ -7,8 +7,8 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { getXMLHttpRequest, getZoomFromScale } from '@/core/utils/utilities';
-import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { getXMLHttpRequest } from '@/core/utils/utilities';
+import { getZoomFromScale, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -366,18 +366,16 @@ export function commonProcessInitialSettings(
   }
 
   // Set zoom limits for max / min zooms
-  // GV Note: minScale is actually the maxZoom and maxScale is actually the minZoom
-  // GV As the scale gets smaller, the zoom gets larger
   const mapView = layer.getMapViewer().getView();
-  if (layerConfig.minScale) {
-    const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+  if (layerConfig.maxScale) {
+    const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
     if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
       layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
     }
   }
 
-  if (layerConfig.maxScale) {
-    const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+  if (layerConfig.minScale) {
+    const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
     if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
       layerConfig.initialSettings.minZoom = minScaleZoomLevel;
     }

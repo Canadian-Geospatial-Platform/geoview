@@ -19,7 +19,7 @@
           {
             "layerId": "0",
             "layerName": "Limited by Scale - Earthquakes 1980 - 1990, by Magnitude",
-            "maxScale": 10000000
+            "minScale": 10000000
           }
         ]
       },
@@ -29,7 +29,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "pub:WHSE_IMAGERY_AND_BASE_MAPS.MOT_CULVERTS_SP",
-            "layerName": "Limited by Service - BC Minitstry of Transportation Culverts"
+            "layerName": "Limited by Service - BC Ministry of Transportation Culverts"
           }
         ]
       },
