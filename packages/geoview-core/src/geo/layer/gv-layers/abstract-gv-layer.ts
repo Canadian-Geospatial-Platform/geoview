@@ -233,6 +233,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
     layerConfig.layerStatus = 'loaded';
 
+    // TODO: refactor - investigate the initOptionsWithInitialSettings. The below should happen in the config api before gv-layers
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
     this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
 
@@ -678,7 +679,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   protected static initOptionsWithInitialSettings(layerOptions: Options, layerConfig: AbstractBaseLayerEntryConfig): void {
     // GV Note: The visible flag (and maybe others?) must be set in the 'onLoaded' function below, because the layer needs to
     // GV attempt to be visible on the map in order to trigger its source loaded event.
-
     // Set the options as read from the initialSettings
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.className !== undefined) layerOptions.className = layerConfig.initialSettings.className;
