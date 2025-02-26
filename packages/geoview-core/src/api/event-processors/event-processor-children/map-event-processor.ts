@@ -436,8 +436,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return layersInVisibleRange;
   };
 
-  static setLayerInVisibleRangeMapState(mapId: string, inVisibleRangeLayers: string[]): void {
-    this.getMapStateProtected(mapId).setterActions.setInVisibleRangeLayers(inVisibleRangeLayers);
+  static setVisibleRangeLayerMapState(mapId: string, visibleRangeLayers: string[]): void {
+    this.getMapStateProtected(mapId).setterActions.setVisibleRangeLayers(visibleRangeLayers);
   }
 
   static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {

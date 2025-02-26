@@ -13,7 +13,7 @@ import {
   useMapStoreActions,
   useMapVisibleLayers,
   useMapClickCoordinates,
-  useMapInVisibleRangeLayers,
+  useMapVisibleRangeLayers,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map-schema-types';
@@ -48,7 +48,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
-  const inVisibleRangeLayers = useMapInVisibleRangeLayers();
+  const visibleRangeLayers = useMapVisibleRangeLayers();
   const mapClickCoordinates = useMapClickCoordinates();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
@@ -127,7 +127,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     const layerListEntries = visibleLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
       // TODO Need to filter by layers in visible range
-      .filter((layer) => layer && inVisibleRangeLayers.includes(layer.layerPath))
+      .filter((layer) => layer && visibleRangeLayers.includes(layer.layerPath))
       .map(
         (layer) =>
           ({
@@ -150,7 +150,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
 
     return orderedLayerListEntries;
-  }, [visibleLayers, arrayOfLayerDataBatch, inVisibleRangeLayers, getNumFeaturesLabel, mapId]);
+  }, [visibleLayers, arrayOfLayerDataBatch, visibleRangeLayers, getNumFeaturesLabel, mapId]);
 
   /**
    * Memoizes the selected layer for the LayerList component.

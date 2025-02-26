@@ -64,7 +64,7 @@ export interface IMapState {
   scale: TypeScaleInfo;
   size: [number, number];
   visibleLayers: string[];
-  inVisibleRangeLayers: string[];
+  visibleRangeLayers: string[];
   zoom: number;
 
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
@@ -127,7 +127,7 @@ export interface IMapState {
     setFixNorth: (ifFix: boolean) => void;
     setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]) => void;
     setVisibleLayers: (newOrder: string[]) => void;
-    setInVisibleRangeLayers: (newOrder: string[]) => void;
+    setVisibleRangeLayers: (newOrder: string[]) => void;
     setOrderedLayerInfo: (newOrderedLayerInfo: TypeOrderedLayerInfo[]) => void;
     setHoverable: (layerPath: string, hoverable: boolean) => void;
     setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
@@ -182,7 +182,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     } as TypeScaleInfo,
     size: [0, 0] as [number, number],
     visibleLayers: [],
-    inVisibleRangeLayers: [],
+    visibleRangeLayers: [],
     zoom: 0,
 
     /**
@@ -777,14 +777,14 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
-       * Sets the in visible range layers of the map.
-       * @param {string[]} inVisibleRangeLayers - The layers in their visible range
+       * Sets the layers of the map that are in visible range.
+       * @param {string[]} visibleRangeLayers - The layers in their visible range
        */
-      setInVisibleRangeLayers: (inVisibleRangeLayers: string[]): void => {
+      setVisibleRangeLayers: (visibleRangeLayers: string[]): void => {
         set({
           mapState: {
             ...get().mapState,
-            inVisibleRangeLayers,
+            visibleRangeLayers,
           },
         });
       },
@@ -941,7 +941,7 @@ export const useMapRotation = (): number => useStore(useGeoViewStore(), (state) 
 export const useMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(), (state) => state.mapState.scale);
 export const useMapSize = (): [number, number] => useStore(useGeoViewStore(), (state) => state.mapState.size);
 export const useMapVisibleLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
-export const useMapInVisibleRangeLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.inVisibleRangeLayers);
+export const useMapVisibleRangeLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleRangeLayers);
 export const useMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
 // Getter function for one-time access, there is no subcription to modification
