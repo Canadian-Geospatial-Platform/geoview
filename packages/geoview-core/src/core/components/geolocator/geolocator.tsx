@@ -24,7 +24,7 @@ export interface GeoListItem {
 }
 
 const MIN_SEARCH_LENGTH = 3;
-const DEBOUNCE_DELAY = 500;git add
+const DEBOUNCE_DELAY = 500;
 
 export function Geolocator(): JSX.Element {
   logger.logTraceRender('components/geolocator/geolocator');
