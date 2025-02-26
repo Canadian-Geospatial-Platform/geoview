@@ -67,5 +67,14 @@
     }
   },
   "corePackages": ["swiper"],
-  "theme": "geo.ca"
+  "theme": "geo.ca",
+  "corePackagesConfig": [{
+    "swiper": {
+      "orientation": "vertical",
+      "keyboardOffset": 10,
+      "layers": [
+        "4e615eae-b90c-420b-adee-2ca35896caf6"
+      ]
+    }
+  }]
 }
