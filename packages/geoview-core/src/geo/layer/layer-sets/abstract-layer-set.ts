@@ -436,6 +436,16 @@ export abstract class AbstractLayerSet {
   }
 
   /**
+   * Checks if the layer is in visible range.
+   * @param {AbstractGVLayer} layer - The layer
+   * @returns {boolean} True if the state is queryable or undefined
+   */
+  protected static isInVisibleRange(layer: AbstractGVLayer): boolean {
+    // Return false when false or undefined
+    return layer.getInVisibleRange() ?? false;
+  }
+
+  /**
    * Align records with informatiom provided by OutFields from layer config.
    * This will update fields in and delete unwanted fields from the arrayOfRecords
    * @param {TypeLayerEntryConfig} layerPath - Path of the layer to get config from.

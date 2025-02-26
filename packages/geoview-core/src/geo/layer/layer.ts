@@ -311,6 +311,7 @@ export class LayerApi {
 
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
       const subLayerPath = layerPath.endsWith(`/${layerEntryConfig.layerId}`) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
+
       const layerInfo: TypeOrderedLayerInfo = {
         layerPath: subLayerPath,
         visible: layerEntryConfig.initialSettings?.states?.visible !== false,
@@ -321,6 +322,7 @@ export class LayerApi {
           layerEntryConfig.initialSettings?.states?.legendCollapsed !== undefined
             ? layerEntryConfig.initialSettings?.states?.legendCollapsed
             : false,
+        inVisibleRange: true,
       };
       newOrderedLayerInfos.push(layerInfo);
       if (layerEntryConfig.listOfLayerEntryConfig?.length) {
@@ -342,6 +344,7 @@ export class LayerApi {
               ? geoviewLayerConfig.initialSettings?.states?.legendCollapsed
               : false,
           visible: geoviewLayerConfig.initialSettings?.states?.visible !== false,
+          inVisibleRange: true,
         };
         newOrderedLayerInfos.push(layerInfo);
         (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.forEach((layerEntryConfig) => {
@@ -589,6 +592,7 @@ export class LayerApi {
       queryable: true,
       hoverable: true,
       legendCollapsed: false,
+      inVisibleRange: true,
     };
 
     // GV: This is here as a placeholder so that the layers will appear in the proper order,
@@ -996,6 +1000,17 @@ export class LayerApi {
     return gvGroupLayer;
   }
 
+  #setLayerInVisibleRange(layerConfig: TypeLayerEntryConfig): void {
+    if (layerConfig.listOfLayerEntryConfig) {
+      layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => this.#setLayerInVisibleRange(subLayerConfig));
+    }
+
+    const zoom = this.mapViewer.getView().getZoom();
+    const { maxZoom, minZoom } = layerConfig.initialSettings;
+    const inVisibleRange = (!maxZoom || zoom! <= maxZoom) && (!minZoom || zoom! > minZoom);
+    MapEventProcessor.setLayerInVisibleRange(this.getMapId(), layerConfig.layerPath, inVisibleRange);
+  }
+
   /**
    * Continues the addition of the geoview layer.
    * Adds the layer to the map if valid. If not (is a string) emits an error.
@@ -1023,6 +1038,9 @@ export class LayerApi {
     if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
       // Add the OpenLayers layer to the map officially
       this.mapViewer.map.addLayer(geoviewLayer.olRootLayer!);
+
+      // Set in visible range property for all newly added layers
+      geoviewLayer.listOfLayerEntryConfig.forEach((layer) => this.#setLayerInVisibleRange(layer));
     }
 
     // Log

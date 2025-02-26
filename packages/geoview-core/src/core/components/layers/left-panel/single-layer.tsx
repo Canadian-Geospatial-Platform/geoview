@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { animated } from '@react-spring/web';
-import { Theme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
+import { getSxClasses } from '../../common/layer-list-style';
 import {
   Collapse,
   IconButton,
@@ -30,6 +31,7 @@ import {
   useMapStoreActions,
   useSelectorLayerLegendCollapsed,
   useSelectorLayerVisibility,
+  useSelectorLayerInVisibleRange,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
@@ -56,6 +58,9 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
 
   const { t } = useTranslation<string>();
 
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
   // Get store states
   const { setSelectedLayerPath, setSelectedLayerSortingArrowId } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, setLegendCollapsed, reorderLayer } = useMapStoreActions();
@@ -70,6 +75,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   useDataTableStoreActions();
 
   const isVisible = useSelectorLayerVisibility(layer.layerPath);
+  const inVisibleRange = useSelectorLayerInVisibleRange(layer.layerPath);
   const legendExpanded = !useSelectorLayerLegendCollapsed(layer.layerPath);
 
   // TODO: I think we should favor using this pattern here, with the store, instead of working with the whole 'layer' object from the props
@@ -250,7 +256,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
               sx={{
                 marginLeft: '0.4rem',
                 height: '1.5rem',
-                backgroundColor: (theme: Theme) => theme.palette.geoViewColor.bgColor.dark[300],
+                backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
               }}
               variant="middle"
               flexItem
@@ -446,7 +452,8 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
           <ListItemButton
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
             tabIndex={-1}
-            sx={{ minHeight: '4.51rem' }}
+            sx={{ minHeight: '4.51rem', ...(!inVisibleRange && sxClasses.outOfRange) }}
+            className={!inVisibleRange ? 'out-of-range' : ''}
           >
             <LayerIcon layer={layer} />
             <ListItemText

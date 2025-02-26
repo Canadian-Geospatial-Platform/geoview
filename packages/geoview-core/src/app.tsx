@@ -192,8 +192,8 @@ export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig:
 
     // Create a data-config attribute and set config value on the div
     const att = document.createAttribute(url ? 'data-config-url' : 'data-config');
-    // Clean apostrophes in the config
-    att.value = mapConfig.replaceAll("'", "\\'");
+    // Clean apostrophes in the config if not escaped already
+    att.value = mapConfig.replaceAll(/(?<!\\)'/g, "\\'");
     mapDiv.setAttributeNode(att);
 
     // Set the geoview-map class on the div so that this class name is standard for all maps (either created via init or via func call)

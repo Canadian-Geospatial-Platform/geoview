@@ -453,10 +453,29 @@ export class MapViewer {
   #handleMapZoomEnd(event: ObjectEvent): void {
     try {
       // Read the zoom value
-      const zoom = this.getView().getZoom()!;
+      const zoom = this.getView().getZoom();
+      if (!zoom) return;
+
+      // Get new inVisibleRange values for all layers
+      const newOrderedLayerInfo = this.getMapLayerOrderInfo();
+
+      const visibleRangeLayers: string[] = [];
+
+      // GV Used the configs since group GV layers have fake max/min zoom levels
+      // GV The group levels are also missing the zoom level getters, so this worked out well anyway
+      this.layer.getLayerEntryConfigs().forEach((config) => {
+        const { minZoom, maxZoom } = config.initialSettings;
+        const inVisibleRange = (!minZoom || zoom! > minZoom) && (!maxZoom || zoom! <= maxZoom);
+        const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === config.layerPath);
+        if (foundLayer) foundLayer.inVisibleRange = inVisibleRange;
+        if (inVisibleRange) {
+          visibleRangeLayers.push(config.layerPath);
+        }
+      });
 
       // Save in the store
-      MapEventProcessor.setZoom(this.mapId, zoom);
+      MapEventProcessor.setZoom(this.mapId, zoom, newOrderedLayerInfo);
+      MapEventProcessor.setVisibleRangeLayerMapState(this.mapId, visibleRangeLayers);
 
       // Emit to the outside
       this.#emitMapZoomEnd({ zoom });

@@ -430,9 +430,33 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (getAppCrosshairsActive(mapId)) this.getMapViewer(mapId).emitMapSingleClick(clickCoordinates);
   }
 
-  static setZoom(mapId: string, zoom: number): void {
+  static getLayersInVisibleRange = (mapId: string): string[] => {
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
+    const layersInVisibleRange = orderedLayerInfo.filter((layer) => layer.inVisibleRange).map((layer) => layer.layerPath);
+    return layersInVisibleRange;
+  };
+
+  static setVisibleRangeLayerMapState(mapId: string, visibleRangeLayers: string[]): void {
+    this.getMapStateProtected(mapId).setterActions.setVisibleRangeLayers(visibleRangeLayers);
+  }
+
+  static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
+    const orderedLayer = orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
+
+    if (orderedLayer && orderedLayer.inVisibleRange !== inVisibleRange) {
+      orderedLayer.inVisibleRange = inVisibleRange;
+      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
+    }
+  }
+
+  static setZoom(mapId: string, zoom: number, orderedLayerInfo?: TypeOrderedLayerInfo[]): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setZoom(zoom);
+
+    if (orderedLayerInfo) {
+      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
+    }
   }
 
   static setIsMouseInsideMap(mapId: string, inside: boolean): void {
@@ -588,16 +612,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get legend status of a layer
-    const info = this.getMapStateProtected(mapId).orderedLayerInfo;
-    const pathInfo = info.find((item) => item.layerPath === layerPath);
-    return pathInfo?.legendCollapsed !== false;
+    return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.legendCollapsed !== false;
   }
 
   static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get visibility of a layer
-    const info = this.getMapStateProtected(mapId).orderedLayerInfo;
-    const pathInfo = info.find((item) => item.layerPath === layerPath);
-    return pathInfo?.visible !== false;
+    return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.visible !== false;
+  }
+
+  static getMapInVisibleRangeFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
+    // Get inVisibleRange of a layer
+    return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.inVisibleRange !== false;
   }
 
   static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void {
