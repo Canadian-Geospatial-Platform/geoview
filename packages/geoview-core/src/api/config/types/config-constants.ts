@@ -136,11 +136,11 @@ export const CV_VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<str
 
 // extents and center for each projection
 export const CV_MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
-  3857: [-180, -35, 120, 84],
+  3857: [-180, 0, 80, 84],
   3978: [-135, 25, -50, 89],
 };
 export const CV_MAP_CENTER: Record<TypeValidMapProjectionCodes, number[]> = {
-  3857: [-90, 55],
+  3857: [-90, 67],
   3978: [-90, 60],
 };
 
