@@ -400,7 +400,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // TODO.CONT: geometry assignement must not be in an async function.
       // Transform the features in an OL feature - at this point, there is no geometry associated with the feature
       const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results }) as Feature<Geometry>[];
-      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
+      const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(features, layerConfig);
 
       // If geometry is needed, use web worker to query and assign geometry later
       if (queryGeometry)

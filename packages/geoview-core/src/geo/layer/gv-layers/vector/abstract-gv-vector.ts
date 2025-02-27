@@ -111,7 +111,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
       const features = this.getOLSource()!.getFeatures();
-      return this.formatFeatureInfoResult(features, layerConfig);
+      return Promise.resolve(this.formatFeatureInfoResult(features, layerConfig));
     } catch (error) {
       // Log
       logger.logError('abstract-gv-vector.getAllFeatureInfo()\n', error);
@@ -140,7 +140,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       const features = this.getMapViewer().map.getFeaturesAtPixel(location, { hitTolerance: this.hitTolerance, layerFilter }) as Feature[];
 
       // Format and return the features
-      return this.formatFeatureInfoResult(features, this.getLayerConfig());
+      return Promise.resolve(this.formatFeatureInfoResult(features, this.getLayerConfig()));
     } catch (error) {
       // Log
       logger.logError('abstract-gv-vector.getFeatureInfoAtPixel()\n', error);
