@@ -18,7 +18,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "10",
-			"layerName": "Greenhouse gas emissions from large facilities",
+            "layerName": "Greenhouse gas emissions from large facilities",
             "initialSettings": {
               "states": {
                 "visible": false
@@ -41,17 +41,37 @@
       }
     ]
   },
-  "components": ["north-arrow", "overview-map"],
-  "overviewMap": { "hideOnZoom": 6 },
-  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 6
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export"]
+      "core": [
+        "geolocator",
+        "export"
+      ]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table", "time-slider"]
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table",
+        "time-slider"
+      ]
     }
   },
   "corePackages": [],

@@ -10,24 +10,24 @@
       "labeled": true
     },
     "listOfGeoviewLayerConfig": [
-{
-  "geoviewLayerId": "756bc907-34bb-4b33-9a87-b3c1a6c3f292",
-  "geoviewLayerName": "Émissions de gaz à effet de serre des installations d’envergure",
-  "metadataAccessPath": "",
-  "geoviewLayerType": "geoCore",
-  "listOfLayerEntryConfig": [
-    {
-      "layerId": "10",
-	  "layerName": "Émissions de gaz à effet de serre des installations d’envergure",
-      "initialSettings": {
-        "states": {
-          "visible": false
-        }
+      {
+        "geoviewLayerId": "756bc907-34bb-4b33-9a87-b3c1a6c3f292",
+        "geoviewLayerName": "Émissions de gaz à effet de serre des installations d’envergure",
+        "metadataAccessPath": "",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "10",
+            "layerName": "Émissions de gaz à effet de serre des installations d’envergure",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            },
+            "menuVisible": false
+          }
+        ]
       },
-      "menuVisible": false
-    }
-  ]
-},
       {
         "geoviewLayerId": "3e9cc0c9-7e59-478b-befb-a584674baa75",
         "geoviewLayerName": "Vague de chaleur",
@@ -42,17 +42,37 @@
       }
     ]
   },
-  "components": ["north-arrow", "overview-map"],
-  "overviewMap": { "hideOnZoom": 6 },
-  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 6
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export"]
+      "core": [
+        "geolocator",
+        "export"
+      ]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table", "time-slider"]
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table",
+        "time-slider"
+      ]
     }
   },
   "corePackages": [],
