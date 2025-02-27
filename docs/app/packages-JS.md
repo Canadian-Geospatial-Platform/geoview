@@ -189,7 +189,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
         'corePackages': ['swiper'],
         'appBar': {
           'tabs': {
-            'core': ['basemap-panel']
+            'core': ['aoi-panel']
           }
         },
         'footerBar': {

@@ -28,7 +28,7 @@ c is for center (an array of two elements, represents latitude and longtitude)
 l is for language (currently supported values: en, fr)
 t is for theme (currently supported values: dark, light)
 b is for basemap options (an object with three properties, id, shaded, labeled)
-cp is for core packages to be loaded (array of strings) supported values: "basemap-panel", "time-slider", "swiper", "geochart"
+cp is for core packages to be loaded (array of strings) supported values: "time-slider", "swiper", "geochart"
 keys is for layer uuid keys (the keys will match keys in the catalog, can be comma seperated)
 ```
 
@@ -68,7 +68,7 @@ The content of the config must match the schema, an example of the object in the
   },
   "theme": "geo.ca",
   "components": ["north-arrow"],
-  "corePackages": ["basemap-panel"],
+  "corePackages": ["swiper"],
   "externalPackages": []
 }
 ```
@@ -158,7 +158,7 @@ cgpv.init(function() {
         },
         theme: 'dark',
         components: ['north-arrow', 'overview-map'],
-        corePackages: ['basemap-panel'],
+        corePackages: ['swiper'],
         externalPackages: []
     },
     800);

@@ -20,18 +20,8 @@
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "3",
-            "layerName": "Centrales nucléaires (MW)",
-            "initialSettings": {
-              "states": {
-                "legendCollapsed": false,
-                "visible": true
-              }
-            }
-          },
-          {
             "layerId": "1",
-            "layerName": "Centrales alimentées à la biomasse (MW)",
+            "layerName": "Stations de surveillance du RCSR",
             "initialSettings": {
               "states": {
                 "legendCollapsed": false,
@@ -41,7 +31,17 @@
           },
           {
             "layerId": "2",
-            "layerName": "Centrales hydroélectriques (MW)",
+            "layerName": "Stations de surveillance du TICE",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": false,
+                "visible": true
+              }
+            }
+          },
+          {
+            "layerId": "3",
+            "layerName": "Réseau de surveuillance en poste fixe (groupé) ",
             "initialSettings": {
               "states": {
                 "legendCollapsed": false,
@@ -51,7 +51,7 @@
           },
           {
             "layerId": "4",
-            "layerName": "Centrales solaires (MW)",
+            "layerName": "Réseau de surveillance en poste fixe",
             "initialSettings": {
               "states": {
                 "legendCollapsed": false,
@@ -61,17 +61,7 @@
           },
           {
             "layerId": "5",
-            "layerName": "Centrales marémotrices (MW)",
-            "initialSettings": {
-              "states": {
-                "legendCollapsed": false,
-                "visible": true
-              }
-            }
-          },
-          {
-            "layerId": "6",
-            "layerName": "Parcs éoliens (MW)",
+            "layerName": "Périmètre de localisation des stations",
             "initialSettings": {
               "states": {
                 "legendCollapsed": false,

@@ -20,18 +20,8 @@
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "3",
-            "layerName": "Nuclear generating stations (MW)",
-            "initialSettings": {
-              "states": {
-                "legendCollapsed": false,
-                "visible": true
-              }
-            }
-          },
-          {
             "layerId": "1",
-            "layerName": "Biomass generating stations (MW)",
+            "layerName": "CRNM Monitoring Stations",
             "initialSettings": {
               "states": {
                 "legendCollapsed": false,
@@ -41,7 +31,17 @@
           },
           {
             "layerId": "2",
-            "layerName": "Hydro generating stations (MW)",
+            "layerName": "CTBT Stations",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": false,
+                "visible": true
+              }
+            }
+          },
+          {
+            "layerId": "3",
+            "layerName": "Fixed Point Surveillance Network (Group)",
             "initialSettings": {
               "states": {
                 "legendCollapsed": false,
@@ -51,7 +51,7 @@
           },
           {
             "layerId": "4",
-            "layerName": "Solar generating stations (MW)",
+            "layerName": "Fixed Point Surveillance Network",
             "initialSettings": {
               "states": {
                 "legendCollapsed": false,
@@ -59,19 +59,10 @@
               }
             }
           },
+
           {
             "layerId": "5",
-            "layerName": "Tidal generating stations (MW)",
-            "initialSettings": {
-              "states": {
-                "legendCollapsed": false,
-                "visible": true
-              }
-            }
-          },
-          {
-            "layerId": "6",
-            "layerName": "Wind generating stations (MW)",
+            "layerName": "Station location range",
             "initialSettings": {
               "states": {
                 "legendCollapsed": false,
