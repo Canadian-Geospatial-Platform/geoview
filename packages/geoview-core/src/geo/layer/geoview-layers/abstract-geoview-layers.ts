@@ -89,7 +89,7 @@ export abstract class AbstractGeoViewLayer {
   initialSettings?: TypeLayerInitialSettings;
 
   /** layers of listOfLayerEntryConfig that did not load. */
-  layerLoadError: { layer: string; loggerMessage: string }[] = [];
+  layerLoadError: { layer: string; layerName?: string | undefined; loggerMessage: string }[] = [];
 
   /** The OpenLayer root layer representing this GeoView Layer. */
   olRootLayer?: BaseLayer;
@@ -467,8 +467,9 @@ export abstract class AbstractGeoViewLayer {
       const arrayOfLayerConfigs = await Promise.all(promisedAllLayerDone);
       arrayOfLayerConfigs.forEach((layerConfig) => {
         if (layerConfig.layerStatus === 'error') {
+          // TODO: refactor - create meaningful message and centralize dispatch for layer - config
+          // We do not log the error here, it will be trapped in setAllLayerStatusTo
           const message = `Error while loading layer path ${layerConfig.layerPath} on map ${this.mapId}`;
-          this.layerLoadError.push({ layer: layerConfig.layerPath, loggerMessage: message });
           throw new Error(message);
         } else {
           // When we get here, we know that the metadata (if the service provide some) are processed.
@@ -564,6 +565,7 @@ export abstract class AbstractGeoViewLayer {
           }
           this.layerLoadError.push({
             layer: listOfLayerEntryConfig[0].layerPath,
+            layerName: listOfLayerEntryConfig[0].layerName,
             loggerMessage: `Unable to create group layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
           });
           return undefined;
@@ -584,6 +586,7 @@ export abstract class AbstractGeoViewLayer {
         }
         this.layerLoadError.push({
           layer: listOfLayerEntryConfig[0].layerPath,
+          layerName: listOfLayerEntryConfig[0].layerName,
           loggerMessage: `Unable to create layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
         });
         this.getLayerConfig(layerPath)!.layerStatus = 'error';
@@ -624,6 +627,7 @@ export abstract class AbstractGeoViewLayer {
         } else {
           this.layerLoadError.push({
             layer: listOfLayerEntryConfig[i].layerPath,
+            layerName: listOfLayerEntryConfig[i].layerName,
             loggerMessage: `Unable to create ${
               layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? CONST_LAYER_ENTRY_TYPES.GROUP : ''
             } layer ${listOfLayerEntryConfig[i].layerPath} on map ${this.mapId}`,
@@ -707,9 +711,11 @@ export abstract class AbstractGeoViewLayer {
         if (layerConfig.layerStatus === 'error') return;
         layerConfig.layerStatus = newStatus;
         if (newStatus === 'error') {
-          const { layerPath } = layerConfig;
+          const { layerPath, layerName } = layerConfig;
+          const useLayerName = layerName === undefined ? layerConfig.geoviewLayerConfig.geoviewLayerName : layerName;
           this.layerLoadError.push({
             layer: layerPath,
+            layerName: useLayerName || layerPath,
             loggerMessage: `${errorMessage} for layer ${layerPath} of map ${this.mapId}`,
           });
         }

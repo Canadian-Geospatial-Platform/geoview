@@ -385,6 +385,10 @@ export type TypeGeoviewLayerConfig = {
    */
   initialSettings?: TypeLayerInitialSettings;
 
+  /** Min and max scales */
+  minScale?: number;
+  maxScale?: number;
+
   /** The layer entries to use from the GeoView layer. */
   listOfLayerEntryConfig: TypeLayerEntryConfig[];
 };

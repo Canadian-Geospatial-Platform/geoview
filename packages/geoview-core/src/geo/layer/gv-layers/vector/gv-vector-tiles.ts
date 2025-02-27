@@ -54,6 +54,12 @@ export class GVVectorTiles extends AbstractGVVectorTile {
     return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
 
+  /**
+   * Used to change the style of the vector tile layer.
+   * @private
+   * @param styleUrl The style URL to apply to the layer
+   * @returns Promise<void>
+   */
   changeStyle(styleUrl: string): Promise<void> {
     if (styleUrl) {
       const olLayer = this.olLayer as VectorTileLayer;

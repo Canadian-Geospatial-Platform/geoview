@@ -198,9 +198,10 @@
         try {
           // get config and test if JSON is valid
           const configArea = document.getElementById('configGeoview');
-          const configJSON = JSON.parse(configArea.value.replaceAll(`'`, `"`));
+          const regexExp = /(?<!\\)'/g
+          const configJSON = JSON.parse(configArea.value.replaceAll(regexExp, `"`).replaceAll('\\', '\\\\'));
 
-          const validConfig = cgpv.api.config.createMapConfig(document.getElementById('configGeoview').value.replaceAll("'", '"'), 'en');
+          const validConfig = cgpv.api.config.createMapConfig(document.getElementById('configGeoview').value.replaceAll(regexExp, '"'), 'en');
 
           // set class and message
           message.classList.add('config-json-valid');
@@ -244,7 +245,9 @@
         // TODO: the delete has a timeout so we need to wait before trying to recreate the map...
         // TO.DOCONT: this should be cleaner
         setTimeout(() => {
-          cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value.replaceAll("'", '"'))
+          // Regex expression to cature all single quotes (') except those preceded by a backslash (\)
+          const regexExp = /(?<!\\)'/g
+          cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value.replaceAll(regexExp, '"'))
             .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'sandboxMap'));
         }, 1500);
       });

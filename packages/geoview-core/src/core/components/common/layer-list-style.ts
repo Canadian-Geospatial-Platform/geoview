@@ -17,7 +17,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       fontSize: theme.palette.geoViewFontSize.lg,
       fontWeight: '600',
     },
-
     '& .MuiListItem-root': {
       height: '100%',
       '& .MuiListItemButton-root': {
@@ -92,5 +91,18 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   layersInstructionsBody: {
     fontSize: theme.palette.geoViewFontSize.default,
+  },
+  outOfRange: {
+    '.layer-panel &.MuiListItemButton-root': {
+      backgroundColor: `${theme.palette.grey[200]} !important`,
+      '& .MuiListItemText-primary': {
+        color: `${theme.palette.grey[600]} !important`,
+        fontStyle: 'italic',
+      },
+      '& .MuiListItemText-secondary': {
+        color: theme.palette.grey[500],
+        fontStyle: 'italic',
+      },
+    },
   },
 });

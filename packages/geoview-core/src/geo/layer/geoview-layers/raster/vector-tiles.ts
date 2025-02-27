@@ -16,7 +16,7 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
-import { validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { getZoomFromScale, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { api } from '@/app';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
@@ -200,13 +200,18 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // TODO: Refactor - Layers refactoring. What is this doing? See how we can do this in the new layers. Can it be done before?
     const resolutions = sourceOptions.tileGrid.getResolutions();
 
-    if (this.metadata?.defaultStyles)
-      applyStyle(olLayer, `${this.metadataAccessPath}${this.metadata.defaultStyles}/root.json`, {
+    let appliedStyle = layerConfig.styleUrl || (this.metadata?.defaultStyles as string);
+
+    if (appliedStyle) {
+      if (!appliedStyle.endsWith('/root.json')) appliedStyle = `${appliedStyle}/root.json`;
+
+      applyStyle(olLayer, appliedStyle, {
         resolutions: resolutions?.length ? resolutions : [],
       }).catch((error) => {
         // Log
         logger.logPromiseFailed('applyStyle in processOneLayerEntry in VectorTiles', error);
       });
+    }
 
     return Promise.resolve(olLayer);
   }
@@ -222,22 +227,57 @@ export class VectorTiles extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (in config?)
   protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    const updatedLayerConfig = layerConfig;
+    if (!(updatedLayerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     if (this.metadata) {
-      const { tileInfo, fullExtent } = this.metadata;
+      const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = this.metadata;
       const newTileGrid: TypeTileGrid = {
         extent: [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number],
         origin: [tileInfo.origin.x as number, tileInfo.origin.y as number],
         resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
         tileSize: [tileInfo.rows as number, tileInfo.cols as number],
       };
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.source!.tileGrid = newTileGrid;
+      updatedLayerConfig.source!.tileGrid = newTileGrid;
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+      updatedLayerConfig.initialSettings.extent = validateExtentWhenDefined(updatedLayerConfig.initialSettings.extent);
+
+      // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
+      // First set the min/max scales based on the service / config
+      // * Infinity and -Infinity are used as extreme zoom level values in case the value is undefined
+      if (minScale !== undefined) {
+        updatedLayerConfig.minScale = Math.min(updatedLayerConfig.minScale ?? Infinity, minScale as number);
+      }
+
+      if (maxScale !== undefined) {
+        updatedLayerConfig.maxScale = Math.max(updatedLayerConfig.maxScale ?? -Infinity, maxScale as number);
+      }
+
+      // Second, set the min/max zoom levels based on the service / config
+      if (minZoom !== undefined) {
+        updatedLayerConfig.initialSettings.minZoom = Math.min(updatedLayerConfig.initialSettings.minZoom ?? Infinity, minZoom as number);
+      }
+
+      if (maxZoom !== undefined) {
+        updatedLayerConfig.initialSettings.maxZoom = Math.max(updatedLayerConfig.initialSettings.maxZoom ?? -Infinity, maxZoom as number);
+      }
+
+      // Third, use the now set scale and zoom levels to determine the actual max / min zoom based on both
+      const mapView = this.getMapViewer().getView();
+      if (updatedLayerConfig.minScale) {
+        const maxScaleZoomLevel = getZoomFromScale(mapView, updatedLayerConfig.minScale);
+        if (maxScaleZoomLevel) {
+          updatedLayerConfig.initialSettings.maxZoom = Math.max(updatedLayerConfig.initialSettings.maxZoom ?? -Infinity, maxScaleZoomLevel);
+        }
+      }
+
+      if (updatedLayerConfig.maxScale) {
+        const minScaleZoomLevel = getZoomFromScale(mapView, updatedLayerConfig.maxScale);
+        if (minScaleZoomLevel) {
+          updatedLayerConfig.initialSettings.minZoom = Math.min(updatedLayerConfig.initialSettings.minZoom ?? Infinity, minScaleZoomLevel);
+        }
+      }
     }
-    return Promise.resolve(layerConfig);
+    return Promise.resolve(updatedLayerConfig);
   }
 }
