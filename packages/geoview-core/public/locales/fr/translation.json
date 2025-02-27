@@ -56,7 +56,6 @@
       "tooltip": "Attribution"
     },
     "disclaimer":{
-      "title": "Avertissement:",
       "message": "Avertissement: Cette carte n'est fournie qu'à titre d'illustration. Les marqueurs représentent les emplacements approximatifs en fonction des données accessibles. Le gouvernement du Canada ne peut être tenu responsable de l'interprétation de l'information par une tierce partie. Le gouvernement du Canada se réserve le droit de modifier l’information à tout moment."
     },
     "crosshair": "Utiliser les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte, <strong>Entrée</strong> pour sélectionner et <strong>Shift+fléchées</strong> <strong>Haut</strong> et <strong>Bas</strong> pour modfier le déplacement."

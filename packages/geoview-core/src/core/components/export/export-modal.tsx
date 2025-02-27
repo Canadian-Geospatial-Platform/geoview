@@ -23,7 +23,6 @@ export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
   const mapId = useGeoViewMapId();
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
-  const disclaimerTitle = t('mapctrl.disclaimer.title');
   const disclaimerMessage = t('mapctrl.disclaimer.message');
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
@@ -213,7 +212,7 @@ export default function ExportModal(): JSX.Element {
               </Box>
             ))}
           </Box>
-          <Box textAlign="center" key={disclaimerMessage} component="p" sx={{ margin: 0 }}>
+          <Box textAlign="center" key={disclaimerMessage} component="p" sx={{ margin: 0, marginBottom: '20px' }}>
             {disclaimerMessage}
           </Box>
           <Box textAlign="center" sx={{ marginBottom: '1rem' }}>
