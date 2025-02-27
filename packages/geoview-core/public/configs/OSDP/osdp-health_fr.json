@@ -3,7 +3,13 @@
     "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
-        "zoomAndCenter": [11, [-78.7860521310545, 43.957998016283646]]
+        "zoomAndCenter": [
+          11,
+          [
+            -78.7860521310545,
+            43.957998016283646
+          ]
+        ]
       },
       "projection": 3857
     },
@@ -102,19 +108,36 @@
       }
     ]
   },
-  "components": ["north-arrow", "overview-map"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "overviewMap": {
     "hideOnZoom": 6
   },
-  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export"]
+      "core": [
+        "geolocator",
+        "export"
+      ]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],

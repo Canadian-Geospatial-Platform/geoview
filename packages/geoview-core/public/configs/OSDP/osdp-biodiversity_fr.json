@@ -18,7 +18,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-			"layerName": "Aire protégée et conservée"
+            "layerName": "Aire protégée et conservée"
           }
         ]
       },
@@ -30,23 +30,42 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-			"layerName": "Lieux Prioritaires : Projets"
+            "layerName": "Lieux Prioritaires : Projets"
           }
         ]
       }
     ]
   },
-  "components": ["north-arrow", "overview-map"],
-  "overviewMap": { "hideOnZoom": 6 },
-  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 6
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export"]
+      "core": [
+        "geolocator",
+        "export"
+      ]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],

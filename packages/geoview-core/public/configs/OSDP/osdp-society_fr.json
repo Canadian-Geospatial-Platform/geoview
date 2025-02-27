@@ -19,10 +19,10 @@
           {
             "layerId": "0",
             "layerName": "Noms de lieux autochtones",
-			"initialSettings": {
-            "states": {
-            "legendCollapsed": true,
-            "visible": true
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": true
               }
             }
           }
@@ -37,10 +37,10 @@
           {
             "layerId": "0",
             "layerName": "La toponymie du Canada rend hommage aux femmes",
-			"initialSettings": {
-            "states": {
-            "legendCollapsed": true,
-            "visible": true
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": true
               }
             }
           }
@@ -60,19 +60,36 @@
       }
     ]
   },
-  "components": ["north-arrow", "overview-map"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "overviewMap": {
     "hideOnZoom": 6
   },
-  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export"]
+      "core": [
+        "geolocator",
+        "export"
+      ]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
