@@ -3,7 +3,7 @@ import { TypeJsonObject, toJsonObject, AnySchemaObject, Cast } from 'geoview-cor
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
 import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
-import { HubOutlinedIcon } from 'geoview-core/src/ui/icons';
+import { CustomLegendIcon } from 'geoview-core/src/ui/icons/index';
 import { LegendPanel } from './custom-legend';
 
 /**
@@ -65,7 +65,7 @@ class LegendPanelPlugin extends AppBarPlugin {
       id: 'custom-legend',
       tooltip: 'LegendPanel.title',
       tooltipPlacement: 'right',
-      children: <HubOutlinedIcon />,
+      children: <CustomLegendIcon />,
       visible: true,
     };
   }
@@ -76,7 +76,7 @@ class LegendPanelPlugin extends AppBarPlugin {
   override onCreateContentProps(): TypePanelProps {
     return {
       title: 'LegendPanel.title',
-      icon: <HubOutlinedIcon />,
+      icon: <CustomLegendIcon />,
       width: 350,
       status: this.configObj?.isOpen as boolean,
     };

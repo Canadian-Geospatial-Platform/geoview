@@ -353,6 +353,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         });
     }
   }, [footerBarTabsConfig, mapId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 
   // Scroll the footer into view on mouse click
   useEffect(() => {
