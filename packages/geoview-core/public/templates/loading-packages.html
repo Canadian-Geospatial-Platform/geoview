@@ -85,8 +85,6 @@
     </table>
   </div>
   <div class="toolbar">
-    <button id="load-basemap-panel-btn">Load Basemap Panel</button>
-    <button id="unload-basemap-panel-btn">Unload Basemap Panel</button>
     <button id="load-aoi-panel-btn">Load Area of Interest Panel</button>
     <button id="unload-aoi-panel-btn">Unload Area of Interest Panel</button>
   </div>
@@ -103,23 +101,6 @@
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
     cgpv.init((mapId) => {
       if (mapId === 'mapWM') {
-        // get load basemap panel button element
-        var loadBasemapPanelBtn = document.getElementById('load-basemap-panel-btn');
-
-        // add event handler to the load basemap panel button
-        loadBasemapPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.plugin.addPlugin('basemap-panel', 'mapWM', window.geoviewPlugins['basemap-panel'], {
-            mapId: 'mapWM',
-          });
-        });
-
-        // get unload basemap panel button element
-        var unloadBasemapPanelBtn = document.getElementById('unload-basemap-panel-btn');
-
-        // add event handler to the unload basemap panel button
-        unloadBasemapPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.plugin.removePlugin('basemap-panel', 'mapWM');
-        });
         // get load aoi panel button element
         var loadAoiPanelBtn = document.getElementById('load-aoi-panel-btn');
 

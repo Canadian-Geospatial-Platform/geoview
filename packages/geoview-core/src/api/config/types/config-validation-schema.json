@@ -229,7 +229,6 @@
       "enum": [
         "geolocator",
         "export",
-        "basemap-panel",
         "geochart",
         "details",
         "legend",
@@ -271,7 +270,6 @@
           "type": "string",
           "enum": [
             "geolocator",
-            "basemap-panel",
             "geochart",
             "details",
             "legend",

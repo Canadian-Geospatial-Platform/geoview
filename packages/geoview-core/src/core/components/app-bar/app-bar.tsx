@@ -289,7 +289,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
           });
       }
     };
-    processPlugin('basemap-panel');
     processPlugin('aoi-panel');
   }, [appBarConfig, mapId]);
 

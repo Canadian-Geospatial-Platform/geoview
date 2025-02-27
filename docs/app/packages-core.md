@@ -179,7 +179,7 @@ Let's say we want to add a new package having the aoi-panel ID. To be detected a
     "TypeValidAppBarCoreProps": {
       "description": "Valid values for the app bar tabs core array.",
       "additionalProperties": false,
-      "enum": ["geolocator", "export", "basemap-panel", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel"]
+      "enum": ["geolocator", "export", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel"]
     },
 ```
 2. config-validation-schema.json
@@ -190,7 +190,6 @@ The file map-schema-type.js contains the typescript definition for all the types
 export type TypeValidAppBarCoreProps =
   | 'geolocator'
   | 'export'
-  | 'basemap-panel'
   | 'aoi-panel'
   | 'geochart'
   | 'guide'
@@ -204,7 +203,7 @@ export type TypeValidAppBarCoreProps =
 Adding the pluggin ID to loading-packages-config.json ensures that your new package is recognized and loaded by the application. Let's say we want to add a package named area of interest. you should add the new package to the configuration file to ensure it is loaded by the application.
 ```
 {
-  "core": ["basemap-panel", "aoi-panel"]
+  "core": ["aoi-panel"]
 }
 ```
 
@@ -224,5 +223,5 @@ CropOriginal as AoiIcon,
 
 ## Available core packages
 
-Available package ids `aoi-panel`, `basemap-panel`, `swiper`, `time-slider`, `geochart`
+Available package ids `aoi-panel`, `swiper`, `time-slider`, `geochart`
 
