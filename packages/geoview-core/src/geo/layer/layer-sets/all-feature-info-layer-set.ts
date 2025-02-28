@@ -46,7 +46,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     const layerPath = layer.getLayerPath();
     this.resultSet[layerPath].eventListenerEnabled = true;
     this.resultSet[layerPath].queryStatus = 'processed';
-    this.resultSet[layerPath].features = [];
+    this.resultSet[layerPath].features = undefined;
 
     // Extra initialization of settings
     DataTableEventProcessor.setInitialSettings(this.getMapId(), layerPath);

@@ -668,7 +668,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // Filter features based on visibility
     return features.filter((feature) => {
-      const fieldValues = uniqueValueStyle.fields.map((field) => feature.fieldInfo[field]!.value).join(';');
+      const fieldValues = uniqueValueStyle.fields.map((field) => feature.fieldInfo[field]?.value).join(';');
 
       return (
         visibleValues.has(fieldValues.toString()) ||
