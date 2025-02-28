@@ -54,7 +54,7 @@ export interface TypeTabPanelProps {
  * @see {@link https://mui.com/material-ui/react-tabs/}
  */
 function TabPanelUI(props: TypeTabPanelProps, ref: Ref<HTMLDivElement>): JSX.Element {
-  logger.logTraceRender('ui/tabs/tab-panel', props);
+  logger.logTraceRenderDetailed('ui/tabs/tab-panel', props);
 
   // Get constant from props
   const { children, value, index, id, containerType, tabId, ...other } = props;

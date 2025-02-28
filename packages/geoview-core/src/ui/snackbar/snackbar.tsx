@@ -63,7 +63,7 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) 
  * @see {@link https://mui.com/material-ui/react-snackbar/}
  */
 function SnackbarUI(props: SnackBarProps): JSX.Element {
-  logger.logTraceRender('ui/snackbar/snackbar', props);
+  logger.logTraceRenderDetailed('ui/snackbar/snackbar', props);
 
   // Get constant from props
   const { snackBarId, open, message, type, button, onClose, ...rest } = props;

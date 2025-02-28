@@ -14,8 +14,8 @@ import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-inti
 import { logger } from '@/core/utils/logger';
 
 export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
-  // Log, commented too annoying
-  logger.logTraceRender('components/hover-tooltip/hover-tooltip');
+  // Log
+  logger.logTraceRenderDetailed('components/hover-tooltip/hover-tooltip');
 
   // Hooks
   const { t } = useTranslation<string>();

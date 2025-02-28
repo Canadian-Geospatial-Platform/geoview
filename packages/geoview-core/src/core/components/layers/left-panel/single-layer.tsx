@@ -26,6 +26,11 @@ import {
   useLayerSelectedLayerPath,
   useSelectedLayerSortingArrowId,
   useSelectorLayerItems,
+  useSelectorLayerStatus,
+  useSelectorLayerControls,
+  useSelectorLayerName,
+  useSelectorLayerChildren,
+  useSelectorLayerId,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useMapStoreActions,
@@ -42,9 +47,11 @@ import { ArrowDownwardIcon, ArrowUpIcon, TableViewIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeLayerControls } from '@/api/config/types/map-schema-types';
 
 interface SingleLayerProps {
-  layer: TypeLegendLayer;
+  layerPath: string;
   depth: number;
   showLayerDetailsPanel: (layerId: string) => void;
   isFirst: boolean;
@@ -52,9 +59,9 @@ interface SingleLayerProps {
   isLayoutEnlarged: boolean;
 }
 
-export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLast, isLayoutEnlarged }: SingleLayerProps): JSX.Element {
+export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, isLast, isLayoutEnlarged }: SingleLayerProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/layers/left-panel/single-layer', layer.layerPath);
+  logger.logTraceRender('components/layers/left-panel/single-layer', layerPath);
 
   const { t } = useTranslation<string>();
 
@@ -74,59 +81,62 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
 
   useDataTableStoreActions();
 
-  const isVisible = useSelectorLayerVisibility(layer.layerPath);
-  const inVisibleRange = useSelectorLayerInVisibleRange(layer.layerPath);
-  const legendExpanded = !useSelectorLayerLegendCollapsed(layer.layerPath);
+  const isVisible = useSelectorLayerVisibility(layerPath);
+  const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
+  const legendExpanded = !useSelectorLayerLegendCollapsed(layerPath);
 
   // TODO: I think we should favor using this pattern here, with the store, instead of working with the whole 'layer' object from the props
-  // const layerLegendQueryStatus: string | undefined = useSelectorLayerLegendQueryStatus(layer.layerPath);
-  // const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layer.layerPath);
-  // const layerName: string | undefined = useSelectorLayerName(layer.layerPath);
-  // const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layer.layerPath);
-  // const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layer.layerPath);
-  const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layer.layerPath);
+  const layerId: string | undefined = useSelectorLayerId(layerPath);
+  const layerName: string | undefined = useSelectorLayerName(layerPath);
+  const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layerPath);
+  const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layerPath);
+  const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layerPath);
+  const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layerPath);
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(
-    (startingLayer: TypeLegendLayer): boolean => {
+    (children: TypeLegendLayer[] | undefined): boolean => {
       // Log
       logger.logTraceUseCallback('SINGLE-LAYER - isLayerChildSelected');
 
       if (displayState !== 'view') {
         return false;
       }
-      if (startingLayer.children && startingLayer.children.length > 0) {
-        if (startingLayer.children.filter((child) => child.layerPath === selectedLayerPath).length > 0) {
+      if (children && children.length > 0) {
+        if (children.filter((child) => child.layerPath === selectedLayerPath).length > 0) {
           return true;
         }
 
-        return _.some(startingLayer.children, (child) => isLayerChildSelected(child));
+        return _.some(children, (child) => isLayerChildSelected(child.children));
       }
       return false;
     },
     [displayState, selectedLayerPath]
   );
 
-  const layerChildIsSelected = isLayerChildSelected(layer);
-  const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
+  const layerChildIsSelected = isLayerChildSelected(layerChildren);
+  const layerIsSelected = layerPath === selectedLayerPath && displayState === 'view';
 
   // returns true if any of the layer children has visibility of false
-  const layerHasDisabledVisibility = useCallback((startingLayer: TypeLegendLayer): boolean => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - layerHasDisabledVisibility');
+  const layerHasDisabledVisibility = useCallback(
+    (children: TypeLegendLayer[] | undefined, controls: TypeLayerControls | undefined): boolean => {
+      // Log
+      logger.logTraceUseCallback('SINGLE-LAYER - layerHasDisabledVisibility');
 
-    if (startingLayer.controls?.visibility === false) {
-      return true;
-    }
-    let childrenHasAlways = false;
-    if (startingLayer.children && startingLayer.children.length > 0) {
-      childrenHasAlways = startingLayer.children.some((child) => layerHasDisabledVisibility(child));
-    }
+      if (controls?.visibility === false) {
+        return true;
+      }
+      let childrenHasAlways = false;
+      if (children && children.length > 0) {
+        childrenHasAlways = children.some((child) => layerHasDisabledVisibility(child.children, child.controls));
+      }
 
-    return childrenHasAlways;
-  }, []);
+      return childrenHasAlways;
+    },
+    []
+  );
 
-  const isLayerAlwaysVisible = layerHasDisabledVisibility(layer);
+  const isLayerAlwaysVisible = layerHasDisabledVisibility(layerChildren, layerControls);
 
   /**
    * Handle expand/shrink of layer groups.
@@ -136,22 +146,22 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     logger.logTraceUseCallback('SINGLE-LAYER - handleExpandGroupClick');
 
     // Set legend collapse value
-    setLegendCollapsed(layer.layerPath);
-  }, [layer.layerPath, setLegendCollapsed]);
+    setLegendCollapsed(layerPath);
+  }, [layerPath, setLegendCollapsed]);
 
   const handleLayerClick = useCallback((): void => {
     // Log
     logger.logTraceUseCallback('SINGLE-LAYER - handleLayerClick');
 
     // Only clickable if the layer status is processed or loaded
-    if (!['processed', 'loaded'].includes(layer.layerStatus!)) {
+    if (!['processed', 'loaded'].includes(layerStatus!)) {
       return;
     }
 
     // Set selected layer path
-    setSelectedLayerPath(layer.layerPath);
-    showLayerDetailsPanel?.(layer.layerId);
-  }, [layer.layerPath, layer.layerId, layer.layerStatus, setSelectedLayerPath, showLayerDetailsPanel]);
+    setSelectedLayerPath(layerPath);
+    showLayerDetailsPanel?.(layerId || '');
+  }, [layerPath, layerId, layerStatus, setSelectedLayerPath, showLayerDetailsPanel]);
 
   const handleListItemKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLLIElement>) => {
@@ -173,12 +183,12 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       logger.logTraceUseCallback('SINGLE-LAYER - handleIconButtonUpKeyDown');
 
       if (event.key === 'Enter') {
-        setSelectedLayerSortingArrowId(`${mapId}-${layer.layerPath}-up-order`);
-        reorderLayer(layer.layerPath, -1);
+        setSelectedLayerSortingArrowId(`${mapId}-${layerPath}-up-order`);
+        reorderLayer(layerPath, -1);
         event.preventDefault();
       }
     },
-    [layer.layerPath, mapId, reorderLayer, setSelectedLayerSortingArrowId]
+    [layerPath, mapId, reorderLayer, setSelectedLayerSortingArrowId]
   );
 
   const handleIconButtonDownKeyDown = useCallback(
@@ -187,12 +197,12 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       logger.logTraceUseCallback('SINGLE-LAYER - handleIconButtonDownKeyDown');
 
       if (event.key === 'Enter') {
-        setSelectedLayerSortingArrowId(`${mapId}-${layer.layerPath}-down-order`);
-        reorderLayer(layer.layerPath, 1);
+        setSelectedLayerSortingArrowId(`${mapId}-${layerPath}-down-order`);
+        reorderLayer(layerPath, 1);
         event.preventDefault();
       }
     },
-    [layer.layerPath, mapId, reorderLayer, setSelectedLayerSortingArrowId]
+    [layerPath, mapId, reorderLayer, setSelectedLayerSortingArrowId]
   );
 
   const handleToggleVisibility = useCallback((): void => {
@@ -200,27 +210,27 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     logger.logTraceUseCallback('SINGLE-LAYER - handleToggleVisibility');
 
     // Toggle visibility
-    setOrToggleLayerVisibility(layer.layerPath);
-  }, [layer.layerPath, setOrToggleLayerVisibility]);
+    setOrToggleLayerVisibility(layerPath);
+  }, [layerPath, setOrToggleLayerVisibility]);
 
   // Get layer description
   const memoLayerDescription = useMemo((): JSX.Element | string | null => {
     // Log
-    logger.logTraceUseMemo('SINGLE-LAYER - memoLayerDescription', layer.layerPath, layer.layerStatus);
+    logger.logTraceUseMemo('SINGLE-LAYER - memoLayerDescription', layerPath, layerStatus);
 
-    if (layer.layerStatus === 'error') {
+    if (layerStatus === 'error') {
       return t('legend.layerError');
     }
-    if (layer.layerStatus === 'processing' || layer.layerStatus === 'loading') {
+    if (layerStatus === 'processing' || layerStatus === 'loading') {
       return t('legend.layerLoading');
     }
 
-    if (layer.children.length > 0) {
-      return t('legend.subLayersCount').replace('{count}', layer.children.length.toString());
+    if (layerChildren && layerChildren.length > 0) {
+      return t('legend.subLayersCount').replace('{count}', layerChildren.length.toString());
     }
 
-    const count = layerItems.filter((d) => d.isVisible !== false).length;
-    const totalCount = layerItems.length;
+    const count = layerItems?.filter((d) => d.isVisible !== false).length || 0;
+    const totalCount = layerItems?.length || 0;
 
     let itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
 
@@ -228,7 +238,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       itemsLengthDesc = '';
     }
 
-    if (datatableSettings[layer.layerPath]) {
+    if (datatableSettings[layerPath]) {
       return (
         <Typography sx={{ color: 'unset', fontSize: 'unset' }} component="span">
           {itemsLengthDesc} &nbsp;
@@ -237,20 +247,20 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       );
     }
     return itemsLengthDesc;
-  }, [datatableSettings, layerItems, layer.children.length, layer.layerPath, layer.layerStatus, t]);
+  }, [datatableSettings, layerItems, layerChildren, layerPath, layerStatus, t]);
 
   // Memoize the EditModeButtons component section
   const memoEditModeButtons = useMemo((): JSX.Element | null => {
     // Log
-    logger.logTraceUseMemo('SINGLE-LAYER - memoEditModeButtons', layer.layerPath);
+    logger.logTraceUseMemo('SINGLE-LAYER - memoEditModeButtons', layerPath);
 
     if (displayState === 'remove') {
-      return <DeleteUndoButton layerPath={layer.layerPath} layerId={layer.layerId} layerRemovable={layer.controls?.remove !== false} />;
+      return <DeleteUndoButton layerPath={layerPath} layerId={layerId || ''} layerRemovable={layerControls?.remove !== false} />;
     }
     if (displayState === 'order') {
       return (
         <>
-          {layer.children?.length > 0 && (
+          {layerChildren && layerChildren.length > 0 && (
             <Divider
               orientation="vertical"
               sx={{
@@ -263,22 +273,22 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
             />
           )}
           <IconButton
-            id={`${mapId}-${layer.layerPath}-up-order`}
+            id={`${mapId}-${layerPath}-up-order`}
             disabled={isFirst}
             edge="end"
             size="small"
             onKeyDown={handleIconButtonUpKeyDown}
-            onClick={() => reorderLayer(layer.layerPath, -1)}
+            onClick={() => reorderLayer(layerPath, -1)}
           >
             <ArrowUpIcon />
           </IconButton>
           <IconButton
-            id={`${mapId}-${layer.layerPath}-down-order`}
+            id={`${mapId}-${layerPath}-down-order`}
             disabled={isLast}
             edge="end"
             size="small"
             onKeyDown={handleIconButtonDownKeyDown}
-            onClick={() => reorderLayer(layer.layerPath, 1)}
+            onClick={() => reorderLayer(layerPath, 1)}
           >
             <ArrowDownwardIcon />
           </IconButton>
@@ -292,24 +302,25 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     handleIconButtonUpKeyDown,
     isFirst,
     isLast,
-    layer.children?.length,
-    layer.controls?.remove,
-    layer.layerId,
-    layer.layerPath,
+    layerChildren,
+    layerControls,
+    layerId,
+    layerPath,
     mapId,
     reorderLayer,
+    theme.palette.geoViewColor.bgColor.dark,
   ]);
 
   // Memoize the MoreLayerButtons component section
   const memoMoreLayerButtons = useMemo((): JSX.Element | null => {
     // Log
-    logger.logTraceUseMemo('SINGLE-LAYER - memoMoreLayerButtons', layer.layerPath);
+    logger.logTraceUseMemo('SINGLE-LAYER - memoMoreLayerButtons', layerPath);
 
-    if (layer.layerStatus === 'processing' || layer.layerStatus === 'loading' || displayState !== 'view') {
+    if (layerStatus === 'processing' || layerStatus === 'loading' || displayState !== 'view') {
       return null;
     }
-    if (layer.layerStatus === 'error') {
-      return <DeleteUndoButton layerPath={layer.layerPath} layerId={layer.layerId} layerRemovable={layer.controls?.remove !== false} />;
+    if (layerStatus === 'error') {
+      return <DeleteUndoButton layerPath={layerPath} layerId={layerId || ''} layerRemovable={layerControls?.remove !== false} />;
     }
 
     if (isLayerAlwaysVisible) {
@@ -331,24 +342,14 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
         {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
       </IconButton>
     );
-  }, [
-    displayState,
-    handleToggleVisibility,
-    isLayerAlwaysVisible,
-    isVisible,
-    layer.controls?.remove,
-    layer.layerId,
-    layer.layerPath,
-    layer.layerStatus,
-    t,
-  ]);
+  }, [displayState, handleToggleVisibility, isLayerAlwaysVisible, isVisible, layerControls?.remove, layerId, layerPath, layerStatus, t]);
 
   // Memoize the arrow buttons component section
   const memoArrowButtons = useMemo((): JSX.Element | null => {
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoArrowButtons');
 
-    if (layer.children?.length) {
+    if (layerChildren?.length) {
       return (
         <IconButton
           color="primary"
@@ -364,14 +365,14 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     }
 
     return null;
-  }, [handleExpandGroupClick, layer.children?.length, legendExpanded, t]);
+  }, [handleExpandGroupClick, layerChildren, legendExpanded, t]);
 
   // Memoize the collapse component section
   const memoCollapse = useMemo((): JSX.Element | null => {
     // Log
-    logger.logTraceUseMemo('SINGLE-LAYER - memoCollapse', layer.children);
+    logger.logTraceUseMemo('SINGLE-LAYER - memoCollapse', layerChildren);
 
-    if (!(layer.children && layer.children.length)) {
+    if (!(layerChildren && layerChildren.length)) {
       return null;
     }
 
@@ -379,20 +380,20 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       <Collapse in={legendExpanded} timeout="auto">
         <LayersList
           depth={1 + depth}
-          layersList={layer.children}
+          layersList={layerChildren}
           isLayoutEnlarged={isLayoutEnlarged}
           showLayerDetailsPanel={showLayerDetailsPanel}
         />
       </Collapse>
     );
-  }, [depth, isLayoutEnlarged, layer.children, legendExpanded, showLayerDetailsPanel]);
+  }, [depth, isLayoutEnlarged, layerChildren, legendExpanded, showLayerDetailsPanel]);
 
   // Memoize the container class section
   const memoContainerClass = useMemo(() => {
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoContainerClass');
 
-    const result: string[] = ['layer-panel ', layer.layerStatus ?? ''];
+    const result: string[] = ['layer-panel ', layerStatus ?? ''];
 
     if (depth === 0) {
       result.push('bordered');
@@ -408,7 +409,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     }
 
     return result.join(' ');
-  }, [depth, layer.layerStatus, layerChildIsSelected, layerIsSelected, legendExpanded]);
+  }, [depth, layerStatus, layerChildIsSelected, layerIsSelected, legendExpanded]);
 
   useEffect(() => {
     // Log
@@ -447,17 +448,17 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
 
   return (
     <AnimatedPaper className={memoContainerClass} data-layer-depth={depth}>
-      <Tooltip title={layer.layerName} placement="top" enterDelay={1000} arrow>
-        <ListItem id={layer.layerId} key={layer.layerName} divider tabIndex={0} onKeyDown={handleListItemKeyDown}>
+      <Tooltip title={layerName} placement="top" enterDelay={1000} arrow>
+        <ListItem id={layerId} key={layerName} divider tabIndex={0} onKeyDown={handleListItemKeyDown}>
           <ListItemButton
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
             tabIndex={-1}
             sx={{ minHeight: '4.51rem', ...(!inVisibleRange && sxClasses.outOfRange) }}
             className={!inVisibleRange ? 'out-of-range' : ''}
           >
-            <LayerIcon layer={layer} />
+            <LayerIcon layerPath={layerPath} />
             <ListItemText
-              primary={layer.layerName !== undefined ? layer.layerName : layer.layerId}
+              primary={layerName !== undefined ? layerName : layerId}
               secondary={memoLayerDescription}
               onClick={handleLayerClick}
             />

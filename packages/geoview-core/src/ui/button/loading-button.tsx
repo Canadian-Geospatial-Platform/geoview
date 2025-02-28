@@ -51,7 +51,7 @@ export interface LoadingButtonPropsExtend extends LoadingButtonProps {
  * @see {@link https://mui.com/material-ui/api/loading-button/}
  */
 function LoadingButtonUI({ children, ...rest }: LoadingButtonPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/button/loading-button');
+  logger.logTraceRenderDetailed('ui/button/loading-button');
 
   return <MaterialLoadingButton {...rest}>{children}</MaterialLoadingButton>;
 }

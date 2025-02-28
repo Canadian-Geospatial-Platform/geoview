@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 // this esLint is used in many places for findLayerByPath function. It is why we keep it global...
-import { useMemo } from 'react';
 import { useStore } from 'zustand';
+import { cloneDeep } from 'lodash';
 
 import { FitOptions } from 'ol/View';
 import { Extent } from 'ol/extent';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
+import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import {
   layerEntryIsEsriDynamic,
@@ -25,7 +25,6 @@ import { LegendEventProcessor } from '@/api/event-processors/event-processor-chi
 import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { TypeLayerControls } from '@/api/config/types/map-schema-types';
-import { logger } from '@/core/utils/logger';
 
 // #region INTERFACES & TYPES
 
@@ -54,7 +53,6 @@ export interface ILayerState {
     setLayerDeleteInProgress: (newVal: boolean) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     setSelectedLayerPath: (layerPath: string) => void;
-    sortLegendLayersChildren: (legendLayerList: TypeLegendLayer[]) => void;
     toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
     setSelectedLayerSortingArrowId: (layerId: string) => void;
@@ -232,14 +230,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
-       * Sorts legend layers children recursively in given legend layers list.
-       * @param {TypeLegendLayer[]} legendLayerList - The list to sort.
-       */
-      sortLegendLayersChildren: (legendLayerList: TypeLegendLayer[]): void => {
-        LegendEventProcessor.sortLegendLayersChildren(get().mapId, legendLayerList);
-      },
-
-      /**
        * Toggle visibility of an item.
        * @param {string} layerPath - The layer path of the layer to change.
        * @param {TypeLegendItem} item - The name of the item to change.
@@ -325,7 +315,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         set({
           layerState: {
             ...get().layerState,
-            legendLayers: [...legendLayers],
+            legendLayers: cloneDeep(legendLayers),
+            // GV When changing the legend layers object itself, we change all inner objects/arrays so that all triggers restart
+            // TODO: We should improve this setter, apply it for different scenarios of actual specific 'sets', and the
+            // TO.DOCONT: new store selectors are compatible with this and should work fine in the future
           },
         });
       },
@@ -415,68 +408,62 @@ export const useIconLayerSet = (layerPath: string): string[] => {
   return [];
 };
 
+export const useSelectorLayerId = (layerPath: string): string | undefined => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.layerId);
+};
+
 export const useSelectorLayerName = (layerPath: string): string | undefined => {
   // Hook
-  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
-  // Redirect
-  return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.layerName;
+  return useStore(useGeoViewStore(), (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.layerName);
+};
+
+export const useSelectorLayerType = (layerPath: string): TypeGeoviewLayerType | undefined => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.type);
 };
 
 export const useSelectorLayerStatus = (layerPath: string): TypeLayerStatus | undefined => {
   // Hook
-  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
-  // Redirect
-  return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.layerStatus;
+  return useStore(
+    useGeoViewStore(),
+    (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.layerStatus
+  );
 };
 
 export const useSelectorLayerLegendQueryStatus = (layerPath: string): string | undefined => {
   // Hook
-  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
-  // Redirect
-  return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.legendQueryStatus;
+  return useStore(
+    useGeoViewStore(),
+    (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.legendQueryStatus
+  );
 };
 
 export const useSelectorLayerControls = (layerPath: string): TypeLayerControls | undefined => {
   // Hook
-  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
-  // Redirect
-  return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.controls;
+  return useStore(useGeoViewStore(), (state) => LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.controls);
 };
 
 export const useSelectorLayerChildren = (layerPath: string): TypeLegendLayer[] | undefined => {
   // Hook
-  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
-
-  // Find the children
-  const children = LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.children;
-
-  // Compute a dependency string based on the children layerPath values
-  const childrenKey = (children || []).map((child) => child.layerPath).join('|||');
-
-  // Only re-create the array if the childrenKey changes
-  return useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('LAYER-STATE - useSelectorLayerChildren', childrenKey); // Purposely use the 'childrenKey' variable to fix the linter warning in the dependency array of the useMemo
-    return LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.children;
-  }, [legendLayers, layerPath, childrenKey]);
+  return useStore(useGeoViewStore(), (state) => {
+    // Get the state value
+    return LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.children;
+  });
 };
 
-export const useSelectorLayerItems = (layerPath: string): TypeLegendItem[] => {
+export const useSelectorLayerItems = (layerPath: string): TypeLegendItem[] | undefined => {
   // Hook
-  const legendLayers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+  return useStore(useGeoViewStore(), (state) => {
+    // Get the state value
+    return LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.items;
+  });
+};
 
-  // Find the items
-  const items = LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.items;
-
-  // Compute a dependency string based on the items values
-  const itemsKey = (items || []).map((item) => `${item.name}|${item.isVisible}|${item.icon}`).join('|||');
-
-  // Return a new array reference when items change
-  return useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('LAYER-STATE - useSelectorLayerItems', itemsKey); // Using itemsKey in log to satisfy linter
-
-    // Create a new array with spread operator to force new reference
-    return items ? [...items] : [];
-  }, [items, itemsKey]);
+export const useSelectorLayerIcons = (layerPath: string): TypeLegendLayerItem[] | undefined => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => {
+    // Get the state value
+    return LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.icons;
+  });
 };

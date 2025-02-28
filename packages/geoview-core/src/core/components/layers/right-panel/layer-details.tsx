@@ -204,7 +204,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <Fragment key={layer.layerId}>
             <ListItem sx={{ padding: '6px 0px', borderTop: `1px solid ${theme.palette.geoViewColor.bgColor.dark[50]}` }}>
               <ListItemIcon>
-                <LayerIcon layer={layer} />
+                <LayerIcon layerPath={layer.layerPath} />
               </ListItemIcon>
               <ListItemText primary={layer.layerName} />
             </ListItem>

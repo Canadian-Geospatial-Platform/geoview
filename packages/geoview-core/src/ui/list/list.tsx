@@ -25,7 +25,7 @@ const sxClasses = {
  * @returns {JSX.Element} the created List element
  */
 function ListUI(props: TypeListProps, ref: Ref<HTMLUListElement>): JSX.Element {
-  logger.logTraceRender('ui/list/list', props);
+  logger.logTraceRenderDetailed('ui/list/list', props);
 
   // Get constant from props
   const { children, className, style, type, sx, ...rest } = props;

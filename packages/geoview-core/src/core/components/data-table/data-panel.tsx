@@ -77,11 +77,9 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       setSelectedLayerPath(_layer.layerPath);
       setIsLoading(true);
 
+      // TODO: Check - Why would we trigger when the layer status is in error!? Removed the OR condition for now
       // trigger the fetching of the features when not available OR when layer status is in error
-      if (
-        !orderedLayerData.filter((layers) => layers.layerPath === _layer.layerPath && !!layers?.features?.length).length ||
-        _layer.layerStatus === LAYER_STATUS.ERROR
-      ) {
+      if (!orderedLayerData.filter((layers) => layers.layerPath === _layer.layerPath && !!layers?.features?.length).length) {
         triggerGetAllFeatureInfo(_layer.layerPath).catch((error) => {
           // Log
           logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in data-panel.handleLayerChange', error);

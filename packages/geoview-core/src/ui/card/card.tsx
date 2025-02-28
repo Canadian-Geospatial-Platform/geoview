@@ -53,7 +53,7 @@ export interface CardPropsExtend extends CardProps {
  * @see {@link https://mui.com/material-ui/react-card/}
  */
 function CardUI(props: CardPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/card/card');
+  logger.logTraceRenderDetailed('ui/card/card');
 
   // Get constant from props
   const { title, contentCard, headerComponent = 'h3', ...rest } = props;

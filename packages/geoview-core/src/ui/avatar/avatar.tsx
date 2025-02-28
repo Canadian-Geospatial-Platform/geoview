@@ -46,7 +46,7 @@ export interface AvatarPropsExtend extends AvatarProps {
  * @see {@link https://mui.com/material-ui/api/avatar/}
  */
 function AvatarUI(props: AvatarPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/avatar/avatar');
+  logger.logTraceRenderDetailed('ui/avatar/avatar');
 
   // Get constant from props
   const { children } = props;

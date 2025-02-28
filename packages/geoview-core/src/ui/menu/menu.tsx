@@ -45,7 +45,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/react-menu/}
  */
 function MenuUI(props: MenuProps): JSX.Element {
-  logger.logTraceRender('ui/menu/menu');
+  logger.logTraceRenderDetailed('ui/menu/menu');
 
   // Get constant from props
   const { children } = props;

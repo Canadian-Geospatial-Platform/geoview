@@ -1,4 +1,4 @@
-// GV: THIS UI COMPONENT IS NOT USE
+// GV: THIS UI COMPONENT IS NOT USED
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ButtonGroupProps, ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -51,7 +51,7 @@ const POPPER_STYLES = { zIndex: 1 } as const;
  * @see {@link https://mui.com/material-ui/react-button-group/}
  */
 function ButtonDropDownUI(props: ButtonDropDownPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/button-drop-down/button-drop-down');
+  logger.logTraceRenderDetailed('ui/button-drop-down/button-drop-down');
 
   // Get constant from props
   const { options, onButtonClick = null, ...otherProps } = props;
