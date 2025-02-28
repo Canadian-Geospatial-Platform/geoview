@@ -626,7 +626,7 @@ export class MapViewer {
     // GV This removes the spinning circle overlay
     MapEventProcessor.setMapLoaded(this.mapId, true);
 
-    // Zoom to extent provided in config, it present
+    // Zoom to extent provided in config, if present
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent)
       // TODO: Timeout allows for map height to be set before zoom happens, so padding is applied properly
       setTimeout(
@@ -756,6 +756,11 @@ export class MapViewer {
           // Is ready
           this.#mapLayersLoaded = true;
           this.#emitMapLayersLoaded();
+
+          // Create and dispatch the resolution change event to force the registration of layers in the
+          // inVisibleRange array when layers are loaded.
+          const event = new ObjectEvent('change:resolution', 'visibleRange', null);
+          this.getView().dispatchEvent(event);
         }
       }
     }, 250);

@@ -163,7 +163,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Layers Status</button>
-    <pre id="Map2-state" class="panel map-title-holder"></pre>
+    <pre id="HMap2-state" class="panel map-title-holder"></pre>
     <hr />
     <div
       id="Map2"
@@ -212,7 +212,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Layers Status</button>
-    <pre id="Map3-state" class="panel map-title-holder"></pre>
+    <pre id="HMap3-state" class="panel map-title-holder"></pre>
     <hr />
     <div
       id="Map3"
@@ -287,9 +287,7 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-          listenToLegendLayerSetChanges('HMap1-state', 'Map1');
-          listenToLegendLayerSetChanges('Map2-state', 'Map2');
-          listenToLegendLayerSetChanges('Map3-state', 'Map3');
+          listenToLegendLayerSetChanges(`H${mapId}-state`, mapId);
       });
 
       // create snippets
