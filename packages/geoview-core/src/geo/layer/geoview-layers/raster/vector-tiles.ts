@@ -253,7 +253,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
         updatedLayerConfig.maxScale = Math.max(updatedLayerConfig.maxScale ?? -Infinity, maxScale as number);
       }
 
-      // Second, set the min/max zoom levels based on the service / config
+      // Second, set the min/max zoom levels based on the service / config.
+      // GV Vector tiles should always have a minZoom and maxZoom, so -Infinity or Infinity should never be set as a value
       if (minZoom !== undefined) {
         updatedLayerConfig.initialSettings.minZoom = Math.min(updatedLayerConfig.initialSettings.minZoom ?? Infinity, minZoom as number);
       }

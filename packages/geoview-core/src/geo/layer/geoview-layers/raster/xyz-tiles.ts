@@ -264,18 +264,16 @@ export class XYZTiles extends AbstractGeoViewRaster {
       newLayerConfig.minScale =
         (metadataLayerConfigFound?.minScale as number) || ((metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number);
 
-      // GV Note: minScale is actually the maxZoom and maxScale is actually the minZoom
-      // GV As the scale gets smaller, the zoom gets larger
       const mapView = this.getMapViewer().getView();
-      if (newLayerConfig?.minScale) {
-        const maxScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.minScale as number);
+      if (newLayerConfig?.maxScale) {
+        const maxScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.maxScale as number);
         if (maxScaleZoomLevel && (!newLayerConfig.initialSettings.maxZoom || maxScaleZoomLevel > newLayerConfig.initialSettings.maxZoom)) {
           newLayerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
         }
       }
 
-      if (newLayerConfig?.maxScale) {
-        const minScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.maxScale as number);
+      if (newLayerConfig?.minScale) {
+        const minScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.minScale as number);
         if (minScaleZoomLevel && (!newLayerConfig.initialSettings.minZoom || minScaleZoomLevel < newLayerConfig.initialSettings.minZoom)) {
           newLayerConfig.initialSettings.minZoom = minScaleZoomLevel;
         }
