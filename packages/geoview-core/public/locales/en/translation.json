@@ -52,6 +52,9 @@
       "toggle": "Toggle overview map",
       "error": "Error loading overview map"
     },
+    "disclaimer":{
+      "message": "Disclaimer: This map is for illustrative purposes. The markers represent the approximate locations based on available data. The Government of Canada shall not be held liable for any third party’s interpretation of the Information. The Government of Canada reserves the right to change or revise the Information at any time."
+    },    
     "attribution": {
       "defaultnrcan": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
       "tooltip": "Attribution"
