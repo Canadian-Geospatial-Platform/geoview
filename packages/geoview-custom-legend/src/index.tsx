@@ -4,12 +4,12 @@ import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
 import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
 import { CustomLegendIcon } from 'geoview-core/src/ui/icons/index';
-import { LegendPanel } from './custom-legend';
+import { CustomLegendPanel } from './custom-legend';
 
 /**
  * Create a plugin to show a custom legend panel
  */
-class LegendPanelPlugin extends AppBarPlugin {
+class CustomLegendPanelPlugin extends AppBarPlugin {
   button = true;
 
   panel = true;
@@ -86,12 +86,12 @@ class LegendPanelPlugin extends AppBarPlugin {
    * Return panel content
    */
   override onCreateContent = (): JSX.Element => {
-    return <LegendPanel mapId={this.api} />;
+    return <CustomLegendPanel mapId={this.api} />;
   };
 }
 
 // Register the plugin
 window.geoviewPlugins = window.geoviewPlugins || {};
-window.geoviewPlugins['custom-legend'] = Cast<LegendPanelPlugin>(LegendPanelPlugin);
+window.geoviewPlugins['custom-legend'] = Cast<CustomLegendPanelPlugin>(CustomLegendPanelPlugin);
 
-export default LegendPanelPlugin;
+export default CustomLegendPanelPlugin;
