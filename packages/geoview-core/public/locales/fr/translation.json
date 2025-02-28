@@ -26,8 +26,7 @@
     "zoomOut": "Zoom arrière",
     "coordinates": "Basculer le format des coordonnées",
     "scale": "Basculer entre l'échelle et la résolution",
-    "location": "Zoom sur ma position",
-    "projection": "Changer la projection de la carte"
+    "location": "Zoom sur ma position"
   },
   "basemaps": {
     "select": "Choisir une carte de base",
@@ -56,12 +55,15 @@
       "defaultnrcan": "© Sa Majesté le Roi du Chef du Canada, représentée par le ministre des Ressources naturelle",
       "tooltip": "Attribution"
     },
+    "disclaimer":{
+      "message": "Avertissement: Cette carte n'est fournie qu'à titre d'illustration. Les marqueurs représentent les emplacements approximatifs en fonction des données accessibles. Le gouvernement du Canada ne peut être tenu responsable de l'interprétation de l'information par une tierce partie. Le gouvernement du Canada se réserve le droit de modifier l’information à tout moment."
+    },
     "crosshair": "Utiliser les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte, <strong>Entrée</strong> pour sélectionner et <strong>Shift+fléchées</strong> <strong>Haut</strong> et <strong>Bas</strong> pour modfier le déplacement."
   },
   "appbar": {
     "export": "Télécharger la carte",
     "notifications": "Notification",
-    "noNotificationsAvailable": "Aucune notification disponible",
+    "no_notifications_available": "Aucune notification disponible",
     "layers": "Couches",
     "share": "Partager",
     "version": "À propos de GéoView",
@@ -107,11 +109,11 @@
     "layerSelect": "Sélectionner couche(s)",
     "errorEmpty": "ne peut être vide",
     "errorNone": "Pas de fichier ou de source ajouté",
-    "errorFile": "Seuls les fichiers geoJSON et CSV peuvent être utilisés",
+    "errorFile": "Seuls les fichiers geoJSON, CSV et GeoPackage peuvent être utilisés",
     "errorServer": "source n'est pas valide",
     "errorNotLoaded": "Une erreur s'est produite lors du chargement de la couche",
     "errorProj": "ne prend pas en charge la projection cartographique actuelle",
-    "errorImageLoad": "Erreur de chargement de l'image source pour la couche: __param__ au niveau de zoom __param__",
+    "errorImageLoad": "Erreur de chargement de l'image source pour le couche: __param__ au niveau de zoom __param__",
     "only": "seulement",
     "opacity": "Opacité",
     "opacityMax": "Maximum du parent",
@@ -121,9 +123,9 @@
     "toggleAllVisibility": "Basculer toute les visibilités",
     "toggleCollapse": "Basculer la fermeture",
     "querying": "Requête en cours",
-    "layerAdded": "Couche __param__ ajoutée",
+    "layerAdded": "Couche __param__  ajoutée",
     "layerAddedAndLoading": "Couche __param__ ajoutée et en chargement",
-    "layerAddedWithError": "Couche __param__ en erreur",
+    "layerAddedWithError": "Couche __param__  en erreur",
     "instructionsNoLayersTitle": "Aucune couche visible",
     "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte."
   },
@@ -161,15 +163,15 @@
   },
   "validation": {
     "layer": {
-      "loadfailed": "Le chargement de la couche __param__ a échoué sur la carte.",
+      "loadfailed": "Le chargement de la couche [__param__] a échoué sur la carte __param__.",
       "notfound": "La sous couche __param__ de la couche __param__ n'existe pas sur le sereur",
-      "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la couche __param__ sur la carte",
-      "usedtwice": "Utilisation en double de l'identifiant de couche __param__ sur la carte",
+      "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la couche __param__ sur la carte __param__",
+      "usedtwice": "Utilisation en double de l'identifiant de couche [__param__] sur la carte __param__",
       "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul identifiant par couche."
     },
     "schema": {
       "notFound": "Une erreur de schéma a été trouvée, vérifiez la console pour voir ce qui ne va pas.",
-      "wrongPath": "Impossible de trouver le schéma (__param__)"
+      "wrongPath": "Impossible de trouver le schéma ([__param__])"
     },
     "changeDisplayLanguageLayers": "Les couches ne peuvent être chargée(s) de nouveau car la configuration ne supporte pas ce langage",
     "changeDisplayLanguage": "Seulement 'en' et 'fr' sont supporées",
@@ -188,7 +190,7 @@
   "geolocator": {
     "title": "Géolocalisation",
     "search": "Texte à rechercher",
-    "noResult": "Aucun résultat correspondant à",
+    "errorMessage": "Aucun résultat correspondant à",
     "province": "Province",
     "category": "Catégorie",
     "clearFilters": "Effacer les filtres",
@@ -227,24 +229,5 @@
   "footerBar": {
     "resizeTooltip": "Redimensionner",
     "noTab": "Pas d'onglet"
-  },
-  "error": {
-    "metadata": {
-      "unableRead": "Impossible de lire les métadonnées",
-      "empty": "La valeur renvoyée est vide",
-      "capability": "La valeur renvoyée ne contient pas de Capability, de Layer ou est vide"
-    },
-    "layer": {
-      "createGroup": "Impossible de créer une couche de groupe",
-      "emptyGroup": "Groupe de couches vide",
-      "esriId": "Le layerId ESRI doit être un nombre",
-      "esriIdNotFound": "Le layerId ESRI introuvable"
-    },
-    "geocore": {
-      "noLayer": "Aucune couche renvoyée par le service GeoCore"
-    },
-    "geolocator": {
-      "noService": "Service de géolocalisation non disponible"
-    }
   }
 }
