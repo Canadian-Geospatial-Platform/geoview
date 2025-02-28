@@ -69,12 +69,9 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'Map1') {
-          listenToLegendLayerSetChanges('HMap1-state', 'Map1');
-        }
-        if (mapId === 'Map2') {
-          listenToLegendLayerSetChanges('HMap2-state', 'Map2');
-        }
+        cgpv.init((mapId) => {
+          listenToLegendLayerSetChanges(`H${mapId}-state`, mapId);
+      });
       });
 
       // create snippets

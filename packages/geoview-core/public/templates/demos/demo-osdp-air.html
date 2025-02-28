@@ -42,6 +42,18 @@
     <a href="https://osdp-psdo.canada.ca/en/learn-about/air">Original RAMP Air</a><br />
 
     <div class="map-title-holder">
+      <h4 id="HMap3">Air Quality (Group)</h4>
+    </div>
+    <button class="collapsible active">Layers Status</button>
+    <pre id="HMap3-state" class="panel map-title-holder"></pre>
+    <div
+      id="Map3"
+      class="geoview-map"
+      data-lang="en"
+      data-config-url="./configs/OSDP/osdp-air.json"
+    ></div>
+
+    <div class="map-title-holder">
       <h4 id="HMap1">Air Quality (English)</h4>
     </div>
     <button class="collapsible active">Layers Status</button>
@@ -69,12 +81,7 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'Map1') {
-          listenToLegendLayerSetChanges('HMap1-state', 'Map1');
-        }
-        if (mapId === 'Map2') {
-          listenToLegendLayerSetChanges('HMap2-state', 'Map2');
-        }
+          listenToLegendLayerSetChanges(`H${mapId}-state`, mapId);
       });
 
       // create snippets
