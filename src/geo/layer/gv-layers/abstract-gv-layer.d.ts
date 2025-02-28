@@ -96,6 +96,11 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     getExternalFragmentsOrder(): TypeDateFragments | undefined;
     /**
+     * Gets the in visible range value
+     * @returns {boolean} true if the layer is in visible range
+     */
+    getInVisibleRange(): boolean;
+    /**
      * Overridable method called when the layer has been loaded correctly
      */
     protected onLoaded(): void;
@@ -199,9 +204,9 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * Converts the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
      * @param {Feature[]} features - The array of features to convert.
      * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The layer configuration.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The Array of feature information.
+     * @returns {TypeFeatureInfoEntry[] | undefined | null} The Array of feature information.
      */
-    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig): TypeFeatureInfoEntry[] | undefined | null;
     /**
      * Gets the layerFilter that is associated to the layer.
      * @returns {string | undefined} The filter associated to the layer or undefined.

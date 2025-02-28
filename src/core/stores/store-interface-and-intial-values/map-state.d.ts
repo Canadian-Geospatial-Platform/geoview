@@ -42,6 +42,7 @@ export interface IMapState {
     scale: TypeScaleInfo;
     size: [number, number];
     visibleLayers: string[];
+    visibleRangeLayers: string[];
     zoom: number;
     setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
     actions: {
@@ -59,6 +60,7 @@ export interface IMapState {
         setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
         setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
         setMapKeyboardPanInteractions: (panDelta: number) => void;
+        setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
         setZoom: (zoom: number, duration?: number) => void;
         setInteraction: (interaction: TypeInteraction) => void;
         setRotation: (rotation: number) => void;
@@ -94,6 +96,7 @@ export interface IMapState {
         setFixNorth: (ifFix: boolean) => void;
         setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]) => void;
         setVisibleLayers: (newOrder: string[]) => void;
+        setVisibleRangeLayers: (newOrder: string[]) => void;
         setOrderedLayerInfo: (newOrderedLayerInfo: TypeOrderedLayerInfo[]) => void;
         setHoverable: (layerPath: string, hoverable: boolean) => void;
         setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
@@ -125,6 +128,7 @@ export interface TypeOrderedLayerInfo {
     layerPath: string;
     queryable?: boolean;
     visible: boolean;
+    inVisibleRange: boolean;
     legendCollapsed: boolean;
 }
 export declare const useMapAttribution: () => string[];
@@ -152,9 +156,11 @@ export declare const useMapRotation: () => number;
 export declare const useMapScale: () => TypeScaleInfo;
 export declare const useMapSize: () => [number, number];
 export declare const useMapVisibleLayers: () => string[];
+export declare const useMapVisibleRangeLayers: () => string[];
 export declare const useMapZoom: () => number;
 export declare const getMapPointerPosition: (mapId: string) => TypeMapMouseInfo | undefined;
 export declare const useSelectorLayerVisibility: (layerPath: string) => boolean;
+export declare const useSelectorLayerInVisibleRange: (layerPath: string) => boolean;
 export declare const useSelectorLayerLegendCollapsed: (layerPath: string) => boolean;
 export declare const useSelectorLayerPathOrder: () => string[];
 export declare const useMapStoreActions: () => MapActions;

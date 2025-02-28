@@ -95,7 +95,10 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setMapLoaded(mapId: string, mapLoaded: boolean): void;
     static setMapPointerPosition(mapId: string, pointerPosition: TypeMapMouseInfo): void;
     static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): void;
-    static setZoom(mapId: string, zoom: number): void;
+    static getLayersInVisibleRange: (mapId: string) => string[];
+    static setVisibleRangeLayerMapState(mapId: string, visibleRangeLayers: string[]): void;
+    static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void;
+    static setZoom(mapId: string, zoom: number, orderedLayerInfo?: TypeOrderedLayerInfo[]): void;
     static setIsMouseInsideMap(mapId: string, inside: boolean): void;
     static setRotation(mapId: string, rotation: number): void;
     static setMapChangeSize(mapId: string, size: [number, number], scale: TypeScaleInfo): void;
@@ -128,6 +131,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number;
     static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
     static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
+    static getMapInVisibleRangeFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
     static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void;
     static removeHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry | 'all'): void;
     /**

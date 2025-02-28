@@ -4,6 +4,7 @@ import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/til
 export declare class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     source: TypeSourceVectorTilesInitialConfig;
     tileGrid: TypeTileGrid;
+    styleUrl?: string;
     /**
      * The class constructor.
      * @param {VectorTilesLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.

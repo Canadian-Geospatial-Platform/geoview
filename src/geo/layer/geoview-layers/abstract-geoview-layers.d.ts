@@ -44,6 +44,7 @@ export declare abstract class AbstractGeoViewLayer {
     /** layers of listOfLayerEntryConfig that did not load. */
     layerLoadError: {
         layer: string;
+        layerName?: string | undefined;
         loggerMessage: string;
     }[];
     /** The OpenLayer root layer representing this GeoView Layer. */

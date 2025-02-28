@@ -7,6 +7,7 @@ import { XYZ, OSM, VectorTile } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
 import { Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
+import View from 'ol/View';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -186,3 +187,23 @@ export declare function calculateDistance(coordinates: Coordinate[], inProj: str
  * @returns {number} Number representing meters per pixel
  */
 export declare function getMetersPerPixel(projection: TypeValidMapProjectionCodes, resolution: number, lat?: number): number;
+/**
+ * Convert a map scale to zoom level
+ * @param view The view for converting the scale
+ * @param targetScale The desired scale (e.g. 50000 for 1:50,000)
+ * @returns number representing the closest zoom level for the given scale
+ */
+export declare const getZoomFromScale: (view: View, targetScale: number) => number | undefined;
+/**
+ * Convert a map scale to zoom level
+ * @param view The view for converting the zoom
+ * @param zoom The desired zoom (e.g. 50000 for 1:50,000)
+ * @returns number representing the closest scale for the given zoom number
+ */
+export declare const getScaleFromZoom: (view: View, zoom: number) => number | undefined;
+/**
+ * Get map scale for Web Mercator or Lambert Conformal Conic projections
+ * @param view The view to get the current scale from
+ * @returns number representing scale (e.g. 50000 for 1:50,000)
+ */
+export declare const getMapScale: (view: View) => number | undefined;
