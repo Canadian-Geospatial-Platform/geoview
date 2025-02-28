@@ -89,10 +89,9 @@
     <button id="unload-basemap-panel-btn">Unload Basemap Panel</button>
     <button id="load-aoi-panel-btn">Load Area of Interest Panel</button>
     <button id="unload-aoi-panel-btn">Unload Area of Interest Panel</button>
-    <button id="load-legend-panel-btn">Load Custom Legend Panel</button>
-    <button id="unload-legend-panel-btn">Unload Custom Legend Panel</button>
+    <button id="load-custom-legend-btn">Load Custom Legend Panel</button>
+    <button id="unload-custom-legend-btn">Unload Custom Legend Panel</button>
   </div>
-
   <div id="mapWM" class="geoview-map" data-lang="en" data-config-url="./configs/loading-packages-config.json"></div>
   <p></p>
   <hr />
@@ -146,7 +145,6 @@
 
     // add event handler to the load custom legend panel button
     loadCustomLegendBtn.addEventListener('click', function (e) {
-      if (!window?.geoviewPlugins) window.geoviewPlugins = {};
       cgpv.api.plugin.addPlugin('custom-legend', 'mapWM', window.geoviewPlugins['custom-legend'], {
         mapId: 'mapWM',
       });

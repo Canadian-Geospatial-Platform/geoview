@@ -17,6 +17,7 @@
     "tabs": {
       "core": ["geolocator",
                 "export",
+                "custom-legend",
                 "aoi-panel",
                 "guide",
                 "basemap-panel",
