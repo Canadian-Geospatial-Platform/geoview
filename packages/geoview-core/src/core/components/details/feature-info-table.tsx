@@ -99,7 +99,7 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
   // Stringify values and create array of string to split item with ';' to separate images
   let stringValue: string | string[] = Array.isArray(value) ? String(value.map(stringify)) : String(stringify(value));
   stringValue = stringValue.toString().split(';');
-  
+
   // Generate stable IDs for each item when component mounts
   const itemIds = useMemo(() => stringValue.map(() => generateId()), [stringValue]);
 
