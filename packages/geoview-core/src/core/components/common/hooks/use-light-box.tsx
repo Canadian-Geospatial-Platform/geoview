@@ -57,8 +57,8 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
 });
 
 export function useLightBox(): UseLightBoxReturnType {
-  // TODO: logger - should we have anotherlevel of logger of thing that log too much?
-  logger.logTraceRender('components/common/use-light-box');
+  // Log
+  logger.logTraceRenderDetailed('components/common/use-light-box');
 
   // State
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);

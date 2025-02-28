@@ -42,7 +42,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/react-switch/}
  */
 function SwitchUI(props: SwitchProps): JSX.Element {
-  logger.logTraceRender('ui/switch/switch', props);
+  logger.logTraceRenderDetailed('ui/switch/switch', props);
 
   // Get constant from props
   const { title, ...otherProps } = props;

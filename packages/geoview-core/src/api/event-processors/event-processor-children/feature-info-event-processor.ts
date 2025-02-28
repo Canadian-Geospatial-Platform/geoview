@@ -77,6 +77,20 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets the layer data array for one layer.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The path of the layer to get.
+   * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
+   */
+  static findLayerDataFromLayerDataArray(
+    mapId: string,
+    layerPath: string,
+    layerDataArray: TypeFeatureInfoResultSetEntry[] = this.getFeatureInfoState(mapId).layerDataArray
+  ): TypeFeatureInfoResultSetEntry | undefined {
+    return layerDataArray.find((layer) => layer.layerPath === layerPath);
+  }
+
+  /**
    * Deletes the feature from a resultSet for a specific layerPath. At the same time it check for
    * removing the higlight and the click marker if selected layer path is the reset path
    * @param {string} mapId - The map identifier

@@ -57,7 +57,7 @@ export interface IconButtonPropsExtend extends IconButtonProps {
  * @see {@link https://mui.com/material-ui/react-button/#icon-button}
  */
 function IconButtonUI(props: IconButtonPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/icon-button/icon-button');
+  logger.logTraceRenderDetailed('ui/icon-button/icon-button');
 
   // TODO: WCAG - Do we need to pass aria label? We should freuse toltip or title when define
   // Get constant from props
