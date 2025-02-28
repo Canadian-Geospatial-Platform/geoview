@@ -41,15 +41,14 @@ export declare function getLegendStyles(styleConfig: TypeLayerStyleConfig | unde
  */
 export declare function getAndCreateFeatureStyle(feature: FeatureLike, style: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean, callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
 /** ***************************************************************************************************************************
- * This method gets the canvas icon from the style of the feature using the layer entry config.
- * @param {Feature} feature - The feature that need its canvas icon to be defined.
+ * This method gets the image source from the style of the feature using the layer entry config.
+ * @param {Feature} feature - The feature that need its icon to be defined.
  * @param {TypeStyleConfig} style - The style to use
  * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
- * @param {boolean} useRecycling - Special parameter to optimize canvas creation time when functions is called multiple times.
- * @returns {Promise<HTMLCanvasElement>} The canvas icon associated to the feature or a default empty canvas.
+ * @returns {string} The icon associated to the feature or a default empty one.
  */
-export declare function getFeatureCanvas(feature: Feature, style: TypeLayerStyleConfig, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean, useRecycling?: boolean): Promise<HTMLCanvasElement>;
+export declare function getFeatureImageSource(feature: Feature, style: TypeLayerStyleConfig, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean): string;
 /** ***************************************************************************************************************************
  * Analyse the filter and split it in syntaxique nodes.  If a problem is detected, an error object is thrown with an
  * explanatory message.

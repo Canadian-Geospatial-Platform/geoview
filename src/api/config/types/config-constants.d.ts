@@ -41,6 +41,7 @@ export declare const CV_BASEMAP_LABEL: Record<TypeValidMapProjectionCodes, boole
 export declare const CV_VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string, number[]>>;
 export declare const CV_MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]>;
 export declare const CV_MAP_CENTER: Record<TypeValidMapProjectionCodes, number[]>;
+export declare const CV_VALID_ZOOM_LEVELS: number[];
 /**
  *  Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are
  * defined here.

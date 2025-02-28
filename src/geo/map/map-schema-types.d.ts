@@ -249,6 +249,9 @@ export type TypeGeoviewLayerConfig = {
      * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
      */
     initialSettings?: TypeLayerInitialSettings;
+    /** Min and max scales */
+    minScale?: number;
+    maxScale?: number;
     /** The layer entries to use from the GeoView layer. */
     listOfLayerEntryConfig: TypeLayerEntryConfig[];
 };

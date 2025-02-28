@@ -8,6 +8,10 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
  * @class GVGroupLayer
  */
 export declare class GVGroupLayer extends AbstractBaseLayer {
+    /** Max zoom constant */
+    static readonly MAX_ZOOM = 23;
+    /** Min zoom constant */
+    static readonly MIN_ZOOM = 0;
     /**
      * Constructs a Group layer to manage an OpenLayer Group Layer.
      * @param {string} mapId - The map id
