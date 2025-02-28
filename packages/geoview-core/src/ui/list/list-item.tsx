@@ -19,7 +19,7 @@ const sxClasses = {
  * @returns {JSX.Element} The List Item component
  */
 function ListItemUI(props: ListItemProps, ref: Ref<HTMLLIElement>): JSX.Element {
-  logger.logTraceRender('ui/list/list-item', props);
+  logger.logTraceRenderDetailed('ui/list/list-item', props);
 
   // Get constant from props
   const { children } = props;

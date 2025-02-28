@@ -44,7 +44,7 @@ export interface DividerPropsExtend extends DividerProps {
  * @see {@link https://mui.com/material-ui/react-divider/}
  */
 function DividerUI(props: DividerPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/divider/divider');
+  logger.logTraceRenderDetailed('ui/divider/divider');
 
   // Get constant from props
   const { className = '', style, grow, orientation = 'horizontal', sx, ...rest } = props;

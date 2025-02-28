@@ -41,7 +41,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://www.material-react-table.com/}
  */
 function MRTTableUI<TData extends MRTRowData>(props: MRTTableOptions<TData>): JSX.Element {
-  logger.logTraceRender('ui/table/table', props);
+  logger.logTraceRenderDetailed('ui/table/table', props);
 
   return <MaterialReactTable {...props} />;
 }

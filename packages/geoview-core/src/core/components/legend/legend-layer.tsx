@@ -2,13 +2,12 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
-import { TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useMapStoreActions,
   useSelectorLayerLegendCollapsed,
-  useSelectorLayerStatus,
-  useSelectorLayerVisibility,
   useSelectorLayerInVisibleRange,
+  useSelectorLayerName,
+  useSelectorLayerItems,
 } from '@/core/stores/';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
@@ -18,14 +17,11 @@ import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 
 interface LegendLayerProps {
-  layer: TypeLegendLayer;
+  layerPath: string;
 }
 
 interface LegendLayerHeaderProps {
-  layer: TypeLegendLayer;
-  isCollapsed: boolean;
-  isVisible: boolean;
-  inVisibleRange: boolean;
+  layerPath: string;
   tooltip: string;
   onExpandClick: (event: React.MouseEvent) => void;
 }
@@ -38,33 +34,45 @@ const styles = {
 } as const;
 
 // Extracted Header Component
-const LegendLayerHeader = memo(
-  ({ layer, isCollapsed, isVisible, inVisibleRange, tooltip, onExpandClick }: LegendLayerHeaderProps): JSX.Element => (
-    <ListItem key={layer.layerName} divider onClick={onExpandClick} className={!inVisibleRange ? 'outOfRange' : ''}>
-      <LayerIcon layer={layer} />
-      <Tooltip title={layer.layerName} placement="top">
+const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLayerHeaderProps): JSX.Element => {
+  // Log
+  logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
+
+  // Hooks
+  const layerName = useSelectorLayerName(layerPath);
+  const layerItems = useSelectorLayerItems(layerPath);
+  const layerChildren = useSelectorLayerItems(layerPath);
+  const isCollapsed = useSelectorLayerLegendCollapsed(layerPath);
+  const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
+
+  // Return the ui
+  return (
+    <ListItem key={layerPath} divider onClick={onExpandClick} className={!inVisibleRange ? 'outOfRange' : ''}>
+      <LayerIcon layerPath={layerPath} />
+      <Tooltip title={layerName} placement="top">
         <ListItemText
           sx={styles.listItemText}
-          primary={layer.layerName}
+          primary={layerName}
           className="layerTitle"
           disableTypography
-          secondary={<SecondaryControls layer={layer} isVisible={isVisible} isInVisibleRange={inVisibleRange} />}
+          secondary={<SecondaryControls layerPath={layerPath} />}
         />
       </Tooltip>
-      {(layer.children?.length > 1 || layer.items?.length > 1) && (
+      {((layerChildren && layerChildren.length >= 1) || (layerItems && layerItems.length >= 1)) && (
         <IconButton className="buttonOutline" edge="end" size="small" tooltip={tooltip}>
           {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
       )}
     </ListItem>
-  )
-);
+  );
+});
+
 LegendLayerHeader.displayName = 'LegendLayerHeader';
 
 // Main LegendLayer component
-export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
+export function LegendLayer({ layerPath }: LegendLayerProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/legend/legend-layer');
+  logger.logTraceRender('components/legend/legend-layer', layerPath);
 
   // Hooks
   const { t } = useTranslation<string>();
@@ -74,49 +82,23 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   // Stores
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { setLegendCollapsed } = useMapStoreActions();
-  const isVisible = useSelectorLayerVisibility(layer.layerPath);
-  const isCollapsed = useSelectorLayerLegendCollapsed(layer.layerPath);
-  const inVisibleRange = useSelectorLayerInVisibleRange(layer.layerPath);
-  const layerStatus = useSelectorLayerStatus(layer.layerPath);
-
-  // TODO: Check - Probably don't do that as it creates a new layer object and new items and new children, etc causing multiple re-renderings
-  // Create a new layer object with updated status (no useMemo to ensure updates in inner child)
-  const currentLayer = {
-    ...layer,
-    layerStatus,
-    items: layer.items?.map((item) => ({
-      ...item,
-    })),
-  };
 
   const handleExpandGroupClick = useCallback(
     (event: React.MouseEvent): void => {
       // Log
-      logger.logTraceUseCallback('LEGEND-LAYER - handleExpandGroupClick', layer.layerPath);
+      logger.logTraceUseCallback('LEGEND-LAYER - handleExpandGroupClick', layerPath);
 
       event.stopPropagation();
-      setLegendCollapsed(layer.layerPath); // store value
+      setLegendCollapsed(layerPath); // store value
     },
-    [layer.layerPath, setLegendCollapsed]
+    [layerPath, setLegendCollapsed]
   );
 
   return (
     <>
       <Box sx={sxClasses.legendLayerListItem}>
-        <LegendLayerHeader
-          layer={currentLayer}
-          isCollapsed={isCollapsed}
-          isVisible={isVisible}
-          inVisibleRange={inVisibleRange}
-          tooltip={t('layers.toggleCollapse') as string}
-          onExpandClick={handleExpandGroupClick}
-        />
-        <CollapsibleContent
-          layer={currentLayer}
-          legendExpanded={!isCollapsed}
-          initLightBox={initLightBox}
-          LegendLayerComponent={LegendLayer}
-        />
+        <LegendLayerHeader layerPath={layerPath} tooltip={t('layers.toggleCollapse')} onExpandClick={handleExpandGroupClick} />
+        <CollapsibleContent layerPath={layerPath} initLightBox={initLightBox} LegendLayerComponent={LegendLayer} />
       </Box>
       <LightBoxComponent />
     </>
