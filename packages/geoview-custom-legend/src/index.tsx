@@ -3,7 +3,7 @@ import { TypeJsonObject, toJsonObject, AnySchemaObject, Cast } from 'geoview-cor
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
 import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
-import { LegendIcon } from '@ui/icons';
+import { LegendIcon } from '@/ui';
 import { CustomLegendPanel } from './custom-legend';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-custom-legend.json';
