@@ -352,8 +352,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
           logger.logPromiseFailed('api.plugin.loadScript(geochart) in useEffect in FooterBar', error);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [footerBarTabsConfig, mapId]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
 
   // Scroll the footer into view on mouse click
   useEffect(() => {
