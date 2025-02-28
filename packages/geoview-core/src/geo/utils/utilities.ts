@@ -507,7 +507,8 @@ export function getMetersPerPixel(projection: TypeValidMapProjectionCodes, resol
  * @param targetScale The desired scale (e.g. 50000 for 1:50,000)
  * @returns number representing the closest zoom level for the given scale
  */
-export const getZoomFromScale = (view: View, targetScale: number): number | undefined => {
+export const getZoomFromScale = (view: View, targetScale: number | undefined): number | undefined => {
+  if (!targetScale) return undefined;
   const projection = view.getProjection();
   const mpu = projection.getMetersPerUnit();
   const dpi = 25.4 / 0.28; // OpenLayers default DPI

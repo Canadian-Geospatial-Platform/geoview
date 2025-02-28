@@ -343,9 +343,8 @@ export function commonProcessInitialSettings(
   const layerMetadata = layer.getLayerMetadata(layerConfig.layerPath);
   if (layerConfig.initialSettings?.states?.visible === undefined)
     layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
-  // GV TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
-  if (layerConfig.minScale === undefined && layerMetadata.minScale !== 0) layerConfig.minScale = layerMetadata.minScale as number;
-  if (layerConfig.maxScale === undefined && layerMetadata.maxScale !== 0) layerConfig.maxScale = layerMetadata.maxScale as number;
+  if (!layerConfig.minScale && layerMetadata.minScale) layerConfig.minScale = layerMetadata.minScale as number;
+  if (!layerConfig.maxScale && layerMetadata.maxScale) layerConfig.maxScale = layerMetadata.maxScale as number;
 
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
