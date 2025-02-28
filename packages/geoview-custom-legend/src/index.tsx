@@ -3,95 +3,82 @@ import { TypeJsonObject, toJsonObject, AnySchemaObject, Cast } from 'geoview-cor
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
 import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
-import { CustomLegendIcon } from 'geoview-core/src/ui/icons/index';
+import { LegendIcon } from '@ui/icons';
 import { CustomLegendPanel } from './custom-legend';
+import schema from '../schema.json';
+import defaultConfig from '../default-config-custom-legend.json';
 
 /**
- * Create a plugin to show a custom legend panel
+ * Create a class for the plugin instance
  */
 class CustomLegendPanelPlugin extends AppBarPlugin {
-  button = true;
-
-  panel = true;
-
   /**
-   * Plugin schema
+   * Return the package schema
+   *
+   * @returns {AnySchemaObject} the package schema
    */
-  schema(): AnySchemaObject {
-    return {
-      type: 'object',
-      properties: {
-        enabled: {
-          type: 'boolean',
-        },
-        isOpen: {
-          type: 'boolean',
-        },
-      },
-    };
+  override schema(): AnySchemaObject {
+    return schema;
   }
 
   /**
-   * Default configuration
+   * Return the default config for this package
+   *
+   * @returns {TypeJsonObject}the default config
    */
-  defaultConfig(): TypeJsonObject {
-    return toJsonObject({
-      enabled: true,
-      isOpen: false,
-    });
+  override defaultConfig(): TypeJsonObject {
+    return toJsonObject(defaultConfig);
   }
 
   /**
-   * Translation strings
+   * translations object to inject to the viewer translations
    */
   translations = toJsonObject({
     en: {
-      LegendPanel: {
-        title: 'Legend',
+      CustomLegend: {
+        title: 'Custom Legend',
       },
     },
     fr: {
-      LegendPanel: {
-        title: 'Légende',
+      CustomLegend: {
+        title: 'Légende personnalisée',
       },
     },
   });
 
-  /**
-   * Return button props
-   */
   override onCreateButtonProps(): TypeIconButtonProps {
+    // Button props
     return {
-      id: 'custom-legend',
-      tooltip: 'LegendPanel.title',
+      id: `custom-legend`,
+      tooltip: 'CustomLegend.title',
       tooltipPlacement: 'right',
-      children: <CustomLegendIcon />,
+      children: <LegendIcon />,
       visible: true,
     };
   }
 
-  /**
-   * Return panel props
-   */
   override onCreateContentProps(): TypePanelProps {
+    // Panel props
     return {
-      title: 'LegendPanel.title',
-      icon: <CustomLegendIcon />,
+      title: 'CustomLegend.title',
+      icon: <LegendIcon />,
       width: 350,
       status: this.configObj?.isOpen as boolean,
     };
   }
 
-  /**
-   * Return panel content
-   */
   override onCreateContent = (): JSX.Element => {
-    return <CustomLegendPanel mapId={this.api} />;
+    return <CustomLegendPanel mapId={this.pluginProps.mapId} config={this.configObj || {}} />;
   };
+
+  /**
+   * Function called when the plugin is removed, used for clean up
+   */
+  override onRemoved(): void {}
 }
 
-// Register the plugin
+export default CustomLegendPanelPlugin;
+
+// Keep a reference to the Custom Legend Panel Plugin as part of the geoviewPlugins property stored in the window object
 window.geoviewPlugins = window.geoviewPlugins || {};
 window.geoviewPlugins['custom-legend'] = Cast<CustomLegendPanelPlugin>(CustomLegendPanelPlugin);
-
-export default CustomLegendPanelPlugin;

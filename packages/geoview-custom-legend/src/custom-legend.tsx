@@ -4,6 +4,8 @@ import { Box } from '@mui/material';
 interface CustomLegendPanelProps {
   // eslint-disable-next-line react/no-unused-prop-types
   mapId: string;
+  // eslint-disable-next-line react/no-unused-prop-types
+  config: unknown;
 }
 
 export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
