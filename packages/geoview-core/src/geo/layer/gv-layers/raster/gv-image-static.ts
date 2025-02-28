@@ -9,7 +9,7 @@ import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-l
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
-import { AbstractGVRaster } from './abstract-gv-raster';
+import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**

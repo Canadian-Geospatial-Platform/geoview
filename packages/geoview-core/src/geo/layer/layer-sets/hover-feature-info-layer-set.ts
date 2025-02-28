@@ -2,10 +2,10 @@ import debounce from 'lodash/debounce';
 
 import { Coordinate } from 'ol/coordinate';
 import { logger } from '@/core/utils/logger';
-import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
-import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
-import { GVWMS } from '../gv-layers/raster/gv-wms';
-import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
@@ -100,7 +100,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    */
   #getOrderedLayerPaths(): string[] {
     // Get the map layer order
-    const mapLayerOrder = this.layerApi.mapViewer.getMapLayerOrderInfo();
+    const mapLayerOrder = this.layerApi.mapViewer.getMapLayerOrderInfo().filter((layer) => layer.inVisibleRange);
     const resultSetLayers = new Set(Object.keys(this.resultSet));
 
     // Filter and order the layers that are in our resultSet

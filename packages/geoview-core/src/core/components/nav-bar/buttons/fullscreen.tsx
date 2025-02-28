@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import { TypeHTMLElement } from '@/core/types/global-types';
@@ -19,6 +20,7 @@ export default function Fullscreen(): JSX.Element {
 
   const mapId = useGeoViewMapId();
 
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -65,7 +67,7 @@ export default function Fullscreen(): JSX.Element {
   return (
     <IconButton
       id="fullscreen"
-      tooltip="mapnav.fullscreen"
+      tooltip={t('mapnav.fullscreen') as string}
       tooltipPlacement="left"
       onClick={() => setFullscreen()}
       sx={sxClasses.navButton}

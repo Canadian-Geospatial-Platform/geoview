@@ -1,5 +1,5 @@
 import { CONST_PANEL_TYPES, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
+import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
 import { generateId } from '@/core/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
@@ -103,20 +103,20 @@ export class AppBarApi {
   /**
    * Creates a button on the app-bar that will open a panel
    *
-   * @param {TypeIconButtonProps} buttonProps - Button properties (icon, tooltip)
+   * @param {IconButtonPropsExtend} buttonProps - Button properties (icon, tooltip)
    * @param {TypePanelProps} panelProps - Panel properties (icon, title, content)
    * @param {string | null | undefined} groupName - Optional value to set this button in a group
    * @returns {TypeButtonPanel | null} The created panel
    */
   createAppbarPanel(
-    buttonProps: TypeIconButtonProps,
+    buttonProps: IconButtonPropsExtend,
     panelProps: TypePanelProps,
     groupName?: string | null | undefined
   ): TypeButtonPanel | null {
     if (buttonProps && panelProps) {
       const buttonPanelId = `${this.mapId}${generateId(buttonProps.id)}`;
 
-      const button: TypeIconButtonProps = {
+      const button: IconButtonPropsExtend = {
         ...buttonProps,
         id: buttonPanelId,
         visible: buttonProps.visible === undefined ? true : buttonProps.visible,

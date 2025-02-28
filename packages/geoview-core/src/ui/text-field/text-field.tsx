@@ -1,30 +1,50 @@
 import { forwardRef, Ref } from 'react';
-
-import { useTranslation } from 'react-i18next';
-
-import { Fade, TextField as MaterialTextField, Tooltip } from '@mui/material';
+import { TextField as MaterialTextField } from '@mui/material';
 
 import { TypeTextFieldProps } from '@/ui/panel/panel-types';
+import { logger } from '@/core/utils/logger';
 
 /**
- * Create a Material UI TextField component
+ * Create a customized Material UI Text Field component.
  *
- * @param {TypeTextFieldProps} props custom textfield properties
- * @returns {JSX.Element} the text field ui component
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <TextField
+ *   label="Username"
+ *   value={username}
+ *   onChange={handleChange}
+ * />
+ *
+ * // With validation
+ * <TextField
+ *   label="Email"
+ *   error={!!emailError}
+ *   helperText={emailError}
+ *   required
+ * />
+ *
+ * // With different variants
+ * <TextField
+ *   label="Password"
+ *   type="password"
+ *   variant="outlined"
+ *   size="small"
+ * />
+ * ```
+ *
+ * @param {TypeTextFieldProps} props - All valid Material-UI Text Field props
+ * @param {Ref<HTMLDivElement>} ref - Reference to the underlying div element
+ * @returns {JSX.Element} The Text Field component
+ *
+ * @see {@link https://mui.com/material-ui/react-text-field/}
  */
-function MUITextField(props: TypeTextFieldProps, ref: Ref<HTMLDivElement>): JSX.Element {
-  const { tooltip, tooltipPlacement, ...rest } = props;
+function TextFieldUI(props: TypeTextFieldProps, ref: Ref<HTMLDivElement>): JSX.Element {
+  logger.logTraceRender('ui/text-field/text-field', props);
 
-  const { t } = useTranslation<string>();
-
-  // internal state
-  // const textRef = useRef<HTMLElement>(null);
-
-  return (
-    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
-      <MaterialTextField {...rest} ref={ref} />
-    </Tooltip>
-  );
+  return <MaterialTextField {...props} ref={ref} />;
 }
 
-export const TextField = forwardRef(MUITextField);
+// Export the Text Field using forwardRef so that passing ref is permitted and functional in the react standards
+export const TextField = forwardRef<HTMLDivElement, TypeTextFieldProps>(TextFieldUI);

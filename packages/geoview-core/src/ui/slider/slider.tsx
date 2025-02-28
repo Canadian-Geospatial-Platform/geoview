@@ -1,11 +1,10 @@
-import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode, useCallback, useRef } from 'react';
-
+import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode, useCallback, useRef, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider } from '@mui/material';
 import { Mark } from '@mui/base';
 import { logger } from '@/core/utils/logger';
 
-import { getSxClasses } from './slider-style';
+import { getSxClasses } from '@/ui/slider/slider-style';
 import { generateId } from '@/core/utils/utilities';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
@@ -52,36 +51,47 @@ type SliderProps = {
  * @param {TypeSliderProps} props the properties passed to the slider element
  * @returns {JSX.Element} the created Slider element
  */
-export function Slider(props: SliderProps): JSX.Element {
+function SliderUI(props: SliderProps): JSX.Element {
+  logger.logTraceRender('ui/slider/slider');
+
+  // Get constant from props
   const {
     value: parentValue,
     min,
     max,
     marks,
     valueLabelDisplay,
+    orientation,
+    className,
     onChange,
     onChangeCommitted,
     onValueLabelFormat,
     onValueDisplayAriaLabel,
     ...properties
   } = props;
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
 
+  // Hooks
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  // Ref
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const containerId = `${properties.mapId}-${properties?.sliderId ?? generateId()}` || '';
   const valueLabelDisplayOption = valueLabelDisplay === undefined ? 'on' : 'auto';
 
-  // internal state
+  // State
   const [value, setValue] = useState<number[] | number>(parentValue);
   const [activeThumb, setActiveThumb] = useState<number>(-1);
 
-  // If spreading the label using an offset
-  if (Array.isArray(value) && value.length >= 2 && (!properties.orientation || properties.orientation === 'horizontal')) {
-    // Dynamically add a class name to the className properties
-    properties.className = properties.className ? `${properties.className} MuiSlider-labelSpread` : 'MuiSlider-labelSpread';
-  }
+  // Memoize the className calculation
+  const finalClassName = useMemo(() => {
+    const shouldSpreadLabel = Array.isArray(value) && value.length >= 2 && (!orientation || orientation === 'horizontal');
+
+    if (!shouldSpreadLabel) return className;
+
+    return className ? `${className} MuiSlider-labelSpread` : 'MuiSlider-labelSpread';
+  }, [value, orientation, className]);
 
   // handle constant change on the slider to set active thumb and instant values
   const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], newActiveThumb: number): void => {
@@ -126,26 +136,21 @@ export function Slider(props: SliderProps): JSX.Element {
     [focusSlider]
   );
 
-  useEffect(() => {
-    // Focus the slider when the component mounts
-    focusSlider();
-  }, [focusSlider]);
-
   /**
    * Checks if two HTML elements overlap, considering the slider's orientation and adding padding.
    *
    * @param {HTMLElement} el1 - The first element to check for overlap.
    * @param {HTMLElement} el2 - The second element to check for overlap.
-   * @param {string} [orientation='horizontal'] - The orientation of the slider ('horizontal' or 'vertical').
+   * @param {string} [orientationIn='horizontal'] - The orientation of the slider ('horizontal' or 'vertical').
    * @returns {boolean} True if the elements overlap, false otherwise.
    */
-  const checkOverlap = useCallback((el1: HTMLElement, el2: HTMLElement, orientation: string): boolean => {
+  const checkOverlap = useCallback((el1: HTMLElement, el2: HTMLElement, orientationIn: string): boolean => {
     if (!el1 || !el2) return false;
     const rect1 = el1.getBoundingClientRect();
     const rect2 = el2.getBoundingClientRect();
     const padding = 50;
 
-    return orientation === 'vertical'
+    return orientationIn === 'vertical'
       ? !(rect1.bottom + padding < rect2.top || rect1.top > rect2.bottom + padding)
       : !(rect1.right + padding < rect2.left || rect1.left > rect2.right + padding);
   }, []);
@@ -168,8 +173,7 @@ export function Slider(props: SliderProps): JSX.Element {
    * @see checkOverlap - The helper function used to determine if two labels overlap.
    */
   const removeLabelOverlap = useCallback((): void => {
-    // Log
-    logger.logTraceCore('UI.SLIDER - removeLabelOverlap');
+    logger.logTraceUseCallback('UI.SLIDER - removeLabelOverlap');
 
     // get slider container
     const container = document.getElementById(containerId);
@@ -180,7 +184,7 @@ export function Slider(props: SliderProps): JSX.Element {
     const markerArray = Array.from(markers) as HTMLElement[];
 
     // Get orientation from the container
-    const orientation = container.classList.contains('MuiSlider-vertical') ? 'vertical' : 'horizontal';
+    const orientationIn = container.classList.contains('MuiSlider-vertical') ? 'vertical' : 'horizontal';
 
     // Reset all labels
     markerArray.forEach((marker) => marker.classList.remove('MuiSlider-markLabel-overlap'));
@@ -192,14 +196,14 @@ export function Slider(props: SliderProps): JSX.Element {
 
     while (left < right) {
       // Check from left
-      if (left === 0 || !checkOverlap(markerArray[lastVisibleLeft], markerArray[left], orientation)) {
+      if (left === 0 || !checkOverlap(markerArray[lastVisibleLeft], markerArray[left], orientationIn)) {
         lastVisibleLeft = left;
       } else {
         markerArray[left].classList.add('MuiSlider-markLabel-overlap');
       }
 
       // Check from right
-      if (right === markerArray.length - 1 || !checkOverlap(markerArray[right], markerArray[lastVisibleRight], orientation)) {
+      if (right === markerArray.length - 1 || !checkOverlap(markerArray[right], markerArray[lastVisibleRight], orientationIn)) {
         lastVisibleRight = right;
       } else {
         markerArray[right].classList.add('MuiSlider-markLabel-overlap');
@@ -213,8 +217,8 @@ export function Slider(props: SliderProps): JSX.Element {
     // TODO: there is still issue when previous to middle interfere with lst in Ontario ring of fire (time slider config- small screen)
     if (left === right) {
       const middleElement = markerArray[left];
-      const overlapWithLeft = checkOverlap(markerArray[lastVisibleLeft], middleElement, orientation);
-      const overlapWithRight = checkOverlap(middleElement, markerArray[lastVisibleRight], orientation);
+      const overlapWithLeft = checkOverlap(markerArray[lastVisibleLeft], middleElement, orientationIn);
+      const overlapWithRight = checkOverlap(middleElement, markerArray[lastVisibleRight], orientationIn);
 
       if (!overlapWithLeft && !overlapWithRight) {
         lastVisibleLeft = left;
@@ -226,16 +230,21 @@ export function Slider(props: SliderProps): JSX.Element {
   useEventListener<Window>('resize', removeLabelOverlap, window);
 
   useEffect(() => {
-    // Log
     logger.logTraceUseEffect('UI.SLIDER - parent value', parentValue);
 
     // Update it internally when the parent has updated the value
     setValue(parentValue);
   }, [parentValue]);
 
+  useEffect(() => {
+    logger.logTraceUseEffect('UI.SLIDER - focus when mount');
+
+    // Focus the slider when the component mounts
+    focusSlider();
+  }, [focusSlider]);
+
   // Add this new effect to handle slider value changes
   useLayoutEffect(() => {
-    // Log
     logger.logTraceUseEffect('UI.SLIDER - remove overlap on value change');
 
     removeLabelOverlap();
@@ -246,7 +255,9 @@ export function Slider(props: SliderProps): JSX.Element {
       {...properties}
       id={containerId}
       sx={sxClasses.slider}
+      className={finalClassName}
       ref={sliderRef}
+      orientation={orientation}
       value={value}
       min={min}
       max={max}
@@ -262,3 +273,5 @@ export function Slider(props: SliderProps): JSX.Element {
     />
   );
 }
+
+export const Slider = SliderUI;

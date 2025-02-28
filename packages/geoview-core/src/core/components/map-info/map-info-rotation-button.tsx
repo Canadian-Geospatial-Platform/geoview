@@ -1,6 +1,8 @@
 import { memo, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { ArrowUpIcon, IconButton } from '@/ui';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { ArrowUpIcon } from '@/ui/icons/index';
 
 import { useMapRotation, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
@@ -15,6 +17,7 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
   logger.logTraceRender('components/map-info/map-info-rotation-button');
 
   // Hooks
+  const { t } = useTranslation<string>();
   const theme = useTheme();
 
   // State
@@ -47,8 +50,8 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
   return (
     <IconButton
       tooltipPlacement="top"
-      tooltip="mapctrl.rotation.resetRotation"
-      aria-label="mapctrl.rotation.resetRotation"
+      tooltip={t('mapctrl.rotation.resetRotation') as string}
+      aria-label={t('mapctrl.rotation.resetRotation') as string}
       onClick={handleRotationReset}
       sx={buttonStyles}
     >

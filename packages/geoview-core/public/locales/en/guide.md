@@ -13,6 +13,8 @@ The following navigation controls can be found in the bottom right corner of the
 | <img src="{{assetsURL}}/img/guide/navigation/minus.svg" width="30"/>       | Zoom out       | Zoom out one level on the map to see less detailed content - bound to Minus key (-)                                                  |
 | <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" width="30"/> | Geolocation    | Zoom and pan to your current geographical location                                                                                   |
 | <img src="{{assetsURL}}/img/guide/navigation/home.svg" width="30"/>        | Initial extent | Zoom and pan map such that initial extent is visible                                                                                 |
+| <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" width="30"/>        | Change Basemap | Change the basemap
+| <img src="{{assetsURL}}/img/guide/navigation/projection.svg" width="30"/>        | Change Projection | Change the map projection between Web Mercator and LCC
 
 You can also pan the map by using your left, right, up and down arrow keys, or by click-holding on the map and dragging. Using the mouse scroll wheel while hovering over the map will zoom the map in/out.
 

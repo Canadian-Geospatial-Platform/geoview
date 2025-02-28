@@ -21,6 +21,7 @@ import {
   ACCEPTED_SCHEMA_VERSIONS,
   VALID_PROJECTION_CODES,
   CV_MAP_CENTER,
+  CV_VALID_ZOOM_LEVELS,
 } from '@config/types/config-constants';
 import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@config/utils';
 import {
@@ -34,6 +35,7 @@ import {
   TypeMapComponents,
   TypeMapConfig,
   TypeMapCorePackages,
+  TypeCorePackagesConfig,
   TypeNavBarProps,
   TypeOverviewMapProps,
   TypeServiceUrls,
@@ -89,6 +91,9 @@ export class MapFeatureConfig {
 
   /** List of core packages. */
   corePackages?: TypeMapCorePackages;
+
+  /** List of core packages config. */
+  corePackagesConfig?: TypeCorePackagesConfig;
 
   /** List of external packages. */
   externalPackages?: TypeExternalPackages;
@@ -161,6 +166,9 @@ export class MapFeatureConfig {
     );
     this.components = [...((userMapFeatureConfig.components || CV_DEFAULT_MAP_FEATURE_CONFIG.components) as TypeMapComponents)];
     this.corePackages = [...((userMapFeatureConfig.corePackages || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages) as TypeMapCorePackages)];
+    this.corePackagesConfig = [
+      ...((userMapFeatureConfig.corePackagesConfig || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig) as TypeCorePackagesConfig),
+    ];
     this.externalPackages = [
       ...((userMapFeatureConfig.externalPackages || CV_DEFAULT_MAP_FEATURE_CONFIG.externalPackages) as TypeExternalPackages),
     ];
@@ -230,11 +238,15 @@ export class MapFeatureConfig {
       : CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed!;
     const minZoom = this.map.viewSettings.minZoom!;
     this.map.viewSettings.minZoom =
-      !Number.isNaN(minZoom) && minZoom >= 0 && minZoom <= 50 ? minZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.minZoom;
+      !Number.isNaN(minZoom) && minZoom >= CV_VALID_ZOOM_LEVELS[0] && minZoom <= CV_VALID_ZOOM_LEVELS[1]
+        ? minZoom
+        : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.minZoom;
 
     const maxZoom = this.map.viewSettings.maxZoom!;
     this.map.viewSettings.maxZoom =
-      !Number.isNaN(maxZoom) && maxZoom >= 0 && maxZoom <= 50 ? maxZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.maxZoom;
+      !Number.isNaN(maxZoom) && maxZoom >= CV_VALID_ZOOM_LEVELS[0] && maxZoom <= CV_VALID_ZOOM_LEVELS[1]
+        ? maxZoom
+        : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.maxZoom;
 
     if (this.map.viewSettings.initialView!.zoomAndCenter) this.#validateMaxExtent();
     this.#logModifs(providedMapConfig);

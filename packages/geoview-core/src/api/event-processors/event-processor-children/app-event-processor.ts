@@ -4,11 +4,11 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { NotificationDetailsType } from '@/core/components';
 import { TypeHTMLElement } from '@/core/types/global-types';
 import { createGuideObject } from '@/core/utils/utilities';
-import { MapViewer } from '@/geo/map/map-viewer';
 import { MapEventProcessor } from './map-event-processor';
 import { SnackbarType } from '@/core/utils/notifications';
 import { logger } from '@/core/utils/logger';
 import { api } from '@/app';
+import i18n from '@/core/translation/i18n';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -59,24 +59,25 @@ export class AppEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Adds a snackbar message.
+   * Adds a snackbar message (optional add to notification).
    * @param {SnackbarType} type - The type of message.
    * @param {string} message - The message.
    * @param {string} param - Optional param to replace in the string if it is a key
+   * @param {boolean} notification - True if we add the message to notification panel (default false)
    */
-  static addMessage(mapId: string, type: SnackbarType, message: string, param?: string[]): void {
+  static addMessage(mapId: string, type: SnackbarType, message: string, param?: string[], notification = false): void {
     switch (type) {
       case 'info':
-        api.maps[mapId].notifications.showMessage(message, param, false);
+        api.maps[mapId].notifications.showMessage(message, param, notification);
         break;
       case 'success':
-        api.maps[mapId].notifications.showSuccess(message, param, false);
+        api.maps[mapId].notifications.showSuccess(message, param, notification);
         break;
       case 'warning':
-        api.maps[mapId].notifications.showWarning(message, param, false);
+        api.maps[mapId].notifications.showWarning(message, param, notification);
         break;
       case 'error':
-        api.maps[mapId].notifications.showError(message, param, false);
+        api.maps[mapId].notifications.showError(message, param, notification);
         break;
       default:
         break;
@@ -84,7 +85,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
   }
 
   static async addNotification(mapId: string, notif: NotificationDetailsType): Promise<void> {
-    // because notification is called before map is created, we use the async
+    // Because notification is called before map is created, we use the async
     // version of getAppStateAsync
     const appState = await this.getAppStateAsync(mapId);
     const curNotifications = appState.notifications;
@@ -116,14 +117,35 @@ export class AppEventProcessor extends AbstractEventProcessor {
     this.getAppState(mapId).setterActions.setCrosshairActive(isActive);
   }
 
-  static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): Promise<[void, void]> {
-    this.getAppState(mapId).setterActions.setDisplayLanguage(lang);
-    // reload the basemap from new language
-    const promiseResetBasemap = MapEventProcessor.resetBasemap(mapId);
-    // load guide in new language
-    const promiseSetGuide = AppEventProcessor.setGuide(mapId);
-    // Return promise of both promises to resolve
-    return Promise.all([promiseResetBasemap, promiseSetGuide]);
+  static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): Promise<void> {
+    // Return a new promise of void when all will be done instead of promise of array of voids
+    return new Promise((resolve, reject) => {
+      // Change language in i18n for the useTranslation used by the ui components
+      const promiseChangeLanguage = i18n.changeLanguage(lang);
+
+      this.getAppState(mapId).setterActions.setDisplayLanguage(lang);
+
+      // reload the basemap from new language
+      const promiseResetBasemap = MapEventProcessor.resetBasemap(mapId);
+
+      // load guide in new language
+      const promiseSetGuide = AppEventProcessor.setGuide(mapId);
+
+      // Remove all previous notifications to ensure there is no mix en and fr
+      AppEventProcessor.removeAllNotifications(mapId);
+
+      // When all promises are done
+      Promise.all([promiseChangeLanguage, promiseResetBasemap, promiseSetGuide])
+        .then(() => {
+          // Now resolve
+          resolve();
+        })
+        .catch((error) => {
+          // Log and reject
+          logger.logPromiseFailed('inner promise in app-event-processor.setDisplayLanguage', error);
+          reject();
+        });
+    });
   }
 
   static setDisplayTheme(mapId: string, theme: TypeDisplayTheme): void {
@@ -132,7 +154,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
 
   static setFullscreen(mapId: string, active: boolean, element?: TypeHTMLElement): void {
     this.getAppState(mapId).setterActions.setFullScreenActive(active);
-    if (element !== undefined) MapViewer.setFullscreen(active, element);
+    MapEventProcessor.getMapViewer(mapId).setFullscreen(active, element);
   }
 
   static setCircularProgress(mapId: string, active: boolean): void {

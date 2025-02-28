@@ -22,13 +22,13 @@ import {
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
 } from '@/geo/map/map-schema-types';
-import { esriGetFieldType, esriGetFieldDomain } from '../utils';
-import { AbstractGVRaster } from './abstract-gv-raster';
+import { esriGetFieldType, esriGetFieldDomain } from '@/geo/layer/gv-layers/utils';
+import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeOutfieldsType, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TypeEsriImageLayerLegend } from './gv-esri-image';
+import { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
@@ -74,24 +74,17 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // TODO.CONT: We can use the layers and layersDef parameters to set what should be visible.
     // TODO.CONT: layers=show:layerId ; layerDefs={ "layerId": "layer def" }
     // TODO.CONT: There is no allowableOffset on esri dynamic to speed up. We will need to see what can be done for layers in wrong projection
-    // TODO.CONT: We may try to use the service projection imageLayerOptions.source?.updateParams({ imageSR: 3978 }); and let OL project on the fly
-    // TODO.CONT: from some test, it reduce time by half
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
       source: olSource,
       properties: { layerConfig },
     };
 
-    // TODO: Performance - For testing purpose on projection and performance
-    if (layerConfig.geoviewLayerConfig.geoviewLayerId === '6c343726-1e92-451a-876a-76e17d398a1c') {
-      imageLayerOptions.source?.updateParams({ imageSR: 3978 });
-    }
-    if (layerConfig.geoviewLayerConfig.geoviewLayerId === 'e2424b6c-db0c-4996-9bc0-2ca2e6714d71') {
-      imageLayerOptions.source?.updateParams({ imageSR: 3857 });
-    }
-    if (layerConfig.geoviewLayerConfig.geoviewLayerId === '1dcd28aa-99da-4f62-b157-15631379b170') {
-      imageLayerOptions.source?.updateParams({ imageSR: 4269 });
-    }
+    // Set the image spatial reference to the service source - performance is better when open layers does the conversion
+    // Older versions of ArcGIS Server are not properly converted, so this is only used for version 10.8+
+    const version = layerConfig.getLayerMetadata()?.currentVersion as number;
+    const sourceSr = layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;
+    if (sourceSr && version && version >= 10.8) imageLayerOptions.source?.updateParams({ imageSR: sourceSr });
 
     // Init the layer options with initial settings
     AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
@@ -355,7 +348,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
         `&imageDisplay=${size[0]},${size[1]},96` +
         `&layers=visible:${layerConfig.layerId}` +
-        `&layerDefs=${layerDefs}` +
+        `&layerDefs=${encodeURI(layerDefs)}` +
         `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
         `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
@@ -407,7 +400,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // TODO.CONT: geometry assignement must not be in an async function.
       // Transform the features in an OL feature - at this point, there is no geometry associated with the feature
       const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results }) as Feature<Geometry>[];
-      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
+      const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(features, layerConfig);
 
       // If geometry is needed, use web worker to query and assign geometry later
       if (queryGeometry)

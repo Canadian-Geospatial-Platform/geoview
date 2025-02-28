@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 
 import { createRoot, type Root } from 'react-dom/client';
 
-import i18n from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 
 import { ThemeProvider } from '@mui/material/styles';
@@ -15,6 +14,7 @@ import { useMapOverviewMapHideZoom, useMapZoom } from '@/core/stores/store-inter
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
+import i18n from '@/core/translation/i18n';
 
 /**
  * Creates an overview map control and adds it to the map
@@ -57,16 +57,11 @@ export function OverviewMap(): JSX.Element {
     const toggleButton = document.createElement('div');
     const overviewMapControl = MapEventProcessor.getOverviewMapControl(mapId, toggleButton);
 
-    const i18nInstance = i18n.cloneInstance({
-      lng: displayLanguage,
-      fallbackLng: displayLanguage,
-    });
-
     // Use setTimeout to defer root creation to next tick
     const timeoutId = setTimeout(() => {
       root = createRoot(toggleButton);
       root.render(
-        <I18nextProvider i18n={i18nInstance}>
+        <I18nextProvider i18n={i18n}>
           <ThemeProvider theme={cgpvTheme}>
             <OverviewMapToggle overviewMap={overviewMapControl} />
           </ThemeProvider>

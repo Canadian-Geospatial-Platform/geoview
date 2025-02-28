@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, IconButton, Tooltip } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 /* eslint-disable camelcase */
 import {
   MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
@@ -83,10 +83,13 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
           <MRTGlobalFilterTextField className="buttonOutline" table={table} />
         </Box>
         <Box display="flex" sx={{ justifyContent: 'space-around' }}>
-          <IconButton className="buttonOutline" color="primary" onClick={() => useTable?.resetColumnFilters()}>
-            <Tooltip title={t('dataTable.clearFilters')} placement="bottom" arrow>
-              <ClearFiltersIcon />
-            </Tooltip>
+          <IconButton
+            className="buttonOutline"
+            title={t('dataTable.clearFilters')}
+            color="primary"
+            onClick={() => useTable?.resetColumnFilters()}
+          >
+            <ClearFiltersIcon />
           </IconButton>
 
           <MRTToggleFiltersButton className="buttonOutline" table={table} />

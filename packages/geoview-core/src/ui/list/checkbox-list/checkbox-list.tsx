@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
+// GV: THIS UI COMPONENT IS NOT USE
+import { useState, useEffect, useCallback } from 'react';
 
 import { useTheme } from '@mui/material/styles';
+
+// TODO: reuse our own ui component
 import { Typography } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -8,7 +11,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 
-import { getSxClasses } from './checkbox-list-style';
+import { getSxClasses } from '@/ui/list/checkbox-list/checkbox-list-style';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -35,7 +38,7 @@ export type CheckboxListItem = {
  * @param props Main props for the component
  * @returns JSX.Element The Component
  */
-export function CheckboxList(props: CheckboxListProps): JSX.Element {
+function CheckboxListUI(props: CheckboxListProps): JSX.Element {
   const { listItems, checkedValues, multiselect, onChecked = null } = props;
 
   const theme = useTheme();
@@ -70,9 +73,13 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
    * Helper function to stop propagation on click of the right-side content
    * @param e React.MouseEvent<HTMLElement> The mouse click event
    */
-  const handleClickContent = (e: React.MouseEvent<HTMLElement>): void => {
-    e.stopPropagation();
-  };
+  const handleClickContent = useCallback((event: React.MouseEvent<HTMLElement>): void => {
+    // Log
+    logger.logTraceUseCallback('CHECKBOX-LIST - handleClickContent');
+
+    // Stop propagation
+    event.stopPropagation();
+  }, []);
 
   // Effect triggered when the checked values changes
   useEffect(() => {
@@ -102,7 +109,7 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
             <Typography sx={sxClasses.typography} variant="body2" noWrap component="ul">
               {item.display}
             </Typography>
-            <Box sx={sxClasses.boxcontent} className="Checkbox-content-root" onClick={(e) => handleClickContent(e)}>
+            <Box sx={sxClasses.boxcontent} className="Checkbox-content-root" onClick={handleClickContent}>
               {item.contentRight}
             </Box>
           </ListItem>
@@ -111,3 +118,5 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
     </List>
   );
 }
+
+export const CheckboxList = CheckboxListUI;

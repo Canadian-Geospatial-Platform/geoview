@@ -15,6 +15,7 @@ import queryString from 'query-string';
 import {
   CV_MAP_CENTER,
   CV_MAP_EXTENTS,
+  CV_VALID_ZOOM_LEVELS,
   VALID_DISPLAY_LANGUAGE,
   VALID_DISPLAY_THEME,
   VALID_PROJECTION_CODES,
@@ -264,8 +265,8 @@ export class MapViewer {
         ),
         zoom: mapViewSettings.initialView?.zoomAndCenter ? mapViewSettings.initialView?.zoomAndCenter[0] : 3.5,
         extent: extentProjected || undefined,
-        minZoom: mapViewSettings.minZoom || 0,
-        maxZoom: mapViewSettings.maxZoom || 17,
+        minZoom: mapViewSettings.minZoom || CV_VALID_ZOOM_LEVELS[0],
+        maxZoom: mapViewSettings.maxZoom || CV_VALID_ZOOM_LEVELS[1],
         rotation: mapViewSettings.rotation || 0,
       }),
       controls: [],
@@ -453,10 +454,29 @@ export class MapViewer {
   #handleMapZoomEnd(event: ObjectEvent): void {
     try {
       // Read the zoom value
-      const zoom = this.getView().getZoom()!;
+      const zoom = this.getView().getZoom();
+      if (!zoom) return;
+
+      // Get new inVisibleRange values for all layers
+      const newOrderedLayerInfo = this.getMapLayerOrderInfo();
+
+      const visibleRangeLayers: string[] = [];
+
+      // GV Used the configs since group GV layers have fake max/min zoom levels
+      // GV The group levels are also missing the zoom level getters, so this worked out well anyway
+      this.layer.getLayerEntryConfigs().forEach((config) => {
+        const { minZoom, maxZoom } = config.initialSettings;
+        const inVisibleRange = (!minZoom || zoom! > minZoom) && (!maxZoom || zoom! <= maxZoom);
+        const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === config.layerPath);
+        if (foundLayer) foundLayer.inVisibleRange = inVisibleRange;
+        if (inVisibleRange) {
+          visibleRangeLayers.push(config.layerPath);
+        }
+      });
 
       // Save in the store
-      MapEventProcessor.setZoom(this.mapId, zoom);
+      MapEventProcessor.setZoom(this.mapId, zoom, newOrderedLayerInfo);
+      MapEventProcessor.setVisibleRangeLayerMapState(this.mapId, visibleRangeLayers);
 
       // Emit to the outside
       this.#emitMapZoomEnd({ zoom });
@@ -596,9 +616,6 @@ export class MapViewer {
       logger.logError('Failed in #checkLayerResultSetReady', error);
     });
 
-    // Start checking for map layers processed
-    this.#checkMapLayersProcessed();
-
     // Check how load in milliseconds has it been processing thus far
     const elapsedMilliseconds = Date.now() - this.#checkMapReadyStartTime!;
 
@@ -662,6 +679,9 @@ export class MapViewer {
         }
       });
     }
+
+    // Start checking for map layers processed after the onMapLayersLoaded is define!
+    this.#checkMapLayersProcessed();
   }
 
   /**
@@ -869,13 +889,13 @@ export class MapViewer {
    * set fullscreen / exit fullscreen
    *
    * @param status - Toggle fullscreen or exit fullscreen status
-   * @param {HTMLElement} element - The element to toggle fullscreen on
+   * @param {HTMLElement | undefined} element - The element to toggle fullscreen on
    */
-  static setFullscreen(status: boolean, element: TypeHTMLElement): void {
+  setFullscreen(status: boolean, element: TypeHTMLElement | undefined): void {
     // TODO: Refactor - For reusability, this function should be static and moved to a browser-utilities class
     // TO.DOCONT: If we want to keep a function here, in MapViewer, it should just be a redirect to the browser-utilities'
     // enter fullscreen
-    if (status) {
+    if (status && element) {
       if (element.requestFullscreen) {
         element.requestFullscreen().catch((error) => {
           // Log
@@ -895,6 +915,33 @@ export class MapViewer {
 
     // exit fullscreen
     if (!status) {
+      // Store the extent before any size changes occur
+      const currentExtent = this.getView().calculateExtent();
+      const currentZoom = this.getView().getZoom();
+
+      // Add one-time size change listener only when we are zoomed out to keep the bottom
+      // extent so the viewer does not zoom center Canada
+      if (currentZoom! < 4.5)
+        this.map.once('change:size', () => {
+          // Update map size first
+          this.map.updateSize();
+
+          // Calculate the new center to focus on bottom portion
+          const width = currentExtent[2] - currentExtent[0];
+          const height = currentExtent[3] - currentExtent[1];
+
+          // Calculate center point that will show bottom of previous extent
+          const centerX = currentExtent[0] + width / 2;
+          const centerY = currentExtent[1] - height / 2;
+
+          // Set the new center and zoom
+          this.getView().setCenter([centerX, centerY]);
+          this.getView().setZoom(currentZoom!);
+
+          // Force render
+          this.map.renderSync();
+        });
+
       if (document.exitFullscreen) {
         document.exitFullscreen().catch((error) => {
           // Log
@@ -1168,7 +1215,7 @@ export class MapViewer {
                   if (data.geometry !== undefined) {
                     // add the geometry
                     // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
-                    this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId(null));
+                    this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId());
                   }
                 })
                 .catch((error) => {

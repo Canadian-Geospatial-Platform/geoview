@@ -1,8 +1,9 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material';
 import { Box, ListItemButton, Grid, Tooltip, Typography, ListItem } from '@/ui';
-import { GeoListItem } from './geolocator';
-import { getSxClassesList } from './geolocator-style';
+import { GeoListItem } from '@/core/components/geolocator/geolocator';
+import { getSxClassesList } from '@/core/components/geolocator/geolocator-style';
+import { getBoldListTitle, getTooltipTitle } from '@/core/components/geolocator/utilities';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
@@ -12,73 +13,47 @@ type GeoListProps = {
   searchValue: string;
 };
 
-type tooltipProp = Pick<GeoListItem, 'name' | 'province' | 'category'>;
-
 /**
  * Create list of items to display under search.
- * @param {GeoListItem[]} geoListItems - items to display
- * @param {string} searchValue - search text
+ * @param {GeoListItem[]} geoListItems - The items to display
+ * @param {string} searchValue - The search text
  * @returns {JSX.Element} React JSX element
  */
-export default function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Element {
-  const { zoomToGeoLocatorLocation } = useMapStoreActions();
+export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/geolocator/geo-list');
+
+  // Hooks
   const theme = useTheme();
   const sxClassesList = useMemo(() => getSxClassesList(theme), [theme]);
 
-  /**
-   * Get the title for tooltip
-   * @param {name} - name of the geo item
-   * @param {province} - province of the geo item
-   * @param {category} - category of the geo item
-   * @returns {string} - tooltip title
-   */
-  const getTooltipTitle = useCallback(({ name, province, category }: tooltipProp): string => {
-    // Log
-    // NOTE: Commenting out because it fires too often and leads console pollution.
-    // logger.logTraceUseCallback('GEOLOCATOR - geolist - getTooltipTitle', name, province, category);
+  // Store
+  const { zoomToGeoLocatorLocation } = useMapStoreActions();
 
-    let title = name;
-    if (category && category !== 'null') {
-      title += `, ${category}`;
-    }
-
-    if (province && province !== 'null') {
-      title += `, ${province}`;
-    }
-
-    return title;
-  }, []);
+  // Handle the zoom to geolocation
+  const handleZoomToGeoLocator = useCallback(
+    (latLng: [number, number], bbox: [number, number, number, number]): void => {
+      zoomToGeoLocatorLocation(latLng, bbox).catch((error) => {
+        logger.logPromiseFailed('Failed to zoomToGeoLocatorLocation in GeoList', error);
+      });
+    },
+    [zoomToGeoLocatorLocation]
+  );
 
   /**
-   * Transform the search value in search result with bold css.
-   * @param {string} title list title in search result
-   * @param {string} searchValue value that user search
-   * @param {string} province province of the list title in search result
-   * @returns {JSX.Element}
+   * Transforms a title string into a JSX element with bold highlighting for search matches
+   * @param {string} title - The original title text to transform
+   * @param {string} searchTerm - The search term to highlight in the title
+   * @param {string} province - The province to append to the title
+   * @returns {JSX.Element} A span element containing the formatted title with bold highlights and province
+   *
+   * @note It's a render-related transformation function who takes direct parameters.
    */
-  const transformListTitle = useCallback((_title: string, _searchValue: string, province: string): JSX.Element | string => {
-    // Log
-    // NOTE: Commenting out because it fires too often and leads console pollution.
-    // logger.logTraceUseCallback('GEOLOCATOR - geolist - transformListTitle', _title, _searchValue, province);
-
-    const searchPattern = `${_searchValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`.replace(/\s+/g, '[ ,]*');
-    const regex = new RegExp(searchPattern, 'i');
-
-    let title = _title;
-    if (regex.test(_title)) {
-      // make matched substring bold.
-      title = _title.replace(regex, '<strong>$&</strong>');
-    }
-
-    return <UseHtmlToReact extraOptions={{ component: 'span' }} itemOptions={{ component: 'span' }} htmlContent={`${title} ${province}`} />;
-  }, []);
-
-  const handleZoomToGeoLocator = (latLng: [number, number], bbox: [number, number, number, number]): void => {
-    // Zoom to location
-    zoomToGeoLocatorLocation(latLng, bbox).catch((error) => {
-      // Log
-      logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in data-panel.GeoList.handleZoomToGeoLocator', error);
-    });
+  const transformListTitle = (title: string, searchTerm: string, province: string): JSX.Element => {
+    const newTitle = getBoldListTitle(title, searchTerm);
+    return (
+      <UseHtmlToReact extraOptions={{ component: 'span' }} itemOptions={{ component: 'span' }} htmlContent={`${newTitle} ${province}`} />
+    );
   };
 
   return (

@@ -120,8 +120,8 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
         return `${datatableSettings[layerPath].rowsFilteredRecord} ${t('dataTable.featureFiltered')}`;
       }
       let featureStr = t('dataTable.noFeatures');
-      const features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length ?? 0;
-      if (features > 0) {
+      const features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length;
+      if (features !== undefined) {
         featureStr = `${features} ${t('dataTable.features')}`;
       }
       return featureStr;

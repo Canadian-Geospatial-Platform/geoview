@@ -7,6 +7,8 @@ import { Layer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
 
+import { Style } from 'ol/style';
+import cloneDeep from 'lodash/cloneDeep';
 import { TimeDimension, DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -23,11 +25,11 @@ import {
   QueryType,
   TypeStyleGeometry,
 } from '@/geo/map/map-schema-types';
-import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
+import { getLegendStyles, getFeatureImageSource } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { AbstractBaseLayer } from './abstract-base-layer';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
 
@@ -217,14 +219,33 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Gets the in visible range value
+   * @returns {boolean} true if the layer is in visible range
+   */
+  getInVisibleRange(): boolean {
+    const mapZoom = this.getMapViewer().getView().getZoom();
+    return mapZoom! > this.getMinZoom() && mapZoom! <= this.getMaxZoom();
+  }
+
+  /**
    * Overridable method called when the layer has been loaded correctly
    */
   protected onLoaded(): void {
+    const layerConfig = this.getLayerConfig();
     // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
-    this.getLayerConfig().layerStatus = 'loaded';
+    layerConfig.layerStatus = 'loaded';
 
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
-    this.setVisible(this.getLayerConfig().initialSettings?.states?.visible !== false);
+    this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+
+    // Set the zoom levels here to prevent the layer being stuck endlessly loading
+    if (layerConfig.initialSettings.maxZoom) {
+      this.setMaxZoom(layerConfig.initialSettings.maxZoom);
+    }
+
+    if (layerConfig.initialSettings.minZoom) {
+      this.setMinZoom(layerConfig.initialSettings.minZoom);
+    }
 
     // Emit event
     this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
@@ -528,41 +549,16 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Converts the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
    * @param {Feature[]} features - The array of features to convert.
    * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The layer configuration.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The Array of feature information.
+   * @returns {TypeFeatureInfoEntry[] | undefined | null} The Array of feature information.
    */
-  protected async formatFeatureInfoResult(
+  protected formatFeatureInfoResult(
     features: Feature[],
     layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  ): TypeFeatureInfoEntry[] | undefined | null {
     try {
       if (!features.length) return [];
 
       const outfields = layerConfig?.source?.featureInfo?.outfields;
-
-      // Loop on the features to build the array holding the promises for their canvas
-      const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement }>[] = [];
-      features.forEach((featureNeedingItsCanvas) => {
-        promisedAllCanvasFound.push(
-          new Promise((resolveCanvas) => {
-            // GV: Callback function was added by PR #1997 and removed by #2590
-            // The PR added an AsyncSemaphore with a callback on geoview renderer to be able to fetch an image with a dataurl from the kernel function geoview-renderer.getFeatureCanvas()
-
-            // GV: Call the function with layerConfig.legendFilterIsOff = true to force the feature to get is canvas
-            // GV: If we don't, it will create canvas only for visible elements and because tables are stored feature will never get its canvas
-            getFeatureCanvas(featureNeedingItsCanvas, this.getStyle()!, layerConfig.filterEquation, true, true)
-              .then((canvas) => {
-                resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
-              })
-              .catch((error) => {
-                // Log
-                logger.logPromiseFailed(
-                  'getFeatureCanvas in featureNeedingItsCanvas loop in formatFeatureInfoResult in AbstractGVLayer',
-                  error
-                );
-              });
-          })
-        );
-      });
 
       // Hold a dictionary built on the fly for the field domains
       const dictFieldDomains: { [fieldName: string]: codedValueType | rangeDomainType | null } = {};
@@ -573,8 +569,29 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       let featureKeyCounter = 0;
       let fieldKeyCounter = 0;
       const queryResult: TypeFeatureInfoEntry[] = [];
-      const arrayOfFeatureInfo = await Promise.all(promisedAllCanvasFound);
-      arrayOfFeatureInfo.forEach(({ feature, canvas }) => {
+
+      // Dict to store created image sources to avoid recreating
+      const imageSourceDict: { [styleAsJsonString: string]: string } = {};
+
+      features.forEach((feature) => {
+        // Check dict for existing image source and create it if it does not exist
+        let imageSource: string | undefined;
+        const layerStyle = this.getStyle()!;
+        const featureStyle = feature.getStyle();
+        if (featureStyle) {
+          const geometryType = feature.getGeometry() ? feature.getGeometry()!.getType() : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
+          // Create a string unique to the style, but geometry agnostic
+          const styleClone = cloneDeep(featureStyle) as Style;
+          styleClone.setGeometry('');
+          const styleString = `${geometryType}${JSON.stringify(styleClone)}`;
+          // Use string as dict key
+          if (!imageSourceDict[styleString])
+            imageSourceDict[styleString] = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
+          imageSource = imageSourceDict[styleString];
+        }
+
+        if (!imageSource) imageSource = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
+
         let extent;
         if (feature.getGeometry()) extent = feature.getGeometry()!.getExtent();
 
@@ -584,7 +601,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType as TypeGeoviewLayerType,
           extent,
           geometry: feature,
-          featureIcon: canvas.toDataURL(),
+          featureIcon: imageSource,
           fieldInfo: {},
           nameField: layerConfig?.source?.featureInfo?.nameField || null,
         };
@@ -659,16 +676,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   protected static initOptionsWithInitialSettings(layerOptions: Options, layerConfig: AbstractBaseLayerEntryConfig): void {
     // GV Note: The visible flag (and maybe others?) must be set in the 'onLoaded' function below, because the layer needs to
     // GV attempt to be visible on the map in order to trigger its source loaded event.
-
+    // TODO: refactor - investigate the initOptions. The below should happen in the config api before gv-layers
     // Set the options as read from the initialSettings
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.className !== undefined) layerOptions.className = layerConfig.initialSettings.className;
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.extent !== undefined) layerOptions.extent = layerConfig.initialSettings.extent;
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.maxZoom !== undefined) layerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.minZoom !== undefined) layerOptions.minZoom = layerConfig.initialSettings.minZoom;
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
   }

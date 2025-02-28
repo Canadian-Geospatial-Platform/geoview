@@ -22,6 +22,8 @@ import { logger } from '@/core/utils/logger';
 export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
   const mapId = useGeoViewMapId();
+  const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
+
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
   const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
@@ -65,7 +67,9 @@ export default function ExportModal(): JSX.Element {
         .toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white, fontEmbedCSS: '' })
         .then((dataUrl) => {
           setIsMapExporting(false);
-          exportPNG(dataUrl, mapId);
+
+          exportPNG(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`);
+
           setActiveAppBarTab(legendId, 'legend', false, false);
           disableFocusTrap();
         })
@@ -132,6 +136,7 @@ export default function ExportModal(): JSX.Element {
           const legendTab = document.getElementById(`shell-${mapId}-legend`) as HTMLElement;
           const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
           if (hasHiddenAttr) legendTab.removeAttribute('hidden');
+
           htmlToImage
             .toPng(legendContainer, { fontEmbedCSS: '' })
             .then((dataUrl) => {

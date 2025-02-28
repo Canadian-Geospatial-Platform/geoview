@@ -1739,13 +1739,13 @@
           "type": "integer",
           "description": "The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
           "minimum": 0,
-          "maximum": 50
+          "maximum": 20
         },
         "maxZoom": {
           "type": "integer",
           "description": "The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
           "minimum": 0,
-          "maximum": 50
+          "maximum": 20
         },
         "projection": {
           "$ref": "#/definitions/TypeValidMapProjectionCodes"
@@ -2022,6 +2022,13 @@
       "description": "Core map packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
       "minItems": 0
     },
+    "TypeCorePackagesConfig": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "description": "Core packages configuration (optional, can be in another file).",
+      "minItems": 0
+    },
     "TypeExternalPackages": {
       "type": "array",
       "items": {
@@ -2149,6 +2156,9 @@
         },
         "corePackages": {
           "$ref": "#/definitions/TypeMapCorePackages"
+        },
+        "corePackagesConfig": {
+          "$ref": "#/definitions/TypeCorePackagesConfig"
         },
         "externalPackages": {
           "$ref": "#/definitions/TypeExternalPackages"

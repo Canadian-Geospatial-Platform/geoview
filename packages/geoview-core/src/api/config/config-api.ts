@@ -15,7 +15,7 @@ import { MapConfigError } from '@config/types/classes/config-exceptions';
 
 import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';
-import { createStyleUsingEsriRenderer, EsriBaseRenderer } from './esri-renderer-parser';
+import { createStyleUsingEsriRenderer, EsriBaseRenderer } from '@/api/config/esri-renderer-parser';
 
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.

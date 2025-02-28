@@ -37,6 +37,9 @@
         "corePackages": {
           "$ref": "#/definitions/TypeMapCorePackages"
         },
+        "corePackagesConfig": {
+          "$ref": "#/definitions/TypeCorePackagesConfig"
+        },
         "externalPackages": {
           "$ref": "#/definitions/TypeExternalPackages"
         },
@@ -340,6 +343,13 @@
         "$ref": "#/definitions/TypeValidMapCorePackageProps"
       },
       "default": [],
+      "minItems": 0
+    },
+    "TypeCorePackagesConfig": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "description": "Core packages configuration (optional, can be in another file).",
       "minItems": 0
     },
     "TypeExternalPackagesProps": {
@@ -725,13 +735,13 @@
           "description": "The minimum view zoom level (exclusive) above which this layer will be visible.",
           "type": "integer",
           "minimum": 0,
-          "maximum": 50
+          "maximum": 20
         },
         "maxZoom": {
           "description": "The maximum view zoom level (inclusive) above which this layer will be visible.",
           "type": "integer",
           "minimum": 0,
-          "maximum": 50
+          "maximum": 20
         },
         "className": {
           "description": "A CSS class name to set to the layer element.",

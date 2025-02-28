@@ -39,18 +39,18 @@ import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 
-import { AppEventProcessor } from './app-event-processor';
-import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { DataTableEventProcessor } from './data-table-event-processor';
-import { TimeSliderEventProcessor } from './time-slider-event-processor';
-import { UIEventProcessor } from './ui-event-processor';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
+import { TypeLegendLayer } from '@/core/components/layers/types';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
+import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
+import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { LegendEventProcessor } from './legend-event-processor';
-import { TypeLegendLayer } from '@/core/components/layers/types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
@@ -430,9 +430,33 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (getAppCrosshairsActive(mapId)) this.getMapViewer(mapId).emitMapSingleClick(clickCoordinates);
   }
 
-  static setZoom(mapId: string, zoom: number): void {
+  static getLayersInVisibleRange = (mapId: string): string[] => {
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
+    const layersInVisibleRange = orderedLayerInfo.filter((layer) => layer.inVisibleRange).map((layer) => layer.layerPath);
+    return layersInVisibleRange;
+  };
+
+  static setVisibleRangeLayerMapState(mapId: string, visibleRangeLayers: string[]): void {
+    this.getMapStateProtected(mapId).setterActions.setVisibleRangeLayers(visibleRangeLayers);
+  }
+
+  static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
+    const orderedLayer = orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
+
+    if (orderedLayer && orderedLayer.inVisibleRange !== inVisibleRange) {
+      orderedLayer.inVisibleRange = inVisibleRange;
+      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
+    }
+  }
+
+  static setZoom(mapId: string, zoom: number, orderedLayerInfo?: TypeOrderedLayerInfo[]): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setZoom(zoom);
+
+    if (orderedLayerInfo) {
+      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
+    }
   }
 
   static setIsMouseInsideMap(mapId: string, inside: boolean): void {
@@ -556,8 +580,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The path of the layer to get.
    * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
    */
-  static getMapOrderedLayerInfoForLayer(mapId: string, layerPath: string): TypeOrderedLayerInfo | undefined {
-    return this.getMapStateProtected(mapId).orderedLayerInfo.find((orderedLayerInfo) => orderedLayerInfo.layerPath === layerPath);
+  static findMapLayerFromOrderedInfo(
+    mapId: string,
+    layerPath: string,
+    orderedLayerInfo: TypeOrderedLayerInfo[] = this.getMapStateProtected(mapId).orderedLayerInfo
+  ): TypeOrderedLayerInfo | undefined {
+    return orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
   }
 
   /**
@@ -567,14 +595,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The array of ordered layer info to search, default is current ordered layer info.
    * @returns {TypeOrderedLayerInfo[] | undefined} The ordered layer info of the layer and its children.
    */
-  static getMapLayerAndChildrenOrderedInfo(
+  static findMapLayerAndChildrenFromOrderedInfo(
     mapId: string,
     layerPath: string,
     orderedLayerInfo: TypeOrderedLayerInfo[] = this.getMapStateProtected(mapId).orderedLayerInfo
   ): TypeOrderedLayerInfo[] {
-    return orderedLayerInfo.filter(
-      (info: TypeOrderedLayerInfo) => info.layerPath.startsWith(`${layerPath}/`) || info.layerPath === layerPath
-    );
+    return orderedLayerInfo.filter((layer) => layer.layerPath.startsWith(`${layerPath}/`) || layer.layerPath === layerPath);
   }
 
   static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number {
@@ -586,16 +612,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get legend status of a layer
-    const info = this.getMapStateProtected(mapId).orderedLayerInfo;
-    const pathInfo = info.find((item) => item.layerPath === layerPath);
-    return pathInfo?.legendCollapsed !== false;
+    return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.legendCollapsed !== false;
   }
 
   static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get visibility of a layer
-    const info = this.getMapStateProtected(mapId).orderedLayerInfo;
-    const pathInfo = info.find((item) => item.layerPath === layerPath);
-    return pathInfo?.visible !== false;
+    return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.visible !== false;
+  }
+
+  static getMapInVisibleRangeFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
+    // Get inVisibleRange of a layer
+    return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.inVisibleRange !== false;
   }
 
   static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void {
@@ -743,7 +770,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {
     // Redirect
-    this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo([...curOrderedLayerInfo]);
+    this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo(curOrderedLayerInfo);
   }
 
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
@@ -770,7 +797,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
     const pathToSearch = layerPathToReplace || layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, pathToSearch);
-    const replacedLayers = this.getMapLayerAndChildrenOrderedInfo(mapId, pathToSearch);
+    const replacedLayers = this.findMapLayerAndChildrenFromOrderedInfo(mapId, pathToSearch);
     const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
 
@@ -988,6 +1015,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     let extent: Extent = CV_MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
 
+    // TODO: Use the values store in state. Use the new store function to set initial view values
+    // TODO.CONT: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2662
     // Transform center coordinates and update options if zoomAndCenter are in config
     if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter) {
       [options.maxZoom] = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter!;
@@ -1138,7 +1167,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   ): TypeLayerEntryConfig {
     // Get needed info
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
-    const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfoForLayer(mapId, layerPath);
+    const orderedLayerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath);
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
 
     // Get original layerEntryConfig from map config
@@ -1221,7 +1250,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath)!;
 
     const { geoviewLayerConfig } = layerEntryConfig;
-    const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfoForLayer(mapId, layerPath);
+    const orderedLayerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath);
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
 
     // Check if the layer is a geocore layers
@@ -1335,6 +1364,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         overviewMap: config.overviewMap,
         components: config.components,
         corePackages: config.corePackages,
+        corePackagesConfig: config.corePackagesConfig,
         externalPackages: config.externalPackages,
         serviceUrls: config.serviceUrls,
         schemaVersionUsed: config.schemaVersionUsed,

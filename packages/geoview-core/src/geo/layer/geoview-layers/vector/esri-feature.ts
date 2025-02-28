@@ -4,7 +4,7 @@ import { EsriJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import Feature from 'ol/Feature';
 
-import { AbstractGeoViewVector } from './abstract-geoview-vector';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
