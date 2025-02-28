@@ -44,7 +44,7 @@ export interface FadePropsExtend extends Omit<FadeProps, 'children'> {
  * @see {@link https://mui.com/material-ui/transitions/#fade}
  */
 function FadeUI({ children, ...props }: FadePropsExtend): JSX.Element {
-  logger.logTraceRender('ui/fade/fade');
+  logger.logTraceRenderDetailed('ui/fade/fade');
 
   return <MaterialFade {...props}>{children}</MaterialFade>;
 }

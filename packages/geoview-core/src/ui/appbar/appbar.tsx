@@ -43,7 +43,7 @@ const AnimatedAppBar = animated(MaterialAppBar);
  * @see {@link https://mui.com/material-ui/api/app-bar/}
  */
 function AppBarUI1(props: AppBarProps): JSX.Element {
-  logger.logTraceRender('ui/appbar/appbar');
+  logger.logTraceRenderDetailed('ui/appbar/appbar');
 
   const fadeInAnimation = useFadeIn();
   return <AnimatedAppBar style={fadeInAnimation} {...props} />;

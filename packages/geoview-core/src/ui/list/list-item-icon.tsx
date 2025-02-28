@@ -10,7 +10,7 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} The List Item Icon component
  */
 function ListItemIconUI(props: ListItemIconProps): JSX.Element {
-  logger.logTraceRender('ui/list/list-item-icon', props);
+  logger.logTraceRenderDetailed('ui/list/list-item-icon', props);
 
   /// Get constant from props
   const { children, className, style, ...rest } = props;

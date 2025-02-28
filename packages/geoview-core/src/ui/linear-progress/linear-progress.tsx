@@ -41,7 +41,7 @@ interface ProgressbarProps {
  * @see {@link https://mui.com/material-ui/react-progress/}
  */
 function ProgressBarUI({ className = '', variant = 'indeterminate', value = 0, ...props }: ProgressbarProps): JSX.Element {
-  logger.logTraceRender('ui/linear-progress/linear-progress');
+  logger.logTraceRenderDetailed('ui/linear-progress/linear-progress');
 
   return <LinearProgressBar variant={variant} value={value} className={className} {...props} />;
 }

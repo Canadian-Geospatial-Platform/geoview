@@ -31,7 +31,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/react-tooltip/}
  */
 function TooltipUI(props: TooltipProps, ref: Ref<HTMLElement>): JSX.Element {
-  logger.logTraceRender('ui/Tooltip/Tooltip', props);
+  logger.logTraceRenderDetailed('ui/Tooltip/Tooltip', props);
 
   // TODO: open issue about this behavior in the Material-UI GitHub repository (multiple tooltip)
   return <MaterialTooltip enterDelay={1000} enterNextDelay={200} {...props} ref={ref} />;

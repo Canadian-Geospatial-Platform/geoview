@@ -52,7 +52,7 @@ type SliderProps = {
  * @returns {JSX.Element} the created Slider element
  */
 function SliderUI(props: SliderProps): JSX.Element {
-  logger.logTraceRender('ui/slider/slider');
+  logger.logTraceRenderDetailed('ui/slider/slider');
 
   // Get constant from props
   const {

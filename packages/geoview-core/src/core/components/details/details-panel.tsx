@@ -7,6 +7,7 @@ import {
   useDetailsCheckedFeatures,
   useDetailsLayerDataArrayBatch,
   useDetailsSelectedLayerPath,
+  useSelectorLayerQueryStatus,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import {
@@ -50,6 +51,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   const visibleLayers = useMapVisibleLayers();
   const visibleRangeLayers = useMapVisibleRangeLayers();
   const mapClickCoordinates = useMapClickCoordinates();
+  const selectedLayerQueryStatus = useSelectorLayerQueryStatus(selectedLayerPath);
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
@@ -273,8 +275,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     logger.logTraceUseEffect('DETAILS-PANEL - check selection', memoLayerSelectedItem);
 
     // Check if the layer we are on is not 'processed' or 'error', ignore if so
-    if (memoLayerSelectedItem && !(memoLayerSelectedItem.queryStatus === 'processed' || memoLayerSelectedItem.queryStatus === 'error'))
-      return;
+    if (memoLayerSelectedItem && !(selectedLayerQueryStatus === 'processed' || selectedLayerQueryStatus === 'error')) return;
 
     if (selectedLayerPath === '') {
       return;
@@ -334,7 +335,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   const handleFeatureNavigateChange = useCallback(
     (change: -1 | 1): void => {
       // Log
-      logger.logTraceUseCallback('DETAILS PANEL - handleFeatureNavigateChange', currentFeatureIndex);
+      logger.logTraceUseCallback('DETAILS-PANEL - handleFeatureNavigateChange', currentFeatureIndex);
 
       // Keep previous index for navigation
       prevFeatureIndex.current = currentFeatureIndex;
@@ -400,7 +401,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   const handleGuideIsOpen = useCallback(
     (guideIsOpenVal: boolean): void => {
       // Log
-      logger.logTraceUseCallback('DETAILS PANEL - handleGuideIsOpen');
+      logger.logTraceUseCallback('DETAILS-PANEL - handleGuideIsOpen');
       if (guideIsOpenVal) {
         setSelectedLayerPath('');
       }

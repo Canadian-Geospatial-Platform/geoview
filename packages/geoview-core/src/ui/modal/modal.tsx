@@ -166,7 +166,7 @@ export interface ModalActionsType {
  * @see {@link https://mui.com/material-ui/react-dialog/|Material-UI Dialog}
  */
 function ModalUI(props: DialogPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/modal/modal');
+  logger.logTraceRenderDetailed('ui/modal/modal');
 
   // Get constant from props
   const {

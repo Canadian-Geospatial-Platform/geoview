@@ -47,7 +47,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/react-collapse/|Material-UI Collapse}
  */
 function CollapseUI(props: CollapseProps): JSX.Element {
-  logger.logTraceRender('ui/collapse/collapse', props);
+  logger.logTraceRenderDetailed('ui/collapse/collapse', props);
 
   // Get constant from props
   const { children, className, style, timeout, unmountOnExit, ...rest } = props;

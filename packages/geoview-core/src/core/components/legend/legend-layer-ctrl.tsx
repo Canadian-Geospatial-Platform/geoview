@@ -13,16 +13,21 @@ import {
   HighlightIcon,
   CenterFocusScaleIcon,
 } from '@/ui';
-import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerHighlightedLayer,
+  useLayerStoreActions,
+  useSelectorLayerChildren,
+  useSelectorLayerControls,
+  useSelectorLayerItems,
+  useSelectorLayerStatus,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
-import { useMapStoreActions } from '@/core/stores/';
+import { useMapStoreActions, useSelectorLayerVisibility } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerControls } from '@/api/config/types/map-schema-types';
 
 interface SecondaryControlsProps {
-  layer: TypeLegendLayer;
-  isVisible: boolean; // Visibility come from store ordered layer info array
+  layerPath: string;
   isInVisibleRange: boolean;
 }
 
@@ -88,20 +93,19 @@ const useSubtitle = (children: TypeLegendLayer[], items: TypeLegendItem[]): stri
 };
 
 // SecondaryControls component (no memo to force re render from layers panel modifications)
-export function SecondaryControls({ layer, isVisible, isInVisibleRange }: SecondaryControlsProps): JSX.Element {
-  // Extract constant from layer prop
-  const { layerPath, layerStatus, items, children } = layer;
-  const layerControls: TypeLayerControls | undefined = layer.controls;
-
+export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath, isVisible, isInVisibleRange);
+  logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath);
 
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-
-  // Stores
+  const layerStatus = useSelectorLayerStatus(layerPath);
+  const layerChildren = useSelectorLayerChildren(layerPath);
+  const layerItems = useSelectorLayerItems(layerPath);
+  const layerControls = useSelectorLayerControls(layerPath);
+  const isVisible = useSelectorLayerVisibility(layerPath);
   const highlightedLayer = useLayerHighlightedLayer();
 
   // Is visibility button disabled?
@@ -112,7 +116,7 @@ export function SecondaryControls({ layer, isVisible, isInVisibleRange }: Second
 
   // Component helper
   const controls = useControlActions(layerPath);
-  const subTitle = useSubtitle(children, items);
+  const subTitle = useSubtitle(layerChildren || [], layerItems || []);
 
   if (!['processed', 'loaded'].includes(layerStatus || 'error')) {
     return <Box />;

@@ -122,7 +122,7 @@ const AccordionExpandIcon = memo(function AccordionExpandIcon({
  * @see {@link https://mui.com/material-ui/react-accordion/}
  */
 function AccordionUI(props: AccordionProps): ReactNode {
-  logger.logTraceRender('ui/accordions/accordion)');
+  logger.logTraceRenderDetailed('ui/accordions/accordion)');
 
   // Get const from props
   const { id, sx, items, className, defaultExpanded = false, showLoadingIcon = false } = props;

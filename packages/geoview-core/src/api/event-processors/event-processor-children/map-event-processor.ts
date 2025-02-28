@@ -99,8 +99,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
           const removedFeatures = prevFeatures.filter(
             (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
           );
-          for (let i = 0; i < newFeatures.length; i++)
+          for (let i = 0; i < newFeatures.length; i++) {
+            // TODO: Check Adding this check, because I've noticed an odd behavior when loading map and
+            // TO.DOCONT: querying details for the first time, the highlights don't show anymore (same in upstream)
+            if (!newFeatures[i].geometry?.getGeometry()) {
+              logger.logError('The geometry for the feature was undefined at the time this was executed');
+            }
             MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.highlightFeature(newFeatures[i]);
+          }
           for (let i = 0; i < removedFeatures.length; i++)
             MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(
               (removedFeatures[i].geometry as TypeGeometry).ol_uid
@@ -125,26 +131,28 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // #endregion FEATURE SELECTION
 
-    const unsubOrderedLayerInfo = store.subscribe(
-      (state) => state.mapState.orderedLayerInfo,
-      (cur) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - orderedLayerInfo', mapId, cur);
+    // TODO: Cleanup this code, remove it once tests official
+    // GV Commenting this out, because it's recreating the orderedLayerInfo for ALL layers via setVisibleLayers below and we're trying another approach
+    // const unsubOrderedLayerInfo = store.subscribe(
+    //   (state) => state.mapState.orderedLayerInfo,
+    //   (cur) => {
+    //     // Log
+    //     logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - orderedLayerInfo', mapId, cur);
 
-        const curVisibleLayers = cur
-          .map((layerInfo) => {
-            if (layerInfo.visible) return layerInfo.layerPath;
-            return undefined;
-          })
-          .filter((layerPath) => layerPath);
-        const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
-        if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(curVisibleLayers))
-          store.getState().mapState.setterActions.setVisibleLayers(curVisibleLayers as string[]);
-      }
-    );
+    //     const curVisibleLayers = cur
+    //       .map((layerInfo) => {
+    //         if (layerInfo.visible) return layerInfo.layerPath;
+    //         return undefined;
+    //       })
+    //       .filter((layerPath) => layerPath);
+    //     const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
+    //     if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(curVisibleLayers))
+    //       store.getState().mapState.setterActions.setVisibleLayers(curVisibleLayers as string[]);
+    //   }
+    // );
 
     // Return the array of subscriptions so they can be destroyed later
-    return [unsubMapHighlightedFeatures, unsubOrderedLayerInfo];
+    return [unsubMapHighlightedFeatures];
   }
 
   /**

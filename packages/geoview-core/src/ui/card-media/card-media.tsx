@@ -73,7 +73,7 @@ const DEFAULT_STYLES = {
  * @see {@link https://mui.com/material-ui/react-card/#media}
  */
 function CardMediaUI(props: CardMediaPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/card-media/card-media');
+  logger.logTraceRenderDetailed('ui/card-media/card-media');
 
   // Get constant from props
   const { sx, src, alt, cardComponent = 'img', click, keyDown, ...rest } = props;

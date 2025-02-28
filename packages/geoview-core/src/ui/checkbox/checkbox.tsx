@@ -33,7 +33,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/react-checkbox/}
  */
 function CheckboxUI(props: CheckboxProps, ref: Ref<HTMLButtonElement>): JSX.Element {
-  logger.logTraceRender('ui/checkbox/checkbox');
+  logger.logTraceRenderDetailed('ui/checkbox/checkbox');
 
   return <MaterialCheckbox ref={ref} {...props} />;
 }

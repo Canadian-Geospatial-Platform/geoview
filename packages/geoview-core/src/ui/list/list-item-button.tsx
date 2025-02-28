@@ -10,7 +10,7 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} The List Item Button component
  */
 function ListItemButtonUI(props: ListItemButtonProps): JSX.Element {
-  logger.logTraceRender('ui/list/list-item-button', props);
+  logger.logTraceRenderDetailed('ui/list/list-item-button', props);
 
   // Get constant from props
   const { children, className, style } = props;
