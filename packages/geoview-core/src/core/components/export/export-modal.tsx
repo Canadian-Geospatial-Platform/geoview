@@ -23,7 +23,7 @@ export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
   const mapId = useGeoViewMapId();
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
-
+  const disclaimerMessage = t('mapctrl.disclaimer.message');
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
   const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
@@ -204,7 +204,9 @@ export default function ExportModal(): JSX.Element {
           <Box ref={legendContainerRef}>
             {isLegendLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
           </Box>
-
+          <Box textAlign="center" key={disclaimerMessage} component="p" sx={{ margin: 0, marginBottom: '20px' }}>
+            {disclaimerMessage}
+          </Box>
           <Box textAlign="center">
             {mapAttributions.map((mapAttribution) => (
               <Box key={mapAttribution} component="p" sx={{ margin: 0 }}>
