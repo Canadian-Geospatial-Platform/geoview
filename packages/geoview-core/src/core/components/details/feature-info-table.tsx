@@ -96,14 +96,10 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
   const theme = useTheme();
   const { alias, value } = featureInfoItem;
 
-  // Convert value to string, handling arrays and other types
-  const stringValue = useMemo((): string[] => {
-    if (Array.isArray(value)) {
-      return [value.map((item) => stringify(item)).join(';')] as string[];
-    }
-    return [stringify(value)] as string[];
-  }, [value]);
-
+  // Stringify values and create array of string to split item with ';' to separate images
+  let stringValue: string | string[] = Array.isArray(value) ? String(value.map(stringify)) : String(stringify(value));
+  stringValue = stringValue.toString().split(';');
+  
   // Generate stable IDs for each item when component mounts
   const itemIds = useMemo(() => stringValue.map(() => generateId()), [stringValue]);
 
