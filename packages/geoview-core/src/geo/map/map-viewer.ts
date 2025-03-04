@@ -1368,6 +1368,19 @@ export class MapViewer {
   }
 
   /**
+   * Initializes translation interactions without requireing the extra selection click.
+   * Note: This will limit translation interactions to one feature at a time.
+   */
+  initTranslateOneFeatureInteractions(): Translate {
+    // Create translating capabilities
+    const translate = new Translate({
+      mapViewer: this,
+    });
+    translate.startInteraction();
+    return translate;
+  }
+
+  /**
    * Initializes drawing interactions on the given vector source
    * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
    * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
