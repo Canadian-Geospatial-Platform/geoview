@@ -22,8 +22,6 @@ This project is now a monorepo and contains the following packages under the `pa
 
 - [geoview-details-panel](packages/geoview-details-panel) - a package that displays a panel with details when a location / feature is clicked on the map.
 
-- [geoview-basemap-panel](packages/geoview-basemap-panel) - a package that displays a panel with a list of basemaps that can be selected to switch the map's basemap.
-
 - [geoview-layers-panel](packages/geoview-layers-panel) - a package that displays a panel with a list of loaded layers and their legend.
 
 - [geoview-swiper](packages/geoview-swiper) - a package that enable a swiper control to tooggle visibility of layers from one side to the other side of the swiper bar.

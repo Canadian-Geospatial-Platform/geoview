@@ -204,7 +204,9 @@ export default function ExportModal(): JSX.Element {
           <Box ref={legendContainerRef}>
             {isLegendLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
           </Box>
-
+          <Box textAlign="center" key={t('mapctrl.disclaimer.message')} component="p" sx={{ margin: 0, marginBottom: '20px' }}>
+            {t('mapctrl.disclaimer.message')}
+          </Box>
           <Box textAlign="center">
             {mapAttributions.map((mapAttribution) => (
               <Box key={mapAttribution} component="p" sx={{ margin: 0 }}>

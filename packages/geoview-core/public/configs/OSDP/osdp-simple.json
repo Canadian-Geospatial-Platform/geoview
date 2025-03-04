@@ -6,17 +6,14 @@
     },
     "basemapOptions": {
       "basemapId": "transport",
-      "shaded": false,
+      "shaded": true,
       "labeled": true
     },
     "listOfGeoviewLayerConfig": []
   },
-  "components": [],
-  "navBar": [],
-  "appBar": {
-    "tabs": {
-      "core": []
-    }
+  "components": ["north-arrow", "overview-map"],
+  "overviewMap": {
+    "hideOnZoom": 6
   },
   "corePackages": [],
   "theme": "geo.ca"

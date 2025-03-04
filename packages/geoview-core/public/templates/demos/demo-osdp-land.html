@@ -42,19 +42,24 @@
     <a href="https://osdp-psdo.canada.ca/en/learn-about/land">Original RAMP Land</a><br />
 
     <div class="map-title-holder">
-      <h4 id="HMap1">Land</h4>
+      <h4 id="HMap1">Land (English)</h4>
     </div>
     <button class="collapsible active">Layers Status</button>
     <pre id="HMap1-state" class="panel map-title-holder"></pre>
-    <div id="Map1" class="geoview-map" data-lang="en" data-config-url="./configs/OSDP/osdp-land.json"></div>
+    <div id="Map1" class="geoview-map" data-lang="en" data-config-url="./configs/OSDP/osdp-land_en.json"></div>
+
+    <div class="map-title-holder">
+      <h4 id="HMap2">Land (French)</h4>
+    </div>
+    <button class="collapsible active">Layers Status</button>
+    <pre id="HMap2-state" class="panel map-title-holder"></pre>
+    <div id="Map2" class="geoview-map" data-lang="fr" data-config-url="./configs/OSDP/osdp-land_fr.json"></div>
 
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'Map1') {
-          listenToLegendLayerSetChanges('HMap1-state', 'Map1');
-        }
+          listenToLegendLayerSetChanges(`H${mapId}-state`, mapId);
       });
 
       // create snippets
