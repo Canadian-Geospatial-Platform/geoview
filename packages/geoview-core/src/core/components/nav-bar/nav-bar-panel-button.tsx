@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ClickAwayListener } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -24,19 +24,22 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
   // Log
   logger.logTraceRender('components/nav-bar/nav-bar-panel-button');
 
+  // Hooks
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
+  // Store
   const mapId = useGeoViewMapId();
   const geoviewElement = useAppGeoviewHTMLElement();
 
-  const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
-
+  // States
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
 
+  const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
+
+  // Handlers
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
     if (open) {
       setOpen(false);

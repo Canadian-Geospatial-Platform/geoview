@@ -37,7 +37,7 @@ export * from './slider/slider';
 export * from './snackbar/snackbar';
 export * from './stepper/stepper';
 export * from './style/theme';
-export * from './svg/geo-ca-icon';
+export * from './svg/svg-icon';
 export * from './switch/switch';
 export * from './table/table';
 export * from './tabs/tabs';

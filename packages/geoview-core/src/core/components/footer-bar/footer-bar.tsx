@@ -22,7 +22,7 @@ import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 
 // default tabs icon and class
-import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
+import { LegendIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
 import { DetailsPanel } from '@/core/components/details/details-panel';
@@ -103,7 +103,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     logger.logTraceUseMemo('FOOTER-BAR - memoTabs');
 
     return {
-      legend: { icon: <HubOutlinedIcon />, content: <Legend /> },
+      legend: { icon: <LegendIcon />, content: <Legend /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel /> },

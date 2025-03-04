@@ -2,9 +2,6 @@
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
-      "initialView": {
-        "extent": [-90, 45, -65, 70]
-      },
       "projection": 3857
     },
     "basemapOptions": {

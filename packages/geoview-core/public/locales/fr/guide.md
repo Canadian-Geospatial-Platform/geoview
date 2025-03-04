@@ -13,6 +13,8 @@ On trouve les commandes suivantes dans le coin inférieur droit de la carte&nbsp
 | <img src="{{assetsURL}}/img/guide/navigation/minus.svg" width="30"/>| Zoom arrière| Permet de faire un zoom arrière d’un niveau à la fois pour voir le contenu moins en détail; fonctionne aussi avec la touche de soustraction du clavier (-).|
 | <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" width="30"/>| Géolocalisation| Permet de zoomer et de déplacer la carte sur votre position géographique.|
 | <img src="{{assetsURL}}/img/guide/navigation/home.svg" width="30"/>| Vue initiale| Permet de zoomer et de déplacer la carte pour retourner à la vue initiale.|
+| <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" width="30"/>        | Changer la carte de base | Changer la carte de base
+| <img src="{{assetsURL}}/img/guide/navigation/projection.svg" width="30"/>        | Changer la projection | Changer la projection de la carte entre Web Mercator et LCC
 
 Vous pouvez aussi déplacer la carte avec les touches fléchées vers la gauche, la droite, le haut et le bas, ou en cliquant sur la carte, puis en la glissant. Lorsque le pointeur est sur la carte, la molette de la souris permet de faire un zoom avant et arrière.
 

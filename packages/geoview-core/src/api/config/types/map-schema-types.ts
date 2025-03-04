@@ -23,7 +23,7 @@ export { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select';
+export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection';
 
 /** Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home', 'basemap-select]. */
 export type TypeNavBarProps = TypeValidNavBarProps[];
@@ -194,12 +194,12 @@ export type TypeViewSettings = {
   maxExtent?: Extent;
   /**
    * The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
-   * Domain = [0..50].
+   * Domain = [0..20].
    */
   minZoom?: number;
   /**
    * The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
-   * Domain = [0..50].
+   * Domain = [0..20].
    */
   maxZoom?: number;
   /**

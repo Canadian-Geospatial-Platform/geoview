@@ -217,14 +217,33 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Gets the in visible range value
+   * @returns {boolean} true if the layer is in visible range
+   */
+  getInVisibleRange(): boolean {
+    const mapZoom = this.getMapViewer().getView().getZoom();
+    return mapZoom! > this.getMinZoom() && mapZoom! <= this.getMaxZoom();
+  }
+
+  /**
    * Overridable method called when the layer has been loaded correctly
    */
   protected onLoaded(): void {
+    const layerConfig = this.getLayerConfig();
     // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
-    this.getLayerConfig().layerStatus = 'loaded';
+    layerConfig.layerStatus = 'loaded';
 
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
-    this.setVisible(this.getLayerConfig().initialSettings?.states?.visible !== false);
+    this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+
+    // Set the zoom levels here to prevent the layer being stuck endlessly loading
+    if (layerConfig.initialSettings.maxZoom) {
+      this.setMaxZoom(layerConfig.initialSettings.maxZoom);
+    }
+
+    if (layerConfig.initialSettings.minZoom) {
+      this.setMinZoom(layerConfig.initialSettings.minZoom);
+    }
 
     // Emit event
     this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
@@ -659,16 +678,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   protected static initOptionsWithInitialSettings(layerOptions: Options, layerConfig: AbstractBaseLayerEntryConfig): void {
     // GV Note: The visible flag (and maybe others?) must be set in the 'onLoaded' function below, because the layer needs to
     // GV attempt to be visible on the map in order to trigger its source loaded event.
-
+    // TODO: refactor - investigate the initOptions. The below should happen in the config api before gv-layers
     // Set the options as read from the initialSettings
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.className !== undefined) layerOptions.className = layerConfig.initialSettings.className;
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.extent !== undefined) layerOptions.extent = layerConfig.initialSettings.extent;
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.maxZoom !== undefined) layerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.minZoom !== undefined) layerOptions.minZoom = layerConfig.initialSettings.minZoom;
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
   }

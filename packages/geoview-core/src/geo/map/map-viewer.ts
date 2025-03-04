@@ -16,6 +16,7 @@ import queryString from 'query-string';
 import {
   CV_MAP_CENTER,
   CV_MAP_EXTENTS,
+  CV_VALID_ZOOM_LEVELS,
   VALID_DISPLAY_LANGUAGE,
   VALID_DISPLAY_THEME,
   VALID_PROJECTION_CODES,
@@ -265,8 +266,8 @@ export class MapViewer {
         ),
         zoom: mapViewSettings.initialView?.zoomAndCenter ? mapViewSettings.initialView?.zoomAndCenter[0] : 3.5,
         extent: extentProjected || undefined,
-        minZoom: mapViewSettings.minZoom || 0,
-        maxZoom: mapViewSettings.maxZoom || 17,
+        minZoom: mapViewSettings.minZoom || CV_VALID_ZOOM_LEVELS[0],
+        maxZoom: mapViewSettings.maxZoom || CV_VALID_ZOOM_LEVELS[1],
         rotation: mapViewSettings.rotation || 0,
       }),
       controls: [],
@@ -454,10 +455,29 @@ export class MapViewer {
   #handleMapZoomEnd(event: ObjectEvent): void {
     try {
       // Read the zoom value
-      const zoom = this.getView().getZoom()!;
+      const zoom = this.getView().getZoom();
+      if (!zoom) return;
+
+      // Get new inVisibleRange values for all layers
+      const newOrderedLayerInfo = this.getMapLayerOrderInfo();
+
+      const visibleRangeLayers: string[] = [];
+
+      // GV Used the configs since group GV layers have fake max/min zoom levels
+      // GV The group levels are also missing the zoom level getters, so this worked out well anyway
+      this.layer.getLayerEntryConfigs().forEach((config) => {
+        const { minZoom, maxZoom } = config.initialSettings;
+        const inVisibleRange = (!minZoom || zoom! > minZoom) && (!maxZoom || zoom! <= maxZoom);
+        const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === config.layerPath);
+        if (foundLayer) foundLayer.inVisibleRange = inVisibleRange;
+        if (inVisibleRange) {
+          visibleRangeLayers.push(config.layerPath);
+        }
+      });
 
       // Save in the store
-      MapEventProcessor.setZoom(this.mapId, zoom);
+      MapEventProcessor.setZoom(this.mapId, zoom, newOrderedLayerInfo);
+      MapEventProcessor.setVisibleRangeLayerMapState(this.mapId, visibleRangeLayers);
 
       // Emit to the outside
       this.#emitMapZoomEnd({ zoom });
@@ -597,9 +617,6 @@ export class MapViewer {
       logger.logError('Failed in #checkLayerResultSetReady', error);
     });
 
-    // Start checking for map layers processed
-    this.#checkMapLayersProcessed();
-
     // Check how load in milliseconds has it been processing thus far
     const elapsedMilliseconds = Date.now() - this.#checkMapReadyStartTime!;
 
@@ -663,6 +680,9 @@ export class MapViewer {
         }
       });
     }
+
+    // Start checking for map layers processed after the onMapLayersLoaded is define!
+    this.#checkMapLayersProcessed();
   }
 
   /**
