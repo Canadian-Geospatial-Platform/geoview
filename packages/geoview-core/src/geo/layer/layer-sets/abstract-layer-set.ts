@@ -13,13 +13,13 @@ import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-
 import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
-import { LayerApi } from '@/geo/layer/layer';
-import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GVEsriDynamic } from '../gv-layers/raster/gv-esri-dynamic';
-import { AbstractGVVector } from '../gv-layers/vector/abstract-gv-vector';
-import { GVWMS } from '../gv-layers/raster/gv-wms';
-import { AbstractBaseLayer, LayerNameChangedEvent } from '../gv-layers/abstract-base-layer';
+import { LayerApi } from '@/geo/layer/layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { AbstractBaseLayer, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -393,16 +393,18 @@ export abstract class AbstractLayerSet {
    * @param {AbstractGVLayer} geoviewLayer - The geoview layer
    * @param {QueryType} queryType - The query type
    * @param {TypeLocation} location - The location for the query
+   * @param {boolean} queryGeometry - The query geometry boolean
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise resolving to the query results
    */
   protected static queryLayerFeatures(
     data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry,
     geoviewLayer: AbstractGVLayer,
     queryType: QueryType,
-    location: TypeLocation
+    location: TypeLocation,
+    queryGeometry: boolean = true
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Get Feature Info
-    return geoviewLayer.getFeatureInfo(queryType, data.layerPath, location);
+    return geoviewLayer.getFeatureInfo(queryType, location, queryGeometry);
   }
 
   /**
@@ -431,6 +433,16 @@ export abstract class AbstractLayerSet {
   protected static isStateQueryable(layer: AbstractBaseLayer): boolean {
     // Return false when it's clearly false, otherwise, return true
     return !((layer.getLayerConfig() as AbstractBaseLayerEntryConfig)?.initialSettings?.states?.queryable === false);
+  }
+
+  /**
+   * Checks if the layer is in visible range.
+   * @param {AbstractGVLayer} layer - The layer
+   * @returns {boolean} True if the state is queryable or undefined
+   */
+  protected static isInVisibleRange(layer: AbstractGVLayer): boolean {
+    // Return false when false or undefined
+    return layer.getInVisibleRange() ?? false;
   }
 
   /**

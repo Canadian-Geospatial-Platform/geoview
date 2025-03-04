@@ -34,7 +34,7 @@ export interface IAppState {
     addMessage: (type: SnackbarType, message: string, param?: string[]) => void;
     addNotification: (notif: NotificationDetailsType) => void;
     setCrosshairActive: (active: boolean) => void;
-    setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<[void, void]>;
+    setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<void>;
     setDisplayTheme: (theme: TypeDisplayTheme) => void;
     setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => void;
     removeNotification: (key: string) => void;
@@ -127,9 +127,9 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       /**
        * Sets the display language.
        * @param {TypeDisplayLanguage} lang - The new display language.
-       * @returns {Promise<[void, void]>}
+       * @returns {Promise<void>}
        */
-      setDisplayLanguage: (lang: TypeDisplayLanguage): Promise<[void, void]> => {
+      setDisplayLanguage: (lang: TypeDisplayLanguage): Promise<void> => {
         // Redirect to processor
         return AppEventProcessor.setDisplayLanguage(get().mapId, lang);
       },
@@ -302,4 +302,8 @@ export const useAppDisplayLanguageById = (mapId: string): TypeDisplayLanguage =>
 export const useAppDisplayThemeById = (mapId: string): TypeDisplayTheme =>
   useStore(getGeoViewStore(mapId), (state) => state.appState.displayTheme);
 
+// Getter function for one-time access, there is no subcription to modification
+export const getAppCrosshairsActive = (mapId: string): boolean => getGeoViewStore(mapId).getState().appState.isCrosshairsActive;
+
+// Store Actions
 export const useAppStoreActions = (): AppActions => useStore(useGeoViewStore(), (state) => state.appState.actions);

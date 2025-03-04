@@ -20,6 +20,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     maxWidth: '350px',
     maxHeight: '60px',
     position: 'absolute',
+    pointerEvents: 'none',
     display: 'flex',
     top: '-5px',
     left: '3px',

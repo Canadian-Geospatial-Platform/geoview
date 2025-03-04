@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Outlier ESRI Layers - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Outlier layers with performace issue</strong></h1>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <a href="./index.html">Main</a><br />
+              <a href="./outliers.html">Outlier Layers</a><br />
+            </td>
+          </tr>
+          <tr>
+            <td><p>This page is used to showcase layers with few layer with bad performance with different original server projection</p></td>
+          </tr>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="map-title-holder">
+      <h4 id="HMap1">Max Record Count Layers</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Layers Status</button>
+    <pre id="HMap1-state" class="panel map-title-holder"></pre>
+    <hr />
+
+    <select name="projections" id="projections">
+      <option value="3857">Web Mercator (3857)</option>
+      <option value="3978">LCC (3978)</option>
+    </select>
+    <button type="button" onclick="reloadMap()">Set Projection</button>
+
+    <div
+      id="Map1"
+      class="geoview-map"
+      data-lang="en"
+      data-config-url="./configs/performance.json"
+    ></div>
+
+    <div>
+      Outlier Layers:
+      <ul>
+        <li>
+          Fieldnotes 2020-2021: Pacific Science Field Operations, 14 sub layer, identify of northern polygon crash the layer.
+        </li>
+        <li>
+          Protected and conserved area - Heavy layer in 3879.
+        </li>
+        <li>
+          Canada Nature Fund for Aquatic Species at Risk (CNFASAR) - Heavy layer in 3857, plus no field define for uniqueValue symbology.
+        </li>
+      </ul>
+    </div>
+    <hr />
+
+    <script src="codedoc.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {
+          listenToLegendLayerSetChanges(`H${mapId}-state`, mapId);
+      });
+
+      function reloadMap() {
+        cgpv.api.maps['Map1'].setProjection(Number(document.getElementById('projections').value));
+      }
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

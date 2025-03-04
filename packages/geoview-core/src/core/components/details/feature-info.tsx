@@ -21,8 +21,8 @@ interface FeatureHeaderProps {
   name: string;
   hasGeometry: boolean;
   checked: boolean;
-  onCheckChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onZoomIn: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onCheckChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onZoomIn: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 // Constants outside component to prevent recreating every render
@@ -50,7 +50,7 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   return (
     <Box sx={HEADER_STYLES.container}>
@@ -69,10 +69,15 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
         <Tooltip title={t('details.keepFeatureSelected')} placement="top" enterDelay={1000}>
           <Checkbox disabled={!hasGeometry} onChange={onCheckChange} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
         </Tooltip>
-        <IconButton color="primary" onClick={onZoomIn} className="buttonOutline">
-          <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
-            <ZoomInSearchIcon />
-          </Tooltip>
+        <IconButton
+          color="primary"
+          tooltip={t('details.zoomTo') as string}
+          tooltipPlacement="top"
+          disabled={!hasGeometry}
+          onClick={onZoomIn}
+          className="buttonOutline"
+        >
+          <ZoomInSearchIcon />
         </IconButton>
       </Box>
     </Box>
@@ -80,11 +85,11 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
 });
 
 export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
-  logger.logTraceRender('components/details/feature-info');
+  logger.logTraceRender('components/details/feature-info', feature);
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
   const [checked, setChecked] = useState<boolean>(false);
@@ -100,7 +105,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
     return {
       uid: feature.geometry ? (feature.geometry as TypeGeometry).ol_uid : null,
-      iconSrc: feature.featureIcon.toDataURL(),
+      iconSrc: feature.featureIcon,
       name: feature.nameField ? (feature.fieldInfo?.[feature.nameField]?.value as string) || '' : 'No name',
       extent: feature.extent,
       geometry: feature.geometry,
@@ -128,8 +133,8 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
   // Event Handlers
   const handleFeatureSelectedChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      e.stopPropagation();
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      event.stopPropagation();
       if (!feature) return;
 
       if (!checked) {
@@ -142,8 +147,8 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   );
 
   const handleZoomIn = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>): void => {
-      e.stopPropagation();
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      event.stopPropagation();
       if (!featureData?.extent) return;
 
       const center = getCenter(featureData.extent);
@@ -186,7 +191,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
       <FeatureHeader
         iconSrc={featureData.iconSrc}
         name={featureData.name}
-        hasGeometry={!!featureData.geometry}
+        hasGeometry={!!featureData.geometry && !!featureData.extent && !featureData.extent.includes(Infinity)}
         checked={checked}
         onCheckChange={handleFeatureSelectedChange}
         onZoomIn={handleZoomIn}

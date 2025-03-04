@@ -7,6 +7,8 @@ import { Layer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
 
+import { Style } from 'ol/style';
+import cloneDeep from 'lodash/cloneDeep';
 import { TimeDimension, DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -23,12 +25,13 @@ import {
   QueryType,
   TypeStyleGeometry,
 } from '@/geo/map/map-schema-types';
-import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
+import { getLegendStyles, getFeatureImageSource } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { AbstractBaseLayer } from './abstract-base-layer';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { getLocalizedMessage } from '@/core/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -91,6 +94,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
     this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
+
+    // If there is a layer style in the config, set it in the layer
+    if (layerConfig.layerStyle) this.setStyle(layerConfig.layerStyle);
   }
 
   /**
@@ -108,7 +114,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).once(['featuresloadend', 'imageloadend', 'tileloadend'], this.onLoaded.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).once(['featuresloaderror', 'imageloaderror', 'tileloaderror'], this.onError.bind(this));
+    (this.#olSource as any).once(['featuresloaderror', 'tileloaderror'], this.onError.bind(this));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).on(['imageloaderror'], this.onImageLoadError.bind(this));
   }
 
   /**
@@ -211,14 +219,33 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Gets the in visible range value
+   * @returns {boolean} true if the layer is in visible range
+   */
+  getInVisibleRange(): boolean {
+    const mapZoom = this.getMapViewer().getView().getZoom();
+    return mapZoom! > this.getMinZoom() && mapZoom! <= this.getMaxZoom();
+  }
+
+  /**
    * Overridable method called when the layer has been loaded correctly
    */
   protected onLoaded(): void {
+    const layerConfig = this.getLayerConfig();
     // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
-    this.getLayerConfig().layerStatus = 'loaded';
+    layerConfig.layerStatus = 'loaded';
 
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
-    this.setVisible(this.getLayerConfig().initialSettings?.states?.visible !== false);
+    this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+
+    // Set the zoom levels here to prevent the layer being stuck endlessly loading
+    if (layerConfig.initialSettings.maxZoom) {
+      this.setMaxZoom(layerConfig.initialSettings.maxZoom);
+    }
+
+    if (layerConfig.initialSettings.minZoom) {
+      this.setMinZoom(layerConfig.initialSettings.minZoom);
+    }
 
     // Emit event
     this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
@@ -233,15 +260,33 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Overridable method called when the layer image is in error and couldn't be loaded correctly.
+   * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
+   */
+  protected onImageLoadError(): void {
+    logger.logError(
+      `Error loading source image for layer path: ${this.getLayerPath()} at zoom level: ${this.getMapViewer().getView().getZoom()}`
+    );
+    const lang = document.getElementById(this.getMapId())!.getAttribute('data-lang') as 'en' | 'fr';
+    // Add notification with the current zoom level
+    this.getMapViewer().notifications.showError(
+      getLocalizedMessage('layers.errorImageLoad', lang),
+      [this.getLayerName()!, this.getMapViewer().getView().getZoom()!],
+      true
+    );
+  }
+
+  /**
    * Returns feature information for the layer specified.
    * @param {QueryType} queryType - The type of query to perform.
    * @param {TypeLocation} location - An optionsl pixel, coordinate or polygon that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
   async getFeatureInfo(
     queryType: QueryType,
-    layerPath: string,
-    location: TypeLocation = null
+    location: TypeLocation = null,
+    queryGeometry: boolean = true
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
     try {
@@ -266,19 +311,19 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           promiseGetFeature = this.getAllFeatureInfo();
           break;
         case 'at_pixel':
-          promiseGetFeature = this.getFeatureInfoAtPixel(location as Pixel);
+          promiseGetFeature = this.getFeatureInfoAtPixel(location as Pixel, queryGeometry);
           break;
         case 'at_coordinate':
-          promiseGetFeature = this.getFeatureInfoAtCoordinate(location as Coordinate);
+          promiseGetFeature = this.getFeatureInfoAtCoordinate(location as Coordinate, queryGeometry);
           break;
         case 'at_long_lat':
-          promiseGetFeature = this.getFeatureInfoAtLongLat(location as Coordinate);
+          promiseGetFeature = this.getFeatureInfoAtLongLat(location as Coordinate, queryGeometry);
           break;
         case 'using_a_bounding_box':
-          promiseGetFeature = this.getFeatureInfoUsingBBox(location as Coordinate[]);
+          promiseGetFeature = this.getFeatureInfoUsingBBox(location as Coordinate[], queryGeometry);
           break;
         case 'using_a_polygon':
-          promiseGetFeature = this.getFeatureInfoUsingPolygon(location as Coordinate[]);
+          promiseGetFeature = this.getFeatureInfoUsingPolygon(location as Coordinate[], queryGeometry);
           break;
         default:
           // Default is empty array
@@ -315,10 +360,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to return of feature information at a given pixel location.
    * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtPixel(location: Pixel, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoAtPixel on layer path ${this.getLayerPath()}`);
   }
@@ -326,10 +372,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to return of feature information at a given coordinate.
    * @param {Coordinate} location - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoAtCoordinate on layer path ${this.getLayerPath()}`);
   }
@@ -337,10 +384,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to return of feature information at the provided long lat coordinate.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtLongLat(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtLongLat(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoAtLongLat on layer path ${this.getLayerPath()}`);
   }
@@ -348,10 +396,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to return of feature information at the provided bounding box.
    * @param {Coordinate} location - The bounding box that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[]): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoUsingBBox(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoUsingBBox on layer path ${this.getLayerPath()}`);
   }
@@ -359,10 +408,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to return of feature information at the provided polygon.
    * @param {Coordinate} location - The polygon that will be used by the query.
+   * @param {boolean} queryGeometry - The query geometry boolean.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[]): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Crash on purpose
     throw new Error(`Not implemented exception for getFeatureInfoUsingPolygon on layer path ${this.getLayerPath()}`);
   }
@@ -455,7 +505,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   async onFetchLegend(): Promise<TypeLegend | null> {
     try {
       const legend: TypeLegend = {
-        type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
+        type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType as TypeGeoviewLayerType,
         styleConfig: this.getStyle(),
         legend: await getLegendStyles(this.getStyle()),
       };
@@ -499,41 +549,16 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Converts the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
    * @param {Feature[]} features - The array of features to convert.
    * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The layer configuration.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The Array of feature information.
+   * @returns {TypeFeatureInfoEntry[] | undefined | null} The Array of feature information.
    */
-  protected async formatFeatureInfoResult(
+  protected formatFeatureInfoResult(
     features: Feature[],
     layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  ): TypeFeatureInfoEntry[] | undefined | null {
     try {
       if (!features.length) return [];
 
       const outfields = layerConfig?.source?.featureInfo?.outfields;
-
-      // Loop on the features to build the array holding the promises for their canvas
-      const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement }>[] = [];
-      features.forEach((featureNeedingItsCanvas) => {
-        promisedAllCanvasFound.push(
-          new Promise((resolveCanvas) => {
-            // GV: Callback function was added by PR #1997 and removed by #2590
-            // The PR added an AsyncSemaphore with a callback on geoview renderer to be able to fetch an image with a dataurl from the kernel function geoview-renderer.getFeatureCanvas()
-
-            // GV: Call the function with layerConfig.legendFilterIsOff = true to force the feature to get is canvas
-            // GV: If we don't, it will create canvas only for visible elements and because tables are stored feature will never get its canvas
-            getFeatureCanvas(featureNeedingItsCanvas, this.getStyle()!, layerConfig.filterEquation, true, true)
-              .then((canvas) => {
-                resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
-              })
-              .catch((error) => {
-                // Log
-                logger.logPromiseFailed(
-                  'getFeatureCanvas in featureNeedingItsCanvas loop in formatFeatureInfoResult in AbstractGVLayer',
-                  error
-                );
-              });
-          })
-        );
-      });
 
       // Hold a dictionary built on the fly for the field domains
       const dictFieldDomains: { [fieldName: string]: codedValueType | rangeDomainType | null } = {};
@@ -544,18 +569,39 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       let featureKeyCounter = 0;
       let fieldKeyCounter = 0;
       const queryResult: TypeFeatureInfoEntry[] = [];
-      const arrayOfFeatureInfo = await Promise.all(promisedAllCanvasFound);
-      arrayOfFeatureInfo.forEach(({ feature, canvas }) => {
+
+      // Dict to store created image sources to avoid recreating
+      const imageSourceDict: { [styleAsJsonString: string]: string } = {};
+
+      features.forEach((feature) => {
+        // Check dict for existing image source and create it if it does not exist
+        let imageSource: string | undefined;
+        const layerStyle = this.getStyle()!;
+        const featureStyle = feature.getStyle();
+        if (featureStyle) {
+          const geometryType = feature.getGeometry() ? feature.getGeometry()!.getType() : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
+          // Create a string unique to the style, but geometry agnostic
+          const styleClone = cloneDeep(featureStyle) as Style;
+          styleClone.setGeometry('');
+          const styleString = `${geometryType}${JSON.stringify(styleClone)}`;
+          // Use string as dict key
+          if (!imageSourceDict[styleString])
+            imageSourceDict[styleString] = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
+          imageSource = imageSourceDict[styleString];
+        }
+
+        if (!imageSource) imageSource = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
+
         let extent;
         if (feature.getGeometry()) extent = feature.getGeometry()!.getExtent();
 
         const featureInfoEntry: TypeFeatureInfoEntry = {
           // feature key for building the data-grid
           featureKey: featureKeyCounter++,
-          geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
+          geoviewLayerType: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType as TypeGeoviewLayerType,
           extent,
           geometry: feature,
-          featureIcon: canvas,
+          featureIcon: imageSource,
           fieldInfo: {},
           nameField: layerConfig?.source?.featureInfo?.nameField || null,
         };
@@ -630,16 +676,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   protected static initOptionsWithInitialSettings(layerOptions: Options, layerConfig: AbstractBaseLayerEntryConfig): void {
     // GV Note: The visible flag (and maybe others?) must be set in the 'onLoaded' function below, because the layer needs to
     // GV attempt to be visible on the map in order to trigger its source loaded event.
-
+    // TODO: refactor - investigate the initOptions. The below should happen in the config api before gv-layers
     // Set the options as read from the initialSettings
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.className !== undefined) layerOptions.className = layerConfig.initialSettings.className;
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.extent !== undefined) layerOptions.extent = layerConfig.initialSettings.extent;
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.maxZoom !== undefined) layerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    // eslint-disable-next-line no-param-reassign
-    if (layerConfig.initialSettings?.minZoom !== undefined) layerOptions.minZoom = layerConfig.initialSettings.minZoom;
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
   }

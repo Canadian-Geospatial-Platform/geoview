@@ -22,6 +22,7 @@ import { TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
+import i18n from '@/core/translation/i18n';
 import { logger } from '@/core/utils/logger';
 import { removeCommentsFromJSON } from '@/core/utils/utilities';
 
@@ -151,6 +152,9 @@ async function renderMap(mapElement: Element): Promise<void> {
   const configObj = config.initializeMapConfig(configuration.mapId, configuration!.map!.listOfGeoviewLayerConfig!);
   configuration.map.listOfGeoviewLayerConfig = configObj!;
 
+  // Set the i18n language to the language specified in the config
+  await i18n.changeLanguage(lang);
+
   // if valid config was provided - mapId is now part of config
   if (configuration) {
     const { mapId } = configuration;
@@ -188,8 +192,8 @@ export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig:
 
     // Create a data-config attribute and set config value on the div
     const att = document.createAttribute(url ? 'data-config-url' : 'data-config');
-    // Clean apostrophes in the config
-    att.value = mapConfig.replaceAll("'", "\\'");
+    // Clean apostrophes in the config if not escaped already
+    att.value = mapConfig.replaceAll(/(?<!\\)'/g, "\\'");
     mapDiv.setAttributeNode(att);
 
     // Set the geoview-map class on the div so that this class name is standard for all maps (either created via init or via func call)

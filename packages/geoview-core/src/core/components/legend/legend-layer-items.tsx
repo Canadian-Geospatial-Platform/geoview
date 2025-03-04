@@ -1,6 +1,6 @@
 import { useTheme } from '@mui/material';
 import { memo, useMemo } from 'react';
-import { Box, ListItem, Tooltip, ListItemText, ListItemIcon, List, BrowserNotSupportedIcon } from '@/ui';
+import { Box, ListItem, ListItemText, ListItemIcon, List, BrowserNotSupportedIcon } from '@/ui';
 import { TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
@@ -14,9 +14,7 @@ const LegendListItem = memo(
   ({ item }: { item: TypeLegendItem }): JSX.Element => (
     <ListItem key={`${item.icon}-${item.name}`} className={!item.isVisible ? 'unchecked' : 'checked'}>
       <ListItemIcon>{item.icon ? <Box component="img" alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>
-      <Tooltip title={item.name} placement="top" enterDelay={1000}>
-        <ListItemText primary={item.name} />
-      </Tooltip>
+      <ListItemText primary={item.name} />
     </ListItem>
   )
 );
@@ -30,6 +28,7 @@ export const ItemsList = memo(function ItemsList({ items }: ItemsListProps): JSX
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
+  // Early returns
   if (!items?.length) return null;
 
   // Direct mapping since we only reach this code if items has content

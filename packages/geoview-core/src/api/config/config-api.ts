@@ -9,11 +9,13 @@ import {
   EntryConfigBaseClass,
   TypeDisplayLanguage,
   TypeGeoviewLayerType,
+  TypeLayerStyleConfig,
 } from '@config/types/map-schema-types';
 import { MapConfigError } from '@config/types/classes/config-exceptions';
 
 import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';
+import { createStyleUsingEsriRenderer, EsriBaseRenderer } from '@/api/config/esri-renderer-parser';
 
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
@@ -422,7 +424,7 @@ export class ConfigApi {
     // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
     // be translated to a json object.
     const providedMapFeatureConfig: TypeJsonObject | undefined =
-      //                                                                     We clone to prevent modifications from leaking back to the user object.
+      // We clone to prevent modifications from leaking back to the user object.
       typeof mapConfig === 'string' ? ConfigApi.#convertStringToJson(mapConfig as string) : (cloneDeep(mapConfig) as TypeJsonObject);
 
     try {
@@ -586,5 +588,18 @@ export class ConfigApi {
       if (!geoviewLayerConfig.getErrorDetectedFlag()) return geoviewLayerConfig.getMetadataLayerTree()!;
     }
     throw new MapConfigError('Unable to build metadata layer tree.');
+  }
+
+  /**
+   * Returns the ESRI Renderer as a Style Config
+   * @param {string} input The input renderer to be converted to a GeoView Style
+   * @returns {TypeLayerStyleConfig} The converted style
+   */
+  static getStyleFromESRIRenderer(input: string): TypeLayerStyleConfig | undefined {
+    const renderer = this.#convertStringToJson(input);
+    if (renderer) {
+      return createStyleUsingEsriRenderer(renderer as unknown as EsriBaseRenderer);
+    }
+    return undefined;
   }
 }

@@ -6,7 +6,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { SwiperEventProcessor } from './event-processor-children/swiper-event-processor';
+import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 
 // core
 const appEventProcessor = new AppEventProcessor();

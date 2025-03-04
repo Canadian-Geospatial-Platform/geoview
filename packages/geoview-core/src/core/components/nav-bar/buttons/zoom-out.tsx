@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material/styles';
-
+import { useTranslation } from 'react-i18next';
 import { IconButton, ZoomOutIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useMapStoreActions, useMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -14,6 +14,7 @@ export default function ZoomOut(): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/buttons/zoom-out');
 
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -22,7 +23,13 @@ export default function ZoomOut(): JSX.Element {
   const { setZoom } = useMapStoreActions();
 
   return (
-    <IconButton id="zoomOut" tooltip="mapnav.zoomOut" tooltipPlacement="left" onClick={() => setZoom(zoom - 0.5)} sx={sxClasses.navButton}>
+    <IconButton
+      id="zoomOut"
+      tooltip={t('mapnav.zoomOut') as string}
+      tooltipPlacement="left"
+      onClick={() => setZoom(zoom - 0.5)}
+      sx={sxClasses.navButton}
+    >
       <ZoomOutIcon />
     </IconButton>
   );

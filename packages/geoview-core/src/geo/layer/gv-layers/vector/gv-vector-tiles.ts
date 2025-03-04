@@ -1,10 +1,11 @@
 import VectorTileLayer from 'ol/layer/VectorTile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import { VectorTile } from 'ol/source';
+import { applyStyle } from 'ol-mapbox-style';
 
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { featureInfoGetFieldType } from '../utils';
-import { AbstractGVVectorTile } from './abstract-gv-vector-tile';
+import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
+import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**
@@ -51,5 +52,29 @@ export class GVVectorTiles extends AbstractGVVectorTile {
   protected override getFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
     return featureInfoGetFieldType(this.getLayerConfig(), fieldName);
+  }
+
+  /**
+   * Used to change the style of the vector tile layer.
+   * @private
+   * @param styleUrl The style URL to apply to the layer
+   * @returns Promise<void>
+   */
+  changeStyle(styleUrl: string): Promise<void> {
+    if (styleUrl) {
+      const olLayer = this.olLayer as VectorTileLayer;
+      const source = olLayer?.getSource();
+      if (olLayer && source) {
+        const tileGrid = source.getTileGrid();
+        if (tileGrid) {
+          return applyStyle(olLayer, styleUrl, {
+            resolutions: tileGrid.getResolutions(),
+          });
+        }
+      }
+    }
+
+    // Done, no style, no layer, no source, or no tilegrid to process
+    return Promise.resolve();
   }
 }

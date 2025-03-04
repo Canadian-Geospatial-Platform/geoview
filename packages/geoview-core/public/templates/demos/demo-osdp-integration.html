@@ -44,166 +44,242 @@
     </div>
 
     <div id="mapSection">
-      <div
-        id="Map1"
-        class="geoview-map"
-        data-lang="fr"
-        data-config-url="./configs/OSDP/osdp-empty.json"
-      ></div>
+      <div id="Map1" class="geoview-map" data-lang="fr" data-config-url="./configs/OSDP/osdp-empty.json"></div>
+    </div>
+
+    <div style="display: flex">
+      <h3>Changes to map div:</h3>
+      <div>
+        <button id="deleteMap" style="margin: 10px;margin-left: 30px;" title="Deletes map div if it exists, leaving the map object in cgpv.maps - Simulates moving away from map tab.">Delete map div</button>
+        <details style="margin-left: 30px;">
+          <summary>Code</summary>
+          <pre>document.getElementById('Map1').remove();</pre>
+        </details>
+      </div>
+
+      <div>
+        <button id="createMap" style="margin: 10px" title="Creates a new div for the map, if the original div has been deleted">Create map div</button>
+        <details style="margin-left: 30px;">
+          <summary>Code</summary>
+          <pre>
+if (!document.getElementById('Map1')) {
+  const newDiv = document.createElement('div');
+  const id = document.createAttribute('id');
+  id.value = 'Map1';
+  newDiv.setAttributeNode(id);
+  const dataLang = document.createAttribute('data-lang');
+  dataLang.value = lang;
+  newDiv.setAttributeNode(dataLang);
+  document.getElementById('mapSection').appendChild(newDiv);
+}
+          </pre>
+        </details>
+      </div>
+
+      <div>
+        <button id="changeLanguage" style="margin: 10px" title="Changes the div language setting from french to english or english to french.">Change <code>data-lang</code> Attribute</button>
+        <p style="margin: 10px;margin-top: 0px;">Currently: <i id="dataLang">fr</i></p>
+        <p style="margin: 10px;margin-top: 0px;">Note: Will not effect the map until reloaded.</p>
+        <details style="margin-left: 30px;margin-top: 10px;">
+          <summary>Code</summary>
+          <pre>
+lang = lang === 'fr' ? 'en' : 'fr';
+const mapDiv = document.getElementById('Map1');
+if (mapDiv) {
+  mapDiv.setAttribute('data-lang', lang);
+            }
+          </pre>
+        </details>
+      </div>
+    </div>
+    <br><br>
+
+    <div>
+      <div style="display: flex">
+        <h3>Add Layers:</h3>
+        <div style="margin-left: 30px;">
+          <textarea id="layerUuids" cols="40" rows="5">21b821cf-0f1c-40ee-8925-eab12d357668,ccc75c12-5acc-4a6a-959f-ef6f621147b9,0fca08b5-e9d0-414b-a3c4-092ff9c5e326</textarea>
+          <br>
+          <button id="addLayers" style="margin: 10px" title="Add entered Geocore UUID's to the map. Can be separated with commas or each on a new line">Add Layers</button>
+          <details style="margin-left: 30px;">
+            <summary>Code</summary>
+            <pre>
+if (document.getElementById('Map1')) {
+  const layerUuids = document.getElementById('layerUuids').value;
+  const uuidList = layerUuids.split('\n').join(',').split(',');
+  addLayers(uuidList);
+}
+
+function addLayers(layers) {
+  layers.forEach((layer) => {
+    cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layer);
+  });
+}
+            </pre>
+          </details>
+      </div>
+      <br>
+      <div>
+        <div style="margin-left: 30px;">
+          <div class="selector">
+            <select name="Select custom config" id="switchCustom">
+              <option value="Airborne Radioactivity">Airborne Radioactivity</option>
+              <option value="IAAC">IAAC</option>
+              <option value="CESI">CESI</option>
+              <option value="DFO">DFO</option>
+              <option value="landCover">Land Cover 2010</option>
+            </select>
+          </div>
+  
+          <div style="display: grid">
+            <input id="layerUuidCustom" style="margin-top: 10px; margin-bottom: 10px; width: 300px" />
+            <textarea id="layerUuidCustomEntries" cols="80" rows="25"></textarea>
+          </div>
+          <div>
+            <button id="addLayersCustom" style="margin: 10px" title="Add entered Geocore UUID's to the map with a custom configuration (List of layer entries)">Add Layers With Custom Config</button>
+            <details style="margin-left: 30px;">
+              <summary>Code</summary>
+              <pre>cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(uuid, customListOfLayerEntries);</pre>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br><br>
+
+    <div style="display: flex">
+      <h3>Current Stored Config:</h3>
+      <div>
+        <button id="refreshMap" style="margin: 10px" title="Recreates the map using the config below, creating a new div if it has been deleted">Refresh map</button>
+        <details style="margin-left: 30px;">
+          <summary>Code</summary>
+          <pre>
+return new Promise (resolve => {
+  removeMap('Map1')
+    .then(() => {
+      cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800)
+      .then(() => {
+          resolve();
+        });
+    });
+  });
+
+  function removeMap(map) {
+    return new Promise(resolve => {
+      if (cgpv.api.maps[map]) {
+        cgpv.api.maps[map].remove(false)
+          .then(() => {
+            resolve();
+          });
+      } else {
+        resolve();
+      }
+    });
+  }
+          </pre>
+        </details>
+      </div>
+      <div>
+        <button id="updateState" style="margin: 10px" title="Updates the stored config with the current map state">Update Config With Current Map State</button>
+        <div class="selector" style="margin: 10px">
+          <label for="keepNames">Override Geocore Service Names:</label>
+          <select name="keepNames" id="keepNames">
+            <option value="true">true</option>
+            <option value="false">false</option>
+            <option value="hybrid">hybrid</option>
+          </select>
+        </div>
+        <details style="margin-left: 30px;">
+          <summary>Modes</summary>
+          <pre>true - All names are kept as they appear on the map
+false - All geocore names are set to undefined, to be reapplied by the service
+hybrid - Geocore layer names are kept, style to be reapplied by the service
+          </pre>
+        </details>
+        <details style="margin-left: 30px;">
+          <summary>Code</summary>
+          <pre>mapConfig = cgpv.api.maps.Map1.createMapConfigFromMapState(overrideGeocoreServiceNames);</pre>
+        </details>
+      </div>
+    </div>
+    <br>
+
+    <div>
+      <textarea id="configTextArea"  cols="100" rows="50" readonly>
+      </textarea>
     </div>
 
     <div>
-      <ul>
-        <li>
-          <button id="deleteMap" style="margin: 10px">Delete map div</button>
-          Deletes map div if it exists, leaving the map object in cgpv.maps - Simulates moving away from map tab.
-          <details>
-            <summary>Code</summary>
-            <pre>
-              document.getElementById('Map1').remove();
-            </pre>
-          </details>
-        </li>
-        <li>
-          <button id="createMap" style="margin: 10px">Create map div</button>
-          Creates a new div for the map, if the original div has been deleted
-          <details>
-            <summary>Code</summary>
-            <pre>
-              if (!document.getElementById('Map1')) {
-                const newDiv = document.createElement('div');
-                const id = document.createAttribute('id');
-                id.value = 'Map1';
-                newDiv.setAttributeNode(id);
-                const dataLang = document.createAttribute('data-lang');
-                dataLang.value = lang;
-                newDiv.setAttributeNode(dataLang);
-                document.getElementById('mapSection').appendChild(newDiv);
-              }
-            </pre>
-          </details>
-        </li>
-        <li>
-          <button id="refreshMap" style="margin: 10px">Refresh map</button>
-          Recreates the map using the stored config, creating a new div if it has been deleted
-          <details>
-            <summary>Code</summary>
-            <pre>
-              <pre>
-                return new Promise (resolve => {
-                  removeMap('Map1')
-                    .then(() => {
-                      cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800)
-                      .then(() => {
-                          resolve();
-                        });
-                    });
-                  });
-
-                  function removeMap(map) {
-                    return new Promise(resolve => {
-                      if (cgpv.api.maps[map]) {
-                        cgpv.api.maps[map].remove(false)
-                          .then(() => {
-                            resolve();
-                          });
-                      } else {
-                        resolve();
-                      }
-                    });
-                  }
-              </pre>
-            </pre>
-          </details>
-        </li>
-        <li>
-          <button id="updateState" style="margin: 10px">Update State</button>
-          Updates the stored config with the current map state
-          <details>
-            <summary>Code</summary>
-            <pre>
-              mapConfig = cgpv.api.maps.Map1.createMapConfigFromMapState();
-            </pre>
-          </details>
-        </li>
-        <li>
-          <button id="changeLanguage" style="margin: 10px">Change Language</button>
-          Changes the language from french to english or english to french and reloads the map if it exists.
-          Note: this will not change the language of the layers, as they are loaded in the current state.
-          <details>
-            <summary>Code</summary>
-            <pre>
-              lang = lang === 'fr' ? 'en' : 'fr';
-              const mapDiv = document.getElementById('Map1');
-              if (mapDiv) {
-                mapDiv.setAttribute('data-lang', lang);
-                cgpv.api.maps.Map1.reloadWithCurrentState();
-              }
-            </pre>
-          </details>
-        </li>
-      </ul>
+      <h3>Change the layer names in the config:</h3>
+      <p>The examples provided below are for the default three layers in the add layers box above. To see this work, click the "Add Layers" button with the default layers,
+ click "Update With Map State" once the layers are loaded, and then click "Change Names". The names in the config will be updated.
+      </p>
+      <p>To try it yourself, add any layer to the map, update the config, and then copy the layer name you would like to change. Put it in square brackets in the box below,
+ followed by a comma, and then the name you would like to replace it with - [name to change, new name]. Note that the order of the names in the pair, and the order of the pairs
+ do not matter, [Radioactivité de l'air, Radioactivity] and [Radioactivity, Radioactivité de l'air] will function the same - any provided layer name will be replaced with its pair,
+ so the same call can be used to switch a name and switch it back.
+      </p>
+      <textarea id="layerNames" cols="100" rows="4">[Radioactivité de l'air, Radioactivity], [Périmètre de localisation des stations, Perimeter], [Carte commémorative du Canada, Commemorative Map]</textarea>
+      <br>
+      <button id="changeNames" style="margin: 10px" title="Replaces listed layer names with thei provided pair in the config">Change Names</button>
+      <details>
+        <summary>Code</summary>
+        <pre>
+const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de localisation des stations', 'Perimeter'], ['Carte commémorative du Canada', 'Commemorative Map']];
+cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
+        </pre>
+      </details>
+      <button id="changeNamesAndRemove" style="margin: 10px" title="Replaces listed layer names with thei provided pair in the config, and removes any names that aren't listed">Change Names and Remove Unlisted</button>
+      <details>
+        <summary>Code</summary>
+        <pre>
+const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de localisation des stations', 'Perimeter'], ['Carte commémorative du Canada', 'Commemorative Map']];
+cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
+        </pre>
+      </details>
     </div>
-
-    <div class="selector">
-      <textarea id="layerUuids" cols="40" rows="5">21b821cf-0f1c-40ee-8925-eab12d357668,ccc75c12-5acc-4a6a-959f-ef6f621147b9,0fca08b5-e9d0-414b-a3c4-092ff9c5e326</textarea>
-      <ul>
-        <li>
-          <button id="addLayers" style="margin: 10px">Add Layers</button>
-          Add entered Geocore UUID's to the map. Can be separated with commas or each on a new line
-          <details>
-            <summary>Code</summary>
-            <pre>
-              if (document.getElementById('Map1')) {
-                const layerUuids = document.getElementById('layerUuids').value;
-                const uuidList = layerUuids.split('\n').join(',').split(',');
-                addLayers(uuidList);
-              }
-
-              function addLayers(layers) {
-                layers.forEach((layer) => {
-                  cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layer);
-                });
-              }
-            </pre>
-          </details>
-        </li>
-      </ul>
-    </div>
+    <br><br>
 
     <script src="codedoc.js"></script>
     <script>
       // Empty map config
       let mapConfig = {
-        "map": {
-          "interaction": "dynamic",
-          "viewSettings": {
-            "projection": 3857
+        map: {
+          interaction: 'dynamic',
+          viewSettings: {
+            projection: 3857,
           },
-          "basemapOptions": {
-            "basemapId": "transport",
-            "shaded": false,
-            "labeled": true
+          basemapOptions: {
+            basemapId: 'transport',
+            shaded: false,
+            labeled: true,
           },
-          "listOfGeoviewLayerConfig": []
+          listOfGeoviewLayerConfig: [],
         },
-        "components": ["overview-map"],
-        "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
-              "appBar": {
-                "tabs": {
-                  "core": ["geolocator", "export"]
-                }
-              },
-        "footerBar": {
-          "tabs": {
-            "core": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
-          }
+        components: ['overview-map'],
+        navBar: ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
+        appBar: {
+          tabs: {
+            core: ['geolocator', 'export'],
+          },
         },
-        "corePackages": [],
-        "theme": "geo.ca"
+        footerBar: {
+          tabs: {
+            core: ['legend', 'layers', 'details', 'data-table', 'time-slider', 'geochart'],
+          },
+        },
+        corePackages: [],
+        theme: 'geo.ca',
       };
 
       let lang = 'fr';
+
+      function updateConfigTextArea() {
+        const configTextArea = document.getElementById('configTextArea');
+        configTextArea.value = JSON.stringify(mapConfig, null, 2);
+      }
+
+      updateConfigTextArea();
 
       function createMapDiv() {
         if (!document.getElementById('Map1')) {
@@ -230,12 +306,11 @@
        * @returns Promise<void>
        */
       function removeMap(map) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           if (cgpv.api.maps[map]) {
-            cgpv.api.maps[map].remove(false)
-              .then(() => {
-                resolve();
-              });
+            cgpv.api.maps[map].remove(false).then(() => {
+              resolve();
+            });
           } else {
             resolve();
           }
@@ -259,15 +334,13 @@
        * @param layers Array of layers.
        */
       function refreshMap() {
-        return new Promise (resolve => {
-          removeMap('Map1')
-            .then(() => {
-              cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800)
-              .then(() => {
-                  resolve();
-                });
+        return new Promise((resolve) => {
+          removeMap('Map1').then(() => {
+            cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800).then(() => {
+              resolve();
             });
           });
+        });
       }
 
       // Delete Button============================================================================================================
@@ -294,13 +367,16 @@
         refreshMap();
       });
 
-      // Update Button============================================================================================================
-      const updateMapButton = document.getElementById('updateState');
+      // Update Config Button============================================================================================================
+      const updateConfigButton = document.getElementById('updateState');
 
       // add an event listener when a button is clicked
-      updateMapButton.addEventListener('click', function () {
-        mapConfig = cgpv.api.maps.Map1.createMapConfigFromMapState();
+      updateConfigButton.addEventListener('click', function () {
+        const keepNames = document.getElementById('keepNames').value;
+        const overrideGeocoreServiceNames = keepNames === "hybrid" ? "hybrid" : keepNames === "true";
+        mapConfig = cgpv.api.maps.Map1.createMapConfigFromMapState(overrideGeocoreServiceNames);
         console.log(mapConfig);
+        updateConfigTextArea();
       });
 
       // Change Language Button============================================================================================================
@@ -309,11 +385,9 @@
       // add an event listener when a button is clicked
       changeLanguageButton.addEventListener('click', function () {
         lang = lang === 'fr' ? 'en' : 'fr';
+        document.getElementById('dataLang').innerHTML = lang;
         const mapDiv = document.getElementById('Map1');
-        if (mapDiv) {
-          mapDiv.setAttribute('data-lang', lang);
-          cgpv.api.maps.Map1.reloadWithCurrentState();
-        }
+        if (mapDiv) mapDiv.setAttribute('data-lang', lang);
       });
 
       // Add Layers Button============================================================================================================
@@ -326,6 +400,181 @@
           const uuidList = layerUuids.split('\n').join(',').split(',');
           addLayers(uuidList);
         }
+      });
+
+      // Change Names Button============================================================================================================
+      const changeNamesButton = document.getElementById('changeNames');
+
+      // add an event listener when a button is clicked
+      changeNamesButton.addEventListener('click', function () {
+        const pairs = document.getElementById('layerNames').value.replace(/\[|\]/g,'').split(',').map((name) => name.trim()).reduce((result, value, index, array) => {
+          if (index % 2 === 0)
+            result.push(array.slice(index, index + 2));
+            return result;
+          }, []);
+        cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
+        updateConfigTextArea();
+      });
+
+      // Change Names and Remove Button============================================================================================================
+      const changeNamesAndRemoveButton = document.getElementById('changeNamesAndRemove');
+
+      // add an event listener when a button is clicked
+      changeNamesAndRemoveButton.addEventListener('click', function () {
+        const pairs = document.getElementById('layerNames').value.replace(/\[|\]/g,'').split(',').map((name) => name.trim()).reduce((result, value, index, array) => {
+          if (index % 2 === 0)
+            result.push(array.slice(index, index + 2));
+            return result;
+          }, []);
+        cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
+        updateConfigTextArea();
+      });
+
+      const uuidConfig = {
+        AirborneRadioactivity: '21b821cf-0f1c-40ee-8925-eab12d357668',
+        AirborneRadioactivityConfig: [
+          {
+            layerId: '0',
+            entryType: 'group',
+            layerName: 'Airborne Radioactivity - Main Group',
+            listOfLayerEntryConfig: [
+              {
+                layerId: '1',
+                layerName: 'Airborne Radioactivity - Feature Layer',
+                initialSettings: {
+                  states: {
+                    visible: false,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        IAAC: 'f4c51eaa-a6ca-48b9-a1fc-b0651da20509',
+        IAACConfig: [
+          {
+            entryType: 'group',
+            layerName: 'IAAC Projects',
+            listOfLayerEntryConfig: [
+              {
+                layerId: '0',
+                initialSettings: {
+                  states: {
+                    legendCollapsed: true,
+                    visible: false,
+                  },
+                },
+              },
+              {
+                layerId: '1',
+                initialSettings: {
+                  states: {
+                    legendCollapsed: false,
+                    visible: true,
+                  },
+                },
+              },
+              {
+                layerId: '2',
+                initialSettings: {
+                  states: {
+                    legendCollapsed: true,
+                    visible: false,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        CESI: '5a65ad7c-561a-466a-8375-8d876624df9d',
+        CESIConfig: [
+          {
+            layerId: '0',
+            entryType: 'group',
+            layerName: 'CESI - Water Quantity Group',
+            listOfLayerEntryConfig: [
+              {
+                layerId: '1',
+                initialSettings: {
+                  states: {
+                    visible: false,
+                  },
+                },
+              },
+            ],
+          },
+          {
+            layerId: '4',
+            entryType: 'group',
+            layerName: 'CESI - Water Quality Group',
+            initialSettings: {
+              states: {
+                visible: false,
+                legendCollapsed: true,
+              },
+            },
+            listOfLayerEntryConfig: [
+              {
+                layerId: '5',
+              },
+              {
+                layerId: '6',
+              },
+              {
+                layerId: '7',
+              },
+            ],
+          },
+        ],
+        DFO: 'db177a8c-5d7d-49eb-8290-31e6a45d786c',
+        DFOConfig: [
+          {
+            layerName: 'Critical Habitat for Aquatic Species at Risk - Canada'
+          },
+        ],
+        landCover: 'c688b87f-e85f-4842-b0e1-a8f79ebf1133',
+        landCoverConfig: [
+          {
+            "layerId": "landcover-2010",
+            "layerName": "2010 Land Cover of Canada",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": false
+                }
+            }
+          }
+        ]
+      };
+
+
+      // Add Layers Custom Button============================================================================================================
+      const addLayersCustomButton = document.getElementById('addLayersCustom');
+
+      // add an event listener when a button is clicked
+      addLayersCustomButton.addEventListener('click', function () {
+        if (document.getElementById('Map1')) {
+          const layerUuid = document.getElementById('layerUuidCustom').value;
+          const layerUuidEntries = document.getElementById('layerUuidCustomEntries').value;
+
+          if (layerUuidEntries === '') cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layerUuid);
+          else cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layerUuid, layerUuidEntries);
+        }
+      });
+
+      // Add a samples selector
+      const layerUuid = document.getElementById('layerUuidCustom');
+      const layerUuidEntries = document.getElementById('layerUuidCustomEntries');
+      layerUuid.value = uuidConfig['AirborneRadioactivity'];
+      layerUuidEntries.value = JSON.stringify(uuidConfig[`AirborneRadioactivityConfig`], null, 2);
+
+      const switchCustom = document.getElementById('switchCustom');
+      switchCustom.addEventListener('change', (e) => {
+        const layerUuid = document.getElementById('layerUuidCustom');
+        const layerUuidEntries = document.getElementById('layerUuidCustomEntries');
+
+        layerUuid.value = uuidConfig[e.target.value.replaceAll(' ', '')];
+        layerUuidEntries.value = JSON.stringify(uuidConfig[`${e.target.value.replaceAll(' ', '')}Config`], null, 2);
       });
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready

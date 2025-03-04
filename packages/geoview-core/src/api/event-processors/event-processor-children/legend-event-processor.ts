@@ -42,6 +42,18 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     this.getLayerState(mapId).setterActions.setSelectedLayerPath(layerPath);
   }
 
+  static reorderLegendLayers(mapId: string): void {
+    // Sort the layers
+    const sortedLayers = this.getLayerState(mapId).legendLayers.sort(
+      (a, b) =>
+        MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, a.layerPath) -
+        MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, b.layerPath)
+    );
+
+    // Save in store
+    this.getLayerState(mapId).setterActions.setLegendLayers(sortedLayers);
+  }
+
   /**
    * Gets a specific state.
    * @param {string} mapId - The mapId
@@ -274,6 +286,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             layerName,
             layerStatus: legendResultSetEntry.layerStatus,
             legendQueryStatus: legendResultSetEntry.legendQueryStatus,
+            maxZoom: layerConfig.initialSettings.maxZoom,
+            minZoom: layerConfig.initialSettings.minZoom,
             type: layerConfig.entryType as TypeGeoviewLayerType,
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
             opacity: layerConfig.initialSettings?.states?.opacity ? layerConfig.initialSettings.states.opacity : 1,
@@ -316,6 +330,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           layerName,
           layerStatus: legendResultSetEntry.layerStatus,
           legendQueryStatus: legendResultSetEntry.legendQueryStatus,
+          maxZoom: layerConfig.initialSettings.maxZoom,
+          minZoom: layerConfig.initialSettings.minZoom,
           styleConfig: legendResultSetEntry.data?.styleConfig,
           type: legendResultSetEntry.data?.type || (layerConfig.entryType as TypeGeoviewLayerType),
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
@@ -416,8 +432,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static deleteLayerFromLegendLayers(mapId: string, layerPath: string): void {
     // Get legend layers to pass to recursive function
     const curLayers = this.getLayerState(mapId).legendLayers;
+
     // Remove layer and children
     LegendEventProcessor.#deleteLayersFromLegendLayersAndChildren(mapId, curLayers, layerPath);
+
+    // Set updated legend layers after delete
+    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
   }
 
   /**
@@ -489,6 +509,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static setItemVisibility(mapId: string, item: TypeLegendItem, visibility: boolean = true): void {
     // Get current layer legends and set item visibility
     const curLayers = this.getLayerState(mapId).legendLayers;
+
+    // TODO: Check - Is this line really at the right place in this function? It doesn't seem to be doing anything with regards to 'curLayers'!?
     // eslint-disable-next-line no-param-reassign
     item.isVisible = visibility;
 
@@ -639,9 +661,14 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const visibleValues = new Set(styleUnique.filter((style) => style.visible).map((style) => style.values.join(';')));
     const unvisibleValues = new Set(styleUnique.filter((style) => !style.visible).map((style) => style.values.join(';')));
 
+    // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
+    // TODO: The fields contain undefined, it should be empty. Check in new config api
+    // TODO: This is a workaround
+    if (uniqueValueStyle.fields[0] === undefined) uniqueValueStyle.fields.pop();
+
     // Filter features based on visibility
     return features.filter((feature) => {
-      const fieldValues = uniqueValueStyle.fields.map((field) => feature.fieldInfo[field]!.value).join(';');
+      const fieldValues = uniqueValueStyle.fields.map((field) => feature.fieldInfo[field]?.value).join(';');
 
       return (
         visibleValues.has(fieldValues.toString()) ||

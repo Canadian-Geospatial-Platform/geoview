@@ -37,6 +37,9 @@
         "corePackages": {
           "$ref": "#/definitions/TypeMapCorePackages"
         },
+        "corePackagesConfig": {
+          "$ref": "#/definitions/TypeCorePackagesConfig"
+        },
         "externalPackages": {
           "$ref": "#/definitions/TypeExternalPackages"
         },
@@ -210,6 +213,10 @@
             "geochart"
           ],
           "description": "Footer tab to be selected at map load"
+        },
+        "selectedLayersLayerPath": {
+          "type": "string",
+          "description": "Layerpath of layer to be selected in the layers tab at map load"
         }
       },
       "required": [
@@ -222,7 +229,6 @@
       "enum": [
         "geolocator",
         "export",
-        "basemap-panel",
         "geochart",
         "details",
         "legend",
@@ -264,7 +270,6 @@
           "type": "string",
           "enum": [
             "geolocator",
-            "basemap-panel",
             "geochart",
             "details",
             "legend",
@@ -275,6 +280,10 @@
             "custom-legend"
           ],
           "description": "App bar tab to be selected at map load"
+        },
+        "selectedLayersLayerPath": {
+          "type": "string",
+          "description": "Layerpath of layer to be selected at map load"
         }
       },
       "required": [
@@ -332,6 +341,13 @@
         "$ref": "#/definitions/TypeValidMapCorePackageProps"
       },
       "default": [],
+      "minItems": 0
+    },
+    "TypeCorePackagesConfig": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "description": "Core packages configuration (optional, can be in another file).",
       "minItems": 0
     },
     "TypeExternalPackagesProps": {
@@ -717,13 +733,13 @@
           "description": "The minimum view zoom level (exclusive) above which this layer will be visible.",
           "type": "integer",
           "minimum": 0,
-          "maximum": 50
+          "maximum": 20
         },
         "maxZoom": {
           "description": "The maximum view zoom level (inclusive) above which this layer will be visible.",
           "type": "integer",
           "minimum": 0,
-          "maximum": 50
+          "maximum": 20
         },
         "className": {
           "description": "A CSS class name to set to the layer element.",
@@ -1707,7 +1723,8 @@
         "string",
         "number",
         "date",
-        "url"
+        "url",
+        "oid"
       ]
     },
     "codedValueType": {

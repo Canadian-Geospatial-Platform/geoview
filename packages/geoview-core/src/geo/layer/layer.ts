@@ -45,6 +45,20 @@ import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { GeoViewLayerCreatedTwiceError, GeoViewLayerNotCreatedError } from '@/geo/layer/exceptions/layer-exceptions';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
+import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
+import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
+import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
+import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
+import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
+import { GVCSV } from '@/geo/layer/gv-layers/vector/gv-csv';
+import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { getExtentUnion } from '@/geo/utils/utilities';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
@@ -55,20 +69,6 @@ import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { AbstractBaseLayer } from './gv-layers/abstract-base-layer';
-import { AbstractGVLayer } from './gv-layers/abstract-gv-layer';
-import { GVEsriDynamic } from './gv-layers/raster/gv-esri-dynamic';
-import { GVEsriImage } from './gv-layers/raster/gv-esri-image';
-import { GVImageStatic } from './gv-layers/raster/gv-image-static';
-import { GVWMS } from './gv-layers/raster/gv-wms';
-import { GVXYZTiles } from './gv-layers/tile/gv-xyz-tiles';
-import { GVEsriFeature } from './gv-layers/vector/gv-esri-feature';
-import { GVGeoJSON } from './gv-layers/vector/gv-geojson';
-import { GVOGCFeature } from './gv-layers/vector/gv-ogc-feature';
-import { GVVectorTiles } from './gv-layers/vector/gv-vector-tiles';
-import { GVWFS } from './gv-layers/vector/gv-wfs';
-import { GVCSV } from './gv-layers/vector/gv-csv';
-import { GVGroupLayer } from './gv-layers/gv-group-layer';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
@@ -80,12 +80,12 @@ import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
-// import { LayerMockup } from './layer-mockup';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+// import { LayerMockup } from '@/geo/layer/layer-mockup';
 
 export type GeoViewLayerAddedResult = {
   layer: AbstractGeoViewLayer;
@@ -311,6 +311,7 @@ export class LayerApi {
 
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
       const subLayerPath = layerPath.endsWith(`/${layerEntryConfig.layerId}`) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
+
       const layerInfo: TypeOrderedLayerInfo = {
         layerPath: subLayerPath,
         visible: layerEntryConfig.initialSettings?.states?.visible !== false,
@@ -321,6 +322,7 @@ export class LayerApi {
           layerEntryConfig.initialSettings?.states?.legendCollapsed !== undefined
             ? layerEntryConfig.initialSettings?.states?.legendCollapsed
             : false,
+        inVisibleRange: true,
       };
       newOrderedLayerInfos.push(layerInfo);
       if (layerEntryConfig.listOfLayerEntryConfig?.length) {
@@ -342,6 +344,7 @@ export class LayerApi {
               ? geoviewLayerConfig.initialSettings?.states?.legendCollapsed
               : false,
           visible: geoviewLayerConfig.initialSettings?.states?.visible !== false,
+          inVisibleRange: true,
         };
         newOrderedLayerInfos.push(layerInfo);
         (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.forEach((layerEntryConfig) => {
@@ -423,10 +426,11 @@ export class LayerApi {
                   if (error instanceof GeoViewLayerCreatedTwiceError) {
                     this.mapViewer.notifications.showError('validation.layer.createtwice', [
                       (error as GeoViewLayerCreatedTwiceError).geoviewLayerId,
-                      this.getMapId(),
                     ]);
                   } else {
-                    this.mapViewer.notifications.showError('validation.layer.genericError', [this.getMapId()]);
+                    this.mapViewer.notifications.showError('validation.layer.loadfailed', [
+                      geoviewLayerConfig.geoviewLayerName || geoviewLayerConfig.geoviewLayerId,
+                    ]);
                   }
                 });
               } else {
@@ -440,7 +444,9 @@ export class LayerApi {
               logger.logError(error);
 
               // TODO: Use a generic error message
-              this.mapViewer.notifications.showError('validation.layer.genericError', [this.getMapId()]);
+              this.mapViewer.notifications.showError('validation.layer.loadfailed', [
+                geoviewLayerConfig.geoviewLayerName || geoviewLayerConfig.geoviewLayerId,
+              ]);
             }
           });
         });
@@ -464,6 +470,10 @@ export class LayerApi {
             configToCreateIndex > configToTestIndex
           ) {
             this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
+            // Remove geoCore ordered layer info placeholder
+            if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId))
+              MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId, false);
+
             return false;
           }
         }
@@ -481,7 +491,7 @@ export class LayerApi {
    */
   #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
     // TODO: find a more centralized way to trap error and display message
-    api.maps[this.getMapId()].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId, this.getMapId()]);
+    api.maps[this.getMapId()].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId]);
 
     // Log
     logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.getMapId()}`);
@@ -574,9 +584,10 @@ export class LayerApi {
   /**
    * Adds a Geoview Layer by GeoCore UUID.
    * @param {string} uuid - The GeoCore UUID to add to the map
+   * @param {string} layerEntryConfig - The optional layer configuration
    * @returns {Promise<void>} A promise which resolves when done adding
    */
-  async addGeoviewLayerByGeoCoreUUID(uuid: string): Promise<void> {
+  async addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<void> {
     // Add a place holder to the ordered layer info array
     const layerInfo: TypeOrderedLayerInfo = {
       layerPath: uuid,
@@ -584,15 +595,38 @@ export class LayerApi {
       queryable: true,
       hoverable: true,
       legendCollapsed: false,
+      inVisibleRange: true,
     };
-    // TODO: Check - Shouldn't we wait for the layer to actually be retrieved positively from
-    // TO.DOCONT: Geocore, before adding ordered layer information? What if the
-    // TO.DOCONT: fetch (createLayersFromUUID) fails, will there be garbage in layer info?
+
+    // GV: This is here as a placeholder so that the layers will appear in the proper order,
+    // GV: regardless of how quickly we get the response. It is removed if the layer fails.
     MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerInfo);
+
+    const parsedLayerEntryConfig = layerEntryConfig ? JSON.parse(layerEntryConfig) : undefined;
+    let optionalConfig: GeoCoreLayerConfig | undefined =
+      parsedLayerEntryConfig && (parsedLayerEntryConfig[0].listOfLayerEntryConfig || parsedLayerEntryConfig[0].initialSettings)
+        ? {
+            geoviewLayerType: 'geoCore',
+            geoviewLayerId: uuid,
+            geoviewLayerName: parsedLayerEntryConfig[0].geoviewLayerName,
+            listOfLayerEntryConfig: parsedLayerEntryConfig[0].geoviewLayerName
+              ? parsedLayerEntryConfig[0].listOfLayerEntryConfig
+              : parsedLayerEntryConfig,
+            initialSettings: parsedLayerEntryConfig[0].initialSettings,
+          }
+        : undefined;
+
+    // If a simplified config is provided, build a config with the layerName provided
+    if (!optionalConfig && parsedLayerEntryConfig && (parsedLayerEntryConfig[0].layerName || parsedLayerEntryConfig[0].geoviewLayerName))
+      optionalConfig = {
+        geoviewLayerType: 'geoCore',
+        geoviewLayerId: uuid,
+        geoviewLayerName: parsedLayerEntryConfig[0].geoviewLayerName || parsedLayerEntryConfig[0].layerName,
+      };
 
     // Create geocore layer configs and add
     const geoCoreGeoviewLayerInstance = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
-    const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
+    const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid, optionalConfig);
     layers.forEach((geoviewLayerConfig) => {
       // Redirect
       this.addGeoviewLayer(geoviewLayerConfig);
@@ -615,8 +649,13 @@ export class LayerApi {
     ConfigValidation.validateListOfGeoviewLayerConfig(this.mapViewer.getDisplayLanguage(), [geoviewLayerConfig]);
 
     // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
-    if (geoviewLayerConfig.geoviewLayerId in this.#geoviewLayers) this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
-    else {
+    if (geoviewLayerConfig.geoviewLayerId in this.#geoviewLayers) {
+      // Remove geoCore ordered layer info placeholder
+      if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId))
+        MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId, false);
+
+      this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
+    } else {
       // Process the addition of the layer
       return this.#addGeoviewLayerStep2(geoviewLayerConfig);
     }
@@ -685,6 +724,12 @@ export class LayerApi {
         // Log
         logger.logDebug(`Layer entry config processed for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
 
+        const selectedLayerPath =
+          this.mapViewer.mapFeaturesConfig.footerBar?.selectedLayersLayerPath ||
+          this.mapViewer.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
+        if (selectedLayerPath && event.config.layerPath.startsWith(selectedLayerPath))
+          LegendEventProcessor.setSelectedLayersTabLayer(this.getMapId(), selectedLayerPath as string);
+
         // GV Do we need to register a layer entry config here? Leave the note for now
         // this.registerLayerConfigInit(layerConfig);
       });
@@ -703,10 +748,17 @@ export class LayerApi {
           gvLayer.onIndividualLayerLoaded((sender, payload) => {
             // Log
             logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
+
+            const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), payload.layerPath);
+            // Ensure that the layer bounds are set when the layer is loaded
+            if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), payload.layerPath);
+
             this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
           });
+
           return gvLayer.getOLLayer();
         }
+
         throw new Error('Error, no corresponding GV layer');
       });
 
@@ -951,6 +1003,17 @@ export class LayerApi {
     return gvGroupLayer;
   }
 
+  #setLayerInVisibleRange(layerConfig: TypeLayerEntryConfig): void {
+    if (layerConfig.listOfLayerEntryConfig) {
+      layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => this.#setLayerInVisibleRange(subLayerConfig));
+    }
+
+    const zoom = this.mapViewer.getView().getZoom();
+    const { maxZoom, minZoom } = layerConfig.initialSettings;
+    const inVisibleRange = (!maxZoom || zoom! <= maxZoom) && (!minZoom || zoom! > minZoom);
+    MapEventProcessor.setLayerInVisibleRange(this.getMapId(), layerConfig.layerPath, inVisibleRange);
+  }
+
   /**
    * Continues the addition of the geoview layer.
    * Adds the layer to the map if valid. If not (is a string) emits an error.
@@ -962,13 +1025,13 @@ export class LayerApi {
     // do not add the layer to the map
     if (geoviewLayer.layerLoadError.length !== 0) {
       geoviewLayer.layerLoadError.forEach((loadError) => {
-        const { layer, loggerMessage } = loadError;
+        const { layer, layerName, loggerMessage } = loadError;
 
         // Log the details in the console
         logger.logError(loggerMessage);
 
         // TODO: find a more centralized way to trap error and display message
-        api.maps[this.getMapId()].notifications.showError('validation.layer.loadfailed', [layer, this.getMapId()]);
+        api.maps[this.getMapId()].notifications.showError('validation.layer.loadfailed', [layerName || layer]);
 
         this.#emitLayerError({ layerPath: layer, errorMessage: loggerMessage });
       });
@@ -978,6 +1041,9 @@ export class LayerApi {
     if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
       // Add the OpenLayers layer to the map officially
       this.mapViewer.map.addLayer(geoviewLayer.olRootLayer!);
+
+      // Set in visible range property for all newly added layers
+      geoviewLayer.listOfLayerEntryConfig.forEach((layer) => this.#setLayerInVisibleRange(layer));
     }
 
     // Log
@@ -1014,7 +1080,7 @@ export class LayerApi {
         const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
 
         // Get the number of layers
-        const numberOfLayers = MapEventProcessor.getMapLayerAndChildrenOrderedInfo(this.getMapId(), parentLayerPath).length;
+        const numberOfLayers = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(this.getMapId(), parentLayerPath).length;
 
         // If the map index of the parent has been set
         if (parentLayerIndex !== -1) {
@@ -1469,13 +1535,13 @@ export class LayerApi {
    * @param {string} layerPath - The path of the layer.
    * @param {boolean} newValue - The new value of visibility.
    */
-  setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): void {
+  setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Apply some visibility logic
     const curOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
     const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath);
     // Determine the outcome of the new visibility based on parameters
     const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
-    const layerInfos = MapEventProcessor.getMapLayerAndChildrenOrderedInfo(this.getMapId(), layerPath, curOrderedLayerInfo);
+    const layerInfos = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(this.getMapId(), layerPath, curOrderedLayerInfo);
 
     layerInfos.forEach((layerInfo: TypeOrderedLayerInfo) => {
       if (layerInfo) {
@@ -1527,6 +1593,8 @@ export class LayerApi {
 
     // Redirect to processor so we can update the store with setterActions
     MapEventProcessor.setOrderedLayerInfoWithNoOrderChangeState(this.getMapId(), curOrderedLayerInfo);
+
+    return newVisibility;
   }
 
   /**
@@ -1627,9 +1695,11 @@ export class LayerApi {
       // Get the layer
       const layer = this.getGeoviewLayer(layerConfig.layerPath) as AbstractGVLayer;
 
-      // Get the bounds of the layer
-      const calculatedBounds = layer.getBounds();
-      if (calculatedBounds) bounds.push(calculatedBounds);
+      if (layer) {
+        // Get the bounds of the layer
+        const calculatedBounds = layer.getBounds();
+        if (calculatedBounds) bounds.push(calculatedBounds);
+      }
     } else {
       // Is a group
       layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => {

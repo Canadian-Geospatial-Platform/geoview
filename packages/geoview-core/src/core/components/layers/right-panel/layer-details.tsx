@@ -123,20 +123,21 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   };
 
   function renderItemCheckbox(item: TypeLegendItem): JSX.Element | null {
-    // no checkbox for simple style layers
-    if (
-      layerDetails.styleConfig?.LineString?.type === 'simple' ||
-      layerDetails.styleConfig?.MultiLineString?.type === 'simple' ||
-      layerDetails.styleConfig?.Point?.type === 'simple' ||
-      layerDetails.styleConfig?.MultiPoint?.type === 'simple' ||
-      layerDetails.styleConfig?.Polygon?.type === 'simple' ||
-      layerDetails.styleConfig?.MultiPolygon?.type === 'simple'
-    ) {
+    // First check if styleConfig exists
+    if (!layerDetails.styleConfig) {
       return null;
     }
+
+    // No checkbox for simple style layers
+    if (layerDetails.styleConfig[item.geometryType]?.type === 'simple') return null;
+
+    // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
+    // For these layers, we need to disable checkboxes
+    if (layerDetails.styleConfig[item.geometryType]?.fields[0] === undefined) return null;
+
     if (!layerDetails.canToggle) {
       return (
-        <IconButton disabled tooltip="layers.visibilityIsAlways">
+        <IconButton disabled tooltip={t('layers.visibilityIsAlways') as string}>
           {' '}
           <CheckBoxIcon color="disabled" />{' '}
         </IconButton>
@@ -177,6 +178,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             key={`${item.name}/${layerDetails.items.indexOf(item)}`}
             alignItems="center"
             justifyItems="stretch"
+            sx={{ display: 'flex', flexWrap: 'nowrap' }}
           >
             <Grid size={{ xs: 'auto' }}>{renderItemCheckbox(item)}</Grid>
             <Grid size={{ xs: 'auto' }} sx={{ display: 'flex' }}>
@@ -216,7 +218,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderDetailsButton(): JSX.Element {
     if (layerDetails.controls?.table !== false)
       return (
-        <IconButton id="table-details" tooltip="legend.tableDetails" className="buttonOutline" onClick={handleOpenTable}>
+        <IconButton id="table-details" tooltip={t('legend.tableDetails') as string} className="buttonOutline" onClick={handleOpenTable}>
           <TableViewIcon />
         </IconButton>
       );
@@ -231,7 +233,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (layerDetails.controls?.highlight !== false)
       return (
         <IconButton
-          tooltip="legend.highlightLayer"
+          tooltip={t('legend.highlightLayer') as string}
           onClick={handleHighlightLayer}
           className={highlightedLayer === layerDetails.layerPath ? 'buttonOutline active' : 'buttonOutline'}
         >
@@ -248,7 +250,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderZoomButton(): JSX.Element {
     if (layerDetails.controls?.zoom !== false)
       return (
-        <IconButton tooltip="legend.zoomTo" onClick={handleZoomTo} className="buttonOutline" disabled={layerDetails.bounds === undefined}>
+        <IconButton
+          tooltip={t('legend.zoomTo') as string}
+          onClick={handleZoomTo}
+          className="buttonOutline"
+          disabled={layerDetails.bounds === undefined}
+        >
           <ZoomInSearchIcon />
         </IconButton>
       );
@@ -263,7 +270,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
         {isDataTableVisible && datatableSettings[layerDetails.layerPath] && renderDetailsButton()}
-        <IconButton tooltip="legend.refreshLayer" className="buttonOutline" onClick={handleRefreshLayer}>
+        <IconButton tooltip={t('legend.refreshLayer') as string} className="buttonOutline" onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
         {renderHighlightButton()}
@@ -353,20 +360,23 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           </Box>
           <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} variant="middle" />
           {layerDetails.layerAttribution &&
-            layerDetails.layerAttribution!.map((attribution) => {
-              return (
-                <Typography
-                  sx={{
-                    marginTop: '10px',
-                    color: theme.palette.geoViewColor.textColor.light[200],
-                    fontSize: theme.palette.geoViewFontSize.sm,
-                    textAlign: 'center',
-                  }}
-                  key={generateId()}
-                >
-                  {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
-                </Typography>
-              );
+            layerDetails.layerAttribution.map((attribution) => {
+              if (attribution) {
+                return (
+                  <Typography
+                    sx={{
+                      marginTop: '10px',
+                      color: theme.palette.geoViewColor.textColor.light[200],
+                      fontSize: theme.palette.geoViewFontSize.sm,
+                      textAlign: 'center',
+                    }}
+                    key={generateId()}
+                  >
+                    {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
+                  </Typography>
+                );
+              }
+              return null;
             })}
         </>
       )}

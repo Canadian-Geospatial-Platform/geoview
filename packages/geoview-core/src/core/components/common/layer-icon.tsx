@@ -3,14 +3,15 @@ import { useTheme } from '@mui/material/styles';
 import { Box, CircularProgressBase, ErrorIcon, GroupWorkOutlinedIcon, IconButton, BrowserNotSupportedIcon } from '@/ui';
 
 import { TypeLegendLayer } from '@/core/components/layers/types';
-import { getSxClasses } from './layer-icon-style';
+import { getSxClasses } from '@/core/components/common/layer-icon-style';
+import { LayerListEntry } from '@/core/components/common/layer-list';
 import { useIconLayerSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { LayerListEntry } from '.';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeIconStackProps {
   layerPath: string;
   onIconClick?: () => void;
-  onStackIconClick?: (e: React.KeyboardEvent<HTMLElement>) => void;
+  onStackIconClick?: (event: React.KeyboardEvent<HTMLElement>) => void;
 }
 
 interface LayerIconProps {
@@ -37,10 +38,11 @@ const ICON_BUTTON_BASE_PROPS = {
  * @returns {JSX.Element} the icon stack item
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackProps): JSX.Element | null {
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
   const iconData = useIconLayerSet(layerPath);
@@ -54,8 +56,11 @@ const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconC
     [iconData]
   );
 
-  const renderSingleIcon = useCallback(
-    (): JSX.Element => (
+  const renderSingleIcon = useCallback((): JSX.Element => {
+    // Log
+    logger.logTraceUseCallback('LAYER-ICON - renderSingleIcon');
+
+    return (
       <IconButton {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreview} onClick={iconImage === 'no data' ? undefined : onIconClick}>
         {iconImage === 'no data' ? (
           <BrowserNotSupportedIcon />
@@ -65,12 +70,14 @@ const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconC
           </Box>
         )}
       </IconButton>
-    ),
-    [iconImage, onIconClick, sxClasses.iconPreview, sxClasses.legendIcon, sxClasses.maxIconImg]
-  );
+    );
+  }, [iconImage, onIconClick, sxClasses.iconPreview, sxClasses.legendIcon, sxClasses.maxIconImg]);
 
-  const renderStackedIcons = useCallback(
-    (): JSX.Element => (
+  const renderStackedIcons = useCallback((): JSX.Element => {
+    // Log
+    logger.logTraceUseCallback('LAYER-ICON - renderStackedIcons');
+
+    return (
       <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyDown={onStackIconClick} aria-hidden="true">
         <IconButton {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreviewStacked}>
           <Box sx={sxClasses.legendIconTransparent}>
@@ -81,23 +88,25 @@ const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconC
           <Box sx={sxClasses.legendIcon}>{iconImage && <Box component="img" alt="icon" src={iconImage} sx={sxClasses.maxIconImg} />}</Box>
         </IconButton>
       </Box>
-    ),
-    [
-      iconImage,
-      iconImageStacked,
-      onIconClick,
-      onStackIconClick,
-      sxClasses.iconPreviewHoverable,
-      sxClasses.iconPreviewStacked,
-      sxClasses.legendIcon,
-      sxClasses.legendIconTransparent,
-      sxClasses.maxIconImg,
-      sxClasses.stackIconsBox,
-    ]
-  );
+    );
+  }, [
+    iconImage,
+    iconImageStacked,
+    onIconClick,
+    onStackIconClick,
+    sxClasses.iconPreviewHoverable,
+    sxClasses.iconPreviewStacked,
+    sxClasses.legendIcon,
+    sxClasses.legendIconTransparent,
+    sxClasses.maxIconImg,
+    sxClasses.stackIconsBox,
+  ]);
 
-  const renderNoDataIcon = useCallback(
-    (): JSX.Element => (
+  const renderNoDataIcon = useCallback((): JSX.Element => {
+    // Log
+    logger.logTraceUseCallback('LAYER-ICON - renderNoDataIcon');
+
+    return (
       <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyDown={onStackIconClick} aria-hidden="true">
         <IconButton {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreviewStacked}>
           <Box sx={sxClasses.legendIconTransparent}>
@@ -105,9 +114,8 @@ const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconC
           </Box>
         </IconButton>
       </Box>
-    ),
-    [onIconClick, onStackIconClick, sxClasses.iconPreviewStacked, sxClasses.legendIconTransparent, sxClasses.stackIconsBox]
-  );
+    );
+  }, [onIconClick, onStackIconClick, sxClasses.iconPreviewStacked, sxClasses.legendIconTransparent, sxClasses.stackIconsBox]);
 
   if (numOfIcons === 1) return renderSingleIcon();
   if (numOfIcons && numOfIcons > 0) return renderStackedIcons();
@@ -117,11 +125,12 @@ const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconC
   return null;
 });
 
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 export const LayerIcon = memo(function LayerIcon({ layer }: LayerIconProps): JSX.Element {
   const isError = layer.layerStatus === 'error' || ('queryStatus' in layer && layer.queryStatus === 'error');
 
   const isLoading =
-    layer.layerStatus === 'processing' || layer.layerStatus === 'loading' || ('queryStatus' in layer && layer.queryStatus === 'processing');
+    (layer.layerStatus !== 'loaded' && layer.layerStatus !== 'error') || ('queryStatus' in layer && layer.queryStatus === 'processing');
 
   const hasChildren = 'children' in layer && layer?.children.length;
 

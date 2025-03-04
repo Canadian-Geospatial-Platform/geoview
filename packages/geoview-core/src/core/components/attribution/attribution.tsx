@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, memo } from 'react';
-
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
 import { Box, MoreHorizIcon, Popover, IconButton, Typography } from '@/ui';
@@ -40,6 +40,7 @@ export const Attribution = memo(function Attribution(): JSX.Element {
   logger.logTraceRender('components/attribution/attribution');
 
   // Hooks
+  const { t } = useTranslation<string>();
   const theme = useTheme();
 
   // State
@@ -58,7 +59,7 @@ export const Attribution = memo(function Attribution(): JSX.Element {
   };
 
   // Memoize values
-  const attributionContent = useMemo(
+  const memoAttributionContent = useMemo(
     () => mapAttribution.map((attribution) => <Typography key={attribution}>{attribution}</Typography>),
     [mapAttribution]
   );
@@ -79,8 +80,8 @@ export const Attribution = memo(function Attribution(): JSX.Element {
         onClick={handleOpenPopover}
         className={open ? 'active' : ''}
         tooltipPlacement="top"
-        tooltip="mapctrl.attribution.tooltip"
-        aria-label="mapctrl.attribution.tooltip"
+        tooltip={t('mapctrl.attribution.tooltip') as string}
+        aria-label={t('mapctrl.attribution.tooltip') as string}
         sx={buttonStyles}
       >
         <MoreHorizIcon />
@@ -96,7 +97,7 @@ export const Attribution = memo(function Attribution(): JSX.Element {
         }}
         onClose={handleClosePopover}
       >
-        <Box sx={BOX_STYLES}>{attributionContent}</Box>
+        <Box sx={BOX_STYLES}>{memoAttributionContent}</Box>
       </Popover>
     </>
   );

@@ -1,4 +1,4 @@
-import { SyntheticEvent, ReactNode, useState, useEffect, useMemo, MouseEvent, useCallback, useRef } from 'react';
+import { SyntheticEvent, ReactNode, useState, useEffect, useMemo, MouseEvent, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -10,14 +10,16 @@ import {
   BoxProps,
   Box,
   SelectChangeEvent,
+  TabScrollButton,
+  TabScrollButtonProps,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
 
 import { Select, TypeMenuItemProps } from '@/ui/select/select';
-import { getSxClasses } from './tabs-style';
-import { TabPanel } from './tab-panel';
+import { getSxClasses } from '@/ui/tabs/tabs-style';
+import { TabPanel } from '@/ui/tabs/tab-panel';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIHiddenTabs } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TypeContainerBox } from '@/core/types/global-types';
@@ -64,19 +66,33 @@ export interface TypeTabsProps {
   containerType?: TypeContainerBox;
 }
 
+// Define scroll button component outside of Tabs
+// TODO: Unmemoize this component, probably, because it's in 'ui' folder
+const CustomScrollButton = memo(function CustomScrollButton({ direction, ...props }: TabScrollButtonProps) {
+  return (
+    <TabScrollButton
+      {...props}
+      direction={direction}
+      sx={{
+        display: props.disabled ? 'none' : 'flex',
+      }}
+    />
+  );
+});
+
 /**
  * Create a tabs ui
  *
  * @param {TypeTabsProps} props properties for the tabs ui
  * @returns {JSX.Element} returns the tabs ui
  */
-export function Tabs(props: TypeTabsProps): JSX.Element {
+function TabsUI(props: TypeTabsProps): JSX.Element {
   const {
     // NOTE: need this shellContainer, so that mobile dropdown can be rendered on top fullscreen window.
     shellContainer,
     tabs,
     rightButtons,
-    selectedTab,
+    selectedTab = 0,
     activeTrap,
     onToggleCollapse,
     onSelectedTabChanged,
@@ -89,17 +105,20 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     isCollapsed,
   } = props;
 
+  // Hooks
+  // TODO: refactor - language values should be pass as props
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
-  // internal state
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  // State
   // boolean value in state reflects when tabs will be collapsed state, then value needs to false.
   const [value, setValue] = useState<number | boolean>(0);
   const [tabPanels, setTabPanels] = useState([tabs[0]]);
-  const tabPanelRef = useRef<HTMLDivElement>();
+  const tabPanelRef = useRef<HTMLDivElement | null>(null);
 
-  // get store values and actions
+  // TODO: refactor - Should decouple from store and values pass as props
+  // Store
   const mapSize = useMapSize();
   const hiddenTabs = useUIHiddenTabs();
 
@@ -113,6 +132,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const updateTabPanel = useCallback(
     (tabValue: number): void => {
+      logger.logTraceUseCallback('UI.TABS - updateTabPanel', tabValue);
+
       // Update panel refs when tab value is changed.
       // handle no tab when mobile dropdown is displayed.
       if (typeof tabValue === 'string') {
@@ -141,6 +162,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const handleChange = useCallback(
     (event: SyntheticEvent<Element, Event>, newValue: number): void => {
+      logger.logTraceUseCallback('UI.TABS - handleChange', newValue);
+
       updateTabPanel(newValue);
     },
     [updateTabPanel]
@@ -151,10 +174,12 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * If the panel is collapsed when tab is clicked, expand the panel
    */
   const handleClick = useCallback(
-    (e: MouseEvent<HTMLDivElement>): void => {
+    (event: MouseEvent<HTMLDivElement>): void => {
+      logger.logTraceUseCallback('UI.TABS - handleClick', event);
+
       // Get the tab (if already created to extract the value, set -1 if tab does not exist)
       // We need this information to know if we create, switch or collapse a tab
-      const { id } = e.target as HTMLDivElement;
+      const { id } = event.target as HTMLDivElement;
       const tab = tabPanels.filter((item) => item !== undefined && item.id === id);
       const index = tab.length > 0 ? tab[0].value : -1;
 
@@ -170,8 +195,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   );
 
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('TABS - selectedTab', selectedTab);
+    logger.logTraceUseEffect('UI.TABS - selectedTab', selectedTab);
+
     // If a selected tab is defined
     if (selectedTab !== undefined) {
       const newPanels = [...tabPanels];
@@ -199,6 +224,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   }, [tabs, t]);
 
   useEffect(() => {
+    logger.logTraceUseEffect('UI.TABS - mapSize', mapSize);
+
     // show/hide mobile dropdown when screen size change.
     if (mapSize[0] < theme.breakpoints.values.sm) {
       setShowMobileDropdown(true);
@@ -208,10 +235,12 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   }, [mapSize, theme.breakpoints.values.sm]);
 
   useEffect(() => {
+    logger.logTraceUseEffect('UI.TABS - isCollapsed', isCollapsed);
+
     const tabPanel = tabPanelRef?.current;
-    const handleFooterbarEscapeKey = (e: KeyboardEvent): void => {
+    const handleFooterbarEscapeKey = (event: KeyboardEvent): void => {
       if (!isCollapsed) {
-        handleEscapeKey(e.key, tabs[selectedTab ?? 0]?.id, true, () => {
+        handleEscapeKey(event.key, tabs[selectedTab ?? 0]?.id, true, () => {
           onCloseKeyboard?.();
         });
       }
@@ -226,6 +255,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sxMerged: any = { ...sxClasses.panel, visibility: TabContentVisibilty };
 
+  const visibleTabs = useMemo(() => tabs.filter((tab) => !hiddenTabs.includes(tab.id)), [tabs, hiddenTabs]);
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
       <Grid container id="footerbar-header" sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100], width: '100%' }}>
@@ -235,12 +265,14 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
               variant="scrollable"
               scrollButtons
               allowScrollButtonsMobile
-              value={value}
+              value={Math.max(0, selectedTab)}
               onChange={handleChange}
               aria-label="basic tabs"
+              ScrollButtonComponent={CustomScrollButton}
               {...tabsProps}
             >
-              {tabs.map((tab) => {
+              {visibleTabs.map((tab) => {
+                const originalIndex = tabs.findIndex((singleTab) => singleTab.id === tab.id);
                 return (
                   <MaterialTab
                     label={t(tab.label)}
@@ -249,9 +281,10 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                     iconPosition="start"
                     id={tab.id}
                     onClick={handleClick}
-                    sx={hiddenTabs.includes(tab.id) ? { display: 'none' } : sxClasses.tab}
+                    sx={sxClasses.tab}
                     aria-controls={`${shellContainer?.id ?? ''}-${tab.id}`}
                     tabIndex={0}
+                    value={originalIndex}
                     {...tabProps}
                   />
                 );
@@ -261,6 +294,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
             <Box sx={sxClasses.mobileDropdown}>
               <Select
                 labelId="footerBarDropdownLabel"
+                label=""
                 formControlProps={{ size: 'small' }}
                 id="footerBarDropdown"
                 fullWidth
@@ -268,7 +302,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 inputLabel={{ id: 'footerBarDropdownLabel' }}
                 menuItems={mobileTabsDropdownValues}
                 value={value}
-                onChange={(e: SelectChangeEvent<unknown>) => updateTabPanel(e.target.value as number)}
+                onChange={(event: SelectChangeEvent<unknown>) => updateTabPanel(event.target.value as number)}
                 {...(shellContainer ? { MenuProps: { container: shellContainer } } : {})}
               />
             </Box>
@@ -290,7 +324,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
               containerType={containerType}
               ref={tabPanelRef}
             >
-              {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
+              {typeof tab?.content === 'string' ? <UseHtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
             </TabPanel>
           ) : (
             ''
@@ -300,3 +334,5 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     </Grid>
   );
 }
+
+export const Tabs = TabsUI;

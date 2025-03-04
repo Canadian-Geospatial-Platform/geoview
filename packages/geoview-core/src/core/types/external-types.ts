@@ -10,7 +10,7 @@ export * from './global-types';
 export * from '@/core/app-start';
 
 export * from '@/core/containers/focus-trap';
-export * from '@/core/containers/html-to-react';
+export * from '@/core/components/common/hooks/use-html-to-react';
 export * from '@/core/containers/shell';
 export * from '@/core/translation/i18n';
 export * from '@/core/utils/config/config';

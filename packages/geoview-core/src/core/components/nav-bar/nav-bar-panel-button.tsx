@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ClickAwayListener } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,7 @@ import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-inti
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
-import { HtmlToReact } from '@/core/containers/html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { handleEscapeKey } from '@/core/utils/utilities';
 
 interface NavbarPanelButtonType {
@@ -24,19 +24,22 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
   // Log
   logger.logTraceRender('components/nav-bar/nav-bar-panel-button');
 
+  // Hooks
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
+  // Store
   const mapId = useGeoViewMapId();
   const geoviewElement = useAppGeoviewHTMLElement();
 
-  const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
-
+  // States
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
 
+  const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
+
+  // Handlers
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
     if (open) {
       setOpen(false);
@@ -60,7 +63,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
         <IconButton
           key={buttonPanel.button.id}
           id={buttonPanel.button.id}
-          tooltip={buttonPanel.button.tooltip}
+          tooltip={t(buttonPanel.button.tooltip!) as string}
           tooltipPlacement={buttonPanel.button.tooltipPlacement}
           sx={sxClasses.navButton}
           onClick={(e) => handleClick(e)}
@@ -82,7 +85,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
             <DialogTitle sx={sxClasses.popoverTitle}>{t(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
             <DialogContent>
               {buttonPanel.panel?.convertHtmlContent ? (
-                <HtmlToReact htmlContent={buttonPanel.panel?.content as string} />
+                <UseHtmlToReact htmlContent={buttonPanel.panel?.content as string} />
               ) : (
                 buttonPanel.panel?.content
               )}

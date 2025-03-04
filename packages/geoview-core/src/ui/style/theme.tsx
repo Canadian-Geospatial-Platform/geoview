@@ -1,9 +1,9 @@
 import { Theme, ThemeOptions, createTheme } from '@mui/material/styles';
 import { TypeDisplayTheme } from '@config/types/map-schema-types';
-import { lightThemeColors } from './light-theme';
-import { darkThemeColors } from './dark-theme';
-import { geoCaThemeColors } from './geo-ca-theme';
-import { generateThemeOptions } from './themeOptionsGenerator';
+import { lightThemeColors } from '@/ui/style/light-theme';
+import { darkThemeColors } from '@/ui/style/dark-theme';
+import { geoCaThemeColors } from '@/ui/style/geo-ca-theme';
+import { generateThemeOptions } from '@/ui/style/themeOptionsGenerator';
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {

@@ -1,14 +1,13 @@
 import React, { createElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMapBasemapOptions, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { MapIcon } from '@/ui';
 import { logger } from '@/core/utils/logger';
+import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { TypeBasemapOptions } from '@/api/config/types/map-schema-types';
-import NavbarPanelButton from '../nav-bar-panel-button';
+import { MapIcon } from '@/ui';
 import { TypePanelProps } from '@/ui/panel/panel-types';
-import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
+import { IconButtonPropsExtend, IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
-import { IconButton } from '@/ui/icon-button/icon-button';
 import { BlockIcon, PublicIcon, SatelliteIcon, SignpostIcon } from '@/ui/icons';
 
 const basemapChoiceOptions: Record<string, TypeBasemapOptions> = {
@@ -62,8 +61,8 @@ export default function BasemapSelect(): JSX.Element {
           <ListItem>
             <IconButton
               id="button-default"
-              aria-label="basemaps.default"
-              tooltip="basemaps.default"
+              aria-label={t('basemaps.default') as string}
+              tooltip={t('basemaps.default') as string}
               tooltipPlacement="left"
               size="small"
               onClick={() => handleChoice('default')}
@@ -77,8 +76,8 @@ export default function BasemapSelect(): JSX.Element {
         <ListItem>
           <IconButton
             id="button-transport"
-            aria-label="basemaps.transport"
-            tooltip="basemaps.transport"
+            aria-label={t('basemaps.transport') as string}
+            tooltip={t('basemaps.transport') as string}
             tooltipPlacement="left"
             size="small"
             onClick={() => handleChoice('transport')}
@@ -91,8 +90,8 @@ export default function BasemapSelect(): JSX.Element {
         <ListItem>
           <IconButton
             id="button-imagery"
-            aria-label="basemaps.imagery"
-            tooltip="basemaps.imagery"
+            aria-label={t('basemaps.imagery') as string}
+            tooltip={t('basemaps.imagery') as string}
             tooltipPlacement="left"
             size="small"
             onClick={() => handleChoice('imagery')}
@@ -105,8 +104,8 @@ export default function BasemapSelect(): JSX.Element {
         <ListItem>
           <IconButton
             id="button-simple"
-            aria-label="basemaps.simple"
-            tooltip="basemaps.simple"
+            aria-label={t('basemaps.simple') as string}
+            tooltip={t('basemaps.simple') as string}
             tooltipPlacement="left"
             size="small"
             onClick={() => handleChoice('simple')}
@@ -119,8 +118,8 @@ export default function BasemapSelect(): JSX.Element {
         <ListItem>
           <IconButton
             id="button-nogeom"
-            aria-label="basemaps.nogeom"
-            tooltip="basemaps.nogeom"
+            aria-label={t('basemaps.nogeom') as string}
+            tooltip={t('basemaps.nogeom') as string}
             tooltipPlacement="left"
             size="small"
             onClick={() => handleChoice('nogeom')}
@@ -135,7 +134,7 @@ export default function BasemapSelect(): JSX.Element {
   };
 
   // Set up props for nav bar panel button
-  const button: TypeIconButtonProps = {
+  const button: IconButtonPropsExtend = {
     tooltip: 'mapnav.basemap',
     children: createElement(MapIcon),
     tooltipPlacement: 'left',

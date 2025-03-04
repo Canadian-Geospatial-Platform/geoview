@@ -13,7 +13,7 @@ import { ProjectionLike } from 'ol/proj';
 import { Geometry, Point } from 'ol/geom';
 import { getUid } from 'ol/util';
 
-import { TypeOutfields } from '@config/types/map-schema-types';
+import { TypeFeatureInfoLayerConfig, TypeOutfields } from '@config/types/map-schema-types';
 
 import { api } from '@/app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -147,11 +147,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             // Convert the CSV to features
             features = AbstractGeoViewVector.convertCsv(this.mapId, xhr.responseText, layerConfig as VectorLayerEntryConfig);
           } else if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
+            // Get oid field
+            const oidField = AbstractGeoViewVector.#getEsriOidField(layerConfig);
+
             // Fetch the features text array
             const esriFeaturesArray = await AbstractGeoViewVector.getEsriFeatures(
               layerConfig.layerPath,
               url as string,
               JSON.parse(xhr.responseText).count,
+              oidField,
               this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount as number | undefined
             );
 
@@ -178,8 +182,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
                is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
             */
           if (features) {
+            // Get oid field
+            const oidField = AbstractGeoViewVector.#getEsriOidField(layerConfig);
+
             features.forEach((feature) => {
-              const featureId = feature.get('OBJECTID') ? feature.get('OBJECTID') : getUid(feature);
+              const featureId = feature.get(oidField) ? feature.get(oidField) : getUid(feature);
               feature.setId(featureId);
             });
             // If there's no feature info, build it from features
@@ -239,6 +246,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string} layerPath - The layer path of the layer.
    * @param {string} url - The base url for the service.
    * @param {number} featureCount - The number of features in the layer.
+   * @param {string} oidField - The unique identifier field name.
    * @param {number} maxRecordCount - The max features per query from the service.
    * @param {number} featureLimit - The maximum number of features to fetch per query.
    * @param {number} queryLimit - The maximum number of queries to run at once.
@@ -252,18 +260,21 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerPath: string,
     url: string,
     featureCount: number,
+    oidField: string,
     maxRecordCount?: number,
     featureLimit: number = 500,
     queryLimit: number = 10
   ): Promise<string[]> {
     // Update url
+    // TODO: Performance - Check if we should add &maxAllowableOffset=10 to the url. It creates small sliver but download size if 18mb compare to 50mb for outlier-election-2019
+    // TODO.CONT: Download time is 90 seconds compare to 130 seconds. It may worth the loss of precision...
     const baseUrl = url.replace('&where=1%3D1&returnCountOnly=true', `&outfields=*&geometryPrecision=1`);
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
 
     // Create array of url's to call
     const urlArray: string[] = [];
     for (let i = 0; i < featureCount; i += featureFetchLimit) {
-      urlArray.push(`${baseUrl}&where=OBJECTID+<=+${i + featureFetchLimit}&resultOffset=${i}`);
+      urlArray.push(`${baseUrl}&where=${oidField}+<=+${i + featureFetchLimit}&resultOffset=${i}`);
     }
 
     const promises: Promise<string>[] = [];
@@ -496,5 +507,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Set name field to first value
     if (!layerConfig.source.featureInfo.nameField)
       layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
+  }
+
+  /**
+   * Gets the Object ID field name from the layer configuration
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration object
+   * @returns {string} The name of the OID field if found, otherwise returns 'OBJECTID' as default
+   * @description Extracts the Object ID field name from the layer configuration. An OID (Object ID) is a
+   * standardized identifier used to uniquely identify features in a layer. If no OID field is specified
+   * in the configuration, it defaults to 'OBJECTID'.
+   * @private
+   */
+  // TODO: We should have this function in abstract-base-layer to be called like layerConfig.getEsriOidField() - issue 2699
+  // TODO.CONT: This should be rename without the esri. The oid type should be mandatory and if not present, we should crate one.
+  // TODO.CONT: We already create the internalGeoviewId but we should make this more officiel by assigning a type of oid
+  static #getEsriOidField(layerConfig: AbstractBaseLayerEntryConfig): string {
+    // Get oid field
+    return layerConfig.source?.featureInfo && (layerConfig.source.featureInfo as TypeFeatureInfoLayerConfig).outfields !== undefined
+      ? (layerConfig.source.featureInfo as TypeFeatureInfoLayerConfig).outfields.filter((field) => field.type === 'oid')[0]?.name
+      : 'OBJECTID';
   }
 }

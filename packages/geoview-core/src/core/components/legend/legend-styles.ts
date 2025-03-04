@@ -8,11 +8,14 @@ type SxClasses = Record<string, object>;
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme): SxClasses => ({
+export const getSxClasses = (theme: Theme, isFullScreen?: boolean, footerPanelResizeValue?: number): SxClasses => ({
   container: {
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
+    maxHeight: isFullScreen ? undefined : '660px', // maxHeight only when not fullscreen
+    height: isFullScreen ? `calc(${footerPanelResizeValue}vh - 40px)` : undefined, // height only when fullscreen (- padding)
+    overflowY: 'auto',
   },
   title: {
     textAlign: 'left',
@@ -89,6 +92,13 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         '&.checked': {
           borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[600]}`,
         },
+      },
+    },
+    '& .outOfRange': {
+      backgroundColor: `${theme.palette.grey[200]}`,
+      '& .layerTitle': {
+        color: `${theme.palette.grey[600]}`,
+        fontStyle: 'italic',
       },
     },
   },

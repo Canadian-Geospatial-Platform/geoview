@@ -29,6 +29,8 @@ export interface TypeLegendLayer {
   layerAttribution?: string[];
   layerName: string;
   legendQueryStatus: string;
+  maxZoom?: number;
+  minZoom?: number;
   type?: TypeGeoviewLayerType;
   styleConfig?: TypeLayerStyleConfig | null;
   layerStatus?: TypeLayerStatus;

@@ -8,7 +8,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { getXMLHttpRequest } from '@/core/utils/utilities';
-import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { getZoomFromScale, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -32,10 +32,10 @@ import {
   esriQueryRecordsByUrl,
   esriQueryRelatedRecordsByUrl,
 } from '@/geo/layer/gv-layers/utils';
-import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
-import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
-import { EsriImage } from './raster/esri-image';
+import { EsriDynamic, geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { EsriFeature, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
@@ -85,17 +85,26 @@ export function commonValidateListOfLayerEntryConfig(
 ): void {
   listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
     if (layerConfig.layerStatus === 'error') return;
-    const { layerPath } = layerConfig;
+    const { layerPath, layerName } = layerConfig;
 
     if (layerEntryIsGroupLayer(layerConfig)) {
+      // Use the layer name from the metadata if it exists and there is no existing name.
+      if (!layerConfig.layerName)
+        layerConfig.layerName = layer.metadata!.layers[layerConfig.layerId]?.name
+          ? (layer.metadata!.layers[layerConfig.layerId].name as string)
+          : '';
+
       layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+
       if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
         layer.layerLoadError.push({
           layer: layerPath,
+          layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
           loggerMessage: `Empty layer group (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
         });
         layerConfig.layerStatus = 'error';
       }
+
       return;
     }
 
@@ -105,6 +114,7 @@ export function commonValidateListOfLayerEntryConfig(
     if (Number.isNaN(esriIndex)) {
       layer.layerLoadError.push({
         layer: layerPath,
+        layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
         loggerMessage: `ESRI layerId must be a number (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
       });
       layerConfig.layerStatus = 'error';
@@ -118,6 +128,7 @@ export function commonValidateListOfLayerEntryConfig(
     if (esriIndex === -1) {
       layer.layerLoadError.push({
         layer: layerPath,
+        layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
         loggerMessage: `ESRI layerId not found (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
       });
       layerConfig.layerStatus = 'error';
@@ -201,6 +212,7 @@ export function commonGetFieldType(
   if (!fieldDefinition) return 'string';
   const esriFieldType = fieldDefinition.type as string;
   if (esriFieldType === 'esriFieldTypeDate') return 'date';
+  if (esriFieldType === 'esriFieldTypeOID') return 'oid';
   if (
     ['esriFieldTypeDouble', 'esriFieldTypeInteger', 'esriFieldTypeSingle', 'esriFieldTypeSmallInteger', 'esriFieldTypeOID'].includes(
       esriFieldType
@@ -332,8 +344,8 @@ export function commonProcessInitialSettings(
   if (layerConfig.initialSettings?.states?.visible === undefined)
     layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
   // GV TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
-  // GV if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
-  // GV if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
+  if (layerConfig.minScale === undefined && layerMetadata.minScale !== 0) layerConfig.minScale = layerMetadata.minScale as number;
+  if (layerConfig.maxScale === undefined && layerMetadata.maxScale !== 0) layerConfig.maxScale = layerMetadata.maxScale as number;
 
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
@@ -346,14 +358,33 @@ export function commonProcessInitialSettings(
     ] as Extent;
 
     // Transform to latlon extent
-    const latlonExtent = Projection.transformExtentFromObj(
-      layerExtent,
-      layerMetadata.extent.spatialReference,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
-    layerConfig.initialSettings!.bounds = latlonExtent;
+    if (layerExtent) {
+      const latlonExtent = Projection.transformExtentFromObj(
+        layerExtent,
+        layerMetadata.extent.spatialReference,
+        Projection.PROJECTION_NAMES.LNGLAT
+      );
+      layerConfig.initialSettings!.bounds = latlonExtent;
+    }
   }
-  layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds);
+
+  // Set zoom limits for max / min zooms
+  const mapView = layer.getMapViewer().getView();
+  if (layerConfig.maxScale) {
+    const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+    if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
+      layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
+    }
+  }
+
+  if (layerConfig.minScale) {
+    const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+    if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
+      layerConfig.initialSettings.minZoom = minScaleZoomLevel;
+    }
+  }
+
+  layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
 }
 
 /** ***************************************************************************************************************************

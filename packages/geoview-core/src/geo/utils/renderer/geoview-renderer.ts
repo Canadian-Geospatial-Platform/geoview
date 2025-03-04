@@ -188,33 +188,6 @@ async function createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement |
   }
 }
 
-/** ***************************************************************************************************************************
- * This method creates a canvas with the image data source (base64 image) provided.
- *
- * @param {string} imageDataSource The image source information (base64 image) of the image to load
- *
- * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
- */
-async function createIconCanvasFromImageSource(imageDataSource: string): Promise<HTMLCanvasElement | null> {
-  try {
-    const image = await loadImage(imageDataSource);
-    if (image) {
-      const width = image.width || LEGEND_CANVAS_WIDTH;
-      const height = image.height || LEGEND_CANVAS_HEIGHT;
-      const drawingCanvas = document.createElement('canvas');
-      drawingCanvas.width = width;
-      drawingCanvas.height = height;
-      const drawingContext = drawingCanvas.getContext('2d')!;
-      drawingContext.drawImage(image, 0, 0);
-      return drawingCanvas;
-    }
-    return null;
-  } catch (error) {
-    logger.logError(`Error creating incon canvas for pointStyle`, error);
-    return null;
-  }
-}
-
 // #region CREATE CANVAS
 /** ***************************************************************************************************************************
  * This method creates a canvas with the vector point settings that are defined in the point style.
@@ -1544,31 +1517,31 @@ export function getAndCreateFeatureStyle(
     const styleSettings = style![geometryType]!;
     const { type } = styleSettings;
     // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
-    return processStyle[type][geometryType].call('', styleSettings, feature as Feature, filterEquation, legendFilterIsOff);
+    const featureStyle = processStyle[type][geometryType].call('', styleSettings, feature as Feature, filterEquation, legendFilterIsOff);
+    // Set the feature style to avoid recreating later
+    (feature as Feature).setStyle(featureStyle);
+    return featureStyle;
   }
+
   return undefined;
 }
 
-const CANVAS_RECYCLING: { [styleAsJsonString: string]: HTMLCanvasElement } = {};
-
 /** ***************************************************************************************************************************
- * This method gets the canvas icon from the style of the feature using the layer entry config.
- * @param {Feature} feature - The feature that need its canvas icon to be defined.
+ * This method gets the image source from the style of the feature using the layer entry config.
+ * @param {Feature} feature - The feature that need its icon to be defined.
  * @param {TypeStyleConfig} style - The style to use
  * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
- * @param {boolean} useRecycling - Special parameter to optimize canvas creation time when functions is called multiple times.
- * @returns {Promise<HTMLCanvasElement>} The canvas icon associated to the feature or a default empty canvas.
+ * @returns {string} The icon associated to the feature or a default empty one.
  */
-export async function getFeatureCanvas(
+export function getFeatureImageSource(
   feature: Feature,
   style: TypeLayerStyleConfig,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean,
-  useRecycling?: boolean
-): Promise<HTMLCanvasElement> {
-  // The canvas that will be returned (if calculated successfully)
-  let canvas: HTMLCanvasElement | undefined;
+  legendFilterIsOff?: boolean
+): string {
+  // The image source that will be returned (if calculated successfully)
+  let imageSource: string | undefined;
 
   // GV: Sometimes, the feature will have no geometry e.g. esriDynamic as we fetch geometry only when needed
   // GV: We need to extract geometry from style instead. For esriDynamic there is only one geometry at a time
@@ -1580,7 +1553,28 @@ export async function getFeatureCanvas(
     if (style[geometryType]) {
       const styleSettings = style[geometryType]!;
       const { type } = styleSettings;
-      const featureStyle = processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
+
+      // TODO: Performance #2688 - Wrap the style processing in a Promise to prevent blocking, Use requestAnimationFrame to process style during next frame
+      // Wrap the style processing in a Promise to prevent blocking
+      // return new Promise((resolve) => {
+      //   // Use requestAnimationFrame to process style during next frame
+      //   requestAnimationFrame(() => {
+      //     const processedStyle = processStyle[type][geometryType].call(
+      //       '',
+      //       styleSettings,
+      //       feature as Feature,
+      //       filterEquation,
+      //       legendFilterIsOff
+      //     );
+      //     resolve(processedStyle);
+      //   });
+      // });
+
+      const featureStyle =
+        feature.getStyle() instanceof Style
+          ? (feature.getStyle() as Style)
+          : processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
+
       if (featureStyle) {
         if (geometryType === 'Point') {
           if (
@@ -1588,39 +1582,24 @@ export async function getFeatureCanvas(
             (styleSettings.type === 'uniqueValue' && !(featureStyle.getImage() instanceof Icon)) ||
             (styleSettings.type === 'classBreaks' && !(featureStyle.getImage() instanceof Icon))
           ) {
-            canvas = createPointCanvas(featureStyle);
+            imageSource = createPointCanvas(featureStyle).toDataURL();
           } else {
-            canvas = (await createIconCanvas(featureStyle)) || undefined;
+            imageSource = (featureStyle.getImage() as Icon).getSrc() || undefined;
           }
         } else if (geometryType === 'LineString') {
-          canvas = createLineStringCanvas(featureStyle);
+          imageSource = createLineStringCanvas(featureStyle).toDataURL();
         } else {
-          // eslint-disable-next-line no-lonely-if
-          if (useRecycling) {
-            // Stringify to compare styles with each others
-            const strokeAsString = JSON.stringify(featureStyle.getStroke());
-            const fillAsString = JSON.stringify(featureStyle.getFill());
-            const featureAsString = strokeAsString + fillAsString;
-
-            // If no other style like it has been processed so far
-            if (!CANVAS_RECYCLING[featureAsString]) {
-              // Keep it as template
-              CANVAS_RECYCLING[featureAsString] = createPolygonCanvas(featureStyle);
-            }
-            canvas = CANVAS_RECYCLING[featureAsString];
-          } else {
-            canvas = createPolygonCanvas(featureStyle);
-          }
+          imageSource = createPolygonCanvas(featureStyle).toDataURL();
         }
       }
     }
   }
 
   // If set, all good
-  if (canvas) return canvas;
+  if (imageSource) return imageSource;
 
   // Here, nothing could be done, use the no_legend template
-  return (await createIconCanvasFromImageSource(FORMATTING_NO_LEGEND))!;
+  return FORMATTING_NO_LEGEND;
 }
 
 /** ***************************************************************************************************************************

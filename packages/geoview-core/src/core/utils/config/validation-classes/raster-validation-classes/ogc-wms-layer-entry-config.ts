@@ -33,6 +33,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // When the dataAccessPath is undefined and the metadataAccessPath ends with ".xml", the dataAccessPath is temporarilly
     // set to '' and will be filled in the fetchServiceMetadata method of the class WMS.
     if (!this.source.dataAccessPath) this.source.dataAccessPath = '';
+
     // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set
     // to the same value of the corresponding metadataAccessPath.
     if (this.geoviewLayerConfig.metadataAccessPath!.slice(-4).toLowerCase() !== '.xml')

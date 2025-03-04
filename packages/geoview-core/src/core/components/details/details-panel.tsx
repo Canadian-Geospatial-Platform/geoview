@@ -9,7 +9,12 @@ import {
   useDetailsSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapStoreActions,
+  useMapVisibleLayers,
+  useMapClickCoordinates,
+  useMapVisibleRangeLayers,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map-schema-types';
 
@@ -22,6 +27,7 @@ import { DetailsSkeleton } from './details-skeleton';
 interface DetailsPanelType {
   fullWidth?: boolean;
 }
+
 /**
  * layers list
  *
@@ -34,7 +40,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
   const mapId = useGeoViewMapId();
@@ -42,6 +48,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
+  const visibleRangeLayers = useMapVisibleRangeLayers();
   const mapClickCoordinates = useMapClickCoordinates();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
@@ -119,7 +126,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     // Set the layers list
     const layerListEntries = visibleLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
-      .filter((layer) => layer)
+      // TODO Need to filter by layers in visible range
+      .filter((layer) => layer && visibleRangeLayers.includes(layer.layerPath))
       .map(
         (layer) =>
           ({
@@ -133,8 +141,16 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
             layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath ?? ''}`,
           }) as LayerListEntry
       );
-    return layerListEntries;
-  }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel, mapId]);
+
+    // Split the layers list into two groups while preserving order
+    const layersWithFeatures = layerListEntries.filter((layer) => layer.numOffeatures && layer.numOffeatures > 0);
+    const layersWithoutFeatures = layerListEntries.filter((layer) => layer.numOffeatures === 0);
+
+    // Combine the lists (features first, then no features)
+    const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
+
+    return orderedLayerListEntries;
+  }, [visibleLayers, arrayOfLayerDataBatch, visibleRangeLayers, getNumFeaturesLabel, mapId]);
 
   /**
    * Memoizes the selected layer for the LayerList component.
@@ -287,7 +303,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
         // Log
         logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
         // None found, select none
-        //  TODO: Investigate infinte loop in AppBar for statement.
+        //  TODO: Investigate infinite loop in AppBar for statement.
         // setSelectedLayerPath('');
       }
     }
@@ -346,7 +362,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   // #endregion
 
   // #region PROCESSING ***********************************************************************************************
-
   /**
    * Resets the currently selected feature index to 0 and keeps in reference the previously selected layer and
    * the previously selected feature index so that in the useEffect, later, the component can udpate
@@ -451,8 +466,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
                   .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
                 <IconButton
                   sx={{ marginLeft: '1.25rem', [theme.breakpoints.down('sm')]: { display: 'none' } }}
-                  aria-label="clear-all-features"
-                  tooltip="details.clearAllfeatures"
+                  aria-label={t('details.clearAllfeatures') as string}
+                  tooltip={t('details.clearAllfeatures') as string}
                   tooltipPlacement="top"
                   onClick={() => handleClearAllHighlights()}
                   className="buttonOutline"
@@ -465,8 +480,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
             <Grid size={{ xs: 6 }}>
               <Box sx={{ textAlign: 'right', marginRight: '1.625rem' }}>
                 <IconButton
-                  aria-label="backward"
-                  tooltip="details.previousFeatureBtn"
+                  aria-label={t('details.previousFeatureBtn') as string}
+                  tooltip={t('details.previousFeatureBtn') as string}
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(-1)}
                   disabled={currentFeatureIndex <= 0}
@@ -476,8 +491,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
                 </IconButton>
                 <IconButton
                   sx={{ marginLeft: '1.25rem' }}
-                  aria-label="forward"
-                  tooltip="details.nextFeatureBtn"
+                  aria-label={t('details.nextFeatureBtn') as string}
+                  tooltip={t('details.nextFeatureBtn') as string}
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(1)}
                   disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData!.features!.length}

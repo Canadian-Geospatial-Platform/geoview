@@ -1,9 +1,9 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { QueryType, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
-import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
-import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
-import { GVWMS } from '../gv-layers/raster/gv-wms';
-import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import {
   TypeAllFeatureInfoResultSet,
   TypeAllFeatureInfoResultSetEntry,
@@ -46,7 +46,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     const layerPath = layer.getLayerPath();
     this.resultSet[layerPath].eventListenerEnabled = true;
     this.resultSet[layerPath].queryStatus = 'processed';
-    this.resultSet[layerPath].features = [];
+    this.resultSet[layerPath].features = undefined;
 
     // Extra initialization of settings
     DataTableEventProcessor.setInitialSettings(this.getMapId(), layerPath);

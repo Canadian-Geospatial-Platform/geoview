@@ -15,6 +15,7 @@ import queryString from 'query-string';
 import {
   CV_MAP_CENTER,
   CV_MAP_EXTENTS,
+  CV_VALID_ZOOM_LEVELS,
   VALID_DISPLAY_LANGUAGE,
   VALID_DISPLAY_THEME,
   VALID_PROJECTION_CODES,
@@ -264,8 +265,8 @@ export class MapViewer {
         ),
         zoom: mapViewSettings.initialView?.zoomAndCenter ? mapViewSettings.initialView?.zoomAndCenter[0] : 3.5,
         extent: extentProjected || undefined,
-        minZoom: mapViewSettings.minZoom || 0,
-        maxZoom: mapViewSettings.maxZoom || 17,
+        minZoom: mapViewSettings.minZoom || CV_VALID_ZOOM_LEVELS[0],
+        maxZoom: mapViewSettings.maxZoom || CV_VALID_ZOOM_LEVELS[1],
         rotation: mapViewSettings.rotation || 0,
       }),
       controls: [],
@@ -290,7 +291,7 @@ export class MapViewer {
     // If map isn't static
     if (this.mapFeaturesConfig.map.interaction !== 'static') {
       // Register handlers on pointer move and map single click
-      this.map.on('pointermove', debounce(this.#handleMapPointerMove.bind(this), 10, { leading: true }).bind(this));
+      this.map.on('pointermove', debounce(this.#handleMapPointerMove.bind(this), 250, { leading: true }).bind(this));
       this.map.on('singleclick', debounce(this.#handleMapSingleClick.bind(this), 1000, { leading: true }).bind(this));
     }
 
@@ -453,10 +454,29 @@ export class MapViewer {
   #handleMapZoomEnd(event: ObjectEvent): void {
     try {
       // Read the zoom value
-      const zoom = this.getView().getZoom()!;
+      const zoom = this.getView().getZoom();
+      if (!zoom) return;
+
+      // Get new inVisibleRange values for all layers
+      const newOrderedLayerInfo = this.getMapLayerOrderInfo();
+
+      const visibleRangeLayers: string[] = [];
+
+      // GV Used the configs since group GV layers have fake max/min zoom levels
+      // GV The group levels are also missing the zoom level getters, so this worked out well anyway
+      this.layer.getLayerEntryConfigs().forEach((config) => {
+        const { minZoom, maxZoom } = config.initialSettings;
+        const inVisibleRange = (!minZoom || zoom! > minZoom) && (!maxZoom || zoom! <= maxZoom);
+        const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === config.layerPath);
+        if (foundLayer) foundLayer.inVisibleRange = inVisibleRange;
+        if (inVisibleRange) {
+          visibleRangeLayers.push(config.layerPath);
+        }
+      });
 
       // Save in the store
-      MapEventProcessor.setZoom(this.mapId, zoom);
+      MapEventProcessor.setZoom(this.mapId, zoom, newOrderedLayerInfo);
+      MapEventProcessor.setVisibleRangeLayerMapState(this.mapId, visibleRangeLayers);
 
       // Emit to the outside
       this.#emitMapZoomEnd({ zoom });
@@ -596,9 +616,6 @@ export class MapViewer {
       logger.logError('Failed in #checkLayerResultSetReady', error);
     });
 
-    // Start checking for map layers processed
-    this.#checkMapLayersProcessed();
-
     // Check how load in milliseconds has it been processing thus far
     const elapsedMilliseconds = Date.now() - this.#checkMapReadyStartTime!;
 
@@ -609,7 +626,7 @@ export class MapViewer {
     // GV This removes the spinning circle overlay
     MapEventProcessor.setMapLoaded(this.mapId, true);
 
-    // Zoom to extent provided in config, it present
+    // Zoom to extent provided in config, if present
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent)
       // TODO: Timeout allows for map height to be set before zoom happens, so padding is applied properly
       setTimeout(
@@ -662,6 +679,9 @@ export class MapViewer {
         }
       });
     }
+
+    // Start checking for map layers processed after the onMapLayersLoaded is define!
+    this.#checkMapLayersProcessed();
   }
 
   /**
@@ -736,6 +756,11 @@ export class MapViewer {
           // Is ready
           this.#mapLayersLoaded = true;
           this.#emitMapLayersLoaded();
+
+          // Create and dispatch the resolution change event to force the registration of layers in the
+          // inVisibleRange array when layers are loaded.
+          const event = new ObjectEvent('change:resolution', 'visibleRange', null);
+          this.getView().dispatchEvent(event);
         }
       }
     }, 250);
@@ -869,13 +894,13 @@ export class MapViewer {
    * set fullscreen / exit fullscreen
    *
    * @param status - Toggle fullscreen or exit fullscreen status
-   * @param {HTMLElement} element - The element to toggle fullscreen on
+   * @param {HTMLElement | undefined} element - The element to toggle fullscreen on
    */
-  static setFullscreen(status: boolean, element: TypeHTMLElement): void {
+  setFullscreen(status: boolean, element: TypeHTMLElement | undefined): void {
     // TODO: Refactor - For reusability, this function should be static and moved to a browser-utilities class
     // TO.DOCONT: If we want to keep a function here, in MapViewer, it should just be a redirect to the browser-utilities'
     // enter fullscreen
-    if (status) {
+    if (status && element) {
       if (element.requestFullscreen) {
         element.requestFullscreen().catch((error) => {
           // Log
@@ -895,6 +920,33 @@ export class MapViewer {
 
     // exit fullscreen
     if (!status) {
+      // Store the extent before any size changes occur
+      const currentExtent = this.getView().calculateExtent();
+      const currentZoom = this.getView().getZoom();
+
+      // Add one-time size change listener only when we are zoomed out to keep the bottom
+      // extent so the viewer does not zoom center Canada
+      if (currentZoom! < 4.5)
+        this.map.once('change:size', () => {
+          // Update map size first
+          this.map.updateSize();
+
+          // Calculate the new center to focus on bottom portion
+          const width = currentExtent[2] - currentExtent[0];
+          const height = currentExtent[3] - currentExtent[1];
+
+          // Calculate center point that will show bottom of previous extent
+          const centerX = currentExtent[0] + width / 2;
+          const centerY = currentExtent[1] - height / 2;
+
+          // Set the new center and zoom
+          this.getView().setCenter([centerX, centerY]);
+          this.getView().setZoom(currentZoom!);
+
+          // Force render
+          this.map.renderSync();
+        });
+
       if (document.exitFullscreen) {
         document.exitFullscreen().catch((error) => {
           // Log
@@ -1102,6 +1154,11 @@ export class MapViewer {
 
   // #region MAP ACTIONS
 
+  emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void {
+    // Emit the event
+    this.#emitMapSingleClick(clickCoordinates);
+  }
+
   /**
    * Loops through all geoview layers and refresh their respective source.
    * Use this function on projection change or other viewer modification who may affect rendering.
@@ -1163,7 +1220,7 @@ export class MapViewer {
                   if (data.geometry !== undefined) {
                     // add the geometry
                     // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
-                    this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId(null));
+                    this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId());
                   }
                 })
                 .catch((error) => {
@@ -1247,9 +1304,11 @@ export class MapViewer {
 
   /**
    * Reload a map from a config object created using current map state. It first removes then recreates the map.
+   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   *                                              Set to false after a language change to update the layer names with the new language.
    */
-  reloadWithCurrentState(): void {
-    const currentMapConfig = this.createMapConfigFromMapState();
+  reloadWithCurrentState(maintainGeocoreLayerNames: boolean = true): void {
+    const currentMapConfig = this.createMapConfigFromMapState(maintainGeocoreLayerNames);
     this.reload(currentMapConfig).catch((error) => {
       // Log
       logger.logError(`Couldn't reload the map in map-viewer`, error);
@@ -1536,12 +1595,34 @@ export class MapViewer {
     return extent;
   }
 
+  // TODO: Move to config API after refactor?
   /**
    * Creates a map config based on current map state.
+   * @param {BooleanExpression} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   *                                                         Set to false after a language change to update the layer names with the new language.
    * @returns {TypeMapFeaturesInstance | undefined} Map config with current map state.
    */
-  createMapConfigFromMapState(): TypeMapFeaturesInstance | undefined {
-    return MapEventProcessor.createMapConfigFromMapState(this.mapId);
+  createMapConfigFromMapState(overrideGeocoreServiceNames: boolean | 'hybrid' = true): TypeMapFeaturesInstance | undefined {
+    return MapEventProcessor.createMapConfigFromMapState(this.mapId, overrideGeocoreServiceNames);
+  }
+
+  // TODO: Move to config API after refactor?
+  /**
+   * Searches through a map config and replaces any matching layer names with their provided partner.
+   *
+   * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
+   * @param {TypeMapFeaturesInstance} mapConfig - The config to modify, or one created using the current map state if not provided.
+   * @param {boolean} removeUnlisted - Whether or not names not provided should be removed from config.
+   * @returns {TypeMapFeaturesInstance} Map config with updated names.
+   */
+  replaceMapConfigLayerNames(
+    namePairs: string[][],
+    mapConfig?: TypeMapFeaturesConfig,
+    removeUnlisted: boolean = false
+  ): TypeMapFeaturesInstance | undefined {
+    const mapConfigToUse = mapConfig || this.createMapConfigFromMapState();
+    if (mapConfigToUse) return MapEventProcessor.replaceMapConfigLayerNames(namePairs, mapConfigToUse, removeUnlisted);
+    return undefined;
   }
 
   // #region EVENTS

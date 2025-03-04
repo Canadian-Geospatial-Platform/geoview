@@ -3,9 +3,9 @@ import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processo
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, TypeResultSet } from '@/geo/map/map-schema-types';
-import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
-import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
-import { EventType, AbstractLayerSet, PropagationType } from './abstract-layer-set';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { EventType, AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import {
   TypeFeatureInfoResultSet,
@@ -110,6 +110,13 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
     // GV As it is (and was like this before events refactor), the this.resultSet is mutating between async calls.
 
+    // TODO: Use the AbortController and kill the active query if there is one in progress. The query layer here call the getFeatureInfoAtLongLat
+    // TODO.CONT: in gv-esri-dynamic. It is for this particular format we need check because identify are slow and many can be sent at the same time
+    // Create an AbortController instance
+    // const controller = new AbortController();
+    // const signal = controller.signal;
+    // controller.abort(); // Cancels the fetch request
+
     // Prepare to hold all promises of features in the loop below
     const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];
 
@@ -129,6 +136,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       if (layer && layer instanceof AbstractGVLayer) {
         // If state is not queryable
         if (!AbstractLayerSet.isStateQueryable(layer)) return;
+
+        // If state is not in visible range
+        if (!AbstractLayerSet.isInVisibleRange(layer)) return;
 
         // Flag processing
         this.resultSet[layerPath].features = undefined;

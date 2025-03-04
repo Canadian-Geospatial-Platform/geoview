@@ -62,11 +62,6 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
-    'geoview-basemap-panel': {
-      import: '../geoview-basemap-panel/src/index.tsx',
-      dependOn: 'cgpv-main',
-      filename: 'corePackages/[name].js',
-    },
     'geoview-geochart': {
       import: '../geoview-geochart/src/index.tsx',
       dependOn: 'cgpv-main',
@@ -89,6 +84,7 @@ const config = {
     }
   },
   output: {
+    globalObject: 'self',
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     chunkFilename: '[name].js',
@@ -151,6 +147,27 @@ const config = {
       {
         test: /\.md$/,
         use: ['html-loader', 'markdown-loader'],
+      },
+      {
+        test: /\-worker-script\.(js|ts)$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'worker-loader',
+            options: {
+              inline: 'fallback',
+              filename: 'workers/[name].worker.js',
+            },
+          },
+          {
+            loader: 'babel-loader',
+            options: {
+              plugins: ['lodash', '@babel/transform-runtime'],
+              presets: ['@babel/preset-env', '@babel/preset-typescript'],
+            },
+          },
+        ],
+        type: 'javascript/auto',
       },
     ],
   },

@@ -3,7 +3,7 @@ import { initReactI18next } from 'react-i18next';
 
 import translationEn from '@public/locales/en/translation.json';
 import translationFr from '@public/locales/fr/translation.json';
-import { logger } from '../utils/logger';
+import { logger } from '@/core/utils/logger';
 
 i18n
   .use(initReactI18next)

@@ -28,6 +28,7 @@ const FOCUS_DELAY = 0;
  * @returns {JSX.Element}
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 export const FocusTrapContainer = memo(function FocusTrapContainer({
   children,
   open = false,
@@ -75,10 +76,10 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
 
   // if focus trap gets focus, send focus to the exit button
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - focusItem', focusItem);
-
     if (id === focusItem.activeElementId) {
+      logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - focusItem', focusItem);
+
+      // SetTimeout with a delay of 0 to force the rendering
       setTimeout(() => document.getElementById(`${id}-exit-btn`)?.focus(), FOCUS_DELAY);
     }
   }, [focusItem, id]);

@@ -20,6 +20,7 @@ const CLOSE_BUTTON_STYLES = {
 } as const;
 
 // Memoizes entire component, preventing re-renders if props haven't changed
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 export const FullScreenDialog = memo(function FullScreenDialog({
   open,
   onClose,
@@ -27,7 +28,7 @@ export const FullScreenDialog = memo(function FullScreenDialog({
   ...dialogProps
 }: FullScreenDialogProps): JSX.Element {
   return (
-    <Dialog fullScreen maxWidth="xl" open={open} onClose={onClose} disablePortal {...dialogProps}>
+    <Dialog fullScreen maxWidth="xl" open={open} onClose={onClose} disablePortal {...dialogProps} sx={{ maxHeight: '100% !important' }}>
       <DialogContent sx={DIALOG_CONTENT_STYLES}>
         <IconButton onClick={onClose} color="primary" className="buttonFilledOutline" sx={CLOSE_BUTTON_STYLES}>
           <CloseIcon />

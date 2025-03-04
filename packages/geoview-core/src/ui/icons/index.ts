@@ -50,7 +50,6 @@ export {
   HighlightOutlined as HighlightOutlinedIcon,
   Highlight as HighlightIcon,
   Home as HomeIcon,
-  HubOutlined as HubOutlinedIcon,
   Height as HeightIcon,
   ImportExport as ReorderIcon,
   Info as InfoIcon,
@@ -74,6 +73,7 @@ export {
   Menu as MenuIcon,
   MoreHoriz as MoreHorizIcon,
   MoreVert as MoreVertIcon,
+  MultipleStop as ProjectionIcon,
   Opacity as OpacityIcon,
   OpenInBrowser as OpenInBrowserIcon,
   Pause as PauseIcon,
@@ -107,3 +107,5 @@ export {
   ZoomIn as ZoomInSearchIcon,
   ZoomOut as ZoomOutSearchIcon,
 } from '@mui/icons-material';
+
+export { LegendIcon } from '@/ui/svg/svg-icon';

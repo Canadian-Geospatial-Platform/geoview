@@ -1,16 +1,66 @@
-import { useTranslation } from 'react-i18next';
-
-import { Fade, IconButton as MaterialIconButton, Tooltip } from '@mui/material';
-
-import { TypeIconButtonProps } from './icon-button-types';
+import { ReactNode, RefObject } from 'react';
+import { Fade, IconButton as MaterialIconButton, Tooltip, TooltipProps, IconButtonProps } from '@mui/material';
+import { logger } from '@/core/utils/logger';
 
 /**
- * Create a customized Material UI Icon Button
- *
- * @param {TypeIconButtonProps} props the properties passed to the Icon Button element
- * @returns {JSX.Element} the created Icon Button element
+ * Properties for the icon button extending Material-UI's IconButtonProps
  */
-export function IconButton(props: TypeIconButtonProps): JSX.Element {
+export interface IconButtonPropsExtend extends IconButtonProps {
+  children?: ReactNode;
+  tooltip?: string;
+  tooltipPlacement?: TooltipProps['placement'];
+  tabIndex?: number;
+  iconRef?: RefObject<HTMLButtonElement>;
+  visible?: boolean;
+}
+
+/**
+ * Create a customized Material UI Icon Button component.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <IconButton>
+ *   <DeleteIcon />
+ * </IconButton>
+ *
+ * // With tooltip
+ * <IconButton
+ *   tooltip="Delete item"
+ *   tooltipPlacement="top"
+ * >
+ *   <DeleteIcon />
+ * </IconButton>
+ *
+ * // With custom styling
+ * <IconButton
+ *   className="custom-button"
+ *   size="small"
+ *   color="primary"
+ * >
+ *   <EditIcon />
+ * </IconButton>
+ *
+ * // With disabled state
+ * <IconButton
+ *   disabled={true}
+ *   tooltip="Not available"
+ * >
+ *   <SaveIcon />
+ * </IconButton>
+ * ```
+ *
+ * @param {IconButtonPropsExtend} props - The properties passed to the Icon Button element
+ * @returns {JSX.Element} The Icon Button component
+ *
+ * @see {@link https://mui.com/material-ui/react-button/#icon-button}
+ */
+function IconButtonUI(props: IconButtonPropsExtend): JSX.Element {
+  logger.logTraceRender('ui/icon-button/icon-button');
+
+  // TODO: WCAG - Do we need to pass aria label? We should freuse toltip or title when define
+  // Get constant from props
   const {
     sx,
     className,
@@ -29,14 +79,12 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
     ...rest
   } = props;
 
-  const { t } = useTranslation<string>();
-
-  function getMaterialIconButton(): JSX.Element {
+  function createIconButtonUI(): JSX.Element {
     return (
       <MaterialIconButton
         id={id}
         sx={sx}
-        aria-label={(t(ariaLabel as string) || t(tooltip as string)) as string}
+        aria-label={ariaLabel || tooltip}
         style={style}
         className={className}
         onClick={onClick}
@@ -53,11 +101,14 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
   }
 
   if (disabled) {
-    return getMaterialIconButton();
+    return createIconButtonUI();
   }
+
   return (
-    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
-      {getMaterialIconButton()}
+    <Tooltip title={tooltip} placement={tooltipPlacement} TransitionComponent={Fade}>
+      {createIconButtonUI()}
     </Tooltip>
   );
 }
+
+export const IconButton = IconButtonUI;

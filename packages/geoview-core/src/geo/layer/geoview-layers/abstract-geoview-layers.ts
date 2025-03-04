@@ -25,10 +25,10 @@ import {
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -89,7 +89,7 @@ export abstract class AbstractGeoViewLayer {
   initialSettings?: TypeLayerInitialSettings;
 
   /** layers of listOfLayerEntryConfig that did not load. */
-  layerLoadError: { layer: string; loggerMessage: string }[] = [];
+  layerLoadError: { layer: string; layerName?: string | undefined; loggerMessage: string }[] = [];
 
   /** The OpenLayer root layer representing this GeoView Layer. */
   olRootLayer?: BaseLayer;
@@ -158,27 +158,30 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Set the list of layer entry configuration and initialize the registered layer object and register all layers to layer sets.
    *
-   * @param {TypeGeoviewLayer} mapLayerConfig The GeoView layer configuration options.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration options.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration
    * @private
    */
-  #setListOfLayerEntryConfig(mapLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+  #setListOfLayerEntryConfig(geoviewLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     if (listOfLayerEntryConfig.length === 0) return;
-    if (listOfLayerEntryConfig.length === 1) this.listOfLayerEntryConfig = listOfLayerEntryConfig;
-    else {
+    if (listOfLayerEntryConfig.length === 1) {
+      this.listOfLayerEntryConfig = listOfLayerEntryConfig;
+    } else {
       const layerGroup = new GroupLayerEntryConfig({
         geoviewLayerConfig: listOfLayerEntryConfig[0].geoviewLayerConfig,
-        layerId: this.geoviewLayerId,
+        layerId: this.getGeoviewLayerId(),
         layerName: this.geoviewLayerName,
         isMetadataLayerGroup: false,
-        initialSettings: mapLayerConfig.initialSettings,
+        initialSettings: geoviewLayerConfig.initialSettings,
         listOfLayerEntryConfig,
       } as GroupLayerEntryConfig);
+
       this.listOfLayerEntryConfig = [layerGroup];
       layerGroup.listOfLayerEntryConfig.forEach((layerConfig) => {
         (layerConfig as AbstractBaseLayerEntryConfig).parentLayerConfig = layerGroup;
       });
     }
+
     this.listOfLayerEntryConfig[0].geoviewLayerConfig.listOfLayerEntryConfig = listOfLayerEntryConfig;
   }
 
@@ -464,8 +467,9 @@ export abstract class AbstractGeoViewLayer {
       const arrayOfLayerConfigs = await Promise.all(promisedAllLayerDone);
       arrayOfLayerConfigs.forEach((layerConfig) => {
         if (layerConfig.layerStatus === 'error') {
+          // TODO: refactor - create meaningful message and centralize dispatch for layer - config
+          // We do not log the error here, it will be trapped in setAllLayerStatusTo
           const message = `Error while loading layer path ${layerConfig.layerPath} on map ${this.mapId}`;
-          this.layerLoadError.push({ layer: layerConfig.layerPath, loggerMessage: message });
           throw new Error(message);
         } else {
           // When we get here, we know that the metadata (if the service provide some) are processed.
@@ -561,6 +565,7 @@ export abstract class AbstractGeoViewLayer {
           }
           this.layerLoadError.push({
             layer: listOfLayerEntryConfig[0].layerPath,
+            layerName: listOfLayerEntryConfig[0].layerName,
             loggerMessage: `Unable to create group layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
           });
           return undefined;
@@ -581,6 +586,7 @@ export abstract class AbstractGeoViewLayer {
         }
         this.layerLoadError.push({
           layer: listOfLayerEntryConfig[0].layerPath,
+          layerName: listOfLayerEntryConfig[0].layerName,
           loggerMessage: `Unable to create layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
         });
         this.getLayerConfig(layerPath)!.layerStatus = 'error';
@@ -621,6 +627,7 @@ export abstract class AbstractGeoViewLayer {
         } else {
           this.layerLoadError.push({
             layer: listOfLayerEntryConfig[i].layerPath,
+            layerName: listOfLayerEntryConfig[i].layerName,
             loggerMessage: `Unable to create ${
               layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? CONST_LAYER_ENTRY_TYPES.GROUP : ''
             } layer ${listOfLayerEntryConfig[i].layerPath} on map ${this.mapId}`,
@@ -704,9 +711,11 @@ export abstract class AbstractGeoViewLayer {
         if (layerConfig.layerStatus === 'error') return;
         layerConfig.layerStatus = newStatus;
         if (newStatus === 'error') {
-          const { layerPath } = layerConfig;
+          const { layerPath, layerName } = layerConfig;
+          const useLayerName = layerName === undefined ? layerConfig.geoviewLayerConfig.geoviewLayerName : layerName;
           this.layerLoadError.push({
             layer: layerPath,
+            layerName: useLayerName || layerPath,
             loggerMessage: `${errorMessage} for layer ${layerPath} of map ${this.mapId}`,
           });
         }
