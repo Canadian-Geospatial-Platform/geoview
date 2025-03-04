@@ -322,7 +322,7 @@ export function commonProcessFeatureInfoConfig(
     if (!layerConfig.source.featureInfo.nameField)
       if (layerMetadata.displayField) layerConfig.source.featureInfo.nameField = layerMetadata.displayField as string;
       else {
-        layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0].name;
+        layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0]?.name;
       }
   }
 }

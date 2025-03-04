@@ -1,0 +1,299 @@
+{
+  "schemaVersionUsed": "1,0",
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "blank.json",
+      "layerName": "Programs",
+      "source": {
+        "featureInfo": {
+          "queryable": true,
+          "nameField": "Project",
+          "outfields": [
+            { "name": "program",    "alias": "Program",       "type": "string", "domain": null },
+            { "name": "project_id", "alias": "Project ID",    "type": "string", "domain": null },
+            { "name": "title_en",   "alias": "Project Title", "type": "string", "domain": null },
+            { "name": "project_leader", "alias": "Project Leader",    "type": "string", "domain": null },
+            { "name": "geo_scope", "alias": "Geo Scope",    "type": "string", "domain": null }
+          ]
+        }
+      },
+      "layerStyle": {
+        "Polygon": {
+          "type": "uniqueValue",
+          "fields": [ "Program" ],
+          "hasDefault": true,
+          "info": [
+            {
+              "label": "CMGD",
+              "values": [ "CMGD" ],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(228,26,28,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(228,26,28,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            },
+            {
+              "label": "EGP",
+              "values": [ "EGP" ],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(55,126,184,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(55,126,184,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            },
+            {
+              "label": "EGP2024",
+              "values": [ "EGP2024" ],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(77,175,74,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(77,175,74,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            },
+            {
+              "label": "GEP",
+              "values": [ "GEP" ],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(152,78,163,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(152,78,163,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            },
+            {
+              "label": "GGN",
+              "values": [ "GGN" ],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(255,127,0,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(255,127,0,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            },
+            {
+              "label": "GGP",
+              "values": [ "GGP" ],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(153,153,153,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(153,153,153,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            },
+            {
+              "label": "MarineGeo",
+              "values": [ "marinegeo" ],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(0,0,255,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(0,0,255,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            },
+            {
+              "label": "NHCCGP",
+              "values": [ "NHCCGP" ],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(247,129,191,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(247,129,191,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            },
+            {
+              "label": "TGI",
+              "values": [ "TGI" ],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(166,86,40,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(166,86,40,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            },
+            {
+              "label": "Other programs",
+              "values": [],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(255,255,51,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(255,255,51,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            }
+          ]
+        },
+        "Point": {
+          "type": "uniqueValue",
+          "fields": [ "Program" ],
+          "hasDefault": true,
+          "info": [
+            {
+              "label": "CMGD",
+              "values": [ "CMGD" ],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(228,26,28,0.70)",
+                "symbol": "circle"
+              }
+            },
+            {
+              "label": "EGP",
+              "values": [ "EGP" ],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(55,126,184,0.70)",
+                "symbol": "circle"
+              }
+            },
+            {
+              "label": "EGP2024",
+              "values": [ "EGP2024" ],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(77,175,74,0.70)",
+                "symbol": "circle"
+              }
+            },
+            {
+              "label": "GEP",
+              "values": [ "GEP" ],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(152,78,163,0.70)",
+                "symbol": "circle"
+              }
+            },
+            {
+              "label": "GGN",
+              "values": [ "GGN" ],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(255,127,0,0.70)",
+                "symbol": "circle"
+              }
+            },
+            {
+              "label": "GGP",
+              "values": [ "GGP" ],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(153,153,153,0.70)",
+                "symbol": "circle"
+              }
+            },
+            {
+              "label": "MarineGeo",
+              "values": [ "marinegeo" ],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(0,0,255,0.70)",
+                "symbol": "circle"
+              }
+            },
+            {
+              "label": "NHCCGP",
+              "values": [ "NHCCGP" ],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(247,129,191,0.70)",
+                "symbol": "circle"
+              }
+            },
+            {
+              "label": "TGI",
+              "values": [ "TGI" ],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(166,86,40,0.70)",
+                "symbol": "circle"
+              }
+            },
+            {
+              "label": "Other programs",
+              "values": [],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(255,255,51,0.70)",
+                "symbol": "circle"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
