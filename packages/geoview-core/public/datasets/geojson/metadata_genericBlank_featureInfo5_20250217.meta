@@ -8,20 +8,20 @@
       "source": {
         "featureInfo": {
           "queryable": true,
-          "nameField": "Project",
+          "nameField": "title_en",
           "outfields": [
-            { "name": "program",    "alias": "Program",       "type": "string", "domain": null },
-            { "name": "project_id", "alias": "Project ID",    "type": "string", "domain": null },
-            { "name": "title_en",   "alias": "Project Title", "type": "string", "domain": null },
-            { "name": "project_leader", "alias": "Project Leader",    "type": "string", "domain": null },
-            { "name": "geo_scope", "alias": "Geo Scope",    "type": "string", "domain": null }
+            { "name": "program", "alias": "Program", "type": "string", "domain": null },
+            { "name": "project_id", "alias": "Project ID", "type": "string", "domain": null },
+            { "name": "title_en", "alias": "Project Title", "type": "string", "domain": null },
+            { "name": "project_leader", "alias": "Project Leader", "type": "string", "domain": null },
+            { "name": "geo_scope", "alias": "Geo Scope", "type": "string", "domain": null }
           ]
         }
       },
       "layerStyle": {
         "Polygon": {
           "type": "uniqueValue",
-          "fields": [ "Program" ],
+          "fields": [ "program" ],
           "hasDefault": true,
           "info": [
             {
@@ -188,7 +188,7 @@
         },
         "Point": {
           "type": "uniqueValue",
-          "fields": [ "Program" ],
+          "fields": [ "program" ],
           "hasDefault": true,
           "info": [
             {
