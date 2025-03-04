@@ -947,7 +947,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Raster layer queries do not accept any layerDefs
     const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
-    olLayer?.getSource()!.updateParams({ layerDefs });
+    olLayer?.getSource()?.updateParams({ layerDefs });
     olLayer?.changed();
 
     // Emit event
