@@ -1447,7 +1447,7 @@ function processClassBreaksPolygon(
 }
 
 /** Table of function to process the style settings based on the feature geometry and the kind of style settings. */
-const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyleProcessor>> = {
+export const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyleProcessor>> = {
   simple: {
     Point: processSimplePoint,
     MultiPoint: processSimplePoint,
