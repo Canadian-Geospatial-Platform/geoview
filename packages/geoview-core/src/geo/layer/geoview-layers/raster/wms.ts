@@ -641,7 +641,7 @@ export class WMS extends AbstractGeoViewRaster {
         // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
         if (
           layerCapabilities.MinScaleDenominator &&
-          (!layerConfig.maxScale! || layerConfig.maxScale >= (layerCapabilities.MinScaleDenominator as unknown as number))
+          (!layerConfig.maxScale || layerConfig.maxScale >= (layerCapabilities.MinScaleDenominator as unknown as number))
         )
           layerConfig.maxScale = layerCapabilities.MinScaleDenominator as number;
         if (
@@ -659,15 +659,15 @@ export class WMS extends AbstractGeoViewRaster {
         const mapView = this.getMapViewer().getView();
         if (layerConfig.maxScale) {
           const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-          if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
-            layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
+          if (maxScaleZoomLevel) {
+            layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
           }
         }
 
         if (layerConfig.minScale) {
           const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-          if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
-            layerConfig.initialSettings.minZoom = minScaleZoomLevel;
+          if (minScaleZoomLevel) {
+            layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
           }
         }
 

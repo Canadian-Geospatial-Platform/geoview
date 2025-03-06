@@ -343,8 +343,12 @@ export function commonProcessInitialSettings(
   const layerMetadata = layer.getLayerMetadata(layerConfig.layerPath);
   if (layerConfig.initialSettings?.states?.visible === undefined)
     layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
-  if (!layerConfig.minScale && layerMetadata.minScale) layerConfig.minScale = layerMetadata.minScale as number;
-  if (!layerConfig.maxScale && layerMetadata.maxScale) layerConfig.maxScale = layerMetadata.maxScale as number;
+
+  // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
+  if (layerMetadata.minScale && (!layerConfig.minScale || (layerMetadata.minScale as number) > layerConfig.minScale))
+    layerConfig.minScale = layerMetadata.minScale as number;
+  if (layerMetadata.maxScale && (!layerConfig.maxScale || (layerMetadata.maxScale as number) < layerConfig.maxScale))
+    layerConfig.maxScale = layerMetadata.maxScale as number;
 
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 

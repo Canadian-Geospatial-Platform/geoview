@@ -258,24 +258,28 @@ export class XYZTiles extends AbstractGeoViewRaster {
       newLayerConfig.initialSettings.extent = validateExtentWhenDefined(newLayerConfig.initialSettings.extent);
 
       // Set zoom limits for max / min zooms
+      const maxScale = metadataLayerConfigFound?.maxScale as number;
+      const minScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number;
       newLayerConfig.maxScale =
-        (metadataLayerConfigFound?.maxScale as number) || ((metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number);
+        !maxScale && !minScaleDenominator ? undefined : Math.min(maxScale ?? Infinity, minScaleDenominator ?? Infinity);
 
-      newLayerConfig.minScale =
-        (metadataLayerConfigFound?.minScale as number) || ((metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number);
+      const minScale = metadataLayerConfigFound?.minScale as number;
+      const maxScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number;
+      newLayerConfig.maxScale =
+        !minScale && !maxScaleDenominator ? undefined : Math.max(minScale ?? -Infinity, maxScaleDenominator ?? -Infinity);
 
       const mapView = this.getMapViewer().getView();
       if (newLayerConfig?.maxScale) {
         const maxScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.maxScale as number);
-        if (maxScaleZoomLevel && (!newLayerConfig.initialSettings.maxZoom || maxScaleZoomLevel > newLayerConfig.initialSettings.maxZoom)) {
-          newLayerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
+        if (maxScaleZoomLevel) {
+          newLayerConfig.initialSettings.maxZoom = Math.min(newLayerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
         }
       }
 
       if (newLayerConfig?.minScale) {
         const minScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.minScale as number);
-        if (minScaleZoomLevel && (!newLayerConfig.initialSettings.minZoom || minScaleZoomLevel < newLayerConfig.initialSettings.minZoom)) {
-          newLayerConfig.initialSettings.minZoom = minScaleZoomLevel;
+        if (minScaleZoomLevel) {
+          newLayerConfig.initialSettings.minZoom = Math.max(newLayerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
         }
       }
     }
