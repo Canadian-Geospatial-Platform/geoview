@@ -265,17 +265,17 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
       // Third, use the now set scale and zoom levels to determine the actual max / min zoom based on both
       const mapView = this.getMapViewer().getView();
-      if (updatedLayerConfig.minScale) {
-        const maxScaleZoomLevel = getZoomFromScale(mapView, updatedLayerConfig.minScale);
+      if (updatedLayerConfig.maxScale) {
+        const maxScaleZoomLevel = getZoomFromScale(mapView, updatedLayerConfig.maxScale);
         if (maxScaleZoomLevel) {
-          updatedLayerConfig.initialSettings.maxZoom = Math.max(updatedLayerConfig.initialSettings.maxZoom ?? -Infinity, maxScaleZoomLevel);
+          updatedLayerConfig.initialSettings.maxZoom = Math.min(updatedLayerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
         }
       }
 
-      if (updatedLayerConfig.maxScale) {
-        const minScaleZoomLevel = getZoomFromScale(mapView, updatedLayerConfig.maxScale);
+      if (updatedLayerConfig.minScale) {
+        const minScaleZoomLevel = getZoomFromScale(mapView, updatedLayerConfig.minScale);
         if (minScaleZoomLevel) {
-          updatedLayerConfig.initialSettings.minZoom = Math.min(updatedLayerConfig.initialSettings.minZoom ?? Infinity, minScaleZoomLevel);
+          updatedLayerConfig.initialSettings.minZoom = Math.max(updatedLayerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
         }
       }
     }

@@ -29,6 +29,7 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { getZoomFromScale } from '@/geo/utils/utilities';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -534,6 +535,21 @@ export abstract class AbstractGeoViewLayer {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: false };
 
+    // Set proper zoom level if applicable
+    const mapView = this.getMapViewer().getView();
+    if (layerConfig.maxScale) {
+      const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+      if (maxScaleZoomLevel) {
+        layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
+      }
+    }
+
+    if (layerConfig.minScale) {
+      const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+      if (minScaleZoomLevel) {
+        layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
+      }
+    }
     return Promise.resolve(layerConfig);
   }
 

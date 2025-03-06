@@ -21,6 +21,7 @@ import {
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { getZoomFromScale } from '@/geo/utils/utilities';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview config section
@@ -150,6 +151,21 @@ export class CSV extends AbstractGeoViewVector {
   protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
+    const mapView = this.getMapViewer().getView();
+    if (layerConfig.maxScale) {
+      const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+      if (maxScaleZoomLevel) {
+        layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
+      }
+    }
+
+    if (layerConfig.minScale) {
+      const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+      if (minScaleZoomLevel) {
+        layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
+      }
+    }
 
     // process the feature info configuration and attach the config to the instance for access by parent class
     this.setLayerMetadata(layerConfig.layerPath, Cast<TypeJsonObject>(layerConfig));
