@@ -465,7 +465,7 @@ export class MapViewer {
       // Get the inVisibleRange property based on the layer's minZoom and maxZoom values
       this.layer.getGeoviewLayers().forEach((layer) => {
         const layerPath = layer.getLayerPath();
-        const inVisibleRange = layer.isInVisibleRange(zoom);
+        const inVisibleRange = layer.inVisibleRange(zoom);
         const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === layerPath);
         if (foundLayer) foundLayer.inVisibleRange = inVisibleRange;
         if (inVisibleRange) {
