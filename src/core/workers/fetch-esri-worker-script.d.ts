@@ -19,7 +19,7 @@
 export interface QueryParams {
     url: string;
     geometryType: string;
-    objectIds: number[];
+    objectIds: number[] | 'all';
     queryGeometry: boolean;
     projection: number;
     maxAllowableOffset: number;

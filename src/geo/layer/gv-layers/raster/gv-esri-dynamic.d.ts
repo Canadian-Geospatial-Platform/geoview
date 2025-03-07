@@ -59,6 +59,12 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      */
     protected getAllFeatureInfo(): Promise<TypeFeatureInfoEntry[] | undefined | null>;
     /**
+     * Query all features with a web worker
+     * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
+     * @returns {TypeJsonObject} A promise of esri response for query.
+     */
+    fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeJsonObject>;
+    /**
      * Overrides the return of feature information at a given pixel location.
      * @param {Coordinate} location - The pixel coordinate that will be used by the query.
      * @param {boolean} queryGeometry - The query geometry boolean.
