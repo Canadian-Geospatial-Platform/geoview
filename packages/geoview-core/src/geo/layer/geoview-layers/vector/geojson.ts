@@ -17,7 +17,7 @@ import {
   layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
 } from '@/geo/map/map-schema-types';
-import { getZoomFromScale, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -199,21 +199,6 @@ export class GeoJSON extends AbstractGeoViewVector {
           const metadataAccessPathRootPlusLayerId = `${metadataAccessPathRoot}/${layerConfig.layerId}`;
           if (metadataAccessPathRootPlusLayerId === layerConfig.source?.dataAccessPath && layerMetadataFound.source?.dataAccessPath) {
             layerConfig.source!.dataAccessPath = layerMetadataFound.source!.dataAccessPath;
-          }
-        }
-
-        const mapView = this.getMapViewer().getView();
-        if (layerConfig.maxScale) {
-          const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-          if (maxScaleZoomLevel) {
-            layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
-          }
-        }
-
-        if (layerConfig.minScale) {
-          const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-          if (minScaleZoomLevel) {
-            layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
           }
         }
       }

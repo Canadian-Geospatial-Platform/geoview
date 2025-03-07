@@ -32,6 +32,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
+import { getZoomFromScale } from '@/geo/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -239,12 +240,17 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
 
     // Set the zoom levels here to prevent the layer being stuck endlessly loading
-    if (layerConfig.initialSettings.maxZoom) {
-      this.setMaxZoom(layerConfig.initialSettings.maxZoom);
+    const mapView = this.getMapViewer().getView();
+    if (layerConfig.initialSettings.maxZoom || layerConfig.maxScale) {
+      const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+      const maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
+      this.setMaxZoom(maxZoom);
     }
 
-    if (layerConfig.initialSettings.minZoom) {
-      this.setMinZoom(layerConfig.initialSettings.minZoom);
+    if (layerConfig.initialSettings.minZoom || layerConfig.minScale) {
+      const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+      const minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
+      this.setMinZoom(minZoom);
     }
 
     // Emit event

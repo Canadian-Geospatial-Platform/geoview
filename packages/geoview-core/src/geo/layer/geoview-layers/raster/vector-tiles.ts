@@ -16,7 +16,7 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
-import { getZoomFromScale, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { api } from '@/app';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
@@ -261,22 +261,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
       if (maxZoom !== undefined) {
         updatedLayerConfig.initialSettings.maxZoom = Math.max(updatedLayerConfig.initialSettings.maxZoom ?? -Infinity, maxZoom as number);
-      }
-
-      // Third, use the now set scale and zoom levels to determine the actual max / min zoom based on both
-      const mapView = this.getMapViewer().getView();
-      if (updatedLayerConfig.maxScale) {
-        const maxScaleZoomLevel = getZoomFromScale(mapView, updatedLayerConfig.maxScale);
-        if (maxScaleZoomLevel) {
-          updatedLayerConfig.initialSettings.maxZoom = Math.min(updatedLayerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
-        }
-      }
-
-      if (updatedLayerConfig.minScale) {
-        const minScaleZoomLevel = getZoomFromScale(mapView, updatedLayerConfig.minScale);
-        if (minScaleZoomLevel) {
-          updatedLayerConfig.initialSettings.minZoom = Math.max(updatedLayerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
-        }
       }
     }
     return Promise.resolve(updatedLayerConfig);

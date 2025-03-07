@@ -462,15 +462,16 @@ export class MapViewer {
 
       const visibleRangeLayers: string[] = [];
 
-      // GV Used the configs since group GV layers have fake max/min zoom levels
-      // GV The group levels are also missing the zoom level getters, so this worked out well anyway
-      this.layer.getLayerEntryConfigs().forEach((config) => {
-        const { minZoom, maxZoom } = config.initialSettings;
-        const inVisibleRange = (!minZoom || zoom! > minZoom) && (!maxZoom || zoom! <= maxZoom);
-        const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === config.layerPath);
+      // Get the inVisibleRange property based on the layer's minZoom and maxZoom values
+      this.layer.getGeoviewLayers().forEach((layer) => {
+        const minZoom = layer.getMinZoom();
+        const maxZoom = layer.getMaxZoom();
+        const layerPath = layer.getLayerPath();
+        const inVisibleRange = (!minZoom || zoom > minZoom) && (!maxZoom || zoom <= maxZoom);
+        const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === layerPath);
         if (foundLayer) foundLayer.inVisibleRange = inVisibleRange;
         if (inVisibleRange) {
-          visibleRangeLayers.push(config.layerPath);
+          visibleRangeLayers.push(layerPath);
         }
       });
 
