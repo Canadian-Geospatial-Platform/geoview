@@ -158,7 +158,7 @@ export function commonValidateListOfLayerEntryConfig(
 
       (layer.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
         // Make sure to copy the layerConfig source before recycling it in the constructors. This was causing the 'source' value to leak between layer entry configs
-        const layerConfigCopy = { ...layerConfig, source: { ...layerConfig.source } };
+        const layerConfigCopy = { ...layerConfig, source: { ...layerConfig.source }, initialSettings: { ...layerConfig.initialSettings } };
 
         let subLayerEntryConfig;
         if (geoviewEntryIsEsriDynamic(layerConfig)) {
