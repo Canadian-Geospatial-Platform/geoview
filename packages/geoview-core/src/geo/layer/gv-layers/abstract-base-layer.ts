@@ -228,7 +228,7 @@ export abstract class AbstractBaseLayer {
    * @param zoom Zoom level to be compared
    * @returns {boolean} If the layer is visible at this zoom level
    */
-  isInVisibleRange(zoom: number): boolean {
+  inVisibleRange(zoom: number): boolean {
     const minZoom = this.getOLLayer().getMinZoom();
     const maxZoom = this.getOLLayer().getMaxZoom();
     return (!minZoom || zoom > minZoom) && (!maxZoom || zoom <= maxZoom);
