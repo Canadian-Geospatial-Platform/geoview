@@ -25,7 +25,7 @@ import { logger } from '@/core/utils/logger';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { getZoomFromScale, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
@@ -270,21 +270,6 @@ export class WFS extends AbstractGeoViewVector {
           });
 
           this.setLayerMetadata(layerConfig.layerPath, featureTypeProperties as TypeJsonObject);
-
-          const mapView = this.getMapViewer().getView();
-          if (layerConfig.maxScale) {
-            const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-            if (maxScaleZoomLevel) {
-              layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
-            }
-          }
-
-          if (layerConfig.minScale) {
-            const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-            if (minScaleZoomLevel) {
-              layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
-            }
-          }
 
           WFS.#processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
         }

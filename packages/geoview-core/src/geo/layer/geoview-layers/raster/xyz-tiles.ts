@@ -14,7 +14,7 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { getZoomFromScale, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
@@ -267,21 +267,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
       const maxScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number;
       newLayerConfig.maxScale =
         !minScale && !maxScaleDenominator ? undefined : Math.max(minScale ?? -Infinity, maxScaleDenominator ?? -Infinity);
-
-      const mapView = this.getMapViewer().getView();
-      if (newLayerConfig?.maxScale) {
-        const maxScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.maxScale as number);
-        if (maxScaleZoomLevel) {
-          newLayerConfig.initialSettings.maxZoom = Math.min(newLayerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
-        }
-      }
-
-      if (newLayerConfig?.minScale) {
-        const minScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.minScale as number);
-        if (minScaleZoomLevel) {
-          newLayerConfig.initialSettings.minZoom = Math.max(newLayerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
-        }
-      }
     }
     return Promise.resolve(newLayerConfig);
   }

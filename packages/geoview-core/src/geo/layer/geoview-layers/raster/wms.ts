@@ -12,7 +12,7 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getZoomFromScale, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { api, WMS_PROXY_URL } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -654,22 +654,6 @@ export class WMS extends AbstractGeoViewRaster {
 
         if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox)
           layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
-
-        // Set zoom limits for max / min zooms
-        const mapView = this.getMapViewer().getView();
-        if (layerConfig.maxScale) {
-          const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-          if (maxScaleZoomLevel) {
-            layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
-          }
-        }
-
-        if (layerConfig.minScale) {
-          const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-          if (minScaleZoomLevel) {
-            layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
-          }
-        }
 
         // Set time dimension
         if (layerCapabilities.Dimension) {

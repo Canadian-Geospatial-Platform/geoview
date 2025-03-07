@@ -20,7 +20,7 @@ import {
   TypeBaseSourceVectorInitialConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { getZoomFromScale, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -213,21 +213,6 @@ export class OgcFeature extends AbstractGeoViewVector {
         const queryResult = await axios.get<TypeJsonObject>(queryUrl);
         if (queryResult.data.properties) {
           this.setLayerMetadata(layerConfig.layerPath, queryResult.data.properties);
-
-          const mapView = this.getMapViewer().getView();
-          if (layerConfig.maxScale) {
-            const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-            if (maxScaleZoomLevel) {
-              layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
-            }
-          }
-
-          if (layerConfig.minScale) {
-            const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-            if (minScaleZoomLevel) {
-              layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
-            }
-          }
 
           OgcFeature.#processFeatureInfoConfig(queryResult.data.properties, layerConfig);
         }

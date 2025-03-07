@@ -8,7 +8,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { getXMLHttpRequest } from '@/core/utils/utilities';
-import { getZoomFromScale, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -372,20 +372,20 @@ export function commonProcessInitialSettings(
   }
 
   // Set zoom limits for max / min zooms
-  const mapView = layer.getMapViewer().getView();
-  if (layerConfig.maxScale) {
-    const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-    if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
-      layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
-    }
-  }
+  // const mapView = layer.getMapViewer().getView();
+  // if (layerConfig.maxScale) {
+  //   const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+  //   if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
+  //     layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
+  //   }
+  // }
 
-  if (layerConfig.minScale) {
-    const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-    if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
-      layerConfig.initialSettings.minZoom = minScaleZoomLevel;
-    }
-  }
+  // if (layerConfig.minScale) {
+  //   const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+  //   if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
+  //     layerConfig.initialSettings.minZoom = minScaleZoomLevel;
+  //   }
+  // }
 
   layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
 }
