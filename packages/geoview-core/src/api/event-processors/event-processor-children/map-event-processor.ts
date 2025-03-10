@@ -441,13 +441,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {
-    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
+    const { orderedLayerInfo, visibleRangeLayers } = this.getMapStateProtected(mapId);
     const orderedLayer = orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
 
     if (orderedLayer && orderedLayer.inVisibleRange !== inVisibleRange) {
       orderedLayer.inVisibleRange = inVisibleRange;
       this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
     }
+
+    if (inVisibleRange && !visibleRangeLayers.includes(layerPath))
+      this.setVisibleRangeLayerMapState(mapId, [...visibleRangeLayers, layerPath]);
   }
 
   static setZoom(mapId: string, zoom: number, orderedLayerInfo?: TypeOrderedLayerInfo[]): void {
