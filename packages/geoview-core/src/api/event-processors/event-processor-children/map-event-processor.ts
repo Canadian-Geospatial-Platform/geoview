@@ -129,26 +129,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // #endregion FEATURE SELECTION
 
-    // TODO: Cleanup this code, remove it once tests official
-    // GV Commenting this out, because it's recreating the orderedLayerInfo for ALL layers via setVisibleLayers below and we're trying another approach
-    // const unsubOrderedLayerInfo = store.subscribe(
-    //   (state) => state.mapState.orderedLayerInfo,
-    //   (cur) => {
-    //     // Log
-    //     logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - orderedLayerInfo', mapId, cur);
-
-    //     const curVisibleLayers = cur
-    //       .map((layerInfo) => {
-    //         if (layerInfo.visible) return layerInfo.layerPath;
-    //         return undefined;
-    //       })
-    //       .filter((layerPath) => layerPath);
-    //     const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
-    //     if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(curVisibleLayers))
-    //       store.getState().mapState.setterActions.setVisibleLayers(curVisibleLayers as string[]);
-    //   }
-    // );
-
     // Return the array of subscriptions so they can be destroyed later
     return [unsubMapHighlightedFeatures];
   }
@@ -443,10 +423,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const layersInVisibleRange = orderedLayerInfo.filter((layer) => layer.inVisibleRange).map((layer) => layer.layerPath);
     return layersInVisibleRange;
   };
-
-  static setVisibleRangeLayerMapState(mapId: string, visibleRangeLayers: string[]): void {
-    this.getMapStateProtected(mapId).setterActions.setVisibleRangeLayers(visibleRangeLayers);
-  }
 
   static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
@@ -767,7 +743,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setQueryable(layerPath, queryable);
   }
 
-  static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed?: boolean): void {
+  static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed: boolean): void {
     this.getMapStateProtected(mapId).setterActions.setLegendCollapsed(layerPath, collapsed);
   }
 
@@ -776,6 +752,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
   }
 
+  // TODO: Check if we still need 'NoOrderChangeState' variant
   static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {
     // Redirect
     this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo(curOrderedLayerInfo);

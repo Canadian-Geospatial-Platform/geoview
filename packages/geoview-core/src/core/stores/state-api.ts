@@ -93,7 +93,7 @@ export class StateApi {
    * @param {boolean} collapsed - The new state
    * @returns {boolean} If the legend is collapsed.
    */
-  setLegendCollapsedState(layerPath: string, collapsed?: boolean): void {
+  setLegendCollapsedState(layerPath: string, collapsed: boolean): void {
     // Redirect to event processor
     MapEventProcessor.setMapLegendCollapsed(this.mapId, layerPath, collapsed);
   }

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 // this esLint is used in many places for findLayerByPath function. It is why we keep it global...
 import { useStore } from 'zustand';
-import { cloneDeep } from 'lodash';
 
 import { FitOptions } from 'ol/View';
 import { Extent } from 'ol/extent';
@@ -315,10 +314,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         set({
           layerState: {
             ...get().layerState,
-            legendLayers: cloneDeep(legendLayers),
-            // GV When changing the legend layers object itself, we change all inner objects/arrays so that all triggers restart
-            // TODO: We should improve this setter, apply it for different scenarios of actual specific 'sets', and the
-            // TO.DOCONT: new store selectors are compatible with this and should work fine in the future
+            legendLayers: [...legendLayers],
           },
         });
       },

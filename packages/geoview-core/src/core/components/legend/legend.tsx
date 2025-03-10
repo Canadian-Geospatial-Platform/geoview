@@ -8,6 +8,7 @@ import {
   useUIActiveFooterBarTabId,
   useAppFullscreenActive,
   useUIFooterPanelResizeValue,
+  useLayerLegendLayers,
 } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
@@ -15,7 +16,6 @@ import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { useDebounceLayerLegendLayers } from './hooks/use-legend-debounce';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 interface LegendType {
@@ -74,7 +74,7 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   const mapId = useGeoViewMapId();
   const footerId = useUIActiveFooterBarTabId();
   const appBarId = useUIActiveAppBarTab();
-  const layersList = useDebounceLayerLegendLayers();
+  const layersList = useLayerLegendLayers();
 
   // Memoize breakpoint values
   const breakpoints = useMemo(() => {
@@ -134,7 +134,7 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   // Wire a handler using a custom hook on the window resize event
   useEventListener<Window>('resize', handleWindowResize, window);
 
-  // Handle initial layer setup (use a debounced 500ms layer)
+  // Handle initial layer setup
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LEGEND - layer setup', layersList);

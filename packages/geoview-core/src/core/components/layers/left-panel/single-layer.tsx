@@ -70,7 +70,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
 
   // Get store states
   const { setSelectedLayerPath, setSelectedLayerSortingArrowId } = useLayerStoreActions();
-  const { setOrToggleLayerVisibility, setLegendCollapsed, reorderLayer } = useMapStoreActions();
+  const { setOrToggleLayerVisibility, toggleLegendCollapsed, reorderLayer } = useMapStoreActions();
 
   const mapId = useGeoViewMapId();
   const selectedLayerPath = useLayerSelectedLayerPath();
@@ -146,8 +146,8 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     logger.logTraceUseCallback('SINGLE-LAYER - handleExpandGroupClick');
 
     // Set legend collapse value
-    setLegendCollapsed(layerPath);
-  }, [layerPath, setLegendCollapsed]);
+    toggleLegendCollapsed(layerPath);
+  }, [layerPath, toggleLegendCollapsed]);
 
   const handleLayerClick = useCallback((): void => {
     // Log
