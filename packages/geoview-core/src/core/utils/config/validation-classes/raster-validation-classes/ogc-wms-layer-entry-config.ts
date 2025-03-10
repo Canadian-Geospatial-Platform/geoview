@@ -36,8 +36,11 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set
     // to the same value of the corresponding metadataAccessPath.
+    this.geoviewLayerConfig.metadataAccessPath = this.geoviewLayerConfig.metadataAccessPath!.replace('wrapper/ramp/ogc', 'ows');
     if (this.geoviewLayerConfig.metadataAccessPath!.slice(-4).toLowerCase() !== '.xml')
       this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
+
+    this.source.dataAccessPath = this.source.dataAccessPath!.replace('wrapper/ramp/ogc', 'ows');
 
     // Default value for layerConfig.source.serverType is 'mapserver'.
     if (!this.source.serverType) this.source.serverType = 'mapserver';

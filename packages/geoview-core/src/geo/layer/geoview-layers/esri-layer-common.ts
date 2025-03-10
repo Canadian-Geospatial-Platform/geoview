@@ -268,7 +268,7 @@ export function commonProcessTemporalDimension(
 /** ***************************************************************************************************************************
  * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
  *
- * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
+ * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
  * @param {EsriFeatureLayerEntryConfig |
  *         EsriDynamicLayerEntryConfig |
  *         EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
@@ -349,7 +349,7 @@ export function commonProcessInitialSettings(
 
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
-  if (!layerConfig.initialSettings?.bounds) {
+  if (!layerConfig.initialSettings?.bounds && layerMetadata.extent) {
     const layerExtent = [
       layerMetadata.extent.xmin,
       layerMetadata.extent.ymin,
@@ -422,11 +422,11 @@ export async function commonProcessLayerMetadata<
           const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
           if (renderer) EsriLayerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
         }
-        layer.processFeatureInfoConfig(
-          layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig
-        );
-        layer.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
       }
+
+      layer.processFeatureInfoConfig(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
+      layer.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
+
       commonProcessTemporalDimension(
         layer,
         data.timeInfo as TypeJsonObject,
