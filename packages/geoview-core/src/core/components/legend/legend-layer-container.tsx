@@ -57,8 +57,6 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   initLightBox,
   LegendLayerComponent,
 }: CollapsibleContentProps): JSX.Element | null {
-  logger.logTraceRender('components/legend/legend-layer-container');
-
   // Hooks
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -67,6 +65,9 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   const layerItems = useSelectorLayerItems(layerPath);
   const layerChildren = useSelectorLayerChildren(layerPath);
   const layerIcons = useSelectorLayerIcons(layerPath);
+
+  // Log
+  logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent', layerPath, layerChildren?.length);
 
   // Early returns
   if (layerChildren?.length === 0 && layerItems?.length === 1) return null;
@@ -86,13 +87,8 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   }
 
   return (
-    <Collapse in={!isCollapsed} sx={sxClasses.collapsibleContainer} timeout="auto">
-      <List>
-        {layerChildren &&
-          layerChildren
-            .filter((d) => !['error', 'processing'].includes(d.layerStatus ?? ''))
-            .map((item) => <LegendLayerComponent layerPath={item.layerPath} key={item.layerPath} />)}
-      </List>
+    <Collapse in={!isCollapsed} sx={sxClasses.collapsibleContainer} timeout="auto" unmountOnExit>
+      <List>{layerChildren && layerChildren.map((item) => <LegendLayerComponent layerPath={item.layerPath} key={item.layerPath} />)}</List>
       <ItemsList items={layerItems || []} />
     </Collapse>
   );

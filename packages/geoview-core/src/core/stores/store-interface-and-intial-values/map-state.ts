@@ -81,7 +81,8 @@ export interface IMapState {
     removePointMarkersOrGroup: (group: string, idsOrCoordinates?: string[] | Coordinate[]) => void;
     reorderLayer: (layerPath: string, move: number) => void;
     resetBasemap: () => Promise<void>;
-    setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
+    setLegendCollapsed: (layerPath: string, newValue: boolean) => void;
+    toggleLegendCollapsed: (layerPath: string) => void;
     setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
     setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
@@ -334,13 +335,26 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
-       * Sets or toggles the legend of a layer.
+       * Sets the collapse state of a layer.
        * @param {string} layerPath - The path of the layer.
-       * @param {boolean} [newValue] - The new value of visibility.
+       * @param {boolean} [newValue] - The new value of collapse.
        */
-      setLegendCollapsed: (layerPath: string, newValue?: boolean): void => {
+      setLegendCollapsed: (layerPath: string, newValue: boolean): void => {
         // Redirect to setter
         get().mapState.setterActions.setLegendCollapsed(layerPath, newValue);
+      },
+
+      /**
+       * Toggles the collapse state of a layer.
+       * @param {string} layerPath - The path of the layer.
+       */
+      toggleLegendCollapsed: (layerPath: string): void => {
+        // Get current value
+        const legendCollapsedRightNow: boolean =
+          MapEventProcessor.findMapLayerFromOrderedInfo(get().mapId, layerPath)?.legendCollapsed || false;
+
+        // Redirect
+        get().mapState.setterActions.setLegendCollapsed(layerPath, !legendCollapsedRightNow);
       },
 
       /**
@@ -811,7 +825,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         set({
           mapState: {
             ...get().mapState,
-            orderedLayerInfo,
+            orderedLayerInfo: [...orderedLayerInfo],
+            // GV Here, we use the spread operator for the custom selector hooks such as useSelectorLayerLegendCollapsed to
+            // GV notice and eventually trigger the changes that need to be get triggered
           },
         });
 
@@ -866,23 +882,16 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets whether a layer is hoverable.
        * @param {string} layerPath - The path of the layer.
-       * @param {boolean} collapsed - Flag indicating if the layer should be hoverable.
+       * @param {boolean} collapsed - Flag indicating if the layer should be collapsed.
        */
-      setLegendCollapsed: (layerPath: string, collapsed?: boolean): void => {
+      setLegendCollapsed: (layerPath: string, collapsed: boolean): void => {
         const curLayerInfo = get().mapState.orderedLayerInfo;
-        const layerIndex = curLayerInfo.findIndex((info) => info.layerPath === layerPath);
-
-        if (layerIndex !== -1) {
-          // Create shallow copy of array
-          const newLayerInfo = curLayerInfo.slice();
-          // Only create new object for the changed layer
-          newLayerInfo[layerIndex] = {
-            ...curLayerInfo[layerIndex],
-            legendCollapsed: collapsed ?? !curLayerInfo[layerIndex].legendCollapsed,
-          };
+        const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
+        if (layerInfo) {
+          layerInfo.legendCollapsed = collapsed;
 
           // Redirect
-          get().mapState.setterActions.setOrderedLayerInfo(newLayerInfo);
+          get().mapState.setterActions.setOrderedLayerInfo(curLayerInfo);
         }
       },
 
