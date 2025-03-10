@@ -492,7 +492,7 @@ export class MapViewer {
 
       // Save in the store
       MapEventProcessor.setZoom(this.mapId, zoom, newOrderedLayerInfo);
-      MapEventProcessor.setVisibleRangeLayerMapState(this.mapId, visibleRangeLayers);
+      MapEventProcessor.setMapOrderedLayerInfo(this.mapId, newOrderedLayerInfo);
 
       // Emit to the outside
       this.#emitMapZoomEnd({ zoom });

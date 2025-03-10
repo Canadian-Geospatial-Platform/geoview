@@ -25,10 +25,6 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
   const mapId = useGeoViewMapId();
   const layerPathOrder = useMapOrderedLayers();
 
-  const sortedLayers = layersList.sort((a, b) => {
-    return layerPathOrder.indexOf(a.layerPath) - layerPathOrder.indexOf(b.layerPath);
-  });
-
   // ? I doubt we want to define an explicit type for style properties?
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getListClass = useCallback((): any => {
@@ -44,7 +40,11 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
   // Memoize the legend items
   const memoLegendItems = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('LAYERS-LIST - memoLegendItems', sortedLayers);
+    logger.logTraceUseMemo('LAYERS-LIST - memoLegendItems', layersList);
+
+    const sortedLayers = layersList.sort((a, b) => {
+      return layerPathOrder.indexOf(a.layerPath) - layerPathOrder.indexOf(b.layerPath);
+    });
 
     return sortedLayers.map((layer, index) => {
       const isFirst = index === 0;
@@ -66,7 +66,7 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
         />
       );
     });
-  }, [depth, isLayoutEnlarged, mapId, showLayerDetailsPanel, sortedLayers]);
+  }, [depth, isLayoutEnlarged, mapId, showLayerDetailsPanel, layersList, layerPathOrder]);
 
   return <Box sx={getListClass()}>{memoLegendItems}</Box>;
 }

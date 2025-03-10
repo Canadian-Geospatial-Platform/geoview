@@ -8,6 +8,8 @@ import {
   useSelectorLayerInVisibleRange,
   useSelectorLayerName,
   useSelectorLayerItems,
+  useSelectorLayerChildren,
+  useSelectorLayerStatus,
 } from '@/core/stores/';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
@@ -35,15 +37,15 @@ const styles = {
 
 // Extracted Header Component
 const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLayerHeaderProps): JSX.Element => {
-  // Log
-  logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
-
   // Hooks
   const layerName = useSelectorLayerName(layerPath);
   const layerItems = useSelectorLayerItems(layerPath);
-  const layerChildren = useSelectorLayerItems(layerPath);
+  const layerChildren = useSelectorLayerChildren(layerPath);
   const isCollapsed = useSelectorLayerLegendCollapsed(layerPath);
   const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
+
+  // Log
+  logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath, isCollapsed);
 
   // Return the ui
   return (
@@ -58,7 +60,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
           secondary={<SecondaryControls layerPath={layerPath} />}
         />
       </Tooltip>
-      {((layerChildren && layerChildren.length >= 1) || (layerItems && layerItems.length >= 1)) && (
+      {((layerChildren && layerChildren.length > 1) || (layerItems && layerItems.length > 1)) && (
         <IconButton className="buttonOutline" edge="end" size="small" tooltip={tooltip}>
           {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
@@ -78,10 +80,11 @@ export function LegendLayer({ layerPath }: LegendLayerProps): JSX.Element {
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const layerStatus = useSelectorLayerStatus(layerPath);
 
   // Stores
   const { initLightBox, LightBoxComponent } = useLightBox();
-  const { setLegendCollapsed } = useMapStoreActions();
+  const { toggleLegendCollapsed } = useMapStoreActions();
 
   const handleExpandGroupClick = useCallback(
     (event: React.MouseEvent): void => {
@@ -89,18 +92,24 @@ export function LegendLayer({ layerPath }: LegendLayerProps): JSX.Element {
       logger.logTraceUseCallback('LEGEND-LAYER - handleExpandGroupClick', layerPath);
 
       event.stopPropagation();
-      setLegendCollapsed(layerPath); // store value
+      toggleLegendCollapsed(layerPath); // store value
     },
-    [layerPath, setLegendCollapsed]
+    [layerPath, toggleLegendCollapsed]
   );
 
-  return (
-    <>
-      <Box sx={sxClasses.legendLayerListItem}>
-        <LegendLayerHeader layerPath={layerPath} tooltip={t('layers.toggleCollapse')} onExpandClick={handleExpandGroupClick} />
-        <CollapsibleContent layerPath={layerPath} initLightBox={initLightBox} LegendLayerComponent={LegendLayer} />
-      </Box>
-      <LightBoxComponent />
-    </>
-  );
+  // If the layer status isn't in error
+  if (!['error'].includes(layerStatus ?? '')) {
+    return (
+      <>
+        <Box sx={sxClasses.legendLayerListItem}>
+          <LegendLayerHeader layerPath={layerPath} tooltip={t('layers.toggleCollapse')} onExpandClick={handleExpandGroupClick} />
+          <CollapsibleContent layerPath={layerPath} initLightBox={initLightBox} LegendLayerComponent={LegendLayer} />
+        </Box>
+        <LightBoxComponent />
+      </>
+    );
+  }
+
+  // Empty, the layer status might be in error
+  return <Box sx={sxClasses.legendLayerListItem} />;
 }
