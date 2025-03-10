@@ -320,7 +320,7 @@ export class LayerApi {
           layerEntryConfig.initialSettings?.states?.hoverable !== undefined ? layerEntryConfig.initialSettings?.states?.hoverable : true,
         legendCollapsed:
           layerEntryConfig.initialSettings?.states?.legendCollapsed !== undefined
-            ? layerEntryConfig.initialSettings?.states?.legendCollapsed
+            ? layerEntryConfig.initialSettings.states.legendCollapsed
             : false,
         inVisibleRange: true,
       };
@@ -341,7 +341,7 @@ export class LayerApi {
           layerPath,
           legendCollapsed:
             geoviewLayerConfig.initialSettings?.states?.legendCollapsed !== undefined
-              ? geoviewLayerConfig.initialSettings?.states?.legendCollapsed
+              ? geoviewLayerConfig.initialSettings.states.legendCollapsed
               : false,
           visible: geoviewLayerConfig.initialSettings?.states?.visible !== false,
           inVisibleRange: true,
