@@ -261,12 +261,16 @@ export class XYZTiles extends AbstractGeoViewRaster {
       const maxScale = metadataLayerConfigFound?.maxScale as number;
       const minScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number;
       newLayerConfig.maxScale =
-        !maxScale && !minScaleDenominator ? undefined : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity);
+        !maxScale && !minScaleDenominator
+          ? newLayerConfig.maxScale
+          : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, newLayerConfig.maxScale ?? -Infinity);
 
       const minScale = metadataLayerConfigFound?.minScale as number;
       const maxScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number;
-      newLayerConfig.maxScale =
-        !minScale && !maxScaleDenominator ? undefined : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity);
+      newLayerConfig.minScale =
+        !minScale && !maxScaleDenominator
+          ? newLayerConfig.minScale
+          : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, newLayerConfig.minScale ?? Infinity);
     }
     return Promise.resolve(newLayerConfig);
   }

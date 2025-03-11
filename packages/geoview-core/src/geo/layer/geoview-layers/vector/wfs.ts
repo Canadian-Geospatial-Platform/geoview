@@ -270,7 +270,6 @@ export class WFS extends AbstractGeoViewVector {
           });
 
           this.setLayerMetadata(layerConfig.layerPath, featureTypeProperties as TypeJsonObject);
-
           WFS.#processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
         }
       }

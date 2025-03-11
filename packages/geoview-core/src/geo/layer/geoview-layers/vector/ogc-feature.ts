@@ -213,7 +213,6 @@ export class OgcFeature extends AbstractGeoViewVector {
         const queryResult = await axios.get<TypeJsonObject>(queryUrl);
         if (queryResult.data.properties) {
           this.setLayerMetadata(layerConfig.layerPath, queryResult.data.properties);
-
           OgcFeature.#processFeatureInfoConfig(queryResult.data.properties, layerConfig);
         }
       }
