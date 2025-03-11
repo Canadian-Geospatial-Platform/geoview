@@ -144,8 +144,9 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     if (layerMetadata?.attributions) this.attributions.push(layerMetadata.attributions as string);
     this.geometryType = (layerMetadata.geometryType || this.geometryType) as TypeStyleGeometry;
     this.layerName = layerMetadata.layerName as string;
+    // Need to compare to user provided value to see which to use
     this.minScale = (layerMetadata?.minScale || this.minScale) as number;
-    this.maxScale = (layerMetadata.maxScale || this.maxScale) as number;
+    this.maxScale = (layerMetadata?.maxScale || this.maxScale) as number;
 
     this.initialSettings = Cast<TypeLayerInitialSettings>(merge(this.initialSettings, layerMetadata.initialSettings));
     this.source.featureInfo = Cast<TypeFeatureInfoLayerConfig>(merge(this.source.featureInfo, layerMetadata.source.featureInfo));

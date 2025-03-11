@@ -534,21 +534,6 @@ export abstract class AbstractGeoViewLayer {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: false };
 
-    // // Set proper zoom level if applicable
-    // const mapView = this.getMapViewer().getView();
-    // if (layerConfig.maxScale) {
-    //   const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-    //   if (maxScaleZoomLevel) {
-    //     layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel);
-    //   }
-    // }
-
-    // if (layerConfig.minScale) {
-    //   const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-    //   if (minScaleZoomLevel) {
-    //     layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel);
-    //   }
-    // }
     return Promise.resolve(layerConfig);
   }
 

@@ -73,6 +73,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
     if (layerMetadata.geometryType)
       this.geometryType = AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layerMetadata.geometryType as string);
 
+    // TODO Need to compare to user provided values to determine which to use
     this.minScale = layerMetadata.minScale as number;
     this.maxScale = layerMetadata.maxScale as number;
 

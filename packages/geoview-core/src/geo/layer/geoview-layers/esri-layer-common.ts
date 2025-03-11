@@ -345,10 +345,13 @@ export function commonProcessInitialSettings(
     layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
 
   // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
-  if (layerMetadata.minScale && (!layerConfig.minScale || (layerMetadata.minScale as number) > layerConfig.minScale))
-    layerConfig.minScale = layerMetadata.minScale as number;
-  if (layerMetadata.maxScale && (!layerConfig.maxScale || (layerMetadata.maxScale as number) < layerConfig.maxScale))
-    layerConfig.maxScale = layerMetadata.maxScale as number;
+  if (layerMetadata.minScale) {
+    layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerMetadata.minScale as number);
+  }
+
+  if (layerMetadata.maxScale) {
+    layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerMetadata.maxScale as number);
+  }
 
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
@@ -370,23 +373,6 @@ export function commonProcessInitialSettings(
       layerConfig.initialSettings!.bounds = latlonExtent;
     }
   }
-
-  // Set zoom limits for max / min zooms
-  // const mapView = layer.getMapViewer().getView();
-  // if (layerConfig.maxScale) {
-  //   const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-  //   if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
-  //     layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
-  //   }
-  // }
-
-  // if (layerConfig.minScale) {
-  //   const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-  //   if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
-  //     layerConfig.initialSettings.minZoom = minScaleZoomLevel;
-  //   }
-  // }
-
   layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
 }
 

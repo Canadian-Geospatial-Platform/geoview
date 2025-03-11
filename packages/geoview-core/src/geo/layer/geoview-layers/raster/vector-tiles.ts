@@ -245,22 +245,22 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
       // First set the min/max scales based on the service / config
       // * Infinity and -Infinity are used as extreme zoom level values in case the value is undefined
-      if (minScale !== undefined) {
+      if (minScale) {
         updatedLayerConfig.minScale = Math.min(updatedLayerConfig.minScale ?? Infinity, minScale as number);
       }
 
-      if (maxScale !== undefined) {
+      if (maxScale) {
         updatedLayerConfig.maxScale = Math.max(updatedLayerConfig.maxScale ?? -Infinity, maxScale as number);
       }
 
       // Second, set the min/max zoom levels based on the service / config.
       // GV Vector tiles should always have a minZoom and maxZoom, so -Infinity or Infinity should never be set as a value
-      if (minZoom !== undefined) {
-        updatedLayerConfig.initialSettings.minZoom = Math.min(updatedLayerConfig.initialSettings.minZoom ?? Infinity, minZoom as number);
+      if (minZoom) {
+        updatedLayerConfig.initialSettings.minZoom = Math.max(updatedLayerConfig.initialSettings.minZoom ?? Infinity, minZoom as number);
       }
 
-      if (maxZoom !== undefined) {
-        updatedLayerConfig.initialSettings.maxZoom = Math.max(updatedLayerConfig.initialSettings.maxZoom ?? -Infinity, maxZoom as number);
+      if (maxZoom) {
+        updatedLayerConfig.initialSettings.maxZoom = Math.min(updatedLayerConfig.initialSettings.maxZoom ?? -Infinity, maxZoom as number);
       }
     }
     return Promise.resolve(updatedLayerConfig);

@@ -153,6 +153,9 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
         );
 
       this.bounds = this.initialSettings!.extent;
+      // TODO Need to compare to user provided values to see which should be used.
+      this.maxScale = layerMetadata.minScaleDenominator as number;
+      this.minScale = layerMetadata.maxScaleDenominator as number;
     }
 
     this.source.featureInfo!.queryable = this.#layerIsQueryable();

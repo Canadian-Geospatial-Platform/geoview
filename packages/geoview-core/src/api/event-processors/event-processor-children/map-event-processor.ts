@@ -448,6 +448,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
       orderedLayer.inVisibleRange = inVisibleRange;
       this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
     }
+
+    const visibleLayers = this.getMapStateProtected(mapId).visibleRangeLayers.filter((path) => path !== layerPath);
+    if (inVisibleRange) {
+      visibleLayers.push(layerPath);
+    }
+    this.getMapStateProtected(mapId).setterActions.setVisibleRangeLayers(visibleLayers);
   }
 
   static setZoom(mapId: string, zoom: number, orderedLayerInfo?: TypeOrderedLayerInfo[]): void {
