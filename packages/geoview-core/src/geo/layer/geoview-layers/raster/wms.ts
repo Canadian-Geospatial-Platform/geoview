@@ -635,20 +635,16 @@ export class WMS extends AbstractGeoViewRaster {
         if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
         MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
 
-        // TODO Add Scale and Zoom level changes to config
-        // TODO Since web map runs mostly in zoom levels, may not need Scale limits. Just hold them locally until converted
-        // Set Min/Max Scale Limits
+        // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
+        // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because
+        // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
         // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
-        if (
-          layerCapabilities.MinScaleDenominator &&
-          (!layerConfig.maxScale || layerConfig.maxScale >= (layerCapabilities.MinScaleDenominator as unknown as number))
-        )
-          layerConfig.maxScale = layerCapabilities.MinScaleDenominator as number;
-        if (
-          layerCapabilities.MaxScaleDenominator &&
-          (!layerConfig.minScale || layerConfig.minScale < (layerCapabilities.MaxScaleDenominator as unknown as number))
-        )
-          layerConfig.minScale = layerCapabilities.MaxScaleDenominator as number;
+        if (layerCapabilities.MinScaleDenominator) {
+          layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerCapabilities.MinScaleDenominator as number);
+        }
+        if (layerCapabilities.MaxScaleDenominator) {
+          layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerCapabilities.MaxScaleDenominator as number);
+        }
 
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 

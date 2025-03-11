@@ -221,7 +221,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Gets the in visible range value
-   * @param {number} zoom - The OpenLayer group layer.
    * @returns {boolean} true if the layer is in visible range
    */
   getInVisibleRange(): boolean {
