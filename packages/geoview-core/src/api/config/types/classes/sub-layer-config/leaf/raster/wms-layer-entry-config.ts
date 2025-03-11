@@ -132,6 +132,10 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     if (layerMetadata.queryable) this.source.featureInfo!.queryable = layerMetadata.queryable as boolean;
 
+    // TODO Need to compare metadata to user provided values to determine which should be used.
+    this.minScale = layerMetadata?.maxScaleDenominator as number;
+    this.maxScale = layerMetadata?.minScaleDenominator as number;
+
     this.source.wmsStyle = layerMetadata.Style
       ? ((layerMetadata.Style as TypeJsonArray).map((style) => {
           return style.Name;

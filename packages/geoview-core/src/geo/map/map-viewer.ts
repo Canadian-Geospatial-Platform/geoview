@@ -60,6 +60,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
+import { GVGroupLayer } from '../layer/gv-layers/gv-group-layer';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -461,11 +462,34 @@ export class MapViewer {
       const newOrderedLayerInfo = this.getMapLayerOrderInfo();
 
       const visibleRangeLayers: string[] = [];
+      const allLayers = this.layer.getGeoviewLayers();
 
       // Get the inVisibleRange property based on the layer's minZoom and maxZoom values
-      this.layer.getGeoviewLayers().forEach((layer) => {
+      allLayers.forEach((layer) => {
         const layerPath = layer.getLayerPath();
-        const inVisibleRange = layer.inVisibleRange(zoom);
+        let inVisibleRange = layer.inVisibleRange(zoom);
+
+        // Group layer maxZoom and minZoom are always set to 23 and 0 so that the sub layers can load
+        // This means that the "inVisibleRange" method will always return "true".
+        // To get around this, the inVisibleRange for groups is set based on the sub layer visibility
+        if (layer instanceof GVGroupLayer) {
+          const childLayers = allLayers.filter((childLayer) => {
+            const childPath = childLayer.getLayerPath();
+            return childPath !== layerPath && childPath.startsWith(`${layerPath}/`);
+          });
+
+          // Group is in visible range if any child is visible
+          // Currently ignores group layer ZOOM LEVELS and SCALES
+          // TODO Make group parent's zoom level be carried down to children in the config if applicable
+          // * example 1: Group's minZoom is 6 and child's is 3, then the child's should be 6 too
+          // * Example 2: Group's maxScale is 50000 and child's is 0, then the child's shold be 50000
+          // * so that it doesn't show when the group is not supposed to be in visible range
+          // * This type of configuration would only come from the user provided config
+          // * specifically when the entryType is set to "group", otherwise the initialSettings
+          // * are inherited properly
+          inVisibleRange = childLayers.some((childLayer) => childLayer.inVisibleRange(zoom));
+        }
+
         const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === layerPath);
         if (foundLayer) foundLayer.inVisibleRange = inVisibleRange;
         if (inVisibleRange) {

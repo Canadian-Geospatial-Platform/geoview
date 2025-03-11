@@ -753,6 +753,9 @@ export class LayerApi {
             // Ensure that the layer bounds are set when the layer is loaded
             if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), payload.layerPath);
 
+            // Set in visible range property for all newly added layers
+            this.#setLayerInVisibleRange(event.config as TypeLayerEntryConfig);
+
             this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
           });
 
@@ -999,18 +1002,16 @@ export class LayerApi {
     // Keep track
     this.#gvLayers[layerConfig.layerPath] = gvGroupLayer;
 
+    // Set in visible range property for all newly added layers
+    this.#setLayerInVisibleRange(layerConfig as TypeLayerEntryConfig);
+
     // Return the GV Group Layer
     return gvGroupLayer;
   }
 
   #setLayerInVisibleRange(layerConfig: TypeLayerEntryConfig): void {
-    if (layerConfig.listOfLayerEntryConfig) {
-      layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => this.#setLayerInVisibleRange(subLayerConfig));
-    }
-
-    const zoom = this.mapViewer.getView().getZoom();
-    const { maxZoom, minZoom } = layerConfig.initialSettings;
-    const inVisibleRange = (!maxZoom || zoom! <= maxZoom) && (!minZoom || zoom! > minZoom);
+    const zoom = this.mapViewer.getView().getZoom() as number;
+    const inVisibleRange = this.getGeoviewLayer(layerConfig.layerPath)?.inVisibleRange(zoom) as boolean;
     MapEventProcessor.setLayerInVisibleRange(this.getMapId(), layerConfig.layerPath, inVisibleRange);
   }
 
@@ -1041,9 +1042,6 @@ export class LayerApi {
     if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
       // Add the OpenLayers layer to the map officially
       this.mapViewer.map.addLayer(geoviewLayer.olRootLayer!);
-
-      // Set in visible range property for all newly added layers
-      geoviewLayer.listOfLayerEntryConfig.forEach((layer) => this.#setLayerInVisibleRange(layer));
     }
 
     // Log
