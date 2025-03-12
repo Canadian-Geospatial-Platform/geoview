@@ -15,6 +15,7 @@ export {
   ArrowUpward as ArrowUpIcon,
   Block as BlockIcon,
   BrowserNotSupported as BrowserNotSupportedIcon,
+  CenterFocusStrong as CenterFocusScaleIcon,
   Check as CheckIcon,
   CheckCircle as CheckCircleIcon,
   CheckBox as CheckBoxIcon,

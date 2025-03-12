@@ -1061,6 +1061,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.zoomToExtent(mapId, extent, options);
   }
 
+  static zoomToLayerVisibleScale(mapId: string, layerPath: string): void {
+    const view = this.getMapViewer(mapId).getView();
+    const mapZoom = view.getZoom();
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    const layerMaxZoom = geoviewLayer!.getMaxZoom();
+    const layerMinZoom = geoviewLayer!.getMinZoom();
+
+    if (layerMinZoom !== Infinity && layerMinZoom > mapZoom!) view.setZoom(layerMinZoom + 0.1);
+    else if (layerMaxZoom !== Infinity && layerMaxZoom < mapZoom!) view.setZoom(layerMaxZoom - 0.1);
+  }
+
   /**
    * Set Z index for layers
    *
