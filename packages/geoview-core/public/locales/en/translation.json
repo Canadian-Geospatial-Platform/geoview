@@ -123,6 +123,7 @@
     "toggleVisibility": "Toggle visibility",
     "toggleAllVisibility": "Toggle all visibility",
     "toggleCollapse": "Toggle collapse",
+    "zoomVisibleScale": "Zoom to visible scale",
     "querying": "Querying",
     "layerAdded": "Layer __param__ added",
     "layerAddedAndLoading": "Layer __param__ added and loading",

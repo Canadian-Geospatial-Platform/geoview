@@ -57,6 +57,7 @@ export interface ILayerState {
     sortLegendLayersChildren: (legendLayerList: TypeLegendLayer[]) => void;
     toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
+    zoomToLayerVisibleScale: (layerPath: string) => void;
     setSelectedLayerSortingArrowId: (layerId: string) => void;
   };
 
@@ -268,7 +269,11 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // Failed
         return Promise.resolve();
       },
-      setSelectedLayerSortingArrowId: (arrowId: string) => {
+      zoomToLayerVisibleScale: (layerPath: string): void => {
+        // Redirect
+        MapEventProcessor.zoomToLayerVisibleScale(get().mapId, layerPath);
+      },
+      setSelectedLayerSortingArrowId: (arrowId: string): void => {
         // Redirect to setter
         get().layerState.setterActions.setSelectedLayerSortingArrowId(arrowId);
       },

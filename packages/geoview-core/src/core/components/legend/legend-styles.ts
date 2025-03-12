@@ -95,11 +95,13 @@ export const getSxClasses = (theme: Theme, isFullScreen?: boolean, footerPanelRe
       },
     },
     '& .outOfRange': {
-      backgroundColor: `${theme.palette.grey[200]}`,
       '& .layerTitle': {
-        color: `${theme.palette.grey[600]}`,
+        color: `${theme.palette.grey[700]}`,
         fontStyle: 'italic',
       },
+    },
+    '& .outOfRangeButton': {
+      display: 'none',
     },
   },
   collapsibleContainer: {

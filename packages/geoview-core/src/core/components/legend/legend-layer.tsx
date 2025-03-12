@@ -48,7 +48,7 @@ const LegendLayerHeader = memo(
           primary={layer.layerName}
           className="layerTitle"
           disableTypography
-          secondary={<SecondaryControls layer={layer} isVisible={isVisible} />}
+          secondary={<SecondaryControls layer={layer} isVisible={isVisible} isInVisibleRange={inVisibleRange} />}
         />
       </Tooltip>
       {(layer.children?.length > 1 || layer.items?.length > 1) && (
