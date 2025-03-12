@@ -18,13 +18,16 @@ import { useMapStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { TypeLayerControls } from '@/api/config/types/map-schema-types';
+import { CenterFocusScaleIcon } from '@/ui/icons';
 
 interface SecondaryControlsProps {
   layer: TypeLegendLayer;
   isVisible: boolean; // Visibility come from store ordered layer info array
+  isInVisibleRange: boolean;
 }
 
 type ControlActions = {
+  handleZoomToLayerVisibleScale: (event: React.MouseEvent) => void;
   handleToggleVisibility: (event: React.MouseEvent) => boolean;
   handleHighlightLayer: (event: React.MouseEvent) => void;
   handleZoomTo: (event: React.MouseEvent) => void;
@@ -39,10 +42,14 @@ const styles = {
 const useControlActions = (layerPath: string): ControlActions => {
   // Store
   const { setOrToggleLayerVisibility } = useMapStoreActions();
-  const { setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
+  const { setHighlightLayer, zoomToLayerExtent, zoomToLayerVisibleScale } = useLayerStoreActions();
 
   return useMemo(
     () => ({
+      handleZoomToLayerVisibleScale: (event: React.MouseEvent): void => {
+        event.stopPropagation();
+        zoomToLayerVisibleScale(layerPath);
+      },
       handleToggleVisibility: (event: React.MouseEvent): boolean => {
         event.stopPropagation();
         return setOrToggleLayerVisibility(layerPath);
@@ -58,7 +65,7 @@ const useControlActions = (layerPath: string): ControlActions => {
         });
       },
     }),
-    [layerPath, setHighlightLayer, setOrToggleLayerVisibility, zoomToLayerExtent]
+    [layerPath, setHighlightLayer, setOrToggleLayerVisibility, zoomToLayerExtent, zoomToLayerVisibleScale]
   );
 };
 
@@ -81,13 +88,13 @@ const useSubtitle = (children: TypeLegendLayer[], items: TypeLegendItem[]): stri
 };
 
 // SecondaryControls component (no memo to force re render from layers panel modifications)
-export function SecondaryControls({ layer, isVisible }: SecondaryControlsProps): JSX.Element {
+export function SecondaryControls({ layer, isVisible, isInVisibleRange }: SecondaryControlsProps): JSX.Element {
   // Extract constant from layer prop
   const { layerPath, layerStatus, items, children } = layer;
   const layerControls: TypeLayerControls | undefined = layer.controls;
 
   // Log
-  logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath, isVisible);
+  logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath, isVisible, isInVisibleRange);
 
   // Hooks
   const { t } = useTranslation<string>();
@@ -98,7 +105,7 @@ export function SecondaryControls({ layer, isVisible }: SecondaryControlsProps):
   const highlightedLayer = useLayerHighlightedLayer();
 
   // Is button disabled?
-  const isLayerVisibleCapable = layerControls?.visibility ?? false;
+  const isLayerVisibleCapable = (layerControls?.visibility && isInVisibleRange) ?? false;
 
   // Component helper
   const controls = useControlActions(layerPath);
@@ -114,6 +121,14 @@ export function SecondaryControls({ layer, isVisible }: SecondaryControlsProps):
       <Box sx={sxClasses.subtitle}>
         <IconButton
           edge="end"
+          tooltip={t('layers.zoomVisibleScale') as string}
+          className={`buttonOutline ${isInVisibleRange ? 'outOfRangeButton' : ''}`}
+          onClick={controls.handleZoomToLayerVisibleScale}
+        >
+          <CenterFocusScaleIcon />
+        </IconButton>
+        <IconButton
+          edge={isInVisibleRange ? false : 'end'}
           tooltip={t('layers.toggleVisibility') as string}
           className="buttonOutline"
           onClick={controls.handleToggleVisibility}

@@ -123,6 +123,7 @@
     "toggleVisibility": "Basculer la visibilité",
     "toggleAllVisibility": "Basculer toute les visibilités",
     "toggleCollapse": "Basculer la fermeture",
+    "zoomVisibleScale": "Zoom à l'échelle visible",
     "querying": "Requête en cours",
     "layerAdded": "Couche __param__ ajoutée",
     "layerAddedAndLoading": "Couche __param__ ajoutée et en chargement",
