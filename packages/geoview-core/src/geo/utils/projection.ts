@@ -41,6 +41,9 @@ export abstract class Projection {
     CSRS: 'EPSG:4617',
     CSRS98: 'EPSG:4140',
     3400: 'EPSG:3400',
+    2151: 'EPSG:2151',
+    2957: 'EPSG:2957',
+    26914: 'EPSG:26914',
   };
 
   // Incremental number when creating custom WKTs on the fly
@@ -510,6 +513,45 @@ function init3400Projection(): void {
   if (projection) Projection.PROJECTIONS['3400'] = projection;
 }
 
+/**
+ * Initializes the EPSG:2151 projection
+ */
+function init2151Projection(): void {
+  proj4.defs(Projection.PROJECTION_NAMES[2151], '+proj=utm +zone=13 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs');
+  register(proj4);
+
+  const projection = olGetProjection(Projection.PROJECTION_NAMES[2151]);
+
+  if (projection) Projection.PROJECTIONS['2151'] = projection;
+}
+
+/**
+ * Initializes the EPSG:2957 projection
+ */
+function init2957Projection(): void {
+  proj4.defs(
+    Projection.PROJECTION_NAMES[2957],
+    '+proj=utm +zone=13 +ellps=GRS80 +towgs84=-0.991,1.9072,0.5129,-1.25033e-07,-4.6785e-08,-5.6529e-08,0 +units=m +no_defs +type=crs'
+  );
+  register(proj4);
+
+  const projection = olGetProjection(Projection.PROJECTION_NAMES[2957]);
+
+  if (projection) Projection.PROJECTIONS['2957'] = projection;
+}
+
+/**
+ * Initializes the EPSG:26914 projection
+ */
+function init26914Projection(): void {
+  proj4.defs(Projection.PROJECTION_NAMES[26914], '+proj=utm +zone=14 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs');
+  register(proj4);
+
+  const projection = olGetProjection(Projection.PROJECTION_NAMES[26914]);
+
+  if (projection) Projection.PROJECTIONS['26914'] = projection;
+}
+
 // Initialize the supported projections
 initCRS84Projection();
 init4326Projection();
@@ -525,4 +567,7 @@ init102100Projection();
 init102184Projection();
 init102190Projection();
 init3400Projection();
+init2151Projection();
+init2957Projection();
+init26914Projection();
 logger.logInfo('Projections initialized');

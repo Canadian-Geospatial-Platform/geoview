@@ -45,6 +45,8 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
   constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
     super(geoviewLayerConfig, language);
 
+    // TODO: remove once datacube URLs are updated
+    this.metadataAccessPath = this.metadataAccessPath.replace('wrapper/ramp/ogc', 'ows');
     // If user has provided parameters, extract the layers=layerId and transfer the layerId to the listOfLayerEntryConfig.
     const metadataAccessPathItems = this.metadataAccessPath.split('?');
     if (metadataAccessPathItems.length > 2) {
