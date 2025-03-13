@@ -104,8 +104,11 @@ export function SecondaryControls({ layer, isVisible, isInVisibleRange }: Second
   // Stores
   const highlightedLayer = useLayerHighlightedLayer();
 
-  // Is button disabled?
+  // Is visibility button disabled?
   const isLayerVisibleCapable = (layerControls?.visibility && isInVisibleRange) ?? false;
+
+  // Is zoom to visible scale button visible?
+  const isZoomToVisibleScaleCapable = !!((layer.type as string) !== 'group' && !isInVisibleRange);
 
   // Component helper
   const controls = useControlActions(layerPath);
@@ -122,7 +125,7 @@ export function SecondaryControls({ layer, isVisible, isInVisibleRange }: Second
         <IconButton
           edge="end"
           tooltip={t('layers.zoomVisibleScale') as string}
-          className={`buttonOutline ${isInVisibleRange ? 'outOfRangeButton' : ''}`}
+          className={`buttonOutline ${isZoomToVisibleScaleCapable ? '' : 'outOfRangeButton'}`}
           onClick={controls.handleZoomToLayerVisibleScale}
         >
           <CenterFocusScaleIcon />
