@@ -457,7 +457,7 @@ export class UUIDmapConfigReader {
    */
   static async getGVConfigFromUUIDs(baseUrl: string, lang: string, uuids: string[]): Promise<UUIDmapConfigReaderResponse> {
     // Build the url
-    const url = `${baseUrl}/vcs?lang=${lang}&id=${uuids.toString()}`;
+    const url = `${baseUrl}/vcs?lang=${lang}&id=${uuids.toString()}&referrer=${window.location.hostname}`;
 
     // Fetch the config
     const result = await axios.get<GeoChartGeoCoreConfig>(url);
