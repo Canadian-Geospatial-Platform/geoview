@@ -147,18 +147,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             // Convert the CSV to features
             features = AbstractGeoViewVector.convertCsv(this.mapId, xhr.responseText, layerConfig as VectorLayerEntryConfig);
           } else if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
-            // Get oid field
-            const oidField = AbstractGeoViewVector.#getEsriOidField(layerConfig);
-
             // Fetch the features text array
             const esriFeaturesArray = await AbstractGeoViewVector.getEsriFeatures(
               layerConfig.layerPath,
               url as string,
               JSON.parse(xhr.responseText).count,
-              oidField,
               this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount as number | undefined
             );
-
             // Convert to features
             features = [];
             esriFeaturesArray.forEach((responseText: string) => {
@@ -246,61 +241,33 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string} layerPath - The layer path of the layer.
    * @param {string} url - The base url for the service.
    * @param {number} featureCount - The number of features in the layer.
-   * @param {string} oidField - The unique identifier field name.
    * @param {number} maxRecordCount - The max features per query from the service.
    * @param {number} featureLimit - The maximum number of features to fetch per query.
    * @param {number} queryLimit - The maximum number of queries to run at once.
    * @returns {Promise<string[]>} An array of the response text for the features.
    * @private
    */
-  // GV: featureLimit and queryLimit ideals vary with the service, 500/10 was a good middle ground for large layers tested
-  // TODO: Add options for featureLimit and queryLimit to config
+  // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
+  // TODO: Add options for featureLimit to config
   // TODO: Will need to move with createVectorSource
   static getEsriFeatures(
     layerPath: string,
     url: string,
     featureCount: number,
-    oidField: string,
     maxRecordCount?: number,
-    featureLimit: number = 500,
-    queryLimit: number = 10
+    featureLimit: number = 1000
   ): Promise<string[]> {
     // Update url
-    // TODO: Performance - Check if we should add &maxAllowableOffset=10 to the url. It creates small sliver but download size if 18mb compare to 50mb for outlier-election-2019
-    // TODO.CONT: Download time is 90 seconds compare to 130 seconds. It may worth the loss of precision...
-    const baseUrl = url.replace('&where=1%3D1&returnCountOnly=true', `&outfields=*&geometryPrecision=1`);
+    const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
 
     // Create array of url's to call
     const urlArray: string[] = [];
     for (let i = 0; i < featureCount; i += featureFetchLimit) {
-      urlArray.push(`${baseUrl}&where=${oidField}+<=+${i + featureFetchLimit}&resultOffset=${i}`);
+      urlArray.push(`${baseUrl}&resultOffset=${i}&resultRecordCount=${featureFetchLimit}`);
     }
 
-    const promises: Promise<string>[] = [];
-    let currentIndex = 0;
-
-    // Gets the next set of features, and reruns on completion
-    const fetchNext = (): void => {
-      if (currentIndex >= urlArray.length) return;
-
-      // Get next url and update index
-      const currentUrl = urlArray[currentIndex];
-      currentIndex++;
-
-      // Fetch from current url and initiate next fetch when complete
-      try {
-        const result = fetch(currentUrl).then((response) => response.text());
-        promises.push(result);
-      } catch (error) {
-        logger.logError(`Error loading features for ${layerPath} from ${currentUrl}`, error);
-      } finally {
-        fetchNext();
-      }
-    };
-
-    // Start fetching queryLimit number of times
-    for (let i = 0; i < queryLimit; i++) fetchNext();
+    const promises: Promise<string>[] = urlArray.map((featureUrl) => fetch(featureUrl).then((response) => response.text()));
 
     return Promise.all(promises);
   }

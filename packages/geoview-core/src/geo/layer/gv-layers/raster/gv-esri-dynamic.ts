@@ -149,41 +149,18 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
 
-      // Fetch the features
-      let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath!;
-      if (!urlRoot.endsWith('/')) urlRoot += '/';
-      // GV: We put returnGeometry=false so on heavy geometry, dynamic layer can load datatable. If not the fetch fails.
-      const url = `${urlRoot}${layerConfig.layerId}/query?where=1=1&outFields=*&f=json&returnGeometry=false`;
-
-      const response = await fetch(url);
-      const jsonResponse = await response.json();
+      // Fetch the features with worker
+      const jsonResponse = await this.fetchAllFeatureInfoWithWorker(layerConfig);
 
       // If any features
       if (jsonResponse.features) {
         // Parse the JSON response and create features
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const features = jsonResponse.features.map((featureData: any) => {
-          // We do not query the geometry anymore (set as undefine). It will query if needed by later
+        const features = (jsonResponse.features as TypeJsonObject[]).map((featureData: any) => {
+          // We do not query the geometry anymore (set as undefined). It will query if needed by later
           const properties = featureData.attributes;
           return new Feature({ ...properties, undefined });
         });
-
-        // Check if there are additional features and get them
-        if (jsonResponse.exceededTransferLimit) {
-          // Get response json for additional features
-          const getAdditionalFeaturesArray = await this.#getAdditionalFeatures(layerConfig, url, features.length);
-          // Parse them and add features
-          getAdditionalFeaturesArray.forEach((responseJson) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const additionalFeatures: Feature[] = (responseJson as any).features.map((featureData: any) => {
-              // We do not query the geometry anymore (set as undefine). It will query if needed by later
-              const properties = featureData.attributes;
-              return new Feature({ ...properties, undefined });
-            });
-
-            features.push(...additionalFeatures);
-          });
-        }
 
         // Format and return the result
         // Not having geometry have an effect on the style as it use the geometry to define wich one to use
@@ -200,47 +177,27 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
   }
 
-  /** ***************************************************************************************************************************
-   * Fetch additional features from service with a max record count.
-   *
-   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {string} url - The base url for the service.
-   * @param {number} maxRecordCount - The max record count from the service.
-   * @param {number} resultOffset - The current offset to use for the features.
-   * @returns {Promise<unknown[]>} An array of the response text for the features.
-   * @private
+  /**
+   * Query all features with a web worker
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
+   * @returns {TypeJsonObject} A promise of esri response for query.
    */
-  async #getAdditionalFeatures(
-    layerConfig: EsriDynamicLayerEntryConfig,
-    url: string,
-    maxRecordCount: number,
-    resultOffset?: number
-  ): Promise<unknown[]> {
-    const responseArray: unknown[] = [];
-    // Add resultOffset to layer query
-    const nextUrl = `${url}&resultOffset=${resultOffset || maxRecordCount}`;
-
+  async fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeJsonObject> {
     try {
-      // Fetch response text and push to array
-      const response = await fetch(nextUrl);
-      const jsonResponse = await response.json();
-      responseArray.push(jsonResponse);
+      const params: QueryParams = {
+        url: layerConfig.source.dataAccessPath + layerConfig.layerId,
+        geometryType: 'Point',
+        objectIds: 'all',
+        queryGeometry: false,
+        projection: 4326,
+        maxAllowableOffset: 6,
+      };
 
-      // Check if there are additional features to fetch
-      if (jsonResponse.exceededTransferLimit)
-        responseArray.push(
-          ...(await this.#getAdditionalFeatures(
-            layerConfig,
-            url,
-            maxRecordCount,
-            resultOffset ? resultOffset + maxRecordCount : 2 * maxRecordCount
-          ))
-        );
+      return await this.#fetchWorkerPool.process(params);
     } catch (error) {
-      logger.logError(`Error loading additional features for ${layerConfig.layerPath} from ${nextUrl}`, error);
+      logger.logError('Query processing failed:', error);
+      throw error;
     }
-
-    return responseArray;
   }
 
   /**
@@ -947,7 +904,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Raster layer queries do not accept any layerDefs
     const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
-    olLayer?.getSource()!.updateParams({ layerDefs });
+    olLayer?.getSource()?.updateParams({ layerDefs });
     olLayer?.changed();
 
     // Emit event

@@ -25,7 +25,7 @@ import {
   QueryType,
   TypeStyleGeometry,
 } from '@/geo/map/map-schema-types';
-import { getLegendStyles, getFeatureImageSource } from '@/geo/utils/renderer/geoview-renderer';
+import { getLegendStyles, getFeatureImageSource, processStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -572,25 +572,35 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
       // Dict to store created image sources to avoid recreating
       const imageSourceDict: { [styleAsJsonString: string]: string } = {};
+      const layerStyle = this.getStyle()!;
 
       features.forEach((feature) => {
         // Check dict for existing image source and create it if it does not exist
-        let imageSource: string | undefined;
-        const layerStyle = this.getStyle()!;
-        const featureStyle = feature.getStyle();
+        const geometryType = feature.getGeometry()
+          ? (feature.getGeometry()!.getType() as TypeStyleGeometry)
+          : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
+
+        let featureStyle = feature.getStyle();
+        // Feature style must be created if it does not exist on feature
+        if (!featureStyle && layerStyle[geometryType]) {
+          const styleSettings = layerStyle[geometryType]!;
+          const { type } = styleSettings;
+          featureStyle = processStyle[type][geometryType](styleSettings, feature, layerConfig.filterEquation, true);
+          feature.setStyle(featureStyle);
+        }
+
+        let imageSource;
         if (featureStyle) {
-          const geometryType = feature.getGeometry() ? feature.getGeometry()!.getType() : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
           // Create a string unique to the style, but geometry agnostic
           const styleClone = cloneDeep(featureStyle) as Style;
           styleClone.setGeometry('');
           const styleString = `${geometryType}${JSON.stringify(styleClone)}`;
+
           // Use string as dict key
           if (!imageSourceDict[styleString])
             imageSourceDict[styleString] = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
           imageSource = imageSourceDict[styleString];
-        }
-
-        if (!imageSource) imageSource = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
+        } else imageSource = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
 
         let extent;
         if (feature.getGeometry()) extent = feature.getGeometry()!.getExtent();
