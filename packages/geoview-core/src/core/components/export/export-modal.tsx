@@ -101,10 +101,17 @@ export default function ExportModal(): JSX.Element {
     // Log
     logger.logTraceUseEffect('Export Modal - mount');
 
+    const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
+
     let timer: NodeJS.Timeout;
     if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
       const mapImage = mapImageRef.current;
       const dialogBox = dialogRef.current;
+
+      if (overviewMap) {
+        overviewMap.style.visibility = 'hidden';
+      }
+
       // open legend in appbar when only appbar exists
       if (appBarLegendContainer && !footerbarLegendContainer) {
         setActiveAppBarTab(legendId, 'legend', true, false);
@@ -156,6 +163,9 @@ export default function ExportModal(): JSX.Element {
       }, 500);
     }
     return () => {
+      if (overviewMap) {
+        overviewMap.style.visibility = 'visible';
+      }
       if (timer) clearTimeout(timer);
       setIsMapLoading(true);
       setIsLegendLoading(true);
