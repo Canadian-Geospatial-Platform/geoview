@@ -469,7 +469,7 @@ export class MapViewer {
         const layerPath = layer.getLayerPath();
         let inVisibleRange = layer.inVisibleRange(zoom);
 
-        // Group layer maxZoom and minZoom are always set to 23 and 0 so that the sub layers can load
+        // Group layer maxZoom and minZoom are never set so that the sub layers can load
         // This means that the "inVisibleRange" method will always return "true".
         // To get around this, the inVisibleRange for groups is set based on the sub layer visibility
         if (layer instanceof GVGroupLayer) {
@@ -479,14 +479,6 @@ export class MapViewer {
           });
 
           // Group is in visible range if any child is visible
-          // Currently ignores group layer ZOOM LEVELS and SCALES
-          // TODO Make group parent's zoom level be carried down to children in the config if applicable
-          // * example 1: Group's minZoom is 6 and child's is 3, then the child's should be 6 too
-          // * Example 2: Group's maxScale is 50000 and child's is 0, then the child's should be 50000
-          // * so that it doesn't show when the group is not supposed to be in visible range
-          // * This type of configuration would only come from the user provided config
-          // * specifically when the entryType is set to "group", otherwise the initialSettings
-          // * are inherited properly
           inVisibleRange = childLayers.some((childLayer) => childLayer.inVisibleRange(zoom));
         }
 
