@@ -241,6 +241,8 @@ export default function ExportModal(): JSX.Element {
 
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
+    const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
+
     let timer: NodeJS.Timeout;
     if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
       const mapImage = mapImageRef.current;
@@ -279,6 +281,8 @@ export default function ExportModal(): JSX.Element {
       }, 100);
     }
     return () => {
+      if (overviewMap) overviewMap.style.visibility = 'visible';
+
       if (timer) clearTimeout(timer);
       setIsMapLoading(true);
       setIsLegendLoading(true);
