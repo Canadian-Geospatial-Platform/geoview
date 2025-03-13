@@ -59,7 +59,7 @@ import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import { GVCSV } from '@/geo/layer/gv-layers/vector/gv-csv';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
-import { getExtentUnion } from '@/geo/utils/utilities';
+import { getExtentUnion, getZoomFromScale } from '@/geo/utils/utilities';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -749,6 +749,9 @@ export class LayerApi {
             // Log
             logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
 
+            // Set in visible range property for all newly added layers
+            this.#setLayerInVisibleRange(sender, gvLayer.getLayerConfig());
+
             const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), payload.layerPath);
             // Ensure that the layer bounds are set when the layer is loaded
             if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), payload.layerPath);
@@ -999,19 +1002,34 @@ export class LayerApi {
     // Keep track
     this.#gvLayers[layerConfig.layerPath] = gvGroupLayer;
 
+    // Set in visible range property for all newly added layers
+    this.#setLayerInVisibleRange(gvGroupLayer, layerConfig);
+
     // Return the GV Group Layer
     return gvGroupLayer;
   }
 
-  #setLayerInVisibleRange(layerConfig: TypeLayerEntryConfig): void {
-    if (layerConfig.listOfLayerEntryConfig) {
-      layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => this.#setLayerInVisibleRange(subLayerConfig));
+  #setLayerInVisibleRange(gvLayer: AbstractGVLayer | GVGroupLayer, layerConfig: TypeLayerEntryConfig): void {
+    // Set the final maxZoom and minZoom values
+    // Skip the GVGroupLayers since we don't want to prevent the children from loading if they aren't initially
+    // in visible range. Inheritance has already been passed in the config and the group layer visibility will
+    // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
+    const mapView = this.mapViewer.getView();
+    if ((layerConfig.initialSettings.maxZoom || layerConfig.maxScale) && !(gvLayer instanceof GVGroupLayer)) {
+      const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+      const maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
+      gvLayer.setMaxZoom(maxZoom);
     }
 
-    const zoom = this.mapViewer.getView().getZoom();
-    const { maxZoom, minZoom } = layerConfig.initialSettings;
-    const inVisibleRange = (!maxZoom || zoom! <= maxZoom) && (!minZoom || zoom! > minZoom);
-    MapEventProcessor.setLayerInVisibleRange(this.getMapId(), layerConfig.layerPath, inVisibleRange);
+    if ((layerConfig.initialSettings.minZoom || layerConfig.minScale) && !(gvLayer instanceof GVGroupLayer)) {
+      const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+      const minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
+      gvLayer.setMinZoom(minZoom);
+    }
+
+    const zoom = mapView.getZoom() as number;
+    const inVisibleRange = gvLayer.inVisibleRange(zoom) as boolean;
+    MapEventProcessor.setLayerInVisibleRange(this.getMapId(), gvLayer.getLayerPath(), inVisibleRange);
   }
 
   /**
@@ -1041,9 +1059,6 @@ export class LayerApi {
     if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
       // Add the OpenLayers layer to the map officially
       this.mapViewer.map.addLayer(geoviewLayer.olRootLayer!);
-
-      // Set in visible range property for all newly added layers
-      geoviewLayer.listOfLayerEntryConfig.forEach((layer) => this.#setLayerInVisibleRange(layer));
     }
 
     // Log

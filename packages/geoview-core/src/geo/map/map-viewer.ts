@@ -60,6 +60,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
+import { GVGroupLayer } from '../layer/gv-layers/gv-group-layer';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -461,16 +462,30 @@ export class MapViewer {
       const newOrderedLayerInfo = this.getMapLayerOrderInfo();
 
       const visibleRangeLayers: string[] = [];
+      const allLayers = this.layer.getGeoviewLayers();
 
-      // GV Used the configs since group GV layers have fake max/min zoom levels
-      // GV The group levels are also missing the zoom level getters, so this worked out well anyway
-      this.layer.getLayerEntryConfigs().forEach((config) => {
-        const { minZoom, maxZoom } = config.initialSettings;
-        const inVisibleRange = (!minZoom || zoom! > minZoom) && (!maxZoom || zoom! <= maxZoom);
-        const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === config.layerPath);
+      // Get the inVisibleRange property based on the layer's minZoom and maxZoom values
+      allLayers.forEach((layer) => {
+        const layerPath = layer.getLayerPath();
+        let inVisibleRange = layer.inVisibleRange(zoom);
+
+        // Group layer maxZoom and minZoom are never set so that the sub layers can load
+        // This means that the "inVisibleRange" method will always return "true".
+        // To get around this, the inVisibleRange for groups is set based on the sub layer visibility
+        if (layer instanceof GVGroupLayer) {
+          const childLayers = allLayers.filter((childLayer) => {
+            const childPath = childLayer.getLayerPath();
+            return childPath.startsWith(`${layerPath}/`) && !(childLayer instanceof GVGroupLayer);
+          });
+
+          // Group is in visible range if any child is visible
+          inVisibleRange = childLayers.some((childLayer) => childLayer.inVisibleRange(zoom));
+        }
+
+        const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === layerPath);
         if (foundLayer) foundLayer.inVisibleRange = inVisibleRange;
         if (inVisibleRange) {
-          visibleRangeLayers.push(config.layerPath);
+          visibleRangeLayers.push(layerPath);
         }
       });
 
