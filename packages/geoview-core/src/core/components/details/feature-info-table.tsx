@@ -75,8 +75,8 @@ export const FeatureItem = memo(function FeatureItem({
         src={item}
         tabIndex={0}
         onClick={() => onInitLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
-        onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === 'Enter') {
+        onKeyDown={(event: React.KeyboardEvent) => {
+          if (event.key === 'Enter') {
             onInitLightBox(featureInfoItem.value as string, `${index}_${featureInfoItem.alias}`, index);
           }
         }}
@@ -96,13 +96,9 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
   const theme = useTheme();
   const { alias, value } = featureInfoItem;
 
-  // Convert value to string, handling arrays and other types
-  const stringValue = useMemo((): string[] => {
-    if (Array.isArray(value)) {
-      return [value.map((item) => stringify(item)).join(';')] as string[];
-    }
-    return [stringify(value)] as string[];
-  }, [value]);
+  // Stringify values and create array of string to split item with ';' to separate images
+  let stringValue: string | string[] = Array.isArray(value) ? String(value.map(stringify)) : String(stringify(value));
+  stringValue = stringValue.toString().split(';');
 
   // Generate stable IDs for each item when component mounts
   const itemIds = useMemo(() => stringValue.map(() => generateId()), [stringValue]);

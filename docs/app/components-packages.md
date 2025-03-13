@@ -21,7 +21,7 @@ In all these cases, components are building blocks on which we can build more im
 
 Packages are collections of components that extend the functionality of the viewer. There are two types of packages, **Core Package** and **External Package**.
 
-A **Core Package** is a package developed and maintained by the viewer team. The viewer supports few core packages such as a [basemap panel](https://canadian-geospatial-platform.github.io/geoview/public/package-basemap-panel.html) or [time slider](https://canadian-geospatial-platform.github.io/geoview/public/package-time-slider.html). Core packages can be added to the map from the configuration via the following line for map package like swiper:
+A **Core Package** is a package developed and maintained by the viewer team. The viewer supports few core packages such as a [time slider](https://canadian-geospatial-platform.github.io/geoview/public/package-time-slider.html). Core packages can be added to the map from the configuration via the following line for map package like swiper:
 
 ```js
 'corePackages': ['swiper'],
@@ -30,7 +30,7 @@ A **Core Package** is a package developed and maintained by the viewer team. The
  ```js
  'appBar': {
    'tabs': {
-    'core': ['basemap-panel']
+    'core': ['aoi-panel']
    }
  },
  ```
@@ -41,7 +41,7 @@ A **Core Package** is a package developed and maintained by the viewer team. The
   }
  },
  ```
-Each of these packages is associated with a default schema and configuration. It is therefore possible to configure them to some extent according to our needs. For exemple, the basemap panel has this [schema](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-basemap-panel/schema.json) and [default configuration](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-basemap-panel/default-config-basemap-panel.json). If necessary, the user can customize the package by providing a custom configuration file to initialize the package.
+Each of these packages is associated with a default schema and configuration. It is therefore possible to configure them to some extent according to our needs. For exemple, the time slider panel has this [schema](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-time-slider/schema.json) and [default configuration](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-time-slider/default-config-time-slider-panel.json). If necessary, the user can customize the package by providing a custom configuration file to initialize the package.
 
 To associate a custom configuration with a package, follow these steps:
 
@@ -64,7 +64,7 @@ To associate a custom configuration with a package, follow these steps:
 ```js
  'appBar': {
    'tabs': {
-    'core': ['basemap-panel']
+    'core': ['time-slider']
    }
  },
  ```
@@ -76,7 +76,7 @@ To associate a custom configuration with a package, follow these steps:
  },
  ```
 
-- Then, create a configuration file for the package and name it <config-file-name>-<package-name>(i.e. `package-bp1-lcc-config-basemap-panel.json`)
+- Then, create a configuration file for the package and name it <config-file-name>-<package-name>(i.e. `package-bp1-lcc-config-time-slider.json`)
 - Put both configuration files in the same folder
 
 An **External Package** is a package developed outside the GeoView repository and not maintained by the viewer team. You can see a demonstration in this [repository](https://github.com/Canadian-Geospatial-Platform/geoview-ce-demo).

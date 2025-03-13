@@ -1,45 +1,85 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 import { Drawer as MaterialDrawer, DrawerProps, Box } from '@mui/material';
 
-import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
-import { getSxClasses } from './drawer-style';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { ChevronLeftIcon, ChevronRightIcon } from '@/ui/icons/index';
+import { getSxClasses } from '@/ui/drawer/drawer-style';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Drawer Properties
+ * Properties for the Drawer component extending Material-UI's DrawerProps
  */
-export interface TypeDrawerProps extends DrawerProps {
-  // eslint-disable-next-line react/require-default-props
+export interface DrawerPropsExtend extends DrawerProps {
   status?: boolean;
 }
 
 /**
- * Create a customized Material UI Drawer
+ * Create a customized Material UI Drawer component.
  *
- * @param {TypeDrawerProps} props the properties passed to the Drawer element
- * @returns {JSX.Element} the created Drawer element
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <Drawer>
+ *   <List>
+ *     <ListItem>Content</ListItem>
+ *   </List>
+ * </Drawer>
+ *
+ * // With controlled state
+ * <Drawer
+ *   status={isOpen}
+ *   variant="permanent"
+ * >
+ *   <List>
+ *     <ListItem>Drawer content</ListItem>
+ *   </List>
+ * </Drawer>
+ *
+ * // With custom styling
+ * <Drawer
+ *   className="custom-drawer"
+ *   style={{ width: 240 }}
+ * >
+ *   <div>Drawer content</div>
+ * </Drawer>
+ * ```
+ *
+ * @param {DrawerPropsExtend} props - The properties passed to the Drawer element
+ * @returns {JSX.Element} The Drawer component
+ *
+ * @note For performance optimization in cases of frequent parent re-renders,
+ * consider wrapping this component with React.memo at the consumption level.
+ *
+ * @see {@link https://mui.com/material-ui/react-drawer/}
  */
-export function Drawer(props: TypeDrawerProps): JSX.Element {
+function DrawerUI(props: DrawerPropsExtend): JSX.Element {
+  logger.logTraceRender('ui/drawer/drawer');
+
+  // Get constant from props
   const { variant, status, className, style, children, ...rest } = props;
 
+  // Hooks
   const { t } = useTranslation<string>();
-
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // internal component state
+  // State
   const [open, setOpen] = useState(false);
 
-  const openCloseDrawer = (drawerStatus: boolean): void => {
-    setOpen(drawerStatus);
-  };
+  // Memoize toggle handler
+  const handleDrawerToggle = useCallback((drawerStatus: boolean): void => {
+    logger.logTraceUseCallback('UI.DRAWER - handleDrawerToggle', drawerStatus);
 
+    setOpen(drawerStatus);
+  }, []);
+
+  // Update open state when status prop changes
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DRAWER - status', status);
+    logger.logTraceUseEffect('UI.DRAWER - status', status);
 
     // set status from props if passed in
     if (status !== undefined) {
@@ -62,7 +102,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
           tooltip={open ? t('general.close')! : t('general.open')!}
           tooltipPlacement="right"
           onClick={() => {
-            openCloseDrawer(!open);
+            handleDrawerToggle(!open);
           }}
           size="large"
         >
@@ -73,3 +113,5 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     </MaterialDrawer>
   );
 }
+
+export const Drawer = DrawerUI;

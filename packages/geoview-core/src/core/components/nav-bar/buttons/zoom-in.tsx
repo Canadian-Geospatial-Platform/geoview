@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material/styles';
-
+import { useTranslation } from 'react-i18next';
 import { IconButton, ZoomInIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useMapStoreActions, useMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -14,6 +14,7 @@ export default function ZoomIn(): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/buttons/zoom-in');
 
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -22,7 +23,13 @@ export default function ZoomIn(): JSX.Element {
   const { setZoom } = useMapStoreActions();
 
   return (
-    <IconButton id="zoomIn" tooltip="mapnav.zoomIn" tooltipPlacement="left" onClick={() => setZoom(zoom + 0.5)} sx={sxClasses.navButton}>
+    <IconButton
+      id="zoomIn"
+      tooltip={t('mapnav.zoomIn') as string}
+      tooltipPlacement="left"
+      onClick={() => setZoom(zoom + 0.5)}
+      sx={sxClasses.navButton}
+    >
       <ZoomInIcon />
     </IconButton>
   );

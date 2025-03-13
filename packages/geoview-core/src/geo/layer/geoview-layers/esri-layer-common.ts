@@ -32,10 +32,10 @@ import {
   esriQueryRecordsByUrl,
   esriQueryRelatedRecordsByUrl,
 } from '@/geo/layer/gv-layers/utils';
-import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
-import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
-import { EsriImage } from './raster/esri-image';
+import { EsriDynamic, geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { EsriFeature, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
@@ -85,7 +85,7 @@ export function commonValidateListOfLayerEntryConfig(
 ): void {
   listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
     if (layerConfig.layerStatus === 'error') return;
-    const { layerPath } = layerConfig;
+    const { layerPath, layerName } = layerConfig;
 
     if (layerEntryIsGroupLayer(layerConfig)) {
       // Use the layer name from the metadata if it exists and there is no existing name.
@@ -99,6 +99,7 @@ export function commonValidateListOfLayerEntryConfig(
       if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
         layer.layerLoadError.push({
           layer: layerPath,
+          layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
           loggerMessage: `Empty layer group (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
         });
         layerConfig.layerStatus = 'error';
@@ -113,6 +114,7 @@ export function commonValidateListOfLayerEntryConfig(
     if (Number.isNaN(esriIndex)) {
       layer.layerLoadError.push({
         layer: layerPath,
+        layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
         loggerMessage: `ESRI layerId must be a number (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
       });
       layerConfig.layerStatus = 'error';
@@ -126,6 +128,7 @@ export function commonValidateListOfLayerEntryConfig(
     if (esriIndex === -1) {
       layer.layerLoadError.push({
         layer: layerPath,
+        layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
         loggerMessage: `ESRI layerId not found (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
       });
       layerConfig.layerStatus = 'error';
@@ -155,7 +158,7 @@ export function commonValidateListOfLayerEntryConfig(
 
       (layer.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
         // Make sure to copy the layerConfig source before recycling it in the constructors. This was causing the 'source' value to leak between layer entry configs
-        const layerConfigCopy = { ...layerConfig, source: { ...layerConfig.source } };
+        const layerConfigCopy = { ...layerConfig, source: { ...layerConfig.source }, initialSettings: { ...layerConfig.initialSettings } };
 
         let subLayerEntryConfig;
         if (geoviewEntryIsEsriDynamic(layerConfig)) {
@@ -265,7 +268,7 @@ export function commonProcessTemporalDimension(
 /** ***************************************************************************************************************************
  * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
  *
- * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
+ * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
  * @param {EsriFeatureLayerEntryConfig |
  *         EsriDynamicLayerEntryConfig |
  *         EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
@@ -319,7 +322,7 @@ export function commonProcessFeatureInfoConfig(
     if (!layerConfig.source.featureInfo.nameField)
       if (layerMetadata.displayField) layerConfig.source.featureInfo.nameField = layerMetadata.displayField as string;
       else {
-        layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0].name;
+        layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0]?.name;
       }
   }
 }
@@ -340,13 +343,19 @@ export function commonProcessInitialSettings(
   const layerMetadata = layer.getLayerMetadata(layerConfig.layerPath);
   if (layerConfig.initialSettings?.states?.visible === undefined)
     layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
-  // GV TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
-  // GV if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
-  // GV if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
+
+  // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
+  if (layerMetadata.minScale) {
+    layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerMetadata.minScale as number);
+  }
+
+  if (layerMetadata.maxScale) {
+    layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerMetadata.maxScale as number);
+  }
 
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
-  if (!layerConfig.initialSettings?.bounds) {
+  if (!layerConfig.initialSettings?.bounds && layerMetadata.extent) {
     const layerExtent = [
       layerMetadata.extent.xmin,
       layerMetadata.extent.ymin,
@@ -364,7 +373,6 @@ export function commonProcessInitialSettings(
       layerConfig.initialSettings!.bounds = latlonExtent;
     }
   }
-
   layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
 }
 
@@ -403,11 +411,11 @@ export async function commonProcessLayerMetadata<
           const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
           if (renderer) EsriLayerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
         }
-        layer.processFeatureInfoConfig(
-          layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig
-        );
-        layer.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
       }
+
+      layer.processFeatureInfoConfig(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
+      layer.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
+
       commonProcessTemporalDimension(
         layer,
         data.timeInfo as TypeJsonObject,

@@ -20,7 +20,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 
     if (!this.source) this.source = {};
     if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
-    if (!this.source.dataAccessPath!.endsWith('{z}/{y}/{x}'))
+    if (!this.source.dataAccessPath!.includes('{z}/{y}/{x}'))
       this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
         ? `${this.source.dataAccessPath}tile/{z}/{y}/{x}`
         : `${this.source.dataAccessPath}/tile/{z}/{y}/{x}`;

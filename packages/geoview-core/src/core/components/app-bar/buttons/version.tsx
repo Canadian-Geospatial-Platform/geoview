@@ -98,11 +98,11 @@ export default function Version(): JSX.Element {
       <Box>
         <IconButton
           id="version-button"
-          tooltip="appbar.version"
+          tooltip={t('appbar.version') as string}
+          aria-label={t('appbar.version') as string}
           tooltipPlacement="bottom-end"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
-          aria-label="appbar.version"
         >
           <SvgIcon viewBox="-4 -2 38 36">
             <GeoCaIcon />

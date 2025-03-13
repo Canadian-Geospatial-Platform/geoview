@@ -13,7 +13,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { api } from '@/app';
+import { api, WMS_PROXY_URL } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -99,73 +99,82 @@ export class WMS extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (in config)
   protected override async fetchServiceMetadata(): Promise<void> {
     const metadataUrl = this.metadataAccessPath;
-    let curatedMetadataUrl = metadataUrl;
-    if (!metadataUrl.includes('request=GetCapabilities')) {
-      curatedMetadataUrl = `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
-    }
-    if (curatedMetadataUrl) {
-      const metadataAccessPathIsXmlFile = curatedMetadataUrl.includes('.xml?');
-      if (metadataAccessPathIsXmlFile) {
-        // XML metadata is a special case that does not use GetCapabilities to get the metadata
-        await this.#fetchXmlServiceMetadata(curatedMetadataUrl);
-      } else {
-        const layerConfigsToQuery = this.#getLayersToQuery();
-        if (layerConfigsToQuery.length === 0) {
-          // Use GetCapabilities to get the metadata
-          try {
-            const metadata = await this.#getServiceMetadata(curatedMetadataUrl);
-            this.metadata = metadata;
-            this.#processMetadataInheritance();
-          } catch (error) {
-            // Log
-            logger.logError(`Unable to read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`, error);
-          }
-        } else {
-          // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
-          // "Layers" parameter on the command line, we need to process each layer individually and merge all layer metadata at
-          // the end. Even though the "Layers" parameter is ignored by other WMS servers, the drawback of this method is
-          // sending unnecessary requests while only one GetCapabilities could be used when the server publishes a small set of
-          // metadata. Which is not the case for the Geomet service.
-          const promisedArrayOfMetadata: Promise<TypeJsonObject | null>[] = [];
-          let i: number;
-          layerConfigsToQuery.forEach((layerConfig: TypeLayerEntryConfig, layerIndex: number) => {
-            for (i = 0; layerConfigsToQuery[i].layerId !== layerConfig.layerId; i++);
-            if (i === layerIndex)
-              // This is the first time we execute this query
-              promisedArrayOfMetadata.push(this.#getServiceMetadata(`${curatedMetadataUrl}&Layers=${layerConfig.layerId}`));
-            // query already done. Use previous returned value
-            else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
+
+    // If the metadata url ends with .xml
+    // GV Not checking if 'includes' .xml, because an url like 'my_url/metadata.xml?request=GetCapabilities' shouldn't exist.
+    if (metadataUrl.toLowerCase().endsWith('.xml')) {
+      // XML metadata is a special case that does not use GetCapabilities to get the metadata
+      await this.#fetchXmlServiceMetadata(metadataUrl, (proxyUsed: string) => {
+        // A Proxy had to be used to fetch the service metadata, update the layer config with it
+        this.metadataAccessPath = `${proxyUsed}${metadataUrl}`;
+      });
+    } else {
+      let metadataUrlGetCap = metadataUrl;
+      if (!metadataUrl.includes('request=GetCapabilities')) {
+        metadataUrlGetCap = `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
+      }
+
+      const layerConfigsToQuery = this.#getLayersToQuery();
+      if (layerConfigsToQuery.length === 0) {
+        // Use GetCapabilities to get the metadata
+        try {
+          const metadata = await this.#getServiceMetadata(metadataUrlGetCap, (proxyUsed: string) => {
+            // A Proxy had to be used to fetch the service metadata, update the layer config with it
+            this.metadataAccessPath = `${proxyUsed}${metadataUrl}`;
           });
-          try {
-            const arrayOfMetadata = await Promise.all(promisedArrayOfMetadata);
-            for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++)
-              this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
-            this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
-            if (this.metadata) {
-              for (; i < arrayOfMetadata.length; i++) {
-                if (!arrayOfMetadata[i]?.Capability) this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
-                else if (!this.#getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
-                  const metadataLayerPathToAdd = this.#getMetadataLayerPath(
-                    layerConfigsToQuery[i].layerId!,
-                    arrayOfMetadata[i]!.Capability.Layer
-                  );
-                  this.#addLayerToMetadataInstance(
-                    metadataLayerPathToAdd,
-                    this.metadata?.Capability?.Layer,
-                    arrayOfMetadata[i]!.Capability.Layer
-                  );
-                }
+          this.metadata = metadata;
+          this.#processMetadataInheritance();
+        } catch (error) {
+          // Log
+          logger.logError(`Unable to read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`, error);
+        }
+      } else {
+        // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
+        // "Layers" parameter on the command line, we need to process each layer individually and merge all layer metadata at
+        // the end. Even though the "Layers" parameter is ignored by other WMS servers, the drawback of this method is
+        // sending unnecessary requests while only one GetCapabilities could be used when the server publishes a small set of
+        // metadata. Which is not the case for the Geomet service.
+        const promisedArrayOfMetadata: Promise<TypeJsonObject | null>[] = [];
+        let i: number;
+        layerConfigsToQuery.forEach((layerConfig: TypeLayerEntryConfig, layerIndex: number) => {
+          for (i = 0; layerConfigsToQuery[i].layerId !== layerConfig.layerId; i++);
+          if (i === layerIndex)
+            // This is the first time we execute this query
+            promisedArrayOfMetadata.push(
+              this.#getServiceMetadata(`${metadataUrlGetCap}&Layers=${layerConfig.layerId}`, (proxyUsed: string) => {
+                // A Proxy had to be used to fetch the service metadata, update the layer config with it
+                layerConfigsToQuery[i].source!.dataAccessPath = `${proxyUsed}${metadataUrl}`;
+              })
+            );
+          // query already done. Use previous returned value
+          else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
+        });
+        try {
+          const arrayOfMetadata = await Promise.all(promisedArrayOfMetadata);
+          for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++)
+            this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
+          this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
+          if (this.metadata) {
+            for (; i < arrayOfMetadata.length; i++) {
+              if (!arrayOfMetadata[i]?.Capability) this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
+              else if (!this.#getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
+                const metadataLayerPathToAdd = this.#getMetadataLayerPath(
+                  layerConfigsToQuery[i].layerId!,
+                  arrayOfMetadata[i]!.Capability.Layer
+                );
+                this.#addLayerToMetadataInstance(
+                  metadataLayerPathToAdd,
+                  this.metadata?.Capability?.Layer,
+                  arrayOfMetadata[i]!.Capability.Layer
+                );
               }
             }
-            this.#processMetadataInheritance();
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          } catch (error) {
-            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
           }
+          this.#processMetadataInheritance();
+        } catch {
+          this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
         }
       }
-    } else {
-      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
     }
   }
 
@@ -178,9 +187,22 @@ export class WMS extends AbstractGeoViewRaster {
    * @private
    */
   // GV Layers Refactoring - Obsolete (in config)
-  async #getServiceMetadata(url: string): Promise<TypeJsonObject | null> {
+  async #getServiceMetadata(url: string, callbackNewMetadataUrl: (proxyUsed: string) => void): Promise<TypeJsonObject | null> {
     try {
-      const response = await fetch(url);
+      let response;
+      try {
+        // Fetch the metadata
+        response = await fetch(url);
+      } catch {
+        // If network issue such as CORS
+        // We're going to change the metadata url to use a proxy
+        const newProxiedMetadataUrl = `${WMS_PROXY_URL}${url}`;
+        // Try again with the proxy this time
+        response = await fetch(newProxiedMetadataUrl);
+        // Callback about it
+        callbackNewMetadataUrl?.(WMS_PROXY_URL);
+      }
+
       const capabilitiesString = await response.text();
       const parser = new WMSCapabilities();
       const metadata: TypeJsonObject = parser.read(capabilitiesString);
@@ -201,10 +223,24 @@ export class WMS extends AbstractGeoViewRaster {
    * @private
    */
   // GV Layers Refactoring - Obsolete (in config)
-  async #fetchXmlServiceMetadata(metadataUrl: string): Promise<void> {
+  async #fetchXmlServiceMetadata(metadataUrl: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<void> {
     try {
       const parser = new WMSCapabilities();
-      const response = await fetch(metadataUrl);
+
+      let response;
+      try {
+        // Fetch the metadata
+        response = await fetch(metadataUrl);
+      } catch {
+        // If network issue such as CORS
+        // We're going to change the metadata url to use a proxy
+        const newProxiedMetadataUrl = `${WMS_PROXY_URL}${metadataUrl}`;
+        // Try again with the proxy this time
+        response = await fetch(newProxiedMetadataUrl);
+        // Callback about it
+        callbackNewMetadataUrl?.(WMS_PROXY_URL);
+      }
+
       const capabilitiesString = await response.text();
       this.metadata = parser.read(capabilitiesString);
       if (this.metadata) {
@@ -343,8 +379,6 @@ export class WMS extends AbstractGeoViewRaster {
       if (layer.BoundingBox === undefined) layer.BoundingBox = parentLayer.BoundingBox;
       if (layer.Dimension === undefined) layer.Dimension = parentLayer.Dimension;
       if (layer.Attribution === undefined) layer.Attribution = parentLayer.Attribution;
-      if (layer.MaxScaleDenominator === undefined) layer.MaxScaleDenominator = parentLayer.MaxScaleDenominator;
-      if (layer.MaxScaleDenominator === undefined) layer.MaxScaleDenominator = parentLayer.MaxScaleDenominator;
       // Table 7 — Inheritance of Layer properties specified in the standard with 'add' behaviour.
       // AuthorityURL inheritance is not implemented in the following code.
       if (parentLayer.Style) {
@@ -600,17 +634,24 @@ export class WMS extends AbstractGeoViewRaster {
         }
         if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
         MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
-        // TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
-        // if (layerConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
-        //   layerConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
-        // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
-        //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
+
+        // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
+        // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because
+        // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
+        // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
+        if (layerCapabilities.MinScaleDenominator) {
+          layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerCapabilities.MinScaleDenominator as number);
+        }
+        if (layerCapabilities.MaxScaleDenominator) {
+          layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerCapabilities.MaxScaleDenominator as number);
+        }
 
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox)
           layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
 
+        // Set time dimension
         if (layerCapabilities.Dimension) {
           const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
             (dimension) => dimension.name === 'time'

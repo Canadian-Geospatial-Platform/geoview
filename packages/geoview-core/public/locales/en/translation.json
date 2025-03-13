@@ -26,7 +26,8 @@
     "zoomOut": "Zoom out",
     "coordinates": "Toggle coordinates format",
     "scale": "Toggle between scale and resolution",
-    "location": "Zoom to my location"
+    "location": "Zoom to my location",
+    "projection": "Change map projection"
   },
   "basemaps": {
     "select": "Select a basemap",
@@ -55,12 +56,15 @@
       "defaultnrcan": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
       "tooltip": "Attribution"
     },
+    "disclaimer":{
+      "message": "Disclaimer: This map is for illustrative purposes. The markers represent the approximate locations based on available data. The Government of Canada shall not be held liable for any third party’s interpretation of the Information. The Government of Canada reserves the right to change or revise the Information at any time."
+    },
     "crosshair": "Use <strong>Arrows</strong>, <strong>+</strong> and <strong>-</strong> keys to navigate the map, <strong>Enter</strong> to select and <strong>Shift+Arrow</strong> <strong>Up</strong> or <strong>Down</strong> to modify the pan value."
   },
   "appbar": {
     "export": "Download map",
     "notifications": "Notification",
-    "no_notifications_available": "No notifications available",
+    "noNotificationsAvailable": "No notifications available",
     "layers": "Layers",
     "share": "Share",
     "version": "About GeoView",
@@ -106,7 +110,7 @@
     "layerSelect": "Select layer(s)",
     "errorEmpty": "cannot be empty",
     "errorNone": "No file or source added",
-    "errorFile": "Only geoJSON, CSV and GeoPackage files can be used",
+    "errorFile": "Only geoJSON and CSV files can be used",
     "errorServer": "source is not valid",
     "errorNotLoaded": "An error occured when loading the layer",
     "errorProj": "does not support current map projection",
@@ -160,15 +164,15 @@
   },
   "validation": {
     "layer": {
-      "loadfailed": "Layer [__param__] failed to load on map __param__.",
-      "notfound": "The sublayer __param__ of the  layer __param__ does not exist on the server",
-      "createtwice": "Can not execute the createGeoViewRasterLayers method twice for the layer __param__ on map __param__",
-      "usedtwice": "Duplicate use of layer identifier [__param__] on map __param__",
+      "loadfailed": "Layer __param__ failed to load on map.",
+      "notfound": "The sublayer __param__ of the layer __param__ does not exist on the server",
+      "createtwice": "Can not execute the createGeoViewRasterLayers method twice for the layer __param__ on map",
+      "usedtwice": "Duplicate use of layer identifier __param__ on map",
       "multipleUUID": "GeoCore layers may only have one GeoCore id per layer"
     },
     "schema": {
       "notFound": "A schema error was found, check the console to see what is wrong.",
-      "wrongPath": "Cannot find schema ([__param__])"
+      "wrongPath": "Cannot find schema (__param__)"
     },
     "changeDisplayLanguageLayers": "Layers can not be relaoded because the configuration does not support this language",
     "changeDisplayLanguage": "Only 'en' and 'fr' are supported",
@@ -181,12 +185,13 @@
     "cancelBtn": "Cancel",
     "exportBtn": "Download",
     "exportTitle": "Title",
+    "fileExportDefaultPrefixName": "map-export",
     "approx": "approx"
   },
   "geolocator": {
     "title": "Geolocator",
     "search": "Search",
-    "errorMessage": "No matches found for",
+    "noResult": "No matches found for",
     "province": "Province",
     "category": "Category",
     "clearFilters": "Clear filters",
@@ -226,5 +231,24 @@
   "footerBar": {
     "resizeTooltip": "Resize",
     "noTab": "No tab"
+  },
+  "error": {
+    "metadata": {
+      "unableRead": "Unable to read metadata",
+      "empty": "Value returned is empty",
+      "capability": "Value returned doesn't contain Capability, Layer or is empty"
+    },
+    "layer": {
+      "createGroup": "Unable to create group layer",
+      "emptyGroup": "Empty layer group",
+      "esriId": "ESRI layerId must be a number",
+      "esriIdNotFound": "ESRI layerId not found"
+    },
+    "geocore": {
+      "noLayer": "No layers returned by GeoCore service"
+    },
+    "geolocator": {
+      "noService": "Geolocator service not available"
+    }
   }
 }

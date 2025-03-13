@@ -45,6 +45,12 @@ export abstract class ConfigBaseClass {
   /** It is used to link the layer entry config to the GeoView layer config. */
   geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
 
+  /** The min scale that can be reach by the layer. */
+  minScale?: number;
+
+  /** The max scale that can be reach by the layer. */
+  maxScale?: number;
+
   /**
    * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
    * configuration tree.

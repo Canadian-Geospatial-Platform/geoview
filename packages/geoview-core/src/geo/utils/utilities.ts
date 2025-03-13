@@ -11,6 +11,7 @@ import { XYZ, OSM, VectorTile } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
 import { LineString, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
+import View from 'ol/View';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
@@ -21,7 +22,7 @@ import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-la
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
 
-import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
+import { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 
 /**
@@ -499,3 +500,58 @@ export function getMetersPerPixel(projection: TypeValidMapProjectionCodes, resol
   // LCC (and other meter-based projections) can use resolution directly
   return resolution;
 }
+
+/**
+ * Convert a map scale to zoom level
+ * @param view The view for converting the scale
+ * @param targetScale The desired scale (e.g. 50000 for 1:50,000)
+ * @returns number representing the closest zoom level for the given scale
+ */
+export const getZoomFromScale = (view: View, targetScale: number | undefined): number | undefined => {
+  if (!targetScale) return undefined;
+  const projection = view.getProjection();
+  const mpu = projection.getMetersPerUnit();
+  const dpi = 25.4 / 0.28; // OpenLayers default DPI
+
+  // Calculate resolution from scale
+  if (!mpu) return undefined;
+  // Resolution = Scale / ( metersPerUnit * inchesPerMeter * DPI )
+  const targetResolution = targetScale / (mpu * 39.37 * dpi);
+
+  // Get the constrained resolution that matches our tile matrix
+  const constrainedResolution = view.getConstrainedResolution(targetResolution);
+
+  // Convert resolution to zoom
+  if (!constrainedResolution) return undefined;
+  return view.getZoomForResolution(constrainedResolution) || undefined;
+};
+
+/**
+ * Convert a map scale to zoom level
+ * @param view The view for converting the zoom
+ * @param zoom The desired zoom (e.g. 50000 for 1:50,000)
+ * @returns number representing the closest scale for the given zoom number
+ */
+export const getScaleFromZoom = (view: View, zoom: number): number | undefined => {
+  const projection = view.getProjection();
+  const mpu = projection.getMetersPerUnit();
+  if (!mpu) return undefined;
+
+  const dpi = 25.4 / 0.28; // OpenLayers default DPI
+
+  // Get resolution for zoom level
+  const resolution = view.getResolutionForZoom(zoom);
+
+  // Calculate scale from resolution
+  // Scale = Resolution * metersPerUnit * inchesPerMeter * DPI
+  return resolution * mpu * 39.37 * dpi;
+};
+
+/**
+ * Get map scale for Web Mercator or Lambert Conformal Conic projections
+ * @param view The view to get the current scale from
+ * @returns number representing scale (e.g. 50000 for 1:50,000)
+ */
+export const getMapScale = (view: View): number | undefined => {
+  return getScaleFromZoom(view, view.getZoom() || 0);
+};

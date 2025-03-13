@@ -1,45 +1,42 @@
+import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { SingleLayer } from './single-layer';
-import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
-import { useGeoViewMapId, useLayerStoreActions, useMapStoreActions } from '@/core/stores';
+import { useGeoViewMapId, useLayerStoreActions, useSelectorLayerPathOrder } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { TABS } from '@/core/utils/constant';
+import { SingleLayer } from './single-layer';
+import { getSxClasses } from './left-panel-styles';
 
 interface LayerListProps {
   depth: number;
   layersList: TypeLegendLayer[];
-  showLayerDetailsPanel: (layer: TypeLegendLayer) => void;
+  showLayerDetailsPanel: (layerId: string) => void;
   isLayoutEnlarged: boolean;
 }
 
 export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged, depth }: LayerListProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/layers/left-panel/layers-list');
+  logger.logTraceRender('components/layers/left-panel/layers-list', `Count ${layersList.length}`);
 
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   const mapId = useGeoViewMapId();
-  const { getIndexFromOrderedLayerInfo } = useMapStoreActions();
+  const layerPathOrder = useSelectorLayerPathOrder();
   const { sortLegendLayersChildren } = useLayerStoreActions();
 
-  const sortedLayers = layersList.sort((a, b) =>
-    getIndexFromOrderedLayerInfo(a.layerPath) > getIndexFromOrderedLayerInfo(b.layerPath) ? 1 : -1
-  );
-  sortLegendLayersChildren(sortedLayers);
+  const sortedLayers = layersList.sort((a, b) => {
+    return layerPathOrder.indexOf(a.layerPath) - layerPathOrder.indexOf(b.layerPath);
+  });
 
-  const textToSlug = (text: string): string => {
-    return text
-      .toLowerCase()
-      .replace(/[^a-z0-9 -]/g, '') // Remove non-alphanumeric characters except spaces and hyphens
-      .replace(/\s+/g, '-'); // Replace spaces with hyphens
-  };
+  // TODO: Check - This sort should likely happen elsewhere than in a rendering component
+  // TO.DOCONT: (the fact that the rendering component exists or not in the ui shouldn't have to do with the order state from store)
+  sortLegendLayersChildren(sortedLayers);
 
   // ? I doubt we want to define an explicit type for style properties?
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getListClass = (): any => {
+  const getListClass = useCallback((): any => {
     if (depth === 0) {
       return sxClasses.list;
     }
@@ -47,25 +44,31 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
       return sxClasses.evenDepthList;
     }
     return sxClasses.oddDepthList;
-  };
+  }, [depth, sxClasses]);
 
-  const legendItems = sortedLayers.map((details, index) => {
-    const isFirst = index === 0;
-    const isLast = index === sortedLayers.length - 1;
+  // Memoize the legend items
+  const memoLegendItems = useMemo(() => {
+    return sortedLayers.map((layer, index) => {
+      const isFirst = index === 0;
+      const isLast = index === sortedLayers.length - 1;
 
-    return (
-      <SingleLayer
-        key={textToSlug(`layerKey-${index}-${details.layerPath}`)}
-        depth={depth}
-        layer={{ ...details, layerId: `${mapId}-${TABS.LAYERS}-${details.layerPath}` }}
-        showLayerDetailsPanel={showLayerDetailsPanel}
-        index={index}
-        isFirst={isFirst}
-        isLast={isLast}
-        isLayoutEnlarged={isLayoutEnlarged}
-      />
-    );
-  });
+      // TODO: Check - What is this for!? Set the layerId
+      // eslint-disable-next-line no-param-reassign
+      layer.layerId = `${mapId}-${TABS.LAYERS}-${layer.layerPath}`;
 
-  return <Box sx={getListClass()}>{legendItems}</Box>;
+      return (
+        <SingleLayer
+          key={layer.layerPath}
+          layer={layer}
+          depth={depth}
+          showLayerDetailsPanel={showLayerDetailsPanel}
+          isFirst={isFirst}
+          isLast={isLast}
+          isLayoutEnlarged={isLayoutEnlarged}
+        />
+      );
+    });
+  }, [depth, isLayoutEnlarged, mapId, showLayerDetailsPanel, sortedLayers]);
+
+  return <Box sx={getListClass()}>{memoLegendItems}</Box>;
 }

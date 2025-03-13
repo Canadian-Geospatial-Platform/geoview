@@ -837,6 +837,14 @@
         "source": {
           "$ref": "#/definitions/TypeVectorSourceInitialConfig"
         },
+        "minScale": {
+          "type": "number",
+          "description": "The minimum scale (furthest zoomed out scale) where the layer will still be seen."
+        },
+        "maxScale": {
+          "type": "number",
+          "description": "The maximum scale (furthest zoomed in scale) where the layer will still be seen."
+        },
         "layerStyle": {
           "$ref": "#/definitions/TypeLayerStyleConfig"
         },
@@ -887,6 +895,14 @@
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "minScale": {
+          "type": "number",
+          "description": "The minimum scale (furthest zoomed out scale) where the layer will still be seen."
+        },
+        "maxScale": {
+          "type": "number",
+          "description": "The maximum scale (furthest zoomed in scale) where the layer will still be seen."
         },
         "source": {
           "$ref": "#/definitions/TypeVectorTileSourceInitialConfig",
@@ -974,6 +990,14 @@
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
         },
+        "minScale": {
+          "type": "number",
+          "description": "The minimum scale (furthest zoomed out scale) where the layer will still be seen."
+        },
+        "maxScale": {
+          "type": "number",
+          "description": "The maximum scale (furthest zoomed in scale) where the layer will still be seen."
+        },
         "source": {
           "$ref": "#/definitions/TypeSourceImageWmsInitialConfig"
         },
@@ -1026,6 +1050,14 @@
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "minScale": {
+          "type": "number",
+          "description": "The minimum scale (furthest zoomed out scale) where the layer will still be seen."
+        },
+        "maxScale": {
+          "type": "number",
+          "description": "The maximum scale (furthest zoomed in scale) where the layer will still be seen."
         },
         "source": {
           "$ref": "#/definitions/TypeSourceImageEsriInitialConfig"
@@ -1080,6 +1112,14 @@
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
         },
+        "minScale": {
+          "type": "number",
+          "description": "The minimum scale (furthest zoomed out scale) where the layer will still be seen."
+        },
+        "maxScale": {
+          "type": "number",
+          "description": "The maximum scale (furthest zoomed in scale) where the layer will still be seen."
+        },
         "source": {
           "$ref": "#/definitions/TypeSourceImageEsriInitialConfig"
         },
@@ -1129,6 +1169,14 @@
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
         },
+        "minScale": {
+          "type": "number",
+          "description": "The minimum scale (furthest zoomed out scale) where the layer will still be seen."
+        },
+        "maxScale": {
+          "type": "number",
+          "description": "The maximum scale (furthest zoomed in scale) where the layer will still be seen."
+        },
         "source": {
           "$ref": "#/definitions/TypeSourceImageStaticInitialConfig"
         },
@@ -1176,6 +1224,14 @@
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "minScale": {
+          "type": "number",
+          "description": "The minimum scale (furthest zoomed out scale) where the layer will still be seen."
+        },
+        "maxScale": {
+          "type": "number",
+          "description": "The maximum scale (furthest zoomed in scale) where the layer will still be seen."
         },
         "source": {
           "$ref": "#/definitions/TypeSourceTileInitialConfig"
@@ -1230,6 +1286,14 @@
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer group entries at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "minScale": {
+          "type": "number",
+          "description": "The minimum scale (furthest zoomed out scale) where the layer will still be seen."
+        },
+        "maxScale": {
+          "type": "number",
+          "description": "The maximum scale (furthest zoomed in scale) where the layer will still be seen."
         },
         "listOfLayerEntryConfig": {
           "$ref": "#/definitions/TypeListOfLayerEntryConfig",
@@ -1642,6 +1706,14 @@
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the GeoView layer at creation time."
         },
+        "minScale": {
+          "type": "number",
+          "description": "The minimum scale (furthest zoomed out scale) where the layer will still be seen."
+        },
+        "maxScale": {
+          "type": "number",
+          "description": "The maximum scale (furthest zoomed in scale) where the layer will still be seen."
+        },
         "listOfLayerEntryConfig": {
           "$ref": "#/definitions/TypeListOfLayerEntryConfig",
           "description": "The layer entries to use from the GeoView layer."
@@ -1739,13 +1811,13 @@
           "type": "integer",
           "description": "The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
           "minimum": 0,
-          "maximum": 50
+          "maximum": 20
         },
         "maxZoom": {
           "type": "integer",
           "description": "The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
           "minimum": 0,
-          "maximum": 50
+          "maximum": 20
         },
         "projection": {
           "$ref": "#/definitions/TypeValidMapProjectionCodes"
@@ -1938,7 +2010,6 @@
                 "enum": [
                   "geolocator",
                   "export",
-                  "basemap-panel",
                   "geochart",
                   "details",
                   "legend",
@@ -1964,7 +2035,6 @@
           "type": "string",
           "enum": [
             "geolocator",
-            "basemap-panel",
             "geochart",
             "details",
             "legend",
@@ -2020,6 +2090,13 @@
       },
       "default": [],
       "description": "Core map packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
+      "minItems": 0
+    },
+    "TypeCorePackagesConfig": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "description": "Core packages configuration (optional, can be in another file).",
       "minItems": 0
     },
     "TypeExternalPackages": {
@@ -2149,6 +2226,9 @@
         },
         "corePackages": {
           "$ref": "#/definitions/TypeMapCorePackages"
+        },
+        "corePackagesConfig": {
+          "$ref": "#/definitions/TypeCorePackagesConfig"
         },
         "externalPackages": {
           "$ref": "#/definitions/TypeExternalPackages"

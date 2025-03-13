@@ -1,5 +1,5 @@
 import { wrap, Remote } from 'comlink';
-import { logger } from '../utils/logger';
+import { logger } from '@/core/utils/logger';
 import { WorkerLogLevel } from './helper/logger-worker';
 
 /**

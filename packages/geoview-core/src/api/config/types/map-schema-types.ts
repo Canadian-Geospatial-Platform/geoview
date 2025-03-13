@@ -23,7 +23,7 @@ export { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select';
+export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection';
 
 /** Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home', 'basemap-select]. */
 export type TypeNavBarProps = TypeValidNavBarProps[];
@@ -53,7 +53,6 @@ export type TypeFooterBarProps = {
 export type TypeValidAppBarCoreProps =
   | 'geolocator'
   | 'export'
-  | 'basemap-panel'
   | 'aoi-panel'
   | 'geochart'
   | 'guide'
@@ -90,6 +89,14 @@ export type TypeValidMapCorePackageProps = 'swiper';
  * Default = [].
  */
 export type TypeMapCorePackages = TypeValidMapCorePackageProps[];
+
+/**
+ * Core packages config to initialize on viewer load. The schema for those are on their own package.
+ * NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json)
+ * OR inline with this parameter
+ * Default = [].
+ */
+export type TypeCorePackagesConfig = [];
 
 /** External package objexct definition. */
 export type TypeExternalPackagesProps = {
@@ -186,12 +193,12 @@ export type TypeViewSettings = {
   maxExtent?: Extent;
   /**
    * The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
-   * Domain = [0..50].
+   * Domain = [0..20].
    */
   minZoom?: number;
   /**
    * The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
-   * Domain = [0..50].
+   * Domain = [0..20].
    */
   maxZoom?: number;
   /**

@@ -9,7 +9,12 @@ import {
   useDetailsSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapStoreActions,
+  useMapVisibleLayers,
+  useMapClickCoordinates,
+  useMapVisibleRangeLayers,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map-schema-types';
 
@@ -43,6 +48,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
+  const visibleRangeLayers = useMapVisibleRangeLayers();
   const mapClickCoordinates = useMapClickCoordinates();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
@@ -120,7 +126,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     // Set the layers list
     const layerListEntries = visibleLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
-      .filter((layer) => layer)
+      // TODO Need to filter by layers in visible range
+      .filter((layer) => layer && visibleRangeLayers.includes(layer.layerPath))
       .map(
         (layer) =>
           ({
@@ -143,7 +150,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
 
     return orderedLayerListEntries;
-  }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel, mapId]);
+  }, [visibleLayers, arrayOfLayerDataBatch, visibleRangeLayers, getNumFeaturesLabel, mapId]);
 
   /**
    * Memoizes the selected layer for the LayerList component.
@@ -459,8 +466,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
                   .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
                 <IconButton
                   sx={{ marginLeft: '1.25rem', [theme.breakpoints.down('sm')]: { display: 'none' } }}
-                  aria-label="clear-all-features"
-                  tooltip="details.clearAllfeatures"
+                  aria-label={t('details.clearAllfeatures') as string}
+                  tooltip={t('details.clearAllfeatures') as string}
                   tooltipPlacement="top"
                   onClick={() => handleClearAllHighlights()}
                   className="buttonOutline"
@@ -473,8 +480,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
             <Grid size={{ xs: 6 }}>
               <Box sx={{ textAlign: 'right', marginRight: '1.625rem' }}>
                 <IconButton
-                  aria-label="backward"
-                  tooltip="details.previousFeatureBtn"
+                  aria-label={t('details.previousFeatureBtn') as string}
+                  tooltip={t('details.previousFeatureBtn') as string}
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(-1)}
                   disabled={currentFeatureIndex <= 0}
@@ -484,8 +491,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
                 </IconButton>
                 <IconButton
                   sx={{ marginLeft: '1.25rem' }}
-                  aria-label="forward"
-                  tooltip="details.nextFeatureBtn"
+                  aria-label={t('details.nextFeatureBtn') as string}
+                  tooltip={t('details.nextFeatureBtn') as string}
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(1)}
                   disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData!.features!.length}

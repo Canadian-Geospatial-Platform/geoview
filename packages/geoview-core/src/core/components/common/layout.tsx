@@ -31,6 +31,7 @@ const TITLE_STYLES = {
 } as const;
 
 // Memoizes entire component, preventing re-renders if props haven't changed
+// TODO: Unmemoize this component, probably, because it's in 'common' folder
 export const Layout = memo(function Layout({
   children,
   guideContentIds,

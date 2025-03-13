@@ -29,5 +29,16 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     // If undefined, we assign the metadataAccessPath of the GeoView layer to the dataAccessPath.
     if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
     if (!this.source.dataAccessPath!.endsWith('/')) this.source.dataAccessPath += '/';
+
+    // Remove ID from dataAccessPath
+    const splitAccessPath = this.source.dataAccessPath!.split('/');
+    if (
+      splitAccessPath[splitAccessPath.length - 2].toLowerCase() !== 'featureserver' &&
+      splitAccessPath[splitAccessPath.length - 2].toLowerCase() !== 'mapserver'
+    ) {
+      splitAccessPath.pop();
+      splitAccessPath.pop();
+      this.source.dataAccessPath = `${splitAccessPath.join('/')}/`;
+    }
   }
 }

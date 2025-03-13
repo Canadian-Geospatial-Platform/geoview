@@ -200,13 +200,18 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // TODO: Refactor - Layers refactoring. What is this doing? See how we can do this in the new layers. Can it be done before?
     const resolutions = sourceOptions.tileGrid.getResolutions();
 
-    if (this.metadata?.defaultStyles)
-      applyStyle(olLayer, `${this.metadataAccessPath}${this.metadata.defaultStyles}/root.json`, {
+    let appliedStyle = layerConfig.styleUrl || (this.metadata?.defaultStyles as string);
+
+    if (appliedStyle) {
+      if (!appliedStyle.endsWith('/root.json')) appliedStyle = `${appliedStyle}/root.json`;
+
+      applyStyle(olLayer, appliedStyle, {
         resolutions: resolutions?.length ? resolutions : [],
       }).catch((error) => {
         // Log
         logger.logPromiseFailed('applyStyle in processOneLayerEntry in VectorTiles', error);
       });
+    }
 
     return Promise.resolve(olLayer);
   }
@@ -222,22 +227,42 @@ export class VectorTiles extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (in config?)
   protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    const updatedLayerConfig = layerConfig;
+    if (!(updatedLayerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     if (this.metadata) {
-      const { tileInfo, fullExtent } = this.metadata;
+      const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = this.metadata;
       const newTileGrid: TypeTileGrid = {
         extent: [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number],
         origin: [tileInfo.origin.x as number, tileInfo.origin.y as number],
         resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
         tileSize: [tileInfo.rows as number, tileInfo.cols as number],
       };
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.source!.tileGrid = newTileGrid;
+      updatedLayerConfig.source!.tileGrid = newTileGrid;
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+      updatedLayerConfig.initialSettings.extent = validateExtentWhenDefined(updatedLayerConfig.initialSettings.extent);
+
+      // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
+      // First set the min/max scales based on the service / config
+      // * Infinity and -Infinity are used as extreme zoom level values in case the value is undefined
+      if (minScale) {
+        updatedLayerConfig.minScale = Math.min(updatedLayerConfig.minScale ?? Infinity, minScale as number);
+      }
+
+      if (maxScale) {
+        updatedLayerConfig.maxScale = Math.max(updatedLayerConfig.maxScale ?? -Infinity, maxScale as number);
+      }
+
+      // Second, set the min/max zoom levels based on the service / config.
+      // GV Vector tiles should always have a minZoom and maxZoom, so -Infinity or Infinity should never be set as a value
+      if (minZoom) {
+        updatedLayerConfig.initialSettings.minZoom = Math.max(updatedLayerConfig.initialSettings.minZoom ?? -Infinity, minZoom as number);
+      }
+
+      if (maxZoom) {
+        updatedLayerConfig.initialSettings.maxZoom = Math.min(updatedLayerConfig.initialSettings.maxZoom ?? Infinity, maxZoom as number);
+      }
     }
-    return Promise.resolve(layerConfig);
+    return Promise.resolve(updatedLayerConfig);
   }
 }

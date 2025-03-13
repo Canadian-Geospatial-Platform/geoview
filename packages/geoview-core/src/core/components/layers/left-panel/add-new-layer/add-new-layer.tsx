@@ -486,6 +486,7 @@ export function AddNewLayer(): JSX.Element {
                 new EsriDynamicLayerEntryConfig({
                   geoviewLayerConfig: esriGeoviewLayerConfig,
                   layerId: aLayer.id as string,
+                  schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
                   layerName: aLayer.name as string,
                 } as EsriDynamicLayerEntryConfig)
               )
@@ -494,7 +495,11 @@ export function AddNewLayer(): JSX.Element {
             layers.push(
               new EsriFeatureLayerEntryConfig({
                 geoviewLayerConfig: esriGeoviewLayerConfig,
-                layerId: esriMetadata.layers[0].id as string,
+                layerId:
+                  layerURL.split('/').pop()?.toLowerCase() !== 'mapserver' && layerURL.split('/').pop()?.toLowerCase() !== 'featureserver'
+                    ? layerURL.split('/').pop()
+                    : (esriMetadata.layers[0].id as string),
+                schemaTag: CONST_LAYER_TYPES.ESRI_FEATURE,
                 layerName: esriMetadata.layers[0].name as string,
               } as EsriFeatureLayerEntryConfig)
             );
@@ -540,6 +545,7 @@ export function AddNewLayer(): JSX.Element {
         new EsriImageLayerEntryConfig({
           geoviewLayerConfig: esriImageGeoviewLayerConfig,
           layerId: esriImageGeoviewLayerConfig.geoviewLayerId,
+          schemaTag: CONST_LAYER_TYPES.ESRI_IMAGE,
           layerName: typeof esriImageGeoviewLayerInstance.metadata?.name === 'string' ? esriImageGeoviewLayerInstance.metadata?.name : '',
           source: {
             dataAccessPath: layerURL,
@@ -585,6 +591,7 @@ export function AddNewLayer(): JSX.Element {
         new XYZTilesLayerEntryConfig({
           geoviewLayerConfig: xyzGeoviewLayerConfig,
           layerId: xyzGeoviewLayerConfig.geoviewLayerId,
+          schemaTag: CONST_LAYER_TYPES.XYZ_TILES,
           layerName: '',
           source: {
             dataAccessPath: layerURL,
@@ -692,6 +699,7 @@ export function AddNewLayer(): JSX.Element {
           new GeoJSONLayerEntryConfig({
             geoviewLayerConfig: geojsonGeoviewLayerConfig,
             layerId: geojsonGeoviewLayerConfig.geoviewLayerId,
+            schemaTag: CONST_LAYER_TYPES.GEOJSON,
             layerName: '',
             source: {
               dataAccessPath: layerURL,
@@ -1120,10 +1128,10 @@ export function AddNewLayer(): JSX.Element {
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>): void => {
-    if (e.key === 'Enter') {
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>): void => {
+    if (event.key === 'Enter') {
       handleBack();
-      e.preventDefault();
+      event.preventDefault();
     }
   };
 

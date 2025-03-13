@@ -18,8 +18,8 @@ import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
-import { featureInfoGetFieldType } from '../utils';
-import { AbstractGVLayer } from '../abstract-gv-layer';
+import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { getExtentUnion } from '@/geo/utils/utilities';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
@@ -111,7 +111,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
       const features = this.getOLSource()!.getFeatures();
-      return this.formatFeatureInfoResult(features, layerConfig);
+      return Promise.resolve(this.formatFeatureInfoResult(features, layerConfig));
     } catch (error) {
       // Log
       logger.logError('abstract-gv-vector.getAllFeatureInfo()\n', error);
@@ -140,7 +140,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       const features = this.getMapViewer().map.getFeaturesAtPixel(location, { hitTolerance: this.hitTolerance, layerFilter }) as Feature[];
 
       // Format and return the features
-      return this.formatFeatureInfoResult(features, this.getLayerConfig());
+      return Promise.resolve(this.formatFeatureInfoResult(features, this.getLayerConfig()));
     } catch (error) {
       // Log
       logger.logError('abstract-gv-vector.getFeatureInfoAtPixel()\n', error);

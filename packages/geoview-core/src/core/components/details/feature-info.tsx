@@ -21,8 +21,8 @@ interface FeatureHeaderProps {
   name: string;
   hasGeometry: boolean;
   checked: boolean;
-  onCheckChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onZoomIn: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onCheckChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onZoomIn: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 // Constants outside component to prevent recreating every render
@@ -69,10 +69,15 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
         <Tooltip title={t('details.keepFeatureSelected')} placement="top" enterDelay={1000}>
           <Checkbox disabled={!hasGeometry} onChange={onCheckChange} checked={checked} sx={sxClasses.selectFeatureCheckbox} />
         </Tooltip>
-        <IconButton color="primary" disabled={!hasGeometry} onClick={onZoomIn} className="buttonOutline">
-          <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
-            <ZoomInSearchIcon />
-          </Tooltip>
+        <IconButton
+          color="primary"
+          tooltip={t('details.zoomTo') as string}
+          tooltipPlacement="top"
+          disabled={!hasGeometry}
+          onClick={onZoomIn}
+          className="buttonOutline"
+        >
+          <ZoomInSearchIcon />
         </IconButton>
       </Box>
     </Box>
@@ -128,8 +133,8 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
   // Event Handlers
   const handleFeatureSelectedChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      e.stopPropagation();
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      event.stopPropagation();
       if (!feature) return;
 
       if (!checked) {
@@ -142,8 +147,8 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   );
 
   const handleZoomIn = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>): void => {
-      e.stopPropagation();
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      event.stopPropagation();
       if (!featureData?.extent) return;
 
       const center = getCenter(featureData.extent);
@@ -186,7 +191,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
       <FeatureHeader
         iconSrc={featureData.iconSrc}
         name={featureData.name}
-        hasGeometry={!!featureData.geometry && !!featureData.extent}
+        hasGeometry={!!featureData.geometry && !!featureData.extent && !featureData.extent.includes(Infinity)}
         checked={checked}
         onCheckChange={handleFeatureSelectedChange}
         onZoomIn={handleZoomIn}

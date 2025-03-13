@@ -45,6 +45,8 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
   constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
     super(geoviewLayerConfig, language);
 
+    // TODO: remove once datacube URLs are updated
+    this.metadataAccessPath = this.metadataAccessPath.replace('wrapper/ramp/ogc', 'ows');
     // If user has provided parameters, extract the layers=layerId and transfer the layerId to the listOfLayerEntryConfig.
     const metadataAccessPathItems = this.metadataAccessPath.split('?');
     if (metadataAccessPathItems.length > 2) {
@@ -149,8 +151,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    * @override @async
    */
   override async fetchServiceMetadata(): Promise<void> {
-    const metadataAccessPathIsXmlFile = this.metadataAccessPath.slice(-4).toLowerCase() === '.xml';
-    if (metadataAccessPathIsXmlFile) {
+    if (this.metadataAccessPath.toLowerCase().endsWith('.xml')) {
       // XML metadata is a special case that does not use GetCapabilities to get the metadata
       await this.#fetchXmlServiceMetadata(this.metadataAccessPath);
     } else {
@@ -539,10 +540,6 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       if (layer.Dimension === undefined) layer.Dimension = parentLayer.Dimension;
       // eslint-disable-next-line no-param-reassign
       if (layer.Attribution === undefined) layer.Attribution = parentLayer.Attribution;
-      // eslint-disable-next-line no-param-reassign
-      if (layer.MaxScaleDenominator === undefined) layer.MaxScaleDenominator = parentLayer.MaxScaleDenominator;
-      // eslint-disable-next-line no-param-reassign
-      if (layer.MaxScaleDenominator === undefined) layer.MaxScaleDenominator = parentLayer.MaxScaleDenominator;
       // Table 7 — Inheritance of Layer properties specified in the standard with 'add' behaviour.
       // AuthorityURL inheritance is not implemented in the following code.
       if (parentLayer.Style) {

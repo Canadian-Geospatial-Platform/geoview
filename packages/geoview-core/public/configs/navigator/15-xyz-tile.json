@@ -22,7 +22,22 @@
             "initialSettings": { "minZoom": 3, "maxZoom": 8 }
           }
         ]
-      }
+      },
+      {
+        "geoviewLayerId": "xyzTilesLYR2",
+        "geoviewLayerName": "GNOSIS_Blue_Marble",
+        "metadataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "blueMarble",
+            "layerName": "GNOSIS Blue Marble",
+            "source": {
+              "dataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad/{z}/{y}/{x}.jpg"
+            }
+          }
+        ]
+      } 
     ]
   },
   "components": ["overview-map"],

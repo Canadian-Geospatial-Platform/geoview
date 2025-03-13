@@ -183,7 +183,8 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "CBMT_CBCT_3978_V_OSM",
-            "layerName": "Tile basemap",
+            "layerName": "Vector Tile basemap - French Style",
+            "styleUrl": "https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/88ad9e2ef6e040a19472985e6606a2f9/resources/styles/root.json",
             "initialSettings": { "minZoom": 3, "maxZoom": 18 }
           }
         ]

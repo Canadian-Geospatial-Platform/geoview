@@ -42,6 +42,18 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     this.getLayerState(mapId).setterActions.setSelectedLayerPath(layerPath);
   }
 
+  static reorderLegendLayers(mapId: string): void {
+    // Sort the layers
+    const sortedLayers = this.getLayerState(mapId).legendLayers.sort(
+      (a, b) =>
+        MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, a.layerPath) -
+        MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, b.layerPath)
+    );
+
+    // Save in store
+    this.getLayerState(mapId).setterActions.setLegendLayers(sortedLayers);
+  }
+
   /**
    * Gets a specific state.
    * @param {string} mapId - The mapId
@@ -493,6 +505,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static setItemVisibility(mapId: string, item: TypeLegendItem, visibility: boolean = true): void {
     // Get current layer legends and set item visibility
     const curLayers = this.getLayerState(mapId).legendLayers;
+
+    // TODO: Check - Is this line really at the right place in this function? It doesn't seem to be doing anything with regards to 'curLayers'!?
     // eslint-disable-next-line no-param-reassign
     item.isVisible = visibility;
 
@@ -650,7 +664,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // Filter features based on visibility
     return features.filter((feature) => {
-      const fieldValues = uniqueValueStyle.fields.map((field) => feature.fieldInfo[field]!.value).join(';');
+      const fieldValues = uniqueValueStyle.fields.map((field) => feature.fieldInfo[field]?.value).join(';');
 
       return (
         visibleValues.has(fieldValues.toString()) ||

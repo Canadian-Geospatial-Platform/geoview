@@ -102,7 +102,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     setDensity(updaterOrValue);
   };
 
-  const handleToggleColumnFilters = () => {
+  const handleToggleColumnFilters = (): void => {
     setShowColumnFilters((prev) => !prev);
     setColumnsFiltersVisibility(false, layerPath);
   };

@@ -200,7 +200,7 @@ const ResponsiveGridLayout = forwardRef(
             ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
           }}
           onClick={() => setIsRightPanelVisible(false)}
-          tooltip={t('dataTable.close') ?? ''}
+          tooltip={t('dataTable.close') as string}
         >
           {t('dataTable.close')}
         </Button>

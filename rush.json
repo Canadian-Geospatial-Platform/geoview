@@ -24,10 +24,6 @@
       "projectFolder": "packages/geoview-aoi-panel"
     },
     {
-      "packageName": "geoview-basemap-panel",
-      "projectFolder": "packages/geoview-basemap-panel"
-    },
-    {
       "packageName": "geoview-core",
       "projectFolder": "packages/geoview-core"
     },
