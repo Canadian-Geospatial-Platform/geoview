@@ -976,6 +976,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerList([]);
     setLayerName(fileName);
     setLayerEntries([]);
+    setStepButtonDisable(false);
   };
 
   /**
@@ -994,7 +995,13 @@ export function AddNewLayer(): JSX.Element {
     // TODO: create a utilities function to test valid URL before we enable the continue button
     // TO.DOCONT: This function should try to ping the server for an answer...
     // Check if url or geocore is provided
-    setStepButtonDisable(!(event.target.value.trim().startsWith('https://') || event.target.value.trim().length !== 35));
+    setStepButtonDisable(
+      !(
+        event.target.value.trim().startsWith('https://') ||
+        event.target.value.trim().startsWith('http://') ||
+        event.target.value.trim().length !== 35
+      )
+    );
   };
 
   /**
