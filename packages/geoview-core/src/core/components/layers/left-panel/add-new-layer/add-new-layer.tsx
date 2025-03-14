@@ -782,7 +782,7 @@ export function AddNewLayer(): JSX.Element {
       setLayerType(GEOCORE);
     } else if (displayURL.toUpperCase().indexOf('WMS') !== -1) {
       setLayerType(WMS);
-    } else if (displayURL.toUpperCase().endsWith('.CSV')) {
+    } else if (displayURL.toUpperCase().endsWith('.CSV') || displayURL.toUpperCase().includes('.CSV?')) {
       setLayerType(CSV);
     } else {
       setLayerType('');

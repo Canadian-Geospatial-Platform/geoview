@@ -41,7 +41,7 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
     if (
       !(this.source.dataAccessPath!.startsWith('blob') && !this.source.dataAccessPath!.endsWith('/')) &&
       !this.source.dataAccessPath!.toUpperCase().endsWith('.CSV') &&
-      !this.source.dataAccessPath!.toUpperCase().endsWith('DOWNLOAD')
+      !this.source.dataAccessPath!.toUpperCase().includes('.CSV?')
     ) {
       this.source.dataAccessPath! = this.source.dataAccessPath!.endsWith('/')
         ? `${this.source.dataAccessPath!}${this.layerId}`
