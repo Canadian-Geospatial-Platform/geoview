@@ -3,8 +3,6 @@
 import axios from 'axios';
 import { Extent } from 'ol/extent';
 
-import cloneDeep from 'lodash/cloneDeep';
-
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { getXMLHttpRequest } from '@/core/utils/utilities';
@@ -138,7 +136,8 @@ export function commonValidateListOfLayerEntryConfig(
     if (layer.metadata!.layers[esriIndex]?.subLayerIds?.length) {
       // We will create dynamically a group layer.
       const newListOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
-      const switchToGroupLayer = Cast<GroupLayerEntryConfig>(cloneDeep(layerConfig));
+      // If we cloneDeep the layerConfig, it seems to clone pointer for parentLayerConfig and geoviewLayerConfig to objects
+      const switchToGroupLayer = Cast<GroupLayerEntryConfig>({ ...layerConfig });
       switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
 
       // Only switch the layer name by the metadata if there were none pre-set (config wins over metadata rule?)
@@ -412,6 +411,9 @@ export async function commonProcessLayerMetadata<
           if (renderer) EsriLayerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
         }
       }
+
+      if (data.spatialReference && !Projection.getProjectionFromObj(data.spatialReference))
+        await Projection.addProjection(data.spatialReference);
 
       layer.processFeatureInfoConfig(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
       layer.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
