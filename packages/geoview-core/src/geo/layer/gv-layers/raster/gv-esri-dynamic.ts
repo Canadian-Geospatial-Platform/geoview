@@ -83,7 +83,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Set the image spatial reference to the service source - performance is better when open layers does the conversion
     // Older versions of ArcGIS Server are not properly converted, so this is only used for version 10.8+
     const version = layerConfig.getLayerMetadata()?.currentVersion as number;
-    const sourceSr = layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;
+    const sourceSr =
+      layerConfig.getLayerMetadata()?.sourceSpatialReference?.latestWkid || layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;
     if (sourceSr && version && version >= 10.8) imageLayerOptions.source?.updateParams({ imageSR: sourceSr });
 
     // Init the layer options with initial settings
@@ -964,7 +965,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         if (extent) {
           const projExtent = Projection.transformExtentFromProj(
             [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
-            `EPSG:${extent.spatialReference.wkid}`,
+            `EPSG:${extent.spatialReference.latestWkid || extent.spatialReference.wkid}`,
             this.getMapViewer().getProjection().getCode()
           );
           return validateExtent(projExtent, this.getMapViewer().getProjection().getCode());
