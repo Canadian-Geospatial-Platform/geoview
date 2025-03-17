@@ -126,6 +126,12 @@ export declare abstract class AbstractBaseLayer {
      */
     setMaxZoom(maxZoom: number): void;
     /**
+     * Checks if layer is visible at the given zoom
+     * @param zoom Zoom level to be compared
+     * @returns {boolean} If the layer is visible at this zoom level
+     */
+    inVisibleRange(zoom: number): boolean;
+    /**
      * Registers a layer name changed event handler.
      * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
      */

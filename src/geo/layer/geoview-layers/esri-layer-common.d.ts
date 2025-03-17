@@ -56,7 +56,7 @@ export declare function commonProcessTemporalDimension(layer: EsriDynamic | Esri
 /** ***************************************************************************************************************************
  * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
  *
- * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
+ * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
  * @param {EsriFeatureLayerEntryConfig |
  *         EsriDynamicLayerEntryConfig |
  *         EsriImageLayerEntryConfig} layerConfig The layer entry to configure.

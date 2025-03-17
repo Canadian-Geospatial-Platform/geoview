@@ -193,7 +193,7 @@ export declare function getMetersPerPixel(projection: TypeValidMapProjectionCode
  * @param targetScale The desired scale (e.g. 50000 for 1:50,000)
  * @returns number representing the closest zoom level for the given scale
  */
-export declare const getZoomFromScale: (view: View, targetScale: number) => number | undefined;
+export declare const getZoomFromScale: (view: View, targetScale: number | undefined) => number | undefined;
 /**
  * Convert a map scale to zoom level
  * @param view The view for converting the zoom

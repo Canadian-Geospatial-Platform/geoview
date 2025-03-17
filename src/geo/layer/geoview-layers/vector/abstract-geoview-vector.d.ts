@@ -66,14 +66,13 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param {string} layerPath - The layer path of the layer.
      * @param {string} url - The base url for the service.
      * @param {number} featureCount - The number of features in the layer.
-     * @param {string} oidField - The unique identifier field name.
      * @param {number} maxRecordCount - The max features per query from the service.
      * @param {number} featureLimit - The maximum number of features to fetch per query.
      * @param {number} queryLimit - The maximum number of queries to run at once.
      * @returns {Promise<string[]>} An array of the response text for the features.
      * @private
      */
-    static getEsriFeatures(layerPath: string, url: string, featureCount: number, oidField: string, maxRecordCount?: number, featureLimit?: number, queryLimit?: number): Promise<string[]>;
+    static getEsriFeatures(layerPath: string, url: string, featureCount: number, maxRecordCount?: number, featureLimit?: number): Promise<string[]>;
     /** ***************************************************************************************************************************
      * Create a vector layer. The layer has in its properties a reference to the layer configuration used at creation time.
      * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
