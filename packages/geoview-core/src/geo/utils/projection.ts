@@ -27,7 +27,7 @@ export abstract class Projection {
   /**
    * constant used for the available projection names
    */
-  static PROJECTION_NAMES = {
+  static PROJECTION_NAMES: Record<string, string> = {
     3578: 'EPSG:3578',
     LCC: 'EPSG:3978',
     3979: 'EPSG:3979',
@@ -225,6 +225,37 @@ export abstract class Projection {
    */
   static transformToLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate {
     return toLonLat(coordinate, projection);
+  }
+
+  /**
+   * Fetches definitions for unsupported projections and adds them.
+   * @param {TypeJsonObject} projection - Object containing wkid and possibly latestWkid from service metadata.
+   */
+  static async addProjection(projection: TypeJsonObject): Promise<void> {
+    // Add latestWkid if provided
+    if (projection.latestWkid && projection.latestWkid !== projection.wkid) await this.addProjection({ wkid: projection.latestWkid });
+
+    const code = projection.wkid as string;
+    const projectionName = `EPSG:${code}`;
+
+    try {
+      // Fetch proj4 definition from epsg.io
+      const response = await fetch(`https://epsg.io/${code}.proj4`);
+      const definition = await response.text();
+
+      if (definition) {
+        // Register in proj4 if fetched
+        proj4.defs(projectionName, definition);
+        register(proj4);
+
+        // Register in supported projections
+        this.PROJECTION_NAMES = { ...this.PROJECTION_NAMES, [code]: projectionName };
+        const foundOlProjection = olGetProjection(projectionName);
+        if (foundOlProjection) this.PROJECTIONS[code] = foundOlProjection;
+      } else logger.logError(`Unable to add projection ${projectionName}, definiton not found`);
+    } catch {
+      logger.logError(`Unable to add projection ${projectionName}, definiton not found`);
+    }
   }
 
   /**

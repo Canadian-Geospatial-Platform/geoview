@@ -69,7 +69,9 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
       featureInfo: this.createFeatureInfoUsingMetadata(),
       format: 'EsriJSON' as TypeVectorSourceFormats, // The only possible value
       strategy: 'all', // default value
-      projection: layerMetadata.sourceSpatialReference.wkid as TypeValidMapProjectionCodes,
+      projection:
+        (layerMetadata.sourceSpatialReference.latestWkid as TypeValidMapProjectionCodes) ||
+        (layerMetadata.sourceSpatialReference.wkid as TypeValidMapProjectionCodes),
     };
 
     const renderer = Cast<EsriBaseRenderer>(layerMetadata.drawingInfo?.renderer);
