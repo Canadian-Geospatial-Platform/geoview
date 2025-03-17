@@ -88,7 +88,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
       layerMetadata.extent.ymax,
     ] as Extent;
 
-    const sourceProj = layerMetadata.extent.spatialReference.wkid;
+    const sourceProj = layerMetadata.initialExtent.spatialReference.latestWkid || layerMetadata.initialExtent.spatialReference.wkid;
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else {
       metadataExtent = Projection.transformExtentFromObj(

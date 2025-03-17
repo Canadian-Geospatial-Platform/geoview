@@ -17,6 +17,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 import { api } from '@/app';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
@@ -241,6 +242,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
       updatedLayerConfig.source!.tileGrid = newTileGrid;
 
       updatedLayerConfig.initialSettings.extent = validateExtentWhenDefined(updatedLayerConfig.initialSettings.extent);
+
+      if (fullExtent.spatialReference && !Projection.getProjectionFromObj(fullExtent.spatialReference))
+        Projection.addProjection(fullExtent.spatialReference).catch((error) => logger.logError(error));
 
       // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
       // First set the min/max scales based on the service / config

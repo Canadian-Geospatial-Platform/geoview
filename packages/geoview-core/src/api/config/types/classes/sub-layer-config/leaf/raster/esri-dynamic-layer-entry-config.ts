@@ -70,7 +70,9 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
       featureInfo: this.createFeatureInfoUsingMetadata(),
       format: 'png' as TypeEsriFormatParameter,
       transparent: true,
-      projection: layerMetadata.sourceSpatialReference.wkid as TypeValidMapProjectionCodes,
+      projection:
+        (layerMetadata.initialExtent.spatialReference.latestWkid as TypeValidMapProjectionCodes) ||
+        (layerMetadata.initialExtent.spatialReference.wkid as TypeValidMapProjectionCodes),
     };
 
     const renderer = Cast<EsriBaseRenderer>(layerMetadata.drawingInfo?.renderer);

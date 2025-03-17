@@ -94,7 +94,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
       layerMetadata.initialExtent.xmax,
       layerMetadata.initialExtent.ymax,
     ] as Extent;
-    const sourceProj = layerMetadata.initialExtent.spatialReference.wkid;
+    const sourceProj = layerMetadata.initialExtent.spatialReference.latestWkid || layerMetadata.initialExtent.spatialReference.wkid;
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else
       this.initialSettings.extent = validateExtentWhenDefined(
@@ -129,7 +129,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
       serviceMetadata.initialExtent.xmax,
       serviceMetadata.initialExtent.ymax,
     ] as Extent;
-    const sourceProj = serviceMetadata.initialExtent.spatialReference.wkid;
+    const sourceProj = serviceMetadata.initialExtent.spatialReference.latestWkid || serviceMetadata.initialExtent.spatialReference.wkid;
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else
       this.initialSettings.extent = validateExtentWhenDefined(
