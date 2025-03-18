@@ -18,7 +18,7 @@ import {
 export const CV_CONFIG_GEOCORE_URL = 'https://geocore.api.geo.ca';
 
 /** The default geolocator url */
-export const CV_CONFIG_GEOLOCATOR_URL = 'https://geolocator-stage.api.geo.ca?keys=geonames,nominatim,locate';
+export const CV_CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
 
 /** The default geolocator url */
 export const CV_CONFIG_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
