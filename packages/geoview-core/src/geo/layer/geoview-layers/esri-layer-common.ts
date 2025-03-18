@@ -8,7 +8,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { getXMLHttpRequest } from '@/core/utils/utilities';
-import { getZoomFromScale, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -158,7 +158,7 @@ export function commonValidateListOfLayerEntryConfig(
 
       (layer.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
         // Make sure to copy the layerConfig source before recycling it in the constructors. This was causing the 'source' value to leak between layer entry configs
-        const layerConfigCopy = { ...layerConfig, source: { ...layerConfig.source } };
+        const layerConfigCopy = { ...layerConfig, source: { ...layerConfig.source }, initialSettings: { ...layerConfig.initialSettings } };
 
         let subLayerEntryConfig;
         if (geoviewEntryIsEsriDynamic(layerConfig)) {
@@ -343,9 +343,15 @@ export function commonProcessInitialSettings(
   const layerMetadata = layer.getLayerMetadata(layerConfig.layerPath);
   if (layerConfig.initialSettings?.states?.visible === undefined)
     layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
-  // GV TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
-  if (layerConfig.minScale === undefined && layerMetadata.minScale !== 0) layerConfig.minScale = layerMetadata.minScale as number;
-  if (layerConfig.maxScale === undefined && layerMetadata.maxScale !== 0) layerConfig.maxScale = layerMetadata.maxScale as number;
+
+  // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
+  if (layerMetadata.minScale) {
+    layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerMetadata.minScale as number);
+  }
+
+  if (layerMetadata.maxScale) {
+    layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerMetadata.maxScale as number);
+  }
 
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
@@ -367,23 +373,6 @@ export function commonProcessInitialSettings(
       layerConfig.initialSettings!.bounds = latlonExtent;
     }
   }
-
-  // Set zoom limits for max / min zooms
-  const mapView = layer.getMapViewer().getView();
-  if (layerConfig.maxScale) {
-    const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-    if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
-      layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
-    }
-  }
-
-  if (layerConfig.minScale) {
-    const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-    if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
-      layerConfig.initialSettings.minZoom = minScaleZoomLevel;
-    }
-  }
-
   layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
 }
 
