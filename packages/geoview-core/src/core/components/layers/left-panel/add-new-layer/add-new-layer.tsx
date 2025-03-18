@@ -51,6 +51,7 @@ import { TypeXYZTilesConfig, XYZTiles } from '@/geo/layer/geoview-layers/raster/
 import { EsriFeature, TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { GeoJSON, TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
+import { ConfigApi } from '@/api/config/config-api';
 
 type EsriOptions = {
   err: string;
@@ -79,7 +80,7 @@ export function AddNewLayer(): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [drag, setDrag] = useState<boolean>(false);
   const [hasMetadata, setHasMetadata] = useState<boolean>(false);
-  const [stepButtonDisable, setStepButtonDisable] = useState<boolean>(true);
+  const [stepButtonEnabled, setStepButtonEnabled] = useState<boolean>(false);
 
   const dragPopover = useRef(null);
   const uploadBtnRef = useRef<HTMLButtonElement>(null);
@@ -786,7 +787,7 @@ export function AddNewLayer(): JSX.Element {
       setLayerType(CSV);
     } else {
       setLayerType('');
-      setStepButtonDisable(true);
+      setStepButtonEnabled(false);
     }
   };
 
@@ -835,7 +836,7 @@ export function AddNewLayer(): JSX.Element {
             setActiveStep(2);
 
             // disable continue button until a layer entry is selected
-            setStepButtonDisable(true);
+            setStepButtonEnabled(false);
           }
         })
         .catch((error) => {
@@ -959,7 +960,7 @@ export function AddNewLayer(): JSX.Element {
     setActiveStep((prevActiveStep: number) => prevActiveStep - 1);
 
     // We assume previous step ok, so enable continue button
-    setStepButtonDisable(false);
+    setStepButtonEnabled(true);
   };
 
   /**
@@ -976,7 +977,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerList([]);
     setLayerName(fileName);
     setLayerEntries([]);
-    setStepButtonDisable(false);
+    setStepButtonEnabled(true);
   };
 
   /**
@@ -995,7 +996,7 @@ export function AddNewLayer(): JSX.Element {
     // TODO: create a utilities function to test valid URL before we enable the continue button
     // TO.DOCONT: This function should try to ping the server for an answer...
     // Check if url or geocore is provided
-    setStepButtonDisable(!(event.target.value.trim().startsWith('https://') || event.target.value.trim().length !== 35));
+    setStepButtonEnabled(event.target.value.trim().startsWith('https://') || ConfigApi.isValidUUID(event.target.value.trim()));
   };
 
   /**
@@ -1008,7 +1009,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerList([]);
     setLayerEntries([]);
 
-    setStepButtonDisable(false);
+    setStepButtonEnabled(true);
   };
 
   /**
@@ -1020,20 +1021,20 @@ export function AddNewLayer(): JSX.Element {
    * @param newValue value/label pairs of select options
    */
   const handleSelectLayer = (event: Event, newValue: TypeLayerEntryConfig[] | TypeLayerEntryConfig): void => {
-    setStepButtonDisable(true);
+    setStepButtonEnabled(false);
 
     if (isMultiple()) {
       if (!((newValue as TypeLayerEntryConfig[]).length === 0)) {
         setLayerEntries(newValue as TypeLayerEntryConfig[]);
         setLayerName((newValue as TypeLayerEntryConfig[]).map((layerConfig) => layerConfig.layerName).join(', '));
 
-        setStepButtonDisable(false);
+        setStepButtonEnabled(true);
       }
     } else {
       setLayerEntries([newValue as TypeLayerEntryConfig]);
       setLayerName((newValue as TypeLayerEntryConfig).layerName!);
 
-      setStepButtonDisable(false);
+      setStepButtonEnabled(true);
     }
   };
 
@@ -1043,13 +1044,13 @@ export function AddNewLayer(): JSX.Element {
    * @param {ChangeEvent<HTMLInputElement>} event - TextField event
    */
   const handleNameLayer = (event: ChangeEvent<HTMLInputElement>): void => {
-    setStepButtonDisable(false);
+    setStepButtonEnabled(true);
     setLayerName(event.target.value);
   };
 
   // To set the button enable when validation set the layerName
   useEffect(() => {
-    if (activeStep === 2 && layerEntries.length > 0) setStepButtonDisable(false);
+    if (activeStep === 2 && layerEntries.length > 0) setStepButtonEnabled(true);
   }, [layerName, activeStep, layerEntries]);
 
   useEffect(() => {
@@ -1156,7 +1157,7 @@ export function AddNewLayer(): JSX.Element {
           className="buttonOutlineFilled"
           size="small"
           type="text"
-          disabled={stepButtonDisable}
+          disabled={!stepButtonEnabled}
           onClick={handleNext}
         >
           {isLast ? t('layers.finish') : t('layers.continue')}
