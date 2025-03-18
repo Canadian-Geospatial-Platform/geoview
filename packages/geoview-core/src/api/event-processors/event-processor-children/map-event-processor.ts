@@ -58,6 +58,7 @@ import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -1074,8 +1075,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const layerMaxZoom = geoviewLayer!.getMaxZoom();
     const layerMinZoom = geoviewLayer!.getMinZoom();
 
-    if (layerMinZoom !== Infinity && layerMinZoom > mapZoom!) view.setZoom(layerMinZoom + 0.1);
-    else if (layerMaxZoom !== Infinity && layerMaxZoom < mapZoom!) view.setZoom(layerMaxZoom - 0.1);
+    // Set the right zoom (Infinity will act as a no change in zoom level)
+    let layerZoom = Infinity;
+    if (layerMinZoom !== Infinity && layerMinZoom > mapZoom!) layerZoom = layerMinZoom + 0.1;
+    else if (layerMaxZoom !== -Infinity && layerMaxZoom < mapZoom!) layerZoom = layerMaxZoom - 0.1;
+
+    // Change view to go to proper zoom centered in the middle of layer extent
+    // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
+    const layerExtent = (geoviewLayer! as AbstractGVLayer).getBounds();
+    const centerExtent =
+      layerExtent && layerMinZoom > mapZoom! ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2] : undefined;
+
+    view.animate({
+      center: centerExtent,
+      zoom: layerZoom,
+      duration: OL_ZOOM_DURATION,
+    });
   }
 
   /**
