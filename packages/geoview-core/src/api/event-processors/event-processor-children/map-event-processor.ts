@@ -1061,6 +1061,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.zoomToExtent(mapId, extent, options);
   }
 
+  /**
+   * Zoom to layer visible scale.
+   *
+   * @param {string} mapId - ID of map to zoom on
+   * @param {string} layerPath - Path of layer to zoom to.
+   */
   static zoomToLayerVisibleScale(mapId: string, layerPath: string): void {
     const view = this.getMapViewer(mapId).getView();
     const mapZoom = view.getZoom();
