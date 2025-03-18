@@ -14,7 +14,7 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { getZoomFromScale, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
@@ -258,28 +258,19 @@ export class XYZTiles extends AbstractGeoViewRaster {
       newLayerConfig.initialSettings.extent = validateExtentWhenDefined(newLayerConfig.initialSettings.extent);
 
       // Set zoom limits for max / min zooms
+      const maxScale = metadataLayerConfigFound?.maxScale as number;
+      const minScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number;
       newLayerConfig.maxScale =
-        (metadataLayerConfigFound?.maxScale as number) || ((metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number);
+        !maxScale && !minScaleDenominator
+          ? newLayerConfig.maxScale
+          : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, newLayerConfig.maxScale ?? -Infinity);
 
+      const minScale = metadataLayerConfigFound?.minScale as number;
+      const maxScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number;
       newLayerConfig.minScale =
-        (metadataLayerConfigFound?.minScale as number) || ((metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number);
-
-      // GV Note: minScale is actually the maxZoom and maxScale is actually the minZoom
-      // GV As the scale gets smaller, the zoom gets larger
-      const mapView = this.getMapViewer().getView();
-      if (newLayerConfig?.minScale) {
-        const maxScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.minScale as number);
-        if (maxScaleZoomLevel && (!newLayerConfig.initialSettings.maxZoom || maxScaleZoomLevel > newLayerConfig.initialSettings.maxZoom)) {
-          newLayerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
-        }
-      }
-
-      if (newLayerConfig?.maxScale) {
-        const minScaleZoomLevel = getZoomFromScale(mapView, newLayerConfig.maxScale as number);
-        if (minScaleZoomLevel && (!newLayerConfig.initialSettings.minZoom || minScaleZoomLevel < newLayerConfig.initialSettings.minZoom)) {
-          newLayerConfig.initialSettings.minZoom = minScaleZoomLevel;
-        }
-      }
+        !minScale && !maxScaleDenominator
+          ? newLayerConfig.minScale
+          : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, newLayerConfig.minScale ?? Infinity);
     }
     return Promise.resolve(newLayerConfig);
   }

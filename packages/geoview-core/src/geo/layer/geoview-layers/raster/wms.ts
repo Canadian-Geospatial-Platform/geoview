@@ -12,7 +12,7 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getZoomFromScale, validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { api, WMS_PROXY_URL } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -635,41 +635,21 @@ export class WMS extends AbstractGeoViewRaster {
         if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
         MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
 
-        // TODO Add Scale and Zoom level changes to config
-        // TODO Since web map runs mostly in zoom levels, may not need Scale limits. Just hold them locally until converted
-        // Set Min/Max Scale Limits
+        // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
+        // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because
+        // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
         // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
-        if (
-          layerCapabilities.MinScaleDenominator &&
-          (!layerConfig.maxScale! || layerConfig.maxScale >= (layerCapabilities.MinScaleDenominator as unknown as number))
-        )
-          layerConfig.maxScale = layerCapabilities.MinScaleDenominator as number;
-        if (
-          layerCapabilities.MaxScaleDenominator &&
-          (!layerConfig.minScale || layerConfig.minScale < (layerCapabilities.MaxScaleDenominator as unknown as number))
-        )
-          layerConfig.minScale = layerCapabilities.MaxScaleDenominator as number;
+        if (layerCapabilities.MinScaleDenominator) {
+          layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerCapabilities.MinScaleDenominator as number);
+        }
+        if (layerCapabilities.MaxScaleDenominator) {
+          layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerCapabilities.MaxScaleDenominator as number);
+        }
 
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox)
           layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
-
-        // Set zoom limits for max / min zooms
-        const mapView = this.getMapViewer().getView();
-        if (layerConfig.maxScale) {
-          const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-          if (maxScaleZoomLevel && (!layerConfig.initialSettings.maxZoom || maxScaleZoomLevel > layerConfig.initialSettings.maxZoom)) {
-            layerConfig.initialSettings.maxZoom = maxScaleZoomLevel;
-          }
-        }
-
-        if (layerConfig.minScale) {
-          const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-          if (minScaleZoomLevel && (!layerConfig.initialSettings.minZoom || minScaleZoomLevel < layerConfig.initialSettings.minZoom)) {
-            layerConfig.initialSettings.minZoom = minScaleZoomLevel;
-          }
-        }
 
         // Set time dimension
         if (layerCapabilities.Dimension) {

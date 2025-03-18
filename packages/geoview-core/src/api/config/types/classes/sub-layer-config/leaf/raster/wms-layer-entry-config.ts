@@ -132,6 +132,14 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     if (layerMetadata.queryable) this.source.featureInfo!.queryable = layerMetadata.queryable as boolean;
 
+    // Overwrite user provided value if service doesn't allow that scale
+    if (layerMetadata.maxScaleDenominator) {
+      this.minScale = Math.min(this.minScale || Infinity, layerMetadata.maxScaleDenominator as number);
+    }
+    if (layerMetadata.minScaleDenominator) {
+      this.maxScale = Math.max(this.maxScale || 0, layerMetadata.minScaleDenominator as number);
+    }
+
     this.source.wmsStyle = layerMetadata.Style
       ? ((layerMetadata.Style as TypeJsonArray).map((style) => {
           return style.Name;

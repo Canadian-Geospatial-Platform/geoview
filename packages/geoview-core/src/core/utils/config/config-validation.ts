@@ -288,6 +288,31 @@ export class ConfigValidation {
       // links the entry to its parent layer configuration.
       layerConfig.parentLayerConfig = parentLayerConfig;
       // layerConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
+
+      // Handle Zoom and Scale levels before default merge of settings
+      if (layerConfig.initialSettings?.minZoom) {
+        layerConfig.initialSettings.minZoom = Math.max(
+          layerConfig.initialSettings.minZoom,
+          parentLayerConfig?.initialSettings?.minZoom || 0
+        );
+      }
+
+      if (layerConfig.initialSettings?.maxZoom) {
+        layerConfig.initialSettings.maxZoom = Math.min(
+          layerConfig.initialSettings.maxZoom,
+          parentLayerConfig?.initialSettings?.maxZoom || 23
+        );
+      }
+
+      if (layerConfig.minScale) {
+        layerConfig.minScale = Math.min(layerConfig.minScale, parentLayerConfig?.minScale || Infinity);
+      }
+
+      if (layerConfig.maxScale) {
+        layerConfig.maxScale = Math.max(layerConfig.maxScale, parentLayerConfig?.maxScale || 0);
+      }
+
+      // Merge the rest of parent and child settings
       layerConfig.initialSettings = defaultsDeep(
         layerConfig.initialSettings,
         layerConfig.parentLayerConfig?.initialSettings || layerConfig.geoviewLayerConfig?.initialSettings
