@@ -5,6 +5,7 @@ import { animated } from '@react-spring/web';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '../../common/layer-list-style';
 import {
+  Box,
   Collapse,
   IconButton,
   KeyboardArrowDownIcon,
@@ -42,7 +43,6 @@ import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, TableViewIcon } f
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { Box } from '@/ui/layout';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;

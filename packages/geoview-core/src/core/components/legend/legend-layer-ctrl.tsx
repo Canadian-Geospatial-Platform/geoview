@@ -11,6 +11,7 @@ import {
   Typography,
   VisibilityOffOutlinedIcon,
   HighlightIcon,
+  CenterFocusScaleIcon,
 } from '@/ui';
 import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
@@ -18,7 +19,6 @@ import { useMapStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { TypeLayerControls } from '@/api/config/types/map-schema-types';
-import { CenterFocusScaleIcon } from '@/ui/icons';
 
 interface SecondaryControlsProps {
   layer: TypeLegendLayer;
