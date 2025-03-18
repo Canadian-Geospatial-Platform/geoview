@@ -683,7 +683,7 @@ export class GeometryApi {
       const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection];
       const mapProjectionCode = mapProjection.getCode();
       const transformProjection = `EPSG:${projection}`;
-      coords = GeometryApi.transformCoordinates(coords, mapProjectionCode, transformProjection);
+      coords = Projection.transformCoordinates(coords, mapProjectionCode, transformProjection);
     }
 
     return coords;
@@ -704,7 +704,7 @@ export class GeometryApi {
     const featureGeometry = feature.getGeometry();
     const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection].getCode();
     const coordsProjection = `EPSG:${projection || 4326}`;
-    const projectedCoordinates = GeometryApi.transformCoordinates(coordinates, coordsProjection, mapProjection);
+    const projectedCoordinates = Projection.transformCoordinates(coordinates, coordsProjection, mapProjection);
 
     // Check if coordinates are valid, and transform the projection to match the map's projection
     if (projectedCoordinates) {
@@ -732,39 +732,6 @@ export class GeometryApi {
     } else {
       throw new Error(`Unable to set coordinates for feature ${featureId}`);
     }
-  }
-
-  /**
-   * Transform coordinates between two projections
-   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} coordinates the coordinates to transform
-   * @param {string} startProjection the current projection of the coordinates.
-   *   Note: the value should include 'EPSG:' then the projection  number.
-   * @param {string} endProjection the transformed projection of the coordinates.
-   *   Note: the value should include 'EPSG:' then the projection  number.
-   * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} the transformed coordinates
-   */
-  static transformCoordinates(
-    coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined,
-    startProjection: string,
-    endProjection: string
-  ): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined {
-    let projectedCoordinates;
-
-    if (coordinates && GeometryApi.isCoordinates(coordinates)) {
-      projectedCoordinates = Projection.transform(coordinates, startProjection, endProjection);
-    } else if (coordinates && GeometryApi.isArrayOfCoordinates(coordinates)) {
-      projectedCoordinates = coordinates.map((coord) => Projection.transform(coord, startProjection, endProjection));
-    } else if (coordinates && GeometryApi.isArrayOfArrayOfCoordinates(coordinates)) {
-      projectedCoordinates = coordinates.map((coordArray) =>
-        coordArray.map((coord) => Projection.transform(coord, startProjection, endProjection))
-      );
-    } else if (coordinates && GeometryApi.isArrayOfArrayOfArrayOfCoordinates(coordinates)) {
-      projectedCoordinates = coordinates.map((coordArrayArray) =>
-        coordArrayArray.map((coordArray) => coordArray.map((coord) => Projection.transform(coord, startProjection, endProjection)))
-      );
-    }
-
-    return projectedCoordinates;
   }
 
   /**

@@ -12,6 +12,8 @@ import {
   toLonLat,
 } from 'ol/proj';
 import { Extent } from 'ol/extent';
+
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { logger } from '@/core/utils/logger';
 import { TypeJsonObject } from '@/core/types/global-types';
 
@@ -322,6 +324,39 @@ export abstract class Projection {
 
     // All good
     return extent;
+  }
+
+  /**
+   * Transform coordinates between two projections
+   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} coordinates the coordinates to transform
+   * @param {string} startProjection the current projection of the coordinates.
+   *   Note: the value should include 'EPSG:' then the projection  number.
+   * @param {string} endProjection the transformed projection of the coordinates.
+   *   Note: the value should include 'EPSG:' then the projection  number.
+   * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} the transformed coordinates
+   */
+  static transformCoordinates(
+    coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined,
+    startProjection: string,
+    endProjection: string
+  ): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined {
+    let projectedCoordinates;
+
+    if (coordinates && GeometryApi.isCoordinates(coordinates)) {
+      projectedCoordinates = Projection.transform(coordinates, startProjection, endProjection);
+    } else if (coordinates && GeometryApi.isArrayOfCoordinates(coordinates)) {
+      projectedCoordinates = coordinates.map((coord) => Projection.transform(coord, startProjection, endProjection));
+    } else if (coordinates && GeometryApi.isArrayOfArrayOfCoordinates(coordinates)) {
+      projectedCoordinates = coordinates.map((coordArray) =>
+        coordArray.map((coord) => Projection.transform(coord, startProjection, endProjection))
+      );
+    } else if (coordinates && GeometryApi.isArrayOfArrayOfArrayOfCoordinates(coordinates)) {
+      projectedCoordinates = coordinates.map((coordArrayArray) =>
+        coordArrayArray.map((coordArray) => coordArray.map((coord) => Projection.transform(coord, startProjection, endProjection)))
+      );
+    }
+
+    return projectedCoordinates;
   }
 }
 
