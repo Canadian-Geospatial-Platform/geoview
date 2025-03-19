@@ -6,8 +6,8 @@ import Collection from 'ol/Collection';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Source from 'ol/source/Source';
 
-import { generateId, getXMLHttpRequest, isJsonString, whenThisThen } from '@/core/utils/utilities';
-import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
+import { generateId, whenThisThen } from '@/core/utils/utilities';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -418,10 +418,15 @@ export abstract class AbstractGeoViewLayer {
   protected async fetchServiceMetadata(): Promise<void> {
     if (this.metadataAccessPath) {
       try {
-        const metadataString = await getXMLHttpRequest(`${this.metadataAccessPath}?f=json`);
-        if (metadataString === '{}' || !isJsonString(metadataString)) this.metadata = null;
+        const url =
+          this.metadataAccessPath.toLowerCase().endsWith('json') || this.metadataAccessPath.toLowerCase().endsWith('meta')
+            ? this.metadataAccessPath
+            : `${this.metadataAccessPath}?f=json`;
+        const response = await fetch(url);
+        const metadataJson: TypeJsonObject = await response.json();
+        if (!metadataJson) this.metadata = null;
         else {
-          this.metadata = toJsonObject(JSON.parse(metadataString));
+          this.metadata = metadataJson;
           const copyrightText = this.metadata.copyrightText as string;
           const attributions = this.getAttributions();
           if (copyrightText && !attributions.includes(copyrightText)) {
