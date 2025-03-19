@@ -84,7 +84,7 @@
     }
   },
   "navBar": ["zoom", "fullscreen", "home", "location"],
-  "components": ["north-arrow"],
+  "components": ["north-arrow", "overview-map"],
   "corePackages": [],
   "externalPackages": []
 }
