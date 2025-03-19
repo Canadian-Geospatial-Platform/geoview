@@ -7,6 +7,7 @@ import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-confi
 
 import { getXMLHttpRequest } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
+import { Projection } from '@/geo/utils/projection';
 
 // ========================
 // #region CLASS HEADER
@@ -77,6 +78,10 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
           throw new GeoviewLayerConfigError('See error description above');
         } else {
           this.setServiceMetadata(jsonMetadata);
+
+          if (jsonMetadata?.spatialReference && !Projection.getProjectionFromObj(jsonMetadata.spatialReference))
+            await Projection.addProjection(jsonMetadata.data.spatialReference);
+
           this.listOfLayerEntryConfig = this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
           await this.fetchListOfLayerMetadata();
 
