@@ -33,6 +33,7 @@ import {
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
+import { isPointInExtent } from '@/geo/utils/utilities';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING } from '@/core/utils/constant';
@@ -1082,9 +1083,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Change view to go to proper zoom centered in the middle of layer extent
     // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
+    // Check if the map center is already ib the layer extent and if so, do not center
     const layerExtent = (geoviewLayer! as AbstractGVLayer).getBounds();
     const centerExtent =
-      layerExtent && layerMinZoom > mapZoom! ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2] : undefined;
+      layerExtent && layerMinZoom > mapZoom! && !isPointInExtent(view.getCenter()!, layerExtent)
+        ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
+        : undefined;
 
     view.animate({
       center: centerExtent,
