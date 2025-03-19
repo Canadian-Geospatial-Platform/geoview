@@ -50,7 +50,8 @@
               {
                 "layerId": "5",
                 "initialSettings": {
-                  "minZoom": 7
+                  "minZoom": 7,
+                  "maxZoom": 10
                 }
               },
               {

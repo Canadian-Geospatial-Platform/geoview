@@ -17,6 +17,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 import { api } from '@/app';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
@@ -225,7 +226,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+  protected override async processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     const updatedLayerConfig = layerConfig;
     if (!(updatedLayerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
@@ -241,6 +242,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
       updatedLayerConfig.source!.tileGrid = newTileGrid;
 
       updatedLayerConfig.initialSettings.extent = validateExtentWhenDefined(updatedLayerConfig.initialSettings.extent);
+
+      if (fullExtent.spatialReference && !Projection.getProjectionFromObj(fullExtent.spatialReference))
+        await Projection.addProjection(fullExtent.spatialReference);
 
       // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
       // First set the min/max scales based on the service / config

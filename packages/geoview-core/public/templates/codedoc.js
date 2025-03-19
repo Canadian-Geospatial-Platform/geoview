@@ -174,6 +174,26 @@ function addSpecialShapes(map, groupKey) {
   );
 }
 
+function addRectangle(map, groupKey) {
+  // Set active geometry group
+  map.layer.geometry.setActiveGeometryGroup(groupKey);
+
+  // Add dummy shapes
+  map.layer.geometry.addPolygon(
+    [
+      [
+        [-100, 60],
+        [-100, 70],
+        [-70, 70],
+        [-70, 60],
+        [-100, 60],
+      ],
+    ],
+    { style: { strokeColor: 'Indigo', strokeWidth: 2, fillColor: 'Indigo', fillOpacity: 0.25 } },
+    'rectangle-outline'
+  );
+}
+
 function listenToLegendLayerSetChanges(elementId, handlerName) {
   const mapId = handlerName.split('/')[0];
   cgpv.api.maps[mapId].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {

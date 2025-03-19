@@ -12,6 +12,8 @@ import {
   toLonLat,
 } from 'ol/proj';
 import { Extent } from 'ol/extent';
+
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { logger } from '@/core/utils/logger';
 import { TypeJsonObject } from '@/core/types/global-types';
 
@@ -25,7 +27,7 @@ export abstract class Projection {
   /**
    * constant used for the available projection names
    */
-  static PROJECTION_NAMES = {
+  static PROJECTION_NAMES: Record<string, string> = {
     3578: 'EPSG:3578',
     LCC: 'EPSG:3978',
     3979: 'EPSG:3979',
@@ -226,6 +228,37 @@ export abstract class Projection {
   }
 
   /**
+   * Fetches definitions for unsupported projections and adds them.
+   * @param {TypeJsonObject} projection - Object containing wkid and possibly latestWkid from service metadata.
+   */
+  static async addProjection(projection: TypeJsonObject): Promise<void> {
+    // Add latestWkid if provided
+    if (projection.latestWkid && projection.latestWkid !== projection.wkid) await this.addProjection({ wkid: projection.latestWkid });
+
+    const code = projection.wkid as string;
+    const projectionName = `EPSG:${code}`;
+
+    try {
+      // Fetch proj4 definition from epsg.io
+      const response = await fetch(`https://epsg.io/${code}.proj4`);
+      const definition = await response.text();
+
+      if (definition) {
+        // Register in proj4 if fetched
+        proj4.defs(projectionName, definition);
+        register(proj4);
+
+        // Register in supported projections
+        this.PROJECTION_NAMES = { ...this.PROJECTION_NAMES, [code]: projectionName };
+        const foundOlProjection = olGetProjection(projectionName);
+        if (foundOlProjection) this.PROJECTIONS[code] = foundOlProjection;
+      } else logger.logError(`Unable to add projection ${projectionName}, definiton not found`);
+    } catch {
+      logger.logError(`Unable to add projection ${projectionName}, definiton not found`);
+    }
+  }
+
+  /**
    * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
    *
    * @param {ProjectionLike} projectionLike Either a code string which is a combination of authority and identifier such as "EPSG:4326", or an existing projection object, or undefined.
@@ -322,6 +355,39 @@ export abstract class Projection {
 
     // All good
     return extent;
+  }
+
+  /**
+   * Transform coordinates between two projections
+   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} coordinates the coordinates to transform
+   * @param {string} startProjection the current projection of the coordinates.
+   *   Note: the value should include 'EPSG:' then the projection  number.
+   * @param {string} endProjection the transformed projection of the coordinates.
+   *   Note: the value should include 'EPSG:' then the projection  number.
+   * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} the transformed coordinates
+   */
+  static transformCoordinates(
+    coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined,
+    startProjection: string,
+    endProjection: string
+  ): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined {
+    let projectedCoordinates;
+
+    if (coordinates && GeometryApi.isCoordinates(coordinates)) {
+      projectedCoordinates = Projection.transform(coordinates, startProjection, endProjection);
+    } else if (coordinates && GeometryApi.isArrayOfCoordinates(coordinates)) {
+      projectedCoordinates = coordinates.map((coord) => Projection.transform(coord, startProjection, endProjection));
+    } else if (coordinates && GeometryApi.isArrayOfArrayOfCoordinates(coordinates)) {
+      projectedCoordinates = coordinates.map((coordArray) =>
+        coordArray.map((coord) => Projection.transform(coord, startProjection, endProjection))
+      );
+    } else if (coordinates && GeometryApi.isArrayOfArrayOfArrayOfCoordinates(coordinates)) {
+      projectedCoordinates = coordinates.map((coordArrayArray) =>
+        coordArrayArray.map((coordArray) => coordArray.map((coord) => Projection.transform(coord, startProjection, endProjection)))
+      );
+    }
+
+    return projectedCoordinates;
   }
 }
 
