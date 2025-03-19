@@ -1078,8 +1078,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Set the right zoom (Infinity will act as a no change in zoom level)
     let layerZoom = Infinity;
-    if (layerMinZoom !== Infinity && layerMinZoom > mapZoom!) layerZoom = layerMinZoom + 0.1;
-    else if (layerMaxZoom !== -Infinity && layerMaxZoom < mapZoom!) layerZoom = layerMaxZoom - 0.1;
+    if (layerMinZoom !== -Infinity && layerMinZoom > mapZoom!) layerZoom = layerMinZoom + 0.1;
+    else if (layerMaxZoom !== Infinity && layerMaxZoom < mapZoom!) layerZoom = layerMaxZoom - 0.1;
 
     // Change view to go to proper zoom centered in the middle of layer extent
     // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
