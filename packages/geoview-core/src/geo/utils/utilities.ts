@@ -6,7 +6,7 @@ import Geometry from 'ol/geom/Geometry';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL, getLength as getLengthOL } from 'ol/sphere';
-import { Extent } from 'ol/extent';
+import { containsCoordinate, Extent } from 'ol/extent';
 import { XYZ, OSM, VectorTile } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
 import { LineString, Polygon } from 'ol/geom';
@@ -242,6 +242,7 @@ export function getLegendStylesFromConfig(styleConfig: TypeLayerStyleConfig): Pr
  * @param {HTMLElement} element the HTML element to get value for
  * @returns {Object} the x, y and z translation values
  */
+// TODO: clean - not use anywhere
 export function getTranslateValues(element: HTMLElement): {
   x: number;
   y: number;
@@ -311,6 +312,16 @@ export function convertTypeFeatureStyleToOpenLayersStyle(style?: TypeFeatureStyl
 }
 
 // #region EXTENT
+/**
+ * Check if a point is contained in an extent
+ * @param {Coordinate} point - The point
+ * @param {Extent} extent - The extent
+ * @returns True if point is within the extent, false otherwise
+ */
+export function isPointInExtent(point: Coordinate, extent: Extent): boolean {
+  return containsCoordinate(extent, point);
+}
+
 /**
  * Returns the union of 2 extents.
  * @param {Extent | undefined} extentA First extent

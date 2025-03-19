@@ -3,6 +3,7 @@ import { ModifyEvent as OLModifyEvent, Options as OLModifyOptions } from 'ol/int
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
 import { FlatStyle } from 'ol/style/flat';
+import { Condition } from 'ol/events/condition';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
@@ -17,6 +18,8 @@ export type ModifyOptions = InteractionOptions & {
   geometryGroupKey?: string;
   features?: Collection<Feature>;
   style?: TypeFeatureStyle;
+  insertVertexCondition?: Condition;
+  pixelTolerance?: number;
 };
 
 /**
@@ -34,6 +37,12 @@ export class Modify extends Interaction {
 
   /** Callback handlers for the modifyend event. */
   #onModifyEndedHandlers: ModifyDelegate[] = [];
+
+  /** Callback handlers for the custom modifydrag event. */
+  #onModifyDraggedHandlers: ModifyDelegate[] = [];
+
+  /** Active feature being modified */
+  #activeFeature: Feature | null = null;
 
   /**
    * Initializes a Modify component.
@@ -59,12 +68,46 @@ export class Modify extends Interaction {
       olOptions.source = geomGroup?.vectorSource;
     }
 
+    // The insertVertexCondition condition takes a function that allows for customizing
+    // a set of rules that determines where new vertices can be added to a feature.
+    // For example, if you don't want to allow for new vertices at all, you can pass the following:
+    // () => false. The condition must always return a boolean.
+    if (options.insertVertexCondition) {
+      olOptions.insertVertexCondition = options.insertVertexCondition;
+    }
+
+    // Pixel Tolerance must be a positive number, so we can revert to the default otherwise
+    if (options.pixelTolerance && options.pixelTolerance > 0) {
+      olOptions.pixelTolerance = options.pixelTolerance;
+    }
+
     // Instantiate the OpenLayers Modify interaction
     this.#ol_modify = new OLModify(olOptions);
 
     // Register handlers for modify events
     this.#ol_modify.on('modifystart', this.#emitModifyStarted.bind(this));
     this.#ol_modify.on('modifyend', this.#emitModifyEnded.bind(this));
+
+    // Since the openlayers modify interaction doesn't fire any events while
+    // the active feature is being modified, we can register handlers for the
+    // custom modifyDrag event by tracking changes to the active feature instead.
+    // We can wrap this inside modifystart and modifyend event handlers
+    // to ensure we only track the changes during the modify interaction
+    this.#ol_modify.on('modifystart', (event: OLModifyEvent) => {
+      this.#activeFeature = event.features.item(0); // Track active feature
+
+      if (this.#activeFeature) {
+        this.#activeFeature.on('change', this.#emitModifyDragged.bind(this));
+      }
+    });
+
+    // Unregister the modifyDrag event when the modify interaction ends
+    this.#ol_modify.on('modifyend', () => {
+      if (this.#activeFeature) {
+        this.#activeFeature.un('change', this.#emitModifyDragged.bind(this));
+        this.#activeFeature = null; // Reset active feature
+      }
+    });
   }
 
   /**
@@ -137,6 +180,33 @@ export class Modify extends Interaction {
   offModifyEnded(callback: ModifyDelegate): void {
     // Unregister the modifyended event callback
     EventHelper.offEvent(this.#onModifyEndedHandlers, callback);
+  }
+
+  /**
+   * Emits the modifydrag event for all registered handlers.
+   * @private
+   */
+  #emitModifyDragged(): void {
+    if (this.#activeFeature) {
+      const event: OLModifyEvent = { features: new Collection([this.#activeFeature]) } as OLModifyEvent;
+      EventHelper.emitEvent(this, this.#onModifyDraggedHandlers, event);
+    }
+  }
+
+  /**
+   * Registers a callback handler for the modifydrag event.
+   * @param {ModifyDelegate} callback - The callback to be executed whenever the event is emitted.
+   */
+  onModifyDragged(callback: ModifyDelegate): void {
+    EventHelper.onEvent(this.#onModifyDraggedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a callback handler for the modifydrag event.
+   * @param {ModifyDelegate} callback - The callback to stop being called whenever the event is emitted.
+   */
+  offModifyDragged(callback: ModifyDelegate): void {
+    EventHelper.offEvent(this.#onModifyDraggedHandlers, callback);
   }
 }
 
