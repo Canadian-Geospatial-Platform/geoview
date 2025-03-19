@@ -1518,8 +1518,7 @@ export function getAndCreateFeatureStyle(
     const { type } = styleSettings;
     // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
     const featureStyle = processStyle[type][geometryType].call('', styleSettings, feature as Feature, filterEquation, legendFilterIsOff);
-    // Set the feature style to avoid recreating later
-    (feature as Feature).setStyle(featureStyle);
+
     return featureStyle;
   }
 
@@ -1570,10 +1569,7 @@ export function getFeatureImageSource(
       //   });
       // });
 
-      const featureStyle =
-        feature.getStyle() instanceof Style
-          ? (feature.getStyle() as Style)
-          : processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
+      const featureStyle = processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
 
       if (featureStyle) {
         if (geometryType === 'Point') {

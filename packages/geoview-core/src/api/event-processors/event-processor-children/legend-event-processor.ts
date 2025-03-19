@@ -506,7 +506,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Get current layer legends and set item visibility
     const curLayers = this.getLayerState(mapId).legendLayers;
 
-    // TODO: Check - Is this line really at the right place in this function? It doesn't seem to be doing anything with regards to 'curLayers'!?
+    // item is a part of curLayers, changing it changes curLayers
     // eslint-disable-next-line no-param-reassign
     item.isVisible = visibility;
 
