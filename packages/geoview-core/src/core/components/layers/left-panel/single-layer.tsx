@@ -87,6 +87,9 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
   const legendExpanded = !useSelectorLayerLegendCollapsed(layerPath);
 
+  // Is visibility button disabled?
+  const isLayerVisibleCapable = (layer.controls?.visibility && inVisibleRange) ?? false;
+
   // TODO: I think we should favor using this pattern here, with the store, instead of working with the whole 'layer' object from the props
   const layerId: string | undefined = useSelectorLayerId(layerPath);
   const layerName: string | undefined = useSelectorLayerName(layerPath);
@@ -334,11 +337,14 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     }
 
     if (isLayerAlwaysVisible) {
-      return (
-        <IconButton edge="end" size="small" tooltip={t('layers.visibilityIsAlways') as string} className="buttonOutline" disabled>
-          <VisibilityOutlinedIcon color="disabled" />
-        </IconButton>
-      );
+      if (isLayerVisibleCapable) {
+        return (
+          <IconButton edge="end" size="small" tooltip={t('layers.visibilityIsAlways') as string} className="buttonOutline" disabled>
+            <VisibilityOutlinedIcon color="disabled" />
+          </IconButton>
+        );
+      }
+      return <Box />;
     }
 
     // Is zoom to visible scale button visible?
@@ -355,16 +361,18 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
         >
           <CenterFocusScaleIcon />
         </IconButton>
-        <IconButton
-          edge={inVisibleRange ? false : 'end'}
-          size="small"
-          onClick={handleToggleVisibility}
-          tooltip={t('layers.toggleVisibility') as string}
-          className="buttonOutline"
-          disabled={!inVisibleRange}
-        >
-          {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
-        </IconButton>
+        {isLayerVisibleCapable && (
+          <IconButton
+            edge={inVisibleRange ? false : 'end'}
+            size="small"
+            onClick={handleToggleVisibility}
+            tooltip={t('layers.toggleVisibility') as string}
+            className="buttonOutline"
+            disabled={!inVisibleRange}
+          >
+            {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+          </IconButton>
+        )}
       </Box>
     );
   }, [
@@ -374,6 +382,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     displayState,
     handleToggleVisibility,
     isLayerAlwaysVisible,
+    isLayerVisibleCapable,
     isVisible,
     layerControls?.remove,
     layerId,
