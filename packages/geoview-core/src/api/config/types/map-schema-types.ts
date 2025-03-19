@@ -116,7 +116,7 @@ export type TypeExternalPackages = TypeExternalPackagesProps[];
 export type TypeServiceUrls = {
   /**
    * Service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can
-   * be another endpoint with similar output. Default = CV_CONFIG_GEOCORE_URL ('https://geocore-stage.api.geo.ca'. Used in config-constants).
+   * be another endpoint with similar output. Default = CV_CONFIG_GEOCORE_URL ('https://geocore.api.geo.ca'. Used in config-constants).
    */
   geocoreUrl: string;
   /**

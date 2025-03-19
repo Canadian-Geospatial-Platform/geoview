@@ -94,13 +94,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   outOfRange: {
     '.layer-panel &.MuiListItemButton-root': {
-      backgroundColor: `${theme.palette.grey[200]} !important`,
       '& .MuiListItemText-primary': {
-        color: `${theme.palette.grey[600]} !important`,
+        color: `${theme.palette.grey[700]} !important`,
         fontStyle: 'italic',
       },
       '& .MuiListItemText-secondary': {
-        color: theme.palette.grey[500],
+        color: theme.palette.grey[600],
         fontStyle: 'italic',
       },
     },

@@ -33,6 +33,7 @@ import {
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
+import { isPointInExtent } from '@/geo/utils/utilities';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING } from '@/core/utils/constant';
@@ -58,6 +59,7 @@ import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -1059,6 +1061,40 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: 13, duration: OL_ZOOM_DURATION };
 
     return this.zoomToExtent(mapId, extent, options);
+  }
+
+  /**
+   * Zoom to layer visible scale.
+   *
+   * @param {string} mapId - ID of map to zoom on
+   * @param {string} layerPath - Path of layer to zoom to.
+   */
+  static zoomToLayerVisibleScale(mapId: string, layerPath: string): void {
+    const view = this.getMapViewer(mapId).getView();
+    const mapZoom = view.getZoom();
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    const layerMaxZoom = geoviewLayer!.getMaxZoom();
+    const layerMinZoom = geoviewLayer!.getMinZoom();
+
+    // Set the right zoom (Infinity will act as a no change in zoom level)
+    let layerZoom = Infinity;
+    if (layerMinZoom !== -Infinity && layerMinZoom > mapZoom!) layerZoom = layerMinZoom + 0.1;
+    else if (layerMaxZoom !== Infinity && layerMaxZoom < mapZoom!) layerZoom = layerMaxZoom - 0.1;
+
+    // Change view to go to proper zoom centered in the middle of layer extent
+    // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
+    // Check if the map center is already ib the layer extent and if so, do not center
+    const layerExtent = (geoviewLayer! as AbstractGVLayer).getBounds();
+    const centerExtent =
+      layerExtent && layerMinZoom > mapZoom! && !isPointInExtent(view.getCenter()!, layerExtent)
+        ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
+        : undefined;
+
+    view.animate({
+      center: centerExtent,
+      zoom: layerZoom,
+      duration: OL_ZOOM_DURATION,
+    });
   }
 
   /**

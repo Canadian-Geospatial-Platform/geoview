@@ -51,7 +51,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   tableIconLabel: {
     color: theme.palette.geoViewColor.textColor.main,
     fontSize: theme.palette.geoViewFontSize.default,
-    marginLeft: 20,
+    marginLeft: '20px',
     alignSelf: 'center',
     whiteSpace: 'nowrap',
   },

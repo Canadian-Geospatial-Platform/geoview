@@ -5,6 +5,7 @@ import { animated } from '@react-spring/web';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '../../common/layer-list-style';
 import {
+  Box,
   Collapse,
   IconButton,
   KeyboardArrowDownIcon,
@@ -38,7 +39,7 @@ import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
 import { useDataTableLayerSettings, useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { ArrowDownwardIcon, ArrowUpIcon, TableViewIcon } from '@/ui/icons';
+import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, TableViewIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -62,7 +63,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Get store states
-  const { setSelectedLayerPath, setSelectedLayerSortingArrowId } = useLayerStoreActions();
+  const { setSelectedLayerPath, setSelectedLayerSortingArrowId, zoomToLayerVisibleScale } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, setLegendCollapsed, reorderLayer } = useMapStoreActions();
 
   const mapId = useGeoViewMapId();
@@ -203,6 +204,13 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     setOrToggleLayerVisibility(layer.layerPath);
   }, [layer.layerPath, setOrToggleLayerVisibility]);
 
+  const handleZoomToLayerVisibleScale = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('SINGLE-LAYER - handleZoomToLayerVisibleScale');
+
+    zoomToLayerVisibleScale(layer.layerPath);
+  }, [layer.layerPath, zoomToLayerVisibleScale]);
+
   // Get layer description
   const memoLayerDescription = useMemo((): JSX.Element | string | null => {
     // Log
@@ -298,6 +306,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     layer.layerPath,
     mapId,
     reorderLayer,
+    theme.palette.geoViewColor.bgColor.dark,
   ]);
 
   // Memoize the MoreLayerButtons component section
@@ -320,18 +329,36 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
       );
     }
 
+    // Is zoom to visible scale button visible?
+    const isZoomToVisibleScaleCapable = !!((layer.type as string) !== 'group' && !inVisibleRange);
+
     return (
-      <IconButton
-        edge="end"
-        size="small"
-        onClick={handleToggleVisibility}
-        tooltip={t('layers.toggleVisibility') as string}
-        className="buttonOutline"
-      >
-        {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
-      </IconButton>
+      <Box>
+        <IconButton
+          edge="end"
+          size="small"
+          tooltip={t('layers.zoomVisibleScale') as string}
+          sx={{ display: isZoomToVisibleScaleCapable ? 'block' : 'none' }}
+          onClick={handleZoomToLayerVisibleScale}
+        >
+          <CenterFocusScaleIcon />
+        </IconButton>
+        <IconButton
+          edge={inVisibleRange ? false : 'end'}
+          size="small"
+          onClick={handleToggleVisibility}
+          tooltip={t('layers.toggleVisibility') as string}
+          className="buttonOutline"
+          disabled={!inVisibleRange}
+        >
+          {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+        </IconButton>
+      </Box>
     );
   }, [
+    inVisibleRange,
+    handleZoomToLayerVisibleScale,
+    layer.type,
     displayState,
     handleToggleVisibility,
     isLayerAlwaysVisible,

@@ -672,8 +672,6 @@ export abstract class AbstractGeoViewLayer {
       properties: { layerConfig },
     };
     if (initialSettings?.extent !== undefined) layerGroupOptions.extent = initialSettings.extent;
-    if (initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = initialSettings.maxZoom;
-    if (initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = initialSettings.minZoom;
     if (initialSettings?.states?.opacity !== undefined) layerGroupOptions.opacity = initialSettings.states.opacity;
 
     // Create the OpenLayer layer
