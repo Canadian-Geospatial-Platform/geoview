@@ -107,6 +107,12 @@ export function SecondaryControls({ layer, isVisible, isInVisibleRange }: Second
   // Is visibility button disabled?
   const isLayerVisibleCapable = (layerControls?.visibility && isInVisibleRange) ?? false;
 
+  // Is highlight button disabled?
+  const isHighlightCapable = (layerControls?.highlight && isInVisibleRange) ?? false;
+
+  // Is zoom to extent button disabled?
+  const isZoomToExtentCapable = (layerControls?.zoom && isInVisibleRange) ?? false;
+
   // Is zoom to visible scale button visible?
   const isZoomToVisibleScaleCapable = !!((layer.type as string) !== 'group' && !isInVisibleRange);
 
@@ -144,10 +150,16 @@ export function SecondaryControls({ layer, isVisible, isInVisibleRange }: Second
           sx={styles.btnMargin}
           className="buttonOutline"
           onClick={controls.handleHighlightLayer}
+          disabled={!isHighlightCapable}
         >
           {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
-        <IconButton tooltip={t('legend.zoomTo') as string} className="buttonOutline" onClick={controls.handleZoomTo}>
+        <IconButton
+          tooltip={t('legend.zoomTo') as string}
+          className="buttonOutline"
+          onClick={controls.handleZoomTo}
+          disabled={!isZoomToExtentCapable}
+        >
           <ZoomInSearchIcon />
         </IconButton>
       </Box>
