@@ -153,18 +153,12 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
             sx={styles.btnMargin}
             className="buttonOutline"
             onClick={controls.handleHighlightLayer}
-            disabled={!isInVisibleRange}
           >
             {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
           </IconButton>
         )}
         {isLayerZoomToExtentCapable && (
-          <IconButton
-            tooltip={t('legend.zoomTo') as string}
-            className="buttonOutline"
-            onClick={controls.handleZoomTo}
-            disabled={!isInVisibleRange}
-          >
+          <IconButton tooltip={t('legend.zoomTo') as string} className="buttonOutline" onClick={controls.handleZoomTo}>
             <ZoomInSearchIcon />
           </IconButton>
         )}
