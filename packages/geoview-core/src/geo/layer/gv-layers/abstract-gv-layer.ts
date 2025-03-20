@@ -571,17 +571,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           ? (feature.getGeometry()!.getType() as TypeStyleGeometry)
           : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
 
-        let featureStyle = feature.getStyle();
-        // Feature style must be created if it does not exist on feature
-        if (!featureStyle && layerStyle[geometryType]) {
+        let imageSource;
+        if (layerStyle[geometryType]) {
           const styleSettings = layerStyle[geometryType]!;
           const { type } = styleSettings;
-          featureStyle = processStyle[type][geometryType](styleSettings, feature, layerConfig.filterEquation, true);
-          feature.setStyle(featureStyle);
-        }
+          const featureStyle = processStyle[type][geometryType](styleSettings, feature, layerConfig.filterEquation, true);
 
-        let imageSource;
-        if (featureStyle) {
           // Create a string unique to the style, but geometry agnostic
           const styleClone = cloneDeep(featureStyle) as Style;
           styleClone.setGeometry('');
@@ -591,7 +586,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           if (!imageSourceDict[styleString])
             imageSourceDict[styleString] = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
           imageSource = imageSourceDict[styleString];
-        } else imageSource = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
+        }
+
+        if (!imageSource) imageSource = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
 
         let extent;
         if (feature.getGeometry()) extent = feature.getGeometry()!.getExtent();
