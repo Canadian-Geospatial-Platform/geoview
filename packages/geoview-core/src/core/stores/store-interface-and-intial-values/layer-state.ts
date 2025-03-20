@@ -235,7 +235,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * @param {TypeLegendItem} item - The name of the item to change.
        */
       toggleItemVisibility: (layerPath: string, item: TypeLegendItem): void => {
-        // Redirect to processor.
+        // Redirect to processor
         LegendEventProcessor.toggleItemVisibility(get().mapId, layerPath, item);
       },
 
