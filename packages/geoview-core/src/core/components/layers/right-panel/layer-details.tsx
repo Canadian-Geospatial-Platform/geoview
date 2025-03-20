@@ -244,7 +244,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           tooltip={t('legend.highlightLayer') as string}
           onClick={handleHighlightLayer}
           className={highlightedLayer === layerDetails.layerPath ? 'buttonOutline active' : 'buttonOutline'}
-          disabled={!inVisibleRange}
         >
           <HighlightOutlinedIcon />
         </IconButton>
@@ -259,7 +258,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           tooltip={t('legend.zoomTo') as string}
           onClick={handleZoomTo}
           className="buttonOutline"
-          disabled={layerDetails.bounds === undefined || !inVisibleRange}
+          disabled={layerDetails.bounds === undefined}
         >
           <ZoomInSearchIcon />
         </IconButton>
