@@ -79,9 +79,6 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   const inVisibleRange = useSelectorLayerInVisibleRange(layer.layerPath);
   const legendExpanded = !useSelectorLayerLegendCollapsed(layer.layerPath);
 
-  // Is visibility button disabled?
-  const isLayerVisibleCapable = (layer.controls?.visibility && inVisibleRange) ?? false;
-
   // TODO: I think we should favor using this pattern here, with the store, instead of working with the whole 'layer' object from the props
   // const layerLegendQueryStatus: string | undefined = useSelectorLayerLegendQueryStatus(layer.layerPath);
   // const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layer.layerPath);
@@ -131,6 +128,7 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
   }, []);
 
   const isLayerAlwaysVisible = layerHasDisabledVisibility(layer);
+  const isLayerVisibleCapable = layer.controls?.visibility ?? false;
 
   /**
    * Handle expand/shrink of layer groups.
@@ -327,7 +325,13 @@ export function SingleLayer({ depth, layer, showLayerDetailsPanel, isFirst, isLa
     if (isLayerAlwaysVisible) {
       if (isLayerVisibleCapable) {
         return (
-          <IconButton edge="end" size="small" tooltip={t('layers.visibilityIsAlways') as string} className="buttonOutline" disabled>
+          <IconButton
+            edge="end"
+            size="small"
+            tooltip={t('layers.visibilityIsAlways') as string}
+            className="buttonOutline"
+            disabled={!inVisibleRange}
+          >
             <VisibilityOutlinedIcon color="disabled" />
           </IconButton>
         );

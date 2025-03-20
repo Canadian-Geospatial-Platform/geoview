@@ -66,10 +66,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const inVisibleRange = useSelectorLayerInVisibleRange(layerDetails?.layerPath);
 
   // Is highlight button disabled?
-  const isLayerHighlightCapable = (layerDetails.controls?.highlight && inVisibleRange) ?? false;
+  const isLayerHighlightCapable = layerDetails.controls?.highlight ?? false;
 
   // Is zoom to extent button disabled?
-  const isLayerZoomToExtentCapable = (layerDetails.controls?.zoom && inVisibleRange) ?? false;
+  const isLayerZoomToExtentCapable = layerDetails.controls?.zoom ?? false;
 
   useEffect(() => {
     // Log
@@ -244,6 +244,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           tooltip={t('legend.highlightLayer') as string}
           onClick={handleHighlightLayer}
           className={highlightedLayer === layerDetails.layerPath ? 'buttonOutline active' : 'buttonOutline'}
+          disabled={!inVisibleRange}
         >
           <HighlightOutlinedIcon />
         </IconButton>
@@ -258,7 +259,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           tooltip={t('legend.zoomTo') as string}
           onClick={handleZoomTo}
           className="buttonOutline"
-          disabled={layerDetails.bounds === undefined}
+          disabled={layerDetails.bounds === undefined || !inVisibleRange}
         >
           <ZoomInSearchIcon />
         </IconButton>

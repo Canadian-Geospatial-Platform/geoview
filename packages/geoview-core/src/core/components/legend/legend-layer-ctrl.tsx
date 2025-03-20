@@ -105,13 +105,13 @@ export function SecondaryControls({ layer, isVisible, isInVisibleRange }: Second
   const highlightedLayer = useLayerHighlightedLayer();
 
   // Is visibility button disabled?
-  const isLayerVisibleCapable = (layerControls?.visibility && isInVisibleRange) ?? false;
+  const isLayerVisibleCapable = layerControls?.visibility ?? false;
 
   // Is highlight button disabled?
-  const isLayerHighlightCapable = (layerControls?.highlight && isInVisibleRange) ?? false;
+  const isLayerHighlightCapable = layerControls?.highlight ?? false;
 
   // Is zoom to extent button disabled?
-  const isLayerZoomToExtentCapable = (layerControls?.zoom && isInVisibleRange) ?? false;
+  const isLayerZoomToExtentCapable = layerControls?.zoom ?? false;
 
   // Is zoom to visible scale button visible?
   const isZoomToVisibleScaleCapable = !!((layer.type as string) !== 'group' && !isInVisibleRange);
@@ -142,6 +142,7 @@ export function SecondaryControls({ layer, isVisible, isInVisibleRange }: Second
             tooltip={t('layers.toggleVisibility') as string}
             className="buttonOutline"
             onClick={controls.handleToggleVisibility}
+            disabled={!isInVisibleRange}
           >
             {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
           </IconButton>
@@ -152,12 +153,18 @@ export function SecondaryControls({ layer, isVisible, isInVisibleRange }: Second
             sx={styles.btnMargin}
             className="buttonOutline"
             onClick={controls.handleHighlightLayer}
+            disabled={!isInVisibleRange}
           >
             {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
           </IconButton>
         )}
         {isLayerZoomToExtentCapable && (
-          <IconButton tooltip={t('legend.zoomTo') as string} className="buttonOutline" onClick={controls.handleZoomTo}>
+          <IconButton
+            tooltip={t('legend.zoomTo') as string}
+            className="buttonOutline"
+            onClick={controls.handleZoomTo}
+            disabled={!isInVisibleRange}
+          >
             <ZoomInSearchIcon />
           </IconButton>
         )}
