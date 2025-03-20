@@ -20,7 +20,7 @@
                 "aoi-panel",
                 "guide",
                 "details",
-                "legend",
+                "custom-legend",
                 "data-table",
                 "layers"]
     }
