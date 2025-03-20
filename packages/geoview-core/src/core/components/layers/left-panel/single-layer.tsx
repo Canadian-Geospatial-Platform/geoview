@@ -339,7 +339,13 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     if (isLayerAlwaysVisible) {
       if (isLayerVisibleCapable) {
         return (
-          <IconButton edge="end" size="small" tooltip={t('layers.visibilityIsAlways') as string} className="buttonOutline" disabled>
+          <IconButton
+            edge="end"
+            size="small"
+            tooltip={t('layers.visibilityIsAlways') as string}
+            className="buttonOutline"
+            disabled={!inVisibleRange}
+          >
             <VisibilityOutlinedIcon color="disabled" />
           </IconButton>
         );
