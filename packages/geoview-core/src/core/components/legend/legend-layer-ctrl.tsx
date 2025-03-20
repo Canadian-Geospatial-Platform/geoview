@@ -20,15 +20,15 @@ import {
   useSelectorLayerControls,
   useSelectorLayerItems,
   useSelectorLayerStatus,
+  useSelectorLayerType,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
-import { useMapStoreActions, useSelectorLayerVisibility } from '@/core/stores/';
+import { useMapStoreActions, useSelectorLayerVisibility, useSelectorLayerInVisibleRange } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 
 interface SecondaryControlsProps {
   layerPath: string;
-  isInVisibleRange: boolean;
 }
 
 type ControlActions = {
@@ -102,17 +102,19 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const layerStatus = useSelectorLayerStatus(layerPath);
+  const layerType = useSelectorLayerType(layerPath);
   const layerChildren = useSelectorLayerChildren(layerPath);
   const layerItems = useSelectorLayerItems(layerPath);
   const layerControls = useSelectorLayerControls(layerPath);
   const isVisible = useSelectorLayerVisibility(layerPath);
+  const isInVisibleRange = useSelectorLayerInVisibleRange(layerPath);
   const highlightedLayer = useLayerHighlightedLayer();
 
   // Is visibility button disabled?
   const isLayerVisibleCapable = (layerControls?.visibility && isInVisibleRange) ?? false;
 
   // Is zoom to visible scale button visible?
-  const isZoomToVisibleScaleCapable = !!((layer.type as string) !== 'group' && !isInVisibleRange);
+  const isZoomToVisibleScaleCapable = !!((layerType as string) !== 'group' && !isInVisibleRange);
 
   // Component helper
   const controls = useControlActions(layerPath);

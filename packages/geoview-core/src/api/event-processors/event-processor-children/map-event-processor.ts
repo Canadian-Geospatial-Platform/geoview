@@ -426,6 +426,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return layersInVisibleRange;
   };
 
+  static setVisibleRangeLayerMapState(mapId: string, visibleRangeLayers: string[]): void {
+    this.getMapStateProtected(mapId).setterActions.setVisibleRangeLayers(visibleRangeLayers);
+  }
+
   static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {
     const { orderedLayerInfo, visibleRangeLayers } = this.getMapStateProtected(mapId);
     const orderedLayer = orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
