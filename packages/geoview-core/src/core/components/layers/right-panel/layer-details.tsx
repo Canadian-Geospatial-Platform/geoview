@@ -35,7 +35,6 @@ import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
-import { useSelectorLayerInVisibleRange } from '@/app';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -63,7 +62,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const datatableSettings = useDataTableLayerSettings();
   const layersData = useDataTableAllFeaturesDataArray();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
-  const inVisibleRange = useSelectorLayerInVisibleRange(layerDetails?.layerPath);
 
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerDetails.controls?.highlight ?? false;
