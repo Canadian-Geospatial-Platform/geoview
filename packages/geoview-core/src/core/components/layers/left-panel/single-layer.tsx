@@ -28,6 +28,7 @@ import {
   useSelectedLayerSortingArrowId,
   useSelectorLayerItems,
   useSelectorLayerStatus,
+  useSelectorLayerType,
   useSelectorLayerControls,
   useSelectorLayerName,
   useSelectorLayerChildren,
@@ -90,6 +91,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const layerId: string | undefined = useSelectorLayerId(layerPath);
   const layerName: string | undefined = useSelectorLayerName(layerPath);
   const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layerPath);
+  const layerType: string | undefined = useSelectorLayerType(layerPath);
   const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layerPath);
   const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layerPath);
   const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layerPath);
@@ -218,8 +220,8 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     // Log
     logger.logTraceUseCallback('SINGLE-LAYER - handleZoomToLayerVisibleScale');
 
-    zoomToLayerVisibleScale(layer.layerPath);
-  }, [layer.layerPath, zoomToLayerVisibleScale]);
+    zoomToLayerVisibleScale(layerPath);
+  }, [layerPath, zoomToLayerVisibleScale]);
 
   // Get layer description
   const memoLayerDescription = useMemo((): JSX.Element | string | null => {
@@ -340,7 +342,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     }
 
     // Is zoom to visible scale button visible?
-    const isZoomToVisibleScaleCapable = !!((layer.type as string) !== 'group' && !inVisibleRange);
+    const isZoomToVisibleScaleCapable = !!((layerType as string) !== 'group' && !inVisibleRange);
 
     return (
       <Box>
@@ -368,15 +370,15 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   }, [
     inVisibleRange,
     handleZoomToLayerVisibleScale,
-    layer.type,
+    layerType,
     displayState,
     handleToggleVisibility,
     isLayerAlwaysVisible,
     isVisible,
-    layer.controls?.remove,
-    layer.layerId,
-    layer.layerPath,
-    layer.layerStatus,
+    layerControls?.remove,
+    layerId,
+    layerPath,
+    layerStatus,
     t,
   ]);
 

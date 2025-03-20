@@ -101,7 +101,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           );
           for (let i = 0; i < newFeatures.length; i++) {
             // TODO: Check Adding this check, because I've noticed an odd behavior when loading map and
-            // TO.DOCONT: querying details for the first time, the highlights don't show anymore (same in upstream)
+            // TO.DOCONT: querying details for the first time, the highlights don't show anymore.
             if (!newFeatures[i].geometry?.getGeometry()) {
               logger.logError('The geometry for the feature was undefined at the time this was executed');
             }
@@ -427,25 +427,18 @@ export class MapEventProcessor extends AbstractEventProcessor {
   };
 
   static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {
-    const { orderedLayerInfo, visibleRangeLayers } = this.getMapStateProtected(mapId);
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const orderedLayer = orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
 
     if (orderedLayer && orderedLayer.inVisibleRange !== inVisibleRange) {
       orderedLayer.inVisibleRange = inVisibleRange;
-      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
+      this.setMapOrderedLayerInfo(mapId, orderedLayerInfo);
     }
-
-    if (inVisibleRange && !visibleRangeLayers.includes(layerPath))
-      this.setVisibleRangeLayerMapState(mapId, [...visibleRangeLayers, layerPath]);
   }
 
-  static setZoom(mapId: string, zoom: number, orderedLayerInfo?: TypeOrderedLayerInfo[]): void {
+  static setZoom(mapId: string, zoom: number): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setZoom(zoom);
-
-    if (orderedLayerInfo) {
-      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
-    }
   }
 
   static setIsMouseInsideMap(mapId: string, inside: boolean): void {
@@ -755,12 +748,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean {
     // Redirect to layerAPI
     return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
-  }
-
-  // TODO: Check if we still need 'NoOrderChangeState' variant
-  static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {
-    // Redirect
-    this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo(curOrderedLayerInfo);
   }
 
   static reorderLayer(mapId: string, layerPath: string, move: number): void {

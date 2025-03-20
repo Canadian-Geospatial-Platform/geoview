@@ -491,7 +491,7 @@ export class MapViewer {
       });
 
       // Save in the store
-      MapEventProcessor.setZoom(this.mapId, zoom, newOrderedLayerInfo);
+      MapEventProcessor.setZoom(this.mapId, zoom);
       MapEventProcessor.setMapOrderedLayerInfo(this.mapId, newOrderedLayerInfo);
 
       // Emit to the outside

@@ -1607,7 +1607,7 @@ export class LayerApi {
     }
 
     // Redirect to processor so we can update the store with setterActions
-    MapEventProcessor.setOrderedLayerInfoWithNoOrderChangeState(this.getMapId(), curOrderedLayerInfo);
+    MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), curOrderedLayerInfo);
 
     return newVisibility;
   }
