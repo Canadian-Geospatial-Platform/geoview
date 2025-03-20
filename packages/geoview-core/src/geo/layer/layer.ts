@@ -1524,7 +1524,7 @@ export class LayerApi {
     }
 
     // Update the legend layers if necessary
-    if (updateLegendLayers) LegendEventProcessor.setItemVisibility(this.getMapId(), item, visibility);
+    if (updateLegendLayers) LegendEventProcessor.setItemVisibility(this.getMapId(), layerPath, item, visibility);
 
     // Apply filter to layer
     MapEventProcessor.applyLayerFilters(this.getMapId(), layerPath);
