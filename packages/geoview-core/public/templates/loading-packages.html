@@ -126,6 +126,7 @@
 
         // add event handler to the load custom legend button
         loadCustomLegendBtn.addEventListener('click', function (e) {
+          if (!window?.geoviewPlugins) window.geoviewPlugins = {};
           cgpv.api.plugin.addPlugin('custom-legend', 'mapWM', window.geoviewPlugins['custom-legend'], {
             mapId: 'mapWM',
           });
