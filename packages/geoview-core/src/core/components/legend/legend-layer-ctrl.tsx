@@ -19,7 +19,6 @@ import {
   useSelectorLayerChildren,
   useSelectorLayerControls,
   useSelectorLayerItems,
-  useSelectorLayerStatus,
   useSelectorLayerType,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
@@ -101,7 +100,6 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const layerStatus = useSelectorLayerStatus(layerPath);
   const layerType = useSelectorLayerType(layerPath);
   const layerChildren = useSelectorLayerChildren(layerPath);
   const layerItems = useSelectorLayerItems(layerPath);
@@ -119,10 +117,6 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   // Component helper
   const controls = useControlActions(layerPath);
   const subTitle = useSubtitle(layerChildren || [], layerItems || []);
-
-  if (!['processed', 'loaded'].includes(layerStatus || 'error')) {
-    return <Box />;
-  }
 
   return (
     <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>

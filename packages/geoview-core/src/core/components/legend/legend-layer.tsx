@@ -9,7 +9,6 @@ import {
   useSelectorLayerName,
   useSelectorLayerItems,
   useSelectorLayerChildren,
-  useSelectorLayerStatus,
 } from '@/core/stores/';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
@@ -80,7 +79,6 @@ export function LegendLayer({ layerPath }: LegendLayerProps): JSX.Element {
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const layerStatus = useSelectorLayerStatus(layerPath);
 
   // Stores
   const { initLightBox, LightBoxComponent } = useLightBox();
@@ -97,19 +95,13 @@ export function LegendLayer({ layerPath }: LegendLayerProps): JSX.Element {
     [layerPath, toggleLegendCollapsed]
   );
 
-  // If the layer status isn't in error
-  if (!['error'].includes(layerStatus ?? '')) {
-    return (
-      <>
-        <Box sx={sxClasses.legendLayerListItem}>
-          <LegendLayerHeader layerPath={layerPath} tooltip={t('layers.toggleCollapse')} onExpandClick={handleExpandGroupClick} />
-          <CollapsibleContent layerPath={layerPath} initLightBox={initLightBox} LegendLayerComponent={LegendLayer} />
-        </Box>
-        <LightBoxComponent />
-      </>
-    );
-  }
-
-  // Empty, the layer status might be in error
-  return <Box sx={sxClasses.legendLayerListItem} />;
+  return (
+    <>
+      <Box sx={sxClasses.legendLayerListItem}>
+        <LegendLayerHeader layerPath={layerPath} tooltip={t('layers.toggleCollapse')} onExpandClick={handleExpandGroupClick} />
+        <CollapsibleContent layerPath={layerPath} initLightBox={initLightBox} LegendLayerComponent={LegendLayer} />
+      </Box>
+      <LightBoxComponent />
+    </>
+  );
 }
