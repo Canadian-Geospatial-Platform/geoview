@@ -1016,13 +1016,15 @@ export class LayerApi {
     // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
     const mapView = this.mapViewer.getView();
     if ((layerConfig.initialSettings.maxZoom || layerConfig.maxScale) && !(gvLayer instanceof GVGroupLayer)) {
-      const maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+      let maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
+      maxScaleZoomLevel = maxScaleZoomLevel ? Math.round(maxScaleZoomLevel) : undefined;
       const maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
       gvLayer.setMaxZoom(maxZoom);
     }
 
     if ((layerConfig.initialSettings.minZoom || layerConfig.minScale) && !(gvLayer instanceof GVGroupLayer)) {
-      const minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+      let minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
+      minScaleZoomLevel = minScaleZoomLevel ? Math.round(minScaleZoomLevel) : undefined;
       const minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
       gvLayer.setMinZoom(minZoom);
     }
