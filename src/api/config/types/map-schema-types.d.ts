@@ -37,7 +37,7 @@ export type TypeFooterBarProps = {
     selectedLayersLayerPath: string;
 };
 /** Supported app bar values. */
-export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'aoi-panel' | 'geochart' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers' | '';
+export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'aoi-panel' | 'custom-legend' | 'geochart' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers';
 /** Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there. */
 export type TypeAppBarProps = {
     tabs: {
@@ -85,7 +85,7 @@ export type TypeExternalPackages = TypeExternalPackagesProps[];
 export type TypeServiceUrls = {
     /**
      * Service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can
-     * be another endpoint with similar output. Default = CV_CONFIG_GEOCORE_URL ('https://geocore-stage.api.geo.ca'. Used in config-constants).
+     * be another endpoint with similar output. Default = CV_CONFIG_GEOCORE_URL ('https://geocore.api.geo.ca'. Used in config-constants).
      */
     geocoreUrl: string;
     /**

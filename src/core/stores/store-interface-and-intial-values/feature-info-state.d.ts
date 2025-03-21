@@ -57,4 +57,7 @@ export declare const useDetailsLayerDataArray: () => TypeFeatureInfoResultSetEnt
 export declare const useDetailsLayerDataArrayBatch: () => TypeFeatureInfoResultSetEntry[];
 export declare const useDetailsSelectedLayerPath: () => string;
 export declare const useDetailsStoreActions: () => FeatureInfoActions;
+export declare const useSelectorLayerQueryStatus: (layerPath: string) => TypeQueryStatus | undefined;
+export declare const useSelectorLayerFeatures: (layerPath: string) => TypeFeatureInfoEntry[] | undefined;
+export declare const useSelectorLayerNumOfFeatures: (layerPath: string) => number | undefined;
 export {};

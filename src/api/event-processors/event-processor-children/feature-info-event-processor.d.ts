@@ -26,6 +26,13 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
      */
     static getSelectedLayerPath(mapId: string): string;
     /**
+     * Gets the layer data array for one layer.
+     * @param {string} mapId - The map id.
+     * @param {string} layerPath - The path of the layer to get.
+     * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
+     */
+    static findLayerDataFromLayerDataArray(mapId: string, layerPath: string, layerDataArray?: TypeFeatureInfoResultSetEntry[]): TypeFeatureInfoResultSetEntry | undefined;
+    /**
      * Deletes the feature from a resultSet for a specific layerPath. At the same time it check for
      * removing the higlight and the click marker if selected layer path is the reset path
      * @param {string} mapId - The map identifier

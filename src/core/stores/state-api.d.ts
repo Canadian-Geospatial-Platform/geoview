@@ -46,7 +46,7 @@ export declare class StateApi {
      * @param {boolean} collapsed - The new state
      * @returns {boolean} If the legend is collapsed.
      */
-    setLegendCollapsedState(layerPath: string, collapsed?: boolean): void;
+    setLegendCollapsedState(layerPath: string, collapsed: boolean): void;
     /**
      * Set selected layer in layers tab.
      * @param {string} layerPath - The path of the layer to set

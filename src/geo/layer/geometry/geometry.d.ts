@@ -214,6 +214,21 @@ export declare class GeometryApi {
      */
     deleteGeometryGroup(geometryGroupid?: string): void;
     /**
+     * Get the coordinates of a specific feature
+     * @param {string} featureId the id of the feature
+     * @param {number} projection optional, transform the coordinates to the provided projection.
+     *   Otherwise, uses the map's projection by default
+     * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} the coordinates of the feature
+     */
+    getFeatureCoords(featureId: string, projection?: number): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined;
+    /**
+     * Allows for a feature's coordinates to be updated programatically.
+     * @param {string} featureId the id of the feature to return
+     * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The new coordinates for the feature
+     * @param {number} projection optional, the projection of the coordinates, assumes 4326 if not specified
+     */
+    setFeatureCoords(featureId: string, coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][], projection?: number): void;
+    /**
      * Creates a Geometry given a geometry type and coordinates expected in any logical format.
      * @param {TypeStyleGeometry} geometryType - The geometry type to create
      * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]} coordinates - The coordinates to use to create the geometry

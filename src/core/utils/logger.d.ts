@@ -1,9 +1,10 @@
 export declare const LOG_TRACE_DETAILED = 1;
 export declare const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
 export declare const LOG_TRACE_USE_CALLBACK = 3;
-export declare const LOG_TRACE_RENDER = 4;
-export declare const LOG_TRACE_USE_MEMO = 5;
-export declare const LOG_TRACE_USE_EFFECT = 6;
+export declare const LOG_TRACE_RENDER_DETAILED = 4;
+export declare const LOG_TRACE_RENDER = 5;
+export declare const LOG_TRACE_USE_MEMO = 6;
+export declare const LOG_TRACE_USE_EFFECT = 7;
 export declare const LOG_TRACE_CORE_STORE_SUBSCRIPTION = 8;
 export declare const LOG_TRACE_CORE_API_EVENT = 9;
 export declare const LOG_TRACE_CORE = 10;
@@ -45,6 +46,14 @@ export declare class ConsoleLogger {
      * @param {unknown[]} messages - The messages to log
      */
     logTraceUseEffectUnmount(useEffectFunction: string, ...messages: unknown[]): void;
+    /**
+     * Logging function commonly used in the rendering to log when a component is being rendered.
+     * This function is for the small components that get rendered a lot and that we don't typically want in the render trace.
+     * Only shows if LOG_ACTIVE is true.
+     * @param {string} component - The component being rendered
+     * @param {unknown[]} messages - The messages to log
+     */
+    logTraceRenderDetailed(component: string, ...messages: unknown[]): void;
     /**
      * Logging function commonly used in the rendering to log when a component is being rendered.
      * Only shows if LOG_ACTIVE is true.

@@ -5,6 +5,7 @@ import View, { FitOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
+import { Condition } from 'ol/events/condition';
 import { TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme } from '@config/types/map-schema-types';
 import { Basemap } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
@@ -274,6 +275,11 @@ export declare class MapViewer {
      */
     initTranslateInteractions(): Translate;
     /**
+     * Initializes translation interactions without requireing the extra selection click.
+     * Note: This will limit translation interactions to one feature at a time.
+     */
+    initTranslateOneFeatureInteractions(): Translate;
+    /**
      * Initializes drawing interactions on the given vector source
      * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
      * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
@@ -284,7 +290,7 @@ export declare class MapViewer {
      * Initializes modifying interactions on the given vector source
      * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
      */
-    initModifyInteractions(geomGroupKey: string): Modify;
+    initModifyInteractions(geomGroupKey: string, style?: TypeFeatureStyle, insertVertexCondition?: Condition, pixelTolerance?: number): Modify;
     /**
      * Initializes snapping interactions on the given vector source
      * @param {string} geomGroupKey - The geometry group key in which to hold the geometries

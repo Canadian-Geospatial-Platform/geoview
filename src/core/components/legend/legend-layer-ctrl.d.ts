@@ -1,7 +1,5 @@
-import { TypeLegendLayer } from '@/core/components/layers/types';
 interface SecondaryControlsProps {
-    layer: TypeLegendLayer;
-    isVisible: boolean;
+    layerPath: string;
 }
-export declare function SecondaryControls({ layer, isVisible }: SecondaryControlsProps): JSX.Element;
+export declare function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.Element;
 export {};

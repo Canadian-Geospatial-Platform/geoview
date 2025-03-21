@@ -12,26 +12,7 @@ export declare abstract class Projection {
     /**
      * constant used for the available projection names
      */
-    static PROJECTION_NAMES: {
-        3578: string;
-        LCC: string;
-        3979: string;
-        42101: string;
-        102100: string;
-        102184: string;
-        102190: string;
-        WM: string;
-        3857: string;
-        4269: string;
-        LNGLAT: string;
-        CRS84: string;
-        CSRS: string;
-        CSRS98: string;
-        3400: string;
-        2151: string;
-        2957: string;
-        26914: string;
-    };
+    static PROJECTION_NAMES: Record<string, string>;
     static CUSTOM_WKT_NUM: number;
     static CUSTOM_WKT_AND_NUM: {
         [wkt_num: string]: string;
@@ -134,6 +115,11 @@ export declare abstract class Projection {
      */
     static transformToLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate;
     /**
+     * Fetches definitions for unsupported projections and adds them.
+     * @param {TypeJsonObject} projection - Object containing wkid and possibly latestWkid from service metadata.
+     */
+    static addProjection(projection: TypeJsonObject): Promise<void>;
+    /**
      * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
      *
      * @param {ProjectionLike} projectionLike Either a code string which is a combination of authority and identifier such as "EPSG:4326", or an existing projection object, or undefined.
@@ -170,4 +156,14 @@ export declare abstract class Projection {
      * @returns {Extent} The extent in order (xmin,ymin,xmax,ymax).
      */
     static readExtentCarefully(projection: string, extent: Extent): Extent;
+    /**
+     * Transform coordinates between two projections
+     * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} coordinates the coordinates to transform
+     * @param {string} startProjection the current projection of the coordinates.
+     *   Note: the value should include 'EPSG:' then the projection  number.
+     * @param {string} endProjection the transformed projection of the coordinates.
+     *   Note: the value should include 'EPSG:' then the projection  number.
+     * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} the transformed coordinates
+     */
+    static transformCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined, startProjection: string, endProjection: string): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined;
 }

@@ -32,6 +32,7 @@ export interface IMapState {
     northArrow: boolean;
     northArrowElement: TypeNorthArrow;
     orderedLayerInfo: TypeOrderedLayerInfo[];
+    orderedLayers: string[];
     overlayClickMarker?: Overlay;
     overlayNorthMarker?: Overlay;
     overviewMap: boolean;
@@ -57,7 +58,8 @@ export interface IMapState {
         removePointMarkersOrGroup: (group: string, idsOrCoordinates?: string[] | Coordinate[]) => void;
         reorderLayer: (layerPath: string, move: number) => void;
         resetBasemap: () => Promise<void>;
-        setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
+        setLegendCollapsed: (layerPath: string, newValue: boolean) => void;
+        toggleLegendCollapsed: (layerPath: string) => void;
         setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
         setMapKeyboardPanInteractions: (panDelta: number) => void;
         setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
@@ -98,6 +100,7 @@ export interface IMapState {
         setVisibleLayers: (newOrder: string[]) => void;
         setVisibleRangeLayers: (newOrder: string[]) => void;
         setOrderedLayerInfo: (newOrderedLayerInfo: TypeOrderedLayerInfo[]) => void;
+        setOrderedLayers: (newOrder: string[]) => void;
         setHoverable: (layerPath: string, hoverable: boolean) => void;
         setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
         setQueryable: (layerPath: string, queryable: boolean) => void;
@@ -155,6 +158,7 @@ export declare const useMapProjection: () => TypeValidMapProjectionCodes;
 export declare const useMapRotation: () => number;
 export declare const useMapScale: () => TypeScaleInfo;
 export declare const useMapSize: () => [number, number];
+export declare const useMapOrderedLayers: () => string[];
 export declare const useMapVisibleLayers: () => string[];
 export declare const useMapVisibleRangeLayers: () => string[];
 export declare const useMapZoom: () => number;
@@ -162,6 +166,5 @@ export declare const getMapPointerPosition: (mapId: string) => TypeMapMouseInfo 
 export declare const useSelectorLayerVisibility: (layerPath: string) => boolean;
 export declare const useSelectorLayerInVisibleRange: (layerPath: string) => boolean;
 export declare const useSelectorLayerLegendCollapsed: (layerPath: string) => boolean;
-export declare const useSelectorLayerPathOrder: () => string[];
 export declare const useMapStoreActions: () => MapActions;
 export {};
