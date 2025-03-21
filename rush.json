@@ -20,6 +20,10 @@
   },
   "projects": [
     {
+      "packageName": "geoview-custom-legend",
+      "projectFolder": "packages/geoview-custom-legend"
+    },
+    {
       "packageName": "geoview-aoi-panel",
       "projectFolder": "packages/geoview-aoi-panel"
     },
