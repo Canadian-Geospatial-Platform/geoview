@@ -87,9 +87,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
   const legendExpanded = !useSelectorLayerLegendCollapsed(layerPath);
 
-  // Is visibility button disabled?
-  const isLayerVisibleCapable = (layer.controls?.visibility && inVisibleRange) ?? false;
-
   // TODO: I think we should favor using this pattern here, with the store, instead of working with the whole 'layer' object from the props
   const layerId: string | undefined = useSelectorLayerId(layerPath);
   const layerName: string | undefined = useSelectorLayerName(layerPath);
@@ -98,6 +95,9 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const layerControls: TypeLayerControls | undefined = useSelectorLayerControls(layerPath);
   const layerChildren: TypeLegendLayer[] | undefined = useSelectorLayerChildren(layerPath);
   const layerItems: TypeLegendItem[] | undefined = useSelectorLayerItems(layerPath);
+
+  // Is visibility button disabled?
+  const isLayerVisibleCapable = layerControls?.visibility;
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(

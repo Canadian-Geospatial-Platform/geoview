@@ -64,10 +64,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
 
   // Is highlight button disabled?
-  const isLayerHighlightCapable = layerDetails.controls?.highlight ?? false;
+  const isLayerHighlightCapable = layerDetails.controls?.highlight;
 
   // Is zoom to extent button disabled?
-  const isLayerZoomToExtentCapable = layerDetails.controls?.zoom ?? false;
+  const isLayerZoomToExtentCapable = layerDetails.controls?.zoom;
 
   useEffect(() => {
     // Log
