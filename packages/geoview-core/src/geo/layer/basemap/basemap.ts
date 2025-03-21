@@ -662,6 +662,7 @@ export class Basemap {
             opacity: layer.opacity,
             source: layer.source,
             declutter: true,
+            updateWhileAnimating: true,
           });
 
           // Apply Style to Vector Tile Basemap
@@ -691,6 +692,15 @@ export class Basemap {
       // Emit basemap changed event
       this.#emitBasemapChanged({ basemap });
     }
+  }
+
+  /**
+   * Refreshes the basemap layers
+   */
+  refreshBasemap(): void {
+    this.activeBasemap?.layers.forEach((layer) => {
+      layer.source.refresh();
+    });
   }
 
   /**
