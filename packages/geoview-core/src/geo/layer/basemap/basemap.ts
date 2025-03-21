@@ -243,8 +243,7 @@ export class Basemap {
     basemapId: string,
     basemapLayer: TypeJsonObject,
     opacity: number,
-    rest: boolean,
-    className?: string
+    rest: boolean
   ): Promise<null | TypeBasemapLayer> {
     const resolutions: number[] = [];
     let minZoom = 0;
@@ -325,8 +324,6 @@ export class Basemap {
                 origin,
                 resolutions,
               }),
-              // Optionally add className if present. Necessary when using multiple vector tiles and one with the declutter option on
-              ...(className ? { className } : {}),
             });
           } else {
             source = new XYZ({
@@ -414,8 +411,7 @@ export class Basemap {
           'transport',
           this.basemapsList[projectionCode].transport,
           coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
-          true,
-          'geom'
+          true
         );
         if (transportLayer) {
           basemapLayers.push(transportLayer);
@@ -661,8 +657,9 @@ export class Basemap {
           basemapLayer = new VectorTileLayer({
             opacity: layer.opacity,
             source: layer.source,
-            declutter: true,
             updateWhileAnimating: true,
+            // Only declutter labels and add className otherwise (https://github.com/openlayers/openlayers/issues/10096)
+            ...(layer.basemapId === 'label' ? { declutter: true } : { className: 'geom' }),
           });
 
           // Apply Style to Vector Tile Basemap
