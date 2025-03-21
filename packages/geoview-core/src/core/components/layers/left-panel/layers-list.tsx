@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
-import { useGeoViewMapId, useLayerStoreActions, useSelectorLayerPathOrder } from '@/core/stores';
+import { useGeoViewMapId, useMapOrderedLayers } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { TABS } from '@/core/utils/constant';
@@ -23,16 +23,7 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   const mapId = useGeoViewMapId();
-  const layerPathOrder = useSelectorLayerPathOrder();
-  const { sortLegendLayersChildren } = useLayerStoreActions();
-
-  const sortedLayers = layersList.sort((a, b) => {
-    return layerPathOrder.indexOf(a.layerPath) - layerPathOrder.indexOf(b.layerPath);
-  });
-
-  // TODO: Check - This sort should likely happen elsewhere than in a rendering component
-  // TO.DOCONT: (the fact that the rendering component exists or not in the ui shouldn't have to do with the order state from store)
-  sortLegendLayersChildren(sortedLayers);
+  const layerPathOrder = useMapOrderedLayers();
 
   // ? I doubt we want to define an explicit type for style properties?
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,6 +39,13 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
 
   // Memoize the legend items
   const memoLegendItems = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('LAYERS-LIST - memoLegendItems', layersList);
+
+    const sortedLayers = layersList.sort((a, b) => {
+      return layerPathOrder.indexOf(a.layerPath) - layerPathOrder.indexOf(b.layerPath);
+    });
+
     return sortedLayers.map((layer, index) => {
       const isFirst = index === 0;
       const isLast = index === sortedLayers.length - 1;
@@ -59,7 +57,7 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
       return (
         <SingleLayer
           key={layer.layerPath}
-          layer={layer}
+          layerPath={layer.layerPath}
           depth={depth}
           showLayerDetailsPanel={showLayerDetailsPanel}
           isFirst={isFirst}
@@ -68,7 +66,7 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
         />
       );
     });
-  }, [depth, isLayoutEnlarged, mapId, showLayerDetailsPanel, sortedLayers]);
+  }, [depth, isLayoutEnlarged, mapId, showLayerDetailsPanel, layersList, layerPathOrder]);
 
   return <Box sx={getListClass()}>{memoLegendItems}</Box>;
 }

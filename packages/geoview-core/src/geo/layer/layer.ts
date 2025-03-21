@@ -320,7 +320,7 @@ export class LayerApi {
           layerEntryConfig.initialSettings?.states?.hoverable !== undefined ? layerEntryConfig.initialSettings?.states?.hoverable : true,
         legendCollapsed:
           layerEntryConfig.initialSettings?.states?.legendCollapsed !== undefined
-            ? layerEntryConfig.initialSettings?.states?.legendCollapsed
+            ? layerEntryConfig.initialSettings.states.legendCollapsed
             : false,
         inVisibleRange: true,
       };
@@ -341,7 +341,7 @@ export class LayerApi {
           layerPath,
           legendCollapsed:
             geoviewLayerConfig.initialSettings?.states?.legendCollapsed !== undefined
-              ? geoviewLayerConfig.initialSettings?.states?.legendCollapsed
+              ? geoviewLayerConfig.initialSettings.states.legendCollapsed
               : false,
           visible: geoviewLayerConfig.initialSettings?.states?.visible !== false,
           inVisibleRange: true,
@@ -1524,7 +1524,7 @@ export class LayerApi {
     }
 
     // Update the legend layers if necessary
-    if (updateLegendLayers) LegendEventProcessor.setItemVisibility(this.getMapId(), item, visibility);
+    if (updateLegendLayers) LegendEventProcessor.setItemVisibility(this.getMapId(), layerPath, item, visibility);
 
     // Apply filter to layer
     MapEventProcessor.applyLayerFilters(this.getMapId(), layerPath);
@@ -1607,7 +1607,7 @@ export class LayerApi {
     }
 
     // Redirect to processor so we can update the store with setterActions
-    MapEventProcessor.setOrderedLayerInfoWithNoOrderChangeState(this.getMapId(), curOrderedLayerInfo);
+    MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), curOrderedLayerInfo);
 
     return newVisibility;
   }

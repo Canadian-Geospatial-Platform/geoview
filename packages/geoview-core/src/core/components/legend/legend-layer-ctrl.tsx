@@ -13,17 +13,21 @@ import {
   HighlightIcon,
   CenterFocusScaleIcon,
 } from '@/ui';
-import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerHighlightedLayer,
+  useLayerStoreActions,
+  useSelectorLayerChildren,
+  useSelectorLayerControls,
+  useSelectorLayerItems,
+  useSelectorLayerType,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
-import { useMapStoreActions } from '@/core/stores/';
+import { useMapStoreActions, useSelectorLayerVisibility, useSelectorLayerInVisibleRange } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerControls } from '@/api/config/types/map-schema-types';
 
 interface SecondaryControlsProps {
-  layer: TypeLegendLayer;
-  isVisible: boolean; // Visibility come from store ordered layer info array
-  isInVisibleRange: boolean;
+  layerPath: string;
 }
 
 type ControlActions = {
@@ -88,35 +92,31 @@ const useSubtitle = (children: TypeLegendLayer[], items: TypeLegendItem[]): stri
 };
 
 // SecondaryControls component (no memo to force re render from layers panel modifications)
-export function SecondaryControls({ layer, isVisible, isInVisibleRange }: SecondaryControlsProps): JSX.Element {
-  // Extract constant from layer prop
-  const { layerPath, layerStatus, items, children } = layer;
-  const layerControls: TypeLayerControls | undefined = layer.controls;
-
+export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath, isVisible, isInVisibleRange);
+  logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath);
 
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-
-  // Stores
+  const layerType = useSelectorLayerType(layerPath);
+  const layerChildren = useSelectorLayerChildren(layerPath);
+  const layerItems = useSelectorLayerItems(layerPath);
+  const layerControls = useSelectorLayerControls(layerPath);
+  const isVisible = useSelectorLayerVisibility(layerPath);
+  const isInVisibleRange = useSelectorLayerInVisibleRange(layerPath);
   const highlightedLayer = useLayerHighlightedLayer();
 
   // Is visibility button disabled?
   const isLayerVisibleCapable = (layerControls?.visibility && isInVisibleRange) ?? false;
 
   // Is zoom to visible scale button visible?
-  const isZoomToVisibleScaleCapable = !!((layer.type as string) !== 'group' && !isInVisibleRange);
+  const isZoomToVisibleScaleCapable = !!((layerType as string) !== 'group' && !isInVisibleRange);
 
   // Component helper
   const controls = useControlActions(layerPath);
-  const subTitle = useSubtitle(children, items);
-
-  if (!['processed', 'loaded'].includes(layerStatus || 'error')) {
-    return <Box />;
-  }
+  const subTitle = useSubtitle(layerChildren || [], layerItems || []);
 
   return (
     <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>

@@ -36,7 +36,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/react-progress/}
  */
 function CircularProgressBaseUI(props: CircularProgressProps): JSX.Element {
-  logger.logTraceRender('ui/circular-progress/circular-progress-base');
+  logger.logTraceRenderDetailed('ui/circular-progress/circular-progress-base');
 
   return <MaterialCircularProgress {...props} />;
 }

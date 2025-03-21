@@ -502,13 +502,24 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {TypeLegendItem} item - The item to change.
    * @param {boolean} visibility - The new visibility.
    */
-  static setItemVisibility(mapId: string, item: TypeLegendItem, visibility: boolean = true): void {
-    // Get current layer legends and set item visibility
+  static setItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem, visibility: boolean = true): void {
+    // Get current layer legends
     const curLayers = this.getLayerState(mapId).legendLayers;
 
-    // item is a part of curLayers, changing it changes curLayers
-    // eslint-disable-next-line no-param-reassign
-    item.isVisible = visibility;
+    // Get the particular object holding the items array itself from the store
+    const layer = this.getLegendLayerInfo(mapId, layerPath);
+
+    // If found
+    if (layer) {
+      // ! Change the visibility of the given item.
+      // ! which happens to be the same object reference as the one in the items array here
+      // TODO: Refactor - Rethink this pattern to find a better cohesive solution for ALL 'set' that go in the store and change them all
+      // eslint-disable-next-line no-param-reassign
+      item.isVisible = visibility;
+
+      // Shadow-copy this specific array so that the hooks are triggered for this items array and this one only
+      layer.items = [...layer.items];
+    }
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
@@ -535,7 +546,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath, true);
     // Get legend layers and legend layer to update
     const curLayers = this.getLayerState(mapId).legendLayers;
-    const layer = this.findLayerByPath(curLayers, layerPath);
+
+    // Get the particular object holding the items array itself from the store
+    const layer = this.getLegendLayerInfo(mapId, layerPath);
 
     // Set item visibility on map and in legend layer item for each item in layer
     if (layer) {
@@ -544,6 +557,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         // eslint-disable-next-line no-param-reassign
         item.isVisible = visibility;
       });
+
+      // Shadow-copy this specific array so that the hooks are triggered for this items array and this one only
+      layer.items = [...layer.items];
     }
 
     // Set updated legend layers

@@ -99,8 +99,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
           const removedFeatures = prevFeatures.filter(
             (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
           );
-          for (let i = 0; i < newFeatures.length; i++)
+          for (let i = 0; i < newFeatures.length; i++) {
+            // TODO: Check Adding this check, because I've noticed an odd behavior when loading map and
+            // TO.DOCONT: querying details for the first time, the highlights don't show anymore.
+            if (!newFeatures[i].geometry?.getGeometry()) {
+              logger.logError('The geometry for the feature was undefined at the time this was executed');
+            }
             MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.highlightFeature(newFeatures[i]);
+          }
           for (let i = 0; i < removedFeatures.length; i++)
             MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(
               (removedFeatures[i].geometry as TypeGeometry).ol_uid
@@ -125,26 +131,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // #endregion FEATURE SELECTION
 
-    const unsubOrderedLayerInfo = store.subscribe(
-      (state) => state.mapState.orderedLayerInfo,
-      (cur) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - orderedLayerInfo', mapId, cur);
-
-        const curVisibleLayers = cur
-          .map((layerInfo) => {
-            if (layerInfo.visible) return layerInfo.layerPath;
-            return undefined;
-          })
-          .filter((layerPath) => layerPath);
-        const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
-        if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(curVisibleLayers))
-          store.getState().mapState.setterActions.setVisibleLayers(curVisibleLayers as string[]);
-      }
-    );
-
     // Return the array of subscriptions so they can be destroyed later
-    return [unsubMapHighlightedFeatures, unsubOrderedLayerInfo];
+    return [unsubMapHighlightedFeatures];
   }
 
   /**
@@ -438,30 +426,19 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return layersInVisibleRange;
   };
 
-  static setVisibleRangeLayerMapState(mapId: string, visibleRangeLayers: string[]): void {
-    this.getMapStateProtected(mapId).setterActions.setVisibleRangeLayers(visibleRangeLayers);
-  }
-
   static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {
-    const { orderedLayerInfo, visibleRangeLayers } = this.getMapStateProtected(mapId);
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const orderedLayer = orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
 
     if (orderedLayer && orderedLayer.inVisibleRange !== inVisibleRange) {
       orderedLayer.inVisibleRange = inVisibleRange;
-      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
+      this.setMapOrderedLayerInfo(mapId, orderedLayerInfo);
     }
-
-    if (inVisibleRange && !visibleRangeLayers.includes(layerPath))
-      this.setVisibleRangeLayerMapState(mapId, [...visibleRangeLayers, layerPath]);
   }
 
-  static setZoom(mapId: string, zoom: number, orderedLayerInfo?: TypeOrderedLayerInfo[]): void {
+  static setZoom(mapId: string, zoom: number): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setZoom(zoom);
-
-    if (orderedLayerInfo) {
-      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
-    }
   }
 
   static setIsMouseInsideMap(mapId: string, inside: boolean): void {
@@ -764,18 +741,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setQueryable(layerPath, queryable);
   }
 
-  static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed?: boolean): void {
+  static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed: boolean): void {
     this.getMapStateProtected(mapId).setterActions.setLegendCollapsed(layerPath, collapsed);
   }
 
   static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean {
     // Redirect to layerAPI
     return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
-  }
-
-  static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {
-    // Redirect
-    this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo(curOrderedLayerInfo);
   }
 
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
@@ -1078,8 +1050,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Set the right zoom (Infinity will act as a no change in zoom level)
     let layerZoom = Infinity;
-    if (layerMinZoom !== -Infinity && layerMinZoom > mapZoom!) layerZoom = layerMinZoom + 0.1;
-    else if (layerMaxZoom !== Infinity && layerMaxZoom < mapZoom!) layerZoom = layerMaxZoom - 0.1;
+    if (layerMinZoom !== -Infinity && layerMinZoom >= mapZoom!) layerZoom = layerMinZoom + 0.1;
+    else if (layerMaxZoom !== Infinity && layerMaxZoom <= mapZoom!) layerZoom = layerMaxZoom - 0.1;
 
     // Change view to go to proper zoom centered in the middle of layer extent
     // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use

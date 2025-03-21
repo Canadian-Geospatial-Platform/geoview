@@ -45,7 +45,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/api/badge/}
  */
 function BadgeUI(props: BadgeProps): JSX.Element {
-  logger.logTraceRender('ui/badge/badge');
+  logger.logTraceRenderDetailed('ui/badge/badge');
 
   return <MaterialBadge {...props} />;
 }

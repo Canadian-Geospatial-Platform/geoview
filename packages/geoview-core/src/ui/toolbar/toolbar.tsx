@@ -27,7 +27,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/react-app-bar/}
  */
 function ToolbarUI(props: ToolbarProps): JSX.Element {
-  logger.logTraceRender('ui/toolbar/toolbar');
+  logger.logTraceRenderDetailed('ui/toolbar/toolbar');
 
   return <MaterialToolbar {...props} />;
 }

@@ -52,7 +52,7 @@ const AnimatedButtonGroup = animated(MaterialButtonGroup);
  * @see {@link https://mui.com/material-ui/react-button-group/}
  */
 function ButtonGroupUI(props: ButtonGroupProps, ref: Ref<HTMLDivElement>): JSX.Element {
-  logger.logTraceRender('ui/button-group/button-group');
+  logger.logTraceRenderDetailed('ui/button-group/button-group');
 
   // Get constant from props
   const { children, ...otherProps } = props;

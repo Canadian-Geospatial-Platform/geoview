@@ -1,10 +1,9 @@
-import { useMemo } from 'react';
 import { Coordinate } from 'ol/coordinate'; // only for typing
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent'; // only for Typing
 import { FitOptions } from 'ol/View'; // only for typing
-
 import { useStore } from 'zustand';
+
 import {
   TypeBasemapOptions,
   TypeHighlightColors,
@@ -54,6 +53,7 @@ export interface IMapState {
   northArrow: boolean;
   northArrowElement: TypeNorthArrow;
   orderedLayerInfo: TypeOrderedLayerInfo[];
+  orderedLayers: string[];
   overlayClickMarker?: Overlay;
   overlayNorthMarker?: Overlay;
   overviewMap: boolean;
@@ -81,7 +81,8 @@ export interface IMapState {
     removePointMarkersOrGroup: (group: string, idsOrCoordinates?: string[] | Coordinate[]) => void;
     reorderLayer: (layerPath: string, move: number) => void;
     resetBasemap: () => Promise<void>;
-    setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
+    setLegendCollapsed: (layerPath: string, newValue: boolean) => void;
+    toggleLegendCollapsed: (layerPath: string) => void;
     setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
     setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
@@ -130,6 +131,7 @@ export interface IMapState {
     setVisibleLayers: (newOrder: string[]) => void;
     setVisibleRangeLayers: (newOrder: string[]) => void;
     setOrderedLayerInfo: (newOrderedLayerInfo: TypeOrderedLayerInfo[]) => void;
+    setOrderedLayers: (newOrder: string[]) => void;
     setHoverable: (layerPath: string, hoverable: boolean) => void;
     setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
     setQueryable: (layerPath: string, queryable: boolean) => void;
@@ -169,6 +171,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     northArrow: false,
     northArrowElement: { degreeRotation: '180.0', isNorthVisible: true } as TypeNorthArrow,
     orderedLayerInfo: [],
+    orderedLayers: [],
     overviewMap: false,
     overviewMapHideZoom: 0,
     pointerPosition: undefined,
@@ -332,13 +335,26 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
-       * Sets or toggles the legend of a layer.
+       * Sets the collapse state of a layer.
        * @param {string} layerPath - The path of the layer.
-       * @param {boolean} [newValue] - The new value of visibility.
+       * @param {boolean} [newValue] - The new value of collapse.
        */
-      setLegendCollapsed: (layerPath: string, newValue?: boolean): void => {
+      setLegendCollapsed: (layerPath: string, newValue: boolean): void => {
         // Redirect to setter
         get().mapState.setterActions.setLegendCollapsed(layerPath, newValue);
+      },
+
+      /**
+       * Toggles the collapse state of a layer.
+       * @param {string} layerPath - The path of the layer.
+       */
+      toggleLegendCollapsed: (layerPath: string): void => {
+        // Get current value
+        const legendCollapsedRightNow: boolean =
+          MapEventProcessor.findMapLayerFromOrderedInfo(get().mapId, layerPath)?.legendCollapsed || false;
+
+        // Redirect
+        get().mapState.setterActions.setLegendCollapsed(layerPath, !legendCollapsedRightNow);
       },
 
       /**
@@ -806,13 +822,43 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The ordered layer information.
        */
       setOrderedLayerInfo: (orderedLayerInfo: TypeOrderedLayerInfo[]): void => {
-        // We need to explicitly define ... for the array. If not subscribe does not fired
-        // TODO: refactor - setterActions in setState will recreate array if needed. We need to implement the pattern in all setterActions
-        // TO.DOCONT: We should have a deep equality function to compare previous / current
         set({
           mapState: {
             ...get().mapState,
             orderedLayerInfo: [...orderedLayerInfo],
+            // GV Here, we use the spread operator for the custom selector hooks such as useSelectorLayerLegendCollapsed to
+            // GV notice and eventually trigger the changes that need to be get triggered
+          },
+        });
+
+        // Get all layers as specified in the order layer info we're updating
+        const orderedLayers = orderedLayerInfo.map((layer) => layer.layerPath);
+
+        // Set the readonly representation of ordered layers array according to the order the layers are
+        get().mapState.setterActions.setOrderedLayers(orderedLayers);
+
+        // Get all visible layers as specified in the order layer info we're updating
+        const visibleLayers = orderedLayerInfo.filter((layer) => layer.visible).map((layer) => layer.layerPath);
+
+        // Set the readonly representation of visibile layers array according to the visibile layers
+        get().mapState.setterActions.setVisibleLayers(visibleLayers);
+
+        // Get all layers in visible range as specified in the order layer info we're updating
+        const inVisibleRange = orderedLayerInfo.filter((layer) => layer.inVisibleRange).map((layer) => layer.layerPath);
+
+        // Set the readonly representation of visibile range layers array according to the visibile range layers
+        get().mapState.setterActions.setVisibleRangeLayers(inVisibleRange);
+      },
+
+      /**
+       * Sets the visible layers of the map.
+       * @param {string[]} orderedLayers - The ordered layers.
+       */
+      setOrderedLayers: (orderedLayers: string[]): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            orderedLayers,
           },
         });
       },
@@ -836,23 +882,16 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets whether a layer is hoverable.
        * @param {string} layerPath - The path of the layer.
-       * @param {boolean} collapsed - Flag indicating if the layer should be hoverable.
+       * @param {boolean} collapsed - Flag indicating if the layer should be collapsed.
        */
-      setLegendCollapsed: (layerPath: string, collapsed?: boolean): void => {
+      setLegendCollapsed: (layerPath: string, collapsed: boolean): void => {
         const curLayerInfo = get().mapState.orderedLayerInfo;
-        const layerIndex = curLayerInfo.findIndex((info) => info.layerPath === layerPath);
-
-        if (layerIndex !== -1) {
-          // Create shallow copy of array
-          const newLayerInfo = curLayerInfo.slice();
-          // Only create new object for the changed layer
-          newLayerInfo[layerIndex] = {
-            ...curLayerInfo[layerIndex],
-            legendCollapsed: collapsed ?? !curLayerInfo[layerIndex].legendCollapsed,
-          };
+        const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
+        if (layerInfo) {
+          layerInfo.legendCollapsed = collapsed;
 
           // Redirect
-          get().mapState.setterActions.setOrderedLayerInfo(newLayerInfo);
+          get().mapState.setterActions.setOrderedLayerInfo(curLayerInfo);
         }
       },
 
@@ -952,6 +991,7 @@ export const useMapProjection = (): TypeValidMapProjectionCodes => useStore(useG
 export const useMapRotation = (): number => useStore(useGeoViewStore(), (state) => state.mapState.rotation);
 export const useMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(), (state) => state.mapState.scale);
 export const useMapSize = (): [number, number] => useStore(useGeoViewStore(), (state) => state.mapState.size);
+export const useMapOrderedLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.orderedLayers);
 export const useMapVisibleLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
 export const useMapVisibleRangeLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleRangeLayers);
 export const useMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
@@ -961,46 +1001,29 @@ export const getMapPointerPosition = (mapId: string): TypeMapMouseInfo | undefin
   getGeoViewStore(mapId).getState().mapState.pointerPosition;
 
 export const useSelectorLayerVisibility = (layerPath: string): boolean => {
-  // Get the store
-  const geoviewStore = useGeoViewStore();
   // Hook
-  const orderedLayerInfo = useStore(geoviewStore, (state) => state.mapState.orderedLayerInfo);
-  // Redirect
-  return MapEventProcessor.findMapLayerFromOrderedInfo(geoviewStore.getState().mapId, layerPath, orderedLayerInfo)?.visible || false;
+  return useStore(
+    useGeoViewStore(),
+    (state) => MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.visible || false
+  );
 };
 
 export const useSelectorLayerInVisibleRange = (layerPath: string): boolean => {
-  // Get the store
-  const geoviewStore = useGeoViewStore();
   // Hook
-  const orderedLayerInfo = useStore(geoviewStore, (state) => state.mapState.orderedLayerInfo);
-  // Redirect
-  return MapEventProcessor.findMapLayerFromOrderedInfo(geoviewStore.getState().mapId, layerPath, orderedLayerInfo)?.inVisibleRange || false;
+  return useStore(
+    useGeoViewStore(),
+    (state) =>
+      MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.inVisibleRange || false
+  );
 };
 
 export const useSelectorLayerLegendCollapsed = (layerPath: string): boolean => {
-  // Get the store
-  const geoviewStore = useGeoViewStore();
   // Hook
-  const orderedLayerInfo = useStore(geoviewStore, (state) => state.mapState.orderedLayerInfo);
-  // Redirect
-  const { mapId } = geoviewStore.getState();
-  return MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, orderedLayerInfo)?.legendCollapsed || false;
-};
-
-export const useSelectorLayerPathOrder = (): string[] => {
-  // Hook
-  const orderedLayerInfo = useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo);
-
-  // Compute a dependency string based on the ordered layerPath values
-  const layerPathsKey = orderedLayerInfo.map((layer) => layer.layerPath).join('|||');
-
-  // Only re-create the array if the layerPathsKey changes
-  return useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('MAP-STATE - useSelectorLayerPathOrder', layerPathsKey); // Purposely use the 'layerPathsKey' variable to fix the linter warning in the dependency array of the useMemo
-    return orderedLayerInfo.map((layer) => layer.layerPath);
-  }, [orderedLayerInfo, layerPathsKey]);
+  return useStore(
+    useGeoViewStore(),
+    (state) =>
+      MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.legendCollapsed || false
+  );
 };
 
 // Store Actions
