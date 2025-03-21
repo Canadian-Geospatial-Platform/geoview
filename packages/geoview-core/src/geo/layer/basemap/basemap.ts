@@ -243,7 +243,8 @@ export class Basemap {
     basemapId: string,
     basemapLayer: TypeJsonObject,
     opacity: number,
-    rest: boolean
+    rest: boolean,
+    className?: string
   ): Promise<null | TypeBasemapLayer> {
     const resolutions: number[] = [];
     let minZoom = 0;
@@ -324,6 +325,8 @@ export class Basemap {
                 origin,
                 resolutions,
               }),
+              // Optionally add className if present. Necessary when using multiple vector tiles and one with the declutter option on
+              ...(className ? { className } : {}),
             });
           } else {
             source = new XYZ({
@@ -411,7 +414,8 @@ export class Basemap {
           'transport',
           this.basemapsList[projectionCode].transport,
           coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
-          true
+          true,
+          'geom'
         );
         if (transportLayer) {
           basemapLayers.push(transportLayer);
@@ -687,6 +691,15 @@ export class Basemap {
       // Emit basemap changed event
       this.#emitBasemapChanged({ basemap });
     }
+  }
+
+  /**
+   * Refreshes the basemap layers
+   */
+  refreshBasemap(): void {
+    this.activeBasemap?.layers.forEach((layer) => {
+      layer.source.refresh();
+    });
   }
 
   /**
