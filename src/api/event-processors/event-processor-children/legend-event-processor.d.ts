@@ -95,7 +95,7 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * @param {TypeLegendItem} item - The item to change.
      * @param {boolean} visibility - The new visibility.
      */
-    static setItemVisibility(mapId: string, item: TypeLegendItem, visibility?: boolean): void;
+    static setItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem, visibility?: boolean): void;
     /**
      * Toggle visibility of an item.
      * @param {string} mapId - The ID of the map.

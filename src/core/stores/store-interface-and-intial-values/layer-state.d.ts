@@ -1,5 +1,5 @@
 import { Extent } from 'ol/extent';
-import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
+import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeFeatureInfoEntryPartial, TypeLayerStatus, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
 import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -27,9 +27,9 @@ export interface ILayerState {
         setLayerDeleteInProgress: (newVal: boolean) => void;
         setLayerOpacity: (layerPath: string, opacity: number) => void;
         setSelectedLayerPath: (layerPath: string) => void;
-        sortLegendLayersChildren: (legendLayerList: TypeLegendLayer[]) => void;
         toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
         zoomToLayerExtent: (layerPath: string) => Promise<void>;
+        zoomToLayerVisibleScale: (layerPath: string) => void;
         setSelectedLayerSortingArrowId: (layerId: string) => void;
     };
     setterActions: {
@@ -69,10 +69,13 @@ export declare const useSelectedLayerSortingArrowId: () => string;
 export declare const useLayerStoreActions: () => LayerActions;
 export declare const useSelectedLayer: () => TypeLegendLayer | undefined;
 export declare const useIconLayerSet: (layerPath: string) => string[];
+export declare const useSelectorLayerId: (layerPath: string) => string | undefined;
 export declare const useSelectorLayerName: (layerPath: string) => string | undefined;
+export declare const useSelectorLayerType: (layerPath: string) => TypeGeoviewLayerType | undefined;
 export declare const useSelectorLayerStatus: (layerPath: string) => TypeLayerStatus | undefined;
 export declare const useSelectorLayerLegendQueryStatus: (layerPath: string) => string | undefined;
 export declare const useSelectorLayerControls: (layerPath: string) => TypeLayerControls | undefined;
 export declare const useSelectorLayerChildren: (layerPath: string) => TypeLegendLayer[] | undefined;
-export declare const useSelectorLayerItems: (layerPath: string) => TypeLegendItem[];
+export declare const useSelectorLayerItems: (layerPath: string) => TypeLegendItem[] | undefined;
+export declare const useSelectorLayerIcons: (layerPath: string) => TypeLegendLayerItem[] | undefined;
 export {};

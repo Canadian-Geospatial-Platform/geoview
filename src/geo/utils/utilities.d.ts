@@ -117,6 +117,13 @@ export declare function coordFormatDMS(value: number): string;
  */
 export declare function convertTypeFeatureStyleToOpenLayersStyle(style?: TypeFeatureStyle): Style;
 /**
+ * Check if a point is contained in an extent
+ * @param {Coordinate} point - The point
+ * @param {Extent} extent - The extent
+ * @returns True if point is within the extent, false otherwise
+ */
+export declare function isPointInExtent(point: Coordinate, extent: Extent): boolean;
+/**
  * Returns the union of 2 extents.
  * @param {Extent | undefined} extentA First extent
  * @param {Extent | undefined} extentB Optional second extent

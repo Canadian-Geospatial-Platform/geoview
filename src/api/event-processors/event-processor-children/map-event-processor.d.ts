@@ -96,9 +96,8 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setMapPointerPosition(mapId: string, pointerPosition: TypeMapMouseInfo): void;
     static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): void;
     static getLayersInVisibleRange: (mapId: string) => string[];
-    static setVisibleRangeLayerMapState(mapId: string, visibleRangeLayers: string[]): void;
     static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void;
-    static setZoom(mapId: string, zoom: number, orderedLayerInfo?: TypeOrderedLayerInfo[]): void;
+    static setZoom(mapId: string, zoom: number): void;
     static setIsMouseInsideMap(mapId: string, inside: boolean): void;
     static setRotation(mapId: string, rotation: number): void;
     static setMapChangeSize(mapId: string, size: [number, number], scale: TypeScaleInfo): void;
@@ -162,9 +161,8 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setMapHoverFeatureInfo(mapId: string, hoverFeatureInfo: TypeHoverFeatureInfo): void;
     static setMapOrderedLayerInfo(mapId: string, orderedLayerInfo: TypeOrderedLayerInfo[]): void;
     static setMapLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void;
-    static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed?: boolean): void;
+    static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed: boolean): void;
     static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean;
-    static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void;
     static reorderLayer(mapId: string, layerPath: string, move: number): void;
     /**
      * Replace a layer in the orderedLayerInfo array.
@@ -235,6 +233,13 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @returns Promise<void>
      */
     static zoomToMyLocation(mapId: string, position: GeolocationPosition): Promise<void>;
+    /**
+     * Zoom to layer visible scale.
+     *
+     * @param {string} mapId - ID of map to zoom on
+     * @param {string} layerPath - Path of layer to zoom to.
+     */
+    static zoomToLayerVisibleScale(mapId: string, layerPath: string): void;
     /**
      * Set Z index for layers
      *
