@@ -115,7 +115,7 @@
     "errorNotLoaded": "An error occured when loading the layer",
     "errorProj": "does not support current map projection",
     "errorImageLoad": "Error loading source image for layer: __param__ at zoom level __param__",
-    "fetchProgress": "Fetching data... Retrieved __param__ de __param__ records",
+    "fetchProgress": "Fetching data... Retrieved __param__ of __param__ records",
     "only": "only",
     "opacity": "Opacity",
     "opacityMax": "Maximum from parent",
