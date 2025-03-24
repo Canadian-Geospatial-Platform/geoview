@@ -86,65 +86,65 @@ async function queryEsriFeatures(params: QueryParams): Promise<TypeJsonObject> {
 //   return responseArray;
 // }
 
-async function getAdditionalFeatures(url: string, maxRecordCount: number, resultOffset?: number): Promise<unknown[]> {
-  const responseArray: unknown[] = [];
-  const nextUrl = `${url}&resultOffset=${resultOffset || maxRecordCount}`;
+// async function getAdditionalFeatures(url: string, maxRecordCount: number, resultOffset?: number): Promise<unknown[]> {
+//   const responseArray: unknown[] = [];
+//   const nextUrl = `${url}&resultOffset=${resultOffset || maxRecordCount}`;
 
-  logger.logTrace('Getting additional features', { url: nextUrl, maxRecordCount, resultOffset });
+//   logger.logTrace('Getting additional features', { url: nextUrl, maxRecordCount, resultOffset });
 
-  try {
-    // Fetch first batch
-    const response = await fetch(nextUrl);
-    const jsonResponse = await response.json();
-    responseArray.push(jsonResponse.features);
+//   try {
+//     // Fetch first batch
+//     const response = await fetch(nextUrl);
+//     const jsonResponse = await response.json();
+//     responseArray.push(jsonResponse.features);
 
-    if (jsonResponse.exceededTransferLimit) {
-      // Calculate total records and number of additional requests needed
-      const totalRecords = jsonResponse.count;
-      const remainingRecords = totalRecords - (resultOffset || maxRecordCount);
-      const numberOfRequests = Math.ceil(remainingRecords / maxRecordCount);
+//     if (jsonResponse.exceededTransferLimit) {
+//       // Calculate total records and number of additional requests needed
+//       const totalRecords = jsonResponse.count;
+//       const remainingRecords = totalRecords - (resultOffset || maxRecordCount);
+//       const numberOfRequests = Math.ceil(remainingRecords / maxRecordCount);
 
-      logger.logTrace('Preparing concurrent requests', {
-        totalRecords,
-        remainingRecords,
-        numberOfRequests,
-      });
+//       logger.logTrace('Preparing concurrent requests', {
+//         totalRecords,
+//         remainingRecords,
+//         numberOfRequests,
+//       });
 
-      // Create array of promises for concurrent requests
-      const promises = Array.from({ length: numberOfRequests }, (_, index) => {
-        const offset = (resultOffset || maxRecordCount) + (index + 1) * maxRecordCount;
-        const queryUrl = `${url}&resultOffset=${offset}`;
+//       // Create array of promises for concurrent requests
+//       const promises = Array.from({ length: numberOfRequests }, (_, index) => {
+//         const offset = (resultOffset || maxRecordCount) + (index + 1) * maxRecordCount;
+//         const queryUrl = `${url}&resultOffset=${offset}`;
 
-        logger.logTrace('Fetching batch', { offset, url: queryUrl });
+//         logger.logTrace('Fetching batch', { offset, url: queryUrl });
 
-        return fetch(queryUrl)
-          .then((response1) => response1.json())
-          .then((json) => {
-            // Report progress
-            const progress = Math.min(((offset + maxRecordCount) / totalRecords) * 100, 100);
-            logger.logInfo({
-              type: 'progress',
-              data: {
-                processed: offset + maxRecordCount,
-                total: totalRecords,
-                percentage: Math.round(progress),
-              },
-            });
-            return json.features;
-          });
-      });
+//         return fetch(queryUrl)
+//           .then((response1) => response1.json())
+//           .then((json) => {
+//             // Report progress
+//             const progress = Math.min(((offset + maxRecordCount) / totalRecords) * 100, 100);
+//             logger.logInfo({
+//               type: 'progress',
+//               data: {
+//                 processed: offset + maxRecordCount,
+//                 total: totalRecords,
+//                 percentage: Math.round(progress),
+//               },
+//             });
+//             return json.features;
+//           });
+//       });
 
-      // Wait for all requests to complete
-      const results = await Promise.all(promises);
-      responseArray.push(...results);
-    }
-  } catch (error) {
-    logger.logError('Error loading additional features', error);
-    throw error;
-  }
+//       // Wait for all requests to complete
+//       const results = await Promise.all(promises);
+//       responseArray.push(...results);
+//     }
+//   } catch (error) {
+//     logger.logError('Error loading additional features', error);
+//     throw error;
+//   }
 
-  return responseArray.flat();
-}
+//   return responseArray.flat();
+// }
 
 /**
  * Queries all features from an ESRI service
