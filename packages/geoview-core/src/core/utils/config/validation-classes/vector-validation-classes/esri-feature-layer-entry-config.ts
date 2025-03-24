@@ -4,6 +4,9 @@ import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/v
 export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceEsriFeatureInitialConfig;
 
+  /** Max number of records for query */
+  maxRecordCount?: number;
+
   /**
    * The class constructor.
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.

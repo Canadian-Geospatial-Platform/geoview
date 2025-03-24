@@ -24,7 +24,7 @@ export abstract class AbstractWorkerPool<T> {
    * @param {new () => AbstractWorker<T>} workerClass - Constructor for creating worker instances
    * @param {number} numWorkers - Number of workers to initialize in the pool
    */
-  constructor(name: string, workerClass: new () => AbstractWorker<T>, numWorkers = navigator.hardwareConcurrency || 4) {
+  constructor(name: string, workerClass: new () => AbstractWorker<T>, numWorkers = navigator.hardwareConcurrency || 2) {
     this.name = name;
     this.WorkerClass = workerClass;
     this.initializeWorkers(numWorkers);
@@ -48,6 +48,22 @@ export abstract class AbstractWorkerPool<T> {
    */
   protected getAvailableWorker(): AbstractWorker<T> | undefined {
     return this.workers.find((w) => !this.busyWorkers.has(w));
+  }
+
+  /**
+   * Add a message handler to all workers in the pool
+   * @param {MessageEvent} handler - The message handler to add
+   */
+  public addMessageHandler(handler: (event: MessageEvent) => void): void {
+    this.workers.forEach((worker) => worker.addMessageHandler(handler));
+  }
+
+  /**
+   * Remove a message handler from all workers in the pool
+   * @param {MessageEvent} handler - The message handler to remove
+   */
+  public removeMessageHandler(handler: (event: MessageEvent) => void): void {
+    this.workers.forEach((worker) => worker.removeMessageHandler(handler));
   }
 
   public terminate(): void {

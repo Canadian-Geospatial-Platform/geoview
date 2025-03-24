@@ -192,7 +192,19 @@ export class GVEsriDynamic extends AbstractGVRaster {
         queryGeometry: false,
         projection: 4326,
         maxAllowableOffset: 6,
+        maxRecordCount: layerConfig.maxRecordCount || 1000,
       };
+
+      // Add a message handler and emit display message if it is progress
+      const messageHandler = (event: MessageEvent): void => {
+        const message = event.data.message[event.data.message.length - 1];
+        if (message.type === 'progress') {
+          this.displayMessage('layers.fetchProgress', [message.data.processed, message.data.total]);
+        }
+      };
+
+      // Register the handler
+      this.#fetchWorkerPool.addMessageHandler(messageHandler);
 
       return await this.#fetchWorkerPool.process(params);
     } catch (error) {
@@ -256,6 +268,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         queryGeometry,
         projection,
         maxAllowableOffset,
+        maxRecordCount: layerConfig.maxRecordCount || 1000,
       };
 
       return await this.#fetchWorkerPool.process(params);
@@ -376,7 +389,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
               //   featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
               // }) as Feature<Geometry>;
 
-              // TODO: Performance - Relying on style to get geometry is not good. We shold extract it from metadata and keep it in dedicated attribute
+              // TODO: Performance - Relying on style to get geometry is not good. We should extract it from metadata and keep it in dedicated attribute
               const geomType = Object.keys(layerConfig?.layerStyle || []);
 
               // Get coordinates in right format and create geometry
@@ -389,7 +402,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
                   ? (GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) as unknown as Geometry)
                   : null;
 
-              // TODO: Perfromance - We will need a trigger to refresh the higight and detaiils panel (for zoom button) when extent and
+              // TODO: Perfromance - We will need a trigger to refresh the highlight and details panel (for zoom button) when extent and
               // TODO.CONT: is applied. Sometime the delay is too big so we need to change tab or layer in layer list to trigger the refresh
               // We assume order of arrayOfFeatureInfoEntries is the same as featuresJSON.features as they are process in same order
               const entry = arrayOfFeatureInfoEntries![index];

@@ -353,6 +353,9 @@ export function commonProcessInitialSettings(
     layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerMetadata.maxScale as number);
   }
 
+  // Set the max record count for querying
+  layerConfig.maxRecordCount = (layerMetadata.maxRecordCount || 0) as number;
+
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
   if (!layerConfig.initialSettings?.bounds && layerMetadata.extent) {
