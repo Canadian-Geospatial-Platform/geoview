@@ -76,6 +76,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   // Keep all callback delegates references
   #onIndividualLayerLoadedHandlers: IndividualLayerLoadedDelegate[] = [];
 
+  // Keep all callback delegates references
+  #onLayerMessageHandlers: LayerMessageDelegate[] = [];
+
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
@@ -240,6 +243,13 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Emit event
     this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
+  }
+
+  protected displayMessage(messageKey: string, messageParams: string[]): void {
+    const lang = document.getElementById(this.getMapId())!.getAttribute('data-lang') as 'en' | 'fr';
+    this.getMapViewer().notifications.showMessage(getLocalizedMessage(messageKey, lang), messageParams, false);
+
+    this.#emitLayerMessage({ message: messageKey });
   }
 
   /**
@@ -825,6 +835,34 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Unregister the event handler
     EventHelper.offEvent(this.#onIndividualLayerLoadedHandlers, callback);
   }
+
+  /**
+   * Emits an event to all handlers when the layer's sent a message.
+   * @param {LayerMessageEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerMessage(event: LayerMessageEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerMessageHandlers, event);
+  }
+
+  /**
+   * Registers an individual layer message event handler.
+   * @param {LayerMessageEventDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerMessage(callback: LayerMessageDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerMessageHandlers, callback);
+  }
+
+  /**
+   * Unregisters an individual layer message event handler.
+   * @param {LayerMessageEventDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerMessage(callback: LayerMessageDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerMessageHandlers, callback);
+  }
 }
 
 /**
@@ -886,4 +924,17 @@ type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGVLayer, Individu
 export type IndividualLayerLoadedEvent = {
   // The loaded layer
   layerPath: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerMessageEvent = {
+  // The loaded layer
+  message: string;
 };

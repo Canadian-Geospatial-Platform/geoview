@@ -18,9 +18,9 @@ export class FetchEsriWorkerPool extends AbstractWorkerPool<FetchEsriWorkerType>
 
   /**
    * Creates an instance of FetchEsriWorkerPool.
-   * @param {number} [numWorkers=navigator.hardwareConcurrency || 4] - Number of workers to create in the pool
+   * @param {number} [numWorkers = 2] - Number of workers to create in the pool
    */
-  constructor(numWorkers = navigator.hardwareConcurrency || 4) {
+  constructor(numWorkers = 2) {
     super('FetchEsriWorkerPool', FetchEsriWorker, numWorkers);
     this.#logger.logInfo('Worker pool created', `Number of workers: ${numWorkers}`);
   }
