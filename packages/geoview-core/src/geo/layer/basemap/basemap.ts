@@ -672,11 +672,6 @@ export class Basemap {
               resolutions: tileGrid.getResolutions(),
             }).catch((err) => logger.logError(err));
           }
-          if (layer.basemapId !== 'label') {
-            basemapLayer.setZIndex(0);
-          } else {
-            basemapLayer.setZIndex(5);
-          }
         } else {
           basemapLayer = new TileLayer({
             opacity: layer.opacity,
