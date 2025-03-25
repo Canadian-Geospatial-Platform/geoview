@@ -316,6 +316,12 @@ Cochez la case ![]({{assetsURL}}/img/guide/layers/check.png) pour garder l’él
 
 _**N.B.&nbsp;: Cliquez sur une couche pour afficher ses données dans la section de droite.**_
 
+**Informations importantes sur la navigation**
+- Vous pouvez demander des données à partir d'une seule table à la fois. Pendant l'extraction des données, tous les boutons _couches_ sont désactivés.
+- La couche sélectionnée sera en vert et un message de progression apparaîtra au bas de la section carte.
+- Une fois la recherche de données terminée, tous les boutons _couches_ sont réactivés.
+- Si vous passez à un autre onglet pendant le processus, vous devrez resélectionner la couche lorsque vous reviendrez à l'onglet _Données_ pour afficher les résultats.
+
 L’onglet **Données** se divise en deux sections. La liste des couches se trouve à gauche, et les données des couches, à droite. Cliquez sur une couche pour en voir les données dans le tableau de droite.
 
 **Commandes de l’onglet Données**

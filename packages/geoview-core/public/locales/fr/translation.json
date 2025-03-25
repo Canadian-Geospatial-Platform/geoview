@@ -116,6 +116,7 @@
     "errorProj": "ne prend pas en charge la projection cartographique actuelle",
     "errorImageLoad": "Erreur de chargement de l'image source pour la couche: __param__ au niveau de zoom __param__",
     "fetchProgress": "Téléchargement des données... Téléchargé __param__ de __param__ enregistrements",
+    "fetchDone": "Données téléchargées - __param__ enregistrements",
     "only": "seulement",
     "opacity": "Opacité",
     "opacityMax": "Maximum du parent",

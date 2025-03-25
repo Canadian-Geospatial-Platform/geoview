@@ -70,6 +70,20 @@ export class GVEsriDynamic extends AbstractGVRaster {
       .then(() => logger.logTraceCore('Worker pool for fetch ESRI initialized'))
       .catch((err) => logger.logError('Worker pool error', err));
 
+    // Add a message handler and emit display message if the worker is in progress progress
+    const messageHandler = (event: MessageEvent): void => {
+      const message = event.data.message[event.data.message.length - 1];
+      if (message.type === 'progress') {
+        const process = message.data.processed;
+        const total = message.data.total;
+        if (process !== total) this.displayMessage('layers.fetchProgress', [message.data.processed, message.data.total]);
+        else this.displayMessage('layers.fetchDone', [message.data.total]);
+      }
+    };
+
+    // Register the handler
+    this.#fetchWorkerPool.addMessageHandler(messageHandler);
+
     // TODO: Performance - Investigate to see if we can call the export map for the whole service at once instead of making many call
     // TODO.CONT: We can use the layers and layersDef parameters to set what should be visible.
     // TODO.CONT: layers=show:layerId ; layerDefs={ "layerId": "layer def" }
@@ -194,17 +208,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
         maxAllowableOffset: 6,
         maxRecordCount: layerConfig.maxRecordCount || 1000,
       };
-
-      // Add a message handler and emit display message if it is progress
-      const messageHandler = (event: MessageEvent): void => {
-        const message = event.data.message[event.data.message.length - 1];
-        if (message.type === 'progress') {
-          this.displayMessage('layers.fetchProgress', [message.data.processed, message.data.total]);
-        }
-      };
-
-      // Register the handler
-      this.#fetchWorkerPool.addMessageHandler(messageHandler);
 
       return await this.#fetchWorkerPool.process(params);
     } catch (error) {

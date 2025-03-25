@@ -31,9 +31,7 @@ const TITLE_STYLES = {
   webkitLineClamp: '2',
 } as const;
 
-// Memoizes entire component, preventing re-renders if props haven't changed
-// TODO: Unmemoize this component, probably, because it's in 'common' folder
-export const Layout = memo(function Layout({
+export const Layout = ({
   children,
   guideContentIds,
   layerList,
@@ -43,7 +41,7 @@ export const Layout = memo(function Layout({
   fullWidth,
   onGuideIsOpen,
   containerType = CONTAINER_TYPE.FOOTER_BAR,
-}: LayoutProps): JSX.Element {
+}: LayoutProps): JSX.Element => {
   logger.logTraceRender('components/common/layout');
 
   // Hooks
@@ -123,4 +121,4 @@ export const Layout = memo(function Layout({
       containerType={containerType}
     />
   );
-});
+};

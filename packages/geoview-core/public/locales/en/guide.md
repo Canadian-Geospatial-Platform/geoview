@@ -322,6 +322,12 @@ Check the highlight box ![]({{assetsURL}}/img/guide/layers/check.png) to keep th
 
 _**Note: Click on a layer to display its Data Table information in the right section.**_
 
+**Important Navigation Information**
+- You can request data from one table at a time. While data is being fetched, all _layers_ buttons will be disabled.
+- The selected layer will be highlighted in green, and a progress message will appear at the bottom of the map section.
+- Once the data fetching is complete, all _layers_ buttons will be re-enabled.
+- If you switch to another tab during the process, you will need to reselect the layer when returning to the tab _Data Table_ to view the results.
+
 The **Data Table** tab has two sections. The layers are listed on the left and the layer data on the right. Click on a layer to show the layer data in the table on the right.
 
 **Data Table Controls**

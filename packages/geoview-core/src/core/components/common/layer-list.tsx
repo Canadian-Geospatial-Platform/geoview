@@ -20,6 +20,7 @@ export interface LayerListEntry {
   numOffeatures?: number;
   features?: TypeFeatureInfoEntry[] | undefined | null;
   layerUniqueId?: string;
+  isDisabled?: boolean;
 }
 
 interface LayerListProps {
@@ -61,7 +62,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     .trim();
 
   // Constant for state
-  const isDisabled = layer?.numOffeatures === 0 || layer?.features === null;
+  const isDisabled = layer?.numOffeatures === 0 || layer?.features === null || layer?.isDisabled;
   const isLoading =
     layer?.numOffeatures === 0 ||
     layer?.features === null ||

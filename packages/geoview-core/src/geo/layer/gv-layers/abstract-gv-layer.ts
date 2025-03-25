@@ -32,6 +32,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
+import { FeaturedVideoSharp } from '@mui/icons-material';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -587,9 +588,14 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           const { type } = styleSettings;
           const featureStyle = processStyle[type][geometryType](styleSettings, feature, layerConfig.filterEquation, true);
 
+          // Sometimes data is not well fomrated and some features has no style associated, just throw a warning
+          if (featureStyle === undefined) {
+            logger.logWarning(`Feature style is undefined for ${this.getLayerPath()}`);
+          }
+
           // Create a string unique to the style, but geometry agnostic
           const styleClone = cloneDeep(featureStyle) as Style;
-          styleClone.setGeometry('');
+          styleClone?.setGeometry?.('');
           const styleString = `${geometryType}${JSON.stringify(styleClone)}`;
 
           // Use string as dict key

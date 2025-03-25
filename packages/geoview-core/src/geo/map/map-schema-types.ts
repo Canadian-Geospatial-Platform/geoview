@@ -199,7 +199,8 @@ export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
   [layerPath: string]: T;
 };
 
-// TODO: Refactor - Check if this type is still used and replace it with something like TypeAllFeatureInfoResultSetEntry?
+// TODO: Refactor - Check if this type is still used and replace it with something like TypeAllFeatureInfoResultSetEntry? Still use in data-table-state
+// TODO.CONT:  Still use in data-table-state et detail.tsx
 export type TypeLayerData = {
   eventListenerEnabled: boolean;
   // When property features is undefined, we are waiting for the query result.
@@ -207,6 +208,7 @@ export type TypeLayerData = {
   // when property features is null, the query ended with an error.
   queryStatus: TypeQueryStatus;
   features: TypeFeatureInfoEntry[] | undefined | null;
+  isDisabled: boolean;
 };
 
 export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
