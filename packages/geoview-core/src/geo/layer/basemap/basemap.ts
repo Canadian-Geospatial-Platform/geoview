@@ -657,7 +657,10 @@ export class Basemap {
           basemapLayer = new VectorTileLayer({
             opacity: layer.opacity,
             source: layer.source,
+            renderMode: 'vector',
+            renderBuffer: 100,
             updateWhileAnimating: true,
+            updateWhileInteracting: true,
             // Only declutter labels and add className otherwise (https://github.com/openlayers/openlayers/issues/10096)
             ...(layer.basemapId === 'label' ? { declutter: true } : { className: 'geom' }),
           });
@@ -668,6 +671,11 @@ export class Basemap {
             applyStyle(basemapLayer, layer.styleUrl, {
               resolutions: tileGrid.getResolutions(),
             }).catch((err) => logger.logError(err));
+          }
+          if (layer.basemapId !== 'label') {
+            basemapLayer.setZIndex(0);
+          } else {
+            basemapLayer.setZIndex(5);
           }
         } else {
           basemapLayer = new TileLayer({

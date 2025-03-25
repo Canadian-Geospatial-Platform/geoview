@@ -87,7 +87,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
   const legendExpanded = !useSelectorLayerLegendCollapsed(layerPath);
 
-  // TODO: I think we should favor using this pattern here, with the store, instead of working with the whole 'layer' object from the props
   const layerId: string | undefined = useSelectorLayerId(layerPath);
   const layerName: string | undefined = useSelectorLayerName(layerPath);
   const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layerPath);
