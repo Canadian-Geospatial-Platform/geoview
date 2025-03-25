@@ -109,7 +109,13 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const highlightedLayer = useLayerHighlightedLayer();
 
   // Is visibility button disabled?
-  const isLayerVisibleCapable = (layerControls?.visibility && isInVisibleRange) ?? false;
+  const isLayerVisibleCapable = layerControls?.visibility ?? false;
+
+  // Is highlight button disabled?
+  const isLayerHighlightCapable = layerControls?.highlight ?? false;
+
+  // Is zoom to extent button disabled?
+  const isLayerZoomToExtentCapable = layerControls?.zoom ?? false;
 
   // Is zoom to visible scale button visible?
   const isZoomToVisibleScaleCapable = !!((layerType as string) !== 'group' && !isInVisibleRange);
@@ -130,26 +136,32 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         >
           <CenterFocusScaleIcon />
         </IconButton>
-        <IconButton
-          edge={isInVisibleRange ? false : 'end'}
-          tooltip={t('layers.toggleVisibility') as string}
-          className="buttonOutline"
-          onClick={controls.handleToggleVisibility}
-          disabled={!isLayerVisibleCapable}
-        >
-          {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
-        </IconButton>
-        <IconButton
-          tooltip={t('legend.highlightLayer') as string}
-          sx={styles.btnMargin}
-          className="buttonOutline"
-          onClick={controls.handleHighlightLayer}
-        >
-          {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
-        </IconButton>
-        <IconButton tooltip={t('legend.zoomTo') as string} className="buttonOutline" onClick={controls.handleZoomTo}>
-          <ZoomInSearchIcon />
-        </IconButton>
+        {isLayerVisibleCapable && (
+          <IconButton
+            edge={isInVisibleRange ? false : 'end'}
+            tooltip={t('layers.toggleVisibility') as string}
+            className="buttonOutline"
+            onClick={controls.handleToggleVisibility}
+            disabled={!isInVisibleRange}
+          >
+            {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+          </IconButton>
+        )}
+        {isLayerHighlightCapable && (
+          <IconButton
+            tooltip={t('legend.highlightLayer') as string}
+            sx={styles.btnMargin}
+            className="buttonOutline"
+            onClick={controls.handleHighlightLayer}
+          >
+            {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
+          </IconButton>
+        )}
+        {isLayerZoomToExtentCapable && (
+          <IconButton tooltip={t('legend.zoomTo') as string} className="buttonOutline" onClick={controls.handleZoomTo}>
+            <ZoomInSearchIcon />
+          </IconButton>
+        )}
       </Box>
     </Stack>
   );
