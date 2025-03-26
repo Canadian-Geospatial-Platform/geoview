@@ -207,6 +207,13 @@ L’onglet **Couches** comprend les sous-menus suivants&nbsp;:
 
 _**N.B.&nbsp;: Cliquez sur une couche pour afficher ses information dans la section de droite.**_
 
+**Information importante**  
+Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) et que l'icône Zoom sur l'échelle visible <img src={{assetsURL}}/img/guide/layers/scaleVisible.svg /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
+
+- En cliquant sur le bouton Zoom sur l'échelle visible, la carte sera ajustée au niveau de zoom approprié, ce qui rendra la couche visible.
+- Cependant, après avoir effectué un zoom, il se peut que vous ne voyiez pas immédiatement les éléments s'il n'y a pas de données dans la zone de visualisation actuelle.
+- Dans ce cas, vous devrez peut-être effectuer un déplacement de la carte pour localiser les éléments.
+
 Le sous-menu **Vue** de l’onglet **Couches** se divise en deux sections. La section de gauche présente les couches affichées sur la carte. Si vous cliquez sur une couche, ses paramètres (options accessibles pour la couche) s’afficheront dans la section de droite.
 
 **Icônes de couche**

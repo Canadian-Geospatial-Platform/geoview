@@ -213,6 +213,13 @@ The _Layers_ tab has the following submenu options:
 
 _**Note: Click on a layer to display its Layer information in the right section.**_
 
+**Important Information**  
+If a layer’s visibility (eye) icon is disabled (greyed out) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) and the Zoom to Visible Scale icon <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" /> is visible, this means the layer is not visible at the current map zoom level.
+
+- Clicking the Zoom to Visible Scale button will adjust the map to the appropriate zoom level, making the layer visible.
+- However, after zooming, you may not immediately see any features if there is no data within the current view extent.
+- In this case, you may need to pan the map to locate the features.
+
 The _View_ submenu option under the _Layers_ tab consists of two sections. The left section lists all the layers displayed on the map. Click on a layer and the right section lists will show the layer settings (available options for that layer).
 
 **Layer Icons**

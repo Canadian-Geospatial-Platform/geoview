@@ -70,7 +70,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       .then(() => logger.logTraceCore('Worker pool for fetch ESRI initialized'))
       .catch((err) => logger.logError('Worker pool error', err));
 
-    // Add a message handler and emit display message if the worker is in progress progress
+    // Add a message handler and emit display message if the worker is in progress
     const messageHandler = (event: MessageEvent): void => {
       const message = event.data.message[event.data.message.length - 1];
       if (message.type === 'progress') {
