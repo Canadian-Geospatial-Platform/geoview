@@ -21,6 +21,7 @@ import { TypeBaseSourceVectorInitialConfig, TypeLayerEntryConfig } from '@/geo/m
 import { DateMgt } from '@/core/utils/date-mgt';
 import { VECTOR_LAYER } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
+import { getLocalizedMessage } from '@/core/utils/utilities';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -149,6 +150,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           } else if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
             // Fetch the features text array
             const esriFeaturesArray = await AbstractGeoViewVector.getEsriFeatures(
+              this.mapId,
               layerConfig.layerPath,
               url as string,
               JSON.parse(xhr.responseText).count,
@@ -238,6 +240,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Fetch features from ESRI Feature services with query and feature limits.
    *
+   * @param {string} mapId - The map id
    * @param {string} layerPath - The layer path of the layer.
    * @param {string} url - The base url for the service.
    * @param {number} featureCount - The number of features in the layer.
@@ -250,7 +253,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
   // TODO: Add options for featureLimit to config
   // TODO: Will need to move with createVectorSource
-  static getEsriFeatures(
+  static async getEsriFeatures(
+    mapId: string,
     layerPath: string,
     url: string,
     featureCount: number,
@@ -261,15 +265,39 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
 
+    // GV: Web worker does not improve the performance of this fetching
     // Create array of url's to call
     const urlArray: string[] = [];
     for (let i = 0; i < featureCount; i += featureFetchLimit) {
       urlArray.push(`${baseUrl}&resultOffset=${i}&resultRecordCount=${featureFetchLimit}`);
     }
 
-    const promises: Promise<string>[] = urlArray.map((featureUrl) => fetch(featureUrl).then((response) => response.text()));
+    // Create interval for logging
+    // TODO: message - Create message for all vector layer fetching. Create a centralized message creator for geoview-layers
+    const timeInterval = setInterval(() => {
+      const mapViewer = MapEventProcessor.getMapViewer(mapId);
+      mapViewer.notifications.showMessage(
+        getLocalizedMessage('layers.slowFetch', mapViewer.getDisplayLanguage()),
+        [MapEventProcessor.getMapViewer(mapId).layer.getLayerEntryConfig(layerPath)?.layerName || '...'],
+        false
+      );
+    }, 15000); // Log every 15 seconds
 
-    return Promise.all(promises);
+    try {
+      const promises = urlArray.map((featureUrl) => fetch(featureUrl).then((response) => response.json()));
+
+      // Wait for all promises to complete
+      const results = await Promise.all(promises);
+
+      // Clear the interval when done
+      clearInterval(timeInterval);
+
+      return results;
+    } catch (error) {
+      // Clear interval even if there's an error
+      clearInterval(timeInterval);
+      throw error;
+    }
   }
 
   /** ***************************************************************************************************************************

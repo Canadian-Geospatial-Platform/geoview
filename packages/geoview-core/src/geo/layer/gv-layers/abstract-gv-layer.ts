@@ -32,7 +32,6 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
-import { FeaturedVideoSharp } from '@mui/icons-material';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -247,8 +246,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   protected displayMessage(messageKey: string, messageParams: string[]): void {
-    const lang = document.getElementById(this.getMapId())!.getAttribute('data-lang') as 'en' | 'fr';
-    this.getMapViewer().notifications.showMessage(getLocalizedMessage(messageKey, lang), messageParams, false);
+    this.getMapViewer().notifications.showMessage(
+      getLocalizedMessage(messageKey, this.getMapViewer().getDisplayLanguage()),
+      messageParams,
+      false
+    );
 
     this.#emitLayerMessage({ message: messageKey });
   }
@@ -269,10 +271,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     logger.logError(
       `Error loading source image for layer path: ${this.getLayerPath()} at zoom level: ${this.getMapViewer().getView().getZoom()}`
     );
-    const lang = document.getElementById(this.getMapId())!.getAttribute('data-lang') as 'en' | 'fr';
     // Add notification with the current zoom level
     this.getMapViewer().notifications.showError(
-      getLocalizedMessage('layers.errorImageLoad', lang),
+      getLocalizedMessage('layers.errorImageLoad', this.getMapViewer().getDisplayLanguage()),
       [this.getLayerName()!, this.getMapViewer().getView().getZoom()!],
       true
     );

@@ -117,6 +117,7 @@
     "errorImageLoad": "Error loading source image for layer: __param__ at zoom level __param__",
     "fetchProgress": "Fetching data... Retrieved __param__ of __param__ records",
     "fetchDone": "Data fetched - __param__ records",
+    "slowFetch": "Downloading __param__ is taking longer then expected",
     "only": "only",
     "opacity": "Opacity",
     "opacityMax": "Maximum from parent",
@@ -167,8 +168,9 @@
   },
   "validation": {
     "layer": {
-      "loadfailed": "Layer __param__ failed to load on map.",
+      "loadfailed": "Layer __param__ failed to load on map",
       "notfound": "The sublayer __param__ of the layer __param__ does not exist on the server",
+      "uuidNotFount": "GeoCore layer identifier __param__ does not exist on the server",
       "createtwice": "Can not execute the createGeoViewRasterLayers method twice for the layer __param__ on map",
       "usedtwice": "Duplicate use of layer identifier __param__ on map",
       "multipleUUID": "GeoCore layers may only have one GeoCore id per layer"

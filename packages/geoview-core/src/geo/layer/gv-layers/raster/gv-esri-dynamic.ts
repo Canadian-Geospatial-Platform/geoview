@@ -75,7 +75,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const message = event.data.message[event.data.message.length - 1];
       if (message.type === 'progress') {
         const process = message.data.processed;
-        const total = message.data.total;
+        const { total } = message.data;
         if (process !== total) this.displayMessage('layers.fetchProgress', [message.data.processed, message.data.total]);
         else this.displayMessage('layers.fetchDone', [message.data.total]);
       }

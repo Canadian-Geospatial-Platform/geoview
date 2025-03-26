@@ -85,7 +85,7 @@ function SnackbarUI(props: SnackBarProps): JSX.Element {
   const memoSnackbarProps = useMemo(
     () => ({
       anchorOrigin: { vertical: 'bottom' as const, horizontal: 'center' as const },
-      autoHideDuration: 6000,
+      autoHideDuration: 5000,
     }),
     []
   );

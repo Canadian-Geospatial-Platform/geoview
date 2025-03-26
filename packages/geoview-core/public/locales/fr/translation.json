@@ -117,6 +117,7 @@
     "errorImageLoad": "Erreur de chargement de l'image source pour la couche: __param__ au niveau de zoom __param__",
     "fetchProgress": "Téléchargement des données... Téléchargé __param__ de __param__ enregistrements",
     "fetchDone": "Données téléchargées - __param__ enregistrements",
+    "slowFetch": "Le téléchargement de __param__ prend plus de temps que prévu",
     "only": "seulement",
     "opacity": "Opacité",
     "opacityMax": "Maximum du parent",
@@ -167,11 +168,12 @@
   },
   "validation": {
     "layer": {
-      "loadfailed": "Le chargement de la couche __param__ a échoué sur la carte.",
-      "notfound": "La sous couche __param__ de la couche __param__ n'existe pas sur le sereur",
+      "loadfailed": "Le chargement de la couche __param__ a échoué sur la carte",
+      "uuidNotFound": "L'identifiant de couche GeoCore __param__ n'existe pas sur le serveur",
+      "notfound": "La sous couche __param__ de la couche __param__ n'existe pas sur le serveur",
       "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la couche __param__ sur la carte",
       "usedtwice": "Utilisation en double de l'identifiant de couche __param__ sur la carte",
-      "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul identifiant par couche."
+      "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul identifiant par couche"
     },
     "schema": {
       "notFound": "Une erreur de schéma a été trouvée, vérifiez la console pour voir ce qui ne va pas.",

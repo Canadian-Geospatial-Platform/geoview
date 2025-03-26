@@ -65,6 +65,20 @@ async function queryEsriFeatures(params: QueryParams): Promise<TypeJsonObject> {
  * @returns {Promise<{features: TypeJsonObject[], processedCount: number}>} A promise that resolves to:
  *   - features: Array of feature objects from all queries in the batch
  *   - processedCount: Total number of features processed after this batch
+ *
+ * Note on ESLint warning for localProcessedFeatures:
+ *
+ * The ESLint rule warns about functions in loops referencing outer scope variables
+ * because it can lead to unexpected behavior when the referenced variable changes
+ * between the function's creation and execution time.
+ *
+ * However, in this specific case it's safe because:
+ * 1. Each promise execution is independent and tracks its own progress
+ * 2. The variable is used for progress tracking only, not critical business logic
+ * 3. While the final count might have race conditions, it will be accurate
+ *    once all promises complete since Promise.all() ensures all operations finish
+ * 4. The main return value (features array) is not affected by this counter
+ *
  */
 const processBatch = async (
   batchIndex: number,
@@ -74,7 +88,7 @@ const processBatch = async (
   resultRecordCount: number,
   totalCount: number,
   currentProcessedFeatures: number
-): Promise<{ features: TypeJsonObject[]; processedCount: number; }> => {
+): Promise<{ features: TypeJsonObject[]; processedCount: number }> => {
   let localProcessedFeatures = currentProcessedFeatures;
   const promises = [];
 
@@ -89,15 +103,19 @@ const processBatch = async (
       url: queryUrl,
     });
 
+    // Create promise without awaiting - this allows parallel execution
     const promise = fetch(queryUrl)
       .then((response) => response.json())
+      // eslint-disable-next-line no-loop-func
       .then((json) => {
-        localProcessedFeatures += json.features.length;
+        // Create atomic update for the counter
+        const currentCount = localProcessedFeatures + json.features.length;
+        localProcessedFeatures = currentCount;
 
         logger.logTrace({
           type: 'progress',
           data: {
-            processed: localProcessedFeatures,
+            processed: currentCount,
             total: totalCount,
           },
         });
@@ -107,6 +125,7 @@ const processBatch = async (
     promises.push(promise);
   }
 
+  // Wait for all promises to complete at once
   const results = await Promise.all(promises);
   return {
     features: results.flat(),
@@ -154,6 +173,7 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
       const startIdx = batchIndex * maxConcurrentRequests;
       const endIdx = Math.min((batchIndex + 1) * maxConcurrentRequests, totalRequests);
 
+      // eslint-disable-next-line no-await-in-loop
       const batchResult = await processBatch(batchIndex, startIdx, endIdx, baseUrl, resultRecordCount, totalCount, totalProcessedFeatures);
 
       totalProcessedFeatures = batchResult.processedCount;

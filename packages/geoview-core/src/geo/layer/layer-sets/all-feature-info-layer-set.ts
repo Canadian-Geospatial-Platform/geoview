@@ -114,8 +114,8 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
         this.resultSet[layerPath].queryStatus = 'processing';
 
         // Disable all buttons until query is done so we do not have concurrent queries
-        Object.keys(this.resultSet).forEach((layerPath) => {
-          this.resultSet[layerPath].isDisabled = true;
+        Object.keys(this.resultSet).forEach((path) => {
+          this.resultSet[path].isDisabled = true;
         });
 
         // Propagate to the store
@@ -144,8 +144,8 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
       }
 
       // Enable all buttons since query is done
-      Object.keys(this.resultSet).forEach((layerPath) => {
-        this.resultSet[layerPath].isDisabled = false;
+      Object.keys(this.resultSet).forEach((path) => {
+        this.resultSet[path].isDisabled = false;
       });
 
       // Propagate to the store

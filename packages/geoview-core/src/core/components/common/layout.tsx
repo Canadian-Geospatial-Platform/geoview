@@ -1,4 +1,4 @@
-import { useCallback, ReactNode, useRef, memo } from 'react';
+import { useCallback, ReactNode, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
@@ -31,7 +31,7 @@ const TITLE_STYLES = {
   webkitLineClamp: '2',
 } as const;
 
-export const Layout = ({
+export function Layout({
   children,
   guideContentIds,
   layerList,
@@ -41,7 +41,7 @@ export const Layout = ({
   fullWidth,
   onGuideIsOpen,
   containerType = CONTAINER_TYPE.FOOTER_BAR,
-}: LayoutProps): JSX.Element => {
+}: LayoutProps): JSX.Element {
   logger.logTraceRender('components/common/layout');
 
   // Hooks
@@ -121,4 +121,4 @@ export const Layout = ({
       containerType={containerType}
     />
   );
-};
+}
