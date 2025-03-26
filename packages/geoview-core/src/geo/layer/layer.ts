@@ -13,7 +13,7 @@ import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { ConfigValidation } from '@/core/utils/config/config-validation';
-import { generateId, whenThisThen } from '@/core/utils/utilities';
+import { generateId, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer, LayerCreationEvent, LayerRequestingEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -46,7 +46,7 @@ import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { GeoViewLayerCreatedTwiceError, GeoViewLayerNotCreatedError } from '@/geo/layer/exceptions/layer-exceptions';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractGVLayer, LayerMessageEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
@@ -252,6 +252,31 @@ export class LayerApi {
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass | undefined {
     return this.#layerEntryConfigs?.[layerPath];
+  }
+
+  /**
+   * Handles layer-specific messages and displays them through the map viewer's notification system
+   * @param {AbstractGVLayer} layer - The layer instance that triggered the message
+   * @param {LayerMessageEvent} layerMessageEvent - The message event containing notification details
+   * @param {string} layerMessageEvent.messageKey - Key for localized message lookup
+   * @param {string[]} layerMessageEvent.messageParams - Parameters to be inserted into the localized message
+   * @param {boolean} layerMessageEvent.notification - Notification configuration options
+   * @returns {void}
+   *
+   * @example
+   * handleLayerMessage(myLayer, {
+   *   messageKey: 'layers.fetchProgress',
+   *   messageParams: [50, 100],
+   *   notification: true
+   * });
+   */
+  #handleLayerMessage(layer: AbstractGVLayer, layerMessageEvent: LayerMessageEvent): void {
+    const mapViewer = MapEventProcessor.getMapViewer(this.getMapId());
+    mapViewer.notifications.showMessage(
+      getLocalizedMessage(layerMessageEvent.messageKey, mapViewer.getDisplayLanguage()),
+      layerMessageEvent.messageParams,
+      layerMessageEvent.notification
+    );
   }
 
   /**
@@ -490,7 +515,7 @@ export class LayerApi {
    * @private
    */
   #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
-    // TODO: find a more centralized way to trap error and display message
+    // TODO: message - find a more centralized way to trap error and display message
     api.maps[this.getMapId()].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId]);
 
     // Log
@@ -977,6 +1002,9 @@ export class LayerApi {
 
       // Initialize the layer, triggering the loaded/error status
       gvLayer.init();
+
+      // Add a handler on layer's message
+      gvLayer.onLayerMessage(this.#handleLayerMessage.bind(this));
 
       // Return the GVLayer
       return gvLayer;

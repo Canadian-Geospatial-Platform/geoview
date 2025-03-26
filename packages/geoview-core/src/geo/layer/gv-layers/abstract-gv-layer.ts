@@ -245,14 +245,25 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
   }
 
-  protected displayMessage(messageKey: string, messageParams: string[]): void {
-    this.getMapViewer().notifications.showMessage(
-      getLocalizedMessage(messageKey, this.getMapViewer().getDisplayLanguage()),
-      messageParams,
-      false
-    );
-
-    this.#emitLayerMessage({ message: messageKey });
+  /**
+   * Emits a layer-specific message event with localization support
+   * @protected
+   * @param {string} messageKey - The key used to lookup the localized message OR message
+   * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
+   * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
+   * @returns {void}
+   *
+   * @example
+   * this.emitMessage(
+   *   'layers.fetchProgress',
+   *   ['50', '100'],
+   *   true
+   * );
+   *
+   * @fires LayerMessageEvent
+   */
+  protected emitMessage(messageKey: string, messageParams: string[], notification = false): void {
+    this.#emitLayerMessage({ messageKey, messageParams, notification });
   }
 
   /**
@@ -940,5 +951,7 @@ type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent
  */
 export type LayerMessageEvent = {
   // The loaded layer
-  message: string;
+  messageKey: string;
+  messageParams: string[];
+  notification: boolean;
 };
