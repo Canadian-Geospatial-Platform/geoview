@@ -52,7 +52,14 @@ export class Config {
    */
   getValidMapConfig(listOfGeoviewLayerConfig: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
     if (listOfGeoviewLayerConfig) {
-      listOfGeoviewLayerConfig.forEach((geoviewLayerEntry) => {
+      listOfGeoviewLayerConfig.forEach((geoviewLayerEntry, index, layerArray) => {
+        // Add duplicate marker for duplicate IDs
+        const firstIndex = layerArray.findIndex((layerEntry) => geoviewLayerEntry.geoviewLayerId === layerEntry.geoviewLayerId);
+        if (firstIndex !== index) {
+          // eslint-disable-next-line no-param-reassign
+          geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${index}`;
+        }
+
         if (mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {
           //  Skip it, because we don't validate the GeoCore configuration anymore. Not the same way as typical GeoView Layer Types at least.
           // TODO Why not do GeoCore request here? Then could easily replace listOfLayerEntries and validate / process along with other layers

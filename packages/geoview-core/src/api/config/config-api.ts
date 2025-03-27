@@ -312,11 +312,15 @@ export class ConfigApi {
     const geocoreServerUrl = geocoreUrl || CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl;
 
     // Filter all geocore layers and convert the result into an array of geoviewLayerId.
-    const geocoreArrayOfKeys = listOfGeoviewLayerConfig
-      .filter((layerConfig) => layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE)
-      .map<string>((geocoreLayer) => {
-        return geocoreLayer.geoviewLayerId as string;
-      });
+    const geocoreArrayOfKeys = [
+      ...new Set(
+        listOfGeoviewLayerConfig
+          .filter((layerConfig) => layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE)
+          .map<string>((geocoreLayer) => {
+            return geocoreLayer.geoviewLayerId as string;
+          })
+      ),
+    ];
 
     // If the listOfGeoviewLayerConfig contains GeoCore layers, process them.
     if (geocoreArrayOfKeys.length) {
@@ -329,13 +333,17 @@ export class ConfigApi {
         // the listOfGeoviewLayerConfig.
         let newListOfGeoviewLayerConfig = listOfGeoviewLayerConfig.map((layerConfig) => {
           if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
-            const jsonConfigFound = arrayOfJsonConfig.find(
-              (jsonConfig) => jsonConfig.geoviewLayerId === `rcs.${layerConfig.geoviewLayerId}.${language}`
-            );
+            const jsonConfigFound = arrayOfJsonConfig.find((jsonConfig) => {
+              // Remove the duplicate tag from the ID so it will match
+              const geocoreId = (layerConfig.geoviewLayerId as string).split(':')[0];
+              return jsonConfig.geoviewLayerId === `rcs.${geocoreId}.${language}`;
+            });
             if (jsonConfigFound) {
-              jsonConfigFound.geoviewLayerId = layerConfig.geoviewLayerId;
-              jsonConfigFound.isGeocore = true as TypeJsonObject; // We want to remember that the origin is GeoCore.
-              return jsonConfigFound;
+              // take a clone in case the ID is a duplicate so the config can be re-used
+              const newConfig = cloneDeep(jsonConfigFound);
+              newConfig.geoviewLayerId = layerConfig.geoviewLayerId;
+              newConfig.isGeocore = true as TypeJsonObject; // We want to remember that the origin is GeoCore.
+              return newConfig;
             }
           }
           return layerConfig;

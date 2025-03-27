@@ -140,6 +140,7 @@ export class MapFeatureConfig {
     if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)
       delete this.map.viewSettings.initialView.zoomAndCenter;
 
+    let duplicateCount = 0;
     this.map.listOfGeoviewLayerConfig = this.map.listOfGeoviewLayerConfig
       .map((geoviewLayerConfig) => {
         return MapFeatureConfig.nodeFactory(toJsonObject(geoviewLayerConfig), this.#language);
@@ -148,10 +149,12 @@ export class MapFeatureConfig {
       .filter((layerConfig) => {
         if (layerConfig) {
           if (layerConfig.geoviewLayerId in this.#registeredLayerPaths) {
-            layerConfig.setErrorDetectedFlag();
-            layerConfig.setErrorDetectedFlagForAllLayers(layerConfig.listOfLayerEntryConfig);
-            logger.logError(`ERROR: The GeoView layer ${layerConfig.geoviewLayerId} is duplicated.`);
-          } else this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
+            // Add duplicate marker so the ID is unique
+            duplicateCount += 1;
+            // eslint-disable-next-line no-param-reassign
+            layerConfig.geoviewLayerId = `${layerConfig.geoviewLayerId}:${duplicateCount}`;
+          }
+          this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
         }
         return layerConfig;
       }) as AbstractGeoviewLayerConfig[];
