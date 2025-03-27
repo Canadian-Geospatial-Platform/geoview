@@ -50,6 +50,12 @@ export class GeoCore {
       // Validate the generated Geoview Layer Config
       ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);
 
+      // For each found geochart associated with the Geocore UUIDs
+      response.geocharts?.forEach((geochartConfig) => {
+        // Add a GeoChart
+        GeochartEventProcessor.addGeochartChart(this.#mapId, layerConfig?.geoviewLayerId as string, geochartConfig);
+      });
+
       // Use user supplied listOfLayerEntryConfig if provided
       if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
         const tempLayerConfig = { ...layerConfig } as unknown as TypeGeoviewLayerConfig;
@@ -72,12 +78,6 @@ export class GeoCore {
         if (response.layers[0].listOfLayerEntryConfig.length === 1)
           response.layers[0].listOfLayerEntryConfig[0].layerName = layerConfig.geoviewLayerName;
       }
-
-      // For each found geochart associated with the Geocore UUIDs
-      response.geocharts?.forEach((geochartConfig) => {
-        // Add a GeoChart
-        GeochartEventProcessor.addGeochartChart(this.#mapId, geochartConfig.layers[0].layerId as string, geochartConfig);
-      });
 
       // Make sure if it's a duplicate, the response has the duplicates safe ID
       if (layerConfig?.geoviewLayerId.includes(':') && layerConfig?.geoviewLayerId.split(':')[0] === response.layers[0].geoviewLayerId) {

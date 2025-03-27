@@ -311,7 +311,7 @@ export class ConfigApi {
     // Get the geocore URL from the config, otherwise use the default URL.
     const geocoreServerUrl = geocoreUrl || CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl;
 
-    // Filter all geocore layers and convert the result into an array of geoviewLayerId.
+    // Filter all geocore layers and convert the result into an array of unique geoviewLayerId.
     const geocoreArrayOfKeys = [
       ...new Set(
         listOfGeoviewLayerConfig
