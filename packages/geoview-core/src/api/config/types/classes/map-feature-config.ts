@@ -140,7 +140,6 @@ export class MapFeatureConfig {
     if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)
       delete this.map.viewSettings.initialView.zoomAndCenter;
 
-    let duplicateCount = 0;
     this.map.listOfGeoviewLayerConfig = this.map.listOfGeoviewLayerConfig
       .map((geoviewLayerConfig) => {
         return MapFeatureConfig.nodeFactory(toJsonObject(geoviewLayerConfig), this.#language);
@@ -149,10 +148,9 @@ export class MapFeatureConfig {
       .filter((layerConfig) => {
         if (layerConfig) {
           if (layerConfig.geoviewLayerId in this.#registeredLayerPaths) {
-            // Add duplicate marker so the ID is unique
-            duplicateCount += 1;
+            // Add duplicate marker ('geoviewId:uuid') so the ID is unique
             // eslint-disable-next-line no-param-reassign
-            layerConfig.geoviewLayerId = `${layerConfig.geoviewLayerId}:${duplicateCount}`;
+            layerConfig.geoviewLayerId = `${layerConfig.geoviewLayerId}:${crypto.randomUUID()}`;
           }
           this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
         }

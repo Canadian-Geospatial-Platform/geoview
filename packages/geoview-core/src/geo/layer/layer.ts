@@ -437,12 +437,10 @@ export class LayerApi {
    * @returns {Promise<void>}
    */
   loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): Promise<void> {
-    const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
-
     // set order for layers to appear on the map according to config
     const promisesOfGeoCoreGeoviewLayers: Promise<TypeGeoviewLayerConfig[]>[] = [];
-    for (let i = 0; i < validGeoviewLayerConfigs.length; i++) {
-      const geoviewLayerConfig = validGeoviewLayerConfigs[i];
+    for (let i = 0; i < mapConfigLayerEntries!.length; i++) {
+      const geoviewLayerConfig = mapConfigLayerEntries![i];
 
       // If the layer is GeoCore add it via the core function
       if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
