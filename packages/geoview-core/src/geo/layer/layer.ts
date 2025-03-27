@@ -365,12 +365,10 @@ export class LayerApi {
    * @returns {Promise<void>}
    */
   loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): Promise<void> {
-    const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
-
     // set order for layers to appear on the map according to config
     const promisesOfGeoCoreGeoviewLayers: Promise<TypeGeoviewLayerConfig[]>[] = [];
-    for (let i = 0; i < validGeoviewLayerConfigs.length; i++) {
-      const geoviewLayerConfig = validGeoviewLayerConfigs[i];
+    for (let i = 0; i < mapConfigLayerEntries!.length; i++) {
+      const geoviewLayerConfig = mapConfigLayerEntries![i];
 
       // If the layer is GeoCore add it via the core function
       if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
@@ -452,49 +450,6 @@ export class LayerApi {
         });
       MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), orderedLayerInfos);
     });
-  }
-
-  /**
-   * Validates the geoview layer configuration array to eliminate duplicate entries and inform the user.
-   * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - The Map Config Layer Entries to validate.
-   * @returns {MapConfigLayerEntry[]} The new configuration with duplicate entries eliminated.
-   * @private
-   */
-  #deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
-    if (mapConfigLayerEntries && mapConfigLayerEntries.length > 0) {
-      const validGeoviewLayerConfigs = mapConfigLayerEntries.filter((geoviewLayerConfigToCreate, configToCreateIndex) => {
-        for (let configToTestIndex = 0; configToTestIndex < mapConfigLayerEntries.length; configToTestIndex++) {
-          if (
-            geoviewLayerConfigToCreate.geoviewLayerId === mapConfigLayerEntries[configToTestIndex].geoviewLayerId &&
-            // We keep the first instance of the duplicate entry.
-            configToCreateIndex > configToTestIndex
-          ) {
-            this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
-            // Remove geoCore ordered layer info placeholder
-            if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId))
-              MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId, false);
-
-            return false;
-          }
-        }
-        return true;
-      });
-      return validGeoviewLayerConfigs;
-    }
-    return [];
-  }
-
-  /**
-   * Prints an error message for the duplicate geoview layer configuration.
-   * @param {MapConfigLayerEntry} mapConfigLayerEntry - The Map Config Layer Entry in error.
-   * @private
-   */
-  #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
-    // TODO: find a more centralized way to trap error and display message
-    api.maps[this.getMapId()].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId]);
-
-    // Log
-    logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.getMapId()}`);
   }
 
   /**

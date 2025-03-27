@@ -57,7 +57,7 @@ export class Config {
         const firstIndex = layerArray.findIndex((layerEntry) => geoviewLayerEntry.geoviewLayerId === layerEntry.geoviewLayerId);
         if (firstIndex !== index) {
           // eslint-disable-next-line no-param-reassign
-          geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${index}`;
+          geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${crypto.randomUUID()}`;
         }
 
         if (mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {

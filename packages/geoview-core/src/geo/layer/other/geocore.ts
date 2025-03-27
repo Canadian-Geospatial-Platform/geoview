@@ -53,7 +53,7 @@ export class GeoCore {
       // For each found geochart associated with the Geocore UUIDs
       response.geocharts?.forEach((geochartConfig) => {
         // Add a GeoChart
-        GeochartEventProcessor.addGeochartChart(this.#mapId, layerConfig?.geoviewLayerId as string, geochartConfig);
+        GeochartEventProcessor.addGeochartChart(this.#mapId, uuid, geochartConfig);
       });
 
       // Use user supplied listOfLayerEntryConfig if provided
@@ -80,8 +80,8 @@ export class GeoCore {
       }
 
       // Make sure if it's a duplicate, the response has the duplicates safe ID
-      if (layerConfig?.geoviewLayerId.includes(':') && layerConfig?.geoviewLayerId.split(':')[0] === response.layers[0].geoviewLayerId) {
-        response.layers[0].geoviewLayerId = layerConfig.geoviewLayerId;
+      if (uuid.includes(':') && uuid.split(':')[0] === response.layers[0].geoviewLayerId) {
+        response.layers[0].geoviewLayerId = uuid;
       }
       return response.layers;
     } catch (error) {
