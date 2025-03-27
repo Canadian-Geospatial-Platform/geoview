@@ -32,6 +32,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
+import { SnackbarType } from '@/core/utils/notifications';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -250,6 +251,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @protected
    * @param {string} messageKey - The key used to lookup the localized message OR message
    * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
+   * @param {SnackbarType} messageType - The message type
    * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
    * @returns {void}
    *
@@ -262,8 +264,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    *
    * @fires LayerMessageEvent
    */
-  protected emitMessage(messageKey: string, messageParams: string[], notification = false): void {
-    this.#emitLayerMessage({ messageKey, messageParams, notification });
+  protected emitMessage(messageKey: string, messageParams: string[], messageType = 'info' as SnackbarType, notification = false): void {
+    this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
   }
 
   /**
@@ -953,5 +955,6 @@ export type LayerMessageEvent = {
   // The loaded layer
   messageKey: string;
   messageParams: string[];
+  messageType: SnackbarType;
   notification: boolean;
 };

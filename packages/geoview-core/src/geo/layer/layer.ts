@@ -255,6 +255,44 @@ export class LayerApi {
   }
 
   /**
+   * Attaches event handlers to a layer
+   * @private
+   * @param {AbstractGVLayer} gvLayer - The layer instance to attach events to
+   * @returns {void}
+   *
+   * @fires LayerMessage - When a layer sends a message
+   * @fires LayerLoaded - When an individual layer is loaded on the map
+   *
+   * @description
+   * This method sets up the following event handlers:
+   * - Layer message handling through onLayerMessage
+   * - Layer loading completion through onIndividualLayerLoaded
+   *   - Handles setting visible range properties
+   *   - Manages legend information and bounds
+   *
+   * @private
+   */
+  #attachEventsOnLayer(gvLayer: AbstractGVLayer): void {
+    // Add a handler on layer's message
+    gvLayer.onLayerMessage(this.#handleLayerMessage.bind(this));
+
+    // Register a hook when a layer is loaded on the map
+    gvLayer.onIndividualLayerLoaded((sender, payload) => {
+      // Log
+      logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
+
+      // Set in visible range property for all newly added layers
+      this.#setLayerInVisibleRange(sender, gvLayer.getLayerConfig());
+
+      // Ensure that the layer bounds are set when the layer is loaded
+      const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), payload.layerPath);
+      if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), payload.layerPath);
+
+      this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
+    });
+  }
+
+  /**
    * Handles layer-specific messages and displays them through the map viewer's notification system
    * @param {AbstractGVLayer} layer - The layer instance that triggered the message
    * @param {LayerMessageEvent} layerMessageEvent - The message event containing notification details
@@ -269,14 +307,22 @@ export class LayerApi {
    *   messageParams: [50, 100],
    *   notification: true
    * });
+   *
+   * @private
    */
-  #handleLayerMessage(layer: AbstractGVLayer, layerMessageEvent: LayerMessageEvent): void {
+  #handleLayerMessage(layer: AbstractGVLayer | AbstractGeoViewLayer, layerMessageEvent: LayerMessageEvent): void {
     const mapViewer = MapEventProcessor.getMapViewer(this.getMapId());
-    mapViewer.notifications.showMessage(
-      getLocalizedMessage(layerMessageEvent.messageKey, mapViewer.getDisplayLanguage()),
-      layerMessageEvent.messageParams,
-      layerMessageEvent.notification
-    );
+    const localMessage = getLocalizedMessage(layerMessageEvent.messageKey, mapViewer.getDisplayLanguage());
+
+    if (layerMessageEvent.messageType === 'info') {
+      mapViewer.notifications.showMessage(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
+    } else if (layerMessageEvent.messageType === 'warning') {
+      mapViewer.notifications.showWarning(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
+    } else if (layerMessageEvent.messageType === 'error') {
+      mapViewer.notifications.showError(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
+    } else if (layerMessageEvent.messageType === 'success') {
+      mapViewer.notifications.showSuccess(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
+    }
   }
 
   /**
@@ -744,6 +790,10 @@ export class LayerApi {
         this.#addInitialFilters(layerConfig);
       });
 
+      // TODO: if we keep geoview layers, regroup the event like what we do for gv layers
+      // Register the messsage handler
+      layerBeingAdded.onLayerMessage(this.#handleLayerMessage.bind(this));
+
       // Register when layer entry config has become processed (catching on-the-fly layer entry configs as they are further processed)
       layerBeingAdded.onLayerEntryProcessed((geoviewLayer, event) => {
         // Log
@@ -769,21 +819,6 @@ export class LayerApi {
 
         // If found the GV layer
         if (gvLayer) {
-          // Register a hook when a layer is loaded on the map
-          gvLayer.onIndividualLayerLoaded((sender, payload) => {
-            // Log
-            logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
-
-            // Set in visible range property for all newly added layers
-            this.#setLayerInVisibleRange(sender, gvLayer.getLayerConfig());
-
-            const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), payload.layerPath);
-            // Ensure that the layer bounds are set when the layer is loaded
-            if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), payload.layerPath);
-
-            this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
-          });
-
           return gvLayer.getOLLayer();
         }
 
@@ -1003,8 +1038,8 @@ export class LayerApi {
       // Initialize the layer, triggering the loaded/error status
       gvLayer.init();
 
-      // Add a handler on layer's message
-      gvLayer.onLayerMessage(this.#handleLayerMessage.bind(this));
+      // Attach the events handler
+      this.#attachEventsOnLayer(gvLayer);
 
       // Return the GVLayer
       return gvLayer;

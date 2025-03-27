@@ -196,6 +196,9 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
     return response as unknown as TypeJsonObject;
   } catch (error) {
     logger.logError('Error in queryAllEsriFeatures', error);
+    logger.logTrace({
+      type: 'error',
+    });
     throw error;
   }
 }

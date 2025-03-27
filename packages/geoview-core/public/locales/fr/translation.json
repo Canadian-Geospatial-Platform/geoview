@@ -246,7 +246,8 @@
       "createGroup": "Impossible de créer une couche de groupe",
       "emptyGroup": "Groupe de couches vide",
       "esriId": "Le layerId ESRI doit être un nombre",
-      "esriIdNotFound": "Le layerId ESRI introuvable"
+      "esriIdNotFound": "Le layerId ESRI introuvable",
+      "notAbleToQuery": "Impossible de téléchager les données pour __param__"
     },
     "geocore": {
       "noLayer": "Aucune couche renvoyée par le service GeoCore"

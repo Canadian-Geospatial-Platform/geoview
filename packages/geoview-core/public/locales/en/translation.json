@@ -247,7 +247,8 @@
       "createGroup": "Unable to create group layer",
       "emptyGroup": "Empty layer group",
       "esriId": "ESRI layerId must be a number",
-      "esriIdNotFound": "ESRI layerId not found"
+      "esriIdNotFound": "ESRI layerId not found",
+      "notAbleToQuery": "Not able to download records for __param__"
     },
     "geocore": {
       "noLayer": "No layers returned by GeoCore service"

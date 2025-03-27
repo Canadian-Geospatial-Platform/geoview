@@ -108,7 +108,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const process = message.data.processed;
       const { total } = message.data;
       if (process !== total) this.emitMessage('layers.fetchProgress', [message.data.processed, message.data.total]);
-      else this.emitMessage('layers.fetchDone', [message.data.total]);
+      else this.emitMessage('layers.fetchDone', [message.data.total], 'info');
+    } else if (message.type === 'error') {
+      this.emitMessage('error.layer.notAbleToQuery', [this.getLayerName()!], 'error');
     }
   }
 
