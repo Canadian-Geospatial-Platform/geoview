@@ -720,20 +720,8 @@ export class LayerApi {
     // TODO: Refactor - This should be dealt with the config classes and this line commented out
     ConfigValidation.validateListOfGeoviewLayerConfig(this.mapViewer.getDisplayLanguage(), [geoviewLayerConfig]);
 
-    // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
-    if (geoviewLayerConfig.geoviewLayerId in this.#geoviewLayers) {
-      // Remove geoCore ordered layer info placeholder
-      if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId))
-        MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId, false);
-
-      this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
-    } else {
-      // Process the addition of the layer
-      return this.#addGeoviewLayerStep2(geoviewLayerConfig);
-    }
-
-    // Not added
-    return undefined;
+    // Process the addition of the layer
+    return this.#addGeoviewLayerStep2(geoviewLayerConfig);
   }
 
   /**

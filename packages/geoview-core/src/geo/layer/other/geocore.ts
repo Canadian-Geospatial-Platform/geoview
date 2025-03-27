@@ -45,7 +45,7 @@ export class GeoCore {
 
     try {
       // Get the GV config from UUID and await
-      const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid]);
+      const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid.split(':')[0]]);
 
       // Validate the generated Geoview Layer Config
       ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);
@@ -79,6 +79,10 @@ export class GeoCore {
         GeochartEventProcessor.addGeochartChart(this.#mapId, geochartConfig.layers[0].layerId as string, geochartConfig);
       });
 
+      // Make sure if it's a duplicate, the response has the duplicates safe ID
+      if (layerConfig?.geoviewLayerId.includes(':') && layerConfig?.geoviewLayerId.split(':')[0] === response.layers[0].geoviewLayerId) {
+        response.layers[0].geoviewLayerId = layerConfig.geoviewLayerId;
+      }
       return response.layers;
     } catch (error) {
       // Log
