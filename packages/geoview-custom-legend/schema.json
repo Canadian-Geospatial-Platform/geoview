@@ -2,13 +2,16 @@
   "type": "object",
   "properties": {
     "id": {
-      "type": "string"
+      "type": "string",
+      "enum": ["custom-legend"]
     },
     "enabled": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": true
     },
     "isOpen": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": false
     },
     "legendList": {
       "type": "array",
@@ -25,15 +28,127 @@
             "type": "string"
           },
           "visibility": {
-            "type": "boolean"
+            "type": "boolean",
+            "default": true
+          },
+          "infoSection": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "infoType": {
+                    "type": "string",
+                    "enum": ["title"]
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "export": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "required": ["infoType", "content"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "infoType": {
+                    "type": "string",
+                    "enum": ["image"]
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "export": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "required": ["infoType", "content"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "infoType": {
+                    "type": "string",
+                    "enum": ["unboundLayer"]
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "layerName": {
+                    "type": "string"
+                  },
+                  "coverIcon": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "symbologyStack": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "image": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["image", "text"],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  },
+                  "symbologyRenderStyle": {
+                    "type": "string",
+                    "enum": ["icons", "images"]
+                  },
+                  "symbologyExpanded": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "export": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "required": ["infoType", "content", "layerName", "symbologyStack", "symbologyRenderStyle"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "infoType": {
+                    "type": "string",
+                    "enum": ["text"]
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "export": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "required": ["infoType", "content"],
+                "additionalProperties": false
+              }
+            ]
           }
         },
-        "required": ["legendTitle", "layerId"]
+        "required": ["legendTitle", "infoSection"]
       }
     },
     "version": {
       "type": "string"
     }
   },
-  "required": ["id", "legendList"]
+  "required": ["id", "legendList", "version"]
 }

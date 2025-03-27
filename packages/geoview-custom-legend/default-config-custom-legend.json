@@ -2,6 +2,18 @@
   "id": "custom-legend",
   "enabled": true,
   "isOpen": false,
-  "legendList": [],
+  "legendList": [
+    {
+      "legendTitle": "Sample Legend",
+      "iconUrl": "https://example.com/icon.png",
+      "layerId": "layer1",
+      "visibility": true,
+      "infoSection": {
+        "infoType": "title",
+        "content": "Sample Info",
+        "export": true
+      }
+    }
+  ],
   "version": "1.0"
 }
