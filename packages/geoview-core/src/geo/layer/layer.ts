@@ -305,6 +305,7 @@ export class LayerApi {
    * handleLayerMessage(myLayer, {
    *   messageKey: 'layers.fetchProgress',
    *   messageParams: [50, 100],
+   *   messageType: 'error',
    *   notification: true
    * });
    *

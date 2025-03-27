@@ -707,6 +707,7 @@ export abstract class AbstractGeoViewLayer {
    * this.emitMessage(
    *   'layers.fetchProgress',
    *   ['50', '100'],
+   *   messageType: 'error',
    *   true
    * );
    *

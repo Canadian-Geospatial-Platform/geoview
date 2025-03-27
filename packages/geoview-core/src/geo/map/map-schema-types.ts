@@ -199,7 +199,7 @@ export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
   [layerPath: string]: T;
 };
 
-// TODO: Refactor - Check if this type is still used and replace it with something like TypeAllFeatureInfoResultSetEntry? Still use in data-table-state
+// TODO: Refactor - Check if this type is still used and replace it with something like TypeAllFeatureInfoResultSetEntry?
 // TODO.CONT:  Still use in data-table-state and detail.tsx
 export type TypeLayerData = {
   eventListenerEnabled: boolean;

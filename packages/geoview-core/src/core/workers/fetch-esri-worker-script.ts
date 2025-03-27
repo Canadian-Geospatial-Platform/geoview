@@ -143,7 +143,7 @@ const processBatch = async (
  */
 async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject> {
   const resultRecordCount = params.maxRecordCount > 10000 ? 10000 : params.maxRecordCount;
-  const maxConcurrentRequests = 10; // Math.min(25, navigator.hardwareConcurrency * 2);
+  const maxConcurrentRequests = Math.min(10, navigator.hardwareConcurrency * 2);
   const baseUrl = `${params.url}/query?where=1=1&outFields=*&f=json&returnGeometry=${params.queryGeometry}&resultRecordCount=${resultRecordCount}`;
 
   try {

@@ -259,6 +259,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * this.emitMessage(
    *   'layers.fetchProgress',
    *   ['50', '100'],
+   *   messageType: 'error',
    *   true
    * );
    *
