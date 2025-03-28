@@ -150,16 +150,17 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
   const baseUrl = `${params.url}/query?where=1=1&outFields=*&f=json&returnGeometry=${params.queryGeometry}&resultRecordCount=${resultRecordCount}`;
 
   try {
+    // Send message for starting fetching
+    logger.sendMessage('info', {
+      processed: 0,
+      total: 0,
+    });
+
     // Get total count with a timeout. This is a simple query and if it takes more then 5 seconds it means
     // the server is unresponsive and we should not continue. This will throw an error...
     const countUrl = `${params.url}/query?where=1=1&returnCountOnly=true&f=json`;
-    const { count: totalCount } = await fetchWithTimeout<{ count: number }>(countUrl);
-
+    const { count: totalCount } = await fetchWithTimeout<{ count: number }>(countUrl, {}, 7000);
     logger.logTrace('Total features count:', totalCount);
-    logger.sendMessage('info', {
-      processed: 0,
-      total: totalCount,
-    });
 
     // Calculate total number of requests needed
     const totalRequests = Math.ceil(totalCount / resultRecordCount);

@@ -117,6 +117,7 @@
     "errorImageLoad": "Erreur de chargement de l'image source pour la couche: __param__ au niveau de zoom __param__",
     "fetchProgress": "Téléchargement des données... Téléchargé __param__ de __param__ enregistrements",
     "fetchDone": "Données téléchargées - __param__ enregistrements",
+    "fetchStart": "Début du téléchargement des données...",
     "slowFetch": "Le téléchargement de __param__ prend plus de temps que prévu",
     "only": "seulement",
     "opacity": "Opacité",

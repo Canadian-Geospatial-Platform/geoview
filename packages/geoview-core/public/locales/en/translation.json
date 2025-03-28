@@ -117,6 +117,7 @@
     "errorImageLoad": "Error loading source image for layer: __param__ at zoom level __param__",
     "fetchProgress": "Fetching data... Retrieved __param__ of __param__ records",
     "fetchDone": "Data fetched - __param__ records",
+    "fetchStart": "Start fetching data...",
     "slowFetch": "Downloading __param__ is taking longer then expected",
     "only": "only",
     "opacity": "Opacity",

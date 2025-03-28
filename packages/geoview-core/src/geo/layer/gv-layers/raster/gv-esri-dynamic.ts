@@ -111,6 +111,34 @@ export class GVEsriDynamic extends AbstractGVRaster {
     } else if (workerLog.type === 'message' && workerLog.level === 'error' && workerLog.message[0] === 'FetchEsriWorker') {
       this.emitMessage('error.layer.notAbleToQuery', [this.getLayerName()!], 'error');
     }
+
+    // Early return if not a FetchEsriWorker message
+    if (workerLog.type !== 'message' || workerLog.message[0] !== 'FetchEsriWorker') {
+      return;
+    }
+
+    // Handle based on log level
+    switch (workerLog.level) {
+      case 'info': {
+        const { processed, total } = workerLog.message[1];
+        let messageKey: string;
+        if (processed === 0) {
+          messageKey = 'layers.fetchStart';
+        } else if (processed === total) {
+          messageKey = 'layers.fetchDone';
+        } else {
+          messageKey = 'layers.fetchProgress';
+        }
+
+        this.emitMessage(messageKey, [processed, total], 'info');
+        break;
+      }
+      case 'error':
+        this.emitMessage('error.layer.notAbleToQuery', [this.getLayerName()!], 'error');
+        break;
+      default:
+        break;
+    }
   }
 
   /**
