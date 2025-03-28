@@ -553,6 +553,11 @@ export class LayerApi {
       inVisibleRange: true,
     };
 
+    if (uuid in this.#geoviewLayers) {
+      // eslint-disable-next-line no-param-reassign
+      uuid = `${uuid}:${crypto.randomUUID()}`;
+    }
+
     // GV: This is here as a placeholder so that the layers will appear in the proper order,
     // GV: regardless of how quickly we get the response. It is removed if the layer fails.
     MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerInfo);
