@@ -312,10 +312,10 @@
 
         // listen to individual layer loaded event
         // TODO: The gv layer does not exist at the time we attach the event. To make this work, we would
-        // TODO.CONT: need to implement a when-this-then internal approach.
+        // TO.DOCONT: need to implement a when-this-then internal approach.
         cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_NON_METAL)?.onIndividualLayerLoaded((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess('Nonmetal mines has finished loading');
-          console.log(sender.olRootLayer.getSource().getFeatures());
+          console.log(sender.getOLLayer().getSource().getFeatures());
         });
 
         // Add more registrations of listeners when the map is ready / layers registered here...

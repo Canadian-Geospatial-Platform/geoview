@@ -1,7 +1,6 @@
 import { getSxClasses } from './custom-legend-style';
 
 interface CustomLegendPanelProps {
-  mapId: string;
   config: TypeLegendProps;
 }
 
@@ -20,11 +19,11 @@ type TypeLegendProps = {
 };
 
 export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
-  const { mapId, config } = props;
+  const { config } = props;
   const legendList = config.legendList as LegendListItems;
 
   const { cgpv } = window;
-  const { api, ui } = cgpv;
+  const { ui } = cgpv;
   const { Card, Box } = ui.elements;
 
   const theme = ui.useTheme();

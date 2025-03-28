@@ -9,7 +9,7 @@ import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
-import { api } from '@/app';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to add geoCore layer to the map
@@ -33,8 +33,8 @@ export class GeoCore {
 
   /**
    * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
-   * @param {string} uuid the UUID of the layer
-   * @param {GeoCoreLayerConfig} layerConfig the layer configuration
+   * @param {string} uuid - The UUID of the layer
+   * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration
    * @returns {Promise<TypeGeoviewLayerConfig[]>} list of layer configurations to add to the map
    */
   async createLayersFromUUID(uuid: string, layerConfig?: GeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig[]> {
@@ -76,7 +76,10 @@ export class GeoCore {
         if (!tempLayerConfig.geoviewLayerName) tempLayerConfig.geoviewLayerName = response.layers[0].geoviewLayerName;
 
         const config = new Config(this.#displayLanguage);
-        const newLayerConfig = config.getValidMapConfig([tempLayerConfig]);
+        const newLayerConfig = config.getValidMapConfig([tempLayerConfig], (error) => {
+          // When an error happens, raise the exception, we handle it higher in this case
+          throw error;
+        });
         return newLayerConfig as TypeGeoviewLayerConfig[];
       }
 
@@ -102,9 +105,8 @@ export class GeoCore {
       if (MapEventProcessor.findMapLayerFromOrderedInfo(this.#mapId, uuid))
         MapEventProcessor.removeOrderedLayerInfo(this.#mapId, uuid, false);
 
-      // TODO: find a more centralized way to trap error and display message
-      api.maps[this.#mapId].notifications.showError('validation.layer.uuidNotFound', [uuid]);
-      throw error;
+      // Throw error
+      throw new GeoViewError(this.#mapId, 'validation.layer.uuidNotFound', [uuid]);
     }
   }
 }

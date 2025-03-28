@@ -2,8 +2,9 @@ import { NotificationType } from '@/core/components/notifications/notifications'
 import { TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { generateId, getLocalizedMessage, replaceParams } from './utilities';
+import { generateId, getLocalizedMessage } from './utilities';
 import { logger } from './logger';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to send message to user for a map. Can be a notification and/or a snackbar message
@@ -24,23 +25,6 @@ export class Notifications {
     this.mapId = mapId;
   }
 
-  /**
-   * Check if message is a valid local key and apply paramter replacement.
-   * @param {string} message - The message or a locale key to retrieve
-   * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Array the parameters to replace
-   * @returns {string} Formated and localized message if valid, the original message otherwise
-   * @private
-   */
-  #formatMessage(message: string, params: TypeJsonValue[] | TypeJsonArray | string[]): string {
-    // if message is a key, get localized value, if not return the string
-    let localMessage = getLocalizedMessage(message, AppEventProcessor.getDisplayLanguage(this.mapId));
-
-    // if params provided, replace them
-    if (params.length > 0) localMessage = replaceParams(params, localMessage);
-
-    return localMessage;
-  }
-
   // #region NOTIFICATIONS
   /**
    * Reusable utility function to send event to add a notification in the notifications manager
@@ -54,7 +38,7 @@ export class Notifications {
     const notification = {
       key: generateId(18),
       notificationType: type,
-      message: this.#formatMessage(message, params),
+      message: getLocalizedMessage(message, AppEventProcessor.getDisplayLanguage(this.mapId), params),
       count: 1,
     };
 
@@ -127,7 +111,7 @@ export class Notifications {
   ): void {
     const snackbar: SnackBarOpenEvent = {
       snackbarType: type,
-      message: this.#formatMessage(message, params),
+      message: getLocalizedMessage(message, AppEventProcessor.getDisplayLanguage(this.mapId), params),
       button,
     };
     // Emit
@@ -135,59 +119,108 @@ export class Notifications {
   }
 
   /**
-   * Display a message in the snackbar
+   * Displays a message in the snackbar
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
    * @param {ISnackbarButton} button - Optional snackbar button
    */
-  showMessage(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
+  showMessage(
+    message: string,
+    params: TypeJsonValue[] | TypeJsonArray | string[] = [],
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Redirect
     this.#showSnackbarMessage('info', message, params, button);
     if (withNotification) this.addNotificationMessage(message, params);
   }
 
   /**
-   * Display an success message in the snackbar
+   * Displays an success message in the snackbar
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
    * @param {ISnackbarButton} button - Optional snackbar button
    */
-  showSuccess(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
+  showSuccess(
+    message: string,
+    params: TypeJsonValue[] | TypeJsonArray | string[] = [],
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Redirect
     this.#showSnackbarMessage('success', message, params, button);
     if (withNotification) this.addNotificationSuccess(message, params);
   }
 
   /**
-   * Display an warning message in the snackbar
+   * Displays an warning message in the snackbar
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {sTypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
    * @param {ISnackbarButton} button - Optional snackbar button
    */
-  showWarning(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
+  showWarning(
+    message: string,
+    params: TypeJsonValue[] | TypeJsonArray | string[] = [],
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Redirect
     this.#showSnackbarMessage('warning', message, params, button);
     if (withNotification) this.addNotificationWarning(message, params);
   }
 
   /**
-   * Display an error message in the snackbar
+   * Displays an error message in the snackbar
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
    * @param {ISnackbarButton} button - Optional snackbar button
    */
-  showError(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
+  showError(
+    message: string,
+    params: TypeJsonValue[] | TypeJsonArray | string[] = [],
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Redirect
     this.#showSnackbarMessage('error', message, params, button);
     if (withNotification) this.addNotificationError(message, params);
+  }
+
+  /**
+   * Displays an error which can be a GeoViewError or a generic Error.
+   *
+   * @param {Error | unknown} error - The error containing the message already formatted to display
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   * @param {ISnackbarButton} button - Optional snackbar button
+   */
+  showErrorGeoView(error: Error | unknown, withNotification: boolean = true, button: ISnackbarButton = {}): void {
+    // If a GeoViewError
+    if (error instanceof GeoViewError) {
+      // Show the GeoViewError message
+      this.showError(error.message, [], withNotification, button);
+    } else {
+      // Show a generic error
+      this.showErrorGeneric(withNotification, button);
+    }
+  }
+
+  /**
+   * Displays a generic error message in the snackbar
+   *
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   */
+  showErrorGeneric(withNotification: boolean = true, button: ISnackbarButton = {}): void {
+    // Redirect
+    this.#showSnackbarMessage('error', 'error.generic', [], button);
+    if (withNotification) this.addNotificationError('error.generic', []);
   }
   // #endregion MESSAGES
 

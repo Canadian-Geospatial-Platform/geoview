@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for sourceOptions-layerConfig. We keep it global...
 import axios from 'axios';
 
 import { Options as SourceOptions } from 'ol/source/Vector';
@@ -8,25 +6,23 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-
 import { TypeJsonObject } from '@/core/types/global-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeBaseSourceVectorInitialConfig,
-  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { logger } from '@/core/utils/logger';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeOutfields } from '@/api/config/types/map-schema-types';
+import { fetchJson } from '@/core/utils/utilities';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -37,66 +33,15 @@ export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 
   listOfLayerEntryConfig: OgcFeatureLayerEntryConfig[];
 }
 
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is OGC_FEATURE. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeOgcFeatureLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as an OgcFeature
- * if the type attribute of the verifyIfGeoViewLayer parameter is OGC_FEATURE. The type ascention
- * applies only to the true block of the if clause that use this function.
- *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is OgcFeature => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.OGC_FEATURE;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a OgcFeatureLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is OGC_FEATURE. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsOgcFeature = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is OgcFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
-};
-
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
-/** ******************************************************************************************************************************
+/**
  * A class to add OGC api feature layer.
  *
  * @exports
  * @class OgcFeature
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class OgcFeature extends AbstractGeoViewVector {
-  // TODO: Check - If this still used?
-  // private variable holding wfs version
-  // private version = '2.0.0';
-
-  /** ***************************************************************************************************************************
-   * Initialize layer
+  /**
+   * Constructs a OgcFeature Layer configuration processor.
    *
    * @param {string} mapId the id of the map
    * @param {TypeOgcFeatureLayerConfig} layerConfig the layer configuration
@@ -105,121 +50,94 @@ export class OgcFeature extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
+  /**
+   * Fetches the metadata for a typical OGCFeature class.
+   * @param {string} url - The url to query the metadata from.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected override fetchServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      const metadataUrl = this.metadataAccessPath;
-      if (metadataUrl) {
-        const queryUrl = metadataUrl.endsWith('/') ? `${metadataUrl}collections?f=json` : `${metadataUrl}/collections?f=json`;
-        axios
-          .get<TypeJsonObject>(queryUrl)
-          .then((response) => {
-            this.metadata = response.data;
-            resolve();
-          })
-          .catch((reason) => {
-            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-            logger.logError('Unable to fetch metadata', this.metadataAccessPath, reason);
-            resolve();
-          });
-      } else {
-        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-      }
-    });
-    return promisedExecution;
+  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+    // The url
+    const queryUrl = url.endsWith('/') ? `${url}collections?f=json` : `${url}/collections?f=json`;
+
+    // Set it
+    return fetchJson(queryUrl);
   }
 
-  /** ***************************************************************************************************************************
-   * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
-   * with a numeric layerId and creates a group entry when a layer is a group.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+  /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-          layerConfig.layerStatus = 'error';
-          return;
-        }
-      }
+  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
+    // Fetch it
+    const responseJson = await OgcFeature.fetchMetadata(this.metadataAccessPath);
 
-      layerConfig.layerStatus = 'processing';
+    // Set it
+    this.metadata = responseJson;
+  }
 
-      // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
-      // you can define them in the configuration section.
-      if (Array.isArray(this.metadata!.collections)) {
-        const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
-        if (!foundCollection) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-          layerConfig.layerStatus = 'error';
-          return;
-        }
-
-        if (foundCollection.description) layerConfig.layerName = foundCollection.description as string;
-
-        layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
-
-        if (!layerConfig.initialSettings.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
-          const latlonExtent = Projection.transformExtentFromProj(
-            foundCollection.extent.spatial.bbox[0] as number[],
-            Projection.getProjectionFromProj(foundCollection.extent.spatial.crs as string)!,
-            Projection.PROJECTION_NAMES.LNGLAT
-          );
-          layerConfig.initialSettings.bounds = latlonExtent;
-        }
-        layerConfig.initialSettings.bounds = validateExtentWhenDefined(layerConfig.initialSettings.bounds);
+  /**
+   * Overrides the validation of a layer entry config.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
+   */
+  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+    // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
+    // you can define them in the configuration section.
+    if (Array.isArray(this.metadata!.collections)) {
+      const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
+      if (!foundCollection) {
+        // Add a layer load error
+        this.addLayerLoadError(layerConfig, `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
         return;
       }
 
-      throw new Error(`Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-    });
+      // eslint-disable-next-line no-param-reassign
+      if (foundCollection.description) layerConfig.layerName = foundCollection.description as string;
+
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+
+      if (!layerConfig.initialSettings.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
+        const latlonExtent = Projection.transformExtentFromProj(
+          foundCollection.extent.spatial.bbox[0] as number[],
+          Projection.getProjectionFromProj(foundCollection.extent.spatial.crs as string)!,
+          Projection.PROJECTION_NAMES.LNGLAT
+        );
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.initialSettings.bounds = latlonExtent;
+      }
+
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings.bounds = validateExtentWhenDefined(layerConfig.initialSettings.bounds);
+      return;
+    }
+
+    throw new GeoViewError(
+      this.mapId,
+      `Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
+    );
   }
 
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
-   * layer's configuration.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected override async processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+  protected override async onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
-    try {
-      const metadataUrl = this.metadataAccessPath;
-      if (metadataUrl) {
-        const queryUrl = metadataUrl.endsWith('/')
-          ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
-          : `${metadataUrl}/collections/${layerConfig.layerId}/queryables?f=json`;
-        const queryResult = await axios.get<TypeJsonObject>(queryUrl);
-        if (queryResult.data.properties) {
-          this.setLayerMetadata(layerConfig.layerPath, queryResult.data.properties);
-          OgcFeature.#processFeatureInfoConfig(queryResult.data.properties, layerConfig);
-        }
+    const metadataUrl = this.metadataAccessPath;
+    if (metadataUrl) {
+      const queryUrl = metadataUrl.endsWith('/')
+        ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
+        : `${metadataUrl}/collections/${layerConfig.layerId}/queryables?f=json`;
+      const queryResult = await axios.get<TypeJsonObject>(queryUrl);
+      if (queryResult.data.properties) {
+        this.setLayerMetadata(layerConfig.layerPath, queryResult.data.properties);
+        OgcFeature.#processFeatureInfoConfig(queryResult.data.properties, layerConfig);
       }
-    } catch (error) {
-      logger.logError(`Error processing layer metadata for layer path "${layerConfig.layerPath}`, error);
-      layerConfig.layerStatus = 'error';
     }
+
+    // Return the layer config
     return layerConfig;
   }
 
@@ -230,13 +148,15 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config?)
   static #processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
 
     // Process undefined outfields or aliasFields
     if (!layerConfig.source.featureInfo.outfields?.length) {
+      // eslint-disable-next-line no-param-reassign
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
 
       Object.keys(fields).forEach((fieldEntryKey) => {
@@ -261,12 +181,15 @@ export class OgcFeature extends AbstractGeoViewVector {
     }
 
     layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
 
     // Set name field to first value
-    if (!layerConfig.source.featureInfo.nameField)
+    if (!layerConfig.source.featureInfo.nameField) {
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -278,17 +201,49 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  // GV Layers Refactoring - Obsolete (in config?, in layers?)
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
+    // eslint-disable-next-line no-param-reassign
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.url = layerConfig.source!.dataAccessPath!;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.url = `${sourceOptions.url}/collections/${layerConfig.layerId}/items?f=json`;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
     return vectorSource;
   }
 }
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayerConfig if the geoviewLayerType attribute of
+ * the verifyIfLayer parameter is OGC_FEATURE. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeOgcFeatureLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
+};
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a OgcFeatureLayerEntryConfig if the geoviewLayerType attribute
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is OGC_FEATURE. The type ascention applies only to the true block of
+ * the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
+ * valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const geoviewEntryIsOgcFeature = (
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
+): verifyIfGeoViewEntry is OgcFeatureLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
+};
