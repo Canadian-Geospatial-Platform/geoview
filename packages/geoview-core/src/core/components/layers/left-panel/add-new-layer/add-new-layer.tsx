@@ -428,8 +428,7 @@ export function AddNewLayer(): JSX.Element {
 
       const geoCoreGeoviewLayerInstance = new GeoCore(mapId, api.maps[mapId].getDisplayLanguage());
       // Add uniqueId to all geoCore layers so they will never be a duplicate layerPath
-      const uniqueId = `${layerURL}:${crypto.randomUUID()}`;
-      const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uniqueId);
+      const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(layerURL);
       if (layers.length === 1) {
         if (layers.length === 1) {
           setLayerName(layers[0].geoviewLayerName!);
