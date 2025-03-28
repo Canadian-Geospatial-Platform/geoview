@@ -1,8 +1,9 @@
 import { expose } from 'comlink';
 
-import { createWorkerLogger } from './helper/logger-worker';
+import { createWorkerLogger } from '@/core/workers/helper/logger-worker';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { fetchWithTimeout } from '../utils/fetch-helper';
+import { fetchWithTimeout } from '@/core/utils/fetch-helper';
+import { AsyncSemaphore } from '@/core/utils/async-semaphore';
 
 /**
  * This worker script is designed to be used with the FetchEsriWorker class.
@@ -66,20 +67,6 @@ async function queryEsriFeatures(params: QueryParams): Promise<TypeJsonObject> {
  * @returns {Promise<{features: TypeJsonObject[], processedCount: number}>} A promise that resolves to:
  *   - features: Array of feature objects from all queries in the batch
  *   - processedCount: Total number of features processed after this batch
- *
- * Note on ESLint warning for localProcessedFeatures:
- *
- * The ESLint rule warns about functions in loops referencing outer scope variables
- * because it can lead to unexpected behavior when the referenced variable changes
- * between the function's creation and execution time.
- *
- * However, in this specific case it's safe because:
- * 1. Each promise execution is independent and tracks its own progress
- * 2. The variable is used for progress tracking only, not critical business logic
- * 3. While the final count might have race conditions, it will be accurate
- *    once all promises complete since Promise.all() ensures all operations finish
- * 4. The main return value (features array) is not affected by this counter
- *
  */
 const processBatch = async (
   batchIndex: number,
@@ -104,21 +91,32 @@ const processBatch = async (
       url: queryUrl,
     });
 
+    // Create a semaphore to update the local processed features variable
+    const asyncSemaphore = new AsyncSemaphore(1);
+
     // Create promise without awaiting - this allows parallel execution
     const promise = fetch(queryUrl)
       .then((response) => response.json())
+      // We keep the esLint but the value is taken care of by async semaphore
       // eslint-disable-next-line no-loop-func
-      .then((json) => {
-        // Create atomic update for the counter
-        const currentCount = localProcessedFeatures + json.features.length;
-        localProcessedFeatures = currentCount;
+      .then(async (json) => {
+        // The current count
+        const currentCount = json.features.length;
+
+        // Use the semaphore to update the shared 'localProcessedFeatures' variable
+        // eslint-disable-next-line no-await-in-loop
+        await asyncSemaphore.withLock(() => {
+          // Update localProcessedFeatures and log progress safely
+          localProcessedFeatures += currentCount;
+          return Promise.resolve();
+        });
 
         logger.logTrace('progress', {
-          processed: currentCount,
+          processed: localProcessedFeatures,
           total: totalCount,
         });
         logger.sendMessage('info', {
-          processed: currentCount,
+          processed: localProcessedFeatures,
           total: totalCount,
         });
 
@@ -156,10 +154,10 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
       total: 0,
     });
 
-    // Get total count with a timeout. This is a simple query and if it takes more then 5 seconds it means
+    // Get total count with a timeout. This is a simple query and if it takes more then 7 seconds it means
     // the server is unresponsive and we should not continue. This will throw an error...
     const countUrl = `${params.url}/query?where=1=1&returnCountOnly=true&f=json`;
-    const { count: totalCount } = await fetchWithTimeout<{ count: number }>(countUrl, {}, 7000);
+    const { count: totalCount } = await fetchWithTimeout<{ count: number }>(countUrl);
     logger.logTrace('Total features count:', totalCount);
 
     // Calculate total number of requests needed
@@ -174,17 +172,19 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
       const startIdx = batchIndex * maxConcurrentRequests;
       const endIdx = Math.min((batchIndex + 1) * maxConcurrentRequests, totalRequests);
 
+      // Batch a certain number of request and await in the loop before batching the next batch. This await in loop is by design
       // eslint-disable-next-line no-await-in-loop
       const batchResult = await processBatch(batchIndex, startIdx, endIdx, baseUrl, resultRecordCount, totalCount, totalProcessedFeatures);
 
+      // GV: Add a delay to avoid server throtle error
+      // GV: We cannot use delay from '@/core/utils/utilities', it breaks the build.
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      });
+
       totalProcessedFeatures = batchResult.processedCount;
       allFeatures = [...allFeatures, ...batchResult.features];
-
-      // // Log the total progress after each batch
-      // logger.sendMessage('info', {
-      //   processed: totalProcessedFeatures,
-      //   total: totalCount,
-      // });
     }
     const response = {
       features: allFeatures,

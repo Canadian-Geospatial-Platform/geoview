@@ -14,7 +14,7 @@ export class RequestTimeoutError extends Error {
  * @template T - The expected type of the JSON response
  * @param {string} url - The URL to fetch from
  * @param {RequestInit} [options={}] - Fetch options to be passed to the fetch call
- * @param {number} [timeoutMs=5000] - Timeout in milliseconds before the request is aborted
+ * @param {number} [timeoutMs=7000] - Timeout in milliseconds before the request is aborted
  * @returns {Promise<T>} A promise that resolves with the parsed JSON response
  * @throws {RequestTimeoutError} When the request exceeds the timeout duration
  * @throws {Error} When the response is not OK (status outside 200-299)
@@ -26,7 +26,7 @@ export class RequestTimeoutError extends Error {
  *     body: JSON.stringify({ id: 123 })
  *   }, 3000);
  */
-export const fetchWithTimeout = async <T>(url: string, options: RequestInit = {}, timeoutMs: number = 5000): Promise<T> => {
+export const fetchWithTimeout = async <T>(url: string, options: RequestInit = {}, timeoutMs: number = 7000): Promise<T> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
