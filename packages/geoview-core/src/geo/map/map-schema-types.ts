@@ -1,5 +1,4 @@
 import { Extent } from 'ol/extent';
-import BaseLayer from 'ol/layer/Base';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { Coordinate } from 'ol/coordinate';
@@ -363,8 +362,6 @@ export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntr
  *  Definition of a single Geoview layer configuration.
  */
 export type TypeGeoviewLayerConfig = {
-  /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-  olLayer?: Promise<BaseLayer>;
   /** The GeoView layer identifier. */
   geoviewLayerId: string;
   /**

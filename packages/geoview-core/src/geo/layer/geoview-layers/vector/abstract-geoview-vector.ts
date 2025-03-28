@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for layerPath-sourceOptions. We keep it global...
 import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
@@ -8,7 +6,6 @@ import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
-import LayerGroup from 'ol/layer/Group';
 import { ProjectionLike } from 'ol/proj';
 import { Geometry, Point } from 'ol/geom';
 import { getUid } from 'ol/util';
@@ -25,15 +22,6 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Projection } from '@/geo/utils/projection';
-
-/* *******************************************************************************************************************************
- * AbstractGeoViewVector types
- */
-
-// Base type used to keep the layer's hierarchical structure. It is similar to ol/layer/Base~BaseLayer.
-export type TypeVectorLayerGroup = LayerGroup;
-export type TypeVectorLayer = VectorSource<Feature>;
-export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
 const EXCLUDED_HEADERS_LNG = ['longitude', 'lon', 'x', 'xcoord', 'longitude|longitude', 'longitude | longitude'];
@@ -66,7 +54,6 @@ export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
  * features are placed and can be considered as a feature group.
  */
 // ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
@@ -84,18 +71,17 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
    */
-  // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
+  // GV Layers Refactoring - Obsolete (in config)
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
     // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
-    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // GV            layerStatus values is correctly sequenced.
-    await super.processOneLayerEntry(layerConfig);
-
     // Instance check
     if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     const vectorSource = this.createVectorSource(layerConfig);
-    const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, vectorSource);
+    const vectorLayer: VectorLayer<VectorSource<Feature<Geometry>>> = this.createVectorLayer(
+      layerConfig as VectorLayerEntryConfig,
+      vectorSource
+    );
     return Promise.resolve(vectorLayer);
   }
 
@@ -117,11 +103,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   ): VectorSource<Feature> {
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     let vectorSource: VectorSource<Feature>;
+    // eslint-disable-next-line no-param-reassign
     if (this.getAttributions().length > 0) sourceOptions.attributions = this.getAttributions();
 
-    // set loading strategy option
+    // Set loading strategy option
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.strategy = (layerConfig.source! as TypeBaseSourceVectorInitialConfig).strategy === 'bbox' ? bbox : all;
 
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.loader = (extent, resolution, projection, success, failure) => {
       let url = vectorSource.getUrl();
       if (typeof url === 'function') url = url(extent, resolution, projection);
@@ -292,7 +281,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {VectorSource<Feature<Geometry>>} The vector layer created.
    */
-  // GV Layers Refactoring - Obsolete (this is bridging between config and layers, okay)
   protected createVectorLayer(
     layerConfig: VectorLayerEntryConfig,
     vectorSource: VectorSource
@@ -369,7 +357,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       logger.logError(errorMsg);
       // TODO: find a more centralized way to trap error and display message
       api.maps[mapId].notifications.showError(errorMsg);
-      layerConfig.layerStatus = 'error';
+
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
       return undefined;
     }
 
@@ -454,11 +444,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     excludedHeaders: string[],
     layerConfig: VectorLayerEntryConfig
   ): void {
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
 
     // Process undefined outfields or aliasFields
     if (!layerConfig.source.featureInfo.outfields?.length) {
+      // eslint-disable-next-line no-param-reassign
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
 
       headers.forEach((header, index) => {
@@ -479,12 +472,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
 
     layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
 
     // Set name field to first value
-    if (!layerConfig.source.featureInfo.nameField)
+    if (!layerConfig.source.featureInfo.nameField) {
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
+    }
   }
 
   /**

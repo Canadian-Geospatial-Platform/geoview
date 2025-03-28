@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for sourceOptions-layerConfig. We keep it global...
 import axios from 'axios';
 
 import { Options as SourceOptions } from 'ol/source/Vector';
@@ -7,8 +5,6 @@ import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
-
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 import { TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -80,22 +76,14 @@ export const geoviewEntryIsOgcFeature = (
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
 /** ******************************************************************************************************************************
  * A class to add OGC api feature layer.
  *
  * @exports
  * @class OgcFeature
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class OgcFeature extends AbstractGeoViewVector {
-  // TODO: Check - If this still used?
-  // private variable holding wfs version
-  // private version = '2.0.0';
-
-  /** ***************************************************************************************************************************
+  /**
    * Initialize layer
    *
    * @param {string} mapId the id of the map
@@ -151,12 +139,15 @@ export class OgcFeature extends AbstractGeoViewVector {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
       }
 
-      layerConfig.layerStatus = 'processing';
+      // Set the layer status to processing
+      layerConfig.setLayerStatusProcessing();
 
       // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
@@ -167,12 +158,16 @@ export class OgcFeature extends AbstractGeoViewVector {
             layer: layerPath,
             loggerMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
 
+        // eslint-disable-next-line no-param-reassign
         if (foundCollection.description) layerConfig.layerName = foundCollection.description as string;
 
+        // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
@@ -181,8 +176,11 @@ export class OgcFeature extends AbstractGeoViewVector {
             Projection.getProjectionFromProj(foundCollection.extent.spatial.crs as string)!,
             Projection.PROJECTION_NAMES.LNGLAT
           );
+          // eslint-disable-next-line no-param-reassign
           layerConfig.initialSettings.bounds = latlonExtent;
         }
+
+        // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.bounds = validateExtentWhenDefined(layerConfig.initialSettings.bounds);
         return;
       }
@@ -218,7 +216,8 @@ export class OgcFeature extends AbstractGeoViewVector {
       }
     } catch (error) {
       logger.logError(`Error processing layer metadata for layer path "${layerConfig.layerPath}`, error);
-      layerConfig.layerStatus = 'error';
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
     }
     return layerConfig;
   }
@@ -232,11 +231,14 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   // GV Layers Refactoring - Obsolete (in config?)
   static #processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
 
     // Process undefined outfields or aliasFields
     if (!layerConfig.source.featureInfo.outfields?.length) {
+      // eslint-disable-next-line no-param-reassign
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
 
       Object.keys(fields).forEach((fieldEntryKey) => {
@@ -261,12 +263,15 @@ export class OgcFeature extends AbstractGeoViewVector {
     }
 
     layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
 
     // Set name field to first value
-    if (!layerConfig.source.featureInfo.nameField)
+    if (!layerConfig.source.featureInfo.nameField) {
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -284,9 +289,13 @@ export class OgcFeature extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
+    // eslint-disable-next-line no-param-reassign
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.url = layerConfig.source!.dataAccessPath!;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.url = `${sourceOptions.url}/collections/${layerConfig.layerId}/items?f=json`;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
     return vectorSource;

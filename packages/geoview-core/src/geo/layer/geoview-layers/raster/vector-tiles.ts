@@ -1,4 +1,3 @@
-import BaseLayer from 'ol/layer/Base';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import VectorTileSource, { Options as SourceOptions } from 'ol/source/VectorTile';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
@@ -83,16 +82,12 @@ export const geoviewEntryIsVectorTiles = (
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
 };
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
 /** *****************************************************************************************************************************
  * a class to add vector-tiles layer
  *
  * @exports
  * @class VectorTiles
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class VectorTiles extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -121,14 +116,15 @@ export class VectorTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
       }
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.layerStatus = 'processing';
+      // Set the layer status to processing
+      layerConfig.setLayerStatusProcessing();
     });
   }
 
@@ -139,12 +135,10 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
-  // GV Layers Refactoring - Obsolete (in config? in layers?)
-  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
-    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // GV            layerStatus values is correctly sequenced.
-    await super.processOneLayerEntry(layerConfig);
-
+  // GV Layers Refactoring - Obsolete (in config)
+  protected override onProcessOneLayerEntry(
+    layerConfig: AbstractBaseLayerEntryConfig
+  ): Promise<VectorTileLayer<VectorTileSource> | undefined> {
     // Instance check
     if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
@@ -161,8 +155,10 @@ export class VectorTiles extends AbstractGeoViewRaster {
         `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`
       );
       logger.logError(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.layerStatus = 'error';
+
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
+
       return Promise.resolve(undefined);
     }
 

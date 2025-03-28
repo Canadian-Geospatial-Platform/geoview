@@ -8,6 +8,8 @@ import {
   TypeAllFeatureInfoResultSet,
   TypeAllFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { logger } from '@/core/utils/logger';
+import { AbortError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -18,6 +20,9 @@ import {
 export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeAllFeatureInfoResultSet */
   declare resultSet: TypeAllFeatureInfoResultSet;
+
+  // Keep all abort controllers per layer path
+  #abortControllers: { [layerPath: string]: AbortController } = {};
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
@@ -91,7 +96,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @returns {Promise<TypeAllFeatureInfoResultSet | void>} A promise which will hold the result of the query
    */
   // TODO: (future development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
-  async queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeAllFeatureInfoResultSet | void> {
+  queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeAllFeatureInfoResultSet | void> {
     // FIXME: Watch out for code reentrancy between queries!
     // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
@@ -121,38 +126,69 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
         // Propagate to the store
         this.#propagateToStore(this.resultSet[layerPath]);
 
+        // If the layer path has an abort controller
+        if (Object.keys(this.#abortControllers).includes(layerPath)) {
+          // Abort it
+          this.#abortControllers[layerPath].abort();
+        }
+
+        // Create an AbortController for the query
+        this.#abortControllers[layerPath] = new AbortController();
+
         // Process query on results data
-        const promiseResult = AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layer, queryType, layerPath);
+        const promiseResult = AbstractLayerSet.queryLayerFeatures(layer, queryType, layerPath, false, this.#abortControllers[layerPath])
+          .then((arrayOfRecords) => {
+            // Use the response to align arrayOfRecords fields with layerConfig fields
+            if (arrayOfRecords.length) {
+              AbstractLayerSet.alignRecordsWithOutFields(
+                this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig,
+                arrayOfRecords
+              );
+            }
 
-        // Wait for promise to resolve
-        const arrayOfRecords = await promiseResult;
+            // Keep the features retrieved
+            this.resultSet[layerPath].features = arrayOfRecords;
 
-        // Use the response to align arrayOfRecords fields with layerConfig fields
-        if (arrayOfRecords?.length)
-          AbstractLayerSet.alignRecordsWithOutFields(this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig, arrayOfRecords);
+            // Query was processed
+            this.resultSet[layerPath].queryStatus = 'processed';
+          })
+          .catch((error) => {
+            // If aborted
+            if (AbortError.isAbortError(error)) {
+              // Log
+              logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
+            } else {
+              // Error
+              this.resultSet[layerPath].features = null;
+              this.resultSet[layerPath].queryStatus = 'error';
 
-        // Keep the features retrieved
-        this.resultSet[layerPath].features = arrayOfRecords;
+              // Log
+              logger.logPromiseFailed('queryLayerFeatures in queryLayers in AllFeatureInfoLayerSet', error);
+            }
+          })
+          .finally(() => {
+            // Enable all buttons since query is done
+            Object.keys(this.resultSet).forEach((path) => {
+              this.resultSet[path].isDisabled = false;
+            });
 
-        // When property features is undefined, we are waiting for the query result.
-        // when Array.isArray(features) is true, the features property contains the query result.
-        // when property features is null, the query ended with an error.
-        this.resultSet[layerPath].queryStatus = arrayOfRecords ? 'processed' : 'error';
-      } else {
-        this.resultSet[layerPath].features = null;
-        this.resultSet[layerPath].queryStatus = 'error';
+            // Propagate to the store
+            this.#propagateToStore(this.resultSet[layerPath]);
+          });
+
+        // Return the promise
+        return promiseResult;
       }
 
-      // Enable all buttons since query is done
-      Object.keys(this.resultSet).forEach((path) => {
-        this.resultSet[path].isDisabled = false;
-      });
+      // Error
+      this.resultSet[layerPath].features = null;
+      this.resultSet[layerPath].queryStatus = 'error';
 
       // Propagate to the store
       this.#propagateToStore(this.resultSet[layerPath]);
     }
 
-    // Return the resultsSet
-    return this.resultSet;
+    // Return empty
+    return Promise.resolve();
   }
 }

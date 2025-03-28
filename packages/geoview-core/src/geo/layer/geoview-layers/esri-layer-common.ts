@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for layerPath-layerConfig. We keep it global..
 import axios from 'axios';
 import { Extent } from 'ol/extent';
 
@@ -51,6 +49,7 @@ export async function commonfetchServiceMetadata(layer: EsriDynamic | EsriFeatur
       const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
       if (metadataString === '{}') layer.setAllLayerStatusTo('error', layer.listOfLayerEntryConfig, 'Unable to read metadata');
       else {
+        // eslint-disable-next-line no-param-reassign
         layer.metadata = JSON.parse(metadataString) as TypeJsonObject;
         if ('error' in layer.metadata) throw new Error(`Error code = ${layer.metadata.error.code}, ${layer.metadata.error.message}`);
         const copyrightText = layer.metadata.copyrightText as string;
@@ -87,10 +86,12 @@ export function commonValidateListOfLayerEntryConfig(
 
     if (layerEntryIsGroupLayer(layerConfig)) {
       // Use the layer name from the metadata if it exists and there is no existing name.
-      if (!layerConfig.layerName)
+      if (!layerConfig.layerName) {
+        // eslint-disable-next-line no-param-reassign
         layerConfig.layerName = layer.metadata!.layers[layerConfig.layerId]?.name
           ? (layer.metadata!.layers[layerConfig.layerId].name as string)
           : '';
+      }
 
       layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
 
@@ -100,13 +101,16 @@ export function commonValidateListOfLayerEntryConfig(
           layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
           loggerMessage: `Empty layer group (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
         });
-        layerConfig.layerStatus = 'error';
+
+        // Set the layer status to error
+        layerConfig.setLayerStatusError();
       }
 
       return;
     }
 
-    layerConfig.layerStatus = 'processing';
+    // Set the layer status to processing
+    layerConfig.setLayerStatusProcessing();
 
     let esriIndex = Number(layerConfig.layerId);
     if (Number.isNaN(esriIndex)) {
@@ -115,7 +119,9 @@ export function commonValidateListOfLayerEntryConfig(
         layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
         loggerMessage: `ESRI layerId must be a number (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
       });
-      layerConfig.layerStatus = 'error';
+
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
       return;
     }
 
@@ -129,7 +135,9 @@ export function commonValidateListOfLayerEntryConfig(
         layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
         loggerMessage: `ESRI layerId not found (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
       });
-      layerConfig.layerStatus = 'error';
+
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
       return;
     }
 
@@ -149,6 +157,7 @@ export function commonValidateListOfLayerEntryConfig(
 
       const groupLayerConfig = new GroupLayerEntryConfig(switchToGroupLayer as GroupLayerEntryConfig);
       // Replace the old version of the layer with the new layer group
+      // eslint-disable-next-line no-param-reassign
       listOfLayerEntryConfig[i] = groupLayerConfig;
 
       // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)...
@@ -185,10 +194,12 @@ export function commonValidateListOfLayerEntryConfig(
     }
 
     if (layer.esriChildHasDetectedAnError(layerConfig, esriIndex)) {
-      layerConfig.layerStatus = 'error';
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
       return;
     }
 
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.layerName) layerConfig.layerName = layer.metadata!.layers[esriIndex].name as string;
   });
 }
@@ -282,24 +293,30 @@ export function commonProcessFeatureInfoConfig(
   const queryable = (layerMetadata.capabilities as string).includes('Query');
   if (layerConfig.source.featureInfo) {
     // if queryable flag is undefined, set it accordingly to what is specified in the metadata
-    if (layerConfig.source.featureInfo.queryable === undefined && layerMetadata.fields?.length)
+    if (layerConfig.source.featureInfo.queryable === undefined && layerMetadata.fields?.length) {
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source.featureInfo.queryable = queryable;
-    // else the queryable flag comes from the user config.
+    }
+    // else The queryable flag comes from the user config.
     else if (layerConfig.source.featureInfo.queryable && layerMetadata.type !== 'Group Layer') {
-      layerConfig.layerStatus = 'error';
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
       throw new Error(
         `The config whose layer path is ${layerPath} cannot set a layer as queryable because it does not have field definitions`
       );
     }
-  } else
+  } else {
+    // eslint-disable-next-line no-param-reassign
     layerConfig.source.featureInfo =
       layerConfig.isMetadataLayerGroup || !layerMetadata.fields?.length ? { queryable: false } : { queryable };
+  }
   MapEventProcessor.setMapLayerQueryable(layer.mapId, layerPath, layerConfig.source.featureInfo.queryable);
 
   // dynamic group layer doesn't have fields definition
   if (layerMetadata.type !== 'Group Layer' && layerMetadata.fields) {
     // Process undefined outfields or aliasFields
     if (!layerConfig.source.featureInfo.outfields?.length) {
+      // eslint-disable-next-line no-param-reassign
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
 
       (layerMetadata.fields as TypeJsonArray).forEach((fieldEntry) => {
@@ -316,12 +333,16 @@ export function commonProcessFeatureInfoConfig(
     }
 
     layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
 
     if (!layerConfig.source.featureInfo.nameField)
-      if (layerMetadata.displayField) layerConfig.source.featureInfo.nameField = layerMetadata.displayField as string;
-      else {
+      if (layerMetadata.displayField) {
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.source.featureInfo.nameField = layerMetadata.displayField as string;
+      } else {
+        // eslint-disable-next-line no-param-reassign
         layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0]?.name;
       }
   }
@@ -341,21 +362,27 @@ export function commonProcessInitialSettings(
 ): void {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
   const layerMetadata = layer.getLayerMetadata(layerConfig.layerPath);
-  if (layerConfig.initialSettings?.states?.visible === undefined)
+  if (layerConfig.initialSettings?.states?.visible === undefined) {
+    // eslint-disable-next-line no-param-reassign
     layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
+  }
 
   // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
   if (layerMetadata.minScale) {
+    // eslint-disable-next-line no-param-reassign
     layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerMetadata.minScale as number);
   }
 
   if (layerMetadata.maxScale) {
+    // eslint-disable-next-line no-param-reassign
     layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerMetadata.maxScale as number);
   }
 
   // Set the max record count for querying
+  // eslint-disable-next-line no-param-reassign
   layerConfig.maxRecordCount = (layerMetadata.maxRecordCount || 0) as number;
 
+  // eslint-disable-next-line no-param-reassign
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
   if (!layerConfig.initialSettings?.bounds && layerMetadata.extent) {
@@ -373,9 +400,11 @@ export function commonProcessInitialSettings(
         layerMetadata.extent.spatialReference,
         Projection.PROJECTION_NAMES.LNGLAT
       );
+      // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings!.bounds = latlonExtent;
     }
   }
+  // eslint-disable-next-line no-param-reassign
   layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
 }
 
@@ -403,7 +432,8 @@ export async function commonProcessLayerMetadata<
     try {
       const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
       if (data?.error) {
-        layerConfig.layerStatus = 'error';
+        // Set the layer status to error
+        layerConfig.setLayerStatusError();
         throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
       }
       layer.setLayerMetadata(layerPath, data);
@@ -429,7 +459,8 @@ export async function commonProcessLayerMetadata<
         layer.type === CONST_LAYER_TYPES.ESRI_IMAGE
       );
     } catch (error) {
-      layerConfig.layerStatus = 'error';
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
       logger.logError('Error in commonProcessLayerMetadata', layerConfig, error);
     }
   }

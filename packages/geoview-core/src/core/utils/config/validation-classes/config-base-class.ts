@@ -11,7 +11,7 @@ import { logger } from '@/core/utils/logger';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 
-/** ******************************************************************************************************************************
+/**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
 export abstract class ConfigBaseClass {
@@ -86,8 +86,23 @@ export abstract class ConfigBaseClass {
    * @param {ConfigBaseClass} layerConfig - The layer configuration we want to instanciate.
    */
   protected constructor(layerConfig: ConfigBaseClass) {
-    // TODO: Refactor - Get rid of this Object.assign pattern here and elsewhere unless explicitely commented why.
+    // TODO: Refactor - Get rid of this Object.assign pattern here and work with the actual objects that
+    // TO.DOCONT: are being sent in the constructor (it's not ConfigBaseClass objects that are in reality being
+    // TO.DOCONT: sent in the constructor here, they are regular 'json' objects..).
+    // TO.DOCONT: Because of this, we have to jump around between class instance and objects here...
+
+    // Keep the layer status
+    const { layerStatus } = layerConfig;
+    // Delete the layer status from the property so that it can go through the Object.assign without failing..
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-param-reassign
+    delete (layerConfig as any).layerStatus;
+
+    // Transfert the properties from the object to the class ( bad practice :( )
     Object.assign(this, layerConfig);
+
+    // Set back the layer status as it was
+    this.setLayerStatus(layerStatus);
+
     // eslint-disable-next-line no-underscore-dangle
     if (this.geoviewLayerConfig) this._layerPath = ConfigBaseClass.#evaluateLayerPath(layerConfig);
     else logger.logError("Couldn't calculate layerPath because geoviewLayerConfig has an invalid value");
@@ -134,11 +149,58 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Sets the layer status to registered.
+   */
+  setLayerStatusRegistered(): void {
+    // Redirect
+    this.setLayerStatus('registered');
+  }
+
+  /**
+   * Sets the layer status to processing.
+   */
+  setLayerStatusProcessing(): void {
+    // Redirect
+    this.setLayerStatus('processing');
+  }
+
+  /**
+   * Sets the layer status to processed.
+   */
+  setLayerStatusProcessed(): void {
+    // Redirect
+    this.setLayerStatus('processed');
+  }
+
+  /**
+   * Sets the layer status to loading.
+   */
+  setLayerStatusLoading(): void {
+    // Redirect
+    this.setLayerStatus('loading');
+  }
+
+  /**
+   * Sets the layer status to loaded.
+   */
+  setLayerStatusLoaded(): void {
+    // Redirect
+    this.setLayerStatus('loaded');
+  }
+
+  /**
+   * Sets the layer status to error.
+   */
+  setLayerStatusError(): void {
+    // Redirect
+    this.setLayerStatus('error');
+  }
+
+  /**
    * Sets the layer status and emits an event when changed.
    * @param {string} newLayerStatus - The new layerId value.
    */
-  // TODO: Refactor - Change this from a 'setter' to an actual set function, arguably too complex for just a 'setter'
-  set layerStatus(newLayerStatus: TypeLayerStatus) {
+  setLayerStatus(newLayerStatus: TypeLayerStatus): void {
     if (
       newLayerStatus === 'loaded' &&
       !layerEntryIsGroupLayer(this) &&
@@ -153,7 +215,7 @@ export abstract class ConfigBaseClass {
       this._layerStatus = newLayerStatus;
       this.#emitLayerStatusChanged({ layerStatus: newLayerStatus });
     }
-    if (newLayerStatus === 'processed' && this.#waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
+    if (newLayerStatus === 'processed' && this.#waitForProcessedBeforeSendingLoaded) this.setLayerStatusLoaded();
 
     // GV For quick debug, uncomment the line
     // if (newLayerStatus === 'error') debugger;
@@ -170,7 +232,7 @@ export abstract class ConfigBaseClass {
     //   // If all children of the parent are loaded, set the parent as loaded
     //   if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', this.parentLayerConfig.listOfLayerEntryConfig)) {
     //     // Set the parent as loaded
-    //     this.parentLayerConfig.layerStatus = 'loaded';
+    //     this.parentLayerConfig.setLayerStatusLoaded();
     //   }
     // }
   }

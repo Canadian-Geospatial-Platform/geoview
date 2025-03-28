@@ -1,5 +1,4 @@
 import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
-import BaseLayer from 'ol/layer/Base';
 import ImageLayer from 'ol/layer/Image';
 
 import { Cast } from '@/core/types/global-types';
@@ -56,16 +55,12 @@ export const geoviewEntryIsImageStatic = (
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
 /** *****************************************************************************************************************************
  * A class to add image static layer.
  *
  * @exports
  * @class ImageStatic
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class ImageStatic extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -109,14 +104,15 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
       }
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.layerStatus = 'processing';
+      // Set the layer status to processing
+      layerConfig.setLayerStatusProcessing();
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -131,8 +127,9 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
         return;
@@ -151,10 +148,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
-  // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
-    await super.processOneLayerEntry(layerConfig);
-
+  // GV Layers Refactoring - Obsolete (in config)
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<Static> | undefined> {
     // Instance check
     if (!(layerConfig instanceof ImageStaticLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 

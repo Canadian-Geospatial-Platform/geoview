@@ -1,6 +1,5 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
-import BaseLayer from 'ol/layer/Base';
 import { Image as ImageLayer } from 'ol/layer';
 
 import { TypeJsonObject } from '@/core/types/global-types';
@@ -62,16 +61,12 @@ export const geoviewEntryIsEsriImage = (verifyIfGeoViewEntry: TypeLayerEntryConf
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_IMAGE;
 };
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
 /** ******************************************************************************************************************************
  * A class to add esri image layer.
  *
  * @exports
  * @class EsriImage
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class EsriImage extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * Initialize layer.
@@ -103,8 +98,9 @@ export class EsriImage extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
         }
       }
     });
@@ -163,12 +159,8 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns { Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
-  // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
-    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // GV            layerStatus values is correctly sequenced.
-    await super.processOneLayerEntry(layerConfig);
-
+  // GV Layers Refactoring - Obsolete (in config)
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest> | undefined> {
     // Instance check
     if (!(layerConfig instanceof EsriImageLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 

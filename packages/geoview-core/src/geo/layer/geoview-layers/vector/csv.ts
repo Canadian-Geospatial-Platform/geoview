@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for sourceOptions-layerConfig. We keep it global...
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -80,15 +78,12 @@ export const geoviewEntryIsCSV = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.CSV;
 };
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
 /** *****************************************************************************************************************************
  * Class used to add CSV layer to the map
  *
  * @exports
  * @class CSV
  */
-// ******************************************************************************************************************************
 export class CSV extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -126,7 +121,9 @@ export class CSV extends AbstractGeoViewVector {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
         }
         return;
       }
@@ -170,8 +167,11 @@ export class CSV extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
+    // eslint-disable-next-line no-param-reassign
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.url = layerConfig.source!.dataAccessPath;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
     return vectorSource;

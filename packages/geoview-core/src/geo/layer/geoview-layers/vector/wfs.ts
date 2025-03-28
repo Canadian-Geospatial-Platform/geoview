@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for sourceOptions-layerConfig. We keep it global...
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WFS as FormatWFS } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -76,16 +74,12 @@ export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
 };
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
 /** *****************************************************************************************************************************
  * A class to add WFS layer.
  *
  * @exports
  * @class WFS
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class WFS extends AbstractGeoViewVector {
   /** private variable holding wfs version. */
   #version = '2.0.0';
@@ -160,12 +154,15 @@ export class WFS extends AbstractGeoViewVector {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
       }
 
-      layerConfig.layerStatus = 'processing';
+      // Set the layer status to processing
+      layerConfig.setLayerStatusProcessing();
 
       // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
@@ -185,10 +182,13 @@ export class WFS extends AbstractGeoViewVector {
             layer: layerPath,
             loggerMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
 
+        // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
@@ -198,8 +198,11 @@ export class WFS extends AbstractGeoViewVector {
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
 
+          // eslint-disable-next-line no-param-reassign
           layerConfig.initialSettings!.bounds = bounds;
         }
+
+        // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings!.bounds = validateExtentWhenDefined(layerConfig.initialSettings!.bounds);
       }
     });
@@ -275,7 +278,8 @@ export class WFS extends AbstractGeoViewVector {
       }
     } catch (error) {
       logger.logError(`Error processing layer metadata for layer path "${layerConfig.layerPath}`, error);
-      layerConfig.layerStatus = 'error';
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
     }
     return layerConfig;
   }
@@ -289,11 +293,14 @@ export class WFS extends AbstractGeoViewVector {
    */
   // GV Layers Refactoring - Obsolete (in config)
   static #processFeatureInfoConfig(fields: TypeJsonArray, layerConfig: VectorLayerEntryConfig): void {
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
 
     // Process undefined outfields or aliasFields
     if (!layerConfig.source.featureInfo.outfields?.length) {
+      // eslint-disable-next-line no-param-reassign
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
 
       fields.forEach((fieldEntry) => {
@@ -312,12 +319,15 @@ export class WFS extends AbstractGeoViewVector {
     }
 
     layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
 
     // INFO: WFS as geometry for first field, set name field to second value
-    if (!layerConfig.source.featureInfo.nameField)
+    if (!layerConfig.source.featureInfo.nameField) {
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[1].name;
+    }
   }
 
   // Patch for field type only use for WFS
@@ -347,8 +357,10 @@ export class WFS extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
+    // eslint-disable-next-line no-param-reassign
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
 
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.url = (extent): string => {
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       let sourceUrl = layerConfig.source!.dataAccessPath!;
@@ -363,6 +375,7 @@ export class WFS extends AbstractGeoViewVector {
       return sourceUrl;
     };
 
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatWFS({
       version: this.#version,
     });

@@ -1,8 +1,5 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for layerPath-layerConfig. We keep it global...
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
-import BaseLayer from 'ol/layer/Base';
 import { Image as ImageLayer } from 'ol/layer';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -84,16 +81,12 @@ export const geoviewEntryIsEsriDynamic = (
 // GV: ^^^^^
 // GV: |||||
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
 /** ******************************************************************************************************************************
  * A class to add esri dynamic layer.
  *
  * @exports
  * @class EsriDynamic
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class EsriDynamic extends AbstractGeoViewRaster {
   // The default hit tolerance the query should be using
   static override DEFAULT_HIT_TOLERANCE: number = 7;
@@ -107,6 +100,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {TypeEsriDynamicLayerConfig} layerConfig The layer configuration.
    */
   constructor(mapId: string, layerConfig: TypeEsriDynamicLayerConfig) {
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
     super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig, mapId);
   }
@@ -203,12 +197,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
-  // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
-    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // GV            layerStatus values is correctly sequenced.
-    await super.processOneLayerEntry(layerConfig);
-
+  // GV Layers Refactoring - Obsolete (in config)
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest> | undefined> {
     // Instance check
     if (!(layerConfig instanceof EsriDynamicLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 

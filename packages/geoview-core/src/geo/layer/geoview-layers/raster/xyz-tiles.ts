@@ -1,4 +1,3 @@
-import BaseLayer from 'ol/layer/Base';
 import TileLayer from 'ol/layer/Tile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
@@ -74,16 +73,12 @@ export const geoviewEntryIsXYZTiles = (verifyIfGeoViewEntry: TypeLayerEntryConfi
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
 /** *****************************************************************************************************************************
  * a class to add xyz-tiles layer
  *
  * @exports
  * @class XYZTiles
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class XYZTiles extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -112,14 +107,15 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
       }
 
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.layerStatus = 'processing';
+      // Set the layer status to processing
+      layerConfig.setLayerStatusProcessing();
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -135,8 +131,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
         return;
@@ -151,8 +148,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
         return;
@@ -171,12 +169,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
-  // GV Layers Refactoring - Obsolete (in config? in layers?)
-  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
-    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // GV            layerStatus values is correctly sequenced.
-    await super.processOneLayerEntry(layerConfig);
-
+  // GV Layers Refactoring - Obsolete (in config)
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TileLayer<XYZ> | undefined> {
     // Instance check
     if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 

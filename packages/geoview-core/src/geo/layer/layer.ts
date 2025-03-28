@@ -5,6 +5,7 @@ import { ImageArcGISRest, ImageWMS, Source, VectorTile, XYZ } from 'ol/source';
 import Static from 'ol/source/ImageStatic';
 import VectorSource from 'ol/source/Vector';
 import LayerGroup from 'ol/layer/Group';
+import { GeoJSONObject } from 'ol/format/GeoJSON';
 
 import { GeoCore } from '@/geo/layer/other/geocore';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
@@ -68,6 +69,7 @@ import { api } from '@/app';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
+import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -928,8 +930,8 @@ export class LayerApi {
       layerSet.registerLayerConfig(layerConfig);
     });
 
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.layerStatus = 'registered';
+    // Set the layer status to registered
+    layerConfig.setLayerStatusRegistered();
   }
 
   /**
@@ -1736,6 +1738,44 @@ export class LayerApi {
   }
 
   /**
+   * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
+   *
+   * @param {string} layerPath - The path of the layer.
+   * @param {GeoJSONObject | string} geojson - The new geoJSON.
+   */
+  setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void {
+    // Get the map id
+    const mapId = this.getMapId();
+
+    // Get the GeoviewLayer
+    const gvLayer = this.getGeoviewLayer(layerPath);
+
+    // If of right type
+    if (gvLayer instanceof GVGeoJSON) {
+      // Override the GeoJson source
+      gvLayer.setGeojsonSource(geojson);
+
+      // Update the bounds in the store
+      const bounds = gvLayer.getBounds();
+      if (bounds) {
+        LegendEventProcessor.setLayerBounds(mapId, layerPath, bounds);
+      }
+
+      // Reset the feature info result set
+      FeatureInfoEventProcessor.resetResultSet(mapId, layerPath);
+
+      // Update feature info
+      DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerPath).catch((error) => {
+        // Log
+        logger.logPromiseFailed(`Update all feature info in setGeojsonSource failed for layer ${layerPath}`, error);
+      });
+    } else {
+      // Invalid layer
+      throw new Error(`The layer ${layerPath} isn't of type Geojson.`);
+    }
+  }
+
+  /**
    * Redefine feature info fields.
    *
    * @param {string} layerPath - The path of the layer.
@@ -1848,6 +1888,8 @@ export class LayerApi {
         (layerConfig as VectorLayerEntryConfig).layerFilter as string
       );
   }
+
+  // #region EVENTS
 
   /**
    * Emits an event to all handlers.
@@ -2014,6 +2056,8 @@ export class LayerApi {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerItemVisibilityToggledHandlers, callback);
   }
+
+  // #endregion EVENTS
 }
 
 /**

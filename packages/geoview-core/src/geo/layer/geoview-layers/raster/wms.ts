@@ -1,7 +1,4 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for layer-layerConfig. We keep it global...
 import ImageLayer from 'ol/layer/Image';
-import BaseLayer from 'ol/layer/Base';
 import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
@@ -65,16 +62,12 @@ export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
 };
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
 /** *****************************************************************************************************************************
  * A class to add wms layer.
  *
  * @exports
  * @class WMS
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class WMS extends AbstractGeoViewRaster {
   WMSStyles: string[];
 
@@ -151,13 +144,17 @@ export class WMS extends AbstractGeoViewRaster {
         });
         try {
           const arrayOfMetadata = await Promise.all(promisedArrayOfMetadata);
-          for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++)
-            this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
+          for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++) {
+            // Set the layer status to error
+            this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.setLayerStatusError();
+          }
           this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
           if (this.metadata) {
             for (; i < arrayOfMetadata.length; i++) {
-              if (!arrayOfMetadata[i]?.Capability) this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
-              else if (!this.#getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
+              if (!arrayOfMetadata[i]?.Capability) {
+                // Set the layer status to error
+                this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.setLayerStatusError();
+              } else if (!this.#getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
                 const metadataLayerPathToAdd = this.#getMetadataLayerPath(
                   layerConfigsToQuery[i].layerId!,
                   arrayOfMetadata[i]!.Capability.Layer
@@ -252,6 +249,7 @@ export class WMS extends AbstractGeoViewRaster {
           listOfLayerEntryConfig.forEach((layerConfig) => {
             if (layerEntryIsGroupLayer(layerConfig)) setDataAccessPath(layerConfig.listOfLayerEntryConfig);
             else {
+              // eslint-disable-next-line no-param-reassign
               layerConfig.source!.dataAccessPath = dataAccessPath;
             }
           });
@@ -367,21 +365,34 @@ export class WMS extends AbstractGeoViewRaster {
   #processMetadataInheritance(parentLayer?: TypeJsonObject, layer: TypeJsonObject | undefined = this.metadata?.Capability?.Layer): void {
     if (parentLayer && layer) {
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
+      // eslint-disable-next-line no-param-reassign
       if (layer.EX_GeographicBoundingBox === undefined) layer.EX_GeographicBoundingBox = parentLayer.EX_GeographicBoundingBox;
+      // eslint-disable-next-line no-param-reassign
       if (layer.queryable === undefined) layer.queryable = parentLayer.queryable;
+      // eslint-disable-next-line no-param-reassign
       if (layer.cascaded === undefined) layer.cascaded = parentLayer.cascaded;
+      // eslint-disable-next-line no-param-reassign
       if (layer.opaque === undefined) layer.opaque = parentLayer.opaque;
+      // eslint-disable-next-line no-param-reassign
       if (layer.noSubsets === undefined) layer.noSubsets = parentLayer.noSubsets;
+      // eslint-disable-next-line no-param-reassign
       if (layer.fixedWidth === undefined) layer.fixedWidth = parentLayer.fixedWidth;
+      // eslint-disable-next-line no-param-reassign
       if (layer.fixedHeight === undefined) layer.fixedHeight = parentLayer.fixedHeight;
+      // eslint-disable-next-line no-param-reassign
       if (layer.MinScaleDenominator === undefined) layer.MinScaleDenominator = parentLayer.MinScaleDenominator;
+      // eslint-disable-next-line no-param-reassign
       if (layer.MaxScaleDenominator === undefined) layer.MaxScaleDenominator = parentLayer.MaxScaleDenominator;
+      // eslint-disable-next-line no-param-reassign
       if (layer.BoundingBox === undefined) layer.BoundingBox = parentLayer.BoundingBox;
+      // eslint-disable-next-line no-param-reassign
       if (layer.Dimension === undefined) layer.Dimension = parentLayer.Dimension;
+      // eslint-disable-next-line no-param-reassign
       if (layer.Attribution === undefined) layer.Attribution = parentLayer.Attribution;
       // Table 7 — Inheritance of Layer properties specified in the standard with 'add' behaviour.
       // AuthorityURL inheritance is not implemented in the following code.
       if (parentLayer.Style) {
+        // eslint-disable-next-line no-param-reassign
         if (!layer.Style as TypeJsonArray) (layer.Style as TypeJsonArray) = [];
         (parentLayer.Style as TypeJsonArray).forEach((parentStyle) => {
           const styleFound = (layer.Style as TypeJsonArray).find((styleEntry) => styleEntry.Name === parentStyle.Name);
@@ -389,6 +400,7 @@ export class WMS extends AbstractGeoViewRaster {
         });
       }
       if (parentLayer.CRS) {
+        // eslint-disable-next-line no-param-reassign
         if (!layer.CRS as TypeJsonArray) (layer.CRS as TypeJsonArray) = [];
         (parentLayer.CRS as TypeJsonArray).forEach((parentCRS) => {
           const crsFound = (layer.CRS as TypeJsonArray).find((crsEntry) => crsEntry.Name === parentCRS);
@@ -415,13 +427,16 @@ export class WMS extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
         }
         return;
       }
 
       if ((layerConfig as AbstractBaseLayerEntryConfig).layerStatus !== 'error') {
-        layerConfig.layerStatus = 'processing';
+        // Set the layer status to processing
+        layerConfig.setLayerStatusProcessing();
 
         const layerFound = this.#getLayerMetadataEntry(layerConfig.layerId!);
         if (!layerFound) {
@@ -429,7 +444,9 @@ export class WMS extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
 
@@ -438,6 +455,7 @@ export class WMS extends AbstractGeoViewRaster {
           return;
         }
 
+        // eslint-disable-next-line no-param-reassign
         if (!layerConfig.layerName) layerConfig.layerName = layerFound.Title as string;
       }
     });
@@ -469,6 +487,7 @@ export class WMS extends AbstractGeoViewRaster {
     // TO.DOCONT: the behavior the same as before..
 
     // Assign the layer name right away
+    // eslint-disable-next-line no-param-reassign
     layerConfig.layerName = layer.Title as string;
 
     // Loop on the sub layers
@@ -495,8 +514,11 @@ export class WMS extends AbstractGeoViewRaster {
     // TO.DOCONT: in order to reproduce the old behavior now that the 'Private element' bug is fixed..
     // TO.DOCONT: Leaving the code there, uncommented, so that if/when we remove the throw of the
     // TO.DOCONT: 'Processing cancelled' this gets executed as would be expected
+    // eslint-disable-next-line no-param-reassign
     layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
+    // eslint-disable-next-line no-param-reassign
     layerConfig.isMetadataLayerGroup = true;
+    // eslint-disable-next-line no-param-reassign
     layerConfig.listOfLayerEntryConfig = newListOfLayerEntryConfig;
     this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
   }
@@ -535,12 +557,8 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
-  // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
-    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // GV            layerStatus values is correctly sequenced.
-    await super.processOneLayerEntry(layerConfig);
-
+  // GV Layers Refactoring - Obsolete (in config)
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageWMS> | undefined> {
     // Instance check
     if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
@@ -632,7 +650,10 @@ export class WMS extends AbstractGeoViewRaster {
           attributions.push(layerCapabilities.Attribution.Title as string);
           this.setAttributions(attributions);
         }
+
+        // eslint-disable-next-line no-param-reassign
         if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
+
         MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
 
         // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
@@ -640,16 +661,21 @@ export class WMS extends AbstractGeoViewRaster {
         // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
         // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
         if (layerCapabilities.MinScaleDenominator) {
+          // eslint-disable-next-line no-param-reassign
           layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerCapabilities.MinScaleDenominator as number);
         }
         if (layerCapabilities.MaxScaleDenominator) {
+          // eslint-disable-next-line no-param-reassign
           layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerCapabilities.MaxScaleDenominator as number);
         }
 
+        // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
-        if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox)
+        if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
+          // eslint-disable-next-line no-param-reassign
           layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
+        }
 
         // Set time dimension
         if (layerCapabilities.Dimension) {

@@ -3,23 +3,15 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
-import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import {
-  TypeLayerStyleConfig,
-  TypeLayerStyleConfigInfo,
-  codedValueType,
-  rangeDomainType,
-  TypeLayerStyleSettings,
-} from '@/geo/map/map-schema-types';
-import { esriGetFieldType, esriGetFieldDomain } from '@/geo/layer/gv-layers/utils';
+import { TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleSettings } from '@/geo/map/map-schema-types';
+import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { validateExtent } from '@/geo/utils/utilities';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 
 /**
  * Manages an Esri Image layer.
@@ -78,27 +70,6 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-   * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field.
-   */
-  protected override getFieldType(fieldName: string): TypeOutfieldsType {
-    // TODO: Refactor - Layers refactoring. Is this function really valid for an esri-image? Remove?
-    // Redirect
-    return esriGetFieldType(this.getLayerConfig(), fieldName);
-  }
-
-  /**
-   * Overrides the return of the domain of the specified field.
-   * @param {string} fieldName - The field name for which we want to get the domain.
-   * @returns {codedValueType | rangeDomainType | null} The domain of the field.
-   */
-  protected override getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
-    // Redirect
-    return esriGetFieldDomain(this.getLayerConfig(), fieldName);
-  }
-
-  /**
    * Overrides the fetching of the legend for an Esri image layer.
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
@@ -150,20 +121,26 @@ export class GVEsriImage extends AbstractGVRaster {
         Point: styleSettings,
       };
 
-      // TODO: Refactor - Find a better place to set the style than in a getter or rename this function like another TODO suggests
-      // Set the style
-      this.setStyle(styleConfig);
-
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
         styleConfig,
         legend: await getLegendStyles(this.getStyle()),
       };
+
       return legend;
     } catch (error) {
       logger.logError(`Get Legend for ${layerConfig.layerPath} error`, error);
       return null;
     }
+  }
+
+  /**
+   * Overrides when the style should be set by the fetched legend.
+   * @param legend
+   */
+  override onSetStyleAccordingToLegend(legend: TypeLegend): void {
+    // Set the style
+    this.setStyle(legend.styleConfig!);
   }
 
   /**
@@ -185,7 +162,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(filter: string, combineLegendFilter?: boolean): void {
+  applyViewFilter(filter: string, combineLegendFilter: boolean = true): void {
     // Log
     logger.logTraceCore('GV-ESRI-IMAGE - applyViewFilter', this.getLayerPath());
 
@@ -195,29 +172,19 @@ export class GVEsriImage extends AbstractGVRaster {
     // Get source
     const source = olLayer.getSource();
     if (source) {
-      let filterValueToUse = filter;
+      // Update the layer config on the fly (maybe not ideal to do this?)
       layerConfig.legendFilterIsOff = !combineLegendFilter;
       if (combineLegendFilter) layerConfig.layerFilter = filter;
 
-      if (filterValueToUse) {
-        filterValueToUse = filterValueToUse.replaceAll(/\s{2,}/g, ' ').trim();
+      if (filter) {
+        let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
         const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
         const dimension = queryElements[0].trim();
         filterValueToUse = queryElements[1].trim();
 
-        // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
-        const searchDateEntry = [
-          ...`${filterValueToUse} `.matchAll(/(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi),
-        ];
-        searchDateEntry.reverse();
-        searchDateEntry.forEach((dateFound) => {
-          // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
-          const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-          const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.getExternalFragmentsOrder(), reverseTimeZone);
-          filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
-            dateFound.index! + dateFound[0].length + 2
-          )}`;
-        });
+        // Parse the filter value to use
+        filterValueToUse = parseDateTimeValuesEsriImageOrWMS(filterValueToUse, this.getExternalFragmentsOrder());
+
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
         olLayer.changed();
 

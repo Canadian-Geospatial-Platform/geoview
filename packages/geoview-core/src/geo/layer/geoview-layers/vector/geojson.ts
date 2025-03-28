@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for sourceOptions-layerConfig. We keep it global...
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -73,16 +71,12 @@ export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
 };
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
 /** *****************************************************************************************************************************
  * Class used to add geojson layer to the map
  *
  * @exports
  * @class GeoJSON
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class GeoJSON extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -143,12 +137,15 @@ export class GeoJSON extends AbstractGeoViewVector {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
         }
         return;
       }
 
-      layerConfig.layerStatus = 'processing';
+      // Set the layer status to processing
+      layerConfig.setLayerStatusProcessing();
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -163,7 +160,9 @@ export class GeoJSON extends AbstractGeoViewVector {
             layer: layerPath,
             loggerMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
           return;
         }
         return;
@@ -215,14 +214,20 @@ export class GeoJSON extends AbstractGeoViewVector {
         Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
       ) as VectorLayerEntryConfig;
       if (layerMetadataFound) {
+        // eslint-disable-next-line no-param-reassign
         layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
+        // eslint-disable-next-line no-param-reassign
         layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
+        // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
+        // eslint-disable-next-line no-param-reassign
         layerConfig.layerStyle = defaultsDeep(layerConfig.layerStyle, layerMetadataFound.layerStyle);
         if (layerMetadataFound.maxScale) {
+          // eslint-disable-next-line no-param-reassign
           layerConfig.maxScale = Math.min(layerConfig.maxScale || Infinity, layerMetadataFound.maxScale);
         }
         if (layerMetadataFound.minScale) {
+          // eslint-disable-next-line no-param-reassign
           layerConfig.minScale = Math.max(layerConfig.minScale || 0, layerMetadataFound.minScale);
         }
         // When the dataAccessPath stored in the layerConfig.source object is equal to the root of the metadataAccessPath with a
@@ -235,11 +240,13 @@ export class GeoJSON extends AbstractGeoViewVector {
             metadataAccessPathRoot.split('/').length > 1 ? metadataAccessPathRoot.split('/').slice(0, -1).join('/') : './';
           const metadataAccessPathRootPlusLayerId = `${metadataAccessPathRoot}/${layerConfig.layerId}`;
           if (metadataAccessPathRootPlusLayerId === layerConfig.source?.dataAccessPath && layerMetadataFound.source?.dataAccessPath) {
+            // eslint-disable-next-line no-param-reassign
             layerConfig.source!.dataAccessPath = layerMetadataFound.source!.dataAccessPath;
           }
         }
       }
 
+      // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
     }
 
@@ -264,8 +271,11 @@ export class GeoJSON extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
+    // eslint-disable-next-line no-param-reassign
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.url = layerConfig.source!.dataAccessPath!;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
     return vectorSource;
