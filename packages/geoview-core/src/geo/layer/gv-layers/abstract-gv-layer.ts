@@ -31,8 +31,9 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
-import { getLocalizedMessage } from '@/core/utils/utilities';
 import { SnackbarType } from '@/core/utils/notifications';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -104,10 +105,19 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Gets the bounds of the layer.
+   * Gets the bounds for the layer.
+   * @returns {Extent | undefined} The layer bounding box.
+   */
+  getBounds(): Extent | undefined {
+    // Redirect to overridable method
+    return this.onGetBounds();
+  }
+
+  /**
+   * Must override method to return the bounds of a layer.
    * @returns {Extent} The layer bounding box.
    */
-  abstract getBounds(): Extent | undefined;
+  abstract onGetBounds(): Extent | undefined;
 
   /**
    * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
@@ -235,9 +245,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Overridable method called when the layer has been loaded correctly
    */
   protected onLoaded(): void {
+    // Get the layer config
     const layerConfig = this.getLayerConfig();
+
     // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
-    layerConfig.layerStatus = 'loaded';
+    layerConfig.setLayerStatusLoaded();
 
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
     this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
@@ -265,7 +277,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    *
    * @fires LayerMessageEvent
    */
-  protected emitMessage(messageKey: string, messageParams: string[], messageType = 'info' as SnackbarType, notification = false): void {
+  protected emitMessage(
+    messageKey: string,
+    messageParams: string[],
+    messageType: SnackbarType = 'info',
+    notification: boolean = false
+  ): void {
     this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
   }
 
@@ -274,7 +291,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   protected onError(): void {
     // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
-    this.getLayerConfig().layerStatus = 'error';
+    this.getLayerConfig().setLayerStatusError();
   }
 
   /**
@@ -282,156 +299,184 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
    */
   protected onImageLoadError(): void {
+    // Log
     logger.logError(
       `Error loading source image for layer path: ${this.getLayerPath()} at zoom level: ${this.getMapViewer().getView().getZoom()}`
     );
-    // Add notification with the current zoom level
-    this.getMapViewer().notifications.showError(
-      getLocalizedMessage('layers.errorImageLoad', this.getMapViewer().getDisplayLanguage()),
-      [this.getLayerName()!, this.getMapViewer().getView().getZoom()!],
-      true
-    );
+
+    // Emit about the error
+    this.emitMessage('layers.errorImageLoad', [this.getLayerName()!, this.getMapViewer().getView().getZoom()!.toString()], 'error', true);
   }
 
   /**
    * Returns feature information for the layer specified.
    * @param {QueryType} queryType - The type of query to perform.
-   * @param {TypeLocation} location - An optionsl pixel, coordinate or polygon that will be used by the query.
-   * @param {boolean} queryGeometry - The query geometry boolean
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
+   * @param {TypeLocation} location - An pixel, coordinate or polygon that will be used by the query.
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} The feature info table.
    */
   async getFeatureInfo(
     queryType: QueryType,
-    location: TypeLocation = null,
-    queryGeometry: boolean = true
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
-    try {
-      // Get the layer config
-      const layerConfig = this.getLayerConfig();
+    location: TypeLocation,
+    queryGeometry: boolean = true,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
 
-      // If the layer is not queryable
-      // GV: This should always be set by now. There were instances where that was not happeneing, recheck once config API is being used
-      if (layerConfig.source?.featureInfo?.queryable === false) {
-        logger.logWarning(`Layer at path ${layerConfig.layerPath} is not queryable`);
-        return null;
-      }
-
-      // Log
-      logger.logTraceCore('ABSTRACT-GV-LAYERS - getFeatureInfo', queryType);
-      const logMarkerKey = `${queryType}`;
-      logger.logMarkerStart(logMarkerKey);
-
-      let promiseGetFeature: Promise<TypeFeatureInfoEntry[] | undefined | null>;
-      switch (queryType) {
-        case 'all':
-          promiseGetFeature = this.getAllFeatureInfo();
-          break;
-        case 'at_pixel':
-          promiseGetFeature = this.getFeatureInfoAtPixel(location as Pixel, queryGeometry);
-          break;
-        case 'at_coordinate':
-          promiseGetFeature = this.getFeatureInfoAtCoordinate(location as Coordinate, queryGeometry);
-          break;
-        case 'at_long_lat':
-          promiseGetFeature = this.getFeatureInfoAtLongLat(location as Coordinate, queryGeometry);
-          break;
-        case 'using_a_bounding_box':
-          promiseGetFeature = this.getFeatureInfoUsingBBox(location as Coordinate[], queryGeometry);
-          break;
-        case 'using_a_polygon':
-          promiseGetFeature = this.getFeatureInfoUsingPolygon(location as Coordinate[], queryGeometry);
-          break;
-        default:
-          // Default is empty array
-          promiseGetFeature = Promise.resolve([]);
-
-          // Log
-          logger.logError(`Queries using ${queryType} are invalid.`);
-      }
-
-      // Wait for results
-      const arrayOfFeatureInfoEntries = await promiseGetFeature;
-
-      // Log
-      logger.logMarkerCheck(logMarkerKey, 'to getFeatureInfo', arrayOfFeatureInfoEntries);
-
-      // Return the result
-      return arrayOfFeatureInfoEntries;
-    } catch (error) {
-      // Log
-      logger.logError(error);
-      return null;
+    // If the layer is not queryable
+    if (layerConfig.source?.featureInfo?.queryable === false) {
+      // Throw error
+      throw new GeoViewError(this.getMapId(), `Layer at path ${layerConfig.layerPath} is not queryable`);
     }
+
+    // Log
+    logger.logTraceCore('ABSTRACT-GV-LAYERS - getFeatureInfo', queryType);
+    const logMarkerKey = `${queryType}`;
+    logger.logMarkerStart(logMarkerKey);
+
+    let promiseGetFeature: Promise<TypeFeatureInfoEntry[]>;
+    switch (queryType) {
+      case 'all':
+        promiseGetFeature = this.getAllFeatureInfo(abortController);
+        break;
+      case 'at_pixel':
+        promiseGetFeature = this.getFeatureInfoAtPixel(location as Pixel, queryGeometry, abortController);
+        break;
+      case 'at_coordinate':
+        promiseGetFeature = this.getFeatureInfoAtCoordinate(location as Coordinate, queryGeometry, abortController);
+        break;
+      case 'at_long_lat':
+        promiseGetFeature = this.getFeatureInfoAtLongLat(location as Coordinate, queryGeometry, abortController);
+        break;
+      case 'using_a_bounding_box':
+        promiseGetFeature = this.getFeatureInfoUsingBBox(location as Coordinate[], queryGeometry, abortController);
+        break;
+      case 'using_a_polygon':
+        promiseGetFeature = this.getFeatureInfoUsingPolygon(location as Coordinate[], queryGeometry, abortController);
+        break;
+      default:
+        // Not implemented
+        throw new NotImplementedError();
+    }
+
+    // Wait for results
+    const arrayOfFeatureInfoEntries = await promiseGetFeature;
+
+    // Log
+    logger.logMarkerCheck(logMarkerKey, `to getFeatureInfo on ${this.getLayerPath()}`, arrayOfFeatureInfoEntries);
+
+    // Return the result
+    return arrayOfFeatureInfoEntries;
   }
 
   /**
    * Overridable function to get all feature information for all the features stored in the layer.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected getAllFeatureInfo(): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getAllFeatureInfo(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception getAllFeatureInfo on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getAllFeatureInfo not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
    * Overridable function to return of feature information at a given pixel location.
-   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - The query geometry boolean.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {Pixel} location - The pixel coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtPixel(
+    location: Pixel,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception for getFeatureInfoAtPixel on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getFeatureInfoAtPixel not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
    * Overridable function to return of feature information at a given coordinate.
    * @param {Coordinate} location - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - The query geometry boolean.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtCoordinate(
+    location: Coordinate,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception for getFeatureInfoAtCoordinate on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getFeatureInfoAtCoordinate not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
    * Overridable function to return of feature information at the provided long lat coordinate.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - The query geometry boolean
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtLongLat(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoAtLongLat(
+    lnglat: Coordinate,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception for getFeatureInfoAtLongLat on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getFeatureInfoAtLongLat not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
    * Overridable function to return of feature information at the provided bounding box.
    * @param {Coordinate} location - The bounding box that will be used by the query.
-   * @param {boolean} queryGeometry - The query geometry boolean.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoUsingBBox(
+    location: Coordinate[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception for getFeatureInfoUsingBBox on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getFeatureInfoUsingBBox not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
    * Overridable function to return of feature information at the provided polygon.
    * @param {Coordinate} location - The polygon that will be used by the query.
-   * @param {boolean} queryGeometry - The query geometry boolean.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected getFeatureInfoUsingPolygon(
+    location: Coordinate[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception for getFeatureInfoUsingPolygon on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getFeatureInfoUsingPolygon not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
@@ -475,6 +520,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       .then((legend) => {
         // If legend was received
         if (legend) {
+          // Save the style according to the legend
+          this.onSetStyleAccordingToLegend(legend);
           // Check for possible number of icons and set icon cache size
           this.updateIconImageCache(legend);
           // Emit legend information once retrieved
@@ -535,6 +582,16 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Overridable function set the style according to the fetched legend information
+   *
+   * @param {TypeLegend} legend - The fetched legend information
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
+  onSetStyleAccordingToLegend(legend: TypeLegend): void {
+    // By default, nothing to do here, check for overrides in children classes
+  }
+
+  /**
    * Gets and formats the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
    * since the base date. Vector feature dates must be in ISO format.
    * @param {Feature} features - The features that hold the field values.
@@ -566,12 +623,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Converts the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
    * @param {Feature[]} features - The array of features to convert.
    * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The layer configuration.
-   * @returns {TypeFeatureInfoEntry[] | undefined | null} The Array of feature information.
+   * @returns {TypeFeatureInfoEntry[]} The Array of feature information.
    */
   protected formatFeatureInfoResult(
     features: Feature[],
     layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig
-  ): TypeFeatureInfoEntry[] | undefined | null {
+  ): TypeFeatureInfoEntry[] {
     try {
       if (!features.length) return [];
 
@@ -690,12 +747,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Gets the layerFilter that is associated to the layer.
    * @returns {string | undefined} The filter associated to the layer or undefined.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getLayerFilter(): string | undefined {
-    const layerConfig = this.getLayerConfig();
-    // TODO: Refactor to put the 'layerFilter' at the right place. Meanwhile, using `any` here
+    // Redirect
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (layerConfig as any)?.layerFilter;
+    return (this.getLayerConfig() as any)?.layerFilter;
   }
 
   /**
@@ -706,8 +761,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   protected static initOptionsWithInitialSettings(layerOptions: Options, layerConfig: AbstractBaseLayerEntryConfig): void {
     // GV Note: The visible flag (and maybe others?) must be set in the 'onLoaded' function below, because the layer needs to
     // GV attempt to be visible on the map in order to trigger its source loaded event.
-    // TODO: refactor - investigate the initOptions. The below should happen in the config api before gv-layers
-    // Set the options as read from the initialSettings
+
+    // Set the layer options as read from the initialSettings
+    // GV We disable the warnings, because this function purpose is to actually initialize the given parameter
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.className !== undefined) layerOptions.className = layerConfig.initialSettings.className;
     // eslint-disable-next-line no-param-reassign
@@ -715,6 +771,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
   }
+
+  // #region EVENTS
 
   /**
    * Emits an event to all handlers.
@@ -882,6 +940,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerMessageHandlers, callback);
   }
+
+  // #endregion EVENTS
 }
 
 /**

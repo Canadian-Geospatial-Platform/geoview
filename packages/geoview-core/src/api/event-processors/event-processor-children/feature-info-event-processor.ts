@@ -164,7 +164,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
    *
    * @param {string} mapId - The map identifier of the modified result set.
-   * @param {string} layerPath - The layer path that has changed.
    * @param {EventType} eventType - The event type that triggered the layer set update.
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
    * @returns {Promise<void>}

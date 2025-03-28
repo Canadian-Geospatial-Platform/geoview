@@ -39,7 +39,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // Log
   logger.logTraceRender('containers/focus-trap/focus-trap');
 
-  // Get conts from props
+  // Read from props
   const { mapId, focusTrapId } = props;
 
   // Hooks
