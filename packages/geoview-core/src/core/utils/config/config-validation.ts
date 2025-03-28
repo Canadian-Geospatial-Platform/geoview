@@ -32,7 +32,7 @@ import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType }
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
 
-import { generateId, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
+import { generateId } from '@/core/utils/utilities';
 import schema from '../../../../schema.json';
 import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -47,16 +47,12 @@ import { ImageStaticLayerEntryConfig } from './validation-classes/raster-validat
 import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
-import { api } from '@/app';
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
-/** *****************************************************************************************************************************
+/**
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.
  * @exports
  * @class DefaultConfig
  */
-// ******************************************************************************************************************************
 export class ConfigValidation {
   /** The map ID associated to the configuration. If it is undefined, a unique value will be generated and assign to it. */
   #mapId: string;
@@ -66,8 +62,6 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * The ConfigValidation class constructor used to instanciate an object of this type.
-   *
-   * @returns {ConfigValidation} A ConfigValidation instance.
    */
   constructor(language: TypeDisplayLanguage) {
     this.#mapId = generateId();
@@ -122,7 +116,8 @@ export class ConfigValidation {
   #isValidTypeListOfLayerEntryConfig(
     geoviewLayerType: TypeGeoviewLayerType,
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
-    validator: Ajv
+    validator: Ajv,
+    onErrorCallback: (errorKey: string, params: string[]) => void
   ): boolean {
     const layerSchemaPath = `https://cgpv/schema#/definitions/${CONST_GEOVIEW_SCHEMA_BY_TYPE[geoviewLayerType]}`;
     const groupSchemaPath = `https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig`;
@@ -132,15 +127,11 @@ export class ConfigValidation {
       const validate = validator.getSchema(schemaPath);
 
       if (!validate) {
-        // TODO: refactor - remove setTimeout (dont know what it is used for)
-        setTimeout(() => {
-          const message = replaceParams([schemaPath], getLocalizedMessage('validation.schema.wrongPath', 'en'));
-          logger.logWarning(`- Map ${this.mapId}: ${message}`);
-          // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
-          api.maps[this.mapId].notifications.showError('validation.schema.wrongPath', [schemaPath]);
-        }, 2000);
+        // Callback about the error
+        onErrorCallback('validation.schema.wrongPath', [schemaPath]);
         return false;
       }
+
       // validate configuration
       const valid = validate(listOfLayerEntryConfig[i]);
 
@@ -153,7 +144,12 @@ export class ConfigValidation {
     for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
       if (
         layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) &&
-        !this.#isValidTypeListOfLayerEntryConfig(geoviewLayerType, listOfLayerEntryConfig[i].listOfLayerEntryConfig!, validator)
+        !this.#isValidTypeListOfLayerEntryConfig(
+          geoviewLayerType,
+          listOfLayerEntryConfig[i].listOfLayerEntryConfig!,
+          validator,
+          onErrorCallback
+        )
       )
         return false;
     }
@@ -166,7 +162,10 @@ export class ConfigValidation {
    *
    * @returns {TypeMapFeaturesConfig} A valid map features configuration.
    */
-  validateMapConfigAgainstSchema(listOfGeoviewLayerConfig: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
+  validateMapConfigAgainstSchema(
+    listOfGeoviewLayerConfig: MapConfigLayerEntry[],
+    onErrorCallback: (errorKey: string, params: string[]) => void
+  ): MapConfigLayerEntry[] {
     // create a validator object
     const validator = new Ajv({
       strict: false,
@@ -185,7 +184,8 @@ export class ConfigValidation {
         isValid = this.#isValidTypeListOfLayerEntryConfig(
           gvLayerConfigCasted.geoviewLayerType,
           gvLayerConfigCasted.listOfLayerEntryConfig,
-          validator
+          validator,
+          onErrorCallback
         );
       }
     }

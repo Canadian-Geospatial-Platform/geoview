@@ -48,21 +48,10 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     | TypeSourceImageStaticInitialConfig;
 
   /** Style to apply to the vector layer. */
-  layerStyle?: TypeLayerStyleConfig;
+  layerStyle?: TypeLayerStyleConfig = undefined;
 
   /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
   declare listOfLayerEntryConfig: never;
-
-  /**
-   * The class constructor.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
-   */
-  protected constructor(layerConfig: AbstractBaseLayerEntryConfig) {
-    super(layerConfig);
-    // Attribute 'layerStyle' must exist in layerConfig even if it is undefined
-    if (!('layerStyle' in this)) this.layerStyle = undefined;
-    Object.assign(this, layerConfig);
-  }
 
   /**
    * Gets the service metadata that is associated to the service.

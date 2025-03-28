@@ -1,15 +1,11 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for layerPath-layerConfig. We keep it global..
 import axios from 'axios';
 import { Extent } from 'ol/extent';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { getXMLHttpRequest } from '@/core/utils/utilities';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
-import { logger } from '@/core/utils/logger';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
@@ -36,37 +32,50 @@ import { EsriFeature, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-laye
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { fetchJson } from '@/core/utils/utilities';
+import { EmptyResponseError } from '@/core/exceptions/core-exceptions';
+import { GeoViewLayerError } from '@/core/exceptions/layer-exceptions';
 
-/** ***************************************************************************************************************************
- * This method reads the service metadata from the metadataAccessPath.
- *
+/**
+ * Fetches the Esri metadata and sets it for the given layer.
  * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
- *
  * @returns {Promise<void>} A promise that the execution is completed.
  */
-export async function commonfetchServiceMetadata(layer: EsriDynamic | EsriFeature): Promise<void> {
-  const metadataUrl = layer.metadataAccessPath;
-  if (metadataUrl) {
-    try {
-      const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
-      if (metadataString === '{}') layer.setAllLayerStatusTo('error', layer.listOfLayerEntryConfig, 'Unable to read metadata');
-      else {
-        layer.metadata = JSON.parse(metadataString) as TypeJsonObject;
-        if ('error' in layer.metadata) throw new Error(`Error code = ${layer.metadata.error.code}, ${layer.metadata.error.message}`);
-        const copyrightText = layer.metadata.copyrightText as string;
-        const attributions = layer.getAttributions();
-        if (copyrightText && !attributions.includes(copyrightText)) {
-          // Add it
-          attributions.push(copyrightText);
-          layer.setAttributions(attributions);
-        }
-      }
-    } catch (error) {
-      logger.logInfo('Unable to read metadata', error);
-      layer.setAllLayerStatusTo('error', layer.listOfLayerEntryConfig, 'Unable to read metadata');
+export async function commonFetchAndSetServiceMetadata(layer: EsriDynamic | EsriFeature): Promise<void> {
+  try {
+    // Query
+    const responseJson = await fetchJson(`${layer.metadataAccessPath}?f=json`);
+
+    // Set it
+    // eslint-disable-next-line no-param-reassign
+    layer.metadata = responseJson;
+
+    // If there's an error in the content of the response itself
+    if ('error' in layer.metadata) {
+      throw new GeoViewLayerError(
+        layer.mapId,
+        layer.geoviewLayerId,
+        `Error code = ${layer.metadata.error.code}, ${layer.metadata.error.message}`
+      );
     }
-  } else {
-    layer.setAllLayerStatusTo('error', layer.listOfLayerEntryConfig, 'Unable to read metadata');
+
+    // Here, content is good
+    const copyrightText = layer.metadata.copyrightText as string;
+    const attributions = layer.getAttributions();
+    if (copyrightText && !attributions.includes(copyrightText)) {
+      // Add it
+      attributions.push(copyrightText);
+      layer.setAttributions(attributions);
+    }
+  } catch (error) {
+    // If empty response error
+    if (error instanceof EmptyResponseError) {
+      // Throw error
+      throw new GeoViewLayerError(layer.mapId, layer.geoviewLayerId, 'Metadata was empty');
+    }
+
+    // Throw higher
+    throw error;
   }
 }
 
@@ -83,39 +92,31 @@ export function commonValidateListOfLayerEntryConfig(
 ): void {
   listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
     if (layerConfig.layerStatus === 'error') return;
-    const { layerPath, layerName } = layerConfig;
-
     if (layerEntryIsGroupLayer(layerConfig)) {
       // Use the layer name from the metadata if it exists and there is no existing name.
-      if (!layerConfig.layerName)
+      if (!layerConfig.layerName) {
+        // eslint-disable-next-line no-param-reassign
         layerConfig.layerName = layer.metadata!.layers[layerConfig.layerId]?.name
           ? (layer.metadata!.layers[layerConfig.layerId].name as string)
           : '';
+      }
 
       layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
 
       if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
-        layer.layerLoadError.push({
-          layer: layerPath,
-          layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
-          loggerMessage: `Empty layer group (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
-        });
-        layerConfig.layerStatus = 'error';
+        // Add a layer load error
+        layer.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${layer.mapId}, layerPath: ${layerConfig.layerPath})`);
       }
-
       return;
     }
 
-    layerConfig.layerStatus = 'processing';
+    // Set the layer status to processing
+    layerConfig.setLayerStatusProcessing();
 
     let esriIndex = Number(layerConfig.layerId);
     if (Number.isNaN(esriIndex)) {
-      layer.layerLoadError.push({
-        layer: layerPath,
-        layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
-        loggerMessage: `ESRI layerId must be a number (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
-      });
-      layerConfig.layerStatus = 'error';
+      // Add a layer load error
+      layer.addLayerLoadError(layerConfig, `ESRI layerId must be a number (mapId:  ${layer.mapId}, layerPath: ${layerConfig.layerPath})`);
       return;
     }
 
@@ -124,12 +125,8 @@ export function commonValidateListOfLayerEntryConfig(
       : -1;
 
     if (esriIndex === -1) {
-      layer.layerLoadError.push({
-        layer: layerPath,
-        layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
-        loggerMessage: `ESRI layerId not found (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
-      });
-      layerConfig.layerStatus = 'error';
+      // Add a layer load error
+      layer.addLayerLoadError(layerConfig, `ESRI layerId not found (mapId:  ${layer.mapId}, layerPath: ${layerConfig.layerPath})`);
       return;
     }
 
@@ -149,6 +146,7 @@ export function commonValidateListOfLayerEntryConfig(
 
       const groupLayerConfig = new GroupLayerEntryConfig(switchToGroupLayer as GroupLayerEntryConfig);
       // Replace the old version of the layer with the new layer group
+      // eslint-disable-next-line no-param-reassign
       listOfLayerEntryConfig[i] = groupLayerConfig;
 
       // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)...
@@ -185,10 +183,12 @@ export function commonValidateListOfLayerEntryConfig(
     }
 
     if (layer.esriChildHasDetectedAnError(layerConfig, esriIndex)) {
-      layerConfig.layerStatus = 'error';
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
       return;
     }
 
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.layerName) layerConfig.layerName = layer.metadata!.layers[esriIndex].name as string;
   });
 }
@@ -282,24 +282,30 @@ export function commonProcessFeatureInfoConfig(
   const queryable = (layerMetadata.capabilities as string).includes('Query');
   if (layerConfig.source.featureInfo) {
     // if queryable flag is undefined, set it accordingly to what is specified in the metadata
-    if (layerConfig.source.featureInfo.queryable === undefined && layerMetadata.fields?.length)
+    if (layerConfig.source.featureInfo.queryable === undefined && layerMetadata.fields?.length) {
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source.featureInfo.queryable = queryable;
-    // else the queryable flag comes from the user config.
+    }
+    // else The queryable flag comes from the user config.
     else if (layerConfig.source.featureInfo.queryable && layerMetadata.type !== 'Group Layer') {
-      layerConfig.layerStatus = 'error';
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
       throw new Error(
         `The config whose layer path is ${layerPath} cannot set a layer as queryable because it does not have field definitions`
       );
     }
-  } else
+  } else {
+    // eslint-disable-next-line no-param-reassign
     layerConfig.source.featureInfo =
       layerConfig.isMetadataLayerGroup || !layerMetadata.fields?.length ? { queryable: false } : { queryable };
+  }
   MapEventProcessor.setMapLayerQueryable(layer.mapId, layerPath, layerConfig.source.featureInfo.queryable);
 
   // dynamic group layer doesn't have fields definition
   if (layerMetadata.type !== 'Group Layer' && layerMetadata.fields) {
     // Process undefined outfields or aliasFields
     if (!layerConfig.source.featureInfo.outfields?.length) {
+      // eslint-disable-next-line no-param-reassign
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
 
       (layerMetadata.fields as TypeJsonArray).forEach((fieldEntry) => {
@@ -316,12 +322,16 @@ export function commonProcessFeatureInfoConfig(
     }
 
     layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
 
     if (!layerConfig.source.featureInfo.nameField)
-      if (layerMetadata.displayField) layerConfig.source.featureInfo.nameField = layerMetadata.displayField as string;
-      else {
+      if (layerMetadata.displayField) {
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.source.featureInfo.nameField = layerMetadata.displayField as string;
+      } else {
+        // eslint-disable-next-line no-param-reassign
         layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0]?.name;
       }
   }
@@ -341,21 +351,27 @@ export function commonProcessInitialSettings(
 ): void {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
   const layerMetadata = layer.getLayerMetadata(layerConfig.layerPath);
-  if (layerConfig.initialSettings?.states?.visible === undefined)
+  if (layerConfig.initialSettings?.states?.visible === undefined) {
+    // eslint-disable-next-line no-param-reassign
     layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
+  }
 
   // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
   if (layerMetadata.minScale) {
+    // eslint-disable-next-line no-param-reassign
     layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerMetadata.minScale as number);
   }
 
   if (layerMetadata.maxScale) {
+    // eslint-disable-next-line no-param-reassign
     layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerMetadata.maxScale as number);
   }
 
   // Set the max record count for querying
+  // eslint-disable-next-line no-param-reassign
   layerConfig.maxRecordCount = (layerMetadata.maxRecordCount || 0) as number;
 
+  // eslint-disable-next-line no-param-reassign
   layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
   if (!layerConfig.initialSettings?.bounds && layerMetadata.extent) {
@@ -373,9 +389,11 @@ export function commonProcessInitialSettings(
         layerMetadata.extent.spatialReference,
         Projection.PROJECTION_NAMES.LNGLAT
       );
+      // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings!.bounds = latlonExtent;
     }
   }
+  // eslint-disable-next-line no-param-reassign
   layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
 }
 
@@ -393,46 +411,44 @@ export async function commonProcessLayerMetadata<
 >(layer: EsriDynamic | EsriFeature | EsriImage, layerConfig: T): Promise<T> {
   // User-defined groups do not have metadata provided by the service endpoint.
   if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return layerConfig;
-  const { layerPath } = layerConfig;
 
+  // The url
   let queryUrl = layer.metadataAccessPath;
+
   if (queryUrl) {
     if (layerConfig.geoviewLayerConfig.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_IMAGE)
       queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
 
-    try {
-      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
-      if (data?.error) {
-        layerConfig.layerStatus = 'error';
-        throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
-      }
-      layer.setLayerMetadata(layerPath, data);
-      // The following line allow the type ascention of the type guard functions on the second line below
-      const EsriLayerConfig = layerConfig;
-      if (geoviewEntryIsEsriDynamic(EsriLayerConfig) || geoviewEntryIsEsriFeature(EsriLayerConfig)) {
-        if (!EsriLayerConfig.layerStyle) {
-          const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
-          if (renderer) EsriLayerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
-        }
-      }
-
-      if (data.spatialReference && !Projection.getProjectionFromObj(data.spatialReference))
-        await Projection.addProjection(data.spatialReference);
-
-      layer.processFeatureInfoConfig(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
-      layer.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
-
-      commonProcessTemporalDimension(
-        layer,
-        data.timeInfo as TypeJsonObject,
-        EsriLayerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig,
-        layer.type === CONST_LAYER_TYPES.ESRI_IMAGE
-      );
-    } catch (error) {
-      layerConfig.layerStatus = 'error';
-      logger.logError('Error in commonProcessLayerMetadata', layerConfig, error);
+    const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
+    if (data?.error) {
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
+      throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
     }
+
+    // Set the layer metadata
+    layer.setLayerMetadata(layerConfig.layerPath, data);
+
+    // The following line allow the type ascention of the type guard functions on the second line below
+    if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
+      if (!layerConfig.layerStyle) {
+        const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
+        // eslint-disable-next-line no-param-reassign
+        if (renderer) layerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
+      }
+    }
+
+    if (data.spatialReference && !Projection.getProjectionFromObj(data.spatialReference)) {
+      await Projection.addProjection(data.spatialReference);
+    }
+
+    commonProcessFeatureInfoConfig(layer, layerConfig);
+
+    commonProcessInitialSettings(layer, layerConfig);
+
+    commonProcessTemporalDimension(layer, data.timeInfo, layerConfig, layer.type === CONST_LAYER_TYPES.ESRI_IMAGE);
   }
+
   return layerConfig;
 }
 

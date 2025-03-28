@@ -5,18 +5,14 @@ import { ReadOptions } from 'ol/format/Feature';
 import Feature from 'ol/Feature';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { TypeJsonObject } from '@/core/types/global-types';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import {
-  commonfetchServiceMetadata,
-  commonProcessFeatureInfoConfig,
-  commonProcessInitialSettings,
+  commonFetchAndSetServiceMetadata,
   commonProcessLayerMetadata,
-  commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 
@@ -29,61 +25,15 @@ export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
   listOfLayerEntryConfig: EsriFeatureLayerEntryConfig[];
 }
 
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriFeatureLayerConfig if the geoviewLayerType attribute
- * of the verifyIfLayer parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use
- * this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriFeatureLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as an EsriFeature if the type attribute of the verifyIfGeoViewLayer
- * parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention
- * is valid
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is EsriFeature => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.ESRI_FEATURE;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a EsriFeatureLayerEntryConfig if the geoviewLayerType
- * attribute of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_FEATURE. The type ascention applies only to the true
- * block of the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention
- * is valid
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsEsriFeature = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is EsriFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
-};
-
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
-/** *****************************************************************************************************************************
- * A class to add esri feature layer.
+/**
+ * A class to add an EsriFeature layer.
  *
  * @exports
  * @class EsriFeature
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class EsriFeature extends AbstractGeoViewVector {
-  /** ***************************************************************************************************************************
-   * Initialize layer.
+  /**
+   * Constructs an EsriFeature Layer configuration processor.
    *
    * @param {string} mapId The id of the map.
    * @param {TypeEsriFeatureLayerConfig} layerConfig The layer configuration.
@@ -92,14 +42,13 @@ export class EsriFeature extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.ESRI_FEATURE, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
+  /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected override fetchServiceMetadata(): Promise<void> {
-    return commonfetchServiceMetadata(this);
+  protected override onFetchAndSetServiceMetadata(): Promise<void> {
+    // Redirect
+    return commonFetchAndSetServiceMetadata(this);
   }
 
   /** ***************************************************************************************************************************
@@ -108,71 +57,31 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+  protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
   }
 
-  /** ***************************************************************************************************************************
-   * This method perform specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-   *
-   * @param {number} esriIndex The index of the current layer in the metadata.
-   *
+  /**
+   * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
+   * @param {esriIndex} esriIndex - The esri layer index config to check.
    * @returns {boolean} true if an error is detected.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
     if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
-      this.layerLoadError.push({
-        layer: layerConfig.layerPath,
-        loggerMessage: `LayerId ${layerConfig.layerPath} of map ${this.mapId} is not a feature layer`,
-      });
+      // Add a layer load error
+      this.addLayerLoadError(layerConfig, `LayerId ${layerConfig.layerPath} of map ${this.mapId} is not a feature layer`);
       return true;
     }
     return false;
   }
 
-  /** ***************************************************************************************************************************
-   * This method will create a Geoview temporal dimension if it exist in the service metadata
-   * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-   * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriFeatureLayerEntryConfig): void {
-    commonProcessTemporalDimension(this, esriTimeDimension, layerConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
-   *
-   * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure.
-   */
-  // GV Layers Refactoring - Obsolete (in config?)
-  processFeatureInfoConfig(layerConfig: EsriFeatureLayerEntryConfig): void {
-    commonProcessFeatureInfoConfig(this, layerConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
-   *
-   * @param {EsriFeature} this The ESRI layer instance pointer.
-   * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure.
-   */
-  // GV Layers Refactoring - Obsolete (in config?)
-  processInitialSettings(layerConfig: EsriFeatureLayerEntryConfig): void {
-    commonProcessInitialSettings(this, layerConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-   * initial settings, fields and aliases).
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
-   */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof EsriFeatureLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
     return commonProcessLayerMetadata(this, layerConfig);
@@ -187,7 +96,6 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  // GV Layers Refactoring - Obsolete (in config?, in layers?)
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
@@ -207,3 +115,32 @@ export class EsriFeature extends AbstractGeoViewVector {
     return vectorSource;
   }
 }
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriFeatureLayerConfig if the geoviewLayerType attribute
+ * of the verifyIfLayer parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriFeatureLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
+};
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a EsriFeatureLayerEntryConfig if the geoviewLayerType
+ * attribute of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_FEATURE. The type ascention applies only to the true
+ * block of the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention
+ * is valid
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const geoviewEntryIsEsriFeature = (
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
+): verifyIfGeoViewEntry is EsriFeatureLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
+};

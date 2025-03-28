@@ -12,13 +12,12 @@ import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { ProjectionLike } from 'ol/proj';
 
-import { DateMgt } from '@/core/utils/date-mgt';
 import { FilterNodeArrayType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
-import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
+import { featureInfoGetFieldType, parseDateTimeValuesVector } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { getExtentUnion } from '@/geo/utils/utilities';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
@@ -104,56 +103,56 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the get all feature information for all the features stored in the layer.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getAllFeatureInfo(): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    try {
-      // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig();
-      const features = this.getOLSource()!.getFeatures();
-      return Promise.resolve(this.formatFeatureInfoResult(features, layerConfig));
-    } catch (error) {
-      // Log
-      logger.logError('abstract-gv-vector.getAllFeatureInfo()\n', error);
-      return Promise.resolve(null);
-    }
+  protected override getAllFeatureInfo(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
+    // Get the layer config in a loaded phase
+    const layerConfig = this.getLayerConfig();
+    const features = this.getOLSource()!.getFeatures();
+    return Promise.resolve(this.formatFeatureInfoResult(features, layerConfig));
   }
 
   /**
    * Overrides the return of feature information at a given pixel location.
-   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {Pixel} location - The pixel coordinate that will be used by the query.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    try {
-      // Get the layer source
-      const layerSource = this.getOLSource();
+  protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[]> {
+    // Get the layer source
+    const layerSource = this.getOLSource();
 
-      // Prepare a filter by layer to know on which layer we want to query features
-      const layerFilter = (layerCandidate: BaseLayer): boolean => {
-        // We know it's the right layer to query on if the source is the same as the current layer
-        const candidateSource = layerCandidate.get('source');
-        return layerSource && candidateSource && layerSource === candidateSource;
-      };
+    // Prepare a filter by layer to know on which layer we want to query features
+    const layerFilter = (layerCandidate: BaseLayer): boolean => {
+      // We know it's the right layer to query on if the source is the same as the current layer
+      const candidateSource = layerCandidate.get('source');
+      return layerSource && candidateSource && layerSource === candidateSource;
+    };
 
-      // Query the map using the layer filter and a hit tolerance
-      const features = this.getMapViewer().map.getFeaturesAtPixel(location, { hitTolerance: this.hitTolerance, layerFilter }) as Feature[];
+    // Query the map using the layer filter and a hit tolerance
+    const features = this.getMapViewer().map.getFeaturesAtPixel(location, { hitTolerance: this.hitTolerance, layerFilter }) as Feature[];
 
-      // Format and return the features
-      return Promise.resolve(this.formatFeatureInfoResult(features, this.getLayerConfig()));
-    } catch (error) {
-      // Log
-      logger.logError('abstract-gv-vector.getFeatureInfoAtPixel()\n', error);
-      return Promise.resolve(null);
-    }
+    // Format and return the features
+    return Promise.resolve(this.formatFeatureInfoResult(features, this.getLayerConfig()));
   }
 
   /**
    * Overrides the return of feature information at a given coordinate.
    * @param {Coordinate} location - The coordinate that will be used by the query.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtCoordinate(
+    location: Coordinate,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Redirect to getFeatureInfoAtPixel
     return this.getFeatureInfoAtPixel(this.getMapViewer().map.getPixelFromCoordinate(location));
   }
@@ -161,9 +160,17 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtLongLat(lnglat: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtLongLat(
+    lnglat: Coordinate,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Convert Coordinates LngLat to map projection
     const projCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
 
@@ -190,38 +197,20 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {string} filter - A filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(filter: string, combineLegendFilter = true): void {
+  applyViewFilter(filter: string, combineLegendFilter: boolean = true): void {
     // Log
     logger.logTraceCore('ABSTRACT-GV-VECTOR - applyViewFilter', this.getLayerPath());
 
     const layerConfig = this.getLayerConfig();
     const olLayer = this.getOLLayer();
 
-    let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
+    // Update the layer config on the fly (maybe not ideal to do this?)
     layerConfig.legendFilterIsOff = !combineLegendFilter;
     if (combineLegendFilter) layerConfig.layerFilter = filter;
 
-    // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
-    // TODO: Standardize the regex across all layer types
-    // OLD REGEX, not working anymore, test before standardization
-    //   ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
-    //     /(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi
-    //   ),
-    const searchDateEntry = [
-      ...filterValueToUse.matchAll(
-        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi
-      ),
-    ];
-
-    searchDateEntry.reverse();
-    searchDateEntry.forEach((dateFound) => {
-      // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
-      const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-      const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.getExternalFragmentsOrder(), reverseTimeZone);
-      filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
-        dateFound.index! + dateFound[0].length
-      )}`;
-    });
+    // Parse the filter value to use
+    let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
+    filterValueToUse = parseDateTimeValuesVector(filterValueToUse, this.getExternalFragmentsOrder());
 
     try {
       const filterEquation = analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);

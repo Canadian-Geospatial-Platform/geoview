@@ -9,8 +9,6 @@ import {
   TypeResultSet,
   TypeResultSetEntry,
 } from '@/geo/map/map-schema-types';
-import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -25,7 +23,7 @@ import { logger } from '@/core/utils/logger';
 /**
  * A class to hold a set of layers associated with a value of any type.
  * Layers are added/removed to the layer-set via the registerOrUnregisterLayer function.
- * @class LayerSet
+ * @class AbstractLayerSet
  * @exports
  */
 export abstract class AbstractLayerSet {
@@ -39,8 +37,7 @@ export abstract class AbstractLayerSet {
   #defaultRegisterLayerConfigCheck = false;
 
   // The registered layers
-  // TODO: Refactor - Layers refactoring. Replace this array of string to array of GVLayer object instead (and rename attribute) once hybrid work is done
-  #registeredLayerLayerPaths: string[] = [];
+  #registeredLayers: AbstractBaseLayer[] = [];
 
   // Keep all callback delegates references
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
@@ -65,6 +62,11 @@ export abstract class AbstractLayerSet {
   }
 
   /**
+   * A must override method to identify a layerset class with a name to distinguish it from the others easily
+   */
+  protected abstract name(): string;
+
+  /**
    * A must-override method called to propagate the result set entry to the store
    * @param {TypeResultSetEntry} resultSetEntry - The result set entry to propagate
    */
@@ -76,9 +78,20 @@ export abstract class AbstractLayerSet {
    */
   protected abstract onDeleteFromStore(layerPath: string): void;
 
-  // Shortcut to get the map id
+  /**
+   * Gets the MapId for the layer set
+   * @returns
+   */
   protected getMapId(): string {
     return this.layerApi.getMapId();
+  }
+
+  /**
+   * Gets the registered layer paths based on the registered layers
+   * @returns {string[]} An array of layer paths
+   */
+  getRegisteredLayerPaths(): string[] {
+    return this.#registeredLayers.map((layer) => layer.getLayerPath());
   }
 
   /**
@@ -129,7 +142,7 @@ export abstract class AbstractLayerSet {
               // Get the parent, again using the LayerApi, can't trust the 'parentLayerConfig'
               const parentConfig = this.layerApi.getLayerEntryConfig(layerConfig.parentLayerConfig.layerPath);
               // If found, this parent can be flagged as loaded
-              if (parentConfig) parentConfig.layerStatus = 'loaded';
+              if (parentConfig) parentConfig.setLayerStatusLoaded();
             }
           }
 
@@ -195,7 +208,7 @@ export abstract class AbstractLayerSet {
     await whenThisThen(() => layer.getLayerStatus() === 'loaded', 20000);
 
     // If the layer is already registered, skip it, we don't register twice
-    if (this.#registeredLayerLayerPaths.includes(layer.getLayerPath())) return;
+    if (this.getRegisteredLayerPaths().includes(layer.getLayerPath())) return;
 
     // Update the registration of all layer sets
     if (this.onRegisterLayerCheck(layer)) {
@@ -254,7 +267,7 @@ export abstract class AbstractLayerSet {
     }
 
     // Add to the registered layers array
-    this.#registeredLayerLayerPaths.push(layerPath);
+    this.#registeredLayers.push(layer);
 
     // Register the layer name changed handler
     layer.onLayerNameChanged(this.#boundHandleLayerNameChanged);
@@ -277,8 +290,8 @@ export abstract class AbstractLayerSet {
     // Delete the result set for the layer path
     delete this.resultSet[layerPath];
 
-    // Remove layer path from registered layer paths
-    this.#registeredLayerLayerPaths = this.#registeredLayerLayerPaths.filter((registeredLayer) => registeredLayer !== layerPath);
+    // Remove layer from registered layers
+    this.#registeredLayers = this.#registeredLayers.filter((layer) => layer.getLayerPath() !== layerPath);
 
     // Inform that the layer set has been updated
     this.onLayerSetUpdatedProcess(layerPath);
@@ -389,22 +402,22 @@ export abstract class AbstractLayerSet {
 
   /**
    * Processes layer data to query features on it, if the layer path can be queried.
-   * @param {TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry} data - The layer data
    * @param {AbstractGVLayer} geoviewLayer - The geoview layer
    * @param {QueryType} queryType - The query type
    * @param {TypeLocation} location - The location for the query
    * @param {boolean} queryGeometry - The query geometry boolean
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise resolving to the query results
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise resolving to the query results
    */
   protected static queryLayerFeatures(
-    data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry,
     geoviewLayer: AbstractGVLayer,
     queryType: QueryType,
     location: TypeLocation,
-    queryGeometry: boolean = true
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+    queryGeometry: boolean = true,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Get Feature Info
-    return geoviewLayer.getFeatureInfo(queryType, location, queryGeometry);
+    return geoviewLayer.getFeatureInfo(queryType, location, queryGeometry, abortController);
   }
 
   /**
@@ -550,10 +563,6 @@ export abstract class AbstractLayerSet {
 export type EventType = 'click' | 'hover' | 'all-features' | 'name';
 
 export type PropagationType = 'config-registration' | 'layer-registration' | 'layerStatus' | 'layerName';
-
-// TODO: Move the definition of the domain in the new schema
-// TO.DOCONT: Starting here vvvv
-// TO.DOCONT: Not anymore. Types were moved, below is event stuff and good here (leaving the TODO here in case it's meant as reference for migration).
 
 /**
  * Define a delegate for the event handler function signature

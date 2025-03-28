@@ -6,6 +6,23 @@ import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '@/core/types
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { EmptyResponseError } from '@/core/exceptions/core-exceptions';
+
+/**
+ * Take string like "My string is __param__" and replace parameters (__param__) from array of values
+ *
+ * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - An array of parameters to replace, i.e. ['short']
+ * @param {string} message - The original message, i.e. "My string is __param__"
+ * @returns {string} Message with values replaced "My string is short"
+ */
+export function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string): string {
+  let tmpMess = message;
+  (params as string[]).forEach((item: string) => {
+    tmpMess = tmpMess.replace('__param__', item);
+  });
+
+  return tmpMess;
+}
 
 /**
  * Return proper language Geoview localized values from map i18n instance
@@ -14,9 +31,19 @@ import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values
  * @param {TypeDisplayLanguage} language - The language to get the message in
  * @returns {string} The translated message with values replaced
  */
-export function getLocalizedMessage(localizedKey: string, language: TypeDisplayLanguage): string {
+export function getLocalizedMessage(
+  localizedKey: string,
+  language: TypeDisplayLanguage,
+  params: TypeJsonValue[] | TypeJsonArray | string[] | undefined = undefined
+): string {
   const trans = i18n.getFixedT(language);
-  return trans(localizedKey);
+  let message = trans(localizedKey);
+
+  // if params provided, replace them
+  if (params && params.length > 0) message = replaceParams(params, message);
+
+  // Return the messsage
+  return message;
 }
 
 /**
@@ -89,22 +116,6 @@ export function generateId(length: 8 | 18 | 36 = 36): string {
 export function isValidUUID(uuid: string): boolean {
   const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return regex.test(uuid);
-}
-
-/**
- * Take string like "My string is __param__" and replace parameters (__param__) from array of values
- *
- * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - An array of parameters to replace, i.e. ['short']
- * @param {string} message - The original message, i.e. "My string is __param__"
- * @returns {string} Message with values replaced "My string is short"
- */
-export function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string): string {
-  let tmpMess = message;
-  (params as string[]).forEach((item: string) => {
-    tmpMess = tmpMess.replace('__param__', item);
-  });
-
-  return tmpMess;
 }
 
 /**
@@ -194,10 +205,62 @@ export function xmlToJson(xml: Document | Node | Element): TypeJsonObject {
 }
 
 /**
+ * Fetches a url for a json response.
+ * If the response is empty, throws an EmptyResponseError.
+ * @param {string} url - The url to fetch.
+ * @returns {Promise<TypeJsonObject>} The fetched json response.
+ */
+export async function fetchJson(url: string): Promise<TypeJsonObject> {
+  // Query and read
+  const response = await fetch(url);
+  const responseJson = await response.json();
+
+  // Check if the response is an empty object
+  if (responseJson.constructor === Object && Object.keys(responseJson).length >= 0) {
+    // Return the value
+    return responseJson;
+  }
+
+  // Throw empty response error
+  throw new EmptyResponseError();
+}
+
+/**
+ * Fetches a url for a xml response then converts the response to a json response.
+ * If the response is empty, throws an EmptyResponseError.
+ * @param {string} url - The url to fetch.
+ * @returns {Promise<TypeJsonObject>} The fetched json response.
+ */
+export async function fetchXMLToJson(url: string): Promise<TypeJsonObject> {
+  // Query and read
+  const response = await fetch(url);
+  const responseText = await response.text();
+
+  // If responded
+  if (responseText.trim() !== '') {
+    // Parse the text/xml to DOM
+    const xmlDOMCapabilities = new DOMParser().parseFromString(responseText, 'text/xml');
+
+    // Parse it using xmlToJson
+    const responseJson = xmlToJson(xmlDOMCapabilities);
+
+    // Check if the response is an empty object
+    if (responseJson.constructor === Object && Object.keys(responseJson).length >= 0) {
+      // Return the value
+      return responseJson;
+    }
+  }
+
+  // Throw empty response error
+  throw new EmptyResponseError();
+}
+
+/**
  * Execute a XMLHttpRequest
  * @param {string} url - The url to request
  * @returns {Promise<string>} The return value, return is '{}' if request failed
  */
+// TODO: Obsolete - This is a very old way of making a query
 export function getXMLHttpRequest(url: string): Promise<string> {
   const request = new Promise<string>((resolve) => {
     try {

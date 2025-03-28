@@ -7,7 +7,6 @@ import {
   useDetailsCheckedFeatures,
   useDetailsLayerDataArrayBatch,
   useDetailsSelectedLayerPath,
-  useSelectorLayerQueryStatus,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import {
@@ -20,6 +19,7 @@ import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map-schema-types';
 
 import { LayerListEntry, Layout } from '@/core/components/common';
+import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info';
 import { FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
@@ -51,7 +51,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   const visibleLayers = useMapVisibleLayers();
   const visibleRangeLayers = useMapVisibleRangeLayers();
   const mapClickCoordinates = useMapClickCoordinates();
-  const selectedLayerQueryStatus = useSelectorLayerQueryStatus(selectedLayerPath);
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
@@ -254,7 +253,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   ]);
 
   /**
-   * Effect used to reset the layer path for the bypass.
+   * Effect used to persist the layer path bypass for the layerDataArray.
    * A useEffect is necessary in order to keep this component pure and be able to set the layer path bypass elsewhere than in this component.
    */
   useEffect(() => {
@@ -273,42 +272,9 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL - check selection', memoLayerSelectedItem);
 
-    // Check if the layer we are on is not 'processed' or 'error', ignore if so
-    if (memoLayerSelectedItem && !(selectedLayerQueryStatus === 'processed' || selectedLayerQueryStatus === 'error')) return;
-
-    if (selectedLayerPath === '') {
-      return;
-    }
-
-    // If the layer has features
-    if (memoLayerSelectedItem?.numOffeatures) {
-      // Log
-      logger.logDebug('DETAILS-PANEL', 'keep selection', memoLayerSelectedItem);
-      // All good, keep selection
-      // Reset the bypass for next time
-      setLayerDataArrayBatchLayerPathBypass(memoLayerSelectedItem.layerPath);
-    } else {
-      // Find the first layer with features
-      const anotherLayerEntry = memoLayersList.find((layer) => {
-        return memoLayersList.find((layer2) => layer.layerPath === layer2.layerPath && layer2.numOffeatures);
-      });
-
-      // If found
-      if (anotherLayerEntry) {
-        // Log
-        logger.logDebug('DETAILS-PANEL', 'select another', memoLayerSelectedItem, anotherLayerEntry.layerPath);
-        // Select that one
-        setSelectedLayerPath(anotherLayerEntry.layerPath);
-      } else {
-        // Log
-        logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
-        // None found, select none
-        //  TODO: Investigate infinite loop in AppBar for statement.
-        // setSelectedLayerPath('');
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memoLayerSelectedItem, memoLayersList]);
+    // Redirect to the keep selected layer path logic
+    checkSelectedLayerPathList(setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath, memoLayerSelectedItem, memoLayersList);
+  }, [memoLayerSelectedItem, memoLayersList, setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath]);
 
   // #endregion
 

@@ -221,12 +221,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Get metric values
     const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
     const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
-    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')!.lastChild as HTMLElement)?.innerHTML;
+    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
 
     // Get metric values
     const scaleControlBarImperial = document.getElementById(`${mapId}-scaleControlBarImperial`);
     const lineWidthImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
-    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')!.lastChild as HTMLElement)?.innerHTML;
+    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
 
     // get resolution value (same for metric and imperial)
     const labelNumeric = (scaleControlBarMetric?.querySelector('.ol-scale-text') as HTMLElement)?.innerHTML;
@@ -344,6 +344,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setMapLoaded(mapId: string, mapLoaded: boolean): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setMapLoaded(mapLoaded);
+  }
+
+  static setMapDisplayed(mapId: string): void {
+    // Save in store
+    this.getMapStateProtected(mapId).setterActions.setMapDisplayed();
   }
 
   static setMapPointerPosition(mapId: string, pointerPosition: TypeMapMouseInfo): void {
@@ -1070,16 +1075,31 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath The path of the layer to apply filters to.
    */
   static applyLayerFilters(mapId: string, layerPath: string): void {
+    // Get the Geoview layer
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
-    if (geoviewLayer) {
+
+    // If found it and of right type
+    if (
+      geoviewLayer &&
+      (geoviewLayer instanceof AbstractGVVector ||
+        geoviewLayer instanceof GVWMS ||
+        geoviewLayer instanceof GVEsriImage ||
+        geoviewLayer instanceof GVEsriDynamic)
+    ) {
+      // Depending on the instance
       if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
+        // Read filter information
         const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+
+        // If filter was defined
         if (filter) geoviewLayer.applyViewFilter(filter);
       } else {
+        // Read filter information
         const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
+        const filter = filters.join(' and ');
 
         // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
-        (geoviewLayer as AbstractGVVector | GVEsriDynamic).applyViewFilter(filters.join(' and '));
+        geoviewLayer.applyViewFilter(filter);
       }
     }
   }

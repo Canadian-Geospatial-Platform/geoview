@@ -25,7 +25,9 @@ export const OL_OVERVIEWMAP_SIZE = {
 
 export const LAYER_STATUS = {
   NEW_INSTANCE: 'newInstance',
+  REGISTERED: 'registered',
   PROCESSING: 'processing',
+  PROCESSED: 'processed',
   LOADING: 'loading',
   LOADED: 'loaded',
   ERROR: 'error',

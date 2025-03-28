@@ -13,7 +13,6 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { applyStyle } from 'ol-mapbox-style';
 
 import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { EventDelegateBase, api } from '@/app';
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
 import { TypeBasemapProps, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
@@ -21,7 +20,8 @@ import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
-import EventHelper from '@/api/events/event-helper';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -145,6 +145,9 @@ export class Basemap {
   // Keep all callback delegates references
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
 
+  // Keep all callback delegates references
+  #onBasemapErrorHandlers: BasemapErrorDelegate[] = [];
+
   // #region OVERVIEW MAP
   getOverviewMapControl(olMap: OLMap, toggleButton: HTMLDivElement): OLOverviewMap {
     if (this.overviewMapCtrl) {
@@ -207,8 +210,8 @@ export class Basemap {
     // Overview Map Config
     if (overviewMap) this.overviewMap = overviewMap;
     else {
-      // TODO: find a more centralized way to trap error and display message
-      api.maps[this.mapId].notifications.showError('mapctrl.overviewmap.error');
+      // Emit about the error
+      this.#emitBasemapError({ error: new GeoViewError(this.mapId, 'mapctrl.overviewmap.error') });
     }
 
     // Overview Map Control
@@ -704,30 +707,59 @@ export class Basemap {
   }
 
   /**
-   * Emits a component removed event to all handlers.
+   * Emits a basemap changed event to all handlers.
+   * @param {BasemapChangedEvent} event - The event to be emitted
    * @private
    */
   #emitBasemapChanged(event: BasemapChangedEvent): void {
-    // Emit the component removed event for all handlers
+    // Emit the basemap changed event for all handlers
     EventHelper.emitEvent(this, this.#onBasemapChangedHandlers, event);
   }
 
   /**
-   * Registers a component removed event callback.
-   * @param {MapComponentRemovedDelegate} callback - The callback to be executed whenever the event is emitted
+   * Registers a basemap changed event callback.
+   * @param {BasemapChangedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onBasemapChanged(callback: BasemapChangedDelegate): void {
-    // Register the component removed event handler
+    // Register the basemap changed event handler
     EventHelper.onEvent(this.#onBasemapChangedHandlers, callback);
   }
 
   /**
-   * Unregisters a component removed event callback.
-   * @param {MapComponentRemovedDelegate} callback - The callback to stop being called whenever the event is emitted
+   * Unregisters a basemap changed event callback.
+   * @param {BasemapChangedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offMapLanguageChanged(callback: BasemapChangedDelegate): void {
-    // Unregister the component removed event handler
+  offBasemapChanged(callback: BasemapChangedDelegate): void {
+    // Unregister the basemap changed event handler
     EventHelper.offEvent(this.#onBasemapChangedHandlers, callback);
+  }
+
+  /**
+   * Emits a basemap error event to all handlers.
+   * @param {BasemapErrorEvent} event - The event to be emitted
+   * @private
+   */
+  #emitBasemapError(event: BasemapErrorEvent): void {
+    // Emit the basemap error event for all handlers
+    EventHelper.emitEvent(this, this.#onBasemapErrorHandlers, event);
+  }
+
+  /**
+   * Registers a basemap error event callback.
+   * @param {BasemapErrorDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onBasemapError(callback: BasemapErrorDelegate): void {
+    // Register the basemap error event handler
+    EventHelper.onEvent(this.#onBasemapErrorHandlers, callback);
+  }
+
+  /**
+   * Unregisters a basemap error event callback.
+   * @param {BasemapErrorDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offBasemapError(callback: BasemapErrorDelegate): void {
+    // Unregister the basemap error event handler
+    EventHelper.offEvent(this.#onBasemapErrorHandlers, callback);
   }
 }
 
@@ -742,3 +774,15 @@ export type BasemapChangedEvent = {
  * Define a delegate for the event handler function signature.
  */
 type BasemapChangedDelegate = EventDelegateBase<Basemap, BasemapChangedEvent, void>;
+
+/**
+ * Define an event for the delegate.
+ */
+export type BasemapErrorEvent = {
+  error: GeoViewError;
+};
+
+/**
+ * Define a delegate for the event handler function signature.
+ */
+type BasemapErrorDelegate = EventDelegateBase<Basemap, BasemapErrorEvent, void>;

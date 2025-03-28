@@ -241,7 +241,6 @@ export function AddNewLayer(): JSX.Element {
 
             // if there is no paramLayers, take them all; If there is paramLayers must be included in layers parameter from url
             if (paramLayers.length === 0 || paramLayers.includes(name)) {
-              logger.logDebug('NAME', name);
               layers.push(
                 new OgcWmsLayerEntryConfig({
                   geoviewLayerConfig: wmsGeoviewLayerConfig,
