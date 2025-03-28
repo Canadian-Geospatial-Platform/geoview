@@ -38,6 +38,11 @@ export class GeoCore {
    */
   async createLayersFromUUID(uuid: string, layerConfig?: GeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig[]> {
     // Get the map config
+    const map = MapEventProcessor.getMapViewer(this.#mapId);
+    if (map.layer.getGeoviewLayerIds().includes(uuid)) {
+      // eslint-disable-next-line no-param-reassign
+      uuid = `${uuid}:${crypto.randomUUID()}`;
+    }
     const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.#mapId);
 
     // Generate the url using metadataAccessPath when specified or using the geocore url

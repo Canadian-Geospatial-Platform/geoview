@@ -193,10 +193,22 @@ export class LayerApi {
   }
 
   /**
-   * Gets the GeoView Layer Ids.
-   * @returns The ids of the new Geoview Layers
+   * Gets the GeoView Layer Ids / UUIDs.
+   * @returns The ids of the layers
    */
   getGeoviewLayerIds(): string[] {
+    const uniqueIds = new Set<string>();
+    for (const layerPath of Object.keys(this.#gvLayers)) {
+      uniqueIds.add(layerPath.split('/')[0]);
+    }
+    return Array.from(uniqueIds);
+  }
+
+  /**
+   * Gets the GeoView Layer Paths.
+   * @returns The layer paths of the GV Layers
+   */
+  getGeoviewLayerPaths(): string[] {
     return Object.keys(this.#gvLayers);
   }
 
@@ -453,6 +465,19 @@ export class LayerApi {
   }
 
   /**
+   * Prints an error message for the duplicate geoview layer configuration.
+   * @param {MapConfigLayerEntry} mapConfigLayerEntry - The Map Config Layer Entry in error.
+   * @private
+   */
+  #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
+    // TODO: find a more centralized way to trap error and display message
+    api.maps[this.getMapId()].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId]);
+
+    // Log
+    logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.getMapId()}`);
+  }
+
+  /**
    * TODO Add this function to utilties
    * Gets all child paths from a parent path
    * @param {string} parentPath - The parent path
@@ -553,7 +578,7 @@ export class LayerApi {
       inVisibleRange: true,
     };
 
-    if (uuid in this.#geoviewLayers) {
+    if (this.getGeoviewLayerIds().includes(uuid)) {
       // eslint-disable-next-line no-param-reassign
       uuid = `${uuid}:${crypto.randomUUID()}`;
     }
@@ -608,8 +633,20 @@ export class LayerApi {
     // TODO: Refactor - This should be dealt with the config classes and this line commented out
     ConfigValidation.validateListOfGeoviewLayerConfig(this.mapViewer.getDisplayLanguage(), [geoviewLayerConfig]);
 
-    // Process the addition of the layer
-    return this.#addGeoviewLayerStep2(geoviewLayerConfig);
+    // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
+    if (this.getGeoviewLayerIds().includes(geoviewLayerConfig.geoviewLayerId)) {
+      // Remove geoCore ordered layer info placeholder
+      if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId))
+        MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId, false);
+
+      this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
+    } else {
+      // Process the addition of the layer
+      return this.#addGeoviewLayerStep2(geoviewLayerConfig);
+    }
+
+    // Not added
+    return undefined;
   }
 
   /**
@@ -1161,7 +1198,7 @@ export class LayerApi {
     callbackNotGood?: (geoviewLayer: AbstractBaseLayer) => void
   ): [boolean, number] {
     // If no layer entries at all or there are layer entries and there are geoview layers to check
-    let allGood = layerEntriesToCheck?.length === 0 || Object.keys(this.#geoviewLayers).length > 0;
+    let allGood = layerEntriesToCheck?.length === 0 || this.getGeoviewLayerIds().length > 0;
 
     // For each registered layer entry
     this.getGeoviewLayers().forEach((geoviewLayer) => {
@@ -1174,7 +1211,7 @@ export class LayerApi {
     });
 
     // Return if all good
-    return [allGood, Object.keys(this.#geoviewLayers).length];
+    return [allGood, this.getGeoviewLayerIds().length];
   }
 
   /**

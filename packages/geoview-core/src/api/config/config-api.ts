@@ -312,15 +312,13 @@ export class ConfigApi {
     const geocoreServerUrl = geocoreUrl || CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl;
 
     // Filter all geocore layers and convert the result into an array of unique geoviewLayerId.
-    const geocoreArrayOfKeys = [
-      ...new Set(
+    const geocoreArrayOfKeys = Array.from(
+      new Set(
         listOfGeoviewLayerConfig
           .filter((layerConfig) => layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE)
-          .map<string>((geocoreLayer) => {
-            return geocoreLayer.geoviewLayerId as string;
-          })
-      ),
-    ];
+          .map<string>((geocoreLayer) => geocoreLayer.geoviewLayerId as string)
+      )
+    );
 
     // If the listOfGeoviewLayerConfig contains GeoCore layers, process them.
     if (geocoreArrayOfKeys.length) {
