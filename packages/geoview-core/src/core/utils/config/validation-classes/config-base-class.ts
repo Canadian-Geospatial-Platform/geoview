@@ -9,9 +9,11 @@ import {
 } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import { TypeJsonObject } from '@/core/types/global-types';
+import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
-/** ******************************************************************************************************************************
+/**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
 export abstract class ConfigBaseClass {
@@ -64,13 +66,10 @@ export abstract class ConfigBaseClass {
   /** It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: GroupLayerEntryConfig;
 
-  /** Flag indicating that the loaded signal arrived before the processed one */
-  #waitForProcessedBeforeSendingLoaded = false;
-
   // Keep all callback delegates references
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
-  // TODO: Review - The status. I think we should have: newInstance, processsing, loading, - loaded : error
+  // The layer status weigths
   static #layerStatusWeight = {
     newInstance: 10,
     registered: 20,
@@ -86,8 +85,24 @@ export abstract class ConfigBaseClass {
    * @param {ConfigBaseClass} layerConfig - The layer configuration we want to instanciate.
    */
   protected constructor(layerConfig: ConfigBaseClass) {
-    // TODO: Refactor - Get rid of this Object.assign pattern here and elsewhere unless explicitely commented why.
+    // TODO: Refactor - Get rid of this Object.assign pattern here and work with the actual objects that
+    // TO.DOCONT: are being sent in the constructor (it's not ConfigBaseClass objects that are in reality being
+    // TO.DOCONT: sent in the constructor here, they are regular 'json' objects..).
+    // TO.DOCONT: Because of this, we have to jump around between class instance and objects here...
+
+    // Keep the layer status
+    const { layerStatus } = layerConfig;
+
+    // Delete the layer status from the property so that it can go through the Object.assign without failing..
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-param-reassign
+    delete (layerConfig as any).layerStatus;
+
+    // Transfert the properties from the object to the class ( bad practice :( )
     Object.assign(this, layerConfig);
+
+    // Set back the layer status as it was
+    if (layerStatus) this.setLayerStatus(layerStatus);
+
     // eslint-disable-next-line no-underscore-dangle
     if (this.geoviewLayerConfig) this._layerPath = ConfigBaseClass.#evaluateLayerPath(layerConfig);
     else logger.logError("Couldn't calculate layerPath because geoviewLayerConfig has an invalid value");
@@ -134,29 +149,77 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Sets the layer status to registered.
+   */
+  setLayerStatusRegistered(): void {
+    // Redirect
+    this.setLayerStatus(LAYER_STATUS.REGISTERED);
+  }
+
+  /**
+   * Sets the layer status to processing.
+   */
+  setLayerStatusProcessing(): void {
+    // Redirect
+    this.setLayerStatus(LAYER_STATUS.PROCESSING);
+  }
+
+  /**
+   * Sets the layer status to processed.
+   */
+  setLayerStatusProcessed(): void {
+    // Redirect
+    this.setLayerStatus(LAYER_STATUS.PROCESSED);
+  }
+
+  /**
+   * Sets the layer status to loading.
+   */
+  setLayerStatusLoading(): void {
+    // Redirect
+    this.setLayerStatus(LAYER_STATUS.LOADING);
+  }
+
+  /**
+   * Sets the layer status to loaded.
+   */
+  setLayerStatusLoaded(): void {
+    // Redirect
+    this.setLayerStatus(LAYER_STATUS.LOADED);
+  }
+
+  /**
+   * Sets the layer status to error.
+   */
+  setLayerStatusError(): void {
+    // Redirect
+    this.setLayerStatus(LAYER_STATUS.ERROR);
+  }
+
+  /**
    * Sets the layer status and emits an event when changed.
    * @param {string} newLayerStatus - The new layerId value.
    */
-  // TODO: Refactor - Change this from a 'setter' to an actual set function, arguably too complex for just a 'setter'
-  set layerStatus(newLayerStatus: TypeLayerStatus) {
-    if (
-      newLayerStatus === 'loaded' &&
-      !layerEntryIsGroupLayer(this) &&
-      !this.isGreaterThanOrEqualTo('loading') &&
-      !this.#waitForProcessedBeforeSendingLoaded
-    ) {
-      this.#waitForProcessedBeforeSendingLoaded = true;
-      return;
-    }
-    if (!this.isGreaterThanOrEqualTo(newLayerStatus)) {
-      // eslint-disable-next-line no-underscore-dangle
-      this._layerStatus = newLayerStatus;
-      this.#emitLayerStatusChanged({ layerStatus: newLayerStatus });
-    }
-    if (newLayerStatus === 'processed' && this.#waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
+  setLayerStatus(newLayerStatus: TypeLayerStatus): void {
+    // Log
+    logger.logDebug('LAYERS STATUS -', this.layerPath, newLayerStatus);
 
     // GV For quick debug, uncomment the line
     // if (newLayerStatus === 'error') debugger;
+
+    // Check if we're not accidentally trying to set a status less than the current one
+    if (!this.isGreaterThanOrEqualTo(newLayerStatus)) {
+      // eslint-disable-next-line no-underscore-dangle
+      this._layerStatus = newLayerStatus;
+
+      // Emit about it
+      this.#emitLayerStatusChanged({ layerStatus: newLayerStatus });
+    } else if (this.layerStatus !== newLayerStatus) {
+      // Log the warning as this shouldn't be happening
+      logger.logWarning(
+        `The layer status for ${this.layerPath} was already '${this.layerStatus}' and the system wanted to set ${newLayerStatus}`
+      );
+    }
 
     // TODO: Cleanup - Commenting this and leaving it here for now.. It turns out that the parentLayerConfig property can't be trusted
     // GV due to a bug with different instances of entryconfigs stored in the objects and depending how you navigate the objects, you get
@@ -170,7 +233,7 @@ export abstract class ConfigBaseClass {
     //   // If all children of the parent are loaded, set the parent as loaded
     //   if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', this.parentLayerConfig.listOfLayerEntryConfig)) {
     //     // Set the parent as loaded
-    //     this.parentLayerConfig.layerStatus = 'loaded';
+    //     this.parentLayerConfig.setLayerStatusLoaded();
     //   }
     // }
   }
@@ -250,7 +313,7 @@ export abstract class ConfigBaseClass {
     // Crash on purpose.
     // GV Make sure to implement a 'protected override onClone(): ConfigBaseClass' in the child-class to
     // GV use this cloning feature. See OgcWMSLayerEntryConfig for example.
-    throw new Error(`Not implemented exception onClone on layer path ${this.layerPath}`);
+    throw new NotImplementedError(`Not implemented exception onClone on layer path ${this.layerPath}`);
   }
 
   /**
@@ -266,7 +329,7 @@ export abstract class ConfigBaseClass {
     return !listOfLayerEntryConfig.find((layerConfig) => {
       if (layerEntryIsGroupLayer(layerConfig))
         return !this.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, layerConfig.listOfLayerEntryConfig);
-      return !layerConfig.isGreaterThanOrEqualTo(layerStatus || 'newInstance');
+      return !layerConfig.isGreaterThanOrEqualTo(layerStatus);
     });
   }
 

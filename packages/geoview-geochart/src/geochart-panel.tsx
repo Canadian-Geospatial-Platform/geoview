@@ -1,9 +1,10 @@
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
 import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
+import { checkSelectedLayerPathList } from 'geoview-core/src/core/components/common/comp-common';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
 import { Box } from 'geoview-core/src/ui';
-import { useMapClickCoordinates, useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
+import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import {
   useGeochartConfigs,
   useGeochartStoreActions,
@@ -47,7 +48,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const selectedLayerPath = useGeochartSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
-  const mapClickCoordinates = useMapClickCoordinates();
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
@@ -161,10 +161,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   }, [memoLayersList, selectedLayerPath]);
 
   /**
-   * Effect used to persist persist the layer path bypass for the layerDataArray.
+   * Effect used to persist the layer path bypass for the layerDataArray.
    * A useEffect is necessary in order to keep this component pure and be able to set the layer path bypass elsewhere than in this component.
    */
-  // TODO: This useEffect and the next one are the same in details-panel, create a custom hook for both?
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('GEOCHART-PANEL - update layer data bypass', selectedLayerPath);
@@ -181,63 +180,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('GEOCHART-PANEL - check selection', memoLayerSelectedItem);
 
-    // Check if the layer we are on is not 'processed' or 'error', ignore if so
-    if (memoLayerSelectedItem && !(memoLayerSelectedItem.queryStatus === 'processed' || memoLayerSelectedItem.queryStatus === 'error'))
-      return;
-
-    if (selectedLayerPath === '') {
-      return;
-    }
-
-    // Check if the layer we are one still have features
-    if (memoLayerSelectedItem?.numOffeatures) {
-      // Log
-      // logger.logDebug('GEOCHART-PANEL', 'keep selection');
-      // All good, keep selection
-      // Reset the bypass for next time
-      setLayerDataArrayBatchLayerPathBypass(memoLayerSelectedItem.layerPath);
-    } else {
-      // Find the first layer with features
-      const anotherLayerEntry = memoLayersList.find((layer) => {
-        return memoLayersList.find((layer2) => layer.layerPath === layer2.layerPath && layer2.numOffeatures);
-      });
-
-      // If found
-      if (anotherLayerEntry) {
-        // Log
-        // logger.logDebug('GEOCHART-PANEL', 'select another', anotherLayerEntry.layerPath);
-
-        // Select that one
-        setSelectedLayerPath(anotherLayerEntry.layerPath);
-      } else {
-        // Log
-        logger.logDebug('GEOCHART-PANEL', 'select none', memoLayerSelectedItem);
-
-        // None found, select none
-        // setSelectedLayerPath('');
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memoLayerSelectedItem, memoLayersList]);
-
-  /**
-   * Select the layer after layer is selected from map.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('GEOCHART-PANEL- mapClickCoordinates', mapClickCoordinates);
-
-    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
-      const selectedLayer = memoLayersList.find((layer) => {
-        return memoLayersList.find((layer2) => layer.layerPath === layer2.layerPath && layer2.numOffeatures);
-      });
-
-      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
-    } else {
-      setSelectedLayerPath('');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapClickCoordinates, memoLayersList]);
+    // Redirect to the keep selected layer path logic
+    checkSelectedLayerPathList(setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath, memoLayerSelectedItem, memoLayersList);
+  }, [memoLayerSelectedItem, memoLayersList, setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath]);
 
   // #region RENDERING ************************************************************************************************
 
