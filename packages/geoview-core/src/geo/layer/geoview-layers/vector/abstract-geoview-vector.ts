@@ -264,12 +264,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // TODO: message - Create message for all vector layer fetching. Create a centralized message creator for geoview-layers
     const timeInterval = setInterval(() => {
       this.emitMessage('layers.slowFetch', [this.geoviewLayerName || '...']);
-      // const mapViewer = MapEventProcessor.getMapViewer(mapId);
-      // mapViewer.notifications.showMessage(
-      //   getLocalizedMessage('layers.slowFetch', mapViewer.getDisplayLanguage()),
-      //   [MapEventProcessor.getMapViewer(mapId).layer.getLayerEntryConfig(layerPath)?.layerName || '...'],
-      //   false
-      // );
     }, 15000); // Log every 15 seconds
 
     try {

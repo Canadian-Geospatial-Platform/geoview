@@ -2,6 +2,7 @@ import { expose } from 'comlink';
 
 import { createWorkerLogger } from './helper/logger-worker';
 import { TypeJsonObject } from '@/api/config/types/config-types';
+import { fetchWithTimeout } from '../utils/fetch-helper';
 
 /**
  * This worker script is designed to be used with the FetchEsriWorker class.
@@ -112,13 +113,15 @@ const processBatch = async (
         const currentCount = localProcessedFeatures + json.features.length;
         localProcessedFeatures = currentCount;
 
-        logger.logTrace({
-          type: 'progress',
-          data: {
-            processed: currentCount,
-            total: totalCount,
-          },
+        logger.logTrace('progress', {
+          processed: currentCount,
+          total: totalCount,
         });
+        logger.sendMessage('info', {
+          processed: currentCount,
+          total: totalCount,
+        });
+
         return json.features;
       });
 
@@ -147,18 +150,15 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
   const baseUrl = `${params.url}/query?where=1=1&outFields=*&f=json&returnGeometry=${params.queryGeometry}&resultRecordCount=${resultRecordCount}`;
 
   try {
-    // Get total count
+    // Get total count with a timeout. This is a simple query and if it takes more then 5 seconds it means
+    // the server is unresponsive and we should not continue. This will throw an error...
     const countUrl = `${params.url}/query?where=1=1&returnCountOnly=true&f=json`;
-    const countResponse = await fetch(countUrl);
-    const { count: totalCount } = await countResponse.json();
+    const { count: totalCount } = await fetchWithTimeout<{ count: number }>(countUrl);
 
     logger.logTrace('Total features count:', totalCount);
-    logger.logTrace({
-      type: 'progress',
-      data: {
-        processed: 0,
-        total: totalCount,
-      },
+    logger.sendMessage('info', {
+      processed: 0,
+      total: totalCount,
     });
 
     // Calculate total number of requests needed
@@ -179,14 +179,11 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
       totalProcessedFeatures = batchResult.processedCount;
       allFeatures = [...allFeatures, ...batchResult.features];
 
-      // Log the total progress after each batch
-      logger.logTrace({
-        type: 'progress',
-        data: {
-          processed: totalProcessedFeatures,
-          total: totalCount,
-        },
-      });
+      // // Log the total progress after each batch
+      // logger.sendMessage('info', {
+      //   processed: totalProcessedFeatures,
+      //   total: totalCount,
+      // });
     }
     const response = {
       features: allFeatures,
@@ -196,9 +193,7 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
     return response as unknown as TypeJsonObject;
   } catch (error) {
     logger.logError('Error in queryAllEsriFeatures', error);
-    logger.logTrace({
-      type: 'error',
-    });
+    logger.sendMessage('error');
     throw error;
   }
 }
@@ -228,7 +223,6 @@ const worker = {
     try {
       logger.logTrace('Starting query processing', JSON.stringify(params));
       const response = params.objectIds === 'all' ? queryAllEsriFeatures(params) : queryEsriFeatures(params);
-      logger.logTrace('Query completed');
       return response;
     } catch (error) {
       logger.logError('Query processing failed', error);

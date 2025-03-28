@@ -77,7 +77,7 @@ export abstract class AbstractWorker<T> {
           default:
             break;
         }
-
+      } else if (event.data && event.data.type === 'message') {
         // Call all registered message handlers
         this.#messageHandlers.forEach((handler) => handler(event));
       }

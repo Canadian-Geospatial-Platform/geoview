@@ -103,13 +103,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {void}
    */
   #handleWorkerMessage(event: MessageEvent): void {
-    const message = event.data.message[event.data.message.length - 1];
-    if (message.type === 'progress') {
-      const process = message.data.processed;
-      const { total } = message.data;
-      if (process !== total) this.emitMessage('layers.fetchProgress', [message.data.processed, message.data.total]);
-      else this.emitMessage('layers.fetchDone', [message.data.total], 'info');
-    } else if (message.type === 'error') {
+    const workerLog = event.data;
+    if (workerLog.type === 'message' && workerLog.level === 'info' && workerLog.message[0] === 'FetchEsriWorker') {
+      const { processed, total } = workerLog.message[1];
+      if (processed !== total) this.emitMessage('layers.fetchProgress', [processed, total]);
+      else this.emitMessage('layers.fetchDone', [total], 'info');
+    } else if (workerLog.type === 'message' && workerLog.level === 'error' && workerLog.message[0] === 'FetchEsriWorker') {
       this.emitMessage('error.layer.notAbleToQuery', [this.getLayerName()!], 'error');
     }
   }

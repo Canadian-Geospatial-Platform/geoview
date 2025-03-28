@@ -24,7 +24,7 @@ export abstract class AbstractWorkerPool<T> {
    * @param {new () => AbstractWorker<T>} workerClass - Constructor for creating worker instances
    * @param {number} numWorkers - Number of workers to initialize in the pool
    */
-  constructor(name: string, workerClass: new () => AbstractWorker<T>, numWorkers = navigator.hardwareConcurrency || 2) {
+  constructor(name: string, workerClass: new () => AbstractWorker<T>, numWorkers: number = navigator.hardwareConcurrency || 2) {
     this.name = name;
     this.WorkerClass = workerClass;
     this.initializeWorkers(numWorkers);
