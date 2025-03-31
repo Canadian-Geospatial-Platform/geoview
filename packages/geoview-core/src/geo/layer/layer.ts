@@ -1333,11 +1333,32 @@ export class LayerApi {
   }
 
   /**
+   * Removes layer and feature highlights for a given layer.
+   * @param {string} layerPath - The path of the layer to remove highlights from.
+   */
+  removeLayerHighlights(layerPath: string): void {
+    // Remove layer highlight if layer being removed or its child is highlighted
+    if (this.#highlightedLayer.layerPath?.startsWith(`${layerPath}/`) || this.#highlightedLayer.layerPath === layerPath)
+      this.removeHighlightLayer();
+
+    // Reset the result set for the layer and any children
+    this.getLayerEntryConfigIds().forEach((registeredLayerPath) => {
+      if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
+        // Remove feature highlight and result set for features from this layer
+        FeatureInfoEventProcessor.resetResultSet(this.getMapId(), registeredLayerPath, 'name');
+      }
+    });
+  }
+
+  /**
    * Removes a layer from the map using its layer path. The path may point to the root geoview layer
    * or a sub layer.
    * @param {string} layerPath - The path or ID of the layer to be removed
    */
   removeLayerUsingPath(layerPath: string): void {
+    // Remove any highlights associated with the layer
+    this.removeLayerHighlights(layerPath);
+
     // A layer path is a slash seperated string made of the GeoView layer Id followed by the layer Ids
     const layerPathNodes = layerPath.split('/');
 

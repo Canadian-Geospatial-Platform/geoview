@@ -24,7 +24,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
  */
 export class FeatureHighlight {
   /** The vector source to use for the highlight features */
-  highlighSource: VectorSource = new VectorSource();
+  highlightSource: VectorSource = new VectorSource();
 
   /** The hidden layer to display highlight. */
   // GV It's public, to save an eslint warning, because even if it's not read in this class, it's actually important to instanciate per OpenLayer design.
@@ -56,7 +56,7 @@ export class FeatureHighlight {
    * @param {MapViewer} mapViewer a reference to the map viewer
    */
   constructor(mapViewer: MapViewer) {
-    this.overlayLayer = new VectorLayer({ source: this.highlighSource, map: mapViewer.map });
+    this.overlayLayer = new VectorLayer({ source: this.highlightSource, map: mapViewer.map });
     this.pointMarkers = new PointMarkers(mapViewer, this);
     if (MapEventProcessor.getFeatureHighlightColor(mapViewer.mapId) !== 'black')
       this.changeHighlightColor(MapEventProcessor.getFeatureHighlightColor(mapViewer.mapId));
@@ -113,7 +113,7 @@ export class FeatureHighlight {
     feature.setStyle(this.#highlightStyle);
     feature.setId(id);
     this.#highlightedFeatureIds.push(id);
-    this.highlighSource.addFeature(feature);
+    this.highlightSource.addFeature(feature);
   }
 
   /**
@@ -123,14 +123,14 @@ export class FeatureHighlight {
   removeHighlight(id: string): void {
     if (id === 'all' && this.#highlightedFeatureIds.length) {
       for (let i = 0; i < this.#highlightedFeatureIds.length; i++) {
-        this.highlighSource.removeFeature(this.highlighSource.getFeatureById(this.#highlightedFeatureIds[i]) as Feature);
+        this.highlightSource.removeFeature(this.highlightSource.getFeatureById(this.#highlightedFeatureIds[i]) as Feature);
       }
       this.#highlightedFeatureIds = [];
     } else if (this.#highlightedFeatureIds.length) {
       for (let i = this.#highlightedFeatureIds.length - 1; i >= 0; i--) {
         if (this.#highlightedFeatureIds[i] === id || this.#highlightedFeatureIds[i].startsWith(`${id}-`)) {
-          if (this.highlighSource.getFeatureById(this.#highlightedFeatureIds[i]))
-            this.highlighSource.removeFeature(this.highlighSource.getFeatureById(this.#highlightedFeatureIds[i]) as Feature);
+          const featureToRemove = this.highlightSource.getFeatureById(this.#highlightedFeatureIds[i]);
+          if (featureToRemove) this.highlightSource.removeFeature(featureToRemove);
           this.#highlightedFeatureIds.splice(i, 1);
         }
       }
@@ -196,6 +196,7 @@ export class FeatureHighlight {
       });
       newFeature.setStyle(radStyle);
     }
+    this.overlayLayer.changed();
   }
 
   /**
@@ -204,8 +205,8 @@ export class FeatureHighlight {
    * @param {boolean} isLayerHighlight - Optional if it is a layer highlight
    */
   highlightGeolocatorBBox(extent: Extent, isLayerHighlight = false): void {
-    if (this.highlighSource.getFeatureById('geoLocatorFeature')) {
-      this.highlighSource.removeFeature(this.highlighSource.getFeatureById('geoLocatorFeature') as Feature);
+    if (this.highlightSource.getFeatureById('geoLocatorFeature')) {
+      this.highlightSource.removeFeature(this.highlightSource.getFeatureById('geoLocatorFeature') as Feature);
       clearTimeout(this.#bboxTimeout as NodeJS.Timeout);
     }
     const bboxPoly = fromExtent(extent);
@@ -213,10 +214,10 @@ export class FeatureHighlight {
     const style = this.#darkOutlineStyle;
     bboxFeature.setStyle(style);
     bboxFeature.setId('geoLocatorFeature');
-    this.highlighSource.addFeature(bboxFeature);
+    this.highlightSource.addFeature(bboxFeature);
     if (!isLayerHighlight)
       this.#bboxTimeout = setTimeout(
-        () => this.highlighSource.removeFeature(this.highlighSource.getFeatureById('geoLocatorFeature') as Feature),
+        () => this.highlightSource.removeFeature(this.highlightSource.getFeatureById('geoLocatorFeature') as Feature),
         5000
       );
   }
@@ -225,6 +226,6 @@ export class FeatureHighlight {
    * Removes bounding box highlight
    */
   removeBBoxHighlight(): void {
-    this.highlighSource.removeFeature(this.highlighSource.getFeatureById('geoLocatorFeature') as Feature);
+    this.highlightSource.removeFeature(this.highlightSource.getFeatureById('geoLocatorFeature') as Feature);
   }
 }

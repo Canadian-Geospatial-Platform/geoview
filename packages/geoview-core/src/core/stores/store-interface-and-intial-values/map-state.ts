@@ -77,6 +77,7 @@ export interface IMapState {
     highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
     addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
     removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
+    removeLayerHighlights: (layerPath: string) => void;
     addPointMarkers: (group: string, pointMarkers: TypePointMarker[]) => void;
     removePointMarkersOrGroup: (group: string, idsOrCoordinates?: string[] | Coordinate[]) => void;
     reorderLayer: (layerPath: string, move: number) => void;
@@ -284,6 +285,15 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all'): void => {
         // Redirect to processor
         MapEventProcessor.removeHighlightedFeature(get().mapId, feature);
+      },
+
+      /**
+       * Removes layer and feature highlights for a given layer.
+       * @param {string} layerPath - The path of the layer to remove highlights from.
+       */
+      removeLayerHighlights: (layerPath: string): void => {
+        // Redirect to processor
+        MapEventProcessor.removeLayerHighlights(get().mapId, layerPath);
       },
 
       /**

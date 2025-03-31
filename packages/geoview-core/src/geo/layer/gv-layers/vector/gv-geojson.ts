@@ -75,7 +75,7 @@ export class GVGeoJSON extends AbstractGVVector {
       }
 
       // Reset the feature info result set
-      FeatureInfoEventProcessor.resetResultSet(mapId, layerPath);
+      FeatureInfoEventProcessor.resetResultSet(mapId, layerPath, 'name');
 
       // Update feature info
       DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerPath).catch((error) => {
