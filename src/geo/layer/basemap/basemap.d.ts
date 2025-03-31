@@ -67,6 +67,10 @@ export declare class Basemap {
      */
     setBasemap(basemap: TypeBasemapProps): void;
     /**
+     * Refreshes the basemap layers
+     */
+    refreshBasemap(): void;
+    /**
      * Registers a component removed event callback.
      * @param {MapComponentRemovedDelegate} callback - The callback to be executed whenever the event is emitted
      */
