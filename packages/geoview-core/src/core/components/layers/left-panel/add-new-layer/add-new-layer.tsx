@@ -427,7 +427,6 @@ export function AddNewLayer(): JSX.Element {
       if (!isValid) throw new Error('err');
 
       const geoCoreGeoviewLayerInstance = new GeoCore(mapId, api.maps[mapId].getDisplayLanguage());
-      // Add uniqueId to all geoCore layers so they will never be a duplicate layerPath
       const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(layerURL);
       if (layers.length === 1) {
         if (layers.length === 1) {
