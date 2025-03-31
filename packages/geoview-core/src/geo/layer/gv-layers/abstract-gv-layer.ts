@@ -633,6 +633,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           featureIcon: imageSource,
           fieldInfo: {},
           nameField: layerConfig?.source?.featureInfo?.nameField || null,
+          layerPath: layerConfig.layerPath,
         };
 
         const featureFields = feature.getKeys();

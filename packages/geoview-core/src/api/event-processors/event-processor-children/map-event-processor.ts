@@ -34,7 +34,6 @@ import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
 import { isPointInExtent } from '@/geo/utils/utilities';
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
@@ -75,66 +74,6 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 // GV The reason for this pattern is so that UI components and processes performing back-end code
 // GV both end up running code in MapEventProcessor (UI: via 'actions' and back-end code via 'MapEventProcessor')
 export class MapEventProcessor extends AbstractEventProcessor {
-  /**
-   * Override the initialization process to register store subscriptions handlers and return them so they can be destroyed later.
-   */
-  protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
-    const { mapId } = store.getState();
-
-    // #region FEATURE SELECTION
-    // Checks for changes to highlighted features and updates highlights
-    const unsubMapHighlightedFeatures = store.subscribe(
-      (state) => state.mapState.highlightedFeatures,
-      (curFeatures, prevFeatures) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - highlightedFeatures', mapId, curFeatures);
-
-        if (curFeatures.length === 0) MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight('all');
-        else {
-          const curFeatureUids = curFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
-          const prevFeatureUids = prevFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
-          const newFeatures = curFeatures.filter(
-            (feature: TypeFeatureInfoEntry) => !prevFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
-          );
-          const removedFeatures = prevFeatures.filter(
-            (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
-          );
-          for (let i = 0; i < newFeatures.length; i++) {
-            // TODO: Check Adding this check, because I've noticed an odd behavior when loading map and
-            // TO.DOCONT: querying details for the first time, the highlights don't show anymore.
-            if (!newFeatures[i].geometry?.getGeometry()) {
-              logger.logError('The geometry for the feature was undefined at the time this was executed');
-            }
-            MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.highlightFeature(newFeatures[i]);
-          }
-          for (let i = 0; i < removedFeatures.length; i++)
-            MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(
-              (removedFeatures[i].geometry as TypeGeometry).ol_uid
-            );
-        }
-      },
-      {
-        equalityFn: (prev, curr) => {
-          // Quick length checks first (prevents re-render) and calls to removeHighlight
-          if (prev === curr) return true;
-          if (prev.length !== curr.length) return false;
-          if (prev.length === 0) return true;
-
-          // Use Set for O(1) lookup instead of array operations
-          const prevUids = new Set(prev.map((feature) => (feature.geometry as TypeGeometry).ol_uid));
-
-          // Single pass through current features
-          return curr.every((feature) => prevUids.has((feature.geometry as TypeGeometry).ol_uid));
-        },
-      }
-    );
-
-    // #endregion FEATURE SELECTION
-
-    // Return the array of subscriptions so they can be destroyed later
-    return [unsubMapHighlightedFeatures];
-  }
-
   /**
    * Initializes the map controls
    * @param {string} mapId - The map id being initialized
@@ -609,6 +548,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void {
     if (feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
+      MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.highlightFeature(feature);
       // Save in store
       this.getMapStateProtected(mapId).setterActions.setHighlightedFeatures([
         ...this.getMapStateProtected(mapId).highlightedFeatures,
@@ -620,17 +560,24 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static removeHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry | 'all'): void {
     if (feature === 'all' || feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
       // Filter what we want to keep as highlighted features
-      const highlightedFeatures =
-        feature === 'all'
-          ? []
-          : this.getMapStateProtected(mapId).highlightedFeatures.filter(
-              (featureInfoEntry: TypeFeatureInfoEntry) =>
-                (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
-            );
+      let highlightedFeatures: TypeFeatureInfoEntry[] = [];
+      if (feature === 'all') {
+        MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(feature);
+      } else {
+        MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight((feature.geometry as TypeGeometry).ol_uid);
+        highlightedFeatures = this.getMapStateProtected(mapId).highlightedFeatures.filter(
+          (featureInfoEntry: TypeFeatureInfoEntry) =>
+            (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
+        );
+      }
 
       // Save in store
       this.getMapStateProtected(mapId).setterActions.setHighlightedFeatures(highlightedFeatures);
     }
+  }
+
+  static removeLayerHighlights(mapId: string, layerPath: string): void {
+    MapEventProcessor.getMapViewerLayerAPI(mapId).removeLayerHighlights(layerPath);
   }
 
   /**
