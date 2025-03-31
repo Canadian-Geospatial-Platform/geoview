@@ -189,7 +189,7 @@ export class GVWMS extends AbstractGVRaster {
         }
 
         if (featureMember) {
-          const featureInfoResult = GVWMS.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
+          const featureInfoResult = this.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
           return featureInfoResult;
         }
       }
@@ -450,7 +450,7 @@ export class GVWMS extends AbstractGVRaster {
    * @returns {TypeFeatureInfoEntry[]} The feature info table.
    * @private
    */
-  static #formatWmsFeatureInfoResult(featureMember: TypeJsonObject, clickCoordinate: Coordinate): TypeFeatureInfoEntry[] {
+  #formatWmsFeatureInfoResult(featureMember: TypeJsonObject, clickCoordinate: Coordinate): TypeFeatureInfoEntry[] {
     const queryResult: TypeFeatureInfoEntry[] = [];
 
     let featureKeyCounter = 0;
@@ -464,6 +464,7 @@ export class GVWMS extends AbstractGVRaster {
       featureIcon: document.createElement('canvas').toDataURL(),
       fieldInfo: {},
       nameField: null,
+      layerPath: this.getLayerConfig().layerPath,
     };
     const createFieldEntries = (entry: TypeJsonObject, prefix = ''): void => {
       const keys = Object.keys(entry);
