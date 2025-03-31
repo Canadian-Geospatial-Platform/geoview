@@ -418,11 +418,7 @@ export abstract class AbstractGeoViewLayer {
   protected async fetchServiceMetadata(): Promise<void> {
     if (this.metadataAccessPath) {
       try {
-        // GV: checking for .meta here instead of in geojson specific layer so it can be used for other layer types going forward
-        const url =
-          this.metadataAccessPath.toLowerCase().endsWith('json') || this.metadataAccessPath.toLowerCase().endsWith('meta')
-            ? this.metadataAccessPath
-            : `${this.metadataAccessPath}?f=json`;
+        const url = this.metadataAccessPath.toLowerCase().endsWith('json') ? this.metadataAccessPath : `${this.metadataAccessPath}?f=json`;
         const response = await fetch(url);
         const metadataJson: TypeJsonObject = await response.json();
         if (!metadataJson) this.metadata = null;

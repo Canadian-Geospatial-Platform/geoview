@@ -22,6 +22,7 @@ import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -91,6 +92,38 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   constructor(mapId: string, layerConfig: TypeGeoJSONLayerConfig) {
     super(CONST_LAYER_TYPES.GEOJSON, layerConfig, mapId);
+  }
+
+  /** ***************************************************************************************************************************
+   * This method reads the service metadata from the metadataAccessPath.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  protected override async fetchServiceMetadata(): Promise<void> {
+    if (this.metadataAccessPath) {
+      try {
+        const url =
+          this.metadataAccessPath.toLowerCase().endsWith('json') || this.metadataAccessPath.toLowerCase().endsWith('meta')
+            ? this.metadataAccessPath
+            : `${this.metadataAccessPath}?f=json`;
+        const response = await fetch(url);
+        const metadataJson: TypeJsonObject = await response.json();
+        if (!metadataJson) this.metadata = null;
+        else {
+          this.metadata = metadataJson;
+          const copyrightText = this.metadata.copyrightText as string;
+          const attributions = this.getAttributions();
+          if (copyrightText && !attributions.includes(copyrightText)) {
+            // Add it
+            attributions.push(copyrightText);
+            this.setAttributions(attributions);
+          }
+        }
+      } catch (error) {
+        this.metadata = null;
+        logger.logError(`No metadata found at ${this.metadataAccessPath}`, error);
+      }
+    }
   }
 
   /** ***************************************************************************************************************************

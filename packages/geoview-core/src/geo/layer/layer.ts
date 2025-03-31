@@ -1274,6 +1274,9 @@ export class LayerApi {
    * @param {string} layerPath - The path or ID of the layer to be removed
    */
   removeLayerUsingPath(layerPath: string): void {
+    // Remove layer highlight if layer being removed or its child is highlighted
+    if (this.#highlightedLayer.layerPath?.startsWith(`${layerPath}/`) || this.#highlightedLayer.layerPath === layerPath)
+      this.removeHighlightLayer();
     // A layer path is a slash seperated string made of the GeoView layer Id followed by the layer Ids
     const layerPathNodes = layerPath.split('/');
 
