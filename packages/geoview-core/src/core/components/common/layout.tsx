@@ -1,4 +1,4 @@
-import { useCallback, ReactNode, useRef, memo } from 'react';
+import { useCallback, ReactNode, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
@@ -31,9 +31,7 @@ const TITLE_STYLES = {
   webkitLineClamp: '2',
 } as const;
 
-// Memoizes entire component, preventing re-renders if props haven't changed
-// TODO: Unmemoize this component, probably, because it's in 'common' folder
-export const Layout = memo(function Layout({
+export function Layout({
   children,
   guideContentIds,
   layerList,
@@ -123,4 +121,4 @@ export const Layout = memo(function Layout({
       containerType={containerType}
     />
   );
-});
+}

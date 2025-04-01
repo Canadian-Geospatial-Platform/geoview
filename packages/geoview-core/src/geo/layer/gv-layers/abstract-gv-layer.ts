@@ -32,6 +32,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
+import { SnackbarType } from '@/core/utils/notifications';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -75,6 +76,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   // Keep all callback delegates references
   #onIndividualLayerLoadedHandlers: IndividualLayerLoadedDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
@@ -243,6 +247,29 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Emits a layer-specific message event with localization support
+   * @protected
+   * @param {string} messageKey - The key used to lookup the localized message OR message
+   * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
+   * @param {SnackbarType} messageType - The message type
+   * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
+   * @returns {void}
+   *
+   * @example
+   * this.emitMessage(
+   *   'layers.fetchProgress',
+   *   ['50', '100'],
+   *   messageType: 'error',
+   *   true
+   * );
+   *
+   * @fires LayerMessageEvent
+   */
+  protected emitMessage(messageKey: string, messageParams: string[], messageType = 'info' as SnackbarType, notification = false): void {
+    this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
+  }
+
+  /**
    * Overridable method called when the layer is in error and couldn't be loaded correctly
    */
   protected onError(): void {
@@ -258,10 +285,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     logger.logError(
       `Error loading source image for layer path: ${this.getLayerPath()} at zoom level: ${this.getMapViewer().getView().getZoom()}`
     );
-    const lang = document.getElementById(this.getMapId())!.getAttribute('data-lang') as 'en' | 'fr';
     // Add notification with the current zoom level
     this.getMapViewer().notifications.showError(
-      getLocalizedMessage('layers.errorImageLoad', lang),
+      getLocalizedMessage('layers.errorImageLoad', this.getMapViewer().getDisplayLanguage()),
       [this.getLayerName()!, this.getMapViewer().getView().getZoom()!],
       true
     );
@@ -577,9 +603,14 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           const { type } = styleSettings;
           const featureStyle = processStyle[type][geometryType](styleSettings, feature, layerConfig.filterEquation, true);
 
+          // Sometimes data is not well fomrated and some features has no style associated, just throw a warning
+          if (featureStyle === undefined) {
+            logger.logWarning(`Feature style is undefined for ${this.getLayerPath()}`);
+          }
+
           // Create a string unique to the style, but geometry agnostic
           const styleClone = cloneDeep(featureStyle) as Style;
-          styleClone.setGeometry('');
+          styleClone?.setGeometry?.('');
           const styleString = `${geometryType}${JSON.stringify(styleClone)}`;
 
           // Use string as dict key
@@ -822,6 +853,34 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Unregister the event handler
     EventHelper.offEvent(this.#onIndividualLayerLoadedHandlers, callback);
   }
+
+  /**
+   * Emits an event to all handlers when the layer's sent a message.
+   * @param {LayerMessageEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerMessage(event: LayerMessageEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerMessageHandlers, event);
+  }
+
+  /**
+   * Registers an individual layer message event handler.
+   * @param {LayerMessageEventDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerMessage(callback: LayerMessageDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerMessageHandlers, callback);
+  }
+
+  /**
+   * Unregisters an individual layer message event handler.
+   * @param {LayerMessageEventDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerMessage(callback: LayerMessageDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerMessageHandlers, callback);
+  }
 }
 
 /**
@@ -883,4 +942,20 @@ type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGVLayer, Individu
 export type IndividualLayerLoadedEvent = {
   // The loaded layer
   layerPath: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerMessageEvent = {
+  // The loaded layer
+  messageKey: string;
+  messageParams: string[];
+  messageType: SnackbarType;
+  notification: boolean;
 };

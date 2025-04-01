@@ -128,7 +128,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     // Set the layers list
     const layerListEntries = visibleLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
-      // TODO Need to filter by layers in visible range
       .filter((layer) => layer && visibleRangeLayers.includes(layer.layerPath))
       .map(
         (layer) =>

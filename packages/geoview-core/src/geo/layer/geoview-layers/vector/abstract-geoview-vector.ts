@@ -148,8 +148,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             features = AbstractGeoViewVector.convertCsv(this.mapId, xhr.responseText, layerConfig as VectorLayerEntryConfig);
           } else if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
             // Fetch the features text array
-            const esriFeaturesArray = await AbstractGeoViewVector.getEsriFeatures(
-              layerConfig.layerPath,
+            const esriFeaturesArray = await this.getEsriFeatures(
               url as string,
               JSON.parse(xhr.responseText).count,
               this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount as number | undefined
@@ -238,7 +237,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Fetch features from ESRI Feature services with query and feature limits.
    *
-   * @param {string} layerPath - The layer path of the layer.
    * @param {string} url - The base url for the service.
    * @param {number} featureCount - The number of features in the layer.
    * @param {number} maxRecordCount - The max features per query from the service.
@@ -250,26 +248,39 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
   // TODO: Add options for featureLimit to config
   // TODO: Will need to move with createVectorSource
-  static getEsriFeatures(
-    layerPath: string,
-    url: string,
-    featureCount: number,
-    maxRecordCount?: number,
-    featureLimit: number = 1000
-  ): Promise<string[]> {
+  async getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit: number = 1000): Promise<string[]> {
     // Update url
     const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
 
+    // GV: Web worker does not improve the performance of this fetching
     // Create array of url's to call
     const urlArray: string[] = [];
     for (let i = 0; i < featureCount; i += featureFetchLimit) {
       urlArray.push(`${baseUrl}&resultOffset=${i}&resultRecordCount=${featureFetchLimit}`);
     }
 
-    const promises: Promise<string>[] = urlArray.map((featureUrl) => fetch(featureUrl).then((response) => response.text()));
+    // Create interval for logging
+    // TODO: message - Create message for all vector layer fetching. Create a centralized message creator for geoview-layers
+    const timeInterval = setInterval(() => {
+      this.emitMessage('layers.slowFetch', [this.geoviewLayerName || '...']);
+    }, 15000); // Log every 15 seconds
 
-    return Promise.all(promises);
+    try {
+      const promises = urlArray.map((featureUrl) => fetch(featureUrl).then((response) => response.json()));
+
+      // Wait for all promises to complete
+      const results = await Promise.all(promises);
+
+      // Clear the interval when done
+      clearInterval(timeInterval);
+
+      return results;
+    } catch (error) {
+      // Clear interval even if there's an error
+      clearInterval(timeInterval);
+      throw error;
+    }
   }
 
   /** ***************************************************************************************************************************

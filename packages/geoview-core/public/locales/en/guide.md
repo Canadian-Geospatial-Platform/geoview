@@ -213,6 +213,13 @@ The _Layers_ tab has the following submenu options:
 
 _**Note: Click on a layer to display its Layer information in the right section.**_
 
+**Important Information**  
+If a layer’s visibility (eye) icon is disabled (greyed out) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) and the Zoom to Visible Scale icon <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" /> is visible, this means the layer is not visible at the current map zoom level.
+
+- Clicking the Zoom to Visible Scale button will adjust the map to the appropriate zoom level, making the layer visible.
+- However, after zooming, you may not immediately see any features if there is no data within the current view extent.
+- In this case, you may need to pan the map to locate the features.
+
 The _View_ submenu option under the _Layers_ tab consists of two sections. The left section lists all the layers displayed on the map. Click on a layer and the right section lists will show the layer settings (available options for that layer).
 
 **Layer Icons**
@@ -321,6 +328,12 @@ Check the highlight box ![]({{assetsURL}}/img/guide/layers/check.png) to keep th
 ### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Data Table [Top](#footerSection)
 
 _**Note: Click on a layer to display its Data Table information in the right section.**_
+
+**Important Navigation Information**
+- You can request data from one table at a time. While data is being fetched, all _layers_ buttons will be disabled.
+- The selected layer will be highlighted in green, and a progress message will appear at the bottom of the map section.
+- Once the data fetching is complete, all _layers_ buttons will be re-enabled.
+- If you switch to another tab during the process, you will need to reselect the layer when returning to the tab _Data Table_ to view the results.
 
 The **Data Table** tab has two sections. The layers are listed on the left and the layer data on the right. Click on a layer to show the layer data in the table on the right.
 

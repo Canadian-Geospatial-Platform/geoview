@@ -18,6 +18,9 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceImageEsriInitialConfig;
 
+  /** Max number of records for query */
+  maxRecordCount?: number;
+
   /**
    * The class constructor.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
