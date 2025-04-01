@@ -1952,7 +1952,7 @@
                   "id": {
                     "type": "string"
                   },
-                  "defaultTabs": {
+                  "label": {
                     "type": "string"
                   },
                   "contentHTML": {
