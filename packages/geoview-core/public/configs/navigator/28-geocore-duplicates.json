@@ -12,14 +12,16 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerType": "geoCore",
+        "geoviewLayerName": "Canada's Commemorative Map - Original",
         "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
       },
       {
         "geoviewLayerType": "geoCore",
+        "geoviewLayerName": "Canada's Commemorative Map - Duplicate",
         "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
       },
       {
-        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d",
+        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:Facility_Emissions",
         "geoviewLayerName": "Air Pollutant Emissions - Fine Particle Emissions by Facility",
         "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
@@ -135,7 +137,7 @@
         ]
       },
       {
-        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:2",
+        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:Water",
         "geoviewLayerName": "Air Pollutant Emissions - Water",
         "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
@@ -213,6 +215,28 @@
             ]
           }
         ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1",
+        "geoviewLayerName": "earthquakes",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1",
+        "geoviewLayerName": "earthquakes",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
       }
     ]
   },
@@ -233,6 +257,19 @@
       ]
     }
   },
-  "corePackages": [],
+  "corePackages": ["swiper"],
+  "corePackagesConfig": [
+    {
+      "swiper": {
+        "orientation": "vertical",
+        "keyboardOffset": 10,
+        "layers": [
+          "5a65ad7c-561a-466a-8375-8d876624df9d:Water",
+          "5a65ad7c-561a-466a-8375-8d876624df9d:Facility_Emissions",
+          "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
+        ]
+      }
+    }
+  ],
   "theme": "geo.ca"
 }

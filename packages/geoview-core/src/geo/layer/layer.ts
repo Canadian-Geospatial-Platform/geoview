@@ -449,10 +449,12 @@ export class LayerApi {
    * @returns {Promise<void>}
    */
   loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): Promise<void> {
+    const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
+
     // set order for layers to appear on the map according to config
     const promisesOfGeoCoreGeoviewLayers: Promise<TypeGeoviewLayerConfig[]>[] = [];
-    for (let i = 0; i < mapConfigLayerEntries!.length; i++) {
-      const geoviewLayerConfig = mapConfigLayerEntries![i];
+    for (let i = 0; i < validGeoviewLayerConfigs.length; i++) {
+      const geoviewLayerConfig = validGeoviewLayerConfigs[i];
 
       // If the layer is GeoCore add it via the core function
       if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
@@ -1518,7 +1520,7 @@ export class LayerApi {
   /**
    * Gets the max extent of all layers on the map, or of a provided subset of layers.
    *
-   * @param {string[]} layerIds - IDs of layer to get max extents from.
+   * @param {string[]} layerIds - IDs or layerPaths of layers to get max extents from.
    * @returns {Extent} The overall extent.
    */
   getExtentOfMultipleLayers(layerIds: string[] = Object.keys(this.#layerEntryConfigs)): Extent {

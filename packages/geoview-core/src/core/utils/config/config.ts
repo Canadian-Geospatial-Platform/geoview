@@ -55,7 +55,7 @@ export class Config {
       listOfGeoviewLayerConfig.forEach((geoviewLayerEntry, index, layerArray) => {
         // Add duplicate marker for duplicate IDs
         const firstIndex = layerArray.findIndex((layerEntry) => geoviewLayerEntry.geoviewLayerId === layerEntry.geoviewLayerId);
-        if (firstIndex !== index) {
+        if (firstIndex !== index && mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {
           // eslint-disable-next-line no-param-reassign
           geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${crypto.randomUUID()}`;
         }
