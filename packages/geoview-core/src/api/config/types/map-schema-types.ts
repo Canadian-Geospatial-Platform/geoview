@@ -34,7 +34,7 @@ export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 
 /** Footer bar tabs custom definition. */
 export type TypeFooterBarTabsCustomProps = {
   id: string;
-  defaultTabs: string;
+  label: string;
   contentHTML: string;
 };
 
