@@ -659,7 +659,7 @@ export class MapViewer {
       // If the layerIds array is empty, use all layers
       const layerIdsToZoomTo = this.mapFeaturesConfig.map.viewSettings.initialView.layerIds.length
         ? this.mapFeaturesConfig.map.viewSettings.initialView.layerIds
-        : this.layer.getGeoviewLayerPaths();
+        : this.layer.getGeoviewLayerIds();
 
       this.onMapLayersLoaded(() => {
         let layerExtents = this.layer.getExtentOfMultipleLayers(layerIdsToZoomTo);
