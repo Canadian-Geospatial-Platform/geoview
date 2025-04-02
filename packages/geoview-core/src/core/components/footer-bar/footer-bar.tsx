@@ -173,7 +173,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       [event.tab.id]: {
         icon: event.tab.icon || <InfoOutlinedIcon />,
         label: event.tab.label,
-        content: <UseHtmlToReact htmlContent={(event.tab.content as string) ?? ''} />,
+        content:
+          typeof event.tab.content === 'string' ? <UseHtmlToReact htmlContent={(event.tab.content as string) ?? ''} /> : event.tab.content,
       },
     } as Record<string, Tab>;
 
