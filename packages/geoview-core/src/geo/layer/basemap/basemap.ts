@@ -255,6 +255,7 @@ export class BasemapApi {
     let extent: Extent = [0, 0, 0, 0];
     let origin: number[] = [];
     let urlProj = 0;
+    let copyright = '';
 
     // ? The actual response expected by AxiosResponse is `any`
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -311,6 +312,9 @@ export class BasemapApi {
           // Set extent for this layer
           extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
 
+          // Set copyright text for this layer
+          copyright = result.copyrightText as string;
+
           // Set the spatial Reference for this layer
           urlProj = tileInfo.spatialReference.latestWkid as number;
 
@@ -363,6 +367,7 @@ export class BasemapApi {
             resolutions, // ? is this use somewhere, modifying values has no effect. Issue 643
             minScale: minZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
             maxScale: maxZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
+            copyright,
           };
         }
       } catch (error) {
@@ -531,7 +536,10 @@ export class BasemapApi {
                 '© OpenStreetMap',
                 getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)),
               ]
-            : [getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId))],
+            : [
+                basemapLayers.find((layer) => coreBasemapOptions.basemapId === layer.basemapId)?.copyright || '',
+                getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)),
+              ],
         zoomLevels: {
           min: minZoom,
           max: maxZoom,
