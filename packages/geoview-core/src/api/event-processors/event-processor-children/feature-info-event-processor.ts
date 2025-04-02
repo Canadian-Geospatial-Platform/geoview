@@ -95,12 +95,13 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * removing the higlight and the click marker if selected layer path is the reset path
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete features from resultSet
+   * @param {EventType} eventType - The event that triggered the reset.
    */
-  static resetResultSet(mapId: string, layerPath: string): void {
+  static resetResultSet(mapId: string, layerPath: string, eventType: EventType = 'click'): void {
     const { resultSet } = MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet;
     if (resultSet[layerPath]) {
       resultSet[layerPath].features = [];
-      this.propagateFeatureInfoToStore(mapId, 'click', resultSet[layerPath]).catch((err) =>
+      this.propagateFeatureInfoToStore(mapId, eventType, resultSet[layerPath]).catch((err) =>
         // Log
         logger.logPromiseFailed('Not able to reset resultSet', err, layerPath)
       );

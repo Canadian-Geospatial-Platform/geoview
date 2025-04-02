@@ -225,6 +225,7 @@ export type TypeFeatureInfoEntry = {
   featureIcon: string;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
   nameField: string | null;
+  layerPath: string;
 };
 
 export interface TypeGeometry extends RenderFeature {
