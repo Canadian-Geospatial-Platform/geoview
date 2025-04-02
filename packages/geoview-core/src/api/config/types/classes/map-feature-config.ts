@@ -150,7 +150,7 @@ export class MapFeatureConfig {
           if (layerConfig.geoviewLayerId in this.#registeredLayerPaths) {
             // Add duplicate marker ('geoviewId:uuid') so the ID is unique
             // eslint-disable-next-line no-param-reassign
-            layerConfig.geoviewLayerId = `${layerConfig.geoviewLayerId}:${crypto.randomUUID()}`;
+            layerConfig.geoviewLayerId = `${layerConfig.geoviewLayerId}:${crypto.randomUUID().substring(0, 8)}`;
           }
           this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
         }

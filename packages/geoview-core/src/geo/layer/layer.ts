@@ -684,7 +684,7 @@ export class LayerApi {
 
     if (this.getGeoviewLayerIds().includes(uuid)) {
       // eslint-disable-next-line no-param-reassign
-      uuid = `${uuid}:${crypto.randomUUID()}`;
+      uuid = `${uuid}:${crypto.randomUUID().substring(0, 8)}`;
     }
 
     // GV: This is here as a placeholder so that the layers will appear in the proper order,

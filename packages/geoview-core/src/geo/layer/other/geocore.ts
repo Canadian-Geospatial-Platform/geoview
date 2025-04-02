@@ -41,7 +41,7 @@ export class GeoCore {
     const map = MapEventProcessor.getMapViewer(this.#mapId);
     if (map.layer.getGeoviewLayerIds().includes(uuid)) {
       // eslint-disable-next-line no-param-reassign
-      uuid = `${uuid}:${crypto.randomUUID()}`;
+      uuid = `${uuid}:${crypto.randomUUID().substring(0, 8)}`;
     }
     const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.#mapId);
 
