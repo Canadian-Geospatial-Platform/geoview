@@ -7,12 +7,23 @@
     "basemapOptions": {
       "basemapId": "transport",
       "shaded": true,
-      "labeled": true
+      "labeled": false
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:air",
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerName": "Canada's Commemorative Map - Original",
+        "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerName": "Canada's Commemorative Map - Duplicate",
+        "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
+      },
+      {
+        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:Facility_Emissions",
         "geoviewLayerName": "Air Pollutant Emissions - Fine Particle Emissions by Facility",
+        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -126,8 +137,9 @@
         ]
       },
       {
-        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:water",
+        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:Water",
         "geoviewLayerName": "Air Pollutant Emissions - Water",
+        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -205,55 +217,34 @@
         ]
       },
       {
-        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:areas",
-        "geoviewLayerName": "Air Pollutant Emissions - Conserved areas",
-        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "wmsLYR1",
+        "geoviewLayerName": "earthquakes",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
+        "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "31",
-            "layerName": "Conserved areas",
-            "entryType": "group",
-            "initialSettings": {
-              "states": {
-                "opacity": 0.5
-              }
-            },
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "33",
-                "layerName": "Ecozone"
-              },
-              {
-                "layerId": "34",
-                "layerName": "Ecozone boundary"
-              }
-            ]
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1",
+        "geoviewLayerName": "earthquakes",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
           }
         ]
       }
     ]
   },
   "components": [
-    "north-arrow",
     "overview-map"
   ],
   "overviewMap": {
-    "hideOnZoom": 6
-  },
-  "navBar": [
-    "zoom",
-    "fullscreen",
-    "home",
-    "location",
-    "basemap-select"
-  ],
-  "appBar": {
-    "tabs": {
-      "core": [
-        "geolocator",
-        "export"
-      ]
-    }
+    "hideOnZoom": 7
   },
   "footerBar": {
     "tabs": {
@@ -261,10 +252,24 @@
         "legend",
         "layers",
         "details",
+        "geochart",
         "data-table"
       ]
     }
   },
-  "corePackages": [],
+  "corePackages": ["swiper"],
+  "corePackagesConfig": [
+    {
+      "swiper": {
+        "orientation": "vertical",
+        "keyboardOffset": 10,
+        "layers": [
+          "5a65ad7c-561a-466a-8375-8d876624df9d:Water",
+          "5a65ad7c-561a-466a-8375-8d876624df9d:Facility_Emissions",
+          "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
+        ]
+      }
+    }
+  ],
   "theme": "geo.ca"
 }

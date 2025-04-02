@@ -38,6 +38,11 @@ export class GeoCore {
    */
   async createLayersFromUUID(uuid: string, layerConfig?: GeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig[]> {
     // Get the map config
+    const map = MapEventProcessor.getMapViewer(this.#mapId);
+    if (map.layer.getGeoviewLayerIds().includes(uuid)) {
+      // eslint-disable-next-line no-param-reassign
+      uuid = `${uuid}:${crypto.randomUUID().substring(0, 8)}`;
+    }
     const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.#mapId);
 
     // Generate the url using metadataAccessPath when specified or using the geocore url
@@ -45,10 +50,16 @@ export class GeoCore {
 
     try {
       // Get the GV config from UUID and await
-      const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid]);
+      const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid.split(':')[0]]);
 
       // Validate the generated Geoview Layer Config
       ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);
+
+      // For each found geochart associated with the Geocore UUIDs
+      response.geocharts?.forEach((geochartConfig) => {
+        // Add a GeoChart
+        GeochartEventProcessor.addGeochartChart(this.#mapId, uuid, geochartConfig);
+      });
 
       // Use user supplied listOfLayerEntryConfig if provided
       if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
@@ -73,12 +84,10 @@ export class GeoCore {
           response.layers[0].listOfLayerEntryConfig[0].layerName = layerConfig.geoviewLayerName;
       }
 
-      // For each found geochart associated with the Geocore UUIDs
-      response.geocharts?.forEach((geochartConfig) => {
-        // Add a GeoChart
-        GeochartEventProcessor.addGeochartChart(this.#mapId, geochartConfig.layers[0].layerId as string, geochartConfig);
-      });
-
+      // Make sure if it's a duplicate, the response has the duplicates safe ID
+      if (uuid.includes(':') && uuid.split(':')[0] === response.layers[0].geoviewLayerId) {
+        response.layers[0].geoviewLayerId = uuid;
+      }
       return response.layers;
     } catch (error) {
       // Log

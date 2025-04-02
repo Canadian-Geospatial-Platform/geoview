@@ -193,10 +193,22 @@ export class LayerApi {
   }
 
   /**
-   * Gets the GeoView Layer Ids.
-   * @returns The ids of the new Geoview Layers
+   * Gets the GeoView Layer Ids / UUIDs.
+   * @returns The ids of the layers
    */
   getGeoviewLayerIds(): string[] {
+    const uniqueIds = new Set<string>();
+    for (const layerPath of Object.keys(this.#gvLayers)) {
+      uniqueIds.add(layerPath.split('/')[0]);
+    }
+    return Array.from(uniqueIds);
+  }
+
+  /**
+   * Gets the GeoView Layer Paths.
+   * @returns The layer paths of the GV Layers
+   */
+  getGeoviewLayerPaths(): string[] {
     return Object.keys(this.#gvLayers);
   }
 
@@ -670,6 +682,11 @@ export class LayerApi {
       inVisibleRange: true,
     };
 
+    if (this.getGeoviewLayerIds().includes(uuid)) {
+      // eslint-disable-next-line no-param-reassign
+      uuid = `${uuid}:${crypto.randomUUID().substring(0, 8)}`;
+    }
+
     // GV: This is here as a placeholder so that the layers will appear in the proper order,
     // GV: regardless of how quickly we get the response. It is removed if the layer fails.
     MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerInfo);
@@ -721,7 +738,7 @@ export class LayerApi {
     ConfigValidation.validateListOfGeoviewLayerConfig(this.mapViewer.getDisplayLanguage(), [geoviewLayerConfig]);
 
     // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
-    if (geoviewLayerConfig.geoviewLayerId in this.#geoviewLayers) {
+    if (this.getGeoviewLayerIds().includes(geoviewLayerConfig.geoviewLayerId)) {
       // Remove geoCore ordered layer info placeholder
       if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId))
         MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId, false);
@@ -1277,7 +1294,7 @@ export class LayerApi {
     callbackNotGood?: (geoviewLayer: AbstractBaseLayer) => void
   ): [boolean, number] {
     // If no layer entries at all or there are layer entries and there are geoview layers to check
-    let allGood = layerEntriesToCheck?.length === 0 || Object.keys(this.#geoviewLayers).length > 0;
+    let allGood = layerEntriesToCheck?.length === 0 || this.getGeoviewLayerIds().length > 0;
 
     // For each registered layer entry
     this.getGeoviewLayers().forEach((geoviewLayer) => {
@@ -1290,7 +1307,7 @@ export class LayerApi {
     });
 
     // Return if all good
-    return [allGood, Object.keys(this.#geoviewLayers).length];
+    return [allGood, this.getGeoviewLayerIds().length];
   }
 
   /**
@@ -1503,7 +1520,7 @@ export class LayerApi {
   /**
    * Gets the max extent of all layers on the map, or of a provided subset of layers.
    *
-   * @param {string[]} layerIds - IDs of layer to get max extents from.
+   * @param {string[]} layerIds - IDs or layerPaths of layers to get max extents from.
    * @returns {Extent} The overall extent.
    */
   getExtentOfMultipleLayers(layerIds: string[] = Object.keys(this.#layerEntryConfigs)): Extent {
