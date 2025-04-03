@@ -1234,14 +1234,20 @@ function searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeLaye
       const fieldName = feature.getKeys().find((key) => {
         return key.toLowerCase() === fields[j]?.toLowerCase();
       });
+
       if (fieldName) {
-        // TODO: info - explain why we need to use == instead of ===
+        const styleInfoValue =
+          typeof uniqueValueStyleInfo[i].values[j] === 'string'
+            ? (uniqueValueStyleInfo[i].values[j] as string).replace("''", "'")
+            : uniqueValueStyleInfo[i].values[j];
+        // We want type conversion for the values, so '1234' equals 1234
         // eslint-disable-next-line eqeqeq
-        isEqual = feature.get(fieldName) == uniqueValueStyleInfo[i].values[j];
+        isEqual = feature.get(fieldName) == styleInfoValue;
         if (isEqual && j + 1 === fields.length) return i;
       } else logger.logWarning(`Renderer searchUniqueValueEntry. Can not find field ${fields[j]}`);
     }
   }
+
   return undefined;
 }
 

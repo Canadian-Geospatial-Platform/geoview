@@ -43,6 +43,7 @@ export interface IMapState {
   featureHighlightColor: TypeHighlightColors;
   fixNorth: boolean;
   highlightedFeatures: TypeFeatureInfoEntry[];
+  homeView: TypeMapViewSettings | undefined;
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
   isMouseInsideMap: boolean;
   initialFilters: Record<string, string>;
@@ -108,6 +109,7 @@ export interface IMapState {
     setAttribution: (attribution: string[]) => void;
     setInitialFilters: (filters: Record<string, string>) => void;
     setInitialView: (view: TypeZoomAndCenter | Extent) => void;
+    setHomeView: (view: TypeMapViewSettings) => void;
     setInteraction: (interaction: TypeInteraction) => void;
     setIsMouseInsideMap: (isMouseInsideMap: boolean) => void;
     setZoom: (zoom: number) => void;
@@ -160,6 +162,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     featureHighlightColor: 'black',
     fixNorth: false,
     highlightedFeatures: [],
+    homeView: undefined,
     hoverFeatureInfo: undefined,
     initialFilters: {},
     initialView: {
@@ -204,6 +207,8 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           currentProjection: geoviewConfig.map.viewSettings.projection,
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
           featureHighlightColor: geoviewConfig.map.highlightColor || 'black',
+          homeView: geoviewConfig.map.viewSettings.homeView ||
+            geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, CV_MAP_CENTER[3857] as [number, number]] },
           initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [3.5, CV_MAP_CENTER[3857] as [number, number]] },
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.maxExtent,
@@ -602,6 +607,19 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           mapState: {
             ...get().mapState,
             initialView: viewType,
+          },
+        });
+      },
+
+      /**
+       * Sets the view of the home button.
+       * @param {TypeMapViewSettings} view - The view to use.
+       */
+      setHomeView: (view: TypeMapViewSettings): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            homeView: view,
           },
         });
       },

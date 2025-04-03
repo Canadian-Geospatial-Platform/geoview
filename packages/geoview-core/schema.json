@@ -1787,6 +1787,10 @@
           "$ref": "#/definitions/TypeInitialViewSettings",
           "description": "Settings for the initial viewing area of the map."
         },
+        "homeView": {
+          "$ref": "#/definitions/TypeInitialViewSettings",
+          "description": "Settings for the home nav bar button."
+        },
         "enableRotation": {
           "type": "boolean",
           "default": true,

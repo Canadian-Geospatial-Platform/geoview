@@ -17,6 +17,7 @@ import {
   TypeViewSettings,
   TypePointMarker,
   TypeHighlightColors,
+  TypeMapViewSettings,
 } from '@config/types/map-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
@@ -474,6 +475,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  static setHomeButtonView(mapId: string, view: TypeMapViewSettings): void {
+    // Save in store
+    this.getMapStateProtected(mapId).setterActions.setHomeView(view);
+  }
+
   static rotate(mapId: string, rotation: number): void {
     // Do the actual view map rotation
     this.getMapViewer(mapId).map.getView().animate({ rotation });
@@ -856,7 +862,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Validate the extent coordinates
     if (
       !extent.some((number) => {
-        return !number || Number.isNaN(number);
+        return (!number && number !== 0) || Number.isNaN(number);
       })
     ) {
       // store state will be updated by map event
@@ -938,26 +944,29 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const currProjection = this.getMapStateProtected(mapId).currentProjection;
     let extent: Extent = CV_MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
+    const homeView = this.getMapStateProtected(mapId).homeView || this.getMapStateProtected(mapId).initialView;
 
-    // TODO: Use the values store in state. Use the new store function to set initial view values
-    // TODO.CONT: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2662
     // Transform center coordinates and update options if zoomAndCenter are in config
-    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter) {
-      [options.maxZoom] = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter!;
+    if (homeView!.zoomAndCenter) {
+      [options.maxZoom] = homeView!.zoomAndCenter!;
 
-      const center = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![1];
+      const center = homeView!.zoomAndCenter![1];
       const projectedCoords = Projection.transformPoints([center], Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
 
       extent = [...projectedCoords[0], ...projectedCoords[0]];
     }
 
     // If extent is in config, use it
-    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.extent) {
-      const lnglatExtent = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.extent as Extent;
+    if (homeView!.extent) {
+      const lnglatExtent = homeView!.extent as Extent;
       extent = Projection.transformExtentFromProj(lnglatExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
       options.padding = [0, 0, 0, 0];
     }
 
+    // If layer IDs are in the config, use them
+    if (homeView!.layerIds) extent = this.getMapViewerLayerAPI(mapId).getExtentOfMultipleLayers(homeView!.layerIds);
+
+    if (extent.length !== 4) extent = Projection.transformFromLonLat(CV_MAP_EXTENTS[currProjection], `EPSG:${currProjection}`);
     return this.zoomToExtent(mapId, extent, options);
   }
 
@@ -1282,7 +1291,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       );
 
       // Get info for view
-      const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
+      const projection = this.getMapStateProtected(mapId).currentProjection as TypeValidMapProjectionCodes;
       const currentView = this.getMapViewer(mapId).map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
@@ -1294,6 +1303,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Set view settings
       const viewSettings: TypeViewSettings = {
         initialView: { zoomAndCenter: [currentView.getZoom() as number, centerLatLng] },
+        homeView: this.getMapStateProtected(mapId).homeView,
         enableRotation: config.map.viewSettings.enableRotation !== undefined ? config.map.viewSettings.enableRotation : undefined,
         rotation: this.getMapStateProtected(mapId).rotation,
         minZoom: currentView.getMinZoom(),

@@ -564,6 +564,10 @@
           "description": "Settings for the initial viewing area of the map.",
           "$ref": "#/definitions/TypeMapViewSettings"
         },
+        "homeView": {
+          "description": "Settings for the home nav bar button.",
+          "$ref": "#/definitions/TypeMapViewSettings"
+        },
         "enableRotation": {
           "description": "Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used.",
           "type": "boolean",
