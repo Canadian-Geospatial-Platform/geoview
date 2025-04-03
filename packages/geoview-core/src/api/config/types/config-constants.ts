@@ -20,8 +20,11 @@ export const CV_CONFIG_GEOCORE_URL = 'https://geocore.api.geo.ca';
 /** The default geolocator url */
 export const CV_CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
 
-/** The default geolocator url */
+/** The default proxy url */
 export const CV_CONFIG_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
+
+/** The default metadata recors url for uuid layer */
+export const CV_CONFIG_METADATA_RECORDS_URL = 'https://open.canada.ca/data/en/dataset/';
 
 export const CV_CONFIG_GEOCORE_TYPE = 'geoCore';
 
@@ -199,6 +202,7 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
     geocoreUrl: CV_CONFIG_GEOCORE_URL,
     geolocator: CV_CONFIG_GEOLOCATOR_URL,
     proxyUrl: CV_CONFIG_PROXY_URL,
+    metadataUrl: CV_CONFIG_METADATA_RECORDS_URL,
   },
   globalSettings: { canRemoveSublayers: true },
   schemaVersionUsed: '1.0',
