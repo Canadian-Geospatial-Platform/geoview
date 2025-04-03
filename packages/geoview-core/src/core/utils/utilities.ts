@@ -79,6 +79,19 @@ export function generateId(id?: string): string {
     : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
 }
 
+// TODO: refactor - This is a duplicate of static config api function. Replace in api OR create utilities api functions
+/**
+ * Function used to validate the GeoCore UUIDs.
+ *
+ * @param {string} uuid The UUID to validate.
+ *
+ * @returns {boolean} Returns true if the UUID respect the format.
+ */
+export function isValidUUID(uuid: string): boolean {
+  const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return regex.test(uuid);
+}
+
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *

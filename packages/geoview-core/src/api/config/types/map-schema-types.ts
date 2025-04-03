@@ -129,6 +129,11 @@ export type TypeServiceUrls = {
    * Default = CV_CONFIG_GEOLOCATOR_URL ('https://geolocator.api.geo.ca?keys=geonames,nominatim,locate'. Used in config-constants).
    */
   geolocator?: string;
+  /**
+   * An optional metadata service end point url, which will be used to call to metadata page for uuid layer.
+   * Default = CV_CONFIG_METADATA_RECORD_URL ('https://open.canada.ca/data/en/dataset/'. Used in config-constants).
+   */
+  metadataUrl?: string;
 };
 
 /** Valid schema version number. */

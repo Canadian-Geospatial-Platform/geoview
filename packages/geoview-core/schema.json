@@ -2143,6 +2143,11 @@
         "geolocator": {
           "type": "string",
           "description": "Service end point to access geo location of searched value."
+        },
+        "metadataUrl": {
+          "type": "string",
+          "description": "Service end point to access metadata of layers.",
+          "default": "https://open.canada.ca/data/en/dataset/"
         }
       },
       "required": [
