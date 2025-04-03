@@ -2,7 +2,7 @@ import { Root } from 'react-dom/client';
 
 import { i18n } from 'i18next';
 
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { MapBrowserEvent, MapEvent } from 'ol';
 import { ObjectEvent } from 'ol/Object';
 import OLMap from 'ol/Map';
@@ -27,8 +27,9 @@ import {
   TypeValidMapProjectionCodes,
   TypeDisplayLanguage,
   TypeDisplayTheme,
+  TypeMapViewSettings,
 } from '@config/types/map-schema-types';
-import { getGeoViewStore, removeGeoviewStore } from '@/core/stores/stores-managers';
+import { removeGeoviewStore } from '@/core/stores/stores-managers';
 
 import { Basemap } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
@@ -670,19 +671,6 @@ export class MapViewer {
 
         // Zoom to calculated extent
         if (layerExtents.length) {
-          // GV Breaking the rule to not change the config here to prevent later issues
-          // GV Here we replace the ids in the config with an extent in case the layers are removed
-          // Replace layerIds with extent in configs
-          delete this.mapFeaturesConfig.map.viewSettings.initialView!.layerIds;
-
-          // The conversions may cause a small amount of inaccuracy as we go to lon/lat for config and convert back when zooming
-          const lnglatExtent = this.convertExtentMapProjToLngLat(layerExtents);
-          this.mapFeaturesConfig.map.viewSettings.initialView!.extent = lnglatExtent;
-
-          const storeConfig = getGeoViewStore(this.mapId).getState().mapConfig;
-          delete storeConfig!.map.viewSettings.initialView!.layerIds;
-          storeConfig!.map.viewSettings.initialView!.extent = lnglatExtent;
-
           // TODO: Timeout allows for map height to be set before zoom happens, so padding is applied properly
           setTimeout(
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -1343,6 +1331,15 @@ export class MapViewer {
     // TO.DOCONT: If we keep some, we should maybe add a fourth call-stack possibility in the MapEventProcessor paradigm documentation.
     // Redirect to the processor
     return MapEventProcessor.zoomToExtent(this.mapId, extent, options);
+  }
+
+  /**
+   * Update nav bar home button view settings.
+   * @param {TypeMapViewSettings} view - The new view settings.
+   */
+  setHomeButtonView(view: TypeMapViewSettings): void {
+    // Redirect to the processor
+    MapEventProcessor.setHomeButtonView(this.mapId, view);
   }
 
   /**

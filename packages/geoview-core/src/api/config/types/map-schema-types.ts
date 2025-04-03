@@ -180,6 +180,8 @@ export type TypeInteraction = 'static' | 'dynamic';
 export type TypeViewSettings = {
   /** Settings for the initial view for map, default is zoomAndCenter of [3.5, [-90, 60]] */
   initialView?: TypeMapViewSettings;
+  /** Settings for the home nav bar button. */
+  homeView?: TypeMapViewSettings;
   /** Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used. Default = true. */
   enableRotation?: boolean;
   /**
