@@ -30,11 +30,15 @@ import {
   useDataTableLayerSettings,
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { generateId } from '@/core/utils/utilities';
+import { generateId, isValidUUID } from '@/core/utils/utilities';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
+import { CV_CONFIG_METADATA_RECORDS_URL, CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { Collapse } from '@/ui/collapse/collapse';
+import { Button } from '@/ui/button/button';
+import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -52,6 +56,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   const [isDataTableVisible, setIsDataTableVisible] = useState(false);
+  const [isInfoCollapse, setIsInfoCollapse] = useState(false);
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
@@ -309,6 +314,105 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return null;
   };
 
+  const renderInfo = (): JSX.Element | null => {
+    const { type, url, layerPath } = layerDetails;
+
+    // Set Ressource
+    const wfsParams = '?service=WFS&version=2.0.0&request=GetCapabilities';
+    const wmsParams = '?service=WMS&version=1.3.0&request=GetCapabilities';
+    let resources: string = '';
+
+    if (url) {
+      switch (type) {
+        case CV_CONST_LAYER_TYPES.WMS:
+          // Check if URL already includes WMS GetCapabilities parameters
+          // eslint-disable-next-line no-nested-ternary
+          resources = url.toLowerCase().endsWith('.xml')
+            ? `${url}`
+            : url.includes('?')
+              ? url
+              : `${url}${wmsParams}&layers=${layerPath.split('/').slice(-1)[0]}`;
+          break;
+        case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
+        case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
+          resources = `${url}${url.endsWith('/') ? '' : '/'}${layerPath.split('/').slice(-1)[0]}`;
+          break;
+        case CV_CONST_LAYER_TYPES.XYZ_TILES:
+        case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
+          resources = `${url}`;
+          break;
+        case CV_CONST_LAYER_TYPES.WFS:
+          // Check if URL already includes WFS GetCapabilities parameters
+          resources = url.includes('?') ? url : `${url}${wfsParams}`;
+          break;
+        case CV_CONST_LAYER_TYPES.OGC_FEATURE:
+          resources = `${url}/collections/${layerPath.split('/').slice(-1)[0]}`;
+          break;
+        case CV_CONST_LAYER_TYPES.VECTOR_TILES:
+          resources = `${url}?f=html`;
+          break;
+        default:
+          break;
+      }
+    }
+
+    return (
+      <Box>
+        <Button type="text" onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
+          More Information
+          <IconButton className="buttonOutline" edge="end" size="small" tooltip={t('layers.toggleCollapse')!}>
+            {isInfoCollapse ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </Button>
+        <Collapse in={isInfoCollapse}>
+          <Box>Type: {layerDetails.type}</Box>
+          {resources !== '' && (
+            <Box component="span" sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+              <Typography
+                component="span"
+                sx={{ color: theme.palette.geoViewColor.textColor.light[200], fontSize: theme.palette.geoViewFontSize.sm }}
+              >
+                Resource:
+              </Typography>
+              <Typography
+                component="span"
+                sx={{
+                  flex: 1,
+                  minWidth: 0, // This is important for flex child to shrink properly
+                  marginLeft: '4px',
+                  '& a': {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    color: theme.palette.geoViewColor.textColor.light[200],
+                    fontSize: theme.palette.geoViewFontSize.sm,
+                    display: 'block',
+                  },
+                }}
+              >
+                <a href={resources} target="_blank" rel="noopener noreferrer">
+                  {resources}
+                </a>
+              </Typography>
+            </Box>
+          )}
+          {isValidUUID(layerDetails.layerPath.split('/')[0]) && (
+            <Box>
+              {`Metadata: `}
+              <a
+                href={`${CV_CONFIG_METADATA_RECORDS_URL}${layerDetails.layerPath.split('/')[0]}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {`${layerDetails.layerPath.split('/')[0]}`}
+              </a>
+            </Box>
+          )}
+        </Collapse>
+      </Box>
+    );
+  };
+
   // Render
   return (
     <Paper sx={sxClasses.layerDetails}>
@@ -376,6 +480,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               }
               return null;
             })}
+          <Typography
+            sx={{
+              color: theme.palette.geoViewColor.textColor.light[200],
+              fontSize: theme.palette.geoViewFontSize.sm,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {renderInfo()}
+          </Typography>
         </>
       )}
     </Paper>

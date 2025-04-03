@@ -247,6 +247,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       return controls;
     };
 
+    // TODO: refactor - avoid nested function relying on outside parameter like layerPathNodes
+    // TODO.CONT: The layerId set by this array has the mamp indentifier in front... remove
     const createNewLegendEntries = (currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
       // If outside of range of layer paths, stop
       if (layerPathNodes.length < currentLevel) return;
@@ -335,6 +337,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
           icons: LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data!) || [],
+          url: layerConfig.geoviewLayerConfig.metadataAccessPath,
         };
 
         // Add the icons as items on the layer entry
