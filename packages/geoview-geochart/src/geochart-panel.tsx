@@ -229,7 +229,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     // Don't clear the selected layer on map load
     if (!mapClickCoordinates) return;
 
-    if (memoLayersList?.length && !selectedLayerPath.length) {
+    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
       const selectedLayer = memoLayersList.find((layer) => {
         return memoLayersList.find((layer2) => layer.layerPath === layer2.layerPath && layer2.numOffeatures);
       });

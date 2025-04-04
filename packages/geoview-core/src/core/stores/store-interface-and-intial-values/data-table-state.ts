@@ -74,7 +74,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       set({
         dataTableState: {
           ...get().dataTableState,
-          selectedLayerPath: geoviewConfig.footerBar?.selectedLayersLayerPath || '',
+          selectedLayerPath: geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath || '',
         },
       });
     },
