@@ -626,6 +626,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     if (hoverable) MapEventProcessor.getMapViewerLayerAPI(mapId).hoverFeatureInfoLayerSet.enableHoverListener(layerPath);
     else MapEventProcessor.getMapViewerLayerAPI(mapId).hoverFeatureInfoLayerSet.disableHoverListener(layerPath);
 
+    // ! Wrong pattern, need to be look at...
+    // TODO: These setters take curLayers, modify an object indirectly (which happens to affect an object inside curLayers!),
+    // TODO.CONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
     const curLayers = this.getLayerState(mapId).legendLayers;
     this.getLegendLayerInfo(mapId, layerPath)!.hoverable = hoverable;
 
@@ -643,6 +646,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     if (queryable) MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.enableClickListener(layerPath);
     else MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.disableClickListener(layerPath);
 
+    // ! Wrong pattern, need to be look at...
+    // TODO: These setters take curLayers, modify an object indirectly (which happens to affect an object inside curLayers!),
+    // TODO.CONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
     const curLayers = this.getLayerState(mapId).legendLayers;
     this.getLegendLayerInfo(mapId, layerPath)!.queryable = queryable;
 
