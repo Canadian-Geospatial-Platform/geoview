@@ -104,7 +104,9 @@
   "footerBar": {
     "tabs": {
       "core": ["legend", "layers", "details", "geochart"]
-    }
+    },
+    "selectedTab": "geochart",
+    "selectedLayersLayerPath": "airborne_radioactivity/1"
   },
   "corePackages": []
 }

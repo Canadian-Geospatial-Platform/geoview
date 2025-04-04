@@ -81,7 +81,9 @@
   "appBar": {
     "tabs": {
       "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
-    }
+    },
+    "selectedTab": "layers",
+    "selectedLayersLayerPath": "sandboxMap-layers-uniqueValueId/1"
   },
   "navBar": ["zoom", "fullscreen", "home", "location"],
   "components": ["north-arrow", "overview-map"],

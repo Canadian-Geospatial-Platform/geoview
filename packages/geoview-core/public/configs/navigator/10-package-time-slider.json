@@ -82,7 +82,9 @@
         "data-table",
         "time-slider"
       ]
-    }
+    },
+    "selectedTab": "time-slider",
+    "selectedLayersLayerPath": "historical-flood/0"
   },
   "corePackages": [],
   "externalPackages": []
