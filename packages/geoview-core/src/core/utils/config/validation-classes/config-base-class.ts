@@ -93,6 +93,7 @@ export abstract class ConfigBaseClass {
 
     // Keep the layer status
     const { layerStatus } = layerConfig;
+
     // Delete the layer status from the property so that it can go through the Object.assign without failing..
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-param-reassign
     delete (layerConfig as any).layerStatus;

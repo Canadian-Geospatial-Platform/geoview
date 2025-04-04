@@ -8,15 +8,41 @@ import i18n from '@/core/translation/i18n';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 /**
+ * Take string like "My string is __param__" and replace parameters (__param__) from array of values
+ *
+ * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - An array of parameters to replace, i.e. ['short']
+ * @param {string} message - The original message, i.e. "My string is __param__"
+ * @returns {string} Message with values replaced "My string is short"
+ */
+export function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string): string {
+  let tmpMess = message;
+  (params as string[]).forEach((item: string) => {
+    tmpMess = tmpMess.replace('__param__', item);
+  });
+
+  return tmpMess;
+}
+
+/**
  * Return proper language Geoview localized values from map i18n instance
  *
  * @param {string} localizedKey - The localize key to read the message from
  * @param {TypeDisplayLanguage} language - The language to get the message in
  * @returns {string} The translated message with values replaced
  */
-export function getLocalizedMessage(localizedKey: string, language: TypeDisplayLanguage): string {
+export function getLocalizedMessage(
+  localizedKey: string,
+  language: TypeDisplayLanguage,
+  params: TypeJsonValue[] | TypeJsonArray | string[] | undefined = undefined
+): string {
   const trans = i18n.getFixedT(language);
-  return trans(localizedKey);
+  let message = trans(localizedKey);
+
+  // if params provided, replace them
+  if (params && params.length > 0) message = replaceParams(params, message);
+
+  // Return the messsage
+  return message;
 }
 
 /**
@@ -77,22 +103,6 @@ export function generateId(id?: string): string {
   return id !== null && id !== undefined && id.length > 0
     ? id
     : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
-}
-
-/**
- * Take string like "My string is __param__" and replace parameters (__param__) from array of values
- *
- * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - An array of parameters to replace, i.e. ['short']
- * @param {string} message - The original message, i.e. "My string is __param__"
- * @returns {string} Message with values replaced "My string is short"
- */
-export function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string): string {
-  let tmpMess = message;
-  (params as string[]).forEach((item: string) => {
-    tmpMess = tmpMess.replace('__param__', item);
-  });
-
-  return tmpMess;
 }
 
 /**

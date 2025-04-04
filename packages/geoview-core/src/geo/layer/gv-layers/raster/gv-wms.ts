@@ -10,7 +10,7 @@ import { Extent } from 'ol/extent';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { xmlToJson } from '@/core/utils/utilities';
-import { AbortError } from '@/core/exceptions/geoview-exceptions';
+import { AbortError } from '@/core/exceptions/core-exceptions';
 import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
@@ -83,7 +83,7 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the return of feature information at a given pixel location.
-   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+   * @param {Pixel} location - The pixel coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].

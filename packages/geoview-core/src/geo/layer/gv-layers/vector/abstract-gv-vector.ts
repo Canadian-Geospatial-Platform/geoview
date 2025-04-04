@@ -118,7 +118,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the return of feature information at a given pixel location.
-   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+   * @param {Pixel} location - The pixel coordinate that will be used by the query.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[]> {

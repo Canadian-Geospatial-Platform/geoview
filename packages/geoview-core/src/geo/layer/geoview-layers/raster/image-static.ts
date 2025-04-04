@@ -146,10 +146,10 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<ImageLayer<Static>>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config)
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<Static> | undefined> {
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<Static>> {
     // Instance check
     if (!(layerConfig instanceof ImageStaticLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
@@ -176,7 +176,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
 
     // If any response
-    let olLayer: ImageLayer<Static> | undefined;
+    let olLayer: ImageLayer<Static>;
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<Static>;

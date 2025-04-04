@@ -2,7 +2,7 @@ import { NotificationType } from '@/core/components/notifications/notifications'
 import { TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { generateId, getLocalizedMessage, replaceParams } from './utilities';
+import { generateId, getLocalizedMessage } from './utilities';
 import { logger } from './logger';
 
 /**
@@ -24,23 +24,6 @@ export class Notifications {
     this.mapId = mapId;
   }
 
-  /**
-   * Check if message is a valid local key and apply paramter replacement.
-   * @param {string} message - The message or a locale key to retrieve
-   * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Array the parameters to replace
-   * @returns {string} Formated and localized message if valid, the original message otherwise
-   * @private
-   */
-  #formatMessage(message: string, params: TypeJsonValue[] | TypeJsonArray | string[]): string {
-    // if message is a key, get localized value, if not return the string
-    let localMessage = getLocalizedMessage(message, AppEventProcessor.getDisplayLanguage(this.mapId));
-
-    // if params provided, replace them
-    if (params.length > 0) localMessage = replaceParams(params, localMessage);
-
-    return localMessage;
-  }
-
   // #region NOTIFICATIONS
   /**
    * Reusable utility function to send event to add a notification in the notifications manager
@@ -54,7 +37,7 @@ export class Notifications {
     const notification = {
       key: generateId(),
       notificationType: type,
-      message: this.#formatMessage(message, params),
+      message: getLocalizedMessage(message, AppEventProcessor.getDisplayLanguage(this.mapId), params),
       count: 1,
     };
 
@@ -127,7 +110,7 @@ export class Notifications {
   ): void {
     const snackbar: SnackBarOpenEvent = {
       snackbarType: type,
-      message: this.#formatMessage(message, params),
+      message: getLocalizedMessage(message, AppEventProcessor.getDisplayLanguage(this.mapId), params),
       button,
     };
     // Emit

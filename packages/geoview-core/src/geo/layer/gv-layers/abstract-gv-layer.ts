@@ -33,7 +33,7 @@ import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
 import { SnackbarType } from '@/core/utils/notifications';
-import { NotImplementedError } from '@/core/exceptions/geoview-exceptions';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -375,7 +375,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overridable function to return of feature information at a given pixel location.
-   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+   * @param {Pixel} location - The pixel coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].

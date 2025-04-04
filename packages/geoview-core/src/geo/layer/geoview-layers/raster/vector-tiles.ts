@@ -17,10 +17,10 @@ import {
 import { TypeJsonObject } from '@/core/types/global-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { api } from '@/app';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -133,12 +133,10 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<VectorTileLayer<VectorTileSource>>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config)
-  protected override onProcessOneLayerEntry(
-    layerConfig: AbstractBaseLayerEntryConfig
-  ): Promise<VectorTileLayer<VectorTileSource> | undefined> {
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<VectorTileLayer<VectorTileSource>> {
     // Instance check
     if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
@@ -150,16 +148,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
       this.metadata?.tileInfo?.spatialReference?.wkid &&
       this.getMapViewer().getProjection().getCode().replace('EPSG:', '') !== this.metadata.tileInfo.spatialReference.wkid.toString()
     ) {
-      // TODO: find a more centralized way to trap error and display message
-      api.maps[this.mapId].notifications.showError(
-        `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`
-      );
-      logger.logError(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
-
       // Set the layer status to error
       layerConfig.setLayerStatusError();
 
-      return Promise.resolve(undefined);
+      // Raise error
+      throw new GeoViewError(this.mapId, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
     }
 
     if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
@@ -185,7 +178,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
 
     // If any response
-    let olLayer: VectorTileLayer<VectorTileSource> | undefined;
+    let olLayer: VectorTileLayer<VectorTileSource>;
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as VectorTileLayer<VectorTileSource>;

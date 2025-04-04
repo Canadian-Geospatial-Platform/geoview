@@ -9,7 +9,7 @@ import {
   TypeAllFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
-import { AbortError } from '@/core/exceptions/geoview-exceptions';
+import { AbortError } from '@/core/exceptions/core-exceptions';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing

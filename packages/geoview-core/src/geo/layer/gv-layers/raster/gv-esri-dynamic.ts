@@ -33,7 +33,7 @@ import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { fetchWithTimeout } from '@/core/utils/fetch-helper';
-import { AbortError } from '@/core/exceptions/geoview-exceptions';
+import { AbortError } from '@/core/exceptions/core-exceptions';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -197,6 +197,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const jsonResponse = await this.fetchAllFeatureInfoWithWorker(layerConfig);
 
     // If was aborted
+    // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
     if (abortController?.signal.aborted) {
       // Raise error
       throw new AbortError('Cancelled', abortController.signal);
@@ -248,7 +249,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the return of feature information at a given pixel location.
-   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+   * @param {Pixel} location - The pixel coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
@@ -364,7 +365,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // If it takes more then 10 seconds it means the server is unresponsive and we should not continue. This will throw an error...
     const identifyJsonResponse = await fetchWithTimeout<TypeJsonObject>(identifyUrl, {}, 10000);
 
-    // If cancelled
+    // If was aborted
+    // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
     if (abortController?.signal.aborted) {
       // Raise error
       throw new AbortError('Cancelled', abortController.signal);
@@ -421,6 +423,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(features, layerConfig);
 
     // If cancelled
+    // Explicitely checking the abort condition here, after reading the features, because the processing above is time consuming and maybe things have become aborted meanwhile.
     if (abortController?.signal.aborted) {
       // Raise error
       throw new AbortError('Cancelled', abortController.signal);
@@ -440,6 +443,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         .then((featuresJSON) => {
           (featuresJSON.features as TypeJsonObject[]).forEach((feat: TypeJsonObject, index: number) => {
             // If cancelled
+            // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
             if (abortController?.signal.aborted) {
               // Raise error
               throw new AbortError('Cancelled', abortController.signal);

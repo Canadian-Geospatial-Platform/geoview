@@ -69,10 +69,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
+   * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config)
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer> {
     // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
     // Instance check
     if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');

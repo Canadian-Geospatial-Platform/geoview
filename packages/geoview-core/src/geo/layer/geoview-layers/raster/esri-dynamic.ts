@@ -195,10 +195,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<ImageLayer<ImageArcGISRest>>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config)
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest> | undefined> {
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
     // Instance check
     if (!(layerConfig instanceof EsriDynamicLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
@@ -228,7 +228,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
 
     // If any response
-    let olLayer: ImageLayer<ImageArcGISRest> | undefined;
+    let olLayer: ImageLayer<ImageArcGISRest>;
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;

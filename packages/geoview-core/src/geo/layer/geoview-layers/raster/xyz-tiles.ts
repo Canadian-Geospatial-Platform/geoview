@@ -167,10 +167,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<TileLayer<XYZ>>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config)
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TileLayer<XYZ> | undefined> {
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TileLayer<XYZ>> {
     // Instance check
     if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
@@ -200,7 +200,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
 
     // If any response
-    let olLayer: TileLayer<XYZ> | undefined;
+    let olLayer: TileLayer<XYZ>;
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as TileLayer<XYZ>;

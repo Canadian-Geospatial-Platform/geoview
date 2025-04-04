@@ -479,12 +479,9 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
    *
-   * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
+   * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
    */
-  protected override onProcessOneLayerEntry(
-    layerConfig: AbstractBaseLayerEntryConfig,
-    layerGroup?: LayerGroup
-  ): Promise<BaseLayer | undefined> {
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer> {
     // TODO: Refactor - This function implementation needs revision, because it doesn't return a single 'BaseLayer', it can
     // TO.DOCONT: create more than one layer which seems to differ from the other layer classes.
 

@@ -21,7 +21,7 @@ import {
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
-import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
+import { GeoViewLayerCreatedTwiceError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -381,7 +381,7 @@ export abstract class AbstractGeoViewLayer {
       if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
     } else {
       // Raise error
-      throw new GeoViewLayerCreatedTwiceError(this as unknown as AbstractGVLayer, this.mapId);
+      throw new GeoViewLayerCreatedTwiceError(this.mapId, this as unknown as AbstractGVLayer);
     }
   }
 
@@ -645,9 +645,9 @@ export abstract class AbstractGeoViewLayer {
    * Processes a layer entry and returns a Promise of an Open Layer Base Layer object or undefined.
    * This method sets the 'loading' status on the layer config and then calls the overridable method 'onProcessOneLayerEntry'.
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   * @returns {Promise<BaseLayer | undefined>} The Open Layer Base Layer that has been created.
+   * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
    */
-  #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
+  #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer> {
     // Indicate that the layer config has entered the 'loading' status
     layerConfig.setLayerStatusLoading();
 
@@ -658,9 +658,9 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object or undefined.
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   * @returns {Promise<BaseLayer | undefined>} The Open Layer Base Layer that has been created.
+   * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
    */
-  protected abstract onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined>;
+  protected abstract onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer>;
 
   /** ***************************************************************************************************************************
    * Creates a layer group.
@@ -857,7 +857,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {LayerRequestingEvent} event The event to emit
    * @private
    */
-  protected emitLayerRequesting(event: LayerRequestingEvent): (BaseLayer | undefined)[] {
+  protected emitLayerRequesting(event: LayerRequestingEvent): BaseLayer[] {
     // Emit the event for all handlers
     return EventHelper.emitEvent(this, this.#onLayerRequestingHandlers, event);
   }
@@ -1034,7 +1034,7 @@ export type LayerRequestingEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerRequestingDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerRequestingEvent, BaseLayer | undefined>;
+type LayerRequestingDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerRequestingEvent, BaseLayer>;
 
 /**
  * Define an event for the delegate

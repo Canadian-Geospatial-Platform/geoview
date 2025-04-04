@@ -45,7 +45,7 @@ import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-i
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
-import { GeoViewLayerCreatedTwiceError, GeoViewLayerNotCreatedError } from '@/geo/layer/exceptions/layer-exceptions';
+import { GeoViewLayerCreatedTwiceError, GeoViewLayerNotCreatedError } from '@/core/exceptions/layer-exceptions';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer, LayerMessageEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
@@ -521,7 +521,7 @@ export class LayerApi {
                 });
               } else {
                 // Layer failed to get created
-                throw new GeoViewLayerNotCreatedError(geoviewLayerConfig.geoviewLayerId, this.getMapId());
+                throw new GeoViewLayerNotCreatedError(this.getMapId(), geoviewLayerConfig.geoviewLayerId);
               }
             } catch (error) {
               // Layer encountered a generic error when being created and added to the map
@@ -830,7 +830,7 @@ export class LayerApi {
       });
 
       // Register hook when an OpenLayer source has been created
-      layerBeingAdded.onLayerRequesting((geoviewLayer: AbstractGeoViewLayer, event: LayerRequestingEvent): BaseLayer | undefined => {
+      layerBeingAdded.onLayerRequesting((geoviewLayer: AbstractGeoViewLayer, event: LayerRequestingEvent): BaseLayer => {
         // Log
         logger.logDebug(`Requesting layer for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
 
