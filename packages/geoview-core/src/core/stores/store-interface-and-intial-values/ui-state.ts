@@ -80,6 +80,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     footerPanelResizeValue: 35,
     footerBarIsCollapsed: false,
     selectedFooterLayerListItemId: '',
+    selectedAppBarLayerListItemId: '',
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -99,6 +100,15 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           corePackagesComponents: geoviewConfig.corePackages || [],
           navBarComponents: geoviewConfig.navBar || [],
           footerBarIsCollapsed: geoviewConfig.footerBar?.collapsed !== undefined ? geoviewConfig.footerBar.collapsed : false,
+          selectedFooterLayerListItemId: ((): string => {
+            if (geoviewConfig.footerBar?.selectedLayersLayerPath) {
+              return `${get().mapId}-${geoviewConfig.footerBar.selectedTab}-${geoviewConfig.footerBar.selectedLayersLayerPath}`;
+            }
+            if (geoviewConfig.appBar?.selectedLayersLayerPath) {
+              return geoviewConfig.appBar.selectedLayersLayerPath;
+            }
+            return '';
+          })(),
         },
       });
     },

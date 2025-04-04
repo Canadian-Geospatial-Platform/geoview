@@ -226,8 +226,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('GEOCHART-PANEL- mapClickCoordinates', mapClickCoordinates);
+    // Don't clear the selected layer on map load
+    if (!mapClickCoordinates) return;
 
-    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
+    if (memoLayersList?.length && !selectedLayerPath.length) {
       const selectedLayer = memoLayersList.find((layer) => {
         return memoLayersList.find((layer2) => layer.layerPath === layer2.layerPath && layer2.numOffeatures);
       });
