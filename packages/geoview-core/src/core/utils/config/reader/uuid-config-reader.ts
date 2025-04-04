@@ -434,7 +434,7 @@ export class UUIDmapConfigReader {
 
     // Find all Geochart configs
     const foundConfigs = result.data.response.gcs
-      .map((gcs) => gcs?.[lang]?.packages?.geochart as GeoChartGeoCoreConfig)
+      .flatMap((gcs) => gcs?.[lang]?.packages?.geochart as unknown as GeoChartGeoCoreConfig[])
       .filter((geochartValue) => !!geochartValue);
 
     // For each found config, parse
