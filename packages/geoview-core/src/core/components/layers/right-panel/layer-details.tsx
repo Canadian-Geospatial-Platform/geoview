@@ -35,10 +35,11 @@ import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
-import { CV_CONFIG_METADATA_RECORDS_URL, CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { Collapse } from '@/ui/collapse/collapse';
 import { Button } from '@/ui/button/button';
 import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
+import { useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -66,6 +67,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const datatableSettings = useDataTableLayerSettings();
   const layersData = useDataTableAllFeaturesDataArray();
+  const metadataUrl = useAppMetadataServiceURL();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
 
   // Is highlight button disabled?
@@ -322,6 +324,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     const wmsParams = '?service=WMS&version=1.3.0&request=GetCapabilities';
     let resources: string = '';
 
+    // Check if we can set the resource url
     if (url) {
       switch (type) {
         case CV_CONST_LAYER_TYPES.WMS:
@@ -356,55 +359,33 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       }
     }
 
+    // Check if we can set the metadata from layerPath
+    const id = layerDetails.layerPath.split('/')[0].split(':')[0];
+    const validId = isValidUUID(id) && metadataUrl !== '';
+
     return (
       <Box>
         <Button type="text" onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
-          More Information
+          {`${t('layers.moreInfo')!}`}
           <IconButton className="buttonOutline" edge="end" size="small" tooltip={t('layers.toggleCollapse')!}>
             {isInfoCollapse ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </Button>
-        <Collapse in={isInfoCollapse}>
-          <Box>Type: {layerDetails.type}</Box>
+        <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
+          <Box>{`${t('layers.layerType')!}${layerDetails.type}`}</Box>
           {resources !== '' && (
-            <Box component="span" sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-              <Typography
-                component="span"
-                sx={{ color: theme.palette.geoViewColor.textColor.light[200], fontSize: theme.palette.geoViewFontSize.sm }}
-              >
-                Resource:
-              </Typography>
-              <Typography
-                component="span"
-                sx={{
-                  flex: 1,
-                  minWidth: 0, // This is important for flex child to shrink properly
-                  marginLeft: '4px',
-                  '& a': {
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    color: theme.palette.geoViewColor.textColor.light[200],
-                    fontSize: theme.palette.geoViewFontSize.sm,
-                    display: 'block',
-                  },
-                }}
-              >
-                <a href={resources} target="_blank" rel="noopener noreferrer">
-                  {resources}
-                </a>
-              </Typography>
+            <Box className="info-container">
+              {`${t('layers.layerResource')!}`}
+              <a href={resources} target="_blank" rel="noopener noreferrer">
+                {resources}
+              </a>
             </Box>
           )}
-          {isValidUUID(layerDetails.layerPath.split('/')[0]) && (
-            <Box>
-              {`Metadata: `}
-              <a
-                href={`${CV_CONFIG_METADATA_RECORDS_URL}${layerDetails.layerPath.split('/')[0]}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {`${layerDetails.layerPath.split('/')[0]}`}
+          {validId && (
+            <Box className="info-container">
+              {`${t('layers.layerMetadata')!}`}
+              <a href={`${metadataUrl}${id}`} target="_blank" rel="noopener noreferrer">
+                {`${id}`}
               </a>
             </Box>
           )}
@@ -480,15 +461,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               }
               return null;
             })}
-          <Typography
-            sx={{
-              color: theme.palette.geoViewColor.textColor.light[200],
-              fontSize: theme.palette.geoViewFontSize.sm,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {renderInfo()}
-          </Typography>
+          {renderInfo()}
         </>
       )}
     </Paper>

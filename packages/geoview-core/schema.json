@@ -2140,7 +2140,7 @@
           "type": "string",
           "description": "An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server or an absolute path on a server which sets CORS headers."
         },
-        "geolocator": {
+        "geolocatorUrl": {
           "type": "string",
           "description": "Service end point to access geo location of searched value."
         },

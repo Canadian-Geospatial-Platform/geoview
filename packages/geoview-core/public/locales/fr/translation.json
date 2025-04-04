@@ -133,7 +133,11 @@
     "layerAddedAndLoading": "Couche __param__ ajoutée et en chargement",
     "layerAddedWithError": "Couche __param__ en erreur",
     "instructionsNoLayersTitle": "Aucune couche visible",
-    "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte."
+    "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte.",
+    "moreInfo": "Plus d'informations",
+    "layerType": "Type : ",
+    "layerResource": "Ressource : ",
+    "layerMetadata": "Métadonnées : "
   },
   "details": {
     "title": "Détails",
