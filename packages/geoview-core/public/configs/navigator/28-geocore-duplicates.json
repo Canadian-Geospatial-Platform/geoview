@@ -271,5 +271,8 @@
       }
     }
   ],
+  "serviceUrls": {
+    "metadataUrl": "https://open.canada.ca/data/en/dataset/"
+  },
   "theme": "geo.ca"
 }

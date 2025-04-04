@@ -133,7 +133,11 @@
     "layerAddedAndLoading": "Layer __param__ added and loading",
     "layerAddedWithError": "Layer __param__ in error",
     "instructionsNoLayersTitle": "No layers visible",
-    "instructionsNoLayersBody": "Add visible layers on the map."
+    "instructionsNoLayersBody": "Add visible layers on the map.",
+    "moreInfo": "More Information",
+    "layerType": "Type: ",
+    "layerResource": "Resource: ",
+    "layerMetadata": "Metadata: "
   },
   "details": {
     "title": "Details",
