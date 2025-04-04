@@ -6,8 +6,8 @@ import Collection from 'ol/Collection';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Source from 'ol/source/Source';
 
-import { generateId, getXMLHttpRequest, isJsonString, whenThisThen } from '@/core/utils/utilities';
-import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
+import { generateId, whenThisThen } from '@/core/utils/utilities';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -29,6 +29,7 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { SnackbarType } from '@/core/utils/notifications';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -132,6 +133,9 @@ export abstract class AbstractGeoViewLayer {
 
   // Keep all callback delegates references
   #onIndividualLayerLoadedHandlers: IndividualLayerLoadedDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
@@ -418,10 +422,12 @@ export abstract class AbstractGeoViewLayer {
   protected async fetchServiceMetadata(): Promise<void> {
     if (this.metadataAccessPath) {
       try {
-        const metadataString = await getXMLHttpRequest(`${this.metadataAccessPath}?f=json`);
-        if (metadataString === '{}' || !isJsonString(metadataString)) this.metadata = null;
+        const url = this.metadataAccessPath.toLowerCase().endsWith('json') ? this.metadataAccessPath : `${this.metadataAccessPath}?f=json`;
+        const response = await fetch(url);
+        const metadataJson: TypeJsonObject = await response.json();
+        if (!metadataJson) this.metadata = null;
         else {
-          this.metadata = toJsonObject(JSON.parse(metadataString));
+          this.metadata = metadataJson;
           const copyrightText = this.metadata.copyrightText as string;
           const attributions = this.getAttributions();
           if (copyrightText && !attributions.includes(copyrightText)) {
@@ -685,6 +691,29 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * Emits a layer-specific message event with localization support
+   * @protected
+   * @param {string} messageKey - The key used to lookup the localized message OR message
+   * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
+   * @param {SnackbarType} messageType - The message type
+   * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
+   * @returns {void}
+   *
+   * @example
+   * this.emitMessage(
+   *   'layers.fetchProgress',
+   *   ['50', '100'],
+   *   messageType: 'error',
+   *   true
+   * );
+   *
+   * @fires LayerMessageEvent
+   */
+  protected emitMessage(messageKey: string, messageParams: string[], messageType = 'info' as SnackbarType, notification = false): void {
+    this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
+  }
+
+  /**
    * Overridable function called when the layer gets in error status.
    * @param layerConfig - The layer configuration
    */
@@ -919,6 +948,34 @@ export abstract class AbstractGeoViewLayer {
     EventHelper.offEvent(this.#onIndividualLayerLoadedHandlers, callback);
   }
 
+  /**
+   * Emits an event to all handlers when the layer's sent a message.
+   * @param {LayerMessageEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerMessage(event: LayerMessageEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerMessageHandlers, event);
+  }
+
+  /**
+   * Registers an individual layer message event handler.
+   * @param {LayerMessageEventDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerMessage(callback: LayerMessageDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerMessageHandlers, callback);
+  }
+
+  /**
+   * Unregisters an individual layer message event handler.
+   * @param {LayerMessageEventDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerMessage(callback: LayerMessageDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerMessageHandlers, callback);
+  }
+
   // #endregion
 }
 
@@ -1021,6 +1078,22 @@ type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGeoViewLayer, Ind
 export type IndividualLayerLoadedEvent = {
   // The loaded layer
   layerPath: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerMessageDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerMessageEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerMessageEvent = {
+  // The loaded layer
+  messageKey: string;
+  messageParams: string[];
+  messageType: SnackbarType;
+  notification: boolean;
 };
 
 export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {

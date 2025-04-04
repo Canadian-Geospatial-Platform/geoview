@@ -11,9 +11,8 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d",
+        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:air",
         "geoviewLayerName": "Air Pollutant Emissions - Fine Particle Emissions by Facility",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -127,10 +126,9 @@
         ]
       },
       {
-        "geoviewLayerId": "water",
+        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:water",
         "geoviewLayerName": "Air Pollutant Emissions - Water",
-        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
-        "geoviewLayerType": "esriDynamic",
+        "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
@@ -207,10 +205,9 @@
         ]
       },
       {
-        "geoviewLayerId": "areas",
+        "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d:areas",
         "geoviewLayerName": "Air Pollutant Emissions - Conserved areas",
-        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
-        "geoviewLayerType": "esriDynamic",
+        "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
             "layerId": "31",

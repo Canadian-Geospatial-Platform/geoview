@@ -18,9 +18,9 @@
       "core": ["geolocator",
                 "export",
                 "aoi-panel",
+                "custom-legend",
                 "guide",
                 "details",
-                "legend",
                 "data-table",
                 "layers"]
     }

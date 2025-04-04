@@ -148,10 +148,11 @@ export class MapFeatureConfig {
       .filter((layerConfig) => {
         if (layerConfig) {
           if (layerConfig.geoviewLayerId in this.#registeredLayerPaths) {
-            layerConfig.setErrorDetectedFlag();
-            layerConfig.setErrorDetectedFlagForAllLayers(layerConfig.listOfLayerEntryConfig);
-            logger.logError(`ERROR: The GeoView layer ${layerConfig.geoviewLayerId} is duplicated.`);
-          } else this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
+            // Add duplicate marker ('geoviewId:uuid') so the ID is unique
+            // eslint-disable-next-line no-param-reassign
+            layerConfig.geoviewLayerId = `${layerConfig.geoviewLayerId}:${crypto.randomUUID().substring(0, 8)}`;
+          }
+          this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
         }
         return layerConfig;
       }) as AbstractGeoviewLayerConfig[];

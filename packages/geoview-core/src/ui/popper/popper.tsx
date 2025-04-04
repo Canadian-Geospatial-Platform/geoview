@@ -62,7 +62,7 @@ interface PopperPropsExtend extends PopperProps {
  * @see {@link https://mui.com/material-ui/react-popper/|Material-UI Popper}
  */
 function PopperUI({ open, onClose, handleKeyDown, ...props }: PopperPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/popper/popper');
+  logger.logTraceRenderDetailed('ui/popper/popper');
 
   // Hooks
   const fadeInAnimation = useFadeIn();

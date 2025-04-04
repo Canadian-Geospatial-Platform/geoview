@@ -115,6 +115,10 @@
     "errorNotLoaded": "An error occured when loading the layer",
     "errorProj": "does not support current map projection",
     "errorImageLoad": "Error loading source image for layer: __param__ at zoom level __param__",
+    "fetchProgress": "Fetching data... Retrieved __param__ of __param__ records",
+    "fetchDone": "Data fetched - __param__ records",
+    "fetchStart": "Start fetching data...",
+    "slowFetch": "Downloading __param__ is taking longer then expected",
     "only": "only",
     "opacity": "Opacity",
     "opacityMax": "Maximum from parent",
@@ -165,8 +169,9 @@
   },
   "validation": {
     "layer": {
-      "loadfailed": "Layer __param__ failed to load on map.",
+      "loadfailed": "Layer __param__ failed to load on map",
       "notfound": "The sublayer __param__ of the layer __param__ does not exist on the server",
+      "uuidNotFount": "GeoCore layer identifier __param__ does not exist on the server",
       "createtwice": "Can not execute the createGeoViewRasterLayers method twice for the layer __param__ on map",
       "usedtwice": "Duplicate use of layer identifier __param__ on map",
       "multipleUUID": "GeoCore layers may only have one GeoCore id per layer"
@@ -243,7 +248,8 @@
       "createGroup": "Unable to create group layer",
       "emptyGroup": "Empty layer group",
       "esriId": "ESRI layerId must be a number",
-      "esriIdNotFound": "ESRI layerId not found"
+      "esriIdNotFound": "ESRI layerId not found",
+      "notAbleToQuery": "Not able to download records for __param__"
     },
     "geocore": {
       "noLayer": "No layers returned by GeoCore service"

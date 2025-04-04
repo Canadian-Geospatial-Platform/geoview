@@ -61,7 +61,7 @@ const handleKeyDown = (event: KeyboardEvent): void => {
  * @see {@link https://mui.com/material-ui/react-popover/|Material-UI Popover}
  */
 function PopoverUI(props: PopoverProps): JSX.Element {
-  logger.logTraceRender('ui/popover/popover');
+  logger.logTraceRenderDetailed('ui/popover/popover');
 
   // Get constant from props
   const { open } = props;

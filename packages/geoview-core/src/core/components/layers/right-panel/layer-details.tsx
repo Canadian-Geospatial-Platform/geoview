@@ -63,6 +63,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layersData = useDataTableAllFeaturesDataArray();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
 
+  // Is highlight button disabled?
+  const isLayerHighlightCapable = layerDetails.controls?.highlight;
+
+  // Is zoom to extent button disabled?
+  const isLayerZoomToExtentCapable = layerDetails.controls?.zoom;
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LAYER DETAILS', selectedLayer, layerDetails);
@@ -204,7 +210,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <Fragment key={layer.layerId}>
             <ListItem sx={{ padding: '6px 0px', borderTop: `1px solid ${theme.palette.geoViewColor.bgColor.dark[50]}` }}>
               <ListItemIcon>
-                <LayerIcon layer={layer} />
+                <LayerIcon layerPath={layer.layerPath} />
               </ListItemIcon>
               <ListItemText primary={layer.layerName} />
             </ListItem>
@@ -230,7 +236,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   function renderHighlightButton(): JSX.Element {
-    if (layerDetails.controls?.highlight !== false)
+    if (isLayerHighlightCapable)
       return (
         <IconButton
           tooltip={t('legend.highlightLayer') as string}
@@ -240,15 +246,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <HighlightOutlinedIcon />
         </IconButton>
       );
-    return (
-      <IconButton className="buttonOutline" disabled>
-        <HighlightOutlinedIcon color="disabled" />
-      </IconButton>
-    );
+    return <Box />;
   }
 
   function renderZoomButton(): JSX.Element {
-    if (layerDetails.controls?.zoom !== false)
+    if (isLayerZoomToExtentCapable)
       return (
         <IconButton
           tooltip={t('legend.zoomTo') as string}
@@ -259,11 +261,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <ZoomInSearchIcon />
         </IconButton>
       );
-    return (
-      <IconButton className="buttonOutline" disabled>
-        <ZoomInSearchIcon color="disabled" />
-      </IconButton>
-    );
+    return <Box />;
   }
 
   function renderLayerButtons(): JSX.Element {

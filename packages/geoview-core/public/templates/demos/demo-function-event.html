@@ -178,6 +178,9 @@
         <li><button id="Zoom-to-marker-group">Zoom to marker group</button><br />
           cgpv.api.maps.Map1.layer.featureHighlight.pointMarkers.zoomToPointMarkerGroup('group1');
         </li>
+        <li><button id="Create-footer-tab">Create a custom tab in footer</button><br />
+          cgpv.api.maps.Map1.footerBarApi.createTab({id: 'test', label: 'My Custom Tab', content: '&lt;br&gt;&lt;div&gt;&lt;ul&gt;&lt;li&gt;How to export map coordinate data to: GeoJSON, or CSV.&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;'});
+        </li>
       </ul>
       <h3>Events that will generate notifications:</h3>
       <ul>
@@ -749,6 +752,15 @@
       // add an event listener when a button is clicked
       zoomToMarkerGroupButton.addEventListener('click', () => {
         cgpv.api.maps.Map1.layer.featureHighlight.pointMarkers.zoomToPointMarkerGroup('group1');
+      });
+
+      // Create-footer-tab Button================================================================================================
+      // find the button element by ID
+      var createFooterTabButton = document.getElementById( 'Create-footer-tab');
+
+      // add an event listener when a button is clicked
+      createFooterTabButton.addEventListener('click', () => {
+        cgpv.api.maps.Map1.footerBarApi.createTab({id: 'test', label: 'My Custom Tab', content: '<br><div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>'});
       });
 
       // create snippets

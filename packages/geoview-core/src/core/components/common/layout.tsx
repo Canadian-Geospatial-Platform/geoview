@@ -1,4 +1,4 @@
-import { useCallback, ReactNode, useRef, useMemo, memo } from 'react';
+import { useCallback, ReactNode, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
@@ -7,6 +7,7 @@ import { Tooltip, Typography } from '@/ui';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useSelectorLayerName } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -30,9 +31,7 @@ const TITLE_STYLES = {
   webkitLineClamp: '2',
 } as const;
 
-// Memoizes entire component, preventing re-renders if props haven't changed
-// TODO: Unmemoize this component, probably, because it's in 'common' folder
-export const Layout = memo(function Layout({
+export function Layout({
   children,
   guideContentIds,
   layerList,
@@ -48,6 +47,7 @@ export const Layout = memo(function Layout({
   // Hooks
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
   const theme = useTheme();
+  const layerName: string | undefined = useSelectorLayerName(selectedLayerPath || '');
 
   // Store
   const { setSelectedFooterLayerListItemId } = useUIStoreActions();
@@ -85,13 +85,6 @@ export const Layout = memo(function Layout({
   }, [selectedLayerPath, layerList, handleLayerChange]);
 
   /**
-   * Get the layer title
-   */
-  const memoLayerTitle = useMemo(() => {
-    return layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? '';
-  }, [layerList, selectedLayerPath]);
-
-  /**
    * Render layer title
    * @returns JSX.Element
    */
@@ -106,13 +99,13 @@ export const Layout = memo(function Layout({
     };
 
     return (
-      <Tooltip title={memoLayerTitle} placement="top" arrow>
+      <Tooltip title={layerName} placement="top" arrow>
         <Typography sx={sxClasses} component="div">
-          {memoLayerTitle}
+          {layerName}
         </Typography>
       </Tooltip>
     );
-  }, [containerType, fullWidth, memoLayerTitle, theme.breakpoints, theme.palette.geoViewFontSize.lg]);
+  }, [containerType, fullWidth, layerName, theme.breakpoints, theme.palette.geoViewFontSize.lg]);
 
   return (
     <ResponsiveGridLayout
@@ -128,4 +121,4 @@ export const Layout = memo(function Layout({
       containerType={containerType}
     />
   );
-});
+}

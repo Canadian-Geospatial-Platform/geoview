@@ -54,7 +54,7 @@ export type ButtonProps = {
  * @see {@link https://mui.com/material-ui/api/button/}
  */
 function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element {
-  logger.logTraceRender('ui/button/button');
+  logger.logTraceRenderDetailed('ui/button/button');
 
   // Get constant from props
   const {

@@ -57,6 +57,11 @@ const multipleHtmlPluginsOutliers = glob.sync('./public/templates/outliers/*.htm
 const config = {
   entry: {
     'cgpv-main': './src/app.tsx',
+    'geoview-custom-legend': {
+      import: '../geoview-custom-legend/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
     'geoview-aoi-panel': {
       import: '../geoview-aoi-panel/src/index.tsx',
       dependOn: 'cgpv-main',

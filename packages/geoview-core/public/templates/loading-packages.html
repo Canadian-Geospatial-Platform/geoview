@@ -87,6 +87,8 @@
   <div class="toolbar">
     <button id="load-aoi-panel-btn">Load Area of Interest Panel</button>
     <button id="unload-aoi-panel-btn">Unload Area of Interest Panel</button>
+    <button id="load-custom-legend-btn">Load Custom Legend</button>
+    <button id="unload-custom-legend-btn">Unload Custom Legend </button>
   </div>
 
   <div id="mapWM" class="geoview-map" data-lang="en" data-config-url="./configs/loading-packages-config.json"></div>
@@ -117,6 +119,25 @@
         // add event handler to the unload aoi panel button
         unloadAoiPanelBtn.addEventListener('click', function (e) {
           cgpv.api.plugin.removePlugin('aoi-panel', 'mapWM');
+        });
+
+        // get load custom legend button element
+        var loadCustomLegendBtn = document.getElementById('load-custom-legend-btn');
+
+        // add event handler to the load custom legend button
+        loadCustomLegendBtn.addEventListener('click', function (e) {
+          if (!window?.geoviewPlugins) window.geoviewPlugins = {};
+          cgpv.api.plugin.addPlugin('custom-legend', 'mapWM', window.geoviewPlugins['custom-legend'], {
+            mapId: 'mapWM',
+          });
+        });
+
+        // get unload custom legend button element
+        var unloadCustomLegendBtn = document.getElementById('unload-custom-legend-btn');
+
+        // add event handler to the unload custom legend button
+        unloadCustomLegendBtn.addEventListener('click', function (e) {
+          cgpv.api.plugin.removePlugin('custom-legend', 'mapWM');
         });
       }
     });

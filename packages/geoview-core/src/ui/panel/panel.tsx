@@ -42,7 +42,7 @@ export type TypePanelAppProps = {
  * @returns {JSX.Element} the created Panel element
  */
 function PanelUI(props: TypePanelAppProps): JSX.Element {
-  logger.logTraceRender('ui/panel/panel');
+  logger.logTraceRenderDetailed('ui/panel/panel');
 
   // Get constant from props
   const { panel, button, onOpen, onClose, onGeneralClose, onKeyDown, ...rest } = props;

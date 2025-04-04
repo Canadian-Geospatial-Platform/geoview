@@ -33,6 +33,7 @@ import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
+import { fetchWithTimeout } from '@/core/utils/fetch-helper';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -70,6 +71,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
       .then(() => logger.logTraceCore('Worker pool for fetch ESRI initialized'))
       .catch((err) => logger.logError('Worker pool error', err));
 
+    // Register the worker message handler
+    this.#fetchWorkerPool.addMessageHandler(this.#handleWorkerMessage.bind(this));
+
     // TODO: Performance - Investigate to see if we can call the export map for the whole service at once instead of making many call
     // TODO.CONT: We can use the layers and layersDef parameters to set what should be visible.
     // TODO.CONT: layers=show:layerId ; layerDefs={ "layerId": "layer def" }
@@ -92,6 +96,42 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Create and set the OpenLayer layer
     this.olLayer = new ImageLayer(imageLayerOptions);
+  }
+
+  /**
+   * Handles progress messages from a worker to update layer loading status
+   * @param {MessageEvent} event - The message event from the worker containing progress data
+   * @returns {void}
+   */
+  #handleWorkerMessage(event: MessageEvent): void {
+    // Early return if not a FetchEsriWorker message
+    const workerLog = event.data;
+    if (workerLog.type !== 'message' || workerLog.message[0] !== 'FetchEsriWorker') {
+      return;
+    }
+
+    // Handle based on log level
+    switch (workerLog.level) {
+      case 'info': {
+        const { processed, total } = workerLog.message[1];
+        let messageKey: string;
+        if (processed === 0) {
+          messageKey = 'layers.fetchStart';
+        } else if (processed === total) {
+          messageKey = 'layers.fetchDone';
+        } else {
+          messageKey = 'layers.fetchProgress';
+        }
+
+        this.emitMessage(messageKey, [processed, total], 'info');
+        break;
+      }
+      case 'error':
+        this.emitMessage('error.layer.notAbleToQuery', [this.getLayerName()!], 'error');
+        break;
+      default:
+        break;
+    }
   }
 
   /**
@@ -192,6 +232,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         queryGeometry: false,
         projection: 4326,
         maxAllowableOffset: 6,
+        maxRecordCount: layerConfig.maxRecordCount || 1000,
       };
 
       return await this.#fetchWorkerPool.process(params);
@@ -256,6 +297,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         queryGeometry,
         projection,
         maxAllowableOffset,
+        maxRecordCount: layerConfig.maxRecordCount || 1000,
       };
 
       return await this.#fetchWorkerPool.process(params);
@@ -310,8 +352,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
         `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
         `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
-      const identifyResponse = await fetch(identifyUrl);
-      const identifyJsonResponse = await identifyResponse.json();
+      // If it takes more then 10 seconds it means the server is unresponsive and we should not continue. This will throw an error...
+      const identifyJsonResponse = await fetchWithTimeout<TypeJsonObject>(identifyUrl, {}, 10000);
       if (identifyJsonResponse.error) {
         logger.logInfo('There is a problem with this query: ', identifyUrl);
         throw new Error(`Error code = ${identifyJsonResponse.error.code} ${identifyJsonResponse.error.message}` || '');
@@ -324,7 +366,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const oidField = layerConfig.source.featureInfo.outfields
         ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
         : 'OBJECTID';
-      const objectIds = identifyJsonResponse.results.map((result: TypeJsonObject) => String(result.attributes[oidField]).replace(',', ''));
+      const objectIds = (identifyJsonResponse.results as TypeJsonObject[]).map((result: TypeJsonObject) =>
+        String(result.attributes[oidField]).replace(',', '')
+      );
 
       // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
       const maxAllowableOffset = queryGeometry
@@ -364,7 +408,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
       if (queryGeometry)
         // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
         // TODO.CONT: the esri query (was working with identify). But identify was failing on huge geometry...
-        this.fetchFeatureInfoGeometryWithWorker(layerConfig, objectIds, true, mapViewer.getMapState().currentProjection, maxAllowableOffset)
+        this.fetchFeatureInfoGeometryWithWorker(
+          layerConfig,
+          objectIds.map(Number),
+          true,
+          mapViewer.getMapState().currentProjection,
+          maxAllowableOffset
+        )
           .then((featuresJSON) => {
             (featuresJSON.features as TypeJsonObject[]).forEach((feat: TypeJsonObject, index: number) => {
               // TODO: Performance - There is still a problem when we create the feature with new EsriJSON().readFeature. It goes trought a loop and take minutes on the deflate function
@@ -376,7 +426,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
               //   featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
               // }) as Feature<Geometry>;
 
-              // TODO: Performance - Relying on style to get geometry is not good. We shold extract it from metadata and keep it in dedicated attribute
+              // TODO: Performance - Relying on style to get geometry is not good. We should extract it from metadata and keep it in dedicated attribute
               const geomType = Object.keys(layerConfig?.layerStyle || []);
 
               // Get coordinates in right format and create geometry
@@ -389,7 +439,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
                   ? (GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) as unknown as Geometry)
                   : null;
 
-              // TODO: Perfromance - We will need a trigger to refresh the higight and detaiils panel (for zoom button) when extent and
+              // TODO: Perfromance - We will need a trigger to refresh the highlight and details panel (for zoom button) when extent and
               // TODO.CONT: is applied. Sometime the delay is too big so we need to change tab or layer in layer list to trigger the refresh
               // We assume order of arrayOfFeatureInfoEntries is the same as featuresJSON.features as they are process in same order
               const entry = arrayOfFeatureInfoEntries![index];

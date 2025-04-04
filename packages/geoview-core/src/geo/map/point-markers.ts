@@ -75,7 +75,7 @@ export class PointMarkers {
         pointFeature.setStyle(pointStyle);
 
         // Add feature to source
-        this.#featureHighlight.highlighSource.addFeature(pointFeature);
+        this.#featureHighlight.highlightSource.addFeature(pointFeature);
         // Add ID to array
         this.#featureIds.push(featureId);
       });
@@ -88,8 +88,8 @@ export class PointMarkers {
    */
   #removePointMarkersFromMap(): void {
     this.#featureIds.forEach((id) => {
-      const feature = this.#featureHighlight.highlighSource.getFeatureById(id);
-      if (feature) this.#featureHighlight.highlighSource.removeFeature(feature);
+      const feature = this.#featureHighlight.highlightSource.getFeatureById(id);
+      if (feature) this.#featureHighlight.highlightSource.removeFeature(feature);
     });
     this.#featureIds = [];
   }
@@ -160,7 +160,7 @@ export class PointMarkers {
       // Get the point coordinates and extrapolate to extent
       const coordinates = ids
         .map((id) => {
-          const feature = this.#featureHighlight.highlighSource.getFeatureById(id);
+          const feature = this.#featureHighlight.highlightSource.getFeatureById(id);
           if (feature) {
             const pointCoordinates = (feature?.getGeometry() as Point).getCoordinates();
             return [pointCoordinates[0], pointCoordinates[1], pointCoordinates[0], pointCoordinates[1]] as Extent;

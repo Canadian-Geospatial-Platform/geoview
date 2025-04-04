@@ -518,23 +518,18 @@ export function getMetersPerPixel(projection: TypeValidMapProjectionCodes, resol
  * @param targetScale The desired scale (e.g. 50000 for 1:50,000)
  * @returns number representing the closest zoom level for the given scale
  */
-export const getZoomFromScale = (view: View, targetScale: number | undefined): number | undefined => {
+export const getZoomFromScale = (view: View, targetScale: number | undefined, dpiValue?: number): number | undefined => {
   if (!targetScale) return undefined;
   const projection = view.getProjection();
   const mpu = projection.getMetersPerUnit();
-  const dpi = 25.4 / 0.28; // OpenLayers default DPI
+  const dpi = dpiValue ?? 25.4 / 0.28; // OpenLayers default DPI
 
   // Calculate resolution from scale
   if (!mpu) return undefined;
   // Resolution = Scale / ( metersPerUnit * inchesPerMeter * DPI )
   const targetResolution = targetScale / (mpu * 39.37 * dpi);
 
-  // Get the constrained resolution that matches our tile matrix
-  const constrainedResolution = view.getConstrainedResolution(targetResolution);
-
-  // Convert resolution to zoom
-  if (!constrainedResolution) return undefined;
-  return view.getZoomForResolution(constrainedResolution) || undefined;
+  return view.getZoomForResolution(targetResolution) || undefined;
 };
 
 /**

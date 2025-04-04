@@ -207,6 +207,13 @@ L’onglet **Couches** comprend les sous-menus suivants&nbsp;:
 
 _**N.B.&nbsp;: Cliquez sur une couche pour afficher ses information dans la section de droite.**_
 
+**Information importante**  
+Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) et que l'icône Zoom sur l'échelle visible <img src={{assetsURL}}/img/guide/layers/scaleVisible.svg /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
+
+- En cliquant sur le bouton Zoom sur l'échelle visible, la carte sera ajustée au niveau de zoom approprié, ce qui rendra la couche visible.
+- Cependant, après avoir effectué un zoom, il se peut que vous ne voyiez pas immédiatement les éléments s'il n'y a pas de données dans la zone de visualisation actuelle.
+- Dans ce cas, vous devrez peut-être effectuer un déplacement de la carte pour localiser les éléments.
+
 Le sous-menu **Vue** de l’onglet **Couches** se divise en deux sections. La section de gauche présente les couches affichées sur la carte. Si vous cliquez sur une couche, ses paramètres (options accessibles pour la couche) s’afficheront dans la section de droite.
 
 **Icônes de couche**
@@ -315,6 +322,12 @@ Cochez la case ![]({{assetsURL}}/img/guide/layers/check.png) pour garder l’él
 ### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Données [Haut de page](#footerSection)
 
 _**N.B.&nbsp;: Cliquez sur une couche pour afficher ses données dans la section de droite.**_
+
+**Informations importantes sur la navigation**
+- Vous pouvez demander des données à partir d'une seule table à la fois. Pendant l'extraction des données, tous les boutons _couches_ sont désactivés.
+- La couche sélectionnée sera en vert et un message de progression apparaîtra au bas de la section carte.
+- Une fois la recherche de données terminée, tous les boutons _couches_ sont réactivés.
+- Si vous passez à un autre onglet pendant le processus, vous devrez resélectionner la couche lorsque vous reviendrez à l'onglet _Données_ pour afficher les résultats.
 
 L’onglet **Données** se divise en deux sections. La liste des couches se trouve à gauche, et les données des couches, à droite. Cliquez sur une couche pour en voir les données dans le tableau de droite.
 

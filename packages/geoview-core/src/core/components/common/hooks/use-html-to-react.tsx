@@ -22,7 +22,7 @@ interface HtmlToReactProps {
  */
 export function UseHtmlToReact({ htmlContent, className, style, extraOptions, itemOptions = {} }: HtmlToReactProps): JSX.Element {
   // Log
-  logger.logTraceRender('core/containers/use-html-to-react');
+  logger.logTraceRenderDetailed('core/containers/use-html-to-react');
 
   // the html-react-parser can return 2 type in an array or not, make sure we have an array
   const parsed = parse(htmlContent) as string | Array<string | TrustedHTML>;

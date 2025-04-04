@@ -4,6 +4,12 @@
 export type WorkerLogLevel = 'info' | 'warning' | 'error' | 'debug' | 'trace';
 
 /**
+ * Represents the log type available for logging. Type log is trap by viewer logger
+ * and log to console and message is trap by viewer and sent to notifications
+ */
+type WorkerLogType = 'log' | 'message';
+
+/**
  * WorkerLogger class for handling logging in a worker context.
  *
  * This logger allows for centralized logging from workers back to the main thread,
@@ -23,15 +29,16 @@ class WorkerLogger {
   /**
    * Internal method to send log messages to the main thread.
    * @private
+   * @param {WorkerLogType} type - The type of log message.
    * @param {WorkerLogLevel} level - The log level of the message.
    * @param {...unknown[]} args - The message and any additional arguments to log.
    */
-  #log(level: WorkerLogLevel, ...args: unknown[]): void {
+  #log(type: WorkerLogType, level: WorkerLogLevel, ...args: unknown[]): void {
     const message = this.#prefix ? [this.#prefix, ...args] : args;
     // Send the log message to the main thread
     // eslint-disable-next-line no-restricted-globals
     self.postMessage({
-      type: 'log',
+      type,
       level,
       message,
     });
@@ -42,7 +49,7 @@ class WorkerLogger {
    * @param {...unknown[]} args - The message and any additional arguments to log.
    */
   logInfo(...args: unknown[]): void {
-    this.#log('info', ...args);
+    this.#log('log', 'info', ...args);
   }
 
   /**
@@ -50,7 +57,7 @@ class WorkerLogger {
    * @param {...unknown[]} args - The message and any additional arguments to log.
    */
   logWarning(...args: unknown[]): void {
-    this.#log('warning', ...args);
+    this.#log('log', 'warning', ...args);
   }
 
   /**
@@ -58,7 +65,7 @@ class WorkerLogger {
    * @param {...unknown[]} args - The message and any additional arguments to log.
    */
   logError(...args: unknown[]): void {
-    this.#log('error', ...args);
+    this.#log('log', 'error', ...args);
   }
 
   /**
@@ -66,7 +73,7 @@ class WorkerLogger {
    * @param {...unknown[]} args - The message and any additional arguments to log.
    */
   logDebug(...args: unknown[]): void {
-    this.#log('debug', ...args);
+    this.#log('log', 'debug', ...args);
   }
 
   /**
@@ -74,7 +81,16 @@ class WorkerLogger {
    * @param {...unknown[]} args - The message and any additional arguments to log.
    */
   logTrace(...args: unknown[]): void {
-    this.#log('trace', ...args);
+    this.#log('log', 'trace', ...args);
+  }
+
+  /**
+   * Logs a message to be handle by viewer notification.
+   * @param {WorkerLogLevel} level - The log level of the message.
+   * @param {...unknown[]} args - The message and any additional arguments to log.
+   */
+  sendMessage(level: WorkerLogLevel, ...args: unknown[]): void {
+    this.#log('message', level, ...args);
   }
 }
 

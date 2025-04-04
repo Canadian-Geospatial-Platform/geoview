@@ -657,7 +657,12 @@ export class Basemap {
           basemapLayer = new VectorTileLayer({
             opacity: layer.opacity,
             source: layer.source,
-            declutter: true,
+            renderMode: 'vector',
+            renderBuffer: 100,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
+            // Only declutter labels and add className otherwise (https://github.com/openlayers/openlayers/issues/10096)
+            ...(layer.basemapId === 'label' ? { declutter: true } : { className: 'geom' }),
           });
 
           // Apply Style to Vector Tile Basemap
@@ -687,6 +692,15 @@ export class Basemap {
       // Emit basemap changed event
       this.#emitBasemapChanged({ basemap });
     }
+  }
+
+  /**
+   * Refreshes the basemap layers
+   */
+  refreshBasemap(): void {
+    this.activeBasemap?.layers.forEach((layer) => {
+      layer.source.refresh();
+    });
   }
 
   /**

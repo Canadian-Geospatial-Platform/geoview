@@ -77,16 +77,31 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets the layer data array for one layer.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The path of the layer to get.
+   * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
+   */
+  static findLayerDataFromLayerDataArray(
+    mapId: string,
+    layerPath: string,
+    layerDataArray: TypeFeatureInfoResultSetEntry[] = this.getFeatureInfoState(mapId).layerDataArray
+  ): TypeFeatureInfoResultSetEntry | undefined {
+    return layerDataArray.find((layer) => layer.layerPath === layerPath);
+  }
+
+  /**
    * Deletes the feature from a resultSet for a specific layerPath. At the same time it check for
    * removing the higlight and the click marker if selected layer path is the reset path
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete features from resultSet
+   * @param {EventType} eventType - The event that triggered the reset.
    */
-  static resetResultSet(mapId: string, layerPath: string): void {
+  static resetResultSet(mapId: string, layerPath: string, eventType: EventType = 'click'): void {
     const { resultSet } = MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet;
     if (resultSet[layerPath]) {
       resultSet[layerPath].features = [];
-      this.propagateFeatureInfoToStore(mapId, 'click', resultSet[layerPath]).catch((err) =>
+      this.propagateFeatureInfoToStore(mapId, eventType, resultSet[layerPath]).catch((err) =>
         // Log
         logger.logPromiseFailed('Not able to reset resultSet', err, layerPath)
       );

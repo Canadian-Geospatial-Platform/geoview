@@ -8,6 +8,7 @@ import {
   useUIActiveFooterBarTabId,
   useAppFullscreenActive,
   useUIFooterPanelResizeValue,
+  useLayerLegendLayers,
 } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
@@ -15,7 +16,6 @@ import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { useDebounceLayerLegendLayers } from './hooks/use-legend-debounce';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 interface LegendType {
@@ -74,10 +74,11 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   const mapId = useGeoViewMapId();
   const footerId = useUIActiveFooterBarTabId();
   const appBarId = useUIActiveAppBarTab();
-  const layersList = useDebounceLayerLegendLayers();
+  const layersList = useLayerLegendLayers();
 
   // Memoize breakpoint values
   const breakpoints = useMemo(() => {
+    // Log
     logger.logTraceUseMemo('LEGEND - breakpoints', theme.breakpoints.values);
 
     return {
@@ -122,22 +123,36 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   );
 
   // Memoize the window resize handler and use the hook to add listener to avoid many creation
-  const formatLegendLayerList = useCallback(() => {
-    logger.logTraceCore('LEGEND - window resize event');
+  const handleWindowResize = useCallback(() => {
+    // Log
+    logger.logTraceUseCallback('LEGEND - window resize event');
+
+    // Update the layer list based on window size
     updateLegendLayerListByWindowSize(legendLayers);
   }, [legendLayers, updateLegendLayerListByWindowSize]);
-  useEventListener<Window>('resize', formatLegendLayerList, window);
 
-  // Handle initial layer setup (use a debounced 500ms layer)
+  // Wire a handler using a custom hook on the window resize event
+  useEventListener<Window>('resize', handleWindowResize, window);
+
+  // Handle initial layer setup
   useEffect(() => {
+    // Log
     logger.logTraceUseEffect('LEGEND - layer setup', layersList);
+
+    // Set the legend layers based on the layers list
+    // TODO: Check - Check necessity of having 2 arrays (layersList vs legendLayers)
     setLegendLayers(layersList);
+
+    // Update the layer list based on window size
     updateLegendLayerListByWindowSize(layersList);
   }, [layersList, updateLegendLayerListByWindowSize]);
 
   // Memoize the no layers content
-  const noLayersContent = useMemo(
-    () => (
+  const noLayersContent = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('components/legend - noLayersContent');
+
+    return (
       <Box sx={styles.noLayersContainer}>
         <Typography variant="h3" gutterBottom sx={sxClasses.legendInstructionsTitle}>
           {t('legend.noLayersAdded')}
@@ -146,24 +161,27 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
           {t('legend.noLayersAddedDescription')}
         </Typography>
       </Box>
-    ),
-    [sxClasses, t]
-  );
+    );
+  }, [sxClasses, t]);
 
   // Memoize the rendered content based on whether there are legend layers
   const content = useMemo(() => {
-    if (!legendLayers.length) {
+    // Log
+    logger.logTraceUseMemo('components/legend - content', formattedLegendLayerList.length);
+
+    if (!formattedLegendLayerList.length) {
       return noLayersContent;
     }
 
     return formattedLegendLayerList.map((layers, idx) => (
-      <Box key={`${idx.toString()}`} width={fullWidth ? responsiveWidths.full : responsiveWidths.responsive} sx={styles.layerBox}>
+      // eslint-disable-next-line react/no-array-index-key
+      <Box key={`${idx}`} width={fullWidth ? responsiveWidths.full : responsiveWidths.responsive} sx={styles.layerBox}>
         {layers.map((layer) => (
-          <LegendLayer layer={layer} key={layer.layerPath} />
+          <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} />
         ))}
       </Box>
     ));
-  }, [legendLayers.length, formattedLegendLayerList, fullWidth, noLayersContent]);
+  }, [formattedLegendLayerList, fullWidth, noLayersContent]);
 
   // Early return with empty fragment if not the active tab
   if (footerId !== 'legend' && appBarId.tabGroup !== 'legend') return null;

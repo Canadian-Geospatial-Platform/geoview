@@ -17,6 +17,7 @@ import {
   TypeViewSettings,
   TypePointMarker,
   TypeHighlightColors,
+  TypeMapViewSettings,
 } from '@config/types/map-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
@@ -34,7 +35,6 @@ import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
 import { isPointInExtent } from '@/geo/utils/utilities';
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
@@ -75,78 +75,6 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 // GV The reason for this pattern is so that UI components and processes performing back-end code
 // GV both end up running code in MapEventProcessor (UI: via 'actions' and back-end code via 'MapEventProcessor')
 export class MapEventProcessor extends AbstractEventProcessor {
-  /**
-   * Override the initialization process to register store subscriptions handlers and return them so they can be destroyed later.
-   */
-  protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
-    const { mapId } = store.getState();
-
-    // #region FEATURE SELECTION
-    // Checks for changes to highlighted features and updates highlights
-    const unsubMapHighlightedFeatures = store.subscribe(
-      (state) => state.mapState.highlightedFeatures,
-      (curFeatures, prevFeatures) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - highlightedFeatures', mapId, curFeatures);
-
-        if (curFeatures.length === 0) MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight('all');
-        else {
-          const curFeatureUids = curFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
-          const prevFeatureUids = prevFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
-          const newFeatures = curFeatures.filter(
-            (feature: TypeFeatureInfoEntry) => !prevFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
-          );
-          const removedFeatures = prevFeatures.filter(
-            (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
-          );
-          for (let i = 0; i < newFeatures.length; i++)
-            MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.highlightFeature(newFeatures[i]);
-          for (let i = 0; i < removedFeatures.length; i++)
-            MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(
-              (removedFeatures[i].geometry as TypeGeometry).ol_uid
-            );
-        }
-      },
-      {
-        equalityFn: (prev, curr) => {
-          // Quick length checks first (prevents re-render) and calls to removeHighlight
-          if (prev === curr) return true;
-          if (prev.length !== curr.length) return false;
-          if (prev.length === 0) return true;
-
-          // Use Set for O(1) lookup instead of array operations
-          const prevUids = new Set(prev.map((feature) => (feature.geometry as TypeGeometry).ol_uid));
-
-          // Single pass through current features
-          return curr.every((feature) => prevUids.has((feature.geometry as TypeGeometry).ol_uid));
-        },
-      }
-    );
-
-    // #endregion FEATURE SELECTION
-
-    const unsubOrderedLayerInfo = store.subscribe(
-      (state) => state.mapState.orderedLayerInfo,
-      (cur) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - orderedLayerInfo', mapId, cur);
-
-        const curVisibleLayers = cur
-          .map((layerInfo) => {
-            if (layerInfo.visible) return layerInfo.layerPath;
-            return undefined;
-          })
-          .filter((layerPath) => layerPath);
-        const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
-        if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(curVisibleLayers))
-          store.getState().mapState.setterActions.setVisibleLayers(curVisibleLayers as string[]);
-      }
-    );
-
-    // Return the array of subscriptions so they can be destroyed later
-    return [unsubMapHighlightedFeatures, unsubOrderedLayerInfo];
-  }
-
   /**
    * Initializes the map controls
    * @param {string} mapId - The map id being initialized
@@ -438,30 +366,19 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return layersInVisibleRange;
   };
 
-  static setVisibleRangeLayerMapState(mapId: string, visibleRangeLayers: string[]): void {
-    this.getMapStateProtected(mapId).setterActions.setVisibleRangeLayers(visibleRangeLayers);
-  }
-
   static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {
-    const { orderedLayerInfo, visibleRangeLayers } = this.getMapStateProtected(mapId);
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const orderedLayer = orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
 
     if (orderedLayer && orderedLayer.inVisibleRange !== inVisibleRange) {
       orderedLayer.inVisibleRange = inVisibleRange;
-      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
+      this.setMapOrderedLayerInfo(mapId, orderedLayerInfo);
     }
-
-    if (inVisibleRange && !visibleRangeLayers.includes(layerPath))
-      this.setVisibleRangeLayerMapState(mapId, [...visibleRangeLayers, layerPath]);
   }
 
-  static setZoom(mapId: string, zoom: number, orderedLayerInfo?: TypeOrderedLayerInfo[]): void {
+  static setZoom(mapId: string, zoom: number): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setZoom(zoom);
-
-    if (orderedLayerInfo) {
-      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
-    }
   }
 
   static setIsMouseInsideMap(mapId: string, inside: boolean): void {
@@ -558,6 +475,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  static setHomeButtonView(mapId: string, view: TypeMapViewSettings): void {
+    // Save in store
+    this.getMapStateProtected(mapId).setterActions.setHomeView(view);
+  }
+
   static rotate(mapId: string, rotation: number): void {
     // Do the actual view map rotation
     this.getMapViewer(mapId).map.getView().animate({ rotation });
@@ -632,6 +554,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void {
     if (feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
+      MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.highlightFeature(feature);
       // Save in store
       this.getMapStateProtected(mapId).setterActions.setHighlightedFeatures([
         ...this.getMapStateProtected(mapId).highlightedFeatures,
@@ -643,17 +566,24 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static removeHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry | 'all'): void {
     if (feature === 'all' || feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
       // Filter what we want to keep as highlighted features
-      const highlightedFeatures =
-        feature === 'all'
-          ? []
-          : this.getMapStateProtected(mapId).highlightedFeatures.filter(
-              (featureInfoEntry: TypeFeatureInfoEntry) =>
-                (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
-            );
+      let highlightedFeatures: TypeFeatureInfoEntry[] = [];
+      if (feature === 'all') {
+        MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(feature);
+      } else {
+        MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight((feature.geometry as TypeGeometry).ol_uid);
+        highlightedFeatures = this.getMapStateProtected(mapId).highlightedFeatures.filter(
+          (featureInfoEntry: TypeFeatureInfoEntry) =>
+            (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
+        );
+      }
 
       // Save in store
       this.getMapStateProtected(mapId).setterActions.setHighlightedFeatures(highlightedFeatures);
     }
+  }
+
+  static removeLayerHighlights(mapId: string, layerPath: string): void {
+    MapEventProcessor.getMapViewerLayerAPI(mapId).removeLayerHighlights(layerPath);
   }
 
   /**
@@ -764,18 +694,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setQueryable(layerPath, queryable);
   }
 
-  static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed?: boolean): void {
+  static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed: boolean): void {
     this.getMapStateProtected(mapId).setterActions.setLegendCollapsed(layerPath, collapsed);
   }
 
   static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean {
     // Redirect to layerAPI
     return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
-  }
-
-  static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {
-    // Redirect
-    this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo(curOrderedLayerInfo);
   }
 
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
@@ -934,10 +859,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     extent: Extent,
     options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: OL_ZOOM_MAXZOOM, duration: OL_ZOOM_DURATION }
   ): Promise<void> {
-    // Validate the extent coordinates
+    // Validate the extent coordinates - need to make sure we aren't excluding zero with !number
     if (
       !extent.some((number) => {
-        return !number || Number.isNaN(number);
+        return (!number && number !== 0) || Number.isNaN(number);
       })
     ) {
       // store state will be updated by map event
@@ -1019,26 +944,29 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const currProjection = this.getMapStateProtected(mapId).currentProjection;
     let extent: Extent = CV_MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
+    const homeView = this.getMapStateProtected(mapId).homeView || this.getMapStateProtected(mapId).initialView;
 
-    // TODO: Use the values store in state. Use the new store function to set initial view values
-    // TODO.CONT: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2662
     // Transform center coordinates and update options if zoomAndCenter are in config
-    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter) {
-      [options.maxZoom] = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter!;
+    if (homeView!.zoomAndCenter) {
+      [options.maxZoom] = homeView!.zoomAndCenter!;
 
-      const center = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![1];
+      const center = homeView!.zoomAndCenter![1];
       const projectedCoords = Projection.transformPoints([center], Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
 
       extent = [...projectedCoords[0], ...projectedCoords[0]];
     }
 
     // If extent is in config, use it
-    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.extent) {
-      const lnglatExtent = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.extent as Extent;
+    if (homeView!.extent) {
+      const lnglatExtent = homeView!.extent as Extent;
       extent = Projection.transformExtentFromProj(lnglatExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
       options.padding = [0, 0, 0, 0];
     }
 
+    // If layer IDs are in the config, use them
+    if (homeView!.layerIds) extent = this.getMapViewerLayerAPI(mapId).getExtentOfMultipleLayers(homeView!.layerIds);
+
+    if (extent.length !== 4) extent = Projection.transformFromLonLat(CV_MAP_EXTENTS[currProjection], `EPSG:${currProjection}`);
     return this.zoomToExtent(mapId, extent, options);
   }
 
@@ -1078,8 +1006,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Set the right zoom (Infinity will act as a no change in zoom level)
     let layerZoom = Infinity;
-    if (layerMinZoom !== -Infinity && layerMinZoom > mapZoom!) layerZoom = layerMinZoom + 0.1;
-    else if (layerMaxZoom !== Infinity && layerMaxZoom < mapZoom!) layerZoom = layerMaxZoom - 0.1;
+    if (layerMinZoom !== -Infinity && layerMinZoom >= mapZoom!) layerZoom = layerMinZoom + 0.1;
+    else if (layerMaxZoom !== Infinity && layerMaxZoom <= mapZoom!) layerZoom = layerMaxZoom - 0.1;
 
     // Change view to go to proper zoom centered in the middle of layer extent
     // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
@@ -1363,7 +1291,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       );
 
       // Get info for view
-      const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
+      const projection = this.getMapStateProtected(mapId).currentProjection as TypeValidMapProjectionCodes;
       const currentView = this.getMapViewer(mapId).map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
@@ -1375,6 +1303,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Set view settings
       const viewSettings: TypeViewSettings = {
         initialView: { zoomAndCenter: [currentView.getZoom() as number, centerLatLng] },
+        homeView: this.getMapStateProtected(mapId).homeView,
         enableRotation: config.map.viewSettings.enableRotation !== undefined ? config.map.viewSettings.enableRotation : undefined,
         rotation: this.getMapStateProtected(mapId).rotation,
         minZoom: currentView.getMinZoom(),

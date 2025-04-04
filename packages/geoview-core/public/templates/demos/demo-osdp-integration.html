@@ -248,6 +248,9 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
           interaction: 'dynamic',
           viewSettings: {
             projection: 3857,
+            homeView: {
+              zoomAndCenter: [8, [-71.26, 46.8]]
+            }
           },
           basemapOptions: {
             basemapId: 'transport',
@@ -323,7 +326,10 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
        * @param layers Array of layers.
        */
       function addLayers(layers) {
-        layers.forEach((layer) => {
+        layers.forEach((layer, i) => {
+          if (layers.indexOf(layer) < i) {
+            layer = `${layer}:${crypto.randomUUID()}`;
+          }
           cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layer);
         });
       }

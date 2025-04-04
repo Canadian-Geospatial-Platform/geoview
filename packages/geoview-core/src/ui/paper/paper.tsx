@@ -44,7 +44,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/react-paper/}
  */
 function MUIPaper(props: PaperProps, ref: Ref<HTMLDivElement>): JSX.Element {
-  logger.logTraceRender('ui/paper/paper');
+  logger.logTraceRenderDetailed('ui/paper/paper');
 
   return <MaterialPaper ref={ref} {...props} />;
 }

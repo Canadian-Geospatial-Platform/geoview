@@ -20,6 +20,7 @@ export interface LayerListEntry {
   numOffeatures?: number;
   features?: TypeFeatureInfoEntry[] | undefined | null;
   layerUniqueId?: string;
+  isDisabled?: boolean;
 }
 
 interface LayerListProps {
@@ -43,6 +44,12 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
+  // TODO: Use this pattern?
+  // const layerName: string | undefined = useSelectorLayerName(layer.layerPath);
+  // const layerStatus: TypeLayerStatus | undefined = useSelectorLayerStatus(layer.layerPath);
+  // const layerQueryStatus: TypeQueryStatus | undefined = useSelectorLayerQueryStatus(layer.layerPath);
+  // const layerTooltip = layerName ? `${layerName}, ${layer.layerFeatures}` : '';
+
   // Style
   const containerClass = [
     'layer-panel',
@@ -55,7 +62,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     .trim();
 
   // Constant for state
-  const isDisabled = layer?.numOffeatures === 0 || layer?.features === null;
+  const isDisabled = layer?.numOffeatures === 0 || layer?.features === null || layer?.isDisabled;
   const isLoading =
     layer?.numOffeatures === 0 ||
     layer?.features === null ||
@@ -118,7 +125,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
               disabled={isDisabled || isLoading}
               aria-label={layer.layerName}
             >
-              {layer.layerPath && !layer.content && <LayerIcon layer={layer} />}
+              {layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />}
               <Box sx={sxClasses.listPrimaryText}>
                 <Typography className="layerTitle">{layer.layerName}</Typography>
                 <Box display="flex" alignContent="center">
