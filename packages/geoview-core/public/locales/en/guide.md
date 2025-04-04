@@ -187,7 +187,7 @@ _Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, 
 <a id="legendSection"></a>
 ### ![]({{assetsURL}}/img/guide/sidebar/legend_25.svg) Legend [Top](#footerSection)
 
-The _Legend_ tab displays the symbology associated with the layers displayed on the map.
+The **Legend** tab displays the symbology associated with the layers displayed on the map.
 
 Each layer has some symbology associated with it. For simple feature layers a single icon ![]({{assetsURL}}/img/guide/footer/icon_single.png) will be present next to the layer name.
 
@@ -200,7 +200,7 @@ The symbology for the layer can be toggled open and closed which is expanded ben
 <a id="layersSection"></a>
 ### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Layers [Top](#footerSection)
 
-The _Layers_ tab has the following submenu options:
+The **Layers** tab has the following submenu options:
 
 - View
 - Add
@@ -419,13 +419,15 @@ To access the buttons and/or input fields within a cell, make sure the cell is h
 
 _**Note: Click on a layer to display its Time Slider information in the right section.**_
 
-The Time Slider tab on the Footer Bar has two sections. Layers with a time dimension are listed in the left section.
+The **Time Slider** tab on the Footer Bar has two sections. Layers with a time dimension are listed in the left section.
 
 The Time Slider section displays a slider bar with one or two draggable handles. A point in time layer will show one handle. A time period layer will show two handles, to adjust the start and end time of the period.
 
-Click hold and drag the handle on the slider bar to set the desired filter values or select a point in time. For a time period layer, click the lock icon ![]({{assetsURL}}/img/guide/footer/lock_30.svg) to lock the start time handle in place.
+This checkbox ![]({{assetsURL}}/img/guide/layers/check.png) controls whether the time slider filters the data.
+- When checked, only the data matching the selected time is shown.
+- When unchecked, all data from all dates is displayed, regardless of the slider's position.
 
-Select the filter checkbox ![]({{assetsURL}}/img/guide/layers/check.png) to toggle the filtering on and off.
+Click hold and drag the handle on the slider bar to set the desired filter values or select a point in time. For a time period layer, click the lock icon ![]({{assetsURL}}/img/guide/footer/lock_30.svg) to lock the start time handle in place.
 
 Click the play icon ![]({{assetsURL}}/img/guide/footer/play_arrow_30.svg) to animate the filter results through time. Click the change direction icon ![]({{assetsURL}}/img/guide/footer/direction_arrow_30.svg) to toggle forward or backward in time.
 
@@ -442,7 +444,7 @@ The field being filtered on is displayed in the lower left of the Time Slider se
 
 _**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
 
-The Chart tab on the Footer Bar has two sections. Layers with a chart are listed in the left section. Select a feature on the map to display its chart in the right section.
+The **Chart** tab on the Footer Bar has two sections. Layers with a chart are listed in the left section. Select a feature on the map to display its chart in the right section.
 
 The Feature dropdown (upper left of the chart section), can be used to select a feature. This is useful when features are close together on the map, making it difficult to click on the desired one.
 

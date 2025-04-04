@@ -137,7 +137,9 @@
     "moreInfo": "Plus d'informations",
     "layerType": "Type : ",
     "layerResource": "Ressource : ",
-    "layerMetadata": "Métadonnées : "
+    "layerMetadata": "Métadonnées : ",
+    "layerHoverable": "Info au passage de la souris",
+    "layerQueryable": "Info au click de la souris"
   },
   "details": {
     "title": "Détails",

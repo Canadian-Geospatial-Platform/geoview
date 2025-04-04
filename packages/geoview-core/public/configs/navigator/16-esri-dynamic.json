@@ -18,7 +18,17 @@
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0"
+            "layerId": "0",
+            "initialSettings": {
+              "controls": {
+                "query": true,
+                "hover": true
+              },
+              "states": {
+                "queryable": false,
+                "hoverable": false
+              }
+            }
           }
         ]
       },
@@ -306,7 +316,12 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "8",
-            "layerFilter": "Total_CSO_Volume > 5000000"
+            "layerFilter": "Total_CSO_Volume > 5000000",
+            "initialSettings": {
+              "controls": {
+                "table": false
+              }
+            }
           }
         ]
       },

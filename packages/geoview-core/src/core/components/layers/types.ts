@@ -35,6 +35,8 @@ export interface TypeLegendLayer {
   querySent?: boolean;
   canToggle?: boolean; // can sublayer visibility be toggled
   url?: string;
+  hoverable?: boolean;
+  queryable?: boolean;
 
   icons: TypeLegendLayerItem[];
   // data: TypeLegend | undefined | null;

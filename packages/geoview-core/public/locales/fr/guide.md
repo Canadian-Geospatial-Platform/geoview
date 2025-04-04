@@ -415,11 +415,13 @@ _**N.B.&nbsp;: Cliquez sur une couche pour afficher son curseur temporel dans la
 
 L’onglet **Curseur temporel** dans le pied de page se divise en deux sections. La liste des couches ayant un facteur temporel se trouve dans la section de gauche.
 
+Cette case à cocher ![]({{assetsURL}}/img/guide/layers/check.png) contrôle si le curseur temporel filtre les données.
+- Lorsque la case est cochée, seules les données correspondant à la date sélectionnée sont affichées.
+- Lorsque la case est décochée, toutes les données, peu importe la date, sont affichées.
+
 Une barre de curseur s’affiche avec un ou deux points déplaçables. Pour les couches à facteur temporel ponctuel, il n’y a qu’un point déplaçable. Pour les couches à plage temporelle, il y a deux points déplaçables permettant de régler le début et la fin de la plage.
 
 Cliquez sur le point et déplacez-le sur la barre pour sélectionner les valeurs de filtre souhaitées ou un moment donné dans le temps. Pour une couche à plage temporelle, cliquez sur l’icône de cadenas ![]({{assetsURL}}/img/guide/footer/lock_30.svg) afin de verrouiller le point de début.
-
-Cochez ou décochez la case de filtre ![]({{assetsURL}}/img/guide/layers/check.png) pour activer ou désactiver le filtrage.
 
 Appuyez sur l’icône de lecture ![]({{assetsURL}}/img/guide/footer/play_arrow_30.svg) pour voir les résultats dans le temps. Cliquez sur l’icône de changement de direction ![]({{assetsURL}}/img/guide/footer/direction_arrow_30.svg) pour avancer ou reculer dans le temps.
 

@@ -51,6 +51,8 @@ export interface ILayerState {
     setHighlightLayer: (layerPath: string) => void;
     setLayerDeleteInProgress: (newVal: boolean) => void;
     setLayerOpacity: (layerPath: string, opacity: number) => void;
+    setLayerHoverable: (layerPath: string, enable: boolean) => void;
+    setLayerQueryable: (layerPath: string, enable: boolean) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
@@ -218,6 +220,26 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       setLayerOpacity: (layerPath: string, opacity: number): void => {
         // Redirect to event processor
         LegendEventProcessor.setLayerOpacity(get().mapId, layerPath, opacity);
+      },
+
+      /**
+       * Sets if the layer hover capacity are enable or disable.
+       * @param {string} layerPath - The layer path of the layer to change.
+       * @param {number} enable - The true if enable.
+       */
+      setLayerHoverable: (layerPath: string, enable: boolean): void => {
+        // Redirect to event processor
+        LegendEventProcessor.setLayerHoverable(get().mapId, layerPath, enable);
+      },
+
+      /**
+       * Sets if the layer query capacity are enable or disable.
+       * @param {string} layerPath - The layer path of the layer to change.
+       * @param {number} enable - The true if enable.
+       */
+      setLayerQueryable: (layerPath: string, enable: boolean): void => {
+        // Redirect to event processor
+        LegendEventProcessor.setLayerQueryable(get().mapId, layerPath, enable);
       },
 
       /**

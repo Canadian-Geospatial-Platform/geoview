@@ -40,6 +40,7 @@ import { Collapse } from '@/ui/collapse/collapse';
 import { Button } from '@/ui/button/button';
 import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
 import { useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { Switch } from '@/ui/switch/switch';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -61,8 +62,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
-  const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, refreshLayer, zoomToLayerExtent, getLayerBounds } =
-    useLayerStoreActions();
+  const {
+    setAllItemsVisibility,
+    toggleItemVisibility,
+    setHighlightLayer,
+    refreshLayer,
+    zoomToLayerExtent,
+    getLayerBounds,
+    setLayerHoverable,
+    setLayerQueryable,
+  } = useLayerStoreActions();
   const { enableFocusTrap } = useUIStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const datatableSettings = useDataTableLayerSettings();
@@ -75,6 +84,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   // Is zoom to extent button disabled?
   const isLayerZoomToExtentCapable = layerDetails.controls?.zoom;
+
+  // Is layer hoverable or queryable
+  const isLayerHoverable = layerDetails.controls?.hover;
+  const isLayerQueryable = layerDetails.controls?.query;
 
   useEffect(() => {
     // Log
@@ -365,7 +378,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     return (
       <Box>
-        <Button type="text" onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
+        <Button type="text" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
           {`${t('layers.moreInfo')!}`}
           <IconButton className="buttonOutline" edge="end" size="small" tooltip={t('layers.toggleCollapse')!}>
             {isInfoCollapse ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
@@ -388,6 +401,22 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                 {`${id}`}
               </a>
             </Box>
+          )}
+          {isLayerHoverable && (
+            <Switch
+              size="small"
+              onChange={() => setLayerHoverable(layerDetails.layerPath, !layerDetails.hoverable!)}
+              title={t('layers.layerHoverable')!}
+              checked={layerDetails.hoverable}
+            />
+          )}
+          {isLayerQueryable && (
+            <Switch
+              size="small"
+              onChange={() => setLayerQueryable(layerDetails.layerPath, !layerDetails.queryable!)}
+              title={t('layers.layerQueryable')!}
+              checked={layerDetails.queryable}
+            />
           )}
         </Collapse>
       </Box>
@@ -442,6 +471,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             )}
           </Box>
           <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} variant="middle" />
+          {renderInfo()}
           {layerDetails.layerAttribution &&
             layerDetails.layerAttribution.map((attribution) => {
               if (attribution) {
@@ -461,7 +491,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               }
               return null;
             })}
-          {renderInfo()}
         </>
       )}
     </Paper>

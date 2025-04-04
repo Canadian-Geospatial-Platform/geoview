@@ -62,7 +62,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].eventListenerEnabled = true;
+    this.resultSet[layerPath].eventListenerEnabled = layer.getLayerConfig().initialSettings.states?.queryable ?? true;
     this.resultSet[layerPath].queryStatus = 'processed';
     this.resultSet[layerPath].features = [];
   }
@@ -134,9 +134,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
       // If layer was found
       if (layer && layer instanceof AbstractGVLayer) {
-        // If state is not queryable
-        if (!AbstractLayerSet.isStateQueryable(layer)) return;
-
         // If state is not in visible range
         if (!AbstractLayerSet.isInVisibleRange(layer)) return;
 
@@ -209,7 +206,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     this.resultSet[layerPath].features = [];
 
     // Propagate to store
-    this.#propagateToStore(this.resultSet[layerPath]);
+    this.#propagateToStore(this.resultSet[layerPath], 'name');
   }
 
   /**

@@ -235,9 +235,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
       const controls: TypeLayerControls = {
         highlight: layerConfig.initialSettings?.controls?.highlight !== undefined ? layerConfig.initialSettings?.controls?.highlight : true,
-        hover: layerConfig.initialSettings?.controls?.hover !== undefined ? layerConfig.initialSettings?.controls?.hover : true,
+        hover: layerConfig.initialSettings?.controls?.hover !== undefined ? layerConfig.initialSettings?.controls?.hover : false,
         opacity: layerConfig.initialSettings?.controls?.opacity !== undefined ? layerConfig.initialSettings?.controls?.opacity : true,
-        query: layerConfig.initialSettings?.controls?.query !== undefined ? layerConfig.initialSettings?.controls?.query : true,
+        query: layerConfig.initialSettings?.controls?.query !== undefined ? layerConfig.initialSettings?.controls?.query : false,
         remove: layerConfig.initialSettings?.controls?.remove !== undefined ? layerConfig.initialSettings?.controls?.remove : removeDefault,
         table: layerConfig.initialSettings?.controls?.table !== undefined ? layerConfig.initialSettings?.controls?.table : true,
         visibility:
@@ -248,7 +248,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     };
 
     // TODO: refactor - avoid nested function relying on outside parameter like layerPathNodes
-    // TODO.CONT: The layerId set by this array has the mamp indentifier in front... remove
+    // TODO.CONT: The layerId set by this array has the map identifier in front... remove
     const createNewLegendEntries = (currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
       // If outside of range of layer paths, stop
       if (layerPathNodes.length < currentLevel) return;
@@ -334,6 +334,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           type: legendResultSetEntry.data?.type || (layerConfig.entryType as TypeGeoviewLayerType),
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
           opacity: layerConfig.initialSettings?.states?.opacity || 1,
+          hoverable: layerConfig.initialSettings?.states?.hoverable,
+          queryable: layerConfig.initialSettings?.states?.queryable,
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
           icons: LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data!) || [],
@@ -609,6 +611,40 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static setLayerOpacity(mapId: string, layerPath: string, opacity: number): void {
     const curLayers = this.getLayerState(mapId).legendLayers;
     this.#setOpacityInLayerAndChildren(mapId, curLayers, layerPath, opacity);
+
+    // Set updated legend layers
+    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
+  }
+
+  /**
+   * Sets the layer hoverable capacity.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {boolean} hoverable - The hoverable state to set.
+   */
+  static setLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
+    if (hoverable) MapEventProcessor.getMapViewerLayerAPI(mapId).hoverFeatureInfoLayerSet.enableHoverListener(layerPath);
+    else MapEventProcessor.getMapViewerLayerAPI(mapId).hoverFeatureInfoLayerSet.disableHoverListener(layerPath);
+
+    const curLayers = this.getLayerState(mapId).legendLayers;
+    this.getLegendLayerInfo(mapId, layerPath)!.hoverable = hoverable;
+
+    // Set updated legend layers
+    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
+  }
+
+  /**
+   * Sets the layer queryable capacity.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {boolean} queryable - The queryable state to set.
+   */
+  static setLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void {
+    if (queryable) MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.enableClickListener(layerPath);
+    else MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.disableClickListener(layerPath);
+
+    const curLayers = this.getLayerState(mapId).legendLayers;
+    this.getLegendLayerInfo(mapId, layerPath)!.queryable = queryable;
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);

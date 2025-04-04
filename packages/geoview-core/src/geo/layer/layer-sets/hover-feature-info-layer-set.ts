@@ -71,7 +71,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].eventListenerEnabled = true;
+    this.resultSet[layerPath].eventListenerEnabled = layer.getLayerConfig().initialSettings.states?.hoverable ?? true;
     this.resultSet[layerPath].queryStatus = 'processed';
     this.resultSet[layerPath].feature = undefined;
   }
@@ -133,9 +133,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
       // If layer was found
       if (layer && layer instanceof AbstractGVLayer) {
-        // If state is not queryable
-        if (!AbstractLayerSet.isStateQueryable(layer)) return;
-
         // Flag processing
         this.resultSet[layerPath].feature = undefined;
         this.resultSet[layerPath].queryStatus = 'init';

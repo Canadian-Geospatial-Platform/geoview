@@ -183,6 +183,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const sourceOptions: SourceOptions = {
       url: layerConfig.source.dataAccessPath,
     };
+    sourceOptions.attributions = [(this.metadata?.copyrightText ? this.metadata?.copyrightText : '') as string];
+
     if (layerConfig.source.crossOrigin) {
       sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
     } else {
