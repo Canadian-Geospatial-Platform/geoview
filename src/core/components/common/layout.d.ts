@@ -12,5 +12,5 @@ interface LayoutProps {
     onIsEnlargeClicked?: (isEnlarge: boolean) => void;
     onGuideIsOpen?: (isGuideOpen: boolean) => void;
 }
-export declare const Layout: import("react").NamedExoticComponent<LayoutProps>;
+export declare function Layout({ children, guideContentIds, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth, onGuideIsOpen, containerType, }: LayoutProps): JSX.Element;
 export {};

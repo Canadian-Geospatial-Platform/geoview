@@ -61,6 +61,12 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      */
     constructor(mapId: string, layerConfig: TypeGeoJSONLayerConfig);
     /** ***************************************************************************************************************************
+     * This method reads the service metadata from the metadataAccessPath.
+     *
+     * @returns {Promise<void>} A promise that the execution is completed.
+     */
+    protected fetchServiceMetadata(): Promise<void>;
+    /** ***************************************************************************************************************************
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.
      *

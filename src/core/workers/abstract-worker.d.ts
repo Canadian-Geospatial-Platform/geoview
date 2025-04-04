@@ -41,6 +41,16 @@ export declare abstract class AbstractWorker<T> {
      */
     abstract process(...args: unknown[]): Promise<unknown>;
     /**
+     * Add method to register message handlers
+     * @param {MessageEvent} handler - The message handler to add.
+     */
+    addMessageHandler(handler: (event: MessageEvent) => void): void;
+    /**
+     * Add method to remove message handlers
+     * @param  {MessageEvent} handler - The message handler to remove.
+     */
+    removeMessageHandler(handler: (event: MessageEvent) => void): void;
+    /**
      * Terminates the worker.
      */
     terminate(): void;

@@ -3,12 +3,11 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
-import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes, TypePointMarker, TypeHighlightColors } from '@config/types/map-schema-types';
+import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes, TypePointMarker, TypeHighlightColors, TypeMapViewSettings } from '@config/types/map-schema-types';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { TypeFeatureInfoEntry, TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -16,10 +15,6 @@ import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/st
 import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 export declare class MapEventProcessor extends AbstractEventProcessor {
     #private;
-    /**
-     * Override the initialization process to register store subscriptions handlers and return them so they can be destroyed later.
-     */
-    protected onInitialize(store: GeoviewStoreType): Array<() => void> | void;
     /**
      * Initializes the map controls
      * @param {string} mapId - The map id being initialized
@@ -104,6 +99,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setMapMoveEnd(mapId: string, centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: string, isNorthVisible: boolean, mapExtent: Extent, scale: TypeScaleInfo): void;
     static setInteraction(mapId: string, interaction: TypeInteraction): void;
     static setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): Promise<void>;
+    static setHomeButtonView(mapId: string, view: TypeMapViewSettings): void;
     static rotate(mapId: string, rotation: number): void;
     static zoom(mapId: string, zoom: number, duration?: number): void;
     /**
@@ -133,6 +129,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static getMapInVisibleRangeFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
     static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void;
     static removeHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry | 'all'): void;
+    static removeLayerHighlights(mapId: string, layerPath: string): void;
     /**
      * Add a point marker
      * @param {string} mapId - The ID of the map.

@@ -22,6 +22,7 @@ export interface IMapState {
     featureHighlightColor: TypeHighlightColors;
     fixNorth: boolean;
     highlightedFeatures: TypeFeatureInfoEntry[];
+    homeView: TypeMapViewSettings | undefined;
     hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
     isMouseInsideMap: boolean;
     initialFilters: Record<string, string>;
@@ -54,6 +55,7 @@ export interface IMapState {
         highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
         addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
         removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
+        removeLayerHighlights: (layerPath: string) => void;
         addPointMarkers: (group: string, pointMarkers: TypePointMarker[]) => void;
         removePointMarkersOrGroup: (group: string, idsOrCoordinates?: string[] | Coordinate[]) => void;
         reorderLayer: (layerPath: string, move: number) => void;
@@ -83,6 +85,7 @@ export interface IMapState {
         setAttribution: (attribution: string[]) => void;
         setInitialFilters: (filters: Record<string, string>) => void;
         setInitialView: (view: TypeZoomAndCenter | Extent) => void;
+        setHomeView: (view: TypeMapViewSettings) => void;
         setInteraction: (interaction: TypeInteraction) => void;
         setIsMouseInsideMap: (isMouseInsideMap: boolean) => void;
         setZoom: (zoom: number) => void;

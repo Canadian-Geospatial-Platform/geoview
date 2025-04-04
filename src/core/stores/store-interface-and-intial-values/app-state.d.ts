@@ -9,6 +9,7 @@ export interface IAppState {
     displayTheme: TypeDisplayTheme;
     guide: TypeGuideObject | undefined;
     geolocatorServiceURL: string | undefined;
+    metadataServiceURL: string | undefined;
     geoviewHTMLElement: HTMLElement;
     geoviewAssetsURL: string;
     isCircularProgressActive: boolean;
@@ -56,6 +57,7 @@ export declare const useAppDisplayLanguage: () => TypeDisplayLanguage;
 export declare const useAppDisplayTheme: () => TypeDisplayTheme;
 export declare const useAppFullscreenActive: () => boolean;
 export declare const useAppGeolocatorServiceURL: () => string | undefined;
+export declare const useAppMetadataServiceURL: () => string | undefined;
 export declare const useAppGeoviewHTMLElement: () => HTMLElement;
 export declare const useAppGeoviewAssetsURL: () => string;
 export declare const useAppGuide: () => TypeGuideObject | undefined;

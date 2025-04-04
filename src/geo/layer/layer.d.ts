@@ -49,10 +49,15 @@ export declare class LayerApi {
      */
     getMapId(): string;
     /**
-     * Gets the GeoView Layer Ids.
-     * @returns The ids of the new Geoview Layers
+     * Gets the GeoView Layer Ids / UUIDs.
+     * @returns The ids of the layers
      */
     getGeoviewLayerIds(): string[];
+    /**
+     * Gets the GeoView Layer Paths.
+     * @returns The layer paths of the GV Layers
+     */
+    getGeoviewLayerPaths(): string[];
     /**
      * Gets all GeoView Layers
      * @returns The list of new Geoview Layers
@@ -174,6 +179,11 @@ export declare class LayerApi {
      */
     removeAllGeoviewLayers(): void;
     /**
+     * Removes layer and feature highlights for a given layer.
+     * @param {string} layerPath - The path of the layer to remove highlights from.
+     */
+    removeLayerHighlights(layerPath: string): void;
+    /**
      * Removes a layer from the map using its layer path. The path may point to the root geoview layer
      * or a sub layer.
      * @param {string} layerPath - The path or ID of the layer to be removed
@@ -192,7 +202,7 @@ export declare class LayerApi {
     /**
      * Gets the max extent of all layers on the map, or of a provided subset of layers.
      *
-     * @param {string[]} layerIds - IDs of layer to get max extents from.
+     * @param {string[]} layerIds - IDs or layerPaths of layers to get max extents from.
      * @returns {Extent} The overall extent.
      */
     getExtentOfMultipleLayers(layerIds?: string[]): Extent;

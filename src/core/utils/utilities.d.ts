@@ -36,6 +36,14 @@ export declare function getScriptAndAssetURL(): string;
  */
 export declare function generateId(id?: string): string;
 /**
+ * Function used to validate the GeoCore UUIDs.
+ *
+ * @param {string} uuid The UUID to validate.
+ *
+ * @returns {boolean} Returns true if the UUID respect the format.
+ */
+export declare function isValidUUID(uuid: string): boolean;
+/**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
  * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - An array of parameters to replace, i.e. ['short']
