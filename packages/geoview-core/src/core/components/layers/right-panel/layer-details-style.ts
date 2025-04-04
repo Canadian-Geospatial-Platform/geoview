@@ -59,23 +59,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     maxWidth: '100%',
     height: 'auto',
   },
-  layerInfo1: {
-    color: theme.palette.geoViewColor.textColor.light[200],
-    fontSize: theme.palette.geoViewFontSize.sm,
-    whiteSpace: 'nowrap',
-    display: 'flex',
-    width: '100%',
-    alignItems: 'center',
-    '& a': {
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      color: theme.palette.geoViewColor.textColor.light[200],
-      fontSize: theme.palette.geoViewFontSize.sm,
-      display: 'block',
-    },
-  },
-
   layerInfo: {
     color: theme.palette.geoViewColor.textColor.light[200],
     fontSize: theme.palette.geoViewFontSize.sm,
