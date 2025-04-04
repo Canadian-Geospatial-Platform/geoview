@@ -92,8 +92,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       set({
         layerState: {
           ...get().layerState,
-          selectedLayerPath:
-            geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath.split('-').at(-1) || null,
+          selectedLayerPath: geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath || null,
         },
       });
     },

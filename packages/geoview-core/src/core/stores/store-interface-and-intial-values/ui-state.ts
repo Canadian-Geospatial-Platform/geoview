@@ -100,15 +100,10 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           corePackagesComponents: geoviewConfig.corePackages || [],
           navBarComponents: geoviewConfig.navBar || [],
           footerBarIsCollapsed: geoviewConfig.footerBar?.collapsed !== undefined ? geoviewConfig.footerBar.collapsed : false,
-          selectedFooterLayerListItemId: ((): string => {
-            if (geoviewConfig.footerBar?.selectedLayersLayerPath) {
-              return `${get().mapId}-${geoviewConfig.footerBar.selectedTab}-${geoviewConfig.footerBar.selectedLayersLayerPath}`;
-            }
-            if (geoviewConfig.appBar?.selectedLayersLayerPath) {
-              return geoviewConfig.appBar.selectedLayersLayerPath;
-            }
-            return '';
-          })(),
+          selectedFooterLayerListItemId:
+            geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath
+              ? `${get().mapId}-${geoviewConfig.footerBar?.selectedTab || geoviewConfig.appBar?.selectedTab}-${geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath}`
+              : '',
         },
       });
     },
