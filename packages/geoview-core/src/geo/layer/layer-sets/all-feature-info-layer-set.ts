@@ -107,9 +107,6 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
       // If layer was found
       if (layer && layer instanceof AbstractGVLayer) {
-        // If state is not queryable
-        if (!AbstractLayerSet.isStateQueryable(layer)) return Promise.resolve();
-
         // Flag processing
         this.resultSet[layerPath].queryStatus = 'processing';
 

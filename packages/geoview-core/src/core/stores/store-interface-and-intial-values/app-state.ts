@@ -21,6 +21,7 @@ export interface IAppState {
   displayTheme: TypeDisplayTheme;
   guide: TypeGuideObject | undefined;
   geolocatorServiceURL: string | undefined;
+  metadataServiceURL: string | undefined;
   geoviewHTMLElement: HTMLElement;
   geoviewAssetsURL: string;
   isCircularProgressActive: boolean;
@@ -66,6 +67,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     displayTheme: 'geo.ca',
     guide: {},
     geolocatorServiceURL: '',
+    metadataServiceURL: '',
     geoviewHTMLElement: document.createElement('div'), // create an empty div before real one is assigned
     geoviewAssetsURL: getScriptAndAssetURL(),
     isCircularProgressActive: false,
@@ -83,7 +85,8 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           ...get().appState,
           displayLanguage: lang as TypeDisplayLanguage,
           displayTheme: geoviewConfig.theme || 'geo.ca',
-          geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocator,
+          geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocatorUrl,
+          metadataServiceURL: geoviewConfig.serviceUrls?.metadataUrl,
           geoviewHTMLElement: document.getElementById(get().mapId)!,
         },
       });
@@ -290,6 +293,7 @@ export const useAppDisplayTheme = (): TypeDisplayTheme => useStore(useGeoViewSto
 export const useAppFullscreenActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
 export const useAppGeolocatorServiceURL = (): string | undefined =>
   useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
+export const useAppMetadataServiceURL = (): string | undefined => useStore(useGeoViewStore(), (state) => state.appState.metadataServiceURL);
 export const useAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
 export const useAppGeoviewAssetsURL = (): string => useStore(useGeoViewStore(), (state) => state.appState.geoviewAssetsURL);
 export const useAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);

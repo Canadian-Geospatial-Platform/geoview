@@ -122,13 +122,20 @@ export type TypeServiceUrls = {
   /**
    * An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server
    * or an absolute path on a server which sets CORS headers.
+   * Default = CV_CONFIG_PROXY_URL ('https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy'. Used in config-constants).
    */
   proxyUrl?: string;
   /**
    * An optional geolocator service end point url, which will be used to call to get geo location of address.
    * Default = CV_CONFIG_GEOLOCATOR_URL ('https://geolocator.api.geo.ca?keys=geonames,nominatim,locate'. Used in config-constants).
    */
-  geolocator?: string;
+  geolocatorUrl?: string;
+  /**
+   * An optional metadata service end point url, which will be used to call to metadata page for uuid layer.
+   * Mostly use for currated amp were en and fr config are use.
+   * Default = CV_CONFIG_METADATA_RECORDS_URL (''. Used in config-constants).
+   */
+  metadataUrl?: string;
 };
 
 /** Valid schema version number. */
