@@ -45,7 +45,7 @@ import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-i
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
-import { GeoViewLayerCreatedTwiceError, GeoViewLayerNotCreatedError } from '@/core/exceptions/layer-exceptions';
+import { GeoViewLayerNotCreatedError } from '@/core/exceptions/layer-exceptions';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer, LayerMessageEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
@@ -65,7 +65,6 @@ import { getExtentUnion, getZoomFromScale } from '@/geo/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { api } from '@/app';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
@@ -87,6 +86,7 @@ import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { ConfigApi } from '@/api/config/config-api';
 // import { LayerMockup } from '@/geo/layer/layer-mockup';
 
 export type GeoViewLayerAddedResult = {
@@ -326,17 +326,16 @@ export class LayerApi {
    * @private
    */
   #handleLayerMessage(layer: AbstractGVLayer | AbstractGeoViewLayer, layerMessageEvent: LayerMessageEvent): void {
-    const mapViewer = MapEventProcessor.getMapViewer(this.getMapId());
-    const localMessage = getLocalizedMessage(layerMessageEvent.messageKey, mapViewer.getDisplayLanguage());
+    const localMessage = getLocalizedMessage(layerMessageEvent.messageKey, this.mapViewer.getDisplayLanguage());
 
     if (layerMessageEvent.messageType === 'info') {
-      mapViewer.notifications.showMessage(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
+      this.mapViewer.notifications.showMessage(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
     } else if (layerMessageEvent.messageType === 'warning') {
-      mapViewer.notifications.showWarning(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
+      this.mapViewer.notifications.showWarning(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
     } else if (layerMessageEvent.messageType === 'error') {
-      mapViewer.notifications.showError(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
+      this.mapViewer.notifications.showError(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
     } else if (layerMessageEvent.messageType === 'success') {
-      mapViewer.notifications.showSuccess(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
+      this.mapViewer.notifications.showSuccess(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
     }
   }
 
@@ -463,10 +462,20 @@ export class LayerApi {
         // Prep the GeoCore
         const geoCore = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
 
-        // Create the layers from the UUID
-        promisesOfGeoCoreGeoviewLayers.push(
-          geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig as GeoCoreLayerConfig)
-        );
+        // Create a promise to fetch from UUID
+        const promise = geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig as GeoCoreLayerConfig);
+
+        // Catch when the promise fails (if it does)
+        promise.catch((error) => {
+          // Log
+          logger.logError(error);
+
+          // Show the error, possibly a GeoViewError
+          this.mapViewer.notifications.showErrorGeoView(error, true);
+        });
+
+        // Add the promise to the array
+        promisesOfGeoCoreGeoviewLayers.push(promise);
       } else {
         // Add a resolved promise for a regular Geoview Layer Config
         promisesOfGeoCoreGeoviewLayers.push(Promise.resolve([geoviewLayerConfig as TypeGeoviewLayerConfig]));
@@ -504,34 +513,22 @@ export class LayerApi {
             if (addedResult) {
               // Catch a problem with the promise if any
               addedResult.promiseLayer.catch((error) => {
-                // Layer failed inside its promise to be added to the map
-                // Log
+                // Log that the layer failed inside its promise to be added to the map
                 logger.logError(error);
 
-                // If the error is a GeoViewLayerCreatedTwiceError
-                if (error instanceof GeoViewLayerCreatedTwiceError) {
-                  this.mapViewer.notifications.showError('validation.layer.createtwice', [
-                    (error as GeoViewLayerCreatedTwiceError).geoviewLayerId,
-                  ]);
-                } else {
-                  this.mapViewer.notifications.showError('validation.layer.loadfailed', [
-                    geoviewLayerConfig.geoviewLayerName || geoviewLayerConfig.geoviewLayerId,
-                  ]);
-                }
+                // Log the error
+                this.mapViewer.notifications.showErrorGeoView(error, true);
               });
             } else {
               // Layer failed to get created
               throw new GeoViewLayerNotCreatedError(this.getMapId(), geoviewLayerConfig.geoviewLayerId);
             }
           } catch (error) {
-            // Layer encountered a generic error when being created and added to the map
             // Log
             logger.logError(error);
 
-            // TODO: Use a generic error message
-            this.mapViewer.notifications.showError('validation.layer.loadfailed', [
-              geoviewLayerConfig.geoviewLayerName || geoviewLayerConfig.geoviewLayerId,
-            ]);
+            // Show the error, possibly a GeoViewError
+            this.mapViewer.notifications.showErrorGeoView(error, true);
           }
         });
       });
@@ -576,11 +573,11 @@ export class LayerApi {
    * @private
    */
   #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
-    // TODO: message - find a more centralized way to trap error and display message
-    api.maps[this.getMapId()].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId]);
-
     // Log
     logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.getMapId()}`);
+
+    // Show the error
+    this.mapViewer.notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId]);
   }
 
   /**
@@ -622,7 +619,7 @@ export class LayerApi {
       configs
         .filter((config) => {
           // Filter to just Geocore layers and not child layers
-          if (api.config.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
+          if (ConfigApi.isValidUUID(config.geoviewLayerConfig.geoviewLayerId) && config.parentLayerConfig === undefined) {
             return true;
           }
           return false;
@@ -717,11 +714,21 @@ export class LayerApi {
 
     // Create geocore layer configs and add
     const geoCoreGeoviewLayerInstance = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
-    const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid, optionalConfig);
-    layers.forEach((geoviewLayerConfig) => {
-      // Redirect
-      this.addGeoviewLayer(geoviewLayerConfig);
-    });
+
+    try {
+      // Create the layers from the UUID
+      const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid, optionalConfig);
+      layers.forEach((geoviewLayerConfig) => {
+        // Redirect
+        this.addGeoviewLayer(geoviewLayerConfig);
+      });
+    } catch (error) {
+      // Log
+      logger.logError(error);
+
+      // Show the error, possibly a GeoViewError
+      this.mapViewer.notifications.showErrorGeoView(error, true);
+    }
   }
 
   /**
@@ -1128,15 +1135,14 @@ export class LayerApi {
     // do not add the layer to the map
     if (geoviewLayer.layerLoadError.length !== 0) {
       geoviewLayer.layerLoadError.forEach((loadError) => {
-        const { layer, layerName, loggerMessage } = loadError;
-
         // Log the details in the console
-        logger.logError(loggerMessage);
+        logger.logError(loadError.causeError);
 
-        // TODO: find a more centralized way to trap error and display message
-        api.maps[this.getMapId()].notifications.showError('validation.layer.loadfailed', [layerName || layer]);
+        // Show error
+        this.mapViewer.notifications.showErrorGeoView(loadError);
 
-        this.#emitLayerError({ layerPath: layer, errorMessage: loggerMessage });
+        // Emit about it
+        this.#emitLayerError({ layerPath: loadError.layerConfig.layerPath, errorMessage: loadError.causeError });
       });
     }
 
@@ -1173,7 +1179,7 @@ export class LayerApi {
       // registered while the geocore layer info was fetched
       if (
         MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath) !== -1 &&
-        api.config.isValidUUID(parentLayerPath)
+        ConfigApi.isValidUUID(parentLayerPath)
       ) {
         // Replace the placeholder ordered layer info
         MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerPath);

@@ -4,6 +4,7 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { generateId, getLocalizedMessage } from './utilities';
 import { logger } from './logger';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to send message to user for a map. Can be a notification and/or a snackbar message
@@ -118,7 +119,7 @@ export class Notifications {
   }
 
   /**
-   * Display a message in the snackbar
+   * Displays a message in the snackbar
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
@@ -137,7 +138,7 @@ export class Notifications {
   }
 
   /**
-   * Display an success message in the snackbar
+   * Displays an success message in the snackbar
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
@@ -156,7 +157,7 @@ export class Notifications {
   }
 
   /**
-   * Display an warning message in the snackbar
+   * Displays an warning message in the snackbar
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {sTypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
@@ -175,7 +176,7 @@ export class Notifications {
   }
 
   /**
-   * Display an error message in the snackbar
+   * Displays an error message in the snackbar
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
@@ -191,6 +192,35 @@ export class Notifications {
     // Redirect
     this.#showSnackbarMessage('error', message, params, button);
     if (withNotification) this.addNotificationError(message, params);
+  }
+
+  /**
+   * Displays an error which can be a GeoViewError or a generic Error.
+   *
+   * @param {Error | unknown} error - The error containing the message already formatted to display
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   * @param {ISnackbarButton} button - Optional snackbar button
+   */
+  showErrorGeoView(error: Error | unknown, withNotification: boolean = true, button: ISnackbarButton = {}): void {
+    // If a GeoViewError
+    if (error instanceof GeoViewError) {
+      // Show the GeoViewError message
+      this.showError(error.message, [], withNotification, button);
+    } else {
+      // Show a generic error
+      this.showErrorGeneric(withNotification, button);
+    }
+  }
+
+  /**
+   * Displays a generic error message in the snackbar
+   *
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   */
+  showErrorGeneric(withNotification: boolean = true, button: ISnackbarButton = {}): void {
+    // Redirect
+    this.#showSnackbarMessage('error', 'error.generic', [], button);
+    if (withNotification) this.addNotificationError('error.generic', []);
   }
   // #endregion MESSAGES
 

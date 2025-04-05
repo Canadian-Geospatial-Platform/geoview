@@ -236,6 +236,12 @@ export class MapViewer {
 
     // create basemap and pass in the map id to be able to access the map instance
     this.basemap = new Basemap(MapEventProcessor.getBasemapOptions(this.mapId), this.mapId);
+
+    // Register handler when basemap has error
+    this.basemap.onBasemapError((sender, event) => {
+      // Show the error
+      this.notifications.showErrorGeoView(event.error, true);
+    });
   }
 
   /**

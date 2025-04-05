@@ -31,7 +31,6 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
-import { getLocalizedMessage } from '@/core/utils/utilities';
 import { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
@@ -290,15 +289,13 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
    */
   protected onImageLoadError(): void {
+    // Log
     logger.logError(
       `Error loading source image for layer path: ${this.getLayerPath()} at zoom level: ${this.getMapViewer().getView().getZoom()}`
     );
-    // Add notification with the current zoom level
-    this.getMapViewer().notifications.showError(
-      getLocalizedMessage('layers.errorImageLoad', this.getMapViewer().getDisplayLanguage()),
-      [this.getLayerName()!, this.getMapViewer().getView().getZoom()!],
-      true
-    );
+
+    // Emit about the error
+    this.emitMessage('layers.errorImageLoad', [this.getLayerName()!, this.getMapViewer().getView().getZoom()!.toString()], 'error', true);
   }
 
   /**

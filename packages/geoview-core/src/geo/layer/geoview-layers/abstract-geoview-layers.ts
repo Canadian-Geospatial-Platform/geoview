@@ -21,7 +21,7 @@ import {
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
-import { GeoViewLayerCreatedTwiceError } from '@/core/exceptions/layer-exceptions';
+import { GeoViewLayerCreatedTwiceError, GeoViewLayerLoadedFailedError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -86,8 +86,8 @@ export abstract class AbstractGeoViewLayer {
   /** Initial settings to apply to the GeoView layer at creation time. This attribute is allowed only if listOfLayerEntryConfig.length > 1. */
   initialSettings?: TypeLayerInitialSettings;
 
-  /** layers of listOfLayerEntryConfig that did not load. */
-  layerLoadError: { layer: string; layerName?: string | undefined; loggerMessage: string }[] = [];
+  /** List of errors for the layers that did not load. */
+  layerLoadError: GeoViewLayerLoadedFailedError[] = [];
 
   /** The OpenLayer root layer representing this GeoView Layer. */
   olRootLayer?: BaseLayer;
@@ -713,9 +713,9 @@ export abstract class AbstractGeoViewLayer {
    * Emits a layer-specific message event with localization support
    * @protected
    * @param {string} messageKey - The key used to lookup the localized message OR message
-   * @param {string[] | undefined} messageParams - Optional, array of parameters to be interpolated into the localized message
-   * @param {SnackbarType} messageType - Optional, the message type. Defaults to 'info'
-   * @param {boolean} notification - Optional, whether to show this as a notification. Defaults to false
+   * @param {string[] | undefined} messageParams - Array of parameters to be interpolated into the localized message
+   * @param {SnackbarType} messageType - The message type
+   * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
    * @returns {void}
    *
    * @example
@@ -754,11 +754,7 @@ export abstract class AbstractGeoViewLayer {
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   addLayerLoadError(layerConfig: TypeLayerEntryConfig, error: string): void {
     // Add the error to the list
-    this.layerLoadError.push({
-      layer: layerConfig.layerPath,
-      layerName: layerConfig.layerName,
-      loggerMessage: error,
-    });
+    this.layerLoadError.push(new GeoViewLayerLoadedFailedError(this.mapId, layerConfig, error));
 
     // Set the layer status to error
     layerConfig.setLayerStatusError();
@@ -782,13 +778,15 @@ export abstract class AbstractGeoViewLayer {
 
         // If the status is error
         if (newStatus === 'error') {
-          const { layerPath, layerName } = layerConfig;
-          const useLayerName = layerName === undefined ? layerConfig.geoviewLayerConfig.geoviewLayerName : layerName;
-          this.layerLoadError.push({
-            layer: layerPath,
-            layerName: useLayerName || layerPath,
-            loggerMessage: `${errorMessage} for layer ${layerPath} of map ${this.mapId}`,
-          });
+          const useLayerName =
+            layerConfig.layerName === undefined ? layerConfig.geoviewLayerConfig.geoviewLayerName : layerConfig.layerName;
+          this.layerLoadError.push(
+            new GeoViewLayerLoadedFailedError(
+              this.mapId,
+              layerConfig,
+              `${errorMessage} for layer ${useLayerName} with layer path ${layerConfig.layerPath} of map ${this.mapId}`
+            )
+          );
         }
       }
     });
