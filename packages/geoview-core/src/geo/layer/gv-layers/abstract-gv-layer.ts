@@ -268,7 +268,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    *
    * @fires LayerMessageEvent
    */
-  protected emitMessage(messageKey: string, messageParams: string[], messageType = 'info' as SnackbarType, notification = false): void {
+  protected emitMessage(
+    messageKey: string,
+    messageParams: string[],
+    messageType: SnackbarType = 'info',
+    notification: boolean = false
+  ): void {
     this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
   }
 

@@ -82,8 +82,6 @@ export function commonValidateListOfLayerEntryConfig(
 ): void {
   listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
     if (layerConfig.layerStatus === 'error') return;
-    const { layerPath, layerName } = layerConfig;
-
     if (layerEntryIsGroupLayer(layerConfig)) {
       // Use the layer name from the metadata if it exists and there is no existing name.
       if (!layerConfig.layerName) {
@@ -96,16 +94,9 @@ export function commonValidateListOfLayerEntryConfig(
       layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
 
       if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
-        layer.layerLoadError.push({
-          layer: layerPath,
-          layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
-          loggerMessage: `Empty layer group (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
-        });
-
-        // Set the layer status to error
-        layerConfig.setLayerStatusError();
+        // Add a layer load error
+        layer.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${layer.mapId}, layerPath: ${layerConfig.layerPath})`);
       }
-
       return;
     }
 
@@ -114,14 +105,8 @@ export function commonValidateListOfLayerEntryConfig(
 
     let esriIndex = Number(layerConfig.layerId);
     if (Number.isNaN(esriIndex)) {
-      layer.layerLoadError.push({
-        layer: layerPath,
-        layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
-        loggerMessage: `ESRI layerId must be a number (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
-      });
-
-      // Set the layer status to error
-      layerConfig.setLayerStatusError();
+      // Add a layer load error
+      layer.addLayerLoadError(layerConfig, `ESRI layerId must be a number (mapId:  ${layer.mapId}, layerPath: ${layerConfig.layerPath})`);
       return;
     }
 
@@ -130,14 +115,8 @@ export function commonValidateListOfLayerEntryConfig(
       : -1;
 
     if (esriIndex === -1) {
-      layer.layerLoadError.push({
-        layer: layerPath,
-        layerName: layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
-        loggerMessage: `ESRI layerId not found (mapId:  ${layer.mapId}, layerPath: ${layerPath})`,
-      });
-
-      // Set the layer status to error
-      layerConfig.setLayerStatusError();
+      // Add a layer load error
+      layer.addLayerLoadError(layerConfig, `ESRI layerId not found (mapId:  ${layer.mapId}, layerPath: ${layerConfig.layerPath})`);
       return;
     }
 

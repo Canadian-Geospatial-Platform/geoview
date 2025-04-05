@@ -112,13 +112,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig?.listOfLayerEntryConfig?.length) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
           return;
         }
       }

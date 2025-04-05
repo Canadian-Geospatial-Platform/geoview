@@ -150,13 +150,8 @@ export class WFS extends AbstractGeoViewVector {
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
           return;
         }
       }
@@ -178,13 +173,8 @@ export class WFS extends AbstractGeoViewVector {
         });
 
         if (!foundMetadata) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
           return;
         }
 

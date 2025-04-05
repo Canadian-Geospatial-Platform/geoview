@@ -141,13 +141,8 @@ export class GeoPackage extends AbstractGeoViewVector {
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
           return;
         }
       }
@@ -499,13 +494,8 @@ export class GeoPackage extends AbstractGeoViewVector {
                   if (layerGroup) layerGroup.getLayers().push(baseLayer);
                   resolve(layerGroup || baseLayer);
                 } else {
-                  this.layerLoadError.push({
-                    layer: layerConfig.layerPath,
-                    loggerMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
-                  });
-
-                  // Set the layer status to error
-                  layerConfig.setLayerStatusError();
+                  // Add a layer load error
+                  this.addLayerLoadError(layerConfig, `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`);
                   reject();
                 }
               })
@@ -544,13 +534,8 @@ export class GeoPackage extends AbstractGeoViewVector {
 
                         resolve2(baseLayer);
                       } else {
-                        this.layerLoadError.push({
-                          layer: layerConfig.layerPath,
-                          loggerMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
-                        });
-
-                        // Set the layer status to error
-                        layerConfig.setLayerStatusError();
+                        // Add a layer load error
+                        this.addLayerLoadError(layerConfig, `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`);
                         reject2();
                       }
                     })

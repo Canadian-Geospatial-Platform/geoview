@@ -100,13 +100,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
           return;
         }
       }
@@ -123,13 +118,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
         const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
         const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
         if (!foundEntry) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
           return;
         }
         return;

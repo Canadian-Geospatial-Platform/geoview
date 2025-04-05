@@ -450,7 +450,7 @@ export class LayerApi {
    * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - An optional array containing layers passed within the map config
    * @returns {Promise<void>}
    */
-  loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): Promise<void> {
+  async loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): Promise<void> {
     const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
 
     // set order for layers to appear on the map according to config
@@ -483,61 +483,61 @@ export class LayerApi {
     // To fix this, we'll have to synch the ADD_LAYER events and make sure those 'know' what order they should be in when they
     // propagate the mapOrderedLayerInfo in their processes. For now at least, this is repeating the same behavior until the events are fixed.
     const orderedLayerInfos: TypeOrderedLayerInfo[] = [];
-    return Promise.allSettled(promisesOfGeoCoreGeoviewLayers).then((promisedLayers) => {
-      // For each layers in the fulfilled promises only
-      promisedLayers
-        .filter((promise) => promise.status === 'fulfilled')
-        .map((promise) => promise as PromiseFulfilledResult<TypeGeoviewLayerConfig[]>)
-        .forEach((promise) => {
-          // For each layer
-          promise.value.forEach((geoviewLayerConfig) => {
-            try {
-              // Generate array of layer order information
-              const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
-              orderedLayerInfos.push(...layerInfos);
+    const promisedLayers = await Promise.allSettled(promisesOfGeoCoreGeoviewLayers);
 
-              // Add it
-              const addedResult = this.addGeoviewLayer(geoviewLayerConfig);
+    // For each layers in the fulfilled promises only
+    promisedLayers
+      .filter((promise) => promise.status === 'fulfilled')
+      .map((promise) => promise as PromiseFulfilledResult<TypeGeoviewLayerConfig[]>)
+      .forEach((promise) => {
+        // For each layer
+        promise.value.forEach((geoviewLayerConfig) => {
+          try {
+            // Generate array of layer order information
+            const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+            orderedLayerInfos.push(...layerInfos);
 
-              // If processed far enough to have a result with a promise
-              if (addedResult) {
-                // Catch a problem with the promise if any
-                addedResult.promiseLayer.catch((error) => {
-                  // Layer failed inside its promise to be added to the map
+            // Add it
+            const addedResult = this.addGeoviewLayer(geoviewLayerConfig);
 
-                  // Log
-                  logger.logError(error);
+            // If processed far enough to have a result with a promise
+            if (addedResult) {
+              // Catch a problem with the promise if any
+              addedResult.promiseLayer.catch((error) => {
+                // Layer failed inside its promise to be added to the map
+                // Log
+                logger.logError(error);
 
-                  // If the error is a GeoViewLayerCreatedTwiceError
-                  if (error instanceof GeoViewLayerCreatedTwiceError) {
-                    this.mapViewer.notifications.showError('validation.layer.createtwice', [
-                      (error as GeoViewLayerCreatedTwiceError).geoviewLayerId,
-                    ]);
-                  } else {
-                    this.mapViewer.notifications.showError('validation.layer.loadfailed', [
-                      geoviewLayerConfig.geoviewLayerName || geoviewLayerConfig.geoviewLayerId,
-                    ]);
-                  }
-                });
-              } else {
-                // Layer failed to get created
-                throw new GeoViewLayerNotCreatedError(this.getMapId(), geoviewLayerConfig.geoviewLayerId);
-              }
-            } catch (error) {
-              // Layer encountered a generic error when being created and added to the map
-
-              // Log
-              logger.logError(error);
-
-              // TODO: Use a generic error message
-              this.mapViewer.notifications.showError('validation.layer.loadfailed', [
-                geoviewLayerConfig.geoviewLayerName || geoviewLayerConfig.geoviewLayerId,
-              ]);
+                // If the error is a GeoViewLayerCreatedTwiceError
+                if (error instanceof GeoViewLayerCreatedTwiceError) {
+                  this.mapViewer.notifications.showError('validation.layer.createtwice', [
+                    (error as GeoViewLayerCreatedTwiceError).geoviewLayerId,
+                  ]);
+                } else {
+                  this.mapViewer.notifications.showError('validation.layer.loadfailed', [
+                    geoviewLayerConfig.geoviewLayerName || geoviewLayerConfig.geoviewLayerId,
+                  ]);
+                }
+              });
+            } else {
+              // Layer failed to get created
+              throw new GeoViewLayerNotCreatedError(this.getMapId(), geoviewLayerConfig.geoviewLayerId);
             }
-          });
+          } catch (error) {
+            // Layer encountered a generic error when being created and added to the map
+            // Log
+            logger.logError(error);
+
+            // TODO: Use a generic error message
+            this.mapViewer.notifications.showError('validation.layer.loadfailed', [
+              geoviewLayerConfig.geoviewLayerName || geoviewLayerConfig.geoviewLayerId,
+            ]);
+          }
         });
-      MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), orderedLayerInfos);
-    });
+      });
+
+    // Init ordered layer info (?)
+    MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), orderedLayerInfos);
   }
 
   /**
@@ -864,17 +864,17 @@ export class LayerApi {
       // Create a promise about the layer will be on the map
       const promiseLayer = new Promise<void>((resolve, reject) => {
         // Continue the addition process
-        layerBeingAdded!
+        layerBeingAdded
           .createGeoViewLayers()
           .then(() => {
             // Add the layer on the map
-            this.#addToMap(layerBeingAdded!);
+            this.#addToMap(layerBeingAdded);
 
             // Resolve, done
             resolve();
 
             // Emit about it
-            this.#emitLayerAdded({ layer: layerBeingAdded! });
+            this.#emitLayerAdded({ layer: layerBeingAdded });
           })
           .catch((error) => {
             // Reject it higher, because that's not where we want to handle the promise failure, we're returning the promise higher
@@ -1124,7 +1124,7 @@ export class LayerApi {
    * @private
    */
   #addToMap(geoviewLayer: AbstractGeoViewLayer): void {
-    // if the returned layer object has something in the layerLoadError, it is because an error was detected
+    // If the returned layer object has something in the layerLoadError, it is because an error was detected
     // do not add the layer to the map
     if (geoviewLayer.layerLoadError.length !== 0) {
       geoviewLayer.layerLoadError.forEach((loadError) => {
@@ -1140,10 +1140,13 @@ export class LayerApi {
       });
     }
 
+    // If no root layer is set, forget about it
+    if (!geoviewLayer.olRootLayer) return;
+
     // If all layer status are good
     if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
       // Add the OpenLayers layer to the map officially
-      this.mapViewer.map.addLayer(geoviewLayer.olRootLayer!);
+      this.mapViewer.map.addLayer(geoviewLayer.olRootLayer);
     }
 
     // Log

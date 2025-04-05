@@ -564,76 +564,94 @@ export abstract class AbstractGeoViewLayer {
     try {
       if (listOfLayerEntryConfig.length === 0) return undefined;
       if (listOfLayerEntryConfig.length === 1) {
-        if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
-          const groupReturned = await this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup);
+        // Get the config to process
+        const layerConfig = listOfLayerEntryConfig[0];
+
+        // If working on a group layer
+        if (layerEntryIsGroupLayer(layerConfig)) {
+          const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
+          const groupReturned = await this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup);
           if (groupReturned) {
             if (layerGroup) layerGroup.getLayers().push(groupReturned);
             return groupReturned;
           }
-          this.layerLoadError.push({
-            layer: listOfLayerEntryConfig[0].layerPath,
-            layerName: listOfLayerEntryConfig[0].layerName,
-            loggerMessage: `Unable to create group layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
-          });
+
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `Unable to create group layer ${layerConfig.layerPath} on map ${this.mapId}`);
           return undefined;
         }
 
-        if ((listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig).layerStatus === 'error') return undefined;
-        const { layerPath } = listOfLayerEntryConfig[0];
-        const baseLayer = await this.#processOneLayerEntry(listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig);
-        if (baseLayer) {
-          if (layerGroup) layerGroup!.getLayers().push(baseLayer!);
+        if (layerConfig.layerStatus === 'error') return undefined;
+
+        try {
+          // Process entry and catch possible error
+          const baseLayer = await this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig);
+          if (layerGroup) layerGroup.getLayers().push(baseLayer);
           return layerGroup || baseLayer;
+        } catch (error) {
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, error as string);
+          return undefined;
         }
-        this.layerLoadError.push({
-          layer: listOfLayerEntryConfig[0].layerPath,
-          layerName: listOfLayerEntryConfig[0].layerName,
-          loggerMessage: `Unable to create layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
-        });
-        this.getLayerConfig(layerPath)!.setLayerStatusError();
-        return undefined;
       }
+
+      // HERE, listOfLayerEntryConfig.length is >= 2
 
       if (!layerGroup) {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
         // eslint-disable-next-line no-param-reassign
         layerGroup = this.createLayerGroup(
-          (listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig).parentLayerConfig as TypeLayerEntryConfig,
+          listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
           listOfLayerEntryConfig[0].initialSettings!
         );
       }
+
       const promiseOfLayerCreated: Promise<BaseLayer | undefined>[] = [];
-      listOfLayerEntryConfig.forEach((layerConfig, i) => {
+      listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) {
-          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i], listOfLayerEntryConfig[i].initialSettings!);
-          promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup));
-        } else if ((listOfLayerEntryConfig[i] as AbstractBaseLayerEntryConfig).layerStatus === 'error')
+          const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
+          promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup));
+        } else if (layerConfig.layerStatus === 'error') {
           promiseOfLayerCreated.push(Promise.resolve(undefined));
-        else {
-          promiseOfLayerCreated.push(this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig));
-        }
-      });
-      const listOfLayerCreated = await Promise.all(promiseOfLayerCreated);
-      listOfLayerCreated.forEach((baseLayer, i) => {
-        const { layerPath } = listOfLayerEntryConfig[i];
-        if (baseLayer) {
-          layerGroup!.getLayers().push(baseLayer);
         } else {
-          this.layerLoadError.push({
-            layer: listOfLayerEntryConfig[i].layerPath,
-            layerName: listOfLayerEntryConfig[i].layerName,
-            loggerMessage: `Unable to create ${
-              layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? CONST_LAYER_ENTRY_TYPES.GROUP : ''
-            } layer ${listOfLayerEntryConfig[i].layerPath} on map ${this.mapId}`,
+          // Create promise and catch possible error
+          const promise = this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig).catch((error) => {
+            // Add a layer load error
+            this.addLayerLoadError(layerConfig, error as string);
+            return undefined;
           });
 
-          // Set the layer status to error
-          this.getLayerConfig(layerPath)!.setLayerStatusError();
+          // Add the promise
+          promiseOfLayerCreated.push(promise);
         }
       });
 
-      return layerGroup!;
+      // Wait until all promises resolve
+      const listOfLayerCreated = await Promise.all(promiseOfLayerCreated);
+
+      // For each resolved promise result
+      // TODO: Check - Do we still need that? This whole function is very confusing to me. I've tried adding a lot of
+      // TO.DOCONT: comments and cleared the logic, but there's likely more work to be done here...
+      // TO.DOCONT: At least now the real error exception that gets thrown gets logged in console.
+      // TO.DOCONT: Code commented out for now, to see, 2025-04-04
+      listOfLayerCreated.forEach((baseLayer) => {
+        if (baseLayer) {
+          layerGroup!.getLayers().push(baseLayer);
+        //}  else {
+        //  this.layerLoadError.push({
+        //    layer: listOfLayerEntryConfig[i].layerPath,
+        //    layerName: listOfLayerEntryConfig[i].layerName,
+        //    loggerMessage: `Unable to create ${
+        //      layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? CONST_LAYER_ENTRY_TYPES.GROUP : ''
+        //    } layer ${listOfLayerEntryConfig[i].layerPath} on map ${this.mapId}`,
+        //  });
+
+        //  // Set the layer status to error
+        //  this.getLayerConfig(layerPath)!.setLayerStatusError();
+        }
+      });
+
+      return layerGroup;
     } catch (error) {
       // Log
       logger.logError(error);
@@ -651,8 +669,13 @@ export abstract class AbstractGeoViewLayer {
     // Indicate that the layer config has entered the 'loading' status
     layerConfig.setLayerStatusLoading();
 
-    // Call the overridable method to process the layer entry
-    return this.onProcessOneLayerEntry(layerConfig);
+    // To make sure all overrides of onProcessOneLayerEntry happen indeed asynchronously (to make sure the try/catch behave correctly),
+    // overlay the call to the child with a Promise(). This can look weird, but when a throw Error() happens too soon in a synch implementation,
+    // it'll be caught synchronously by the caller, and we'll have to do 2 different try/catch to catch everything, which isn't what we want.
+    return new Promise((resolve, reject) => {
+      // Call the overridable method to process the layer entry
+      this.onProcessOneLayerEntry(layerConfig).then(resolve).catch(reject);
+    });
   }
 
   /**
@@ -720,7 +743,23 @@ export abstract class AbstractGeoViewLayer {
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  onError(layerConfig: AbstractBaseLayerEntryConfig): void {
+  protected onError(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // Set the layer status to error
+    layerConfig.setLayerStatusError();
+  }
+
+  /**
+   * Adds an error in the internal list of errors for a layer being loaded. It also sets the layer status to error.
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  addLayerLoadError(layerConfig: TypeLayerEntryConfig, error: string): void {
+    // Add the error to the list
+    this.layerLoadError.push({
+      layer: layerConfig.layerPath,
+      layerName: layerConfig.layerName,
+      loggerMessage: error,
+    });
+
     // Set the layer status to error
     layerConfig.setLayerStatusError();
   }

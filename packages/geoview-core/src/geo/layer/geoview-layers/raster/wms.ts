@@ -10,13 +10,14 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { api, WMS_PROXY_URL } from '@/app';
+import { WMS_PROXY_URL } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -423,13 +424,8 @@ export class WMS extends AbstractGeoViewRaster {
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig?.listOfLayerEntryConfig?.length) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
         }
         return;
       }
@@ -440,13 +436,8 @@ export class WMS extends AbstractGeoViewRaster {
 
         const layerFound = this.#getLayerMetadataEntry(layerConfig.layerId!);
         if (!layerFound) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
           return;
         }
 
@@ -555,15 +546,18 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<ImageLayer<ImageWMS>>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config)
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageWMS> | undefined> {
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageWMS>> {
     // Instance check
-    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
     if (geoviewEntryIsWMS(layerConfig)) {
+      // Get the layer capabilities
       const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
+
+      // If layer capabilities found
       if (layerCapabilities) {
         const dataAccessPath = layerConfig.source.dataAccessPath!;
 
@@ -606,7 +600,7 @@ export class WMS extends AbstractGeoViewRaster {
         const requestResult = this.emitLayerRequesting({ config: layerConfig, source, extraConfig: { layerCapabilities } });
 
         // If any response
-        let olLayer: ImageLayer<ImageWMS> | undefined;
+        let olLayer: ImageLayer<ImageWMS>;
         if (requestResult.length > 0) {
           // Get the OpenLayer that was created
           olLayer = requestResult[0] as ImageLayer<ImageWMS>;
@@ -618,13 +612,15 @@ export class WMS extends AbstractGeoViewRaster {
         return Promise.resolve(olLayer);
       }
 
-      // TODO: find a more centralized way to trap error and display message
-      api.maps[this.mapId].notifications.showError('validation.layer.notfound', [layerConfig.layerId, this.geoviewLayerId]);
-      return Promise.resolve(undefined);
+      // Error
+      throw new GeoViewError(this.mapId, 'validation.layer.notfound', [layerConfig.layerId, this.geoviewLayerId]);
     }
 
+    // Log
     logger.logError(`geoviewLayerType must be ${CONST_LAYER_TYPES.WMS}`);
-    return Promise.resolve(undefined);
+
+    // Raise error
+    throw new GeoViewError(this.mapId, `geoviewLayerType must be ${CONST_LAYER_TYPES.WMS}`);
   }
 
   /** ***************************************************************************************************************************

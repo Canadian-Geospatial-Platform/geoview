@@ -135,13 +135,8 @@ export class OgcFeature extends AbstractGeoViewVector {
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
           return;
         }
       }
@@ -154,13 +149,8 @@ export class OgcFeature extends AbstractGeoViewVector {
       if (Array.isArray(this.metadata!.collections)) {
         const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
         if (!foundCollection) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
           return;
         }
 

@@ -133,13 +133,8 @@ export class GeoJSON extends AbstractGeoViewVector {
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
         }
         return;
       }
@@ -156,14 +151,8 @@ export class GeoJSON extends AbstractGeoViewVector {
           Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
         );
         if (!foundEntry) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
-          return;
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
         }
         return;
       }
@@ -177,7 +166,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * This method is used to do a recursive search in the array of layer entry config.
    *
-   * @param {string} layerId The layer list to search.
+   * @param {string} searchKey The layer list to search.
    * @param {TypeLayerEntryConfig[]} metadataLayerList The layer list to search.
    *
    * @returns {TypeLayerEntryConfig | undefined} The found layer or undefined if not found.

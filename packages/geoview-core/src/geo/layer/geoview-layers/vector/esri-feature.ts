@@ -119,10 +119,8 @@ export class EsriFeature extends AbstractGeoViewVector {
   // GV Layers Refactoring - Obsolete (in config?)
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
     if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
-      this.layerLoadError.push({
-        layer: layerConfig.layerPath,
-        loggerMessage: `LayerId ${layerConfig.layerPath} of map ${this.mapId} is not a feature layer`,
-      });
+      // Add a layer load error
+      this.addLayerLoadError(layerConfig, `LayerId ${layerConfig.layerPath} of map ${this.mapId} is not a feature layer`);
       return true;
     }
     return false;
