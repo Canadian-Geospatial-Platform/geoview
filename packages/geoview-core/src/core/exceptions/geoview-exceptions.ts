@@ -20,7 +20,7 @@ export class GeoViewError extends Error {
     // Store the map ID
     this.mapId = mapId;
 
-    // Get the message
+    // Set the message
     this.message = getLocalizedMessage(localizedKeyOrMessage, AppEventProcessor.getDisplayLanguage(mapId), params);
 
     // Set the prototype explicitly to ensure correct inheritance (recommended by TypeScript documentation)

@@ -238,6 +238,7 @@
     "noTab": "Pas d'onglet"
   },
   "error": {
+    "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour détails",
     "metadata": {
       "unableRead": "Impossible de lire les métadonnées",
       "empty": "La valeur renvoyée est vide",

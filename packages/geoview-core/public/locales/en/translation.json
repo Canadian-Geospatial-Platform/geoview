@@ -239,6 +239,7 @@
     "noTab": "No tab"
   },
   "error": {
+    "generic": "An error happened, contact us or view console for details",
     "metadata": {
       "unableRead": "Unable to read metadata",
       "empty": "Value returned is empty",
