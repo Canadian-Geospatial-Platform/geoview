@@ -633,11 +633,11 @@ export abstract class AbstractGeoViewLayer {
       // TODO: Check - Do we still need that? This whole function is very confusing to me. I've tried adding a lot of
       // TO.DOCONT: comments and cleared the logic, but there's likely more work to be done here...
       // TO.DOCONT: At least now the real error exception that gets thrown gets logged in console.
-      // TO.DOCONT: Code commented out for now, to see, 2025-04-04
+      // TO.DOCONT: Code in the else commented out for now, to see, 2025-04-04
       listOfLayerCreated.forEach((baseLayer) => {
         if (baseLayer) {
           layerGroup!.getLayers().push(baseLayer);
-        //}  else {
+        } // else {
         //  this.layerLoadError.push({
         //    layer: listOfLayerEntryConfig[i].layerPath,
         //    layerName: listOfLayerEntryConfig[i].layerName,
@@ -648,7 +648,7 @@ export abstract class AbstractGeoViewLayer {
 
         //  // Set the layer status to error
         //  this.getLayerConfig(layerPath)!.setLayerStatusError();
-        }
+        // }
       });
 
       return layerGroup;
@@ -713,9 +713,9 @@ export abstract class AbstractGeoViewLayer {
    * Emits a layer-specific message event with localization support
    * @protected
    * @param {string} messageKey - The key used to lookup the localized message OR message
-   * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
-   * @param {SnackbarType} messageType - The message type
-   * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
+   * @param {string[] | undefined} messageParams - Optional, array of parameters to be interpolated into the localized message
+   * @param {SnackbarType} messageType - Optional, the message type. Defaults to 'info'
+   * @param {boolean} notification - Optional, whether to show this as a notification. Defaults to false
    * @returns {void}
    *
    * @example
@@ -730,7 +730,7 @@ export abstract class AbstractGeoViewLayer {
    */
   protected emitMessage(
     messageKey: string,
-    messageParams: string[],
+    messageParams: string[] | undefined = [],
     messageType: SnackbarType = 'info' as SnackbarType,
     notification: boolean = false
   ): void {

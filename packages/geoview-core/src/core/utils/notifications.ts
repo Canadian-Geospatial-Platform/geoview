@@ -122,10 +122,15 @@ export class Notifications {
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
    * @param {ISnackbarButton} button - Optional snackbar button
    */
-  showMessage(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
+  showMessage(
+    message: string,
+    params: TypeJsonValue[] | TypeJsonArray | string[] = [],
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Redirect
     this.#showSnackbarMessage('info', message, params, button);
     if (withNotification) this.addNotificationMessage(message, params);
@@ -136,10 +141,15 @@ export class Notifications {
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
    * @param {ISnackbarButton} button - Optional snackbar button
    */
-  showSuccess(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
+  showSuccess(
+    message: string,
+    params: TypeJsonValue[] | TypeJsonArray | string[] = [],
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Redirect
     this.#showSnackbarMessage('success', message, params, button);
     if (withNotification) this.addNotificationSuccess(message, params);
@@ -150,10 +160,15 @@ export class Notifications {
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {sTypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
    * @param {ISnackbarButton} button - Optional snackbar button
    */
-  showWarning(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
+  showWarning(
+    message: string,
+    params: TypeJsonValue[] | TypeJsonArray | string[] = [],
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Redirect
     this.#showSnackbarMessage('warning', message, params, button);
     if (withNotification) this.addNotificationWarning(message, params);
@@ -164,10 +179,15 @@ export class Notifications {
    *
    * @param {string} message - The message or a locale key to retrieve
    * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
    * @param {ISnackbarButton} button - Optional snackbar button
    */
-  showError(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
+  showError(
+    message: string,
+    params: TypeJsonValue[] | TypeJsonArray | string[] = [],
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Redirect
     this.#showSnackbarMessage('error', message, params, button);
     if (withNotification) this.addNotificationError(message, params);

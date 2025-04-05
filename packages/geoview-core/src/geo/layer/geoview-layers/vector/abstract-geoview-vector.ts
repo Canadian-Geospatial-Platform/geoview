@@ -12,7 +12,6 @@ import { getUid } from 'ol/util';
 
 import { TypeFeatureInfoLayerConfig, TypeOutfields } from '@config/types/map-schema-types';
 
-import { api } from '@/app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeBaseSourceVectorInitialConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -22,6 +21,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Projection } from '@/geo/utils/projection';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
 const EXCLUDED_HEADERS_LNG = ['longitude', 'lon', 'x', 'xcoord', 'longitude|longitude', 'longitude | longitude'];
@@ -133,8 +133,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         if (xhr.status === 200) {
           let features: Feature[] | undefined;
           if (layerConfig.schemaTag === CONST_LAYER_TYPES.CSV) {
-            // Convert the CSV to features
-            features = AbstractGeoViewVector.convertCsv(this.mapId, xhr.responseText, layerConfig as VectorLayerEntryConfig);
+            try {
+              // Convert the CSV to features
+              features = AbstractGeoViewVector.convertCsv(this.mapId, xhr.responseText, layerConfig as VectorLayerEntryConfig);
+            } catch (error) {
+              // Set the layer status to error
+              layerConfig.setLayerStatusError();
+
+              // Emit message about the error
+              this.emitMessage(error as string, undefined, 'error', true);
+            }
           } else if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
             // Fetch the features text array
             const esriFeaturesArray = await this.getEsriFeatures(
@@ -252,6 +260,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Create interval for logging
     // TODO: message - Create message for all vector layer fetching. Create a centralized message creator for geoview-layers
     const timeInterval = setInterval(() => {
+      // Emit message about the fetching being slow
       this.emitMessage('layers.slowFetch', [this.geoviewLayerName || '...']);
     }, 15000); // Log every 15 seconds
 
@@ -353,14 +362,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
 
     if (latIndex === undefined || lonIndex === undefined) {
-      const errorMsg = `Could not find geographic data in the CSV`;
-      logger.logError(errorMsg);
-      // TODO: find a more centralized way to trap error and display message
-      api.maps[mapId].notifications.showError(errorMsg);
-
-      // Set the layer status to error
-      layerConfig.setLayerStatusError();
-      return undefined;
+      throw new GeoViewError(mapId, `Could not find geographic data in the CSV`);
     }
 
     AbstractGeoViewVector.#processFeatureInfoConfig(headers, csvRows[1], EXCLUDED_HEADERS, layerConfig);
