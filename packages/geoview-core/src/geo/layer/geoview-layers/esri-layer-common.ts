@@ -284,8 +284,8 @@ export function commonProcessFeatureInfoConfig(
     // if queryable flag is undefined, set it accordingly to what is specified in the metadata
     if (layerConfig.source.featureInfo.queryable === undefined && layerMetadata.fields?.length)
       layerConfig.source.featureInfo.queryable = queryable;
-    // else the queryable flag comes from the user config.
-    else if (layerConfig.source.featureInfo.queryable && layerMetadata.type !== 'Group Layer') {
+    // else the queryable flag comes from the user config... If the service is not queryable throw an error
+    else if (layerConfig.source.featureInfo.queryable && !queryable && layerMetadata.type !== 'Group Layer') {
       layerConfig.layerStatus = 'error';
       throw new Error(
         `The config whose layer path is ${layerPath} cannot set a layer as queryable because it does not have field definitions`

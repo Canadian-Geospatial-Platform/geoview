@@ -167,7 +167,6 @@ async function renderMap(mapElement: Element): Promise<void> {
 
     // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
     return new Promise<void>((resolve) => {
-      // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
       reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} onMapViewerInit={(): void => resolve()} />);
     });
   }
@@ -253,7 +252,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           callbackMapInit?.(mapId); // TODO: Obsolete call, remove it eventually
 
           // Register when the map viewer will have a map ready
-          api.maps[mapId].onMapReady((mapViewer) => {
+          api.getMapViewer(mapId).onMapReady((mapViewer) => {
             logger.logInfo('Map ready / layers registered', mapViewer.mapId);
 
             // Callback for that particular map
@@ -261,7 +260,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           });
 
           // Register when the map viewer will have loaded layers
-          api.maps[mapId].onMapLayersProcessed((mapViewer) => {
+          api.getMapViewer(mapId).onMapLayersProcessed((mapViewer) => {
             logger.logInfo('Map layers processed', mapViewer.mapId);
 
             // Callback for that particular map
@@ -269,7 +268,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           });
 
           // Register when the map viewer will have loaded layers
-          api.maps[mapId].onMapLayersLoaded((mapViewer) => {
+          api.getMapViewer(mapId).onMapLayersLoaded((mapViewer) => {
             logger.logInfo('Map layers loaded', mapViewer.mapId);
 
             // Callback for that particular map

@@ -574,9 +574,13 @@ export class LayerApi {
    * @private
    */
   #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
-    // TODO: message - find a more centralized way to trap error and display message
-    api.maps[this.getMapId()].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId]);
-
+    // Cast the config to GEoviewLayer so we can throw the notification
+    this.#handleLayerMessage(mapConfigLayerEntry as unknown as AbstractGeoViewLayer, {
+      messageKey: 'validation.layer.usedtwice',
+      messageParams: [mapConfigLayerEntry.geoviewLayerId],
+      messageType: 'error',
+      notification: true,
+    });
     // Log
     logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.getMapId()}`);
   }
@@ -1130,9 +1134,7 @@ export class LayerApi {
 
         // Log the details in the console
         logger.logError(loggerMessage);
-
-        // TODO: find a more centralized way to trap error and display message
-        api.maps[this.getMapId()].notifications.showError('validation.layer.loadfailed', [layerName || layer]);
+        this.mapViewer.notifications.showError('validation.layer.loadfailed', [layerName || layer]);
 
         this.#emitLayerError({ layerPath: layer, errorMessage: loggerMessage });
       });

@@ -13,7 +13,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { api, WMS_PROXY_URL } from '@/app';
+import { WMS_PROXY_URL } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -600,8 +600,8 @@ export class WMS extends AbstractGeoViewRaster {
         return Promise.resolve(olLayer);
       }
 
-      // TODO: find a more centralized way to trap error and display message
-      api.maps[this.mapId].notifications.showError('validation.layer.notfound', [layerConfig.layerId, this.geoviewLayerId]);
+      // Emit error message
+      this.emitMessage('validation.layer.notfound', [layerConfig.layerId, this.geoviewLayerId], 'error', true);
       return Promise.resolve(undefined);
     }
 

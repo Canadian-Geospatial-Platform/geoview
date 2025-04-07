@@ -68,16 +68,16 @@ export class AppEventProcessor extends AbstractEventProcessor {
   static addMessage(mapId: string, type: SnackbarType, message: string, param?: string[], notification = false): void {
     switch (type) {
       case 'info':
-        api.maps[mapId].notifications.showMessage(message, param, notification);
+        api.getMapViewer(mapId).notifications.showMessage(message, param, notification);
         break;
       case 'success':
-        api.maps[mapId].notifications.showSuccess(message, param, notification);
+        api.getMapViewer(mapId).notifications.showSuccess(message, param, notification);
         break;
       case 'warning':
-        api.maps[mapId].notifications.showWarning(message, param, notification);
+        api.getMapViewer(mapId).notifications.showWarning(message, param, notification);
         break;
       case 'error':
-        api.maps[mapId].notifications.showError(message, param, notification);
+        api.getMapViewer(mapId).notifications.showError(message, param, notification);
         break;
       default:
         break;

@@ -137,7 +137,7 @@ export class ConfigValidation {
           const message = replaceParams([schemaPath], getLocalizedMessage('validation.schema.wrongPath', 'en'));
           logger.logWarning(`- Map ${this.mapId}: ${message}`);
           // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
-          api.maps[this.mapId].notifications.showError('validation.schema.wrongPath', [schemaPath]);
+          api.getMapViewer(this.mapId).notifications.showError('validation.schema.wrongPath', [schemaPath]);
         }, 2000);
         return false;
       }

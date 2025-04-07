@@ -96,7 +96,7 @@
     <pre id="mapWM-state" class="panel map-title-holder"></pre>
 
     <div
-      id="mapWM"
+      id="map1"
       class="geoview-map"
       data-lang="en"
       data-config="{
@@ -187,12 +187,12 @@
           : 'geocore conversion error';
         document.getElementById('access-path-field').innerText = geoviewConfig ? geoviewConfig.metadataAccessPath : '';
 
-        cgpv.api.maps['mapWM'].layer.addGeoviewLayerByGeoCoreUUID(uuid);
+        cgpv.api.getMapViewer('map1').layer.addGeoviewLayerByGeoCoreUUID(uuid);
       }
 
       async function addGeoviewLayer(geoviewLayerType, metadataAccessPath, layerId) {
         // adding a geojson layer requires a type of geojson and url
-        const addResult = cgpv.api.maps['mapWM'].layer.addGeoviewLayer(
+        const addResult = cgpv.api.getMapViewer('map1').layer.addGeoviewLayer(
           {
             geoviewLayerType: `${geoviewLayerType}`,
             metadataAccessPath: `${metadataAccessPath}`,
@@ -216,7 +216,7 @@
       }
 
       function reloadMap() {
-        cgpv.api.maps['mapWM'].setProjection(Number(document.getElementById('projections').value));
+        cgpv.api.getMapViewer('map1').setProjection(Number(document.getElementById('projections').value));
       }
 
       async function addGeocoreNametoSelectOption(uuid, optionElement) {
@@ -293,7 +293,7 @@
           initTableFields();
         });
 
-        listenToLegendLayerSetChanges('mapWM-state', 'mapWM');
+        listenToLegendLayerSetChanges('mapWM-state', 'map1');
       });
 
       // create snippets

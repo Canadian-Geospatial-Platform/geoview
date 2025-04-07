@@ -101,7 +101,7 @@ export class GeoCore {
         MapEventProcessor.removeOrderedLayerInfo(this.#mapId, uuid, false);
 
       // TODO: find a more centralized way to trap error and display message
-      api.maps[this.#mapId].notifications.showError('validation.layer.uuidNotFound', [uuid]);
+      api.getMapViewer(this.#mapId).notifications.showError('validation.layer.uuidNotFound', [uuid]);
       throw error;
     }
   }

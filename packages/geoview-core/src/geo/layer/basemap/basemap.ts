@@ -208,7 +208,7 @@ export class Basemap {
     if (overviewMap) this.overviewMap = overviewMap;
     else {
       // TODO: find a more centralized way to trap error and display message
-      api.maps[this.mapId].notifications.showError('mapctrl.overviewmap.error');
+      api.getMapViewer(this.mapId).notifications.showError('mapctrl.overviewmap.error');
     }
 
     // Overview Map Control

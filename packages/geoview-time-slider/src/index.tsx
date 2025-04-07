@@ -216,7 +216,9 @@ class TimeSliderPlugin extends FooterPlugin {
   #filterTimeSliderLayers(layerPaths: string[]): string[] {
     const filteredLayerPaths = layerPaths.filter((layerPath) => {
       // Return the temporal dimension for the layer if any
-      return this.mapViewer().layer.getGeoviewLayer(layerPath)?.getTemporalDimension();
+      return this.mapViewer().layer.getGeoviewLayer(layerPath)
+        ? this.mapViewer().layer.getGeoviewLayer(layerPath).getTemporalDimension()
+        : '';
     });
     return filteredLayerPaths;
   }

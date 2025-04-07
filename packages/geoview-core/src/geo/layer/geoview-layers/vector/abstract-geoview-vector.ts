@@ -368,7 +368,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       const errorMsg = `Could not find geographic data in the CSV`;
       logger.logError(errorMsg);
       // TODO: find a more centralized way to trap error and display message
-      api.maps[mapId].notifications.showError(errorMsg);
+      api.getMapViewer(mapId).notifications.showError('error.layer.noCSVGeometry', [layerConfig.layerId]);
+
       layerConfig.layerStatus = 'error';
       return undefined;
     }

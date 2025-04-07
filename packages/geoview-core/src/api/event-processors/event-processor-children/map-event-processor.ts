@@ -160,27 +160,27 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the Map Viewer instance for a given map id
-   * This is use to reduce the use of api.maps[mapId] and be more explicit
+   * This is use to reduce the use of api.getMapViewer(mapId) and be more explicit
    * @param {string} mapId - map Id
    * @returns {MapViewer} The Map viewer instance
    */
   static getMapViewer(mapId: string): MapViewer {
-    return api.maps[mapId];
+    return api.getMapViewer(mapId);
   }
 
   /**
    * Shortcut to get the Map Viewer layer api instance for a given map id
-   * This is use to reduce the use of api.maps[mapId].layer and be more explicit
+   * This is use to reduce the use of api.getMapViewer(mapId).layer and be more explicit
    * @param {string} mapId - map Id
    * @returns {LayerApi} The Map viewer layer API instance
    */
   static getMapViewerLayerAPI(mapId: string): LayerApi {
-    return api.maps[mapId].layer;
+    return api.getMapViewer(mapId).layer;
   }
 
   /**
    * Shortcut to get the Map Viewer plugins instance for a given map id
-   * This is use to reduce the use of api.maps[mapId].plugins and be more explicit
+   * This is use to reduce the use of apigetMapViewer(mapId).plugins and be more explicit
    * @param {string} mapId - map Id
    * @returns {TypeRecordOfPlugin} The map plugins record
    */
@@ -189,13 +189,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Check if the plugins exist
       // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),
       // TO.DOCONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
-      await whenThisThen(() => api && api.maps && api.maps[mapId] && api.maps[mapId].plugins);
+      await whenThisThen(() => api && api.hasMapViewer(mapId) && api.getMapViewer(mapId).plugins);
     } catch (error) {
       // Log
       logger.logError(`Couldn't retrieve the plugins instance on Map Viewer`, error);
     }
 
-    return api.maps[mapId].plugins;
+    return api.getMapViewer(mapId).plugins;
   }
 
   /**
@@ -705,7 +705,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
     // Redirect to state API
-    api.maps[mapId].stateApi.reorderLayers(mapId, layerPath, move);
+    api.getMapViewer(mapId).stateApi.reorderLayers(mapId, layerPath, move);
   }
 
   /**

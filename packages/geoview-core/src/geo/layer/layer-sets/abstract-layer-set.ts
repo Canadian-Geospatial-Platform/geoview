@@ -112,8 +112,8 @@ export abstract class AbstractLayerSet {
 
           // GV Take this opportunity to verify if the layer had a parent (this code used to be inside ConfigBaseClass,
           // GV but it turns out parentLayerConfig couldn't be trusted when navigating the object hierarchy - see note over there)
-          // GV cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').layerStatus
-          // GV vs cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').parentLayerConfig.listOfLayerEntryConfig[0].layerStatus
+          // GV cgpv.api.getMapViewer('sandboxMap').layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').layerStatus
+          // GV vs cgpv.api.getMapVierwer('sandboxMap').layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').parentLayerConfig.listOfLayerEntryConfig[0].layerStatus
 
           // If the config has a parent
           if (layerConfig.parentLayerConfig) {

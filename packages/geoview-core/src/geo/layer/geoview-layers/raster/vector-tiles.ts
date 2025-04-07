@@ -18,7 +18,6 @@ import {
 import { TypeJsonObject } from '@/core/types/global-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { api } from '@/app';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -156,11 +155,10 @@ export class VectorTiles extends AbstractGeoViewRaster {
       this.metadata?.tileInfo?.spatialReference?.wkid &&
       this.getMapViewer().getProjection().getCode().replace('EPSG:', '') !== this.metadata.tileInfo.spatialReference.wkid.toString()
     ) {
-      // TODO: find a more centralized way to trap error and display message
-      api.maps[this.mapId].notifications.showError(
-        `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`
-      );
+      // Emiterror message
+      this.emitMessage('error.layer.unsuportedProjection', [layerConfig.layerId], 'error', true);
       logger.logError(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
+
       // eslint-disable-next-line no-param-reassign
       layerConfig.layerStatus = 'error';
       return Promise.resolve(undefined);

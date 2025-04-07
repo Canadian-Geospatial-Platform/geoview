@@ -64,7 +64,7 @@ function AppStart(props: AppStartProps): JSX.Element {
   function getInlineMaps(): JSX.Element {
     // create a new map viewer instance and add it to the api
     // TODO: use store, remove the use of feature by viewer class and use state to gather values
-    if (!(mapId in api.maps)) {
+    if (!api.hasMapViewer(mapId)) {
       const mapViewer = new MapViewer(mapFeaturesConfig, i18n);
       api.setMapViewer(mapId, mapViewer, onMapViewerInit);
     }
@@ -74,7 +74,7 @@ function AppStart(props: AppStartProps): JSX.Element {
         <MapContext.Provider value={mapContextValue}>
           <ThemeProvider theme={getTheme(theme)}>
             <StrictMode>
-              <Shell mapViewer={api.maps[mapId]} />
+              <Shell mapViewer={api.getMapViewer(mapId)} />
             </StrictMode>
           </ThemeProvider>
         </MapContext.Provider>
