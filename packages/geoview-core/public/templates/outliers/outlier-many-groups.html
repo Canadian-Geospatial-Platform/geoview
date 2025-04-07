@@ -44,10 +44,10 @@
     </div>
 
     <div class="map-title-holder">
-      <h4 id="HMap1">Many Group Layers</h4>
+      <h4 id="Hmap1">Many Group Layers</h4>
     </div>
     <button class="collapsible active">Layers Status</button>
-    <pre id="HMap1-state" class="panel map-title-holder"></pre>
+    <pre id="Hmap1-state" class="panel map-title-holder"></pre>
     <hr />
 
     <select name="projections" id="projections">
@@ -57,7 +57,7 @@
     <button type="button" onclick="reloadMap()">Set Projection</button>
 
     <div
-      id="Map1"
+      id="map1"
       class="geoview-map"
       data-lang="en"
       data-config-url="./configs/many-groups.json"
@@ -81,7 +81,7 @@
       });
 
       function reloadMap() {
-        cgpv.api.maps['Map1'].setProjection(Number(document.getElementById('projections').value));
+        cgpv.api.getMapViewer('map1').setProjection(Number(document.getElementById('projections').value));
       }
 
       // create snippets

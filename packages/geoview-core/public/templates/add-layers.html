@@ -72,7 +72,7 @@
     <button type="button" onclick="reloadMap()">Set Projection</button>
 
     <div
-      id="mapWM"
+      id="map1"
       class="geoview-map"
       data-lang="en"
       data-config="{
@@ -214,7 +214,7 @@
         if (!document.getElementById('selectGeoCore').value) return;
 
         // Add the layer on the map
-        cgpv.api.maps['mapWM'].layer.addGeoviewLayerByGeoCoreUUID(document.getElementById('selectGeoCore').value);
+        cgpv.api.getMapViewer('map1').layer.addGeoviewLayerByGeoCoreUUID(document.getElementById('selectGeoCore').value);
       }
 
       document.addEventListener('DOMContentLoaded', function () {
@@ -253,7 +253,7 @@
 
     <script>
       function reloadMap() {
-        cgpv.api.maps['mapWM'].setProjection(Number(document.getElementById('projections').value));
+        cgpv.api.getMapViewer('map1').setProjection(Number(document.getElementById('projections').value));
       }
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready

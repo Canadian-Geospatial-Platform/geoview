@@ -255,7 +255,9 @@
       "emptyGroup": "Groupe de couches vide",
       "esriId": "Le layerId ESRI doit être un nombre",
       "esriIdNotFound": "Le layerId ESRI introuvable",
-      "notAbleToQuery": "Impossible de téléchager les données pour __param__"
+      "notAbleToQuery": "Impossible de téléchager les données pour __param__",
+      "unsuportedProjection": "La projection de la couche __param__ ne correspond pas à la projection de la carte",
+      "noCSVGeometry": "Impossible de trouver des données géographiques dans la couche CSV __param__"
     },
     "geocore": {
       "noLayer": "Aucune couche renvoyée par le service GeoCore"

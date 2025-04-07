@@ -18,6 +18,25 @@ export const useStoresManager = createStore<StoresManagerState>(() => ({
   stores: {},
 }));
 
+/**
+ * Mounts Zustand DevTools for a specific store instance.
+ *
+ * @param {string} instanceName - Unique name for this store instance
+ * @param {any} store - The Zustand store
+ * @param {HTMLElement} container - The container element
+ */
+const mountZustandDevTools = (instanceName: string, store: GeoviewStoreType, container: HTMLElement): void => {
+  // Only mount in development
+  if (process.env.NODE_ENV === 'development') {
+    // Check if container already has devtools
+    if (!container.hasAttribute('data-zustand-devtools')) {
+      mountStoreDevtool(instanceName, store, container);
+      // Mark container as having devtools mounted
+      container.setAttribute('data-zustand-devtools', 'true');
+    }
+  }
+};
+
 export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   if (!config.mapId) {
     return;
@@ -39,12 +58,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
     },
   }));
 
-  // TODO Revert back this code and delete line before. Issue #1559
-  /*
-  if (process.env.NODE_ENV === 'development') {
-    mountStoreDevtool(`getViewStore-${config.mapId}`, geoviewStore);
-  } */
-  mountStoreDevtool(`getViewStore-${config.mapId}`, geoviewStore);
+  mountZustandDevTools(`getViewStore-${config.mapId}`, geoviewStore, geoviewStore.getState().appState.geoviewHTMLElement);
 };
 
 export const getGeoViewStore = (id: string | undefined): GeoviewStoreType => {

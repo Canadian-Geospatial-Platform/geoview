@@ -93,28 +93,6 @@
       </table>
     </div>
     <br />
-    <!--  TODO: repair when layer populate automatically child element -->
-    <div style="display: none">
-      <span>Add Layers</span><br />
-      <div id="sourcedLayers" class="load-test-params">
-        <label>Layer Type</label>
-        <select name="layerType" id="layerType">
-          <option value="ogcWms">WMS Layer</option>
-          <option value="esriFeature">Esri Feature Layer</option>
-          <option value="esriDynamic">Esri Dynamic Layer</option>
-          <option value="geoJSONPoint">GeoJson Point Layer</option>
-          <option value="geoJSONLine">GeoJson Line Layer</option>
-          <option value="geoJSONPolygon">GeoJson Polygon Layer</option>
-        </select>
-        <label id="URLlbl"> URL </label><input id="url" />
-        <label id="entrieslbl">entries</label>
-        <input id="entries" />
-        <label> No of layers to load </label><input id="layerCount" />
-        <button id="load-btn">Load Data</button>
-      </div>
-    </div>
-    <br />
-    <br />
     <span>Add GeoJSON Features</span><br />
     <div id="jsonFeatures" class="load-test-params">
       <label id="featuretype">Geometry</label>
@@ -131,7 +109,7 @@
     <span>Time to render: </span><span id="timer"></span><br />
     <span>Time to zoom : </span><span id="zoomtime"></span><br />
     <div
-      id="mapWM"
+      id="map1"
       class="geoview-map"
       data-lang="en"
       data-config="{
@@ -159,97 +137,20 @@
     <script src="codedoc.js"></script>
     <script>
       let tzoom0 = 0;
-      const layerOptionValues = ['ogcWms', 'esriFeature', 'esriDynamic', 'geoJSONPoint', 'geoJSONLine', 'geoJSONPolygon'];
       const jsonFeatureOptionValues = ['jsonPoint', 'jsonLine', 'jsonPolygon'];
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'mapWM') {
-          setTimeout(() => cgpv.api.maps.mapWM.map.on('movestart', () => (tzoom0 = performance.now())), 1000);
+        if (mapId === 'map1') {
+          setTimeout(() => cgpv.api.getMapViewer('map1').map.on('movestart', () => (tzoom0 = performance.now())), 1000);
           setTimeout(
             () =>
-              cgpv.api.maps.mapWM.map.on('moveend', () => {
+              cgpv.api.getMapViewer('map1').map.on('moveend', () => {
                 var tzoom1 = performance.now();
                 document.getElementById('zoomtime').innerText = Math.round(tzoom1 - tzoom0) / 1000 + ' Seconds';
               }),
             1000
           );
-        }
-      });
-
-      // find the button element by ID
-      var addwmsButton = document.getElementById('load-wms-btn');
-
-      function updateURL() {
-        // TODO: repair when layer populate automatically child element
-        switch (layerOptionValues[document.getElementById('layerType').selectedIndex]) {
-          case 'esriFeature':
-            document.getElementById('url').value =
-              'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1';
-            document.getElementById('entries').value = '---';
-            break;
-          case 'esriDynamic':
-            document.getElementById('url').value =
-              'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer';
-            document.getElementById('entries').value = '0, 2, 4, 5';
-            break;
-          case 'ogcWms':
-            document.getElementById('url').value =
-              'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer';
-            document.getElementById('entries').value = '0';
-            break;
-          case 'geoJSONPoint':
-            document.getElementById('url').value = './datasets/geojson/';
-            document.getElementById('entries').value = 'points.json';
-            break;
-          case 'geoJSONLine':
-            document.getElementById('url').value = './datasets/geojson/';
-            document.getElementById('entries').value = 'lines.json';
-            break;
-          case 'geoJSONPolygon':
-            document.getElementById('url').value = './datasets/geojson/';
-            document.getElementById('entries').value = 'polygons.json';
-            break;
-        }
-      }
-
-      var layerTypeCbo = document.getElementById('layerType');
-      layerTypeCbo.addEventListener('change', function (e) {
-        updateURL();
-      });
-      setTimeout(() => updateURL(), 1000);
-
-      var addFeatureButton = document.getElementById('load-btn');
-      addFeatureButton.addEventListener('click', function (e) {
-        if (typeof parseInt(document.getElementById('layerCount').value) === 'number') {
-          let type = layerOptionValues[document.getElementById('layerType').selectedIndex];
-          type = type.indexOf('geoJSON') === -1 ? type : 'GeoJSON';
-
-          let listOfLayerEntryConfig = [];
-          let entriesValue = document.getElementById('entries').value;
-
-          if (entriesValue) {
-            listOfLayerEntryConfig = entriesValue.split(',').map((entry) => {
-              return {
-                layerId: entry,
-              };
-            });
-          }
-
-          var t0 = performance.now();
-
-          for (j = 0; j < parseInt(document.getElementById('layerCount').value); j++) {
-            cgpv.api.maps['mapWM'].layer.addGeoviewLayer({
-              geoviewLayerId: new Date().getTime().toString(),
-              geoviewLayerName: 'test',
-              geoviewLayerType: type,
-              listOfLayerEntryConfig,
-              metadaAccessPath: document.getElementById('url').value,
-            });
-          }
-
-          var t1 = performance.now();
-          document.getElementById('timer').innerText = Math.round(t1 - t0) / 1000 + ' Seconds';
         }
       });
 
@@ -278,7 +179,7 @@
           const coord = generateRandomCoord();
 
           // call an api function to draw a polygon
-          const circle = cgpv.api.maps['mapWM'].layer.geometry.addCircle([coord[0], coord[1]], {
+          const circle = cgpv.api.getMapViewer('map1').layer.geometry.addCircle([coord[0], coord[1]], {
             style: {
               strokeColor: 'red',
               strokeOpacity: 0.15,
@@ -310,7 +211,7 @@
           line.push(ptEnd);
           line.unshift(ptStart);
 
-          const polyline = cgpv.api.maps['mapWM'].layer.geometry.addPolyline(line, {
+          const polyline = cgpv.api.getMapViewer('map1').layer.geometry.addPolyline(line, {
             style: {
               strokeColor: '#000',
               strokeWidth: 1,
@@ -326,7 +227,7 @@
           const factor = (Math.random() * 100 + 1) / 10;
 
           // call an api function to draw a polygon
-          const polygon = cgpv.api.maps['mapWM'].layer.geometry.addPolygon(
+          const polygon = cgpv.api.getMapViewer('map1').layer.geometry.addPolygon(
             [
               [
                 [center[0] + factor / 2, center[1] + factor],

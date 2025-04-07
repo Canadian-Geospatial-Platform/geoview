@@ -51,7 +51,7 @@
   <div class="map-title-holder">
     <h4 id="HLYR5">GeoJSON Layer</h4>
   </div>
-  <div id="LYR5" class="geoview-map" data-lang="en" data-config="{
+  <div id="map1" class="geoview-map" data-lang="en" data-config="{
     'map': {
       'interaction': 'dynamic',
       'viewSettings': {
@@ -128,12 +128,12 @@
     // add an event listener when a button is clicked
     addGeoJSONButton.addEventListener('click', async () => {
       const layerPath = document.getElementById('GeoMet-New-Layer-Id-Label').innerText;
-      if (layerPath) cgpv.api.maps['LYR5'].layer.removeLayerUsingPath(layerPath);
+      if (layerPath) cgpv.api.getMapViewer('map1').layer.removeLayerUsingPath(layerPath);
 
       // adding a geojson layer requires a type of geojson and url
       const lat = document.getElementById('GeoMet-Lat-Input').value;
       const long = document.getElementById('GeoMet-Long-Input').value;
-      const addResult = cgpv.api.maps['LYR5'].layer.addGeoviewLayer(
+      const addResult = cgpv.api.getMapViewer('map1').layer.addGeoviewLayer(
         {
           geoviewLayerId: 'GeoMetGeoJsonProcess',
           metadataAccessPath: './datasets/geojson/processes-metadata.meta' ,
@@ -169,12 +169,12 @@
     // add an event listener when a button is clicked
     addGeoJSONButton.addEventListener('click', async () => {
       const layerPath = document.getElementById('Hydro-New-Layer-Id-Label').innerText;
-      if (layerPath) cgpv.api.maps['LYR5'].layer.removeLayerUsingPath(layerPath);
+      if (layerPath) cgpv.api.getMapViewer('map1').layer.removeLayerUsingPath(layerPath);
 
       // adding a geojson layer requires a type of geojson and url
       const lat = document.getElementById('Hydro-Lat-Input').value;
       const long = document.getElementById('Hydro-Long-Input').value;
-      const addResult = cgpv.api.maps['LYR5'].layer.addGeoviewLayer(
+      const addResult = cgpv.api.getMapViewer('map1').layer.addGeoviewLayer(
         {
           geoviewLayerId: 'HydroGeoJsonProcess',
           metadataAccessPath: './datasets/geojson/hydro-metadata.meta',

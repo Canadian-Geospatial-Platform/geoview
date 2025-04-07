@@ -25,7 +25,7 @@ export class API {
   config = ConfigApi;
 
   // list of available maps
-  maps: Record<string, MapViewer> = {};
+  #maps: Record<string, MapViewer> = {};
 
   // load plugins API
   plugin: typeof Plugin;
@@ -57,30 +57,84 @@ export class API {
     API.#manageKeyboardFocus();
   }
 
-  // TODO Add getter function and make maps property private
   /**
-   * Sets a map viewer in maps, or removes one if the mapViewer property is null.
+   * Gets the list of all map IDs currently in the collection.
+   *
+   * @returns {string[]} Array of map IDs
+   */
+  getMapViewerIds(): string[] {
+    return Object.keys(this.#maps);
+  }
+
+  /**
+   * Gets a map viewer instance by its ID.
+   *
+   * @param {string} mapId - The unique identifier of the map to retrieve
+   * @returns {MapViewer} The map viewer instance if found
+   * @throws {Error} If the map with the specified ID is not found
+   */
+  getMapViewer(mapId: string): MapViewer {
+    const map = this.#maps[mapId];
+    if (!map) throw new Error(`Map with ID ${mapId} not found`);
+
+    return map;
+  }
+
+  /**
+   * Delete a map viewer instance by its ID.
+   *
+   * @param {string} mapId - The unique identifier of the map to delete
+   * @param {boolean} deleteContainer - True if we want to delete div from the page
+   * @returns {Promise<HTMLElement>} The Promise containing the HTML element
+   */
+  deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement | void> {
+    if (!this.hasMapViewer(mapId)) {
+      logger.logWarning(`Cannot delete map. Map with ID ${mapId} does not exist`);
+      return Promise.resolve();
+    }
+
+    // Only delete from #maps after successful removal
+    return this.getMapViewer(mapId)
+      .remove(deleteContainer)
+      .then((element: HTMLElement) => {
+        // Delete the map instance from the maps array, will delete attached plugins
+        delete this.#maps[mapId];
+
+        return element;
+      });
+  }
+
+  /**
+   * Return true if a map id is already registered.
+   *
+   * @param {string} mapId - The unique identifier of the map to retrieve
+   * @returns {boolean} True if map exist
+   */
+  hasMapViewer(mapId: string): boolean {
+    return mapId in this.#maps;
+  }
+
+  /**
+   * Sets a map viewer in maps.
    * @param {string} mapId - ID of the map
-   * @param {MapViewer | null} mapViewer - The viewer to be added or null to remove
+   * @param {MapViewer} mapViewer - The viewer to be added
    * @param {(mapViewer: MapViewer) => void} onMapViewerInit - Function to run on map init
    */
-  setMapViewer(mapId: string, mapViewer: MapViewer | null, onMapViewerInit?: (mapViewer: MapViewer) => void): void {
-    if (mapViewer) {
-      if (this.maps[mapId]) logger.logError(`Cannot add map. Map with ID ${mapId} already exists`);
-      else {
-        this.maps[mapId] = mapViewer;
+  setMapViewer(mapId: string, mapViewer: MapViewer, onMapViewerInit?: (mapViewer: MapViewer) => void): void {
+    if (this.hasMapViewer(mapId)) logger.logError(`Cannot add map. Map with ID ${mapId} already exists`);
+    else {
+      this.#maps[mapId] = mapViewer;
 
-        // Register a handler (which will only happen once) for when the map viewer will get initialized.
-        // At the time of writing, this happens later, asynchronously, via the components/map/map.tsx when 'MapViewer.initMap()' is called.
-        // That should be fixed eventually, but that refactoring is out of the scope at the time of writing. So, I'm doing like this for now.
-        this.maps[mapId].onMapInit((viewer) => {
-          // MapViewer has been created and initialized, callback about it
-          onMapViewerInit?.(viewer);
-          // Emit that viewer is ready
-          this.#emitMapViewerReady({ mapId });
-        });
-      }
-    } else delete this.maps[mapId];
+      // Register a handler (which will only happen once) for when the map viewer will get initialized.
+      // At the time of writing, this happens later, asynchronously, via the components/map/map.tsx when 'MapViewer.initMap()' is called.
+      // That should be fixed eventually, but that refactoring is out of the scope at the time of writing. So, I'm doing like this for now.
+      this.#maps[mapId].onMapInit((viewer) => {
+        // MapViewer has been created and initialized, callback about it
+        onMapViewerInit?.(viewer);
+        // Emit that viewer is ready
+        this.#emitMapViewerReady({ mapId });
+      });
+    }
   }
 
   /**
