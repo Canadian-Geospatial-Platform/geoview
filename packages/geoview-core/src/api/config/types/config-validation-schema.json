@@ -392,10 +392,15 @@
           "type": "string",
           "default": "https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy"
         },
-        "geolocator": {
+        "geolocatorUrl": {
           "description": "Service end point to access geo location of searched value.",
           "type": "string",
           "default": "https://geolocator.api.geo.ca?keys=geonames,nominatim,locate"
+        },
+        "metadataUrl": {
+          "type": "string",
+          "description": "Service end point to access metadata of layers.",
+          "default": "https://open.canada.ca/data/en/dataset/"
         }
       }
     },

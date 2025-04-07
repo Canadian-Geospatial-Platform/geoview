@@ -57,8 +57,11 @@ export class GeoCore {
 
       // For each found geochart associated with the Geocore UUIDs
       response.geocharts?.forEach((geochartConfig) => {
+        // Get the layerPath from geocore response
+        const layerPath = geochartConfig.layers[0].layerId;
+
         // Add a GeoChart
-        GeochartEventProcessor.addGeochartChart(this.#mapId, uuid, geochartConfig);
+        GeochartEventProcessor.addGeochartChart(this.#mapId, layerPath, geochartConfig);
       });
 
       // Use user supplied listOfLayerEntryConfig if provided
