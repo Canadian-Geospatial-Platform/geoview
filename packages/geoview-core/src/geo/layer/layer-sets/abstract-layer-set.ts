@@ -61,6 +61,9 @@ export abstract class AbstractLayerSet {
     this.#boundHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
   }
 
+  // Must override function to identify a layerset class with a name to distinguish it from the others easily
+  protected abstract name(): string;
+
   /**
    * A must-override method called to propagate the result set entry to the store
    * @param {TypeResultSetEntry} resultSetEntry - The result set entry to propagate

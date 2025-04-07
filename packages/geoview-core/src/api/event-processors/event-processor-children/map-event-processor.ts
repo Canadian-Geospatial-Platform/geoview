@@ -221,12 +221,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Get metric values
     const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
     const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
-    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')!.lastChild as HTMLElement)?.innerHTML;
+    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
 
     // Get metric values
     const scaleControlBarImperial = document.getElementById(`${mapId}-scaleControlBarImperial`);
     const lineWidthImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
-    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')!.lastChild as HTMLElement)?.innerHTML;
+    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
 
     // get resolution value (same for metric and imperial)
     const labelNumeric = (scaleControlBarMetric?.querySelector('.ol-scale-text') as HTMLElement)?.innerHTML;

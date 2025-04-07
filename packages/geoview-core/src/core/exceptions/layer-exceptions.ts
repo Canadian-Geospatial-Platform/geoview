@@ -67,7 +67,7 @@ export class GeoViewLayerLoadedFailedError extends GeoViewLayerError {
 
     // Set the message
     this.message = getLocalizedMessage('validation.layer.loadfailed', AppEventProcessor.getDisplayLanguage(mapId), [
-      layerConfig.layerName || layerConfig.layerId || layerConfig.layerPath,
+      layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName || layerConfig.layerId || layerConfig.layerPath,
     ]);
 
     // Set the prototype explicitly to ensure correct inheritance (recommended by TypeScript documentation)

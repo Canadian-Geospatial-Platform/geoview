@@ -632,7 +632,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 

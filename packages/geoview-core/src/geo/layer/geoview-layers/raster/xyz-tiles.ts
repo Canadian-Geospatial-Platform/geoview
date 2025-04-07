@@ -204,10 +204,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
-    const newLayerConfig = layerConfig;
 
     // TODO Need to see why the metadata isn't handled properly for ESRI XYZ tiles.
     // GV Possibly caused by a difference between OGC and ESRI XYZ Tiles, but only have ESRI XYZ Tiles as example currently
@@ -217,38 +216,43 @@ export class XYZTiles extends AbstractGeoViewRaster {
       let metadataLayerConfigFound: XYZTilesLayerEntryConfig | TypeJsonObject | undefined;
       if (this.metadata?.listOfLayerEntryConfig) {
         metadataLayerConfigFound = Cast<XYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
-          (metadataLayerConfig) => metadataLayerConfig.layerId === newLayerConfig.layerId
+          (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
         );
       }
 
       // For ESRI MapServer XYZ Tiles
       if (this.metadata?.layers) {
         metadataLayerConfigFound = (this.metadata?.layers as TypeJsonArray).find(
-          (metadataLayerConfig) => metadataLayerConfig.id.toString() === newLayerConfig.layerId
+          (metadataLayerConfig) => metadataLayerConfig.id.toString() === layerConfig.layerId
         );
       }
 
       // metadataLayerConfigFound can not be undefined because we have already validated the config exist
-      this.setLayerMetadata(newLayerConfig.layerPath, toJsonObject(metadataLayerConfigFound));
-      newLayerConfig.source = defaultsDeep(newLayerConfig.source, metadataLayerConfigFound!.source);
-      newLayerConfig.initialSettings = defaultsDeep(newLayerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
-      newLayerConfig.initialSettings.extent = validateExtentWhenDefined(newLayerConfig.initialSettings.extent);
+      this.setLayerMetadata(layerConfig.layerPath, toJsonObject(metadataLayerConfigFound));
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound!.source);
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
       // Set zoom limits for max / min zooms
       const maxScale = metadataLayerConfigFound?.maxScale as number;
       const minScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number;
-      newLayerConfig.maxScale =
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.maxScale =
         !maxScale && !minScaleDenominator
-          ? newLayerConfig.maxScale
-          : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, newLayerConfig.maxScale ?? -Infinity);
+          ? layerConfig.maxScale
+          : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, layerConfig.maxScale ?? -Infinity);
 
       const minScale = metadataLayerConfigFound?.minScale as number;
       const maxScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number;
-      newLayerConfig.minScale =
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.minScale =
         !minScale && !maxScaleDenominator
-          ? newLayerConfig.minScale
-          : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, newLayerConfig.minScale ?? Infinity);
+          ? layerConfig.minScale
+          : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, layerConfig.minScale ?? Infinity);
     }
-    return Promise.resolve(newLayerConfig);
+    return Promise.resolve(layerConfig);
   }
 }

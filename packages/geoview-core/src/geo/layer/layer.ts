@@ -883,10 +883,7 @@ export class LayerApi {
             // Emit about it
             this.#emitLayerAdded({ layer: layerBeingAdded });
           })
-          .catch((error) => {
-            // Reject it higher, because that's not where we want to handle the promise failure, we're returning the promise higher
-            reject(error);
-          });
+          .catch(reject); // Reject it higher, because that's not where we want to handle the promise failure, we're returning the promise higher
       });
 
       // Return the layer with the promise it'll be on the map
