@@ -85,13 +85,12 @@ export class WMS extends AbstractGeoViewRaster {
     this.fullSubLayers = fullSubLayers;
   }
 
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
+  /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  // GV Layers Refactoring - Obsolete (in config)
-  protected override async fetchServiceMetadata(): Promise<void> {
+  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
+    // TODO: Refactor - Some code paths handle exception here, whereas other overrides of this function it's thrown. Normal?
     const metadataUrl = this.metadataAccessPath;
 
     // If the metadata url ends with .xml
@@ -110,8 +109,8 @@ export class WMS extends AbstractGeoViewRaster {
 
       const layerConfigsToQuery = this.#getLayersToQuery();
       if (layerConfigsToQuery.length === 0) {
-        // Use GetCapabilities to get the metadata
         try {
+          // Use GetCapabilities to get the metadata
           const metadata = await this.#getServiceMetadata(metadataUrlGetCap, (proxyUsed: string) => {
             // A Proxy had to be used to fetch the service metadata, update the layer config with it
             this.metadataAccessPath = `${proxyUsed}${metadataUrl}`;

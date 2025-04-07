@@ -73,19 +73,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Image static has no metadata.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected override fetchServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      resolve();
-    });
-    return promisedExecution;
-  }
-
-  /** ***************************************************************************************************************************
    * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
    * extra configuration may be done here.
    *

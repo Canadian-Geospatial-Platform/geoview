@@ -105,13 +105,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
+  /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected override fetchServiceMetadata(): Promise<void> {
+  protected override onFetchAndSetServiceMetadata(): Promise<void> {
+    // Redirect
     return commonfetchServiceMetadata(this);
   }
 

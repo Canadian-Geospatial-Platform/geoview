@@ -88,35 +88,36 @@ export class GeoJSON extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.GEOJSON, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
+  /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected override async fetchServiceMetadata(): Promise<void> {
-    if (this.metadataAccessPath) {
-      try {
-        const url =
-          this.metadataAccessPath.toLowerCase().endsWith('json') || this.metadataAccessPath.toLowerCase().endsWith('meta')
-            ? this.metadataAccessPath
-            : `${this.metadataAccessPath}?f=json`;
-        const response = await fetch(url);
-        const metadataJson: TypeJsonObject = await response.json();
-        if (!metadataJson) this.metadata = null;
-        else {
-          this.metadata = metadataJson;
-          const copyrightText = this.metadata.copyrightText as string;
-          const attributions = this.getAttributions();
-          if (copyrightText && !attributions.includes(copyrightText)) {
-            // Add it
-            attributions.push(copyrightText);
-            this.setAttributions(attributions);
-          }
-        }
-      } catch (error) {
-        this.metadata = null;
-        logger.logError(`No metadata found at ${this.metadataAccessPath}`, error);
+  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
+    // The url
+    const url =
+      this.metadataAccessPath.toLowerCase().endsWith('json') || this.metadataAccessPath.toLowerCase().endsWith('meta')
+        ? this.metadataAccessPath
+        : `${this.metadataAccessPath}?f=json`;
+
+    // Query and read
+    this.metadata = null;
+    const response = await fetch(url);
+    const metadataJson: TypeJsonObject = await response.json();
+
+    // If read
+    if (metadataJson) {
+      this.metadata = metadataJson;
+      const copyrightText = this.metadata.copyrightText as string;
+      const attributions = this.getAttributions();
+      if (copyrightText && !attributions.includes(copyrightText)) {
+        // Add it
+        attributions.push(copyrightText);
+        this.setAttributions(attributions);
       }
+    } else {
+      // Log
+      logger.logError('Metadata was empty');
+      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
     }
   }
 

@@ -389,57 +389,51 @@ export abstract class AbstractGeoViewLayer {
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
   protected async getAdditionalServiceDefinition(): Promise<void> {
-    try {
-      await this.fetchServiceMetadata();
-      if (this.listOfLayerEntryConfig.length) await this.validateAndExtractLayerMetadata();
-    } catch (error) {
-      // Log
-      logger.logError(error);
-    }
+    await this.fetchAndSetServiceMetadata();
+    if (this.listOfLayerEntryConfig.length) await this.validateAndExtractLayerMetadata();
   }
 
   /** ***************************************************************************************************************************
    * This method Validate the list of layer configs and extract them in the geoview instance.
    */
   async validateAndExtractLayerMetadata(): Promise<void> {
+    // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
+    this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+    await this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig);
+  }
+
+  /**
+   * This method reads the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
+   * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
+   */
+  async fetchAndSetServiceMetadata(): Promise<void> {
     try {
-      // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
-      this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
-      await this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig);
+      // If there's a metadata access path
+      if (this.metadataAccessPath) {
+        // Process and, yes, keep the await here, because we want to make extra sure the onFetchAndSetServiceMetadata is
+        // executed asynchronously, even if the implementation of the overriden method is synchronous.
+        // All so that the try/catch works nicely here.
+        await this.onFetchAndSetServiceMetadata();
+      }
     } catch (error) {
       // Log
       logger.logError(error);
+      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+
+      // TODO: Create a specific layer exception and throw it higher?
+      // Raise higher
+      // throw new GeoViewLayerError(this.mapId, this.geoviewLayerId);
     }
   }
 
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
+  /**
+   * Overridable method to read the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
+   * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
    */
-  protected async fetchServiceMetadata(): Promise<void> {
-    if (this.metadataAccessPath) {
-      try {
-        const url = this.metadataAccessPath.toLowerCase().endsWith('json') ? this.metadataAccessPath : `${this.metadataAccessPath}?f=json`;
-        const response = await fetch(url);
-        const metadataJson: TypeJsonObject = await response.json();
-        if (!metadataJson) this.metadata = null;
-        else {
-          this.metadata = metadataJson;
-          const copyrightText = this.metadata.copyrightText as string;
-          const attributions = this.getAttributions();
-          if (copyrightText && !attributions.includes(copyrightText)) {
-            // Add it
-            attributions.push(copyrightText);
-            this.setAttributions(attributions);
-          }
-        }
-      } catch (error) {
-        // Log
-        logger.logError(error);
-        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-      }
-    }
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected onFetchAndSetServiceMetadata(): Promise<void> {
+    // Default, no metadata fetching
+    return Promise.resolve();
   }
 
   /** ***************************************************************************************************************************
@@ -448,6 +442,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
+  // TODO: Refactor and review - What's supposed to happen by this function. Some inherited classes set the
+  // TO.DOCONT: layer status to processing and some don't... standardize? Ex, image-static does and esri-image doesn't
   protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void;
 
   /** ***************************************************************************************************************************
@@ -458,100 +454,97 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async processListOfLayerEntryMetadata(listOfLayerEntryConfig: ConfigBaseClass[]): Promise<void> {
-    try {
-      const promisedAllLayerDone: Promise<ConfigBaseClass>[] = [];
-      for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
-        const layerConfig = listOfLayerEntryConfig[i];
-        if (layerEntryIsGroupLayer(layerConfig))
-          if (layerConfig.isMetadataLayerGroup) promisedAllLayerDone.push(this.#processMetadataGroupLayer(layerConfig));
-          // eslint-disable-next-line no-await-in-loop
-          else await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig);
-        else promisedAllLayerDone.push(this.processLayerMetadata(layerConfig as AbstractBaseLayerEntryConfig));
+    // Create a promise for each metadata layer found throughout the recursive config
+    const allPromises: Promise<ConfigBaseClass>[] = [];
+    this.#createPromiseForEachMetadataLayerRec(listOfLayerEntryConfig, allPromises);
+
+    // Wait for all the layers to be processed
+    const arrayOfLayerConfigs = await Promise.allSettled(allPromises);
+    arrayOfLayerConfigs.forEach((promise) => {
+      // If the promise fulfilled
+      if (promise.status === 'fulfilled') {
+        // When we get here, we know that the metadata (if the service provide some) are processed.
+        const layerConfig = promise.value;
+
+        logger.logDebug('FULFILLED', layerConfig.layerPath, layerConfig);
+
+        //
+        // TODO: Refactor - Layers refactoring. Make it a super clear function when moving config information in the layer for real.
+        // TO.DOCONT: After this point(?) the layerConfig should be full static and the system should rely on the Layer class to do stuff.
+        //
+        // Save the style in the layer as we're done processing style found in metadata
+        if (layerConfig instanceof AbstractBaseLayerEntryConfig) this.setStyle(layerConfig.layerPath, layerConfig.layerStyle!);
+
+        // We need to signal to the layer sets that the 'processed' phase is done.
+        layerConfig.setLayerStatusProcessed();
+        this.#emitLayerEntryProcessed({ config: layerConfig });
+      } else {
+        // All reasons are 'GeoViewLayerLoadedFailedError'
+        this.onError((promise.reason as GeoViewLayerLoadedFailedError).layerConfig as AbstractBaseLayerEntryConfig);
       }
-      const arrayOfLayerConfigs = await Promise.all(promisedAllLayerDone);
-      arrayOfLayerConfigs.forEach((layerConfig) => {
-        if (layerConfig.layerStatus === 'error') {
-          // TODO: refactor - create meaningful message and centralize dispatch for layer - config
-          // We do not log the error here, it will be trapped in setAllLayerStatusTo
-          const message = `Error while loading layer path ${layerConfig.layerPath} on map ${this.mapId}`;
-          throw new Error(message);
-        } else {
-          // When we get here, we know that the metadata (if the service provide some) are processed.
+    });
+  }
 
-          //
-          // TODO: Refactor - Layers refactoring. Make it a super clear function when moving config information in the layer for real.
-          // TO.DOCONT: After this point(?) the layerConfig should be full static and the system should rely on the Layer class to do stuff.
-          //
-          // Save the style in the layer as we're done processing style found in metadata
-          if (layerConfig instanceof AbstractBaseLayerEntryConfig) this.setStyle(layerConfig.layerPath, layerConfig.layerStyle!);
+  /**
+   * Recursively gather all the promises of layer metadata for all the layer entry configs.
+   * @param listOfLayerEntryConfig - The list of layer entry config currently being processed.
+   * @param promisesEntryMetadata - The gathered promises as the recursive function is called.
+   */
+  #createPromiseForEachMetadataLayerRec(
+    listOfLayerEntryConfig: ConfigBaseClass[],
+    promisesEntryMetadata: Promise<ConfigBaseClass>[]
+  ): void {
+    // For each layer entry in the config
+    listOfLayerEntryConfig.forEach((layerConfig) => {
+      // If is a group layer
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        // Add it
+        promisesEntryMetadata.push(Promise.resolve(layerConfig));
 
-          // We need to signal to the layer sets that the 'processed' phase is done.
-          layerConfig.setLayerStatusProcessed();
-          this.#emitLayerEntryProcessed({ config: layerConfig });
-        }
-      });
+        // Go recursively in the group
+        this.#createPromiseForEachMetadataLayerRec(layerConfig.listOfLayerEntryConfig, promisesEntryMetadata);
+      } else {
+        // Not a group layer, process the layer metadata normally
+        promisesEntryMetadata.push(this.processLayerMetadata(layerConfig as AbstractBaseLayerEntryConfig));
+      }
+    });
+  }
+
+  /**
+   * Processes the layer metadata. It will fill the empty outfields and aliasFields properties of the
+   * layer configuration when applicable.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+   */
+  async processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    try {
+      // Process and, yes, keep the await here, because we want to make extra sure the onProcessLayerMetadata is
+      // executed asynchronously, even if the implementation of the overriden method is synchronous.
+      // All so that the try/catch works nicely here.
+      return await this.onProcessLayerMetadata(layerConfig);
     } catch (error) {
-      // Log
-      logger.logError(error);
+      // Raise higher
+      throw new GeoViewLayerLoadedFailedError(this.mapId, layerConfig, error as string);
     }
   }
 
   /**
-   * Processes metadata group layer entries. These layers behave as a GeoView group layer and also as a data
-   * layer (i.e. they have extent, visibility and query flag definition). Metadata group layers can be identified by
-   * the presence of an isMetadataLayerGroup attribute set to true.
-   *
-   * @param {GroupLayerEntryConfig} layerConfig The layer entry configuration to process.
-   * @returns {Promise<GroupLayerEntryConfig>} A promise that the vector layer configuration has its metadata and group layers processed.
-   * @private
+   * Overridable method to process a layer entry and return a Promise of an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+   * @returns {Promise<BaseLayer>} The Promise that the config metadata has been processed.
    */
-  async #processMetadataGroupLayer(layerConfig: GroupLayerEntryConfig): Promise<GroupLayerEntryConfig> {
-    try {
-      // Process the list of layer entry
-      await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig!);
-
-      // Set the layer status to processed
-      layerConfig.setLayerStatusProcessed();
-
-      // Emit event about the layer entry being processed
-      this.#emitLayerEntryProcessed({ config: layerConfig });
-    } catch (error) {
-      // Log
-      logger.logError(error);
-      // TODO: Check - Shouldn't we just remove the try/catch and handle this higher in the
-      // TO.DOCONT: stack? When is it going to get to 'error' status otherwise?
-    }
-
-    // Return the received layer config object
-    return layerConfig;
-  }
-
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
-   * layer's configuration when applicable.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.source) layerConfig.source = {};
-    // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: false };
-
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
+  protected onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Override this function to process layer metadata
     return Promise.resolve(layerConfig);
   }
 
-  /** ***************************************************************************************************************************
-   * Process recursively the list of layer Entries to create the layers and the layer groups.
+  /**
+   * Recursively processes the list of layer Entries to create the layers and the layer groups.
    *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries to process.
-   * @param {LayerGroup} layerGroup Optional layer group to use when we have many layers. The very first call to
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entries to process.
+   * @param {LayerGroup} layerGroup - Optional layer group to use when we have many layers. The very first call to
    *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
-   *
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
    */
   async processListOfLayerEntryConfig(
@@ -655,6 +648,8 @@ export abstract class AbstractGeoViewLayer {
     } catch (error) {
       // Log
       logger.logError(error);
+
+      // For now, we return undefined when a layer entry config failed..
       return undefined;
     }
   }
@@ -665,17 +660,19 @@ export abstract class AbstractGeoViewLayer {
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
    */
-  #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer> {
+  async #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer> {
     // Indicate that the layer config has entered the 'loading' status
     layerConfig.setLayerStatusLoading();
 
-    // To make sure all overrides of onProcessOneLayerEntry happen indeed asynchronously (to make sure the try/catch behave correctly),
-    // overlay the call to the child with a Promise(). This can look weird, but when a throw Error() happens too soon in a synch implementation,
-    // it'll be caught synchronously by the caller, and we'll have to do 2 different try/catch to catch everything, which isn't what we want.
-    return new Promise((resolve, reject) => {
-      // Call the overridable method to process the layer entry
-      this.onProcessOneLayerEntry(layerConfig).then(resolve).catch(reject);
-    });
+    try {
+      // Process and, yes, keep the await here, because we want to make extra sure the onProcessLayerMetadata is
+      // executed asynchronously, even if the implementation of the overriden method is synchronous.
+      // All so that the try/catch works nicely here.
+      return await this.onProcessOneLayerEntry(layerConfig);
+    } catch (error) {
+      // Raise higher
+      throw new GeoViewLayerLoadedFailedError(this.mapId, layerConfig, error as string);
+    }
   }
 
   /**
@@ -751,7 +748,6 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Adds an error in the internal list of errors for a layer being loaded. It also sets the layer status to error.
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   addLayerLoadError(layerConfig: TypeLayerEntryConfig, error: string): void {
     // Add the error to the list
     this.layerLoadError.push(new GeoViewLayerLoadedFailedError(this.mapId, layerConfig, error));
@@ -778,8 +774,7 @@ export abstract class AbstractGeoViewLayer {
 
         // If the status is error
         if (newStatus === 'error') {
-          const useLayerName =
-            layerConfig.layerName === undefined ? layerConfig.geoviewLayerConfig.geoviewLayerName : layerConfig.layerName;
+          const useLayerName = layerConfig.geoviewLayerConfig.geoviewLayerName || layerConfig.layerName;
           this.layerLoadError.push(
             new GeoViewLayerLoadedFailedError(
               this.mapId,

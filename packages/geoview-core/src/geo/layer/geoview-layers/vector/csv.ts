@@ -96,16 +96,6 @@ export class CSV extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
-   * CSV has no metadata.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected override fetchServiceMetadata(): Promise<void> {
-    // Return resolved promise
-    return Promise.resolve();
-  }
-
-  /** ***************************************************************************************************************************
    * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
    * extra configuration may be done here.
    *

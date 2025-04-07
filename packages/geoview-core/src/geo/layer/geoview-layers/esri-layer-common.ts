@@ -43,29 +43,21 @@ import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-
  * @returns {Promise<void>} A promise that the execution is completed.
  */
 export async function commonfetchServiceMetadata(layer: EsriDynamic | EsriFeature): Promise<void> {
-  const metadataUrl = layer.metadataAccessPath;
-  if (metadataUrl) {
-    try {
-      const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
-      if (metadataString === '{}') layer.setAllLayerStatusTo('error', layer.listOfLayerEntryConfig, 'Unable to read metadata');
-      else {
-        // eslint-disable-next-line no-param-reassign
-        layer.metadata = JSON.parse(metadataString) as TypeJsonObject;
-        if ('error' in layer.metadata) throw new Error(`Error code = ${layer.metadata.error.code}, ${layer.metadata.error.message}`);
-        const copyrightText = layer.metadata.copyrightText as string;
-        const attributions = layer.getAttributions();
-        if (copyrightText && !attributions.includes(copyrightText)) {
-          // Add it
-          attributions.push(copyrightText);
-          layer.setAttributions(attributions);
-        }
-      }
-    } catch (error) {
-      logger.logInfo('Unable to read metadata', error);
-      layer.setAllLayerStatusTo('error', layer.listOfLayerEntryConfig, 'Unable to read metadata');
-    }
-  } else {
-    layer.setAllLayerStatusTo('error', layer.listOfLayerEntryConfig, 'Unable to read metadata');
+  // Query
+  const metadataString = await getXMLHttpRequest(`${layer.metadataAccessPath}?f=json`);
+
+  // eslint-disable-next-line no-param-reassign
+  layer.metadata = JSON.parse(metadataString) as TypeJsonObject;
+
+  // TODO: Refactor Metadata - Throw specific metadata error
+  if ('error' in layer.metadata) throw new Error(`Error code = ${layer.metadata.error.code}, ${layer.metadata.error.message}`);
+
+  const copyrightText = layer.metadata.copyrightText as string;
+  const attributions = layer.getAttributions();
+  if (copyrightText && !attributions.includes(copyrightText)) {
+    // Add it
+    attributions.push(copyrightText);
+    layer.setAttributions(attributions);
   }
 }
 

@@ -93,48 +93,37 @@ export class WFS extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.WFS, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
+  /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected override fetchServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      let metadataUrl = this.metadataAccessPath;
+  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
+    // The url
+    let metadataUrl = this.metadataAccessPath;
 
-      // check if url contains metadata parameters for the getCapabilities request and reformat the urls
-      const getCapabilitiesUrl =
-        metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(metadataUrl!.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
-      metadataUrl = metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(0, metadataUrl!.indexOf('?')) : metadataUrl;
+    // check if url contains metadata parameters for the getCapabilities request and reformat the urls
+    const getCapabilitiesUrl =
+      metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(metadataUrl!.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
+    metadataUrl = metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(0, metadataUrl!.indexOf('?')) : metadataUrl;
 
-      if (metadataUrl) {
-        getXMLHttpRequest(`${metadataUrl}${getCapabilitiesUrl}`)
-          .then((metadataString) => {
-            if (metadataString === '{}') {
-              this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-            } else {
-              // need to pass a xmldom to xmlToJson
-              const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
-              const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
+    // Query and read
+    const metadataString = await getXMLHttpRequest(`${metadataUrl}${getCapabilitiesUrl}`);
 
-              const capabilitiesObject = findPropertyNameByRegex(xmlJsonCapabilities, /(?:WFS_Capabilities)/);
+    // If read
+    if (metadataString && metadataString !== '' && metadataString !== '{}') {
+      // need to pass a xmldom to xmlToJson
+      const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
+      const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
 
-              this.metadata = capabilitiesObject as TypeJsonObject;
-              this.#version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
-              resolve();
-            }
-          })
-          .catch((reason) => {
-            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-            logger.logError('Unable to fetch metadata', this.metadataAccessPath, reason);
-            resolve();
-          });
-      } else {
-        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-      }
-    });
-    return promisedExecution;
+      const capabilitiesObject = findPropertyNameByRegex(xmlJsonCapabilities, /(?:WFS_Capabilities)/);
+
+      this.metadata = capabilitiesObject as TypeJsonObject;
+      this.#version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
+    } else {
+      // Log
+      logger.logError('Metadata was empty');
+      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+    }
   }
 
   /** ***************************************************************************************************************************

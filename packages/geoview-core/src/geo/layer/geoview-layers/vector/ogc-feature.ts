@@ -93,33 +93,21 @@ export class OgcFeature extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
+  /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected override fetchServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      const metadataUrl = this.metadataAccessPath;
-      if (metadataUrl) {
-        const queryUrl = metadataUrl.endsWith('/') ? `${metadataUrl}collections?f=json` : `${metadataUrl}/collections?f=json`;
-        axios
-          .get<TypeJsonObject>(queryUrl)
-          .then((response) => {
-            this.metadata = response.data;
-            resolve();
-          })
-          .catch((reason) => {
-            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-            logger.logError('Unable to fetch metadata', this.metadataAccessPath, reason);
-            resolve();
-          });
-      } else {
-        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-      }
-    });
-    return promisedExecution;
+  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
+    // The url
+    const queryUrl = this.metadataAccessPath.endsWith('/')
+      ? `${this.metadataAccessPath}collections?f=json`
+      : `${this.metadataAccessPath}/collections?f=json`;
+
+    // Query
+    const response = await axios.get<TypeJsonObject>(queryUrl);
+
+    // Set it
+    this.metadata = response.data;
   }
 
   /** ***************************************************************************************************************************
