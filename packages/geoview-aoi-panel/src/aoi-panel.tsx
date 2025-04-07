@@ -28,7 +28,7 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
   const { cgpv } = window;
   const { api, ui } = cgpv;
 
-  const myMap = api.maps[mapId];
+  const myMap = api.getMapViewer(mapId);
   const { Card, Box } = ui.elements;
 
   const theme = ui.useTheme();

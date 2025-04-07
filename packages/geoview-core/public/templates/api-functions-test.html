@@ -45,7 +45,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
-      id="LNG1"
+      id="map1"
       class="geoview-map"
       data-lang="en"
       data-config="{
@@ -139,7 +139,7 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api' s after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'LNG1') {
+        if (mapId === 'map1') {
           cgpv.api.utilities.geo
             .getESRIServiceMetadata('https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/1')
             .then((data) => {

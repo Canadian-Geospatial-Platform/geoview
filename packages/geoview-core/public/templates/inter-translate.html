@@ -61,7 +61,7 @@
         <div id="LOGS1"></div>
       </div>
       <div
-        id="MAP1"
+        id="map1"
         class="geoview-map"
         data-lang="en"
         data-config="{
@@ -121,9 +121,9 @@
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
         // If all maps initialized
-        if (mapId === 'MAP1') {
+        if (mapId === 'map1') {
           // Init map
-          initMap1(cgpv.api.maps['MAP1']);
+          initMap1(cgpv.api.getMapViewer('map1'));
         }
       });
 

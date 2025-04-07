@@ -175,7 +175,7 @@
     <button type="button" class="collapsible">Layers Status</button>
     <pre id="sandboxMap-state" class="panel map-title-holder"></pre>
     <div id="mapSection">
-      <div id="sandboxMap"></div>
+      <div id="map1"></div>
     </div>
     <p>This map loads it's configurations from the text area.</p>
     <hr />
@@ -223,12 +223,12 @@
       // add an event listener when a button is clicked
       createMapButton.addEventListener('click', function (e) {
         // delete old map
-        cgpv.api.maps['sandboxMap']?.remove(true);
+        cgpv.api.deleteMapViewer('map1', true);
 
         // create new map in a new dom node
         const newDiv = document.createElement('div');
         const a = document.createAttribute('id');
-        a.value = 'sandboxMap';
+        a.value = 'map1';
         newDiv.setAttributeNode(a);
 
         const mapWidth = `${document.getElementById('mapWidth')?.value}px`;
@@ -247,8 +247,8 @@
         setTimeout(() => {
           // Regex expression to cature all single quotes (') except those preceded by a backslash (\)
           const regexExp = /(?<!\\)'/g
-          cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value.replaceAll(regexExp, '"'))
-            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'sandboxMap'));
+          cgpv.api.createMapFromConfig('map1', document.getElementById('configGeoview').value.replaceAll(regexExp, '"'))
+            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
         }, 1500);
       });
 
@@ -290,7 +290,7 @@
 
       document.getElementById('mapHeight').value = '900';
 
-      const sandboxMap = document.getElementById('sandboxMap');
+      const sandboxMap = document.getElementById('map1');
       if (sandboxMap) {
         sandboxMap.dataset.height = '900px';
       }
@@ -302,7 +302,7 @@
       // add an event listener when a button is clicked
       deleteMapButton.addEventListener('click', function (e) {
         // Delete the map
-        cgpv.api.maps['sandboxMap'].remove(true);
+        cgpv.api.deleteMapViewer('map1', true);
       });
 
       // Editor script section===================================================================================================
@@ -323,7 +323,7 @@
       });
 
       // Create default map==========================================================================================================
-      cgpv.api.createMapFromConfig('sandboxMap', JSON.stringify({
+      cgpv.api.createMapFromConfig('map1', JSON.stringify({
               'map': {
                 'interaction': 'dynamic',
                 'viewSettings': {
@@ -355,7 +355,7 @@
               'corePackages': [],
               'theme': 'geo.ca'
         })
-      ).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'sandboxMap'));
+      ).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
