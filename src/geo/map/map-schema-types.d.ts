@@ -98,6 +98,7 @@ export type TypeLayerData = {
     eventListenerEnabled: boolean;
     queryStatus: TypeQueryStatus;
     features: TypeFeatureInfoEntry[] | undefined | null;
+    isDisabled?: boolean;
 };
 export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
 export type TypeLocation = null | Pixel | Coordinate | Coordinate[] | string;
@@ -110,6 +111,7 @@ export type TypeFeatureInfoEntry = {
     featureIcon: string;
     fieldInfo: Partial<Record<string, TypeFieldEntry>>;
     nameField: string | null;
+    layerPath: string;
 };
 export interface TypeGeometry extends RenderFeature {
     ol_uid: string;

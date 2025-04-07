@@ -12,6 +12,7 @@ export interface LayerListEntry {
     numOffeatures?: number;
     features?: TypeFeatureInfoEntry[] | undefined | null;
     layerUniqueId?: string;
+    isDisabled?: boolean;
 }
 interface LayerListProps {
     layerList: LayerListEntry[];

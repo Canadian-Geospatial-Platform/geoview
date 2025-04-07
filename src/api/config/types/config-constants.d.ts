@@ -5,8 +5,10 @@ import { TypeBasemapId, TypeDisplayLanguage, TypeDisplayTheme, TypeInteraction, 
 export declare const CV_CONFIG_GEOCORE_URL = "https://geocore.api.geo.ca";
 /** The default geolocator url */
 export declare const CV_CONFIG_GEOLOCATOR_URL = "https://geolocator.api.geo.ca?keys=geonames,nominatim,locate";
-/** The default geolocator url */
+/** The default proxy url */
 export declare const CV_CONFIG_PROXY_URL = "https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy";
+/** The default metadata recors url for uuid layer (empty because it needs to be set by config en and fr) */
+export declare const CV_CONFIG_METADATA_RECORDS_URL = "";
 export declare const CV_CONFIG_GEOCORE_TYPE = "geoCore";
 export declare const CV_CONST_SUB_LAYER_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType>;
 /**

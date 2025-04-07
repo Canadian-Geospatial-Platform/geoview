@@ -31,5 +31,15 @@ export declare abstract class AbstractWorkerPool<T> {
      * @returns {AbstractWorker<T> | undefined}
      */
     protected getAvailableWorker(): AbstractWorker<T> | undefined;
+    /**
+     * Add a message handler to all workers in the pool
+     * @param {MessageEvent} handler - The message handler to add
+     */
+    addMessageHandler(handler: (event: MessageEvent) => void): void;
+    /**
+     * Remove a message handler from all workers in the pool
+     * @param {MessageEvent} handler - The message handler to remove
+     */
+    removeMessageHandler(handler: (event: MessageEvent) => void): void;
     terminate(): void;
 }

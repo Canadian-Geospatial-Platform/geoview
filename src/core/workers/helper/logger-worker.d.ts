@@ -40,6 +40,12 @@ declare class WorkerLogger {
      * @param {...unknown[]} args - The message and any additional arguments to log.
      */
     logTrace(...args: unknown[]): void;
+    /**
+     * Logs a message to be handle by viewer notification.
+     * @param {WorkerLogLevel} level - The log level of the message.
+     * @param {...unknown[]} args - The message and any additional arguments to log.
+     */
+    sendMessage(level: WorkerLogLevel, ...args: unknown[]): void;
 }
 /**
  * Creates and returns a new WorkerLogger instance.

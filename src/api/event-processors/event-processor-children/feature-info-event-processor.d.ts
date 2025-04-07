@@ -37,8 +37,9 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
      * removing the higlight and the click marker if selected layer path is the reset path
      * @param {string} mapId - The map identifier
      * @param {string} layerPath - The layer path to delete features from resultSet
+     * @param {EventType} eventType - The event that triggered the reset.
      */
-    static resetResultSet(mapId: string, layerPath: string): void;
+    static resetResultSet(mapId: string, layerPath: string, eventType?: EventType): void;
     /**
      * Deletes the specified layer path from the layer sets in the store. The update of the array will also trigger an update in a batched manner.
      * @param {string} mapId - The map identifier

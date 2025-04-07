@@ -12,6 +12,8 @@ export declare class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryCon
     layerFilter?: string;
     /** Source settings to apply to the GeoView image layer source at creation time. */
     source: TypeSourceImageEsriInitialConfig;
+    /** Max number of records for query - NOT USE FOR IMAGE SERVER */
+    maxRecordCount?: number;
     /**
      * The class constructor.
      * @param {EsriImageLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.

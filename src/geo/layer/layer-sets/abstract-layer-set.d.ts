@@ -127,12 +127,6 @@ export declare abstract class AbstractLayerSet {
      */
     protected static isSourceQueryable(layer: AbstractBaseLayer): boolean;
     /**
-     * Checks if the layer config state is queryable.
-     * @param {AbstractBaseLayer} layer - The layer
-     * @returns {boolean} True if the state is queryable or undefined
-     */
-    protected static isStateQueryable(layer: AbstractBaseLayer): boolean;
-    /**
      * Checks if the layer is in visible range.
      * @param {AbstractGVLayer} layer - The layer
      * @returns {boolean} True if the state is queryable or undefined

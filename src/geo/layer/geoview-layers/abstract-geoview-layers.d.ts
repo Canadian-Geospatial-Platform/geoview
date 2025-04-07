@@ -9,6 +9,7 @@ import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStyleConfig, Typ
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { SnackbarType } from '@/core/utils/notifications';
 /**
  * The AbstractGeoViewLayer class is the abstraction class of all GeoView Layers classes.
  * It registers the configuration options and defines the methods shared by all its descendant. The class constructor has
@@ -242,6 +243,26 @@ export declare abstract class AbstractGeoViewLayer {
      */
     protected createLayerGroup(layerConfig: TypeLayerEntryConfig, initialSettings: TypeLayerInitialSettings): LayerGroup;
     /**
+     * Emits a layer-specific message event with localization support
+     * @protected
+     * @param {string} messageKey - The key used to lookup the localized message OR message
+     * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
+     * @param {SnackbarType} messageType - The message type
+     * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
+     * @returns {void}
+     *
+     * @example
+     * this.emitMessage(
+     *   'layers.fetchProgress',
+     *   ['50', '100'],
+     *   messageType: 'error',
+     *   true
+     * );
+     *
+     * @fires LayerMessageEvent
+     */
+    protected emitMessage(messageKey: string, messageParams: string[], messageType?: SnackbarType, notification?: boolean): void;
+    /**
      * Overridable function called when the layer gets in error status.
      * @param layerConfig - The layer configuration
      */
@@ -337,6 +358,16 @@ export declare abstract class AbstractGeoViewLayer {
      * @param {IndividualLayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void;
+    /**
+     * Registers an individual layer message event handler.
+     * @param {LayerMessageEventDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onLayerMessage(callback: LayerMessageDelegate): void;
+    /**
+     * Unregisters an individual layer message event handler.
+     * @param {LayerMessageEventDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerMessage(callback: LayerMessageDelegate): void;
 }
 /**
  * Define an event for the delegate
@@ -415,6 +446,19 @@ type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGeoViewLayer, Ind
  */
 export type IndividualLayerLoadedEvent = {
     layerPath: string;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerMessageDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerMessageEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type LayerMessageEvent = {
+    messageKey: string;
+    messageParams: string[];
+    messageType: SnackbarType;
+    notification: boolean;
 };
 export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
     legend: HTMLCanvasElement | null;

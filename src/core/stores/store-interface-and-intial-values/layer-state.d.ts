@@ -26,6 +26,8 @@ export interface ILayerState {
         setHighlightLayer: (layerPath: string) => void;
         setLayerDeleteInProgress: (newVal: boolean) => void;
         setLayerOpacity: (layerPath: string, opacity: number) => void;
+        setLayerHoverable: (layerPath: string, enable: boolean) => void;
+        setLayerQueryable: (layerPath: string, enable: boolean) => void;
         setSelectedLayerPath: (layerPath: string) => void;
         toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
         zoomToLayerExtent: (layerPath: string) => Promise<void>;

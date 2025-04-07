@@ -15,6 +15,7 @@
  * @property {boolean} queryGeometry - Whether to include geometry in the query
  * @property {number} projection - The spatial reference ID for the output
  * @property {number} maxAllowableOffset - The maximum allowable offset for geometry simplification
+ * @property {number} maxRecordCount - The maximum number of records to return from service in one fetch
  */
 export interface QueryParams {
     url: string;
@@ -23,6 +24,7 @@ export interface QueryParams {
     queryGeometry: boolean;
     projection: number;
     maxAllowableOffset: number;
+    maxRecordCount: number;
 }
 declare const _default: typeof Worker & {
     new (): Worker;

@@ -118,6 +118,20 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static setLayerOpacity(mapId: string, layerPath: string, opacity: number): void;
     /**
+     * Sets the layer hoverable capacity.
+     * @param {string} mapId - The ID of the map.
+     * @param {string} layerPath - The layer path of the layer to change.
+     * @param {boolean} hoverable - The hoverable state to set.
+     */
+    static setLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void;
+    /**
+     * Sets the layer queryable capacity.
+     * @param {string} mapId - The ID of the map.
+     * @param {string} layerPath - The layer path of the layer to change.
+     * @param {boolean} queryable - The queryable state to set.
+     */
+    static setLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void;
+    /**
      * Filters features based on their visibility settings defined in the layer's unique value or class break style configuration.
      *
      * @static

@@ -6,7 +6,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
-import { TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme } from '@config/types/map-schema-types';
+import { TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapViewSettings } from '@config/types/map-schema-types';
 import { Basemap } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
@@ -255,6 +255,11 @@ export declare class MapViewer {
      * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
      */
     zoomToExtent(extent: Extent, options?: FitOptions): Promise<void>;
+    /**
+     * Update nav bar home button view settings.
+     * @param {TypeMapViewSettings} view - The new view settings.
+     */
+    setHomeButtonView(view: TypeMapViewSettings): void;
     /**
      * Zoom to specified extent or coordinate provided in lnglat.
      *
