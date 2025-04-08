@@ -182,7 +182,7 @@ function AccordionUI(props: AccordionProps): ReactNode {
   );
 
   return (
-    <Box id={generateId(id)} sx={sx} className="accordion-group">
+    <Box id={id || generateId(18)} sx={sx} className="accordion-group">
       {items.map((item: AccordionItem, index: number) => (
         <MaterialAccordion
           // eslint-disable-next-line react/no-array-index-key

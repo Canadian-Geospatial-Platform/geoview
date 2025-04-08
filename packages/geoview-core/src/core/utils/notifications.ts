@@ -52,7 +52,7 @@ export class Notifications {
    */
   #addNotification(type: NotificationType, message: string, params: TypeJsonValue[] | TypeJsonArray | string[]): void {
     const notification = {
-      key: generateId(),
+      key: generateId(18),
       notificationType: type,
       message: this.#formatMessage(message, params),
       count: 1,
