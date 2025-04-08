@@ -10,7 +10,7 @@ import initSqlJs, { SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
@@ -55,61 +55,15 @@ type TableInfo = {
   geometry_column_name: SqlValue;
 };
 
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoPackageFeatureLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is GEOPACKAGE. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsGeoPackage = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoPackageLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as a GeoPackage
- * if the type attribute of the verifyIfGeoViewLayer parameter is GEOPACKAGE. The type ascention
- * applies only to the true block of the if clause that use this function.
- *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewLayerIsGeoPackage = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is GeoPackage => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.GEOPACKAGE;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a GeoPackageLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOPACKAGE. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsGeoPackage = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is GeoPackageLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
-};
-
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
-/** ******************************************************************************************************************************
+/**
  * A class to add GeoPackage api feature layer.
  *
  * @exports
  * @class GeoPackage
  */
-// ******************************************************************************************************************************
 export class GeoPackage extends AbstractGeoViewVector {
-  /** ***************************************************************************************************************************
-   * Initialize layer
+  /**
+   * Constructs a GeoPackage Layer configuration processor.
    *
    * @param {string} mapId the id of the map
    * @param {TypeGeoPackageFeatureLayerConfig} layerConfig the layer configuration
@@ -434,12 +388,10 @@ export class GeoPackage extends AbstractGeoViewVector {
     return Promise.resolve(vectorLayer);
   }
 
-  /** ***************************************************************************************************************************
-   * This method creates all layers from a single geopackage.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+  /**
+   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
-   *
    * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer> {
@@ -520,7 +472,7 @@ export class GeoPackage extends AbstractGeoViewVector {
             // Wait for all layer to be resolved
             await Promise.all(promises);
 
-            // Now resolve
+            // Resolve the OpenLayer layer
             resolve(newLayerGroup);
           }
         })
@@ -618,3 +570,32 @@ export class GeoPackage extends AbstractGeoViewVector {
     return gpkgBinGeom.subarray(envelopeSize + 8);
   }
 }
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoPackageFeatureLayerConfig if the geoviewLayerType attribute of
+ * the verifyIfLayer parameter is GEOPACKAGE. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerConfigIsGeoPackage = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoPackageLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
+};
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a GeoPackageLayerEntryConfig if the geoviewLayerType attribute
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOPACKAGE. The type ascention applies only to the true block of
+ * the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
+ * valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const geoviewEntryIsGeoPackage = (
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
+): verifyIfGeoViewEntry is GeoPackageLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
+};

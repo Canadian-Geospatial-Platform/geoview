@@ -76,7 +76,6 @@ export class GVXYZTiles extends AbstractGVTile {
    * Gets the bounds of the layer and returns updated bounds.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override getBounds(): Extent | undefined {
     // Get the layer
     const layer = this.getOLLayer() as TileLayer<XYZ> | undefined;

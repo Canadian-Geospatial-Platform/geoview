@@ -7,7 +7,6 @@ import { getXMLHttpRequest } from '@/core/utils/utilities';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
-import { logger } from '@/core/utils/logger';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
@@ -393,48 +392,49 @@ export async function commonProcessLayerMetadata<
 >(layer: EsriDynamic | EsriFeature | EsriImage, layerConfig: T): Promise<T> {
   // User-defined groups do not have metadata provided by the service endpoint.
   if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return layerConfig;
-  const { layerPath } = layerConfig;
 
+  // The url
   let queryUrl = layer.metadataAccessPath;
+
   if (queryUrl) {
     if (layerConfig.geoviewLayerConfig.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_IMAGE)
       queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
 
-    try {
-      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
-      if (data?.error) {
-        // Set the layer status to error
-        layerConfig.setLayerStatusError();
-        throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
-      }
-      layer.setLayerMetadata(layerPath, data);
-      // The following line allow the type ascention of the type guard functions on the second line below
-      const EsriLayerConfig = layerConfig;
-      if (geoviewEntryIsEsriDynamic(EsriLayerConfig) || geoviewEntryIsEsriFeature(EsriLayerConfig)) {
-        if (!EsriLayerConfig.layerStyle) {
-          const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
-          if (renderer) EsriLayerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
-        }
-      }
-
-      if (data.spatialReference && !Projection.getProjectionFromObj(data.spatialReference))
-        await Projection.addProjection(data.spatialReference);
-
-      layer.processFeatureInfoConfig(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
-      layer.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
-
-      commonProcessTemporalDimension(
-        layer,
-        data.timeInfo as TypeJsonObject,
-        EsriLayerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig,
-        layer.type === CONST_LAYER_TYPES.ESRI_IMAGE
-      );
-    } catch (error) {
+    const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
+    if (data?.error) {
       // Set the layer status to error
       layerConfig.setLayerStatusError();
-      logger.logError('Error in commonProcessLayerMetadata', layerConfig, error);
+      throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
     }
+
+    // Set the layer metadata
+    layer.setLayerMetadata(layerConfig.layerPath, data);
+
+    // The following line allow the type ascention of the type guard functions on the second line below
+    if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
+      if (!layerConfig.layerStyle) {
+        const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
+        // eslint-disable-next-line no-param-reassign
+        if (renderer) layerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
+      }
+    }
+
+    if (data.spatialReference && !Projection.getProjectionFromObj(data.spatialReference)) {
+      await Projection.addProjection(data.spatialReference);
+    }
+
+    commonProcessFeatureInfoConfig(layer, layerConfig);
+
+    commonProcessInitialSettings(layer, layerConfig);
+
+    commonProcessTemporalDimension(
+      layer,
+      data.timeInfo as TypeJsonObject,
+      layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig,
+      layer.type === CONST_LAYER_TYPES.ESRI_IMAGE
+    );
   }
+
   return layerConfig;
 }
 

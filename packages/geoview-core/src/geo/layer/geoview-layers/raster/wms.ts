@@ -5,7 +5,7 @@ import WMSCapabilities from 'ol/format/WMSCapabilities';
 import { Extent } from 'ol/extent';
 
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -25,46 +25,7 @@ export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
   listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
 }
 
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWMSLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is WMS. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsWMS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWMSLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as a WMS if the type attribute of the verifyIfGeoViewLayer
- * parameter is WMS. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is WMS => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.WMS;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a OgcWmsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WMS. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is OgcWmsLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
-};
-
-/** *****************************************************************************************************************************
+/**
  * A class to add wms layer.
  *
  * @exports
@@ -75,8 +36,8 @@ export class WMS extends AbstractGeoViewRaster {
 
   fullSubLayers: boolean = false;
 
-  /** ***************************************************************************************************************************
-   * Initialize layer
+  /**
+   * Constructs a WMS Layer configuration processor.
    * @param {string} mapId the id of the map
    * @param {TypeWMSLayerConfig} layerConfig the layer configuration
    */
@@ -184,7 +145,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config)
   async #getServiceMetadata(url: string, callbackNewMetadataUrl: (proxyUsed: string) => void): Promise<TypeJsonObject | null> {
     try {
       let response;
@@ -220,7 +180,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config)
   async #fetchXmlServiceMetadata(metadataUrl: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<void> {
     try {
       const parser = new WMSCapabilities();
@@ -278,7 +237,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {number[]} An array containing the path to the layer or [] if not found.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config)
   #getMetadataLayerPath(layerName: string, layerProperty: TypeJsonObject, pathToTheParentLayer: number[] = []): number[] {
     const newLayerPath = [...pathToTheParentLayer];
     if (Array.isArray(layerProperty)) {
@@ -311,7 +269,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} layerToAdd The layer property to add
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config)
   #addLayerToMetadataInstance(
     metadataLayerPathToAdd: number[],
     metadataLayer: TypeJsonObject | undefined,
@@ -340,7 +297,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeLayerEntryConfig[]} The array of layer configurations.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config)
   #getLayersToQuery(): TypeLayerEntryConfig[] {
     const arrayOfLayerIds: TypeLayerEntryConfig[] = [];
     const gatherLayerIds = (listOfLayerEntryConfig = this.listOfLayerEntryConfig): void => {
@@ -362,7 +318,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject | undefined} layer The layer property from the metadata that will inherit the values
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config)
   #processMetadataInheritance(parentLayer?: TypeJsonObject, layer: TypeJsonObject | undefined = this.metadata?.Capability?.Layer): void {
     if (parentLayer && layer) {
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
@@ -413,9 +368,8 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
-   * DOCUMENTATION!
-   * @param layerConfig
-   * @returns
+   * Overrides the validation of a layer entry config.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
    */
   protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
     const layerFound = this.#getLayerMetadataEntry(layerConfig.layerId!);
@@ -441,7 +395,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {GroupLayerEntryConfig} layerConfig The group layer configuration associated to the dynamic group.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config)
   #createGroupLayer(layer: TypeJsonObject, layerConfig: GroupLayerEntryConfig): void {
     // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
     // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
@@ -501,8 +454,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeJsonObject | null} The found layer from the capabilities or null if not found.
    * @private
    */
-  // TODO: Refactor - Layers Refactoring - Check here for layer metadata config vs layers
-  // GV Layers Refactoring - Obsolete (in config)
   #getLayerMetadataEntry(layerId: string, layer: TypeJsonObject | undefined = this.metadata?.Capability?.Layer): TypeJsonObject | null {
     if (!layer) return null;
     if ('Name' in layer && (layer.Name as string) === layerId) return layer;
@@ -519,159 +470,164 @@ export class WMS extends AbstractGeoViewRaster {
     return null;
   }
 
-  /** ****************************************************************************************************************************
-   * This method creates a GeoView WMS layer using the definition provided in the layerConfig parameter.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   *
+  /**
+   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<ImageLayer<ImageWMS>>} The GeoView raster layer that has been created.
    */
-  // GV Layers Refactoring - Obsolete (in config)
   protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageWMS>> {
     // Instance check
     if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
-    if (geoviewEntryIsWMS(layerConfig)) {
-      // Get the layer capabilities
-      const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
+    // Get the layer capabilities
+    const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
 
-      // If layer capabilities found
-      if (layerCapabilities) {
-        const dataAccessPath = layerConfig.source.dataAccessPath!;
+    // If layer capabilities found
+    if (layerCapabilities) {
+      const dataAccessPath = layerConfig.source.dataAccessPath!;
 
-        let styleToUse = '';
-        if (Array.isArray(layerConfig.source?.wmsStyle) && layerConfig.source?.wmsStyle) {
-          styleToUse = layerConfig.source?.wmsStyle[0];
-        } else if (layerConfig.source.wmsStyle) {
-          styleToUse = layerConfig.source?.wmsStyle as string;
-        } else if (layerCapabilities.Style) {
-          styleToUse = layerCapabilities.Style[0].Name as string;
-        }
-
-        if (Array.isArray(layerConfig.source?.wmsStyle)) {
-          this.WMSStyles = layerConfig.source.wmsStyle;
-        } else if (layerCapabilities.Style && (layerCapabilities.Style.length as number) > 1) {
-          this.WMSStyles = [];
-          for (let i = 0; i < (layerCapabilities.Style.length as number); i++) {
-            this.WMSStyles.push(layerCapabilities.Style[i].Name as string);
-          }
-        } else this.WMSStyles = [styleToUse];
-
-        const sourceOptions: SourceOptions = {
-          url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
-          params: { LAYERS: layerConfig.layerId, STYLES: styleToUse },
-        };
-
-        sourceOptions.attributions = this.getAttributions();
-        sourceOptions.serverType = layerConfig.source.serverType;
-        if (layerConfig.source.crossOrigin) {
-          sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-        } else {
-          sourceOptions.crossOrigin = 'Anonymous';
-        }
-        if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-
-        // Create the source
-        const source = new ImageWMS(sourceOptions);
-
-        // GV Time to request an OpenLayers layer!
-        const requestResult = this.emitLayerRequesting({ config: layerConfig, source, extraConfig: { layerCapabilities } });
-
-        // If any response
-        let olLayer: ImageLayer<ImageWMS>;
-        if (requestResult.length > 0) {
-          // Get the OpenLayer that was created
-          olLayer = requestResult[0] as ImageLayer<ImageWMS>;
-        } else throw new Error('Error on layerRequesting event');
-
-        // GV Time to emit about the layer creation!
-        this.emitLayerCreation({ config: layerConfig, layer: olLayer });
-
-        return Promise.resolve(olLayer);
+      let styleToUse = '';
+      if (Array.isArray(layerConfig.source?.wmsStyle) && layerConfig.source?.wmsStyle) {
+        styleToUse = layerConfig.source?.wmsStyle[0];
+      } else if (layerConfig.source.wmsStyle) {
+        styleToUse = layerConfig.source?.wmsStyle as string;
+      } else if (layerCapabilities.Style) {
+        styleToUse = layerCapabilities.Style[0].Name as string;
       }
 
-      // Error
-      throw new GeoViewError(this.mapId, 'validation.layer.notfound', [layerConfig.layerId, this.geoviewLayerId]);
+      if (Array.isArray(layerConfig.source?.wmsStyle)) {
+        this.WMSStyles = layerConfig.source.wmsStyle;
+      } else if (layerCapabilities.Style && (layerCapabilities.Style.length as number) > 1) {
+        this.WMSStyles = [];
+        for (let i = 0; i < (layerCapabilities.Style.length as number); i++) {
+          this.WMSStyles.push(layerCapabilities.Style[i].Name as string);
+        }
+      } else this.WMSStyles = [styleToUse];
+
+      const sourceOptions: SourceOptions = {
+        url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
+        params: { LAYERS: layerConfig.layerId, STYLES: styleToUse },
+      };
+
+      sourceOptions.attributions = this.getAttributions();
+      sourceOptions.serverType = layerConfig.source.serverType;
+      if (layerConfig.source.crossOrigin) {
+        sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+      } else {
+        sourceOptions.crossOrigin = 'Anonymous';
+      }
+      if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+
+      // Create the source
+      const source = new ImageWMS(sourceOptions);
+
+      // GV Time to request an OpenLayers layer!
+      const requestResult = this.emitLayerRequesting({ config: layerConfig, source, extraConfig: { layerCapabilities } });
+
+      // If any response
+      let olLayer: ImageLayer<ImageWMS>;
+      if (requestResult.length > 0) {
+        // Get the OpenLayer that was created
+        olLayer = requestResult[0] as ImageLayer<ImageWMS>;
+      } else throw new Error('Error on layerRequesting event');
+
+      // GV Time to emit about the layer creation!
+      this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+
+      // Return the OpenLayer layer
+      return Promise.resolve(olLayer);
     }
 
-    // Log
-    logger.logError(`geoviewLayerType must be ${CONST_LAYER_TYPES.WMS}`);
-
-    // Raise error
-    throw new GeoViewError(this.mapId, `geoviewLayerType must be ${CONST_LAYER_TYPES.WMS}`);
+    // Error
+    throw new GeoViewError(this.mapId, 'validation.layer.notfound', [layerConfig.layerId, this.geoviewLayerId]);
   }
 
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-   * initial settings, fields and aliases).
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
   protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
-    if (geoviewEntryIsWMS(layerConfig)) {
-      const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId)!;
-      this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);
-      if (layerCapabilities) {
-        const attributions = this.getAttributions();
-        if (layerCapabilities.Attribution && !attributions.includes(layerCapabilities.Attribution?.Title as string)) {
-          // Add it
-          attributions.push(layerCapabilities.Attribution.Title as string);
-          this.setAttributions(attributions);
-        }
+    const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId)!;
+    this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);
+    if (layerCapabilities) {
+      const attributions = this.getAttributions();
+      if (layerCapabilities.Attribution && !attributions.includes(layerCapabilities.Attribution?.Title as string)) {
+        // Add it
+        attributions.push(layerCapabilities.Attribution.Title as string);
+        this.setAttributions(attributions);
+      }
 
+      // eslint-disable-next-line no-param-reassign
+      if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
+
+      // TODO: Check - Likely not the best place to set the layer as queryable?
+      MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
+
+      // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
+      // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because
+      // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
+      // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
+      if (layerCapabilities.MinScaleDenominator) {
         // eslint-disable-next-line no-param-reassign
-        if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
-
-        MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
-
-        // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
-        // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because
-        // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
-        // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
-        if (layerCapabilities.MinScaleDenominator) {
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerCapabilities.MinScaleDenominator as number);
-        }
-        if (layerCapabilities.MaxScaleDenominator) {
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerCapabilities.MaxScaleDenominator as number);
-        }
-
+        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerCapabilities.MinScaleDenominator as number);
+      }
+      if (layerCapabilities.MaxScaleDenominator) {
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerCapabilities.MaxScaleDenominator as number);
+      }
 
-        if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
-        }
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
-        // Set time dimension
-        if (layerCapabilities.Dimension) {
-          const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
-            (dimension) => dimension.name === 'time'
-          );
-          if (temporalDimension) this.processTemporalDimension(temporalDimension, layerConfig);
+      if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
+      }
+
+      // Set time dimension
+      if (layerCapabilities.Dimension) {
+        const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
+          (dimension) => dimension.name === 'time'
+        );
+
+        // If a temporal dimension was found
+        if (temporalDimension) {
+          this.setTemporalDimension(layerConfig.layerPath, DateMgt.createDimensionFromOGC(temporalDimension));
         }
       }
     }
+
+    // Return the layer config
     return Promise.resolve(layerConfig);
   }
-
-  /** ***************************************************************************************************************************
-   * This method will create a Geoview temporal dimension if it existds in the service metadata
-   * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
-   * @param {OgcWmsLayerEntryConfig} layerConfig The layer entry to configure
-   */
-  // GV Layers Refactoring - Obsolete (in config)
-  protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: OgcWmsLayerEntryConfig): void {
-    if (wmsTimeDimension !== undefined) {
-      this.setTemporalDimension(layerConfig.layerPath, DateMgt.createDimensionFromOGC(wmsTimeDimension));
-    }
-  }
 }
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWMSLayerConfig if the geoviewLayerType attribute of the
+ * verifyIfLayer parameter is WMS. The type ascention applies only to the true block of the if clause that use this function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerConfigIsWMS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWMSLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
+};
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a OgcWmsLayerEntryConfig if the geoviewLayerType attribute of the
+ * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WMS. The type ascention applies only to the true block of
+ * the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
+ * valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is OgcWmsLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
+};

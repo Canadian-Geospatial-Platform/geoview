@@ -5,7 +5,7 @@ import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import { applyStyle } from 'ol-mapbox-style';
 
 import { MVT } from 'ol/format';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig, TypeTileGrid } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
@@ -34,57 +34,15 @@ export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'lis
 // GV: ^^^^^
 // GV: |||||
 
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeVectorTilesConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is VECTOR_TILES. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsVectorTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeVectorTilesConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as an VectorTiles if the type attribute of the verifyIfGeoViewLayer
- * parameter is Vector_TILES. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention
- * is valid
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewLayerIsVectorTiles = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is VectorTiles => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.VECTOR_TILES;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a VectorTilesLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is VECTOR_TILES. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsVectorTiles = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is VectorTilesLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
-};
-
-/** *****************************************************************************************************************************
- * a class to add vector-tiles layer
+/**
+ * A class to add vector-tiles layer
  *
  * @exports
  * @class VectorTiles
  */
 export class VectorTiles extends AbstractGeoViewRaster {
-  /** ***************************************************************************************************************************
-   * Initialize layer
+  /**
+   * Constructs a VectorTiles Layer configuration processor.
    *
    * @param {string} mapId the id of the map
    * @param {TypeVectorTilesConfig} layerConfig the layer configuration
@@ -93,14 +51,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
     super(CONST_LAYER_TYPES.VECTOR_TILES, layerConfig, mapId);
   }
 
-  /** ****************************************************************************************************************************
-   * This method creates a GeoView VectorTiles layer using the definition provided in the layerConfig parameter.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   *
+  /**
+   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<VectorTileLayer<VectorTileSource>>} The GeoView raster layer that has been created.
    */
-  // GV Layers Refactoring - Obsolete (in config)
   protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<VectorTileLayer<VectorTileSource>> {
     // Instance check
     if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
@@ -168,22 +123,18 @@ export class VectorTiles extends AbstractGeoViewRaster {
       });
     }
 
+    // Return the OpenLayer layer
     return Promise.resolve(olLayer);
   }
 
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-   * initial settings, fields and aliases).
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
   protected override async onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    const updatedLayerConfig = layerConfig;
-    if (!(updatedLayerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     if (this.metadata) {
       const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = this.metadata;
@@ -193,9 +144,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
         resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
         tileSize: [tileInfo.rows as number, tileInfo.cols as number],
       };
-      updatedLayerConfig.source!.tileGrid = newTileGrid;
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.source!.tileGrid = newTileGrid;
 
-      updatedLayerConfig.initialSettings.extent = validateExtentWhenDefined(updatedLayerConfig.initialSettings.extent);
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
       if (fullExtent.spatialReference && !Projection.getProjectionFromObj(fullExtent.spatialReference))
         await Projection.addProjection(fullExtent.spatialReference);
@@ -204,23 +157,58 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // First set the min/max scales based on the service / config
       // * Infinity and -Infinity are used as extreme zoom level values in case the value is undefined
       if (minScale) {
-        updatedLayerConfig.minScale = Math.min(updatedLayerConfig.minScale ?? Infinity, minScale as number);
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, minScale as number);
       }
 
       if (maxScale) {
-        updatedLayerConfig.maxScale = Math.max(updatedLayerConfig.maxScale ?? -Infinity, maxScale as number);
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, maxScale as number);
       }
 
       // Second, set the min/max zoom levels based on the service / config.
       // GV Vector tiles should always have a minZoom and maxZoom, so -Infinity or Infinity should never be set as a value
       if (minZoom) {
-        updatedLayerConfig.initialSettings.minZoom = Math.max(updatedLayerConfig.initialSettings.minZoom ?? -Infinity, minZoom as number);
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minZoom as number);
       }
 
       if (maxZoom) {
-        updatedLayerConfig.initialSettings.maxZoom = Math.min(updatedLayerConfig.initialSettings.maxZoom ?? Infinity, maxZoom as number);
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxZoom as number);
       }
     }
-    return Promise.resolve(updatedLayerConfig);
+
+    // Return the layer config
+    return Promise.resolve(layerConfig);
   }
 }
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeVectorTilesConfig if the geoviewLayerType attribute of the
+ * verifyIfLayer parameter is VECTOR_TILES. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerConfigIsVectorTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeVectorTilesConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
+};
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a VectorTilesLayerEntryConfig if the geoviewLayerType attribute
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is VECTOR_TILES. The type ascention applies only to the true block of
+ * the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
+ * valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const geoviewEntryIsVectorTiles = (
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
+): verifyIfGeoViewEntry is VectorTilesLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
+};

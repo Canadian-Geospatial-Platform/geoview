@@ -4,7 +4,7 @@ import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
@@ -28,55 +28,15 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
   listOfLayerEntryConfig: XYZTilesLayerEntryConfig[];
 }
 
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeXYZTilesConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is XYZ_TILES. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeXYZTilesConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as an XYZTiles if the type attribute of the verifyIfGeoViewLayer
- * parameter is XYZ_TILES. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention
- * is valid
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is XYZTiles => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.XYZ_TILES;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a XYZTilesLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is XYZ_TILES. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsXYZTiles = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is XYZTilesLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
-};
-
-/** *****************************************************************************************************************************
- * a class to add xyz-tiles layer
+/**
+ * A class to add xyz-tiles layer
  *
  * @exports
  * @class XYZTiles
  */
 export class XYZTiles extends AbstractGeoViewRaster {
-  /** ***************************************************************************************************************************
-   * Initialize layer
+  /**
+   * Constructs a XYZTiles Layer configuration processor.
    *
    * @param {string} mapId the id of the map
    * @param {TypeXYZTilesConfig} layerConfig the layer configuration
@@ -86,9 +46,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /**
-   * DOCUMENTATION!
-   * @param layerConfig
-   * @returns
+   * Overrides the validation of a layer entry config.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
    */
   protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
     // TODO: Update to properly use metadata from map server
@@ -120,14 +79,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
     );
   }
 
-  /** ****************************************************************************************************************************
-   * This method creates a GeoView XYZTiles layer using the definition provided in the layerConfig parameter.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   *
+  /**
+   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<TileLayer<XYZ>>} The GeoView raster layer that has been created.
    */
-  // GV Layers Refactoring - Obsolete (in config)
   protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TileLayer<XYZ>> {
     // Instance check
     if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
@@ -167,18 +123,15 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });
 
+    // Return the OpenLayer layer
     return Promise.resolve(olLayer);
   }
 
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-   * initial settings, fields and aliases).
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
   protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
@@ -228,6 +181,35 @@ export class XYZTiles extends AbstractGeoViewRaster {
           ? layerConfig.minScale
           : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, layerConfig.minScale ?? Infinity);
     }
+
+    // Return the layer config
     return Promise.resolve(layerConfig);
   }
 }
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeXYZTilesConfig if the geoviewLayerType attribute of the
+ * verifyIfLayer parameter is XYZ_TILES. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeXYZTilesConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
+};
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a XYZTilesLayerEntryConfig if the geoviewLayerType attribute
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is XYZ_TILES. The type ascention applies only to the true block of
+ * the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
+ * valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const geoviewEntryIsXYZTiles = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is XYZTilesLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
+};

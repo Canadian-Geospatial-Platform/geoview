@@ -324,22 +324,6 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Recursively process the list of layer entries to count all layers in error.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration
-   *                                                        (default: this.listOfLayerEntryConfig).
-   *
-   * @returns {number} The number of layers in error.
-   */
-  countErrorStatus(listOfLayerEntryConfig: TypeLayerEntryConfig[] = this.listOfLayerEntryConfig): number {
-    return listOfLayerEntryConfig.reduce((counter: number, layerConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig)) return counter + this.countErrorStatus(layerConfig.listOfLayerEntryConfig);
-      if ((layerConfig as AbstractBaseLayerEntryConfig).layerStatus === 'error') return counter + 1;
-      return counter;
-    }, 0);
-  }
-
-  /** ***************************************************************************************************************************
    * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
    * Its code is the same for all child classes. It must first validate that the olLayers attribute is null indicating
@@ -385,7 +369,7 @@ export abstract class AbstractGeoViewLayer {
       if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to get additional service definition');
 
       // Process list of layers and await
-      this.olRootLayer = await this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+      this.olRootLayer = await this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
 
       // Log the time it took thus far
       if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
@@ -522,6 +506,7 @@ export abstract class AbstractGeoViewLayer {
         // TODO: Refactor - Layers refactoring. Make it a super clear function when moving config information in the layer for real.
         // TO.DOCONT: After this point(?) the layerConfig should be full static and the system should rely on the Layer class to do stuff.
         //
+
         // Save the style in the layer as we're done processing style found in metadata
         if (layerConfig instanceof AbstractBaseLayerEntryConfig) this.setStyle(layerConfig.layerPath, layerConfig.layerStyle!);
 
@@ -588,13 +573,13 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Recursively processes the list of layer Entries to create the layers and the layer groups.
-   *
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entries to process.
    * @param {LayerGroup} layerGroup - Optional layer group to use when we have many layers. The very first call to
    *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
-   * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
+   * @returns {Promise<BaseLayer | undefined>} The promise that the layers were processed.
+   * @private
    */
-  async processListOfLayerEntryConfig(
+  async #processListOfLayerEntryConfig(
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | undefined> {
@@ -610,7 +595,7 @@ export abstract class AbstractGeoViewLayer {
         // If working on a group layer
         if (layerEntryIsGroupLayer(layerConfig)) {
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
-          const groupReturned = await this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup);
+          const groupReturned = await this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup);
           if (groupReturned) {
             if (layerGroup) layerGroup.getLayers().push(groupReturned);
             return groupReturned;
@@ -650,7 +635,7 @@ export abstract class AbstractGeoViewLayer {
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) {
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
-          promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup));
+          promiseOfLayerCreated.push(this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup));
         } else if (layerConfig.layerStatus === 'error') {
           promiseOfLayerCreated.push(Promise.resolve(undefined));
         } else {
@@ -702,7 +687,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Processes a layer entry and returns a Promise of an Open Layer Base Layer object or undefined.
+   * Processes a layer entry and returns a Promise of an Open Layer Base Layer object.
    * This method sets the 'loading' status on the layer config and then calls the overridable method 'onProcessOneLayerEntry'.
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
@@ -712,7 +697,7 @@ export abstract class AbstractGeoViewLayer {
     layerConfig.setLayerStatusLoading();
 
     try {
-      // Process and, yes, keep the await here, because we want to make extra sure the onProcessLayerMetadata is
+      // Process and, yes, keep the await here, because we want to make extra sure the onProcessOneLayerEntry is
       // executed asynchronously, even if the implementation of the overriden method is synchronous.
       // All so that the try/catch works nicely here.
       return await this.onProcessOneLayerEntry(layerConfig);
@@ -723,7 +708,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object or undefined.
+   * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
    */
@@ -803,17 +788,22 @@ export abstract class AbstractGeoViewLayer {
     layerConfig.setLayerStatusError();
   }
 
-  /** ***************************************************************************************************************************
-   * Set the layerStatus code of all layers in the listOfLayerEntryConfig.
-   *
-   * @param {TypeLayerStatus} newStatus The new status to assign to the layers.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration.
-   * @param {string} errorMessage The error message.
+  /**
+   * Sets the layerStatus code of all layers in the listOfLayerEntryConfig and the children.
+   * If the error status of the layer entry is already 'error' the new status isn't applied.
+   * If the new status is error, compile the error in the 'layerLoadError' using 'errorMessage' as the text.
+   * @param {TypeLayerStatus} newStatus - The new status to assign to the layers.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer's configuration.
+   * @param {string} errorMessage - The error message.
    */
   setAllLayerStatusTo(newStatus: TypeLayerStatus, listOfLayerEntryConfig: TypeLayerEntryConfig[], errorMessage?: string): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig)) this.setAllLayerStatusTo(newStatus, layerConfig.listOfLayerEntryConfig, errorMessage);
-      else {
+      // If the layer entry is a group
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        // Recursively set the status to the children
+        this.setAllLayerStatusTo(newStatus, layerConfig.listOfLayerEntryConfig, errorMessage);
+      } else {
+        // If already set to error, don't touch it
         if (layerConfig.layerStatus === 'error') return;
 
         // Update the layer status

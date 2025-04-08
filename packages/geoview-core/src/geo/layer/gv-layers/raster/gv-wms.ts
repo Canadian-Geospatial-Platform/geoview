@@ -543,7 +543,6 @@ export class GVWMS extends AbstractGVRaster {
    * Gets the bounds of the layer and returns updated bounds.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override getBounds(): Extent | undefined {
     const layerConfig = this.getLayerConfig();
 

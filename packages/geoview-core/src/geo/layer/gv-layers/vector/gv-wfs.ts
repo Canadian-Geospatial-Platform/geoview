@@ -17,8 +17,6 @@ export class GVWFS extends AbstractGVVector {
    * @param {VectorSource} olSource - The OpenLayer source.
    * @param {WfsLayerEntryConfig} layerConfig - The layer configuration.
    */
-  // Disabling 'any', because that's how it is in OpenLayers
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public constructor(mapId: string, olSource: VectorSource, layerConfig: WfsLayerEntryConfig) {
     super(mapId, olSource, layerConfig);
   }

@@ -2,18 +2,14 @@ import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { Image as ImageLayer } from 'ol/layer';
 
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeJsonObject } from '@/core/types/global-types';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 
 import {
   commonfetchServiceMetadata,
-  commonProcessFeatureInfoConfig,
-  commonProcessInitialSettings,
   commonProcessLayerMetadata,
-  commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -29,60 +25,11 @@ export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
   listOfLayerEntryConfig: EsriDynamicLayerEntryConfig[];
 }
 
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use
- * this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriDynamicLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
-};
-
 // GV: ^^^^^
 // GV: |||||
 
-/** ******************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as an EsriDynamic if the type attribute of the verifyIfGeoViewLayer
- * parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is EsriDynamic => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.ESRI_DYNAMIC;
-};
-// GV: CONFIG EXTRACTION
-// GV: This section of code must be deleted because we already have another type guard that does the same thing
-// GV: |||||
-// GV: vvvvv
-
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a EsriDynamicLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsEsriDynamic = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is EsriDynamicLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
-};
-
-// GV: ^^^^^
-// GV: |||||
-
-/** ******************************************************************************************************************************
- * A class to add esri dynamic layer.
+/**
+ * A class to add an EsriDynamic layer.
  *
  * @exports
  * @class EsriDynamic
@@ -94,8 +41,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   // Override the hit tolerance for a EsriDynamic layer
   override hitTolerance: number = EsriDynamic.DEFAULT_HIT_TOLERANCE;
 
-  /** ****************************************************************************************************************************
-   * Initialize layer.
+  /**
+   * Constructs an EsriDynamic Layer configuration processor.
    * @param {string} mapId The id of the map.
    * @param {TypeEsriDynamicLayerConfig} layerConfig The layer configuration.
    */
@@ -120,19 +67,15 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
   }
 
-  /** ***************************************************************************************************************************
-   * This method perform specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-   *
-   * @param {number} esriIndex The index of the current layer in the metadata.
-   *
+  /**
+   * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
    * @returns {boolean} true if an error is detected.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
     if (this.metadata?.supportsDynamicLayers === false) {
       // Log a warning, but continue
@@ -143,60 +86,22 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     return false;
   }
 
-  /** ***************************************************************************************************************************
-   * This method will create a Geoview temporal dimension if it exist in the service metadata
-   * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-   * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriDynamicLayerEntryConfig): void {
-    commonProcessTemporalDimension(this, esriTimeDimension, layerConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
-   *
-   * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
-   */
-  // GV Layers Refactoring - Obsolete (in config?)
-  processFeatureInfoConfig(layerConfig: EsriDynamicLayerEntryConfig): void {
-    commonProcessFeatureInfoConfig(this, layerConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
-   *
-   * @param {EsriDynamic} this The ESRI layer instance pointer.
-   * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
-   */
-  // GV Layers Refactoring - Obsolete (in config?)
-  processInitialSettings(layerConfig: EsriDynamicLayerEntryConfig): void {
-    commonProcessInitialSettings(this, layerConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-   * initial settings, fields and aliases).
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
-   */
-  // GV Layers Refactoring - Obsolete (in config?)
   protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof EsriDynamicLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
     return commonProcessLayerMetadata(this, layerConfig);
   }
 
-  /** ****************************************************************************************************************************
-   * This method creates a GeoView EsriDynamic layer using the definition provided in the layerConfig parameter.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   *
-   * @returns {Promise<ImageLayer<ImageArcGISRest>>} The GeoView raster layer that has been created.
+  /**
+   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+   * @returns {Promise<ImageLayer<ImageArcGISRest>>} The created Open Layer object.
    */
-  // GV Layers Refactoring - Obsolete (in config)
   protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
     // Instance check
     if (!(layerConfig instanceof EsriDynamicLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
@@ -236,6 +141,36 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });
 
+    // Return the OpenLayer layer
     return Promise.resolve(olLayer);
   }
 }
+
+/** ******************************************************************************************************************************
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
+ * the verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriDynamicLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+};
+
+/** ******************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a EsriDynamicLayerEntryConfig if the geoviewLayerType attribute
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
+ * the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
+ * valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const geoviewEntryIsEsriDynamic = (
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
+): verifyIfGeoViewEntry is EsriDynamicLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+};

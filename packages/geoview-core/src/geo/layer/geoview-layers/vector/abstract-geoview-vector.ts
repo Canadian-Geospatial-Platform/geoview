@@ -15,7 +15,6 @@ import { TypeFeatureInfoLayerConfig, TypeOutfields } from '@config/types/map-sch
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeBaseSourceVectorInitialConfig } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { VECTOR_LAYER } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -23,46 +22,21 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { Projection } from '@/geo/utils/projection';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
+// Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
 const EXCLUDED_HEADERS_LNG = ['longitude', 'lon', 'x', 'xcoord', 'longitude|longitude', 'longitude | longitude'];
 const EXCLUDED_HEADERS_GEN = ['geometry', 'geom'];
 const EXCLUDED_HEADERS = EXCLUDED_HEADERS_LAT.concat(EXCLUDED_HEADERS_LNG).concat(EXCLUDED_HEADERS_GEN);
 
 /**
- * Determine if layer instance is a vector layer
- *
- * @param {AbstractGeoViewLayer} layer the layer to check
- * @returns {boolean} true if layer is a vector layer
+ * The AbstractGeoViewVector class.
  */
-export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
-  return layer?.type in VECTOR_LAYER;
-};
-
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
-/** *****************************************************************************************************************************
- * The AbstractGeoViewVector class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
- * instanciate GeoView vector layers. It inherits from its parent class an attribute named olLayers where the vector elements
- * of the class will be kept.
- *
- * The olLayers attribute has a hierarchical structure. Its data type is TypeBaseVectorLayer. Subclasses of this type are
- * BaseLayer, TypeVectorLayerGroup and TypeVectorLayer. The TypeVectorLayerGroup is a collection of TypeBaseVectorLayer. It is
- * important to note that a TypeBaseVectorLayer attribute can polymorphically refer to a TypeVectorLayerGroup or a
- * TypeVectorLayer. Here, we must not confuse instantiation and declaration of a polymorphic attribute.
- *
- * All leaves of the tree structure stored in the olLayers attribute must be of type TypeVectorLayer. This is where the
- * features are placed and can be considered as a feature group.
- */
-// ******************************************************************************************************************************
 export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
-  /** ***************************************************************************************************************************
-   * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
-   *
-   * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   *
+  /**
+   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
    */
-  // GV Layers Refactoring - Obsolete (in config)
   protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer> {
     // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
     // Instance check
@@ -73,6 +47,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       layerConfig as VectorLayerEntryConfig,
       vectorSource
     );
+
+    // Return the OpenLayer layer
     return Promise.resolve(vectorLayer);
   }
 

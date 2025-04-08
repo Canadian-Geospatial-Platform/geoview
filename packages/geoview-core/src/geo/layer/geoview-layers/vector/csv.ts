@@ -4,25 +4,18 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-
 import { Cast, TypeJsonObject } from '@config/types/config-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
-  TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeBaseSourceVectorInitialConfig,
+  TypeLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-
-// GV: CONFIG EXTRACTION
-// GV: This section of code was extracted and copied to the geoview config section
-// GV: |||||
-// GV: vvvvv
 
 export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'CSV';
@@ -34,58 +27,15 @@ export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
   listOfLayerEntryConfig: CsvLayerEntryConfig[];
 }
 
-/** *****************************************************************************************************************************
- * type guard function that redefines a CsvLayerEntryConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is CSV. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsCSV = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeCSVLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.CSV;
-};
-
-// GV: ^^^^^
-// GV: |||||
-
-/** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as a CSV if the type attribute of the verifyIfGeoViewLayer
- * parameter is CSV. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewLayerIsCSV = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is CSV => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.CSV;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeCsvLayerEntryConfig if the geoviewLayerType attribute of
- * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is CSV. The type ascention applies only to the true block of the if
- * clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsCSV = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is CsvLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.CSV;
-};
-
-/** *****************************************************************************************************************************
- * Class used to add CSV layer to the map
+/**
+ * Class used to add a CSV layer to the map
  *
  * @exports
  * @class CSV
  */
 export class CSV extends AbstractGeoViewVector {
-  /** ***************************************************************************************************************************
-   * Initialize layer
+  /**
+   * Constructs a CSV Layer configuration processor.
    *
    * @param {string} mapId the id of the map
    * @param {TypeCSVLayerConfig} layerConfig the layer configuration
@@ -94,12 +44,10 @@ export class CSV extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.CSV, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
-   * Metadata is processed when parsing the file.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
@@ -107,6 +55,8 @@ export class CSV extends AbstractGeoViewVector {
 
     // process the feature info configuration and attach the config to the instance for access by parent class
     this.setLayerMetadata(layerConfig.layerPath, Cast<TypeJsonObject>(layerConfig));
+
+    // Return the layer config
     return Promise.resolve(layerConfig);
   }
 
@@ -134,3 +84,30 @@ export class CSV extends AbstractGeoViewVector {
     return vectorSource;
   }
 }
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a CsvLayerEntryConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
+ * verifyIfLayer parameter is CSV. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerConfigIsCSV = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeCSVLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.CSV;
+};
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeCsvLayerEntryConfig if the geoviewLayerType attribute of
+ * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is CSV. The type ascention applies only to the true block of the if
+ * clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
+ * valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const geoviewEntryIsCSV = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is CsvLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.CSV;
+};

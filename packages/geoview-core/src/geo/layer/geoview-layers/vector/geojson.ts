@@ -6,7 +6,7 @@ import Feature from 'ol/Feature';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
@@ -30,55 +30,15 @@ export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
   listOfLayerEntryConfig: GeoJSONLayerEntryConfig[];
 }
 
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoJSONLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is GEOJSON. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoJSONLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as a GeoJSON if the type attribute of the verifyIfGeoViewLayer
- * parameter is GEOJSON. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is GeoJSON => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.GEOJSON;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a GeoJSONLayerEntryConfig if the geoviewLayerType attribute of
- * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOJSON. The type ascention applies only to the true block of the if
- * clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is GeoJSONLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
-};
-
-/** *****************************************************************************************************************************
- * Class used to add geojson layer to the map
+/**
+ * Class used to add GeoJSON layer to the map
  *
  * @exports
  * @class GeoJSON
  */
 export class GeoJSON extends AbstractGeoViewVector {
-  /** ***************************************************************************************************************************
-   * Initialize layer
+  /**
+   * Constructs a GeoJSON Layer configuration processor.
    *
    * @param {string} mapId the id of the map
    * @param {TypeGeoJSONLayerConfig} layerConfig the layer configuration
@@ -121,9 +81,8 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /**
-   * DOCUMENTATION!
-   * @param layerConfig
-   * @returns
+   * Overrides the validation of a layer entry config.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
    */
   protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
     if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
@@ -164,15 +123,11 @@ export class GeoJSON extends AbstractGeoViewVector {
     return undefined;
   }
 
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-   * initial settings, fields and aliases).
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
   protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
@@ -222,6 +177,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV
     this.setLayerMetadata(layerConfig.layerPath, Cast<TypeJsonObject>(layerConfig));
 
+    // Return the layer config
     return Promise.resolve(layerConfig);
   }
 
@@ -234,7 +190,6 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  // GV Layers Refactoring - Obsolete (in config?, in layers?)
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
@@ -250,3 +205,30 @@ export class GeoJSON extends AbstractGeoViewVector {
     return vectorSource;
   }
 }
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoJSONLayerConfig if the geoviewLayerType attribute of the
+ * verifyIfLayer parameter is GEOJSON. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoJSONLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
+};
+
+/** *****************************************************************************************************************************
+ * type guard function that redefines a TypeLayerEntryConfig as a GeoJSONLayerEntryConfig if the geoviewLayerType attribute of
+ * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOJSON. The type ascention applies only to the true block of the if
+ * clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
+ * valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is GeoJSONLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
+};
