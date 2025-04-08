@@ -9,6 +9,7 @@ import { MapContext } from '@/core/app-start';
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { getItemAsNumber } from '@/core//utils/localStorage';
 
 export interface StoresManagerState {
   stores: Record<string, GeoviewStoreType>;
@@ -18,6 +19,10 @@ export const useStoresManager = createStore<StoresManagerState>(() => ({
   stores: {},
 }));
 
+// Check if running in dev or if the key is set in the local storage
+const LOCAL_STORAGE_KEY_DEVTOOLS = 'GEOVIEW_DEVTOOLS';
+const DEVTOOLS_ACTIVE = process.env.NODE_ENV === 'development' || !!getItemAsNumber(LOCAL_STORAGE_KEY_DEVTOOLS);
+
 /**
  * Mounts Zustand DevTools for a specific store instance.
  *
@@ -26,12 +31,16 @@ export const useStoresManager = createStore<StoresManagerState>(() => ({
  * @param {HTMLElement} container - The container element
  */
 const mountZustandDevTools = (instanceName: string, store: GeoviewStoreType, container: HTMLElement): void => {
-  // Only mount in development
-  if (process.env.NODE_ENV === 'development') {
+  if (DEVTOOLS_ACTIVE) {
     // Check if container already has devtools
     if (!container.hasAttribute('data-zustand-devtools')) {
-      mountStoreDevtool(instanceName, store, container);
-      // Mark container as having devtools mounted
+      // Create new DevTools container
+      const devToolsContainer = document.createElement('div');
+      devToolsContainer.id = `devtools-${instanceName}`;
+      container.appendChild(devToolsContainer);
+
+      // Mount and mark container as having devtools mounted
+      mountStoreDevtool(instanceName, store, devToolsContainer);
       container.setAttribute('data-zustand-devtools', 'true');
     }
   }
