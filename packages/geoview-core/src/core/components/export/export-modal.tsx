@@ -32,6 +32,45 @@ export default function ExportModal(): JSX.Element {
 
   const theme = useTheme();
 
+  // dummy promise to wait for the timeout complete
+  function resolveAfter2Seconds(): Promise<unknown> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve('resolved');
+      }, 2000);
+    });
+  }
+
+  // resising image from dataurl
+  async function resizeImageData(imageUri: string, inFileName: string): Promise<void> {
+    const img = new Image();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    img.addEventListener('load', () => {
+      const width = 1478; // Math.ceil(img.naturalWidth * 0.5),
+      const scale = width / img.naturalWidth;
+      const height = Math.ceil(img.naturalHeight * scale);
+
+      // IMAGE TO CANVAS
+      canvas.width = width;
+      canvas.height = height;
+
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height);
+        ctx.getImageData(0, 0, width, height);
+        // Generate the image data
+        const imgurl = canvas.toDataURL('image/png');
+        // Download png file from dataurl
+        exportPNG(imgurl, inFileName);
+      }
+    });
+    img.src = imageUri; // load image
+    console.log('calling'); // eslint-disable-line no-console
+    const result = await resolveAfter2Seconds();
+    console.log(result); // eslint-disable-line no-console
+  }
+
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [isLegendLoading, setIsLegendLoading] = useState(true);
   const [isMapExporting, setIsMapExporting] = useState(false);
@@ -67,11 +106,14 @@ export default function ExportModal(): JSX.Element {
         .toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white, fontEmbedCSS: '' })
         .then((dataUrl) => {
           setIsMapExporting(false);
-
-          exportPNG(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`);
-
-          setActiveAppBarTab(legendId, 'legend', false, false);
-          disableFocusTrap();
+          resizeImageData(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`)
+            .then(() => {
+              setActiveAppBarTab(legendId, 'legend', false, false);
+              disableFocusTrap();
+            })
+            .catch((error: Error) => {
+              logger.logError('Error while resizing the image', error);
+            });
         })
         .catch((error: Error) => {
           logger.logError('Error while exporting the image', error);
