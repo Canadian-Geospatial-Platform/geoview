@@ -20,7 +20,7 @@ Once the project matures, these docs can be the basis of official public docs, h
 
 ## How the application works
 
-- [GoeView layer documentation](./app/geoview-layer/README.md)
+- [GeoView layer documentation](./app/geoview-layer/README.md)
 - [Theme](./app/ui/theming.md)
 - [Events documentation](./app/event/README.md)
 - [Accessing types](./app/accessing-types.md)
@@ -34,7 +34,7 @@ Once the project matures, these docs can be the basis of official public docs, h
 The api.maps array is now private and only accessible from the api. The ```cgpv.api.maps``` is not available anymore. To access and interact with the maps, new functions have been added.
 
 - How to get a list of maps available
-```
+``` ts
 /**
  * Gets the list of all map IDs currently in the collection.
  *
@@ -44,7 +44,7 @@ getMapViewerIds(): string[]
 ```
 
 - How to know if a map exist
-```
+``` ts
 /**
  * Return true if a map id is already registered.
  *
@@ -55,7 +55,7 @@ hasMapViewer(mapId: string): boolean
 ```
 
 - How to access a map by id
-```
+``` ts
 /**
  * Gets a map viewer instance by its ID.
  *
@@ -66,13 +66,13 @@ hasMapViewer(mapId: string): boolean
 getMapViewer(mapId: string): MapViewer
 ```
 _Implementation_
-```
+``` ts
 const myMap = cgpv.api.getMapViewer('Map1');
 myMap.layer.addGeoviewLayerByGeoCoreUUID(layer)
 ```
 
 - How to delete a map instance
-```
+``` ts
 /**
  * Delete a map viewer instance by its ID.
  *
@@ -83,7 +83,7 @@ myMap.layer.addGeoviewLayerByGeoCoreUUID(layer)
 deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement | void> {
 ```
 _Implementation_
-```
+``` ts
 if (cgpv.api.hasMapViewer(map)) {
   cgpv.api.deleteMapViewer(map, false).then(() => {
     resolve();
@@ -92,5 +92,3 @@ if (cgpv.api.hasMapViewer(map)) {
   resolve();
 }
 ```
-
-A call with the old version would look like ```cgpv.api.maps['Map1'].layer.addGeoviewLayerByGeoCoreUUID(layer)``` will now look like this ```cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(layer)```
