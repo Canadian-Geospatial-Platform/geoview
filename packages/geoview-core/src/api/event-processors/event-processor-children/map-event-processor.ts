@@ -723,7 +723,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   ): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const layerPath = (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
-      ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}`
+      ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/base-group`
       : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
     const pathToSearch = layerPathToReplace || layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, pathToSearch);

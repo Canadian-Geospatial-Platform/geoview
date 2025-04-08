@@ -418,9 +418,7 @@ export class LayerApi {
 
     if ((geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId) {
       if ((geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.length > 1) {
-        const layerPath = `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${
-          (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
-        }`;
+        const layerPath = `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/base-group`;
         const layerInfo: TypeOrderedLayerInfo = {
           layerPath,
           legendCollapsed:
@@ -684,7 +682,7 @@ export class LayerApi {
 
     if (this.getGeoviewLayerIds().includes(uuid)) {
       // eslint-disable-next-line no-param-reassign
-      uuid = `${uuid}:${crypto.randomUUID().substring(0, 8)}`;
+      uuid = `${uuid}:${generateId(8)}`;
     }
 
     // GV: This is here as a placeholder so that the layers will appear in the proper order,
@@ -692,6 +690,8 @@ export class LayerApi {
     MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerInfo);
 
     const parsedLayerEntryConfig = layerEntryConfig ? JSON.parse(layerEntryConfig) : undefined;
+    if (parsedLayerEntryConfig && !parsedLayerEntryConfig[0].layerId) parsedLayerEntryConfig[0].layerId = 'base-group';
+
     let optionalConfig: GeoCoreLayerConfig | undefined =
       parsedLayerEntryConfig && (parsedLayerEntryConfig[0].listOfLayerEntryConfig || parsedLayerEntryConfig[0].initialSettings)
         ? {
@@ -732,7 +732,7 @@ export class LayerApi {
   addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult | undefined {
     // TODO: Refactor - This should be dealt with the config classes and this line commented out
     // eslint-disable-next-line no-param-reassign
-    geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
+    geoviewLayerConfig.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId();
 
     // TODO: Refactor - This should be dealt with the config classes and this line commented out
     ConfigValidation.validateListOfGeoviewLayerConfig(this.mapViewer.getDisplayLanguage(), [geoviewLayerConfig]);
@@ -1339,13 +1339,9 @@ export class LayerApi {
    * Removes all geoview layers from the map
    */
   removeAllGeoviewLayers(): void {
-    // FIXME: Layers refactoring. When working in LAYERS_HYBRID_MODE=true, the GVLayers aren't created until the layer config gets in 'processed' layer status.
-    // FIX.MECONT: Therefore, this can't remove the layers that failed due to for example bad metadataUrl.
-    // FIX.MECONT: To effectively remove all layers in the UI boxes, this removal process should be using the 'LayerConfigs' (and the layer paths). Not the 'Layer' classes.
-    // For each Geoview layers
-    this.getGeoviewLayers().forEach((geoviewLayer) => {
+    this.getLayerEntryConfigIds().forEach((layerEntryConfigId) => {
       // Remove it
-      this.removeLayerUsingPath(geoviewLayer.getGeoviewLayerId());
+      this.removeLayerUsingPath(layerEntryConfigId);
     });
   }
 

@@ -77,7 +77,7 @@ function SliderUI(props: SliderProps): JSX.Element {
   // Ref
   const sliderRef = useRef<HTMLDivElement>(null);
 
-  const containerId = `${properties.mapId}-${properties?.sliderId ?? generateId()}` || '';
+  const containerId = `${properties.mapId}-${properties?.sliderId ?? generateId(18)}` || '';
   const valueLabelDisplayOption = valueLabelDisplay === undefined ? 'on' : 'auto';
 
   // State
