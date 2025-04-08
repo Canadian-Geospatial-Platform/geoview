@@ -15,7 +15,8 @@
     "openGuide": "Ouvrir le guide",
     "guide": "Guide",
     "fullScreen": "Plein écran",
-    "processing": "Traitement de __param__ element(s) sur __param__"
+    "processing": "Traitement de __param__ element(s) sur __param__",
+    "clickEnlarge": "Cliquer pour agrandir"
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",

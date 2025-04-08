@@ -1264,7 +1264,7 @@ export class MapViewer {
     // GV If this is done after plugin removal, it triggers a rerender, and the plugins can cause an error, depending on state
     // Remove the dom element (remove rendered map and overview map)
     if (this.overviewRoot) this.overviewRoot.unmount();
-    unmountMap(this.mapId);
+    unmountMap(this.mapId, mapContainer);
 
     // Unload all loaded plugins on the map
     await Plugin.removePlugins(this.mapId);

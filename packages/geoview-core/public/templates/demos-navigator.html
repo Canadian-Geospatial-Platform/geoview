@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -167,7 +167,7 @@
           <option value="fr">French</option>
           <option value="unsupported">Not Supported</option>
         </select>
-        <input type="checkbox" id="resetLayer" name="resetLayer" checked>
+        <input type="checkbox" id="resetLayer" name="resetLayer" checked />
         <label for="resetLayer">Reset Layers</label>
       </div>
       <p>Display Theme:</p>
@@ -223,19 +223,20 @@
         // delete old map
         cgpv.api.deleteMapViewer('map1', true);
 
-        // create new map in a new dom node
-        const newDiv = document.createElement('div');
-        const id = document.createAttribute('id');
-        const style = document.createAttribute('style');
-        id.value = 'map1';
-        newDiv.setAttributeNode(id);
-        document.getElementById('mapSection').appendChild(newDiv);
-
         // wait until map is removed before recreating it
         setTimeout(() => {
+          // create new map in a new dom node
+          if (document.getElementById('map1') === null) {
+            const newDiv = document.createElement('div');
+            const id = document.createAttribute('id');
+            const style = document.createAttribute('style');
+            id.value = 'map1';
+            newDiv.setAttributeNode(id);
+            document.getElementById('mapSection').appendChild(newDiv);
+          }
+
           // create map
-          cgpv.api.createMapFromConfig('map1', e.target.value, 800)
-            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
+          cgpv.api.createMapFromConfig('map1', e.target.value, 800).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
         }, 1500);
 
         // fetch JSON config file to show in the text are section
