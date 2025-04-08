@@ -34,50 +34,63 @@ Once the project matures, these docs can be the basis of official public docs, h
 The api.maps array is now private and only accessible from the api. The ```cgpv.api.maps``` is not available anymore. To access and interact with the maps, new functions have been added.
 
 - How to get a list of maps available
->  /**
->   * Gets the list of all map IDs currently in the collection.
->   *
->   * @returns {string[]} Array of map IDs
->   */
->  getMapViewerIds(): string[]
-
-- How to access a map by id
->  /**
->   * Gets a map viewer instance by its ID.
->   *
->   * @param {string} mapId - The unique identifier of the map to retrieve
->   * @returns {MapViewer} The map viewer instance if found
->   * @throws {Error} If the map with the specified ID is not found
->   */
->  getMapViewer(mapId: string): MapViewer
-
-- How to delete a map instance
->  /**
->   * Delete a map viewer instance by its ID.
->   *
->   * @param {string} mapId - The unique identifier of the map to delete
->   * @param {boolean} deleteContainer - True if we want to delete div from the page
->   * @returns {Promise<HTMLElement>} The Promise containing the HTML element
->   */
->  deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement | void> {
-
 ```
-if (cgpv.api.hasMapViewer(map)) {
-            cgpv.api.deleteMapViewer(map, false).then(() => {
-              resolve();
-            });
-          } else {
-            resolve();
-          }
+/**
+ * Gets the list of all map IDs currently in the collection.
+ *
+ * @returns {string[]} Array of map IDs
+ */
+getMapViewerIds(): string[]
 ```
 
 - How to know if a map exist
->  /**
->   * Return true if a map id is already registered.
->   *
->   * @param {string} mapId - The unique identifier of the map to retrieve
->   * @returns {boolean} True if map exist
->   */
->  hasMapViewer(mapId: string): boolean
+```
+/**
+ * Return true if a map id is already registered.
+ *
+ * @param {string} mapId - The unique identifier of the map to retrieve
+ * @returns {boolean} True if map exist
+ */
+hasMapViewer(mapId: string): boolean
+```
 
-A call witht he old version would look like ```cgpv.api.maps['Map1'].layer.addGeoviewLayerByGeoCoreUUID(layer)``` will now look like this ```cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(layer)```
+- How to access a map by id
+```
+/**
+ * Gets a map viewer instance by its ID.
+ *
+ * @param {string} mapId - The unique identifier of the map to retrieve
+ * @returns {MapViewer} The map viewer instance if found
+ * @throws {Error} If the map with the specified ID is not found
+ */
+getMapViewer(mapId: string): MapViewer
+```
+_Implementation_
+```
+const myMap = cgpv.api.getMapViewer('Map1');
+myMap.layer.addGeoviewLayerByGeoCoreUUID(layer)
+```
+
+- How to delete a map instance
+```
+/**
+ * Delete a map viewer instance by its ID.
+ *
+ * @param {string} mapId - The unique identifier of the map to delete
+ * @param {boolean} deleteContainer - True if we want to delete div from the page
+ * @returns {Promise<HTMLElement} The Promise containing the HTML element
+ */
+deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement | void> {
+```
+_Implementation_
+```
+if (cgpv.api.hasMapViewer(map)) {
+  cgpv.api.deleteMapViewer(map, false).then(() => {
+    resolve();
+  });
+} else {
+  resolve();
+}
+```
+
+A call with the old version would look like ```cgpv.api.maps['Map1'].layer.addGeoviewLayerByGeoCoreUUID(layer)``` will now look like this ```cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(layer)```
