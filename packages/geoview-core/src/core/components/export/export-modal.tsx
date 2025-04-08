@@ -32,6 +32,11 @@ export default function ExportModal(): JSX.Element {
 
   const theme = useTheme();
 
+  // resizing the map to full width in order to keep integrity
+  //  when combining legend list
+  var canvas = document.getElementById(mapId);
+  if (canvas) canvas.setAttribute("style","width:1478px");
+
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [isLegendLoading, setIsLegendLoading] = useState(true);
   const [isMapExporting, setIsMapExporting] = useState(false);
