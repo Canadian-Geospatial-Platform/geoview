@@ -7,7 +7,7 @@ import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classe
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 
 import {
   commonProcessFeatureInfoConfig,
@@ -77,28 +77,6 @@ export class EsriImage extends AbstractGeoViewRaster {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
     super(CONST_LAYER_TYPES.ESRI_IMAGE, layerConfig, mapId);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
-   * extra configuration may be done here.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   *
-   * @returns {TypeLayerEntryConfig[]} A new list of layer entries configuration with deleted error layers.
-   */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-        }
-      }
-    });
   }
 
   /** ***************************************************************************************************************************

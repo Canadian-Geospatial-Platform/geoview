@@ -7,13 +7,7 @@ import { applyStyle } from 'ol-mapbox-style';
 import { MVT } from 'ol/format';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import {
-  TypeLayerEntryConfig,
-  TypeSourceTileInitialConfig,
-  TypeGeoviewLayerConfig,
-  TypeTileGrid,
-  layerEntryIsGroupLayer,
-} from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig, TypeTileGrid } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
@@ -97,30 +91,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   constructor(mapId: string, layerConfig: TypeVectorTilesConfig) {
     super(CONST_LAYER_TYPES.VECTOR_TILES, layerConfig, mapId);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
-   * extra configuration may be done here.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig?.listOfLayerEntryConfig?.length) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-          return;
-        }
-      }
-
-      // Set the layer status to processing
-      layerConfig.setLayerStatusProcessing();
-    });
   }
 
   /** ****************************************************************************************************************************

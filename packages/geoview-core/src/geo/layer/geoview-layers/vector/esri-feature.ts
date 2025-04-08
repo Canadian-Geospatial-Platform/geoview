@@ -104,7 +104,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+  protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
   }
 

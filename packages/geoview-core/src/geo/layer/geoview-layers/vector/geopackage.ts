@@ -22,7 +22,6 @@ import {
   TypePolygonVectorConfig,
   TypeFillStyle,
   CONST_LAYER_ENTRY_TYPES,
-  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -117,29 +116,6 @@ export class GeoPackage extends AbstractGeoViewVector {
    */
   constructor(mapId: string, layerConfig: TypeGeoPackageLayerConfig) {
     super(CONST_LAYER_TYPES.GEOPACKAGE, layerConfig, mapId);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
-   * with a numeric layerId and creates a group entry when a layer is a group.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-          return;
-        }
-      }
-
-      // Set the layer status to processing
-      layerConfig.setLayerStatusProcessing();
-    });
   }
 
   /** ***************************************************************************************************************************

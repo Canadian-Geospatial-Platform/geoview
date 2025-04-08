@@ -12,7 +12,6 @@ import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
 } from '@/geo/map/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
@@ -121,47 +120,27 @@ export class GeoJSON extends AbstractGeoViewVector {
     }
   }
 
-  /** ***************************************************************************************************************************
-   * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
-   * extra configuration may be done here.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+  /**
+   * DOCUMENTATION!
+   * @param layerConfig
+   * @returns
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-        }
-        return;
-      }
-
-      // Set the layer status to processing
-      layerConfig.setLayerStatusProcessing();
-
-      // When no metadata are provided, all layers are considered valid.
-      if (!this.metadata) return;
-
-      if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-        const foundEntry = this.#recursiveSearch(
-          `${layerConfig.layerId}${layerConfig.layerIdExtension ? `.${layerConfig.layerIdExtension}` : ''}`,
-          Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
-        );
-        if (!foundEntry) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-        }
-        return;
-      }
-
-      throw new Error(
-        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
+  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+    if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
+      const foundEntry = this.#recursiveSearch(
+        `${layerConfig.layerId}${layerConfig.layerIdExtension ? `.${layerConfig.layerIdExtension}` : ''}`,
+        Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
       );
-    });
+      if (!foundEntry) {
+        // Add a layer load error
+        this.addLayerLoadError(layerConfig, `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+      }
+      return;
+    }
+
+    throw new Error(
+      `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
+    );
   }
 
   /** ***************************************************************************************************************************

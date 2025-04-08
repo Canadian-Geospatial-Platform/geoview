@@ -18,6 +18,7 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { AbortError } from '@/core/exceptions/core-exceptions';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -411,44 +412,26 @@ export class WMS extends AbstractGeoViewRaster {
     if (layer?.Layer !== undefined) (layer.Layer as TypeJsonArray).forEach((subLayer) => this.#processMetadataInheritance(layer, subLayer));
   }
 
-  /** ***************************************************************************************************************************
-   * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+  /**
+   * DOCUMENTATION!
+   * @param layerConfig
+   * @returns
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig?.listOfLayerEntryConfig?.length) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-        }
-        return;
-      }
+  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+    const layerFound = this.#getLayerMetadataEntry(layerConfig.layerId!);
+    if (!layerFound) {
+      // Add a layer load error
+      this.addLayerLoadError(layerConfig, `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+      return;
+    }
 
-      if ((layerConfig as AbstractBaseLayerEntryConfig).layerStatus !== 'error') {
-        // Set the layer status to processing
-        layerConfig.setLayerStatusProcessing();
+    if ('Layer' in layerFound) {
+      this.#createGroupLayer(layerFound, layerConfig as unknown as GroupLayerEntryConfig);
+      return;
+    }
 
-        const layerFound = this.#getLayerMetadataEntry(layerConfig.layerId!);
-        if (!layerFound) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-          return;
-        }
-
-        if ('Layer' in layerFound) {
-          this.#createGroupLayer(layerFound, layerConfig as unknown as GroupLayerEntryConfig);
-          return;
-        }
-
-        // eslint-disable-next-line no-param-reassign
-        if (!layerConfig.layerName) layerConfig.layerName = layerFound.Title as string;
-      }
-    });
+    // eslint-disable-next-line no-param-reassign
+    if (!layerConfig.layerName) layerConfig.layerName = layerFound.Title as string;
   }
 
   /** ***************************************************************************************************************************
@@ -476,10 +459,6 @@ export class WMS extends AbstractGeoViewRaster {
     // TO.DOCONT: Therefore, we're making it crash on purpose by raising a 'Processing cancelled' exception for now to keep
     // TO.DOCONT: the behavior the same as before..
 
-    // Assign the layer name right away
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.layerName = layer.Title as string;
-
     // Loop on the sub layers
     arrayOfLayerMetadata.forEach((subLayer) => {
       // Log for pertinent debugging purposes
@@ -496,7 +475,7 @@ export class WMS extends AbstractGeoViewRaster {
       // If we don't want all sub layers (simulating the 'Private element not on object' error we had for long time)
       if (!this.fullSubLayers) {
         // Skip the rest on purpose (ref TODO: Bug above)
-        throw new Error('Processing cancelled');
+        throw new AbortError();
       }
     });
 

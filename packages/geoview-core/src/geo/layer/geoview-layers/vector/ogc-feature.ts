@@ -14,7 +14,6 @@ import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeBaseSourceVectorInitialConfig,
-  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
@@ -110,61 +109,44 @@ export class OgcFeature extends AbstractGeoViewVector {
     this.metadata = response.data;
   }
 
-  /** ***************************************************************************************************************************
-   * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
-   * with a numeric layerId and creates a group entry when a layer is a group.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+  /**
+   * DOCUMENTATION!
+   * @param layerConfig
+   * @returns
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-          return;
-        }
-      }
-
-      // Set the layer status to processing
-      layerConfig.setLayerStatusProcessing();
-
-      // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
-      // you can define them in the configuration section.
-      if (Array.isArray(this.metadata!.collections)) {
-        const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
-        if (!foundCollection) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-          return;
-        }
-
-        // eslint-disable-next-line no-param-reassign
-        if (foundCollection.description) layerConfig.layerName = foundCollection.description as string;
-
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
-
-        if (!layerConfig.initialSettings.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
-          const latlonExtent = Projection.transformExtentFromProj(
-            foundCollection.extent.spatial.bbox[0] as number[],
-            Projection.getProjectionFromProj(foundCollection.extent.spatial.crs as string)!,
-            Projection.PROJECTION_NAMES.LNGLAT
-          );
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.initialSettings.bounds = latlonExtent;
-        }
-
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.bounds = validateExtentWhenDefined(layerConfig.initialSettings.bounds);
+  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+    // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
+    // you can define them in the configuration section.
+    if (Array.isArray(this.metadata!.collections)) {
+      const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
+      if (!foundCollection) {
+        // Add a layer load error
+        this.addLayerLoadError(layerConfig, `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
         return;
       }
 
-      throw new Error(`Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-    });
+      // eslint-disable-next-line no-param-reassign
+      if (foundCollection.description) layerConfig.layerName = foundCollection.description as string;
+
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+
+      if (!layerConfig.initialSettings.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
+        const latlonExtent = Projection.transformExtentFromProj(
+          foundCollection.extent.spatial.bbox[0] as number[],
+          Projection.getProjectionFromProj(foundCollection.extent.spatial.crs as string)!,
+          Projection.PROJECTION_NAMES.LNGLAT
+        );
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.initialSettings.bounds = latlonExtent;
+      }
+
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings.bounds = validateExtentWhenDefined(layerConfig.initialSettings.bounds);
+      return;
+    }
+
+    throw new Error(`Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
   }
 
   /** ***************************************************************************************************************************

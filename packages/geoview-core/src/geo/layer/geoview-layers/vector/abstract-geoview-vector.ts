@@ -13,7 +13,7 @@ import { getUid } from 'ol/util';
 import { TypeFeatureInfoLayerConfig, TypeOutfields } from '@config/types/map-schema-types';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeBaseSourceVectorInitialConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeBaseSourceVectorInitialConfig } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { VECTOR_LAYER } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
@@ -55,15 +55,6 @@ export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
  */
 // ******************************************************************************************************************************
 export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
-  /** ***************************************************************************************************************************
-   * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
-   * necessary, additional code can be executed in the child method to complete the layer configuration.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected abstract override validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
-
   /** ***************************************************************************************************************************
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *

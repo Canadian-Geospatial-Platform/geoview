@@ -4,7 +4,7 @@ import ImageLayer from 'ol/layer/Image';
 import { Cast } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -72,50 +72,28 @@ export class ImageStatic extends AbstractGeoViewRaster {
     super(CONST_LAYER_TYPES.IMAGE_STATIC, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
-   * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
-   * extra configuration may be done here.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   *
-   * @returns {TypeLayerEntryConfig[]} A new list of layer entries configuration with deleted error layers.
+  /**
+   * DOCUMENTATION!
+   * @param layerConfig
+   * @returns
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-          return;
-        }
-      }
-
-      // Set the layer status to processing
-      layerConfig.setLayerStatusProcessing();
-
-      // When no metadata are provided, all layers are considered valid.
-      if (!this.metadata) return;
-
-      // Note that Image Static metadata as we defined it does not contains metadata layer group. If you need geojson layer group,
-      // you can define them in the configuration section.
-      if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-        const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-        const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
-        if (!foundEntry) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-          return;
-        }
+  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+    // Note that Image Static metadata as we defined it does not contains metadata layer group. If you need geojson layer group,
+    // you can define them in the configuration section.
+    if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
+      const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
+      const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
+      if (!foundEntry) {
+        // Add a layer load error
+        this.addLayerLoadError(layerConfig, `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
         return;
       }
+      return;
+    }
 
-      throw new Error(
-        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
-      );
-    });
+    throw new Error(
+      `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
+    );
   }
 
   /** ****************************************************************************************************************************

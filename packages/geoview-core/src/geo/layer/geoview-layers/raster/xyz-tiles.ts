@@ -6,12 +6,7 @@ import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import {
-  TypeLayerEntryConfig,
-  TypeSourceTileInitialConfig,
-  TypeGeoviewLayerConfig,
-  layerEntryIsGroupLayer,
-} from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
@@ -90,59 +85,39 @@ export class XYZTiles extends AbstractGeoViewRaster {
     super(CONST_LAYER_TYPES.XYZ_TILES, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
-   * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
-   * extra configuration may be done here.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+  /**
+   * DOCUMENTATION!
+   * @param layerConfig
+   * @returns
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-          return;
-        }
+  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+    // TODO: Update to properly use metadata from map server
+    // Note that XYZ metadata as we defined it does not contain metadata layer group. If you need geojson layer group,
+    // you can define them in the configuration section.
+    if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
+      const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
+      const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
+      if (!foundEntry) {
+        // Add a layer load error
+        this.addLayerLoadError(layerConfig, `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
       }
+      return;
+    }
 
-      // Set the layer status to processing
-      layerConfig.setLayerStatusProcessing();
-
-      // When no metadata are provided, all layers are considered valid.
-      if (!this.metadata) return;
-
-      // TODO: Update to properly use metadata from map server
-      // Note that XYZ metadata as we defined it does not contain metadata layer group. If you need geojson layer group,
-      // you can define them in the configuration section.
-      if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-        const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-        const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
-        if (!foundEntry) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-        }
-        return;
+    // ESRI MapServer Implementation
+    if (Array.isArray(this.metadata?.layers)) {
+      const metadataLayerList = this.metadata.layers;
+      const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.id.toString() === layerConfig.layerId);
+      if (!foundEntry) {
+        // Add a layer load error
+        this.addLayerLoadError(layerConfig, `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
       }
+      return;
+    }
 
-      // ESRI MapServer Implementation
-      if (Array.isArray(this.metadata?.layers)) {
-        const metadataLayerList = this.metadata.layers;
-        const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.id.toString() === layerConfig.layerId);
-        if (!foundEntry) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-        }
-        return;
-      }
-
-      throw new Error(
-        `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
-      );
-    });
+    throw new Error(
+      `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
+    );
   }
 
   /** ****************************************************************************************************************************

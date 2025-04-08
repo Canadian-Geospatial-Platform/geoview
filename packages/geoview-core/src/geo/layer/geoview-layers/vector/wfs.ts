@@ -15,7 +15,6 @@ import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeBaseSourceVectorInitialConfig,
-  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 
 import { getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
@@ -126,65 +125,48 @@ export class WFS extends AbstractGeoViewVector {
     }
   }
 
-  /** ***************************************************************************************************************************
-   * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
-   * necessary, additional code can be executed in the child method to complete the layer configuration.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+  /**
+   * DOCUMENTATION!
+   * @param layerConfig
+   * @returns
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-          return;
-        }
+  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+    // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
+    // you can define them in the configuration section.
+    // when there is only one layer, it is not an array but an object
+    if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType))
+      this.metadata!.FeatureTypeList!.FeatureType = [this.metadata?.FeatureTypeList?.FeatureType] as TypeJsonObject;
+
+    if (Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
+      const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
+      const foundMetadata = metadataLayerList.find((layerMetadata) => {
+        const metadataLayerId = (layerMetadata.Name && layerMetadata.Name['#text']) as string;
+        return metadataLayerId.includes(layerConfig.layerId!);
+      });
+
+      if (!foundMetadata) {
+        // Add a layer load error
+        this.addLayerLoadError(layerConfig, `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+        return;
       }
 
-      // Set the layer status to processing
-      layerConfig.setLayerStatusProcessing();
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
-      // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
-      // you can define them in the configuration section.
-      // when there is only one layer, it is not an array but an object
-      if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType))
-        this.metadata!.FeatureTypeList!.FeatureType = [this.metadata?.FeatureTypeList?.FeatureType] as TypeJsonObject;
-
-      if (Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
-        const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
-        const foundMetadata = metadataLayerList.find((layerMetadata) => {
-          const metadataLayerId = (layerMetadata.Name && layerMetadata.Name['#text']) as string;
-          return metadataLayerId.includes(layerConfig.layerId!);
-        });
-
-        if (!foundMetadata) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-          return;
-        }
+      if (!layerConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
+        // TODO: Check - This additional processing seem valid, but is it at the right place? A bit confusing with the rest of the codebase.
+        // TODO: Refactor - Layers refactoring. Validate if this code is still being executed after the layers migration. This code may easily have been forgotten.
+        const lowerCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
+        const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
+        const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
 
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
-
-        if (!layerConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
-          // TODO: Check - This additional processing seem valid, but is it at the right place? A bit confusing with the rest of the codebase.
-          // TODO: Refactor - Layers refactoring. Validate if this code is still being executed after the layers migration. This code may easily have been forgotten.
-          const lowerCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
-          const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
-          const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
-
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.initialSettings!.bounds = bounds;
-        }
-
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings!.bounds = validateExtentWhenDefined(layerConfig.initialSettings!.bounds);
+        layerConfig.initialSettings!.bounds = bounds;
       }
-    });
+
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings!.bounds = validateExtentWhenDefined(layerConfig.initialSettings!.bounds);
+    }
   }
 
   /** ***************************************************************************************************************************

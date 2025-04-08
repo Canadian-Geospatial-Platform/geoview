@@ -14,7 +14,6 @@ import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeBaseSourceVectorInitialConfig,
-  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -93,33 +92,6 @@ export class CSV extends AbstractGeoViewVector {
    */
   constructor(mapId: string, layerConfig: TypeCSVLayerConfig) {
     super(CONST_LAYER_TYPES.CSV, layerConfig, mapId);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
-   * extra configuration may be done here.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          // Add a layer load error
-          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`);
-        }
-        return;
-      }
-
-      // When no metadata are provided, all layers are considered valid.
-      if (!this.metadata) return;
-
-      throw new Error(
-        `Invalid CSV metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerPath})`
-      );
-    });
   }
 
   /** ***************************************************************************************************************************
