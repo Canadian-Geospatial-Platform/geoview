@@ -335,24 +335,84 @@
                   'labeled': true
                 },
                 'listOfGeoviewLayerConfig': [{
-                  'geoviewLayerId': 'wmsLYR1',
-                  'geoviewLayerName': 'earthquakes',
-                  'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
-                  'geoviewLayerType': 'esriDynamic',
+                  'geoviewLayerId':'airborne_radioactivity',
+                  'geoviewLayerName':'Airborne Radioactivity',
+                  'metadataAccessPath':'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer',
+                  'geoviewLayerType':'esriDynamic',
                   'listOfLayerEntryConfig': [
                     {
-                      'layerId': '0'
+                        'layerId':'1'
                     }
                   ]
-                }]
+              }]
               },
               'components': ['overview-map'],
               'footerBar': {
                 'tabs': {
-                  'core': ['legend', 'layers', 'details', 'data-table']
+                  'core': ['legend', 'layers', 'details', 'data-table', 'geochart']
                 }
               },
               'corePackages': [],
+              'corePackagesConfig':[
+                  {
+                    'geochart': { 'charts': [
+                
+                        {
+                          'layers':[{
+                              'layerId':'airborne_radioactivity/1',
+                              'propertyValue': 'OBJECTID',
+                              'propertyDisplay': 'Location_Emplacement'
+                          }],
+                          'chart': 'line',
+                          'query': {
+                              'type': 'esriRegular',
+                              'url': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3',
+                              'queryOptions': {
+                                'whereClauses': [
+                                    {
+                                      'field': 'Location_Emplacement',
+                                      'prefix': '\u0027',
+                                      'valueFrom': 'Location_Emplacement',
+                                      'suffix': '\u0027'
+                                    }
+                                ],
+                                'orderByField': 'CollectionStart_DebutPrelevement'
+                              }
+                          },
+                          'geochart': {
+                              'xAxis': {
+                                'type': 'time',
+                                'property': 'CollectionStart_DebutPrelevement',
+                                'label': 'Collected date'
+                              },
+                              'yAxis': {
+                                'type': 'linear',
+                                'property': 'Activity_Activite_mBqm3',
+                                'label': 'Activity (mBqm3)',
+                                'tooltipSuffix': 'mBqm3'
+                              },
+                              'borderWidth': 1
+                          },
+                          'category': {
+                              'property': 'Radionuclide_Radionucleide',
+                              'usePalette': false
+                          },
+                          'ui': {
+                              'xSlider': {
+                                'display': true
+                              },
+                              'ySlider': {
+                                'display': true
+                              },
+                              'stepsSwitcher': true,
+                              'resetStates': true,
+                              'description': 'This is a description text',
+                              'download': true
+                          }
+                        }
+                    ]}
+                  }
+              ],
               'theme': 'geo.ca'
         })
       ).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
