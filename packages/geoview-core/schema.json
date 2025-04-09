@@ -814,6 +814,10 @@
             "vector"
           ]
         },
+        "isLayerGroup": {
+          "description": "Flag used to distinguish layer group nodes.",
+          "type": "boolean"
+        },
         "layerPathEnding": {
           "type": "string",
           "description": "The ending element of the layer configuration path."
@@ -1268,6 +1272,10 @@
           "enum": [
             "group"
           ]
+        },
+        "isLayerGroup": {
+          "description": "Flag used to distinguish layer group nodes.",
+          "type": "boolean"
         },
         "layerId": {
           "type": "string",
@@ -1907,7 +1915,8 @@
           "fullscreen",
           "home",
           "location",
-          "projection"
+          "projection",
+          "basemap-select"
         ]
       },
       "default": [

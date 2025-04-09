@@ -125,7 +125,7 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       crossOrigin: 'Anonymous',
       projection: 3978,
       featureInfo: {
-        queryable: false,
+        queryable: true,
         nameField: '',
         outfields: [],
       },

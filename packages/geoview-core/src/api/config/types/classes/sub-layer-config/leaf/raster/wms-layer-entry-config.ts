@@ -6,6 +6,8 @@ import {
   TypeSourceWmsInitialConfig,
   Extent,
   WmsLayerConfig,
+  AbstractGeoviewLayerConfig,
+  EntryConfigBaseClass,
 } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 import { isvalidComparedToInternalSchema } from '@/api/config/utils';
@@ -28,6 +30,27 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /** Style to apply to the raster layer. */
   layerStyle?: TypeLayerStyleConfig;
+
+  constructor(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode: EntryConfigBaseClass | undefined) {
+    super(layerConfig, geoviewConfig, parentNode);
+
+    // When the dataAccessPath is undefined and the metadataAccessPath ends with ".xml", the dataAccessPath is temporarilly
+    // set to '' and will be filled in the fetchServiceMetadata method of the class WMS.
+    if (!this.source) this.source = {};
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = '';
+
+    // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set
+    // to the same value of the corresponding metadataAccessPath.
+    // TODO: remove this wrapper replace when datacube updates the URLs
+    this.getGeoviewLayerConfig().metadataAccessPath = this.getGeoviewLayerConfig().metadataAccessPath!.replace('wrapper/ramp/ogc', 'ows');
+    if (this.getGeoviewLayerConfig().metadataAccessPath!.slice(-4).toLowerCase() !== '.xml')
+      this.source.dataAccessPath = this.getGeoviewLayerConfig().metadataAccessPath;
+
+    this.source.dataAccessPath = this.source.dataAccessPath!.replace('wrapper/ramp/ogc', 'ows');
+
+    // Default value for layerConfig.source.serverType is 'mapserver'.
+    if (!this.source.serverType) this.source.serverType = 'mapserver';
+  }
   // #endregion PROPERTIES
 
   // ===============

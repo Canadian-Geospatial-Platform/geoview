@@ -27,7 +27,6 @@ import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@
 import {
   Extent,
   TypeAppBarProps,
-  TypeDisplayLanguage,
   TypeDisplayTheme,
   TypeExternalPackages,
   TypeFooterBarProps,
@@ -56,8 +55,6 @@ import { ConfigApi } from '@/api/config/config-api';
 export class MapFeatureConfig {
   // ==========================
   // #region PRIVATE PROPERTIES
-  /** The language used when interacting with this instance of MapFeatureConfig. */
-  #language;
 
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetectedFlag = false;
@@ -121,14 +118,11 @@ export class MapFeatureConfig {
    * from the configuration passed as a parameter or from the default values.
    *
    * @param {TypeJsonObject} userMapFeatureConfig The map feature configuration to instantiate.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
    * @constructor
    */
-  constructor(userMapFeatureConfig: TypeJsonObject, language: TypeDisplayLanguage) {
+  constructor(userMapFeatureConfig: TypeJsonObject) {
     // Input schema validation.
     this.#errorDetectedFlag = !isvalidComparedToInputSchema(CV_MAP_CONFIG_SCHEMA_PATH, userMapFeatureConfig);
-
-    this.#language = language;
 
     // set map configuration
     const gvMap = cloneDeep(userMapFeatureConfig.map) as TypeJsonObject;
@@ -143,7 +137,7 @@ export class MapFeatureConfig {
 
     this.map.listOfGeoviewLayerConfig = this.map.listOfGeoviewLayerConfig
       .map((geoviewLayerConfig) => {
-        return MapFeatureConfig.nodeFactory(toJsonObject(geoviewLayerConfig), this.#language);
+        return MapFeatureConfig.nodeFactory(toJsonObject(geoviewLayerConfig));
       })
       // Validate and filter undefined entries (undefined is returned when a GeoView layer cannot be instanciated).
       .filter((layerConfig) => {
@@ -455,28 +449,24 @@ export class MapFeatureConfig {
    * needed.
    *
    * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
-   * @param {MapFeatureConfig} mapFeatureConfig An optional mapFeatureConfig instance if the layer is part of it.
    *
    * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer instance or undefined if there is an error.
    * @static
    */
-  static nodeFactory(layerConfig: TypeJsonObject, language: TypeDisplayLanguage): AbstractGeoviewLayerConfig | undefined {
+  static nodeFactory(layerConfig: TypeJsonObject): AbstractGeoviewLayerConfig | undefined {
     switch (layerConfig.geoviewLayerType) {
       case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
-        return new EsriDynamicLayerConfig(layerConfig, language);
+        return new EsriDynamicLayerConfig(layerConfig);
       case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
-        return new EsriFeatureLayerConfig(layerConfig, language);
+        return new EsriFeatureLayerConfig(layerConfig);
       case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
-        return new EsriImageLayerConfig(layerConfig, language);
+        return new EsriImageLayerConfig(layerConfig);
       case CV_CONST_LAYER_TYPES.WMS:
-        return new WmsLayerConfig(layerConfig, language);
+        return new WmsLayerConfig(layerConfig);
       case CV_CONST_LAYER_TYPES.WFS:
-        return new WfsLayerConfig(layerConfig, language);
+        return new WfsLayerConfig(layerConfig);
       case CV_CONST_LAYER_TYPES.GEOJSON:
-        return new GeoJsonLayerConfig(layerConfig, language);
-      // case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
-      //   return new EsriImageLayerConfig(layerConfig, language);
+        return new GeoJsonLayerConfig(layerConfig);
       // case CV_CONST_LAYER_TYPES.GEOPACKAGE:
       //   return new GeopackageLayerConfig(layerConfig, language);
       // case CV_CONST_LAYER_TYPES.XYZ_TILES:

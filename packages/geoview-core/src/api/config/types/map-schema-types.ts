@@ -437,7 +437,9 @@ export type TypeNearestValues = 'discrete' | 'absolute';
 
 /** Base type from which we derive the source properties for all the leaf nodes in the layer tree. */
 export type TypeBaseSourceInitialConfig = {
-  /** Path used to access the data. */
+  /**
+   * The service endpoint of the layer. Added during creation of specific layer entry config.
+   */
   dataAccessPath?: string;
   /**
    * Spatial Reference EPSG code supported (https://epsg.io/). We support lat/long, Web Mercator and Lambert Conical Conform Canada.
