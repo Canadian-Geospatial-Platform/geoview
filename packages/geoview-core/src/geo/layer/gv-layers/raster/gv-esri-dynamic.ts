@@ -34,6 +34,7 @@ import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { fetchWithTimeout } from '@/core/utils/fetch-helper';
 import { AbortError } from '@/core/exceptions/core-exceptions';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -220,7 +221,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
 
     // Error
-    throw new Error('Error querying service. No features were returned.');
+    throw new GeoViewError(this.getMapId(), 'Error querying service. No features were returned.');
   }
 
   /**
@@ -374,7 +375,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     if (identifyJsonResponse.error) {
       logger.logInfo('There is a problem with this query: ', identifyUrl);
-      throw new Error(`Error code = ${identifyJsonResponse.error.code} ${identifyJsonResponse.error.message}` || '');
+      throw new GeoViewError(
+        this.getMapId(),
+        `Error code = ${identifyJsonResponse.error.code} ${identifyJsonResponse.error.message}` || ''
+      );
     }
 
     // If no features identified return []

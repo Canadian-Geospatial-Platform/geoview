@@ -21,6 +21,7 @@ import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raste
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
 import { WMS_PROXY_URL } from '@/app';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Manages a WMS layer.
@@ -37,9 +38,6 @@ export class GVWMS extends AbstractGVRaster {
    */
   public constructor(mapId: string, olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig, layerCapabilities: TypeJsonObject) {
     super(mapId, olSource, layerConfig);
-
-    // Validate
-    if (!layerCapabilities) throw new Error('No layer capabilities were provided');
 
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageWMS> = {
@@ -163,7 +161,12 @@ export class GVWMS extends AbstractGVRaster {
         if (featureInfoFormat.includes('text/xml' as TypeJsonObject)) infoFormat = 'text/xml';
         else if (featureInfoFormat.includes('text/html' as TypeJsonObject)) infoFormat = 'text/html';
         else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
-        else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml, text/html and text/plain for WMS services.');
+        else {
+          throw new GeoViewError(
+            this.getMapId(),
+            'Parameter info_format of GetFeatureInfo only support text/xml, text/html and text/plain for WMS services.'
+          );
+        }
 
       const wmsSource = this.getOLSource();
       const viewResolution = this.getMapViewer().getView().getResolution()!;

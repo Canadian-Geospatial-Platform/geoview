@@ -657,7 +657,6 @@ export class MapViewer {
     MapEventProcessor.setMapLoaded(this.mapId, true);
 
     // Wait for the map height to be set before continuing, so padding is applied properly and such.
-    // This delay guarantees padding is applied properly and such before continuing.
     await delay(200);
 
     // Save in the store that the map is property being displayed now

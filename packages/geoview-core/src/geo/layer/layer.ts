@@ -87,6 +87,7 @@ import { LegendEventProcessor } from '@/api/event-processors/event-processor-chi
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { ConfigApi } from '@/api/config/config-api';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 // import { LayerMockup } from '@/geo/layer/layer-mockup';
 
 export type GeoViewLayerAddedResult = {
@@ -888,7 +889,7 @@ export class LayerApi {
           return gvLayer.getOLLayer();
         }
 
-        throw new Error('Error, no corresponding GV layer');
+        throw new GeoViewError(this.getMapId(), 'Error, no corresponding GV layer');
       });
 
       // Register hook when an OpenLayer layer has been created
@@ -1797,7 +1798,7 @@ export class LayerApi {
       });
     } else {
       // Invalid layer
-      throw new Error(`The layer ${layerPath} isn't of type Geojson.`);
+      throw new GeoViewError(mapId, `The layer ${layerPath} isn't of type Geojson.`);
     }
   }
 

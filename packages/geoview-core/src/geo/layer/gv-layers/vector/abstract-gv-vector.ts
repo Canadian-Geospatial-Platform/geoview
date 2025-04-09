@@ -21,6 +21,7 @@ import { featureInfoGetFieldType, parseDateTimeValuesVector } from '@/geo/layer/
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { getExtentUnion } from '@/geo/utils/utilities';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -216,7 +217,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       const filterEquation = analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
       layerConfig.filterEquation = filterEquation;
     } catch (error) {
-      throw new Error(
+      throw new GeoViewError(
+        this.getMapId(),
         `Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${this.getLayerFilter()}\ninternal filter = ${filterValueToUse}`
       );
     }

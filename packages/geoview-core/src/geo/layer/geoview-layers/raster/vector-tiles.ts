@@ -58,7 +58,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<VectorTileLayer<VectorTileSource>> {
     // Instance check
-    if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof VectorTilesLayerEntryConfig))
+      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
     const sourceOptions: SourceOptions = {
       url: layerConfig.source.dataAccessPath,
@@ -102,7 +103,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as VectorTileLayer<VectorTileSource>;
-    } else throw new Error('Error on layerRequesting event');
+    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });
@@ -134,7 +135,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   protected override async onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof VectorTilesLayerEntryConfig))
+      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
     if (this.metadata) {
       const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = this.metadata;

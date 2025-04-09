@@ -20,6 +20,7 @@ import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { fetchJson } from '@/core/utils/utilities';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -95,7 +96,8 @@ export class GeoJSON extends AbstractGeoViewVector {
       return;
     }
 
-    throw new Error(
+    throw new GeoViewError(
+      this.mapId,
       `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
     );
   }
@@ -128,7 +130,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
     if (this.metadata) {
       const layerMetadataFound = this.#recursiveSearch(

@@ -47,6 +47,7 @@ import { ImageStaticLayerEntryConfig } from './validation-classes/raster-validat
 import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.
@@ -239,7 +240,8 @@ export class ConfigValidation {
               ConfigValidation.#processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
               break;
             default:
-              throw new Error('Your not supposed to end here. There is a problem with the schema validator.');
+              // Error
+              throw new NotImplementedError('Your not supposed to end here. There is a problem with the schema validator.');
           }
         });
     }

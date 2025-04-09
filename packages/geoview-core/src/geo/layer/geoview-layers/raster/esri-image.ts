@@ -9,6 +9,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 
 import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-layer-common';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -40,7 +41,8 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    if (!(layerConfig instanceof EsriImageLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof EsriImageLayerEntryConfig))
+      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
     return commonProcessLayerMetadata(this, layerConfig);
   }
 
@@ -51,7 +53,8 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
     // Instance check
-    if (!(layerConfig instanceof EsriImageLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof EsriImageLayerEntryConfig))
+      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
@@ -77,7 +80,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
-    } else throw new Error('Error on layerRequesting event');
+    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });

@@ -35,6 +35,7 @@ import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-
 import { fetchJson } from '@/core/utils/utilities';
 import { EmptyResponseError } from '@/core/exceptions/core-exceptions';
 import { GeoViewLayerError } from '@/core/exceptions/layer-exceptions';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Fetches the Esri metadata and sets it for the given layer.
@@ -290,7 +291,8 @@ export function commonProcessFeatureInfoConfig(
     else if (layerConfig.source.featureInfo.queryable && layerMetadata.type !== 'Group Layer') {
       // Set the layer status to error
       layerConfig.setLayerStatusError();
-      throw new Error(
+      throw new GeoViewError(
+        layer.mapId,
         `The config whose layer path is ${layerPath} cannot set a layer as queryable because it does not have field definitions`
       );
     }
@@ -423,7 +425,7 @@ export async function commonProcessLayerMetadata<
     if (data?.error) {
       // Set the layer status to error
       layerConfig.setLayerStatusError();
-      throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
+      throw new GeoViewError(layer.mapId, `Error code = ${data.error.code}, ${data.error.message}`);
     }
 
     // Set the layer metadata

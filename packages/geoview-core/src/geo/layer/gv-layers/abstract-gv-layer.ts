@@ -33,6 +33,7 @@ import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -318,7 +319,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // If the layer is not queryable
     if (layerConfig.source?.featureInfo?.queryable === false) {
       // Throw error
-      throw new Error(`Layer at path ${layerConfig.layerPath} is not queryable`);
+      throw new GeoViewError(this.getMapId(), `Layer at path ${layerConfig.layerPath} is not queryable`);
     }
 
     // Log
@@ -372,7 +373,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception getAllFeatureInfo on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getAllFeatureInfo not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
@@ -390,7 +391,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception for getFeatureInfoAtPixel on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getFeatureInfoAtPixel not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
@@ -409,7 +410,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception for getFeatureInfoAtCoordinate on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getFeatureInfoAtCoordinate not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
@@ -428,7 +429,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception for getFeatureInfoAtLongLat on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getFeatureInfoAtLongLat not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
@@ -447,7 +448,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception for getFeatureInfoUsingBBox on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getFeatureInfoUsingBBox not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**
@@ -466,7 +467,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
-    throw new Error(`Not implemented exception for getFeatureInfoUsingPolygon on layer path ${this.getLayerPath()}`);
+    throw new NotImplementedError(`getFeatureInfoUsingPolygon not implemented on layer path ${this.getLayerPath()}`);
   }
 
   /**

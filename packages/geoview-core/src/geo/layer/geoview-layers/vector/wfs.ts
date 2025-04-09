@@ -24,6 +24,7 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { GeoViewLayerError } from '@/core/exceptions/layer-exceptions';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -138,7 +139,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   protected override async onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
     let queryUrl = layerConfig.source!.dataAccessPath;
 

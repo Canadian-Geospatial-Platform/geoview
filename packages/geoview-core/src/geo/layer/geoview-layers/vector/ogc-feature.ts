@@ -22,6 +22,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeOutfields } from '@/api/config/types/map-schema-types';
 import { fetchJson } from '@/core/utils/utilities';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -109,7 +110,10 @@ export class OgcFeature extends AbstractGeoViewVector {
       return;
     }
 
-    throw new Error(`Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+    throw new GeoViewError(
+      this.mapId,
+      `Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
+    );
   }
 
   /**
@@ -119,7 +123,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   protected override async onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
     const metadataUrl = this.metadataAccessPath;
     if (metadataUrl) {

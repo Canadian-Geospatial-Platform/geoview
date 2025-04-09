@@ -40,7 +40,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer> {
     // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
     // Instance check
-    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
     const vectorSource = this.createVectorSource(layerConfig);
     const vectorLayer: VectorLayer<VectorSource<Feature<Geometry>>> = this.createVectorLayer(
@@ -271,7 +271,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as VectorLayer<VectorSource<Feature<Geometry>>>;
-    } else throw new Error('Error on layerRequesting event');
+    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });

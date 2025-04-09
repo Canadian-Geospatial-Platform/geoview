@@ -11,6 +11,7 @@ import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -74,7 +75,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
       return;
     }
 
-    throw new Error(
+    throw new GeoViewError(
+      this.mapId,
       `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
     );
   }
@@ -86,7 +88,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TileLayer<XYZ>> {
     // Instance check
-    if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
     const sourceOptions: SourceOptions = {
       url: layerConfig.source.dataAccessPath,
@@ -120,7 +122,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as TileLayer<XYZ>;
-    } else throw new Error('Error on layerRequesting event');
+    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });
@@ -136,7 +138,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
     // TODO Need to see why the metadata isn't handled properly for ESRI XYZ tiles.
     // GV Possibly caused by a difference between OGC and ESRI XYZ Tiles, but only have ESRI XYZ Tiles as example currently

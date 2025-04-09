@@ -11,6 +11,7 @@ import { logger } from '@/core/utils/logger';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -312,7 +313,7 @@ export abstract class ConfigBaseClass {
     // Crash on purpose.
     // GV Make sure to implement a 'protected override onClone(): ConfigBaseClass' in the child-class to
     // GV use this cloning feature. See OgcWMSLayerEntryConfig for example.
-    throw new Error(`Not implemented exception onClone on layer path ${this.layerPath}`);
+    throw new NotImplementedError(`Not implemented exception onClone on layer path ${this.layerPath}`);
   }
 
   /**

@@ -8,6 +8,7 @@ import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-sche
 
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
@@ -49,7 +50,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
       return;
     }
 
-    throw new Error(
+    throw new GeoViewError(
+      this.mapId,
       `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
     );
   }
@@ -61,9 +63,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<Static>> {
     // Instance check
-    if (!(layerConfig instanceof ImageStaticLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof ImageStaticLayerEntryConfig))
+      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
-    if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
+    if (!layerConfig?.source?.extent)
+      throw new GeoViewError(this.mapId, 'Parameter extent is not defined in source element of layerConfig.');
     const sourceOptions: SourceOptions = {
       url: layerConfig.source.dataAccessPath || '',
       imageExtent: layerConfig.source.extent,
@@ -77,7 +81,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
     if (layerConfig?.source?.projection) {
       sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-    } else throw new Error('Parameter projection is not define in source element of layerConfig.');
+    } else throw new GeoViewError(this.mapId, 'Parameter projection is not define in source element of layerConfig.');
 
     // Create the source
     const source = new Static(sourceOptions);
@@ -90,7 +94,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<Static>;
-    } else throw new Error('Error on layerRequesting event');
+    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });

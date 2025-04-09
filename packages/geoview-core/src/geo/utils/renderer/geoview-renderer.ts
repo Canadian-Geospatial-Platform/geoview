@@ -45,6 +45,7 @@ import {
 } from './geoview-renderer-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -487,7 +488,7 @@ function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayTyp
           else dataStack.push({ nodeType: NodeType.variable, nodeValue: operand.nodeValue.toLowerCase() });
           break;
         default:
-          throw new Error(`unknown operator error`);
+          throw new NotImplementedError(`unknown operator error`);
       }
     }
   }

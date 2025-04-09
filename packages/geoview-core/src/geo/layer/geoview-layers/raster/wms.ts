@@ -491,7 +491,7 @@ export class WMS extends AbstractGeoViewRaster {
       if (requestResult.length > 0) {
         // Get the OpenLayer that was created
         olLayer = requestResult[0] as ImageLayer<ImageWMS>;
-      } else throw new Error('Error on layerRequesting event');
+      } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
 
       // GV Time to emit about the layer creation!
       this.emitLayerCreation({ config: layerConfig, layer: olLayer });
@@ -511,7 +511,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
 
     const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId)!;
     this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);

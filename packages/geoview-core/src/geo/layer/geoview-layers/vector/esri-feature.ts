@@ -15,6 +15,7 @@ import {
   commonProcessLayerMetadata,
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -83,7 +84,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
-    if (!(layerConfig instanceof EsriFeatureLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    if (!(layerConfig instanceof EsriFeatureLayerEntryConfig))
+      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
     return commonProcessLayerMetadata(this, layerConfig);
   }
 
