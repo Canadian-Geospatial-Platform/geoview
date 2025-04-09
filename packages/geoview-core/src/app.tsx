@@ -99,7 +99,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
 
   // create a new config object and apply default
-  let mapConfig: MapFeatureConfig = api.config.getDefaultMapFeatureConfig(lang);
+  let mapConfig: MapFeatureConfig = api.config.getDefaultMapFeatureConfig();
 
   // check what type of config is provided (data-config, data-config-url or data-shared)
   if (mapElement.hasAttribute('data-config')) {

@@ -57,7 +57,7 @@
       "defaultnrcan": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
       "tooltip": "Attribution"
     },
-    "disclaimer":{
+    "disclaimer": {
       "message": "Disclaimer: This map is for illustrative purposes. The markers represent the approximate locations based on available data. The Government of Canada shall not be held liable for any third party’s interpretation of the Information. The Government of Canada reserves the right to change or revise the Information at any time."
     },
     "crosshair": "Use <strong>Arrows</strong>, <strong>+</strong> and <strong>-</strong> keys to navigate the map, <strong>Enter</strong> to select and <strong>Shift+Arrow</strong> <strong>Up</strong> or <strong>Down</strong> to modify the pan value."
@@ -100,11 +100,11 @@
     "dropzone": "Drop here",
     "upload": "Choose a file",
     "drop": "Drop the file to upload",
-    "url": "Enter URL or Geocore id",
+    "url": "Enter URL or Geocore ID",
     "urlNoGeocore": "Enter URL",
     "layer": "Layer",
-    "stepOne": "Upload a file or enter URL/Geocore id",
-    "stepOneNoGeocore": "Upload a file or enter URL",
+    "stepOne": "Enter URL/Geocore ID",
+    "stepOneNoGeocore": "Enter URL",
     "stepTwo": "Select format",
     "stepThree": "Configure layer",
     "stepFour": "Enter name",

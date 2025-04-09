@@ -1,11 +1,11 @@
 import { toJsonObject, TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { TypeDisplayLanguage, TypeStyleGeometry } from '@/api/config/types/map-schema-types';
+import { TypeStyleGeometry } from '@/api/config/types/map-schema-types';
 import { EsriGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/esri-group-layer-config';
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
-import { getXMLHttpRequest } from '@/core/utils/utilities';
+import { generateId, getXMLHttpRequest } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { Projection } from '@/geo/utils/projection';
 
@@ -21,10 +21,9 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
    * The class constructor.
    *
    * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
    */
-  constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
-    super(geoviewLayerConfig, language);
+  constructor(geoviewLayerConfig: TypeJsonObject) {
+    super(geoviewLayerConfig);
     const metadataAccessPathItems = this.metadataAccessPath.split('/');
     const pathItemLength = metadataAccessPathItems.length;
     const lastPathItem = metadataAccessPathItems[pathItemLength - 1];
@@ -39,7 +38,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         this.setErrorDetectedFlag();
         logger.logError('When an ESRI metadataAccessPath ends with a layer index, the listOfLayerEntryConfig must be  empty.');
       }
-      this.listOfLayerEntryConfig = [this.createLeafNode(toJsonObject({ layerId: lastPathItem }), language, this)!];
+      this.listOfLayerEntryConfig = [this.createLeafNode(toJsonObject({ layerId: lastPathItem }), this)!];
     }
   }
   // #endregion CONSTRUCTOR
@@ -120,7 +119,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         layerId,
         layerName: layerId,
       });
-      return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
+      return this.createLeafNode(layerConfig, this, parentNode)!;
     }
 
     // If we cannot find the layerId in the layer definitions, throw an error.
@@ -135,12 +134,13 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         layerName: layerFound.name,
         geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layerFound.geometryType as string),
       });
-      return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
+
+      return this.createLeafNode(layerConfig, this, parentNode)!;
     }
 
     // Create the layer group from the array of layers
     const jsonConfig = this.#createGroupNodeJsonConfig(parseInt(layerFound.id as string, 10), layerFound?.name as string);
-    return this.createGroupNode(jsonConfig, this.getLanguage(), this, parentNode)!;
+    return this.createGroupNode(jsonConfig, this, parentNode)!;
   }
 
   /**
@@ -152,40 +152,40 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
   protected override createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[] {
     // test to find if the GeoView layer is linked to an ESRI Image service.
     const serviceMetadata = this.getServiceMetadata();
-    if ((serviceMetadata?.serviceDataType as string)?.toLowerCase?.().includes?.('esriimageservice')) {
+    if ((serviceMetadata?.serviceDataType as string)?.toLowerCase().includes('esriimageservice')) {
       // If it is the case, the layer's metadata are the service metadata.
       return [
         this.createLeafNode(
           toJsonObject({
-            layerId: serviceMetadata.name,
+            layerId: generateId(8),
             layerName: serviceMetadata.name!,
           }),
-          this.getLanguage(),
           this
         )!,
       ];
     }
 
-    const layers = this.getServiceMetadata().layers as TypeJsonArray;
-    if (layers.length > 1) {
-      const groupName = this.getServiceMetadata().mapName as string;
-      return [new EsriGroupLayerConfig(this.#createGroupNodeJsonConfig(-1, groupName), this.getLanguage(), this)];
-    }
+    const layers = serviceMetadata.layers as TypeJsonArray;
+    const layerTree: EntryConfigBaseClass[] = [];
 
-    if (layers.length === 1)
-      return [
-        this.createLeafNode(
+    layers.forEach((layer) => {
+      if (layer.subLayerIds?.length) {
+        layerTree.push(new EsriGroupLayerConfig(this.#createGroupNodeJsonConfig(layer.id as number, layer.name as string), this));
+      } else if (layer.parentLayerId === -1) {
+        const leafNode = this.createLeafNode(
           toJsonObject({
-            layerId: layers[0].id.toString(),
-            layerName: layers[0].name!,
-            geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layers[0].geometryType as string),
+            layerId: layer.id.toString(),
+            layerName: layer.name!,
+            geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layer.geometryType as string),
           }),
-          this.getLanguage(),
           this
-        )!,
-      ];
+        );
 
-    return [];
+        if (leafNode) layerTree.push(leafNode);
+      }
+    });
+
+    return layerTree;
   }
   // #endregion OVERRIDE
 
