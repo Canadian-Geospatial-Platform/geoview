@@ -982,11 +982,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds.
+   * Overrides the way to get the bounds for this layer type.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getBounds(): Extent | undefined {
+  override onGetBounds(): Extent | undefined {
     // Get the metadata extent
     const metadataExtent = this.getMetadataExtent();
 

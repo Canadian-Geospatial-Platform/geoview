@@ -105,10 +105,19 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Gets the bounds of the layer.
+   * Gets the bounds for the layer.
+   * @returns {Extent | undefined} The layer bounding box.
+   */
+  getBounds(): Extent | undefined {
+    // Redirect to overridable method
+    return this.onGetBounds();
+  }
+
+  /**
+   * Must override method to return the bounds of a layer.
    * @returns {Extent} The layer bounding box.
    */
-  abstract getBounds(): Extent | undefined;
+  abstract onGetBounds(): Extent | undefined;
 
   /**
    * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.

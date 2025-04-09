@@ -65,12 +65,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * Overrides the get of the OpenLayers Layer
    * @returns {VectorLayer<Feature>} The OpenLayers Layer
    */
-  // Disabling 'any', because too many renderer types in OpenLayers
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   override getOLLayer(): VectorLayer<VectorSource> {
     // Call parent and cast
-    // Disabling 'any', because too many renderer types in OpenLayers
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return super.getOLLayer() as VectorLayer<VectorSource>;
   }
 
@@ -232,10 +228,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds.
+   * Overrides the way to get the bounds for this layer type.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  override getBounds(): Extent | undefined {
+  override onGetBounds(): Extent | undefined {
     const sourceExtent = this.getOLSource().getExtent();
 
     // Return the calculated layer bounds
@@ -247,8 +243,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {string[]} objectIds - The uids of the features to calculate the extent from.
    * @returns {Promise<Extent | undefined>} The extent of the features, if available.
    */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   override getExtentFromFeatures(objectIds: string[]): Promise<Extent | undefined> {
     // Get array of features
     const requestedFeatures = objectIds.map((id) => this.getOLLayer().getSource()?.getFeatureById(id));

@@ -543,10 +543,10 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds.
+   * Overrides the way to get the bounds for this layer type.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  override getBounds(): Extent | undefined {
+  override onGetBounds(): Extent | undefined {
     const layerConfig = this.getLayerConfig();
 
     // Get the layer config bounds
