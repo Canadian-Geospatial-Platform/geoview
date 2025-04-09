@@ -186,7 +186,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeVectorTilesConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is VECTOR_TILES. The type ascention applies only to the true block of the if clause that use this
  * function.
@@ -199,7 +199,7 @@ export const layerConfigIsVectorTiles = (verifyIfLayer: TypeGeoviewLayerConfig):
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeLayerEntryConfig as a VectorTilesLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is VECTOR_TILES. The type ascention applies only to the true block of
  * the if clause that use this function.

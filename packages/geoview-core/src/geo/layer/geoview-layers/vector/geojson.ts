@@ -102,7 +102,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     );
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method is used to do a recursive search in the array of layer entry config.
    *
    * @param {string} searchKey The layer list to search.
@@ -181,7 +181,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     return Promise.resolve(layerConfig);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
@@ -206,7 +206,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoJSONLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is GEOJSON. The type ascention applies only to the true block of the if clause that use this
  * function.
@@ -219,7 +219,7 @@ export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): ver
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeLayerEntryConfig as a GeoJSONLayerEntryConfig if the geoviewLayerType attribute of
  * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOJSON. The type ascention applies only to the true block of the if
  * clause that use this function.

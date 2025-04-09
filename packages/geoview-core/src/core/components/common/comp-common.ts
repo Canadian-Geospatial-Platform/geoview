@@ -20,7 +20,7 @@ export function checkSelectedLayerPathList(
   if (memoLayerSelectedItem && !(memoLayerSelectedItem.queryStatus === 'processed' || memoLayerSelectedItem.queryStatus === 'error'))
     return;
 
-  // Check if the layer we are one still have features
+  // Check if the layer we are on still have features
   if (memoLayerSelectedItem?.numOffeatures) {
     // All good, keep selection
     // Reset the bypass for next time

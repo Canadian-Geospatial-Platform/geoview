@@ -198,7 +198,7 @@ export class WFS extends AbstractGeoViewVector {
     return layerConfig;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
@@ -255,7 +255,7 @@ export class WFS extends AbstractGeoViewVector {
     return 'string';
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
@@ -298,7 +298,7 @@ export class WFS extends AbstractGeoViewVector {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is WFS. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -310,7 +310,7 @@ export const layerConfigIsWFS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyI
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeLayerEntryConfig as a WfsLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WFS. The type ascention applies only to the true block of
  * the if clause that use this function.

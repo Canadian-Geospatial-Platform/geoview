@@ -52,7 +52,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return Promise.resolve(vectorLayer);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
@@ -198,7 +198,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return vectorSource;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Fetch features from ESRI Feature services with query and feature limits.
    *
    * @param {string} url - The base url for the service.
@@ -248,7 +248,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Create a vector layer. The layer has in its properties a reference to the layer configuration used at creation time.
    * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
    *
@@ -303,7 +303,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return JSON.parse(geoJsonStr);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Converts csv text to feature array.
    *
    * @param {string} csvData The data from the .csv file.
@@ -358,7 +358,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return features;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Converts csv to array of rows of separated values.
    *
    * @param {string} csvData The raw csv text.
@@ -398,7 +398,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return parsedData;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {string[]} headers - An array of field names.

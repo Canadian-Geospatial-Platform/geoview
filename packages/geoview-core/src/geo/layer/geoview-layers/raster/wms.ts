@@ -155,7 +155,7 @@ export class WMS extends AbstractGeoViewRaster {
     }
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method reads the service metadata from a XML metadataAccessPath.
    *
    * @param {string} metadataUrl The metadataAccessPath
@@ -186,7 +186,7 @@ export class WMS extends AbstractGeoViewRaster {
     setDataAccessPath(this.listOfLayerEntryConfig);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method find the layer path that lead to the layer identified by the layerName. Values stored in the array tell us which
    * direction to use to get to the layer. A value of -1 tells us that the Layer property is an object. Other values tell us that
    * the Layer property is an array and the value is the index to follow. If the layer can not be found, the returned value is
@@ -219,7 +219,7 @@ export class WMS extends AbstractGeoViewRaster {
     return [];
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method merge the layer identified by the path stored in the metadataLayerPathToAdd array to the metadata property of
    * the WMS instance. Values stored in the path array tell us which direction to use to get to the layer. A value of -1 tells us
    * that the Layer property is an object. In this case, it is assumed that the metadata objects at this level only differ by the
@@ -253,7 +253,7 @@ export class WMS extends AbstractGeoViewRaster {
     }
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method reads the layer identifiers from the configuration to create an array that will be used in the GetCapabilities.
    *
    * @returns {TypeLayerEntryConfig[]} The array of layer configurations.
@@ -273,7 +273,7 @@ export class WMS extends AbstractGeoViewRaster {
     return arrayOfLayerIds;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method propagate the WMS metadata inherited values.
    *
    * @param {TypeJsonObject} parentLayer The parent layer that contains the inherited values
@@ -350,7 +350,7 @@ export class WMS extends AbstractGeoViewRaster {
     if (!layerConfig.layerName) layerConfig.layerName = layerFound.Title as string;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method create recursively dynamic group layers from the service metadata.
    *
    * @param {TypeJsonObject} layer The dynamic group layer metadata.
@@ -407,7 +407,7 @@ export class WMS extends AbstractGeoViewRaster {
     this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
   }
 
-  /** ****************************************************************************************************************************
+  /**
    * This method search recursively the layerId in the layer entry of the capabilities.
    *
    * @param {string} layerId The layer identifier that must exists on the server.
@@ -568,7 +568,7 @@ export class WMS extends AbstractGeoViewRaster {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWMSLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is WMS. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -580,7 +580,7 @@ export const layerConfigIsWMS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyI
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeLayerEntryConfig as a OgcWmsLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WMS. The type ascention applies only to the true block of
  * the if clause that use this function.

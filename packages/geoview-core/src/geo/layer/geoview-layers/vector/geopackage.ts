@@ -72,7 +72,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.GEOPACKAGE, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
@@ -195,7 +195,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     return promisedGeopackageData;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
@@ -352,7 +352,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     }
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
    * @param {AbstractLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
@@ -489,7 +489,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     return promisedLayers;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
@@ -538,7 +538,7 @@ export class GeoPackage extends AbstractGeoViewVector {
       layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {Uint8Array} gpkgBinGeom Binary geometry array to be parsed.
@@ -571,7 +571,7 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoPackageFeatureLayerConfig if the geoviewLayerType attribute of
  * the verifyIfLayer parameter is GEOPACKAGE. The type ascention applies only to the true block of the if clause that use this
  * function.
@@ -584,7 +584,7 @@ export const layerConfigIsGeoPackage = (verifyIfLayer: TypeGeoviewLayerConfig): 
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeLayerEntryConfig as a GeoPackageLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOPACKAGE. The type ascention applies only to the true block of
  * the if clause that use this function.

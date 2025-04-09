@@ -52,7 +52,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     return commonFetchAndSetServiceMetadata(this);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
    * with a numeric layerId and creates a group entry when a layer is a group.
    *
@@ -89,7 +89,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     return commonProcessLayerMetadata(this, layerConfig);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
@@ -118,7 +118,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriFeatureLayerConfig if the geoviewLayerType attribute
  * of the verifyIfLayer parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use
  * this function.
@@ -131,7 +131,7 @@ export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig):
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeLayerEntryConfig as a EsriFeatureLayerEntryConfig if the geoviewLayerType
  * attribute of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_FEATURE. The type ascention applies only to the true
  * block of the if clause that use this function.

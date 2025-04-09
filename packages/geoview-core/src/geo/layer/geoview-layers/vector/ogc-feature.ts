@@ -141,7 +141,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     return layerConfig;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
@@ -192,7 +192,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     }
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
@@ -219,7 +219,7 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayerConfig if the geoviewLayerType attribute of
  * the verifyIfLayer parameter is OGC_FEATURE. The type ascention applies only to the true block of the if clause that use this
  * function.
@@ -232,7 +232,7 @@ export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): 
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeLayerEntryConfig as a OgcFeatureLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is OGC_FEATURE. The type ascention applies only to the true block of
  * the if clause that use this function.

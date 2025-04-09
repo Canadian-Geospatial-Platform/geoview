@@ -80,7 +80,7 @@ export async function commonFetchAndSetServiceMetadata(layer: EsriDynamic | Esri
   }
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
  * with a numeric layerId and creates a group entry when a layer is a group.
  *
@@ -194,7 +194,7 @@ export function commonValidateListOfLayerEntryConfig(
   });
 }
 
-/** ***************************************************************************************************************************
+/**
  * Extract the domain of the specified field from the metadata. If the type can not be found, return 'string'.
  *
  * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
@@ -223,7 +223,7 @@ export function commonGetFieldType(
   return 'string';
 }
 
-/** ***************************************************************************************************************************
+/**
  * Return the type of the specified field.
  *
  * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
@@ -242,7 +242,7 @@ export function commonGetFieldDomain(
   return fieldDefinition ? Cast<codedValueType | rangeDomainType>(fieldDefinition.domain) : null;
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method will create a Geoview temporal dimension if it exist in the service metadata
  *
  * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
@@ -266,7 +266,7 @@ export function commonProcessTemporalDimension(
   }
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
  *
  * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
@@ -339,7 +339,7 @@ export function commonProcessFeatureInfoConfig(
   }
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
  *
  * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
@@ -399,7 +399,7 @@ export function commonProcessInitialSettings(
   layerConfig.initialSettings!.bounds = validateExtent(layerConfig.initialSettings!.bounds || [-180, -90, 180, 90]);
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
  * initial settings, fields and aliases).
  *

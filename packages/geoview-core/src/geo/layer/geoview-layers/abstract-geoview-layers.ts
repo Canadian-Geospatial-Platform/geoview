@@ -135,9 +135,8 @@ export abstract class AbstractGeoViewLayer {
   // Keep all callback delegates references
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
-  /** ***************************************************************************************************************************
-   * The class constructor saves parameters and common configuration parameters in attributes.
-   *
+  /**
+   * Constructor
    * @param {TypeGeoviewLayerType} type - The type of GeoView layer that is instantiated.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration options.
    * @param {string} mapId - The unique identifier of the map on which the GeoView layer will be drawn.
@@ -157,7 +156,7 @@ export abstract class AbstractGeoViewLayer {
     this.#setListOfLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Set the list of layer entry configuration and initialize the registered layer object and register all layers to layer sets.
    *
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration options.
@@ -214,7 +213,7 @@ export abstract class AbstractGeoViewLayer {
     return this.geoviewLayerId;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Gets the layer configuration of the specified layer path.
    *
    * @param {string} layerPath The layer path.
@@ -226,7 +225,7 @@ export abstract class AbstractGeoViewLayer {
     return this.getMapViewer().layer.getLayerEntryConfig(layerPath);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Gets the OpenLayer of the specified layer path.
    *
    * @param {string} layerPath The layer path.
@@ -280,7 +279,7 @@ export abstract class AbstractGeoViewLayer {
     this.#attributions = attributions;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Get the layer metadata that is associated to the layer.
    *
    * @param {string} layerPath The layer path to the layer's configuration.
@@ -291,7 +290,7 @@ export abstract class AbstractGeoViewLayer {
     return this.#layerMetadata[layerPath];
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Set the layer metadata for the layer identified by specified layerPath.
    *
    * @param {string} layerPath The layer path to the layer's configuration affected by the change.
@@ -301,7 +300,7 @@ export abstract class AbstractGeoViewLayer {
     this.#layerMetadata[layerPath] = layerMetadata;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Get the temporal dimension that is associated to the layer. Returns undefined when the layer config can't be found using the layer
    * path.
    *
@@ -313,7 +312,7 @@ export abstract class AbstractGeoViewLayer {
     return this.#layerTemporalDimension[layerPath];
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Set the layerTemporalDimension for the layer identified by specified layerPath.
    *
    * @param {string} layerPath The layer path to the layer's configuration affected by the change.
@@ -331,7 +330,7 @@ export abstract class AbstractGeoViewLayer {
     return this.#isTimeAware;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
    * Its code is the same for all child classes. It must first validate that the olLayers attribute is null indicating
@@ -503,7 +502,7 @@ export abstract class AbstractGeoViewLayer {
     // Override to perform a validation on the layer entry config
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Recursively processes the metadata of each layer in the "layer list" configuration.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layers to process.
    * @returns {Promise<void>} A promise that the execution is completed.
@@ -750,7 +749,7 @@ export abstract class AbstractGeoViewLayer {
    */
   protected abstract onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer>;
 
-  /** ***************************************************************************************************************************
+  /**
    * Creates a layer group.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    * @param {TypeLayerInitialSettings } initialSettings Initial settings to apply to the layer.
@@ -865,7 +864,7 @@ export abstract class AbstractGeoViewLayer {
     });
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Recursively processes the list of layer entries to see if all of them are greater than or equal to the provided layer status.
    * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
    * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
@@ -1236,7 +1235,7 @@ export type TypeStyleRepresentation = {
 };
 export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
 
-/** ******************************************************************************************************************************
+/**
  * GeoViewAbstractLayers types
  */
 

@@ -90,7 +90,7 @@ export class EsriImage extends AbstractGeoViewRaster {
   }
 }
 
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriImageLayerConfig if the geoviewLayerType attribute of
  * the verifyIfLayer parameter is ESRI_IMAGE. The type ascention applies only to the true block of the if clause that use
  * this function.
@@ -103,7 +103,7 @@ export const layerConfigIsEsriImage = (verifyIfLayer: TypeGeoviewLayerConfig): v
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_IMAGE;
 };
 
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a TypeLayerEntryConfig as a EsriImageLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_IMAGE. The type ascention applies only to the true block of
  * the if clause that use this function.

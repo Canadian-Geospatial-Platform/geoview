@@ -53,7 +53,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
       const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
-        this.addLayerLoadError(layerConfig, `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+        this.addLayerLoadError(layerConfig, `ImageStatic layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
         return;
       }
       return;
@@ -61,7 +61,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
     throw new GeoViewError(
       this.mapId,
-      `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
+      `Invalid ImageStatic metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
     );
   }
 
@@ -113,7 +113,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeImageStaticLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is ImageStatic. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -125,7 +125,7 @@ export const layerConfigIsImageStatic = (verifyIfLayer: TypeGeoviewLayerConfig):
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeLayerEntryConfig as a ImageStaticLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewLayerConfig attribute is ImageStatic. The type ascention applies only to the true block of
  * the if clause that use this function.

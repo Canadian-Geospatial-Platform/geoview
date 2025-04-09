@@ -61,7 +61,7 @@ export class CSV extends AbstractGeoViewVector {
     return Promise.resolve(layerConfig);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
@@ -86,7 +86,7 @@ export class CSV extends AbstractGeoViewVector {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a CsvLayerEntryConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is CSV. The type ascention applies only to the true block of the if clause that use this
  * function.
@@ -99,7 +99,7 @@ export const layerConfigIsCSV = (verifyIfLayer: TypeGeoviewLayerConfig): verifyI
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.CSV;
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a TypeLayerEntryConfig as a TypeCsvLayerEntryConfig if the geoviewLayerType attribute of
  * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is CSV. The type ascention applies only to the true block of the if
  * clause that use this function.

@@ -62,10 +62,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     return commonFetchAndSetServiceMetadata(this);
   }
 
-  /** ***************************************************************************************************************************
-   * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
-   * with a numeric layerId and creates a group entry when a layer is a group.
-   *
+  /**
+   * Overrides the way the validation of the list of layer entry config happens.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
@@ -149,7 +147,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 }
 
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
  * the verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use
  * this function.
@@ -162,7 +160,7 @@ export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig):
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a TypeLayerEntryConfig as a EsriDynamicLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
  * the if clause that use this function.
