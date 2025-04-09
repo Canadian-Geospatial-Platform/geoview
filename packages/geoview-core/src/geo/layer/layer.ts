@@ -493,9 +493,10 @@ export class LayerApi {
     // I have 3 layers loaded in Details - for example.
     // To fix this, we'll have to synch the ADD_LAYER events and make sure those 'know' what order they should be in when they
     // propagate the mapOrderedLayerInfo in their processes. For now at least, this is repeating the same behavior until the events are fixed.
-    const orderedLayerInfos: TypeOrderedLayerInfo[] = [];
+    const orderedLayerInfos: TypeOrderedLayerInfo[] = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId()).length
+      ? MapEventProcessor.getMapOrderedLayerInfo(this.getMapId())
+      : [];
     const promisedLayers = await Promise.allSettled(promisesOfGeoCoreGeoviewLayers);
-
     // For each layers in the fulfilled promises only
     promisedLayers
       .filter((promise) => promise.status === 'fulfilled')

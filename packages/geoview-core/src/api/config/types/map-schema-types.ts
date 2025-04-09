@@ -415,6 +415,9 @@ export { EsriFeatureLayerEntryConfig } from '@/api/config/types/classes/sub-laye
 export { WmsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
 export { WfsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
 export { GeoJsonLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
+export { CsvLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/csv-layer-entry-config';
+export { XyzLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/xyz-layer-entry-config';
+export { OgcFeatureLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/ogc-feature-layer-entry-config';
 
 /** Valid keys for the geometryType property. */
 export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
@@ -437,7 +440,9 @@ export type TypeNearestValues = 'discrete' | 'absolute';
 
 /** Base type from which we derive the source properties for all the leaf nodes in the layer tree. */
 export type TypeBaseSourceInitialConfig = {
-  /** Path used to access the data. */
+  /**
+   * The service endpoint of the layer. Added during creation of specific layer entry config.
+   */
   dataAccessPath?: string;
   /**
    * Spatial Reference EPSG code supported (https://epsg.io/). We support lat/long, Web Mercator and Lambert Conical Conform Canada.
@@ -529,12 +534,6 @@ export type TypeTileGrid = {
 
 /** Type that defines the vector layer source formats. */
 export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV' | 'MVT';
-
-/** Type from which we derive the source properties for all the ESRI feature leaf nodes in the layer tree. */
-export type TypeSourceEsriFeatureInitialConfig = TypeBaseVectorSourceInitialConfig;
-
-/** Type from which we derive the source properties for all the GeoJson feature leaf nodes in the layer tree. */
-export type TypeSourceGeoJsonInitialConfig = TypeBaseVectorSourceInitialConfig;
 
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
