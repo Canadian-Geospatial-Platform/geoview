@@ -94,7 +94,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
       format: 'EsriJSON',
       projection: 3978,
       featureInfo: {
-        queryable: false,
+        queryable: true,
         nameField: '',
         outfields: [],
       },

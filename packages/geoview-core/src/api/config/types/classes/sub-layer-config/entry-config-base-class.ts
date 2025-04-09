@@ -4,13 +4,7 @@ import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@/api/config/types/config-con
 import { toJsonObject, TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
-import {
-  TypeGeoviewLayerType,
-  TypeLayerEntryType,
-  TypeLayerInitialSettings,
-  TypeDisplayLanguage,
-  Extent,
-} from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeLayerEntryType, TypeLayerInitialSettings, Extent } from '@/api/config/types/map-schema-types';
 import { isvalidComparedToInputSchema } from '@/api/config/utils';
 
 // ========================
@@ -21,8 +15,6 @@ import { isvalidComparedToInputSchema } from '@/api/config/utils';
 export abstract class EntryConfigBaseClass {
   // ==========================
   // #region PRIVATE PROPERTIES
-  /** The language used when interacting with this instance of MapFeatureConfig. */
-  #language;
 
   /** The GeoView configuration that owns the configuration tree that contains this node. */
   #geoviewLayerConfig: AbstractGeoviewLayerConfig;
@@ -88,19 +80,12 @@ export abstract class EntryConfigBaseClass {
    * layer group.
    *
    * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    * @constructor
    */
-  constructor(
-    layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
-    geoviewLayerConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass
-  ) {
+  constructor(layerConfig: TypeJsonObject, geoviewLayerConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass) {
     this.validateLayerConfig(layerConfig);
-    this.#language = language;
     this.#geoviewLayerConfig = geoviewLayerConfig;
     this.#parentNode = parentNode;
 
@@ -283,24 +268,6 @@ export abstract class EntryConfigBaseClass {
   }
 
   /**
-   * The setter method that sets the language used to create the sublayer.
-   *
-   * @param {TypeDisplayLanguage} language The language associated to the config.
-   */
-  setLanguage(language: TypeDisplayLanguage): void {
-    this.#language = language;
-  }
-
-  /**
-   * The getter method that returns the language used to create the sublayer.
-   *
-   * @returns {TypeDisplayLanguage} The language associated to the config.
-   */
-  getLanguage(): TypeDisplayLanguage {
-    return this.#language;
-  }
-
-  /**
    * This method returns the json string of the entry configuration. The output representation is a multi-line indented
    * string. Indentation can be controled using the ident parameter. Private variables are not serialized.
    * @param {number} indent The number of space to indent the output string (default=2).
@@ -340,19 +307,8 @@ export abstract class EntryConfigBaseClass {
 
     // Create a new instance using the cloned config.
     if (cloneOfTheNode.isLayerGroup)
-      cloneOfTheNode = this.#geoviewLayerConfig.createGroupNode(
-        toJsonObject(cloneOfTheNode),
-        this.#language,
-        this.#geoviewLayerConfig,
-        parentNode
-      )!;
-    else
-      cloneOfTheNode = this.#geoviewLayerConfig.createLeafNode(
-        toJsonObject(cloneOfTheNode),
-        this.#language,
-        this.#geoviewLayerConfig,
-        parentNode
-      )!;
+      cloneOfTheNode = this.#geoviewLayerConfig.createGroupNode(toJsonObject(cloneOfTheNode), this.#geoviewLayerConfig, parentNode)!;
+    else cloneOfTheNode = this.#geoviewLayerConfig.createLeafNode(toJsonObject(cloneOfTheNode), this.#geoviewLayerConfig, parentNode)!;
     // Restore the layerName and the private properties.
     cloneOfTheNode.layerName = this.layerName;
     cloneOfTheNode.setErrorDetectedFlag(this.#errorDetectedFlag);
