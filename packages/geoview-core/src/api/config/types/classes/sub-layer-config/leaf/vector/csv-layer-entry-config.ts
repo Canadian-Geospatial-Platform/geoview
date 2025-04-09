@@ -4,14 +4,14 @@ import { Cast } from '@/api/config/types/config-types';
 import {
   TypeLayerStyleConfig,
   TypeLayerEntryType,
-  TypeSourceGeoJsonInitialConfig,
+  TypeSourceCsvInitialConfig,
   TypeFeatureInfoLayerConfig,
   TypeStyleGeometry,
   TypeLayerInitialSettings,
   Extent,
 } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
-import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/geojson-config';
+import { CsvLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/csv-config';
 import { isvalidComparedToInternalSchema } from '@/api/config/utils';
 import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 
@@ -22,14 +22,14 @@ import { TimeDimension } from '@/core/utils/date-mgt';
 // ====================
 // #region CLASS HEADER
 /**
- * The GeoJson geoview sublayer class.
+ * The CSV geoview sublayer class.
  */
 
-export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export class CsvLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   // ==================
   // #region PROPERTIES
   /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeSourceGeoJsonInitialConfig;
+  declare source: TypeSourceCsvInitialConfig;
 
   /** Style to apply to the raster layer. */
   layerStyle?: TypeLayerStyleConfig;
@@ -51,7 +51,7 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @protected @override
    */
   protected override getSchemaPath(): string {
-    return CV_CONST_LEAF_LAYER_SCHEMA_PATH.GEOJSON;
+    return CV_CONST_LEAF_LAYER_SCHEMA_PATH.CSV;
   }
 
   /**
@@ -65,14 +65,14 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
-   * Shadow method used to do a cast operation on the parent method to return GeoJsonLayerConfig instead of
+   * Shadow method used to do a cast operation on the parent method to return CsvLayerConfig instead of
    * AbstractGeoviewLayerConfig.
    *
-   * @returns {GeoJsonLayerConfig} The Geoview layer configuration that owns this GeoJson layer entry config.
+   * @returns {CsvLayerConfig} The Geoview layer configuration that owns this CSV layer entry config.
    * @override
    */
-  override getGeoviewLayerConfig(): GeoJsonLayerConfig {
-    return super.getGeoviewLayerConfig() as GeoJsonLayerConfig;
+  override getGeoviewLayerConfig(): CsvLayerConfig {
+    return super.getGeoviewLayerConfig() as CsvLayerConfig;
   }
 
   /**
@@ -84,7 +84,7 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // If an error has already been detected, then the layer is unusable.
     if (this.getErrorDetectedFlag()) return Promise.resolve();
 
-    // If the GeoJson GeoView layer doesn't have service metadata, the layer metadata are set using an empty object and they
+    // If the CSV GeoView layer doesn't have service metadata, the layer metadata are set using an empty object and they
     // will be fetch on the fly by the layer api.
     if (Object.keys(this.getGeoviewLayerConfig().getServiceMetadata()).length === 0) {
       this.setLayerMetadata({});
