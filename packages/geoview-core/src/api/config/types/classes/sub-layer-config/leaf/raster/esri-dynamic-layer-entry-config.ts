@@ -92,9 +92,8 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
     this.source = {
       maxRecordCount: 0,
       format: 'png',
-      projection: 3978,
       featureInfo: {
-        queryable: false,
+        queryable: true,
         nameField: '',
         outfields: [],
       },

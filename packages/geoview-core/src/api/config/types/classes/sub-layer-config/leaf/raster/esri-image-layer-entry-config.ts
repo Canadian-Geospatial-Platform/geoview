@@ -75,7 +75,6 @@ export class EsriImageLayerEntryConfig extends AbstractBaseEsriLayerEntryConfig 
       crossOrigin: 'anonymous',
       format: 'png',
       transparent: true,
-      projection: 3978,
     };
   }
   // #endregion OVERRIDE
