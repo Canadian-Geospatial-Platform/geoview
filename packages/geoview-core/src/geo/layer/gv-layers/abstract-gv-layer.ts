@@ -671,7 +671,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
           // Create a string unique to the style, but geometry agnostic
           const styleClone = cloneDeep(featureStyle) as Style;
-          styleClone?.setGeometry?.('');
+          styleClone?.setGeometry('');
           const styleString = `${geometryType}${JSON.stringify(styleClone)}`;
 
           // Use string as dict key

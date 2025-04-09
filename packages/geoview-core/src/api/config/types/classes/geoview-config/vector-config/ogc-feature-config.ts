@@ -1,34 +1,54 @@
 import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@/api/config/types/config-constants';
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { WfsGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/wfs-group-layer-config';
-import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { WfsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
+import { OgcFeatureGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/ogc-feature-group-layer-config';
+import { toJsonObject, TypeJsonObject } from '@/api/config/types/config-types';
+import { OgcFeatureLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/ogc-feature-layer-entry-config';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
-import { findPropertyNameByRegex, getXMLHttpRequest, xmlToJson } from '@/core/utils/utilities';
+import { fetchJson } from '@/core/utils/utilities';
 
-export type TypeWfsLayerNode = WfsGroupLayerConfig | WfsLayerEntryConfig;
+export type TypeOgcFeatureLayerNode = OgcFeatureGroupLayerConfig | OgcFeatureLayerEntryConfig;
 
 // ========================
 // #region CLASS HEADER
 
 /**
- * The WFS geoview layer class.
+ * The OGC geoview layer class.
  */
-export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
+export class OgcFeatureLayerConfig extends AbstractGeoviewLayerConfig {
   // ==================
   // #region PROPERTIES
 
   /**
    * Type of GeoView layer.
    */
-  override geoviewLayerType = CV_CONST_LAYER_TYPES.WFS;
+  override geoviewLayerType = CV_CONST_LAYER_TYPES.OGC_FEATURE;
 
   /** The layer entries to use from the GeoView layer. */
-  declare listOfLayerEntryConfig: EntryConfigBaseClass[] | TypeWfsLayerNode[];
+  declare listOfLayerEntryConfig: EntryConfigBaseClass[] | TypeOgcFeatureLayerNode[];
   // #endregion PROPERTIES
+
+  // ===================
+  // #region CONSTRUCTOR
+  /**
+   * The class constructor.
+   *
+   * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
+   */
+  constructor(geoviewLayerConfig: TypeJsonObject) {
+    super(geoviewLayerConfig);
+    if (this.metadataAccessPath) {
+      const splitMetaDataAccessPath = this.metadataAccessPath.split('collections');
+      [this.metadataAccessPath] = splitMetaDataAccessPath;
+      if (splitMetaDataAccessPath[1]?.replaceAll('/', ''))
+        this.listOfLayerEntryConfig = [
+          this.createLeafNode(toJsonObject({ layerId: splitMetaDataAccessPath[1].replaceAll('/', '') }), this)!,
+        ];
+    }
+  }
+  // #endregion CONSTRUCTOR
 
   // ===============
   // #region METHODS
@@ -46,8 +66,8 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
    * @protected @override
    */
   protected override getGeoviewLayerSchema(): string {
-    /** The GeoView layer schema associated to WfsLayerConfig */
-    return CV_GEOVIEW_SCHEMA_PATH.WFS;
+    /** The GeoView layer schema associated to OgcFeatureLayerConfig */
+    return CV_GEOVIEW_SCHEMA_PATH.OGC_FEATURE;
   }
 
   /**
@@ -66,7 +86,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new WfsLayerEntryConfig(layerConfig, geoviewConfig, parentNode);
+    return new OgcFeatureLayerEntryConfig(layerConfig, geoviewConfig, parentNode);
   }
 
   /**
@@ -85,7 +105,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new WfsGroupLayerConfig(layerConfig, geoviewConfig, parentNode);
+    return new OgcFeatureGroupLayerConfig(layerConfig, geoviewConfig, parentNode);
   }
 
   /**
@@ -94,16 +114,16 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
    */
   override async fetchServiceMetadata(): Promise<void> {
     try {
-      const metadataUrl = this.processUrlParameters();
-      const metadataString = await getXMLHttpRequest(metadataUrl);
-      if (metadataString && metadataString !== '{}') {
-        // Convert XML to JSON.
-        const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
-        const jsonCapabilities = xmlToJson(xmlDOMCapabilities);
+      // The url
+      const queryUrl = this.metadataAccessPath.endsWith('/')
+        ? `${this.metadataAccessPath}collections?f=json`
+        : `${this.metadataAccessPath}/collections?f=json`;
 
-        const capabilitiesObject = findPropertyNameByRegex(jsonCapabilities, /(?:WFS_Capabilities)/);
-        if (capabilitiesObject) this.setServiceMetadata(capabilitiesObject);
-        else throw new GeoviewLayerConfigError('Capabilities object is undefined');
+      // Set it
+      const metadataJson = await fetchJson(queryUrl);
+
+      if (metadataJson && metadataJson !== '{}') {
+        this.setServiceMetadata(metadataJson);
       } else throw new GeoviewLayerConfigError('An empty metadata object was returned');
 
       this.listOfLayerEntryConfig = this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
@@ -114,7 +134,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
-      logger.logError(`Error detected while reading WFS metadata for geoview layer ${this.geoviewLayerId}.\n`, error);
+      logger.logError(`Error detected while reading OGC metadata for geoview layer ${this.geoviewLayerId}.\n`, error);
     }
   }
 
@@ -126,16 +146,17 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
    */
   protected override createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[] {
     // Extract FeatureType array that list all available layers.
-    const featureType = findPropertyNameByRegex(this.getServiceMetadata(), [/(?:FeatureTypeList)/, /(?:FeatureType)/]) as TypeJsonArray;
+    const layers = this.getServiceMetadata().collections;
 
     const layerTree: EntryConfigBaseClass[] = [];
-    featureType.forEach((feature) => {
-      const layerConfig = toJsonObject({
-        layerId: feature.Name['#text'],
-        layerName: feature.Title['#text'],
+    if (Array.isArray(layers))
+      layers.forEach((layer) => {
+        const layerConfig = toJsonObject({
+          layerId: layer.id,
+          layerName: layer.description,
+        });
+        layerTree.push(this.createLeafNode(layerConfig, this));
       });
-      layerTree.push(this.createLeafNode(layerConfig, this));
-    });
 
     return layerTree;
   }
@@ -160,7 +181,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     // Create the layer using the metadata. WFS metadata has no layer group definition.
     const layerConfig = toJsonObject({
       layerId,
-      layerName: layerFound.Title['#text'],
+      layerName: layerFound.description,
     });
     return this.createLeafNode(layerConfig, this, parentNode)!;
   }
@@ -169,63 +190,6 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
 
   // ==============
   // #region PUBLIC
-  /**
-   * Process URL parameters. If a parameter is not provided by the user, a default value will be used.
-   * Defaults are: service=WFS
-   *               request=GetCapabilities
-   *               version=2.0.0
-   *
-   * @param {string} requestToExecute The request to execute (default=GetCapabilities).
-   *
-   * @returns {string} The new URL.
-   * @public
-   */
-  processUrlParameters(requestToExecute = 'GetCapabilities'): string {
-    // Use user-provided parameters, if applicable.
-    const metadataAccessPathItems = this.metadataAccessPath.split('?');
-    if (metadataAccessPathItems.length === 2) {
-      const [metadataAccessPath, metadataAccessParameters] = metadataAccessPathItems;
-      // Get the list of parameters (a lower case version).
-      const lowerParameters = metadataAccessParameters.toLowerCase().split('&');
-      // Get the list of parameters (as provided by the user).
-      const originalParameters = metadataAccessParameters.split('&');
-      // Find parameters index.
-      const serviceIndex = lowerParameters.findIndex((parameter) => parameter.startsWith('service'));
-      const versionIndex = lowerParameters.findIndex((parameter) => parameter.startsWith('version'));
-      // Get user-provided value or default value
-      const service = serviceIndex !== -1 ? originalParameters[serviceIndex] : 'service=WFS';
-      const version = versionIndex !== -1 ? originalParameters[versionIndex] : 'version=2.0.0';
-      const request = `request=${requestToExecute}`;
-      // URL reconstruction using calculated values.
-      return `${metadataAccessPath}?${service}&${version}&${request}`;
-    }
-
-    // If no parameter was specified, use default values.
-    return `${this.metadataAccessPath}?service=WFS&version=2.0.0&request=${requestToExecute}`;
-  }
-
-  /**
-   * Extract the WFS version from the URL provided by the user. If version is unspecified, version 2.0.0 will be used.
-   *
-   * @returns {string} The version number.
-   * @public
-   */
-  getWfsVersion(): string {
-    // Use user-provided parameters, if applicable.
-    const metadataAccessPathItems = this.metadataAccessPath.split('?');
-    if (metadataAccessPathItems.length === 2) {
-      const [, metadataAccessParameters] = metadataAccessPathItems;
-      // Get the list of parameters (a lower case version).
-      const parameters = metadataAccessParameters.toLowerCase().split('&');
-      // Find version index.
-      const versionIndex = parameters.findIndex((parameter) => parameter.startsWith('version'));
-      // Get user-provided value or default value
-      return versionIndex !== -1 ? parameters[versionIndex] : 'version=2.0.0';
-    }
-
-    // If no parameter was specified, use default values.
-    return '2.0.0';
-  }
 
   /** ****************************************************************************************************************************
    * This method search recursively the layerId in the layer entry of the capabilities.
@@ -236,10 +200,8 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
    */
   findLayerMetadataEntry(layerId: string): TypeJsonObject | null {
     const serviceMetadata = this.getServiceMetadata();
-    if (serviceMetadata) {
-      const featureType = findPropertyNameByRegex(serviceMetadata, [/(?:FeatureTypeList)/, /(?:FeatureType)/]) as TypeJsonArray;
-      // If we cannot find the layerId in the layer definitions, return null.
-      const layerFound = featureType.find((layerMetadata) => layerMetadata.Name['#text'] === layerId) as TypeJsonObject | undefined;
+    if (serviceMetadata && Array.isArray(serviceMetadata.collections)) {
+      const layerFound = serviceMetadata.collections.find((layerMetadata) => layerMetadata.id === layerId);
       return layerFound || null;
     }
     return null;
