@@ -1,32 +1,31 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@/api/config/types/config-constants';
-import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import {
   TypeLayerStyleConfig,
   TypeLayerEntryType,
-  TypeSourceWmsInitialConfig,
-  Extent,
-  WmsLayerConfig,
+  TypeSourceTileInitialConfig,
   AbstractGeoviewLayerConfig,
   EntryConfigBaseClass,
+  TypeTileGrid,
 } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 import { isvalidComparedToInternalSchema } from '@/api/config/utils';
 import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
-import { DateMgt } from '@/core/utils/date-mgt';
+import { VectorTileLayerConfig } from '../../../geoview-config/raster-config/vector-tile-config';
 
-// ========================
+// ====================
 // #region CLASS HEADER
 /**
- * The OGC WMS geoview sublayer class.
+ * The vector tile geoview sublayer class.
  */
 
-export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  // =========================
+export class VectorTileLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+  // ==================
   // #region PROPERTIES
   /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeSourceWmsInitialConfig;
+  source?: TypeSourceTileInitialConfig;
 
   /** Style to apply to the raster layer. */
   layerStyle?: TypeLayerStyleConfig;
@@ -34,22 +33,19 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode: EntryConfigBaseClass | undefined) {
     super(layerConfig, geoviewConfig, parentNode);
 
-    // When the dataAccessPath is undefined and the metadataAccessPath ends with ".xml", the dataAccessPath is temporarilly
-    // set to '' and will be filled in the fetchServiceMetadata method of the class WMS.
+    if (!geoviewConfig.metadataAccessPath && !this.source?.dataAccessPath) {
+      throw new Error(
+        `dataAccessPath is mandatory for GeoView layer ${geoviewConfig.geoviewLayerId} when the metadataAccessPath is undefined.`
+      );
+    }
+
     if (!this.source) this.source = {};
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = '';
-
-    // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set
-    // to the same value of the corresponding metadataAccessPath.
-    // TODO: remove this wrapper replace when datacube updates the URLs
-    this.getGeoviewLayerConfig().metadataAccessPath = this.getGeoviewLayerConfig().metadataAccessPath!.replace('wrapper/ramp/ogc', 'ows');
-    if (this.getGeoviewLayerConfig().metadataAccessPath!.slice(-4).toLowerCase() !== '.xml')
-      this.source.dataAccessPath = this.getGeoviewLayerConfig().metadataAccessPath;
-
-    this.source.dataAccessPath = this.source.dataAccessPath!.replace('wrapper/ramp/ogc', 'ows');
-
-    // Default value for layerConfig.source.serverType is 'mapserver'.
-    if (!this.source.serverType) this.source.serverType = 'mapserver';
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = geoviewConfig.metadataAccessPath;
+    if (!this.source.dataAccessPath!.toLowerCase().endsWith('.pbf')) {
+      this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
+        ? `${this.source.dataAccessPath}tile/{z}/{y}/{x}.pbf`
+        : `${this.source.dataAccessPath}/tile/{z}/{y}/{x}.pbf`;
+    }
   }
   // #endregion PROPERTIES
 
@@ -58,7 +54,7 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /*
    * Methods are listed in the following order: abstract, override, private, protected, public and static.
    */
-  // ================
+  // ==========================
   // #region OVERRIDE
 
   /**
@@ -69,7 +65,7 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @protected @override
    */
   protected override getSchemaPath(): string {
-    return CV_CONST_LEAF_LAYER_SCHEMA_PATH.WMS;
+    return CV_CONST_LEAF_LAYER_SCHEMA_PATH.VECTOR_TILES;
   }
 
   /**
@@ -79,33 +75,40 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @protected @override
    */
   protected override getEntryType(): TypeLayerEntryType {
-    return CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE;
+    return CV_CONST_SUB_LAYER_TYPES.RASTER_TILE;
   }
 
   /**
-   * Shadow method used to do a cast operation on the parent method to return WmsLayerConfig instead of
+   * Shadow method used to do a cast operation on the parent method to returVectorTileLayerConfig instead of
    * AbstractGeoviewLayerConfig.
    *
-   * @returns {WmsLayerConfig} The Geoview layer configuration that owns this WMS layer entry config.
-   * @override @async
+   * @returns {VectorTileLayerConfig} The Geoview layer configuration that owns this vector tile layer entry config.
+   * @override
    */
-  override getGeoviewLayerConfig(): WmsLayerConfig {
-    return super.getGeoviewLayerConfig() as WmsLayerConfig;
+  override getGeoviewLayerConfig(): VectorTileLayerConfig {
+    return super.getGeoviewLayerConfig() as VectorTileLayerConfig;
   }
 
   /**
    * This method is used to fetch, parse and extract the relevant information from the metadata of the leaf node.
    * The same method signature is used by layer group nodes and leaf nodes (layers).
-   * @override
+   * @override @async
    */
   override fetchLayerMetadata(): Promise<void> {
     // If an error has already been detected, then the layer is unusable.
     if (this.getErrorDetectedFlag()) return Promise.resolve();
 
-    // WMS service metadata contains the layer's metadata.
+    // If the vector tile GeoView layer doesn't have service metadata, the layer metadata are set using an empty object and they
+    // will be fetch on the fly by the layer api.
+    if (Object.keys(this.getGeoviewLayerConfig().getServiceMetadata()).length === 0) {
+      this.setLayerMetadata({});
+      return Promise.resolve();
+    }
+
     const layerMetadata = this.getGeoviewLayerConfig().findLayerMetadataEntry(this.layerId);
     if (layerMetadata) {
       this.setLayerMetadata(layerMetadata);
+
       // Parse the raw layer metadata and build the geoview configuration.
       this.parseLayerMetadata();
 
@@ -132,7 +135,6 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     super.applyDefaultValues();
     this.source = {
       crossOrigin: 'Anonymous',
-      serverType: 'mapserver',
       featureInfo: {
         queryable: true,
         nameField: '',
@@ -147,46 +149,21 @@ export class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   protected override parseLayerMetadata(): void {
     const layerMetadata = this.getLayerMetadata();
+    // return if the layer has no metadata.
+    if (Object.keys(layerMetadata).length === 0) return;
 
-    if (layerMetadata?.Attribution?.Title) this.attributions.push(layerMetadata.Attribution.Title as string);
-
-    this.bounds = layerMetadata.EX_GeographicBoundingBox as Extent;
-
-    if (layerMetadata.queryable) this.source.featureInfo!.queryable = layerMetadata.queryable as boolean;
-
-    // Overwrite user provided value if service doesn't allow that scale
-    if (layerMetadata.maxScaleDenominator) {
-      this.minScale = Math.min(this.minScale || Infinity, layerMetadata.maxScaleDenominator as number);
-    }
-    if (layerMetadata.minScaleDenominator) {
-      this.maxScale = Math.max(this.maxScale || 0, layerMetadata.minScaleDenominator as number);
-    }
-
-    this.source.wmsStyle = layerMetadata.Style
-      ? ((layerMetadata.Style as TypeJsonArray).map((style) => {
-          return style.Name;
-        }) as string[])
-      : undefined;
-
-    this.#processTemporalDimension(layerMetadata.Dimension);
+    const { tileInfo, fullExtent } = layerMetadata;
+    const newTileGrid: TypeTileGrid = {
+      extent: [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number],
+      origin: [tileInfo.origin.x as number, tileInfo.origin.y as number],
+      resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
+      tileSize: [tileInfo.rows as number, tileInfo.cols as number],
+    };
+    // eslint-disable-next-line no-param-reassign
+    this.source!.tileGrid = newTileGrid;
   }
 
   // #endregion OVERRIDE
-
-  // ===============
-  // #region PRIVATE
-  /** ***************************************************************************************************************************
-   * This method will create a Geoview temporal dimension if it existds in the service metadata
-   * @param {TypeJsonObject} wmsDimension The WMS time dimension object
-   * @private
-   */
-  #processTemporalDimension(wmsDimension: TypeJsonObject): void {
-    if (wmsDimension) {
-      const temporalDimension: TypeJsonObject | undefined = (wmsDimension as TypeJsonArray).find((dimension) => dimension.name === 'time');
-      if (temporalDimension) this.temporalDimension = DateMgt.createDimensionFromOGC(temporalDimension);
-    }
-  }
-  // #endregion PRIVATE
   // #endregion METHODS
   // #endregion CLASS HEADER
 }

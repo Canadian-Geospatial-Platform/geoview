@@ -2,7 +2,6 @@ import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@/api/config/types
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { EsriGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/esri-group-layer-config';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { AbstractGeoviewEsriLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-esri-layer-config';
 import { EsriImageLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/esri-image-layer-entry-config';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
@@ -50,7 +49,6 @@ export class EsriImageLayerConfig extends AbstractGeoviewEsriLayerConfig {
    * type needed.
    *
    * @param {TypeJsonObject} layerConfig The sublayer configuration.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
@@ -59,11 +57,10 @@ export class EsriImageLayerConfig extends AbstractGeoviewEsriLayerConfig {
    */
   override createLeafNode(
     layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new EsriImageLayerEntryConfig(layerConfig, language, geoviewConfig, parentNode);
+    return new EsriImageLayerEntryConfig(layerConfig, geoviewConfig, parentNode);
   }
 
   /**
@@ -71,7 +68,6 @@ export class EsriImageLayerConfig extends AbstractGeoviewEsriLayerConfig {
    * type needed.
    *
    * @param {TypeJsonObject} layerConfig The group node configuration.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
@@ -80,11 +76,10 @@ export class EsriImageLayerConfig extends AbstractGeoviewEsriLayerConfig {
    */
   override createGroupNode(
     layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new EsriGroupLayerConfig(layerConfig, language, geoviewConfig, parentNode);
+    return new EsriGroupLayerConfig(layerConfig, geoviewConfig, parentNode);
   }
   // #endregion OVERRIDE
   // #endregion METHODS

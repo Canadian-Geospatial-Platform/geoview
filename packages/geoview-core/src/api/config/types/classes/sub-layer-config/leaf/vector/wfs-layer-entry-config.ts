@@ -121,9 +121,8 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       strategy: 'all',
       maxRecordCount: 0,
       crossOrigin: 'Anonymous',
-      projection: 3978,
       featureInfo: {
-        queryable: false,
+        queryable: true,
         nameField: '',
         outfields: [],
       },

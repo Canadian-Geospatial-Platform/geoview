@@ -4,7 +4,7 @@ import { AbstractBaseEsriLayerEntryConfig } from '@/api/config/types/classes/sub
 import {
   TypeLayerStyleConfig,
   TypeLayerEntryType,
-  TypeSourceEsriFeatureInitialConfig,
+  TypeBaseVectorSourceInitialConfig,
   TypeVectorSourceFormats,
   TypeValidMapProjectionCodes,
 } from '@/api/config/types/map-schema-types';
@@ -19,7 +19,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   // =========================
   // #region PUBLIC PROPERTIES
   /** Source settings to apply to the GeoView feature layer source at creation time. */
-  declare source: TypeSourceEsriFeatureInitialConfig;
+  declare source: TypeBaseVectorSourceInitialConfig;
 
   /** Style to apply to the feature layer. */
   layerStyle?: TypeLayerStyleConfig;
@@ -92,9 +92,8 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
       strategy: 'all',
       maxRecordCount: 0,
       format: 'EsriJSON',
-      projection: 3978,
       featureInfo: {
-        queryable: false,
+        queryable: true,
         nameField: '',
         outfields: [],
       },
