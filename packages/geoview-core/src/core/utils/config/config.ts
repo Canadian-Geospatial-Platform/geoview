@@ -14,6 +14,7 @@ import { logger } from '@/core/utils/logger';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { generateId } from '@/core/utils/utilities';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -57,7 +58,7 @@ export class Config {
         const firstIndex = layerArray.findIndex((layerEntry) => geoviewLayerEntry.geoviewLayerId === layerEntry.geoviewLayerId);
         if (firstIndex !== index && mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {
           // eslint-disable-next-line no-param-reassign
-          geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${crypto.randomUUID().substring(0, 8)}`;
+          geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${generateId(8)}`;
         }
 
         if (mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {

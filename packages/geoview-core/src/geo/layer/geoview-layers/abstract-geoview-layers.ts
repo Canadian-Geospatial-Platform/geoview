@@ -147,7 +147,7 @@ export abstract class AbstractGeoViewLayer {
   constructor(type: TypeGeoviewLayerType, geoviewLayerConfig: TypeGeoviewLayerConfig, mapId: string) {
     this.mapId = mapId;
     this.type = type;
-    this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId('');
+    this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId();
     this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName ? geoviewLayerConfig.geoviewLayerName : DEFAULT_LAYER_NAMES[type];
     if (geoviewLayerConfig.metadataAccessPath) this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath.trim();
     this.initialSettings = geoviewLayerConfig.initialSettings;
@@ -173,7 +173,7 @@ export abstract class AbstractGeoViewLayer {
     } else {
       const layerGroup = new GroupLayerEntryConfig({
         geoviewLayerConfig: listOfLayerEntryConfig[0].geoviewLayerConfig,
-        layerId: this.getGeoviewLayerId(),
+        layerId: 'base-group',
         layerName: this.geoviewLayerName,
         isMetadataLayerGroup: false,
         initialSettings: geoviewLayerConfig.initialSettings,

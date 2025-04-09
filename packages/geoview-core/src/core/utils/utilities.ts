@@ -69,14 +69,13 @@ export function getScriptAndAssetURL(): string {
 }
 
 /**
- * Generate a unique id if an id was not provided
- * @param {string?} id - An id to return if it was already passed
- * @returns {string} The generated id
+ * Generates a unique id of the specified length.
+ * @param {8 | 18 | 36} length - Number of characters to return.
+ * @returns {string} The id.
  */
-export function generateId(id?: string): string {
-  return id !== null && id !== undefined && id.length > 0
-    ? id
-    : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
+export function generateId(length: 8 | 18 | 36 = 36): string {
+  const generatedId = crypto.randomUUID().substring(0, length);
+  return generatedId;
 }
 
 // TODO: refactor - This is a duplicate of static config api function. Replace in api OR create utilities api functions

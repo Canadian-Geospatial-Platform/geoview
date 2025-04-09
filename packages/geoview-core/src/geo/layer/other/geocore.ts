@@ -5,6 +5,7 @@ import { Config } from '@/core/utils/config/config';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { logger } from '@/core/utils/logger';
+import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
@@ -41,7 +42,7 @@ export class GeoCore {
     const map = MapEventProcessor.getMapViewer(this.#mapId);
     if (map.layer.getGeoviewLayerIds().includes(uuid)) {
       // eslint-disable-next-line no-param-reassign
-      uuid = `${uuid}:${crypto.randomUUID().substring(0, 8)}`;
+      uuid = `${uuid}:${generateId(8)}`;
     }
     const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.#mapId);
 
@@ -91,6 +92,7 @@ export class GeoCore {
       if (uuid.includes(':') && uuid.split(':')[0] === response.layers[0].geoviewLayerId) {
         response.layers[0].geoviewLayerId = uuid;
       }
+
       return response.layers;
     } catch (error) {
       // Log
