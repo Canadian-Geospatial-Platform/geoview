@@ -62,9 +62,12 @@ export abstract class AbstractLayerSet {
   }
 
   /**
-   * A must override method to identify a layerset class with a name to distinguish it from the others easily
+   * A quick getter to help identify which layerset class the current instance is coming from.
    */
-  protected abstract name(): string;
+  public getClassName(): string {
+    // Return the name of the class
+    return this.constructor.name;
+  }
 
   /**
    * A must-override method called to propagate the result set entry to the store

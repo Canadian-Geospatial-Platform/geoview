@@ -31,14 +31,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * The layer set name to distinguish from the others.
-   * @returns The layer set name.
-   */
-  protected override name(): string {
-    return 'LegendsLayerSet';
-  }
-
-  /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
    * @param {ConfigBaseClass} layerConfig - The layer config
    * @returns {boolean} True when the layer should be registered to this legends-layer-set

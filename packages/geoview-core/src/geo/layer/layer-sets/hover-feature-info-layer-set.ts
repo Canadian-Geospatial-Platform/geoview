@@ -43,14 +43,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * The layer set name to distinguish from the others.
-   * @returns The layer set name.
-   */
-  protected override name(): string {
-    return 'HoverFeatureInfoLayerSet';
-  }
-
-  /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
    * @param {AbstractBaseLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.

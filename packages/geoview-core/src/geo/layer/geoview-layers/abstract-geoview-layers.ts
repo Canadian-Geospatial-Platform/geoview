@@ -189,6 +189,14 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * A quick getter to help identify which layer class the current instance is coming from.
+   */
+  public getClassName(): string {
+    // Return the name of the class
+    return this.constructor.name;
+  }
+
+  /**
    * Gets the MapViewer where the layer resides
    * @returns {MapViewer} The MapViewer
    */

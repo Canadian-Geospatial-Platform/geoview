@@ -47,14 +47,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * The layer set name to distinguish from the others.
-   * @returns The layer set name.
-   */
-  protected override name(): string {
-    return 'FeatureInfoLayerSet';
-  }
-
-  /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
    * @param {AbstractBaseLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
