@@ -2,8 +2,7 @@ import { mergeWith } from 'lodash';
 import { CV_CONST_LAYER_TYPES, CV_CONST_SUB_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@/api/config/types/config-constants';
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { GeoJsonGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/geojson-group-layer-config';
-import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { GeoJsonLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
@@ -39,10 +38,9 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    * The class constructor.
    *
    * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
    */
-  constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
-    super(geoviewLayerConfig, language);
+  constructor(geoviewLayerConfig: TypeJsonObject) {
+    super(geoviewLayerConfig);
     if (this.metadataAccessPath) {
       const metadataAccessPathItems = this.metadataAccessPath.split('/');
       const pathItemLength = metadataAccessPathItems.length;
@@ -55,9 +53,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
           this.setErrorDetectedFlag();
           logger.logError('When a GeoJson metadataAccessPath ends with a layer file name, the listOfLayerEntryConfig must be empty.');
         }
-        this.listOfLayerEntryConfig = [
-          this.createLeafNode(toJsonObject({ layerId: lastPathItem, layerName: lastPathItem }), language, this)!,
-        ];
+        this.listOfLayerEntryConfig = [this.createLeafNode(toJsonObject({ layerId: lastPathItem, layerName: lastPathItem }), this)!];
       }
     }
   }
@@ -88,7 +84,6 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    * type needed.
    *
    * @param {TypeJsonObject} layerConfig The sublayer configuration.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    *
@@ -97,11 +92,10 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    */
   override createLeafNode(
     layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new GeoJsonLayerEntryConfig(layerConfig, language, geoviewConfig, parentNode);
+    return new GeoJsonLayerEntryConfig(layerConfig, geoviewConfig, parentNode);
   }
 
   /**
@@ -109,7 +103,6 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    * type needed.
    *
    * @param {TypeJsonObject} layerConfig The group node configuration.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    *
@@ -118,11 +111,10 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    */
   override createGroupNode(
     layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new GeoJsonGroupLayerConfig(layerConfig, language, geoviewConfig, parentNode);
+    return new GeoJsonGroupLayerConfig(layerConfig, geoviewConfig, parentNode);
   }
 
   /**
@@ -180,7 +172,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
   protected override createLayerEntryNode(layerId: string, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass {
     // GV: To determine if service metadata exists, we must verify that the object is not empty.
     if (Object.keys(this.getServiceMetadata()).length === 0)
-      return this.createLeafNode(toJsonObject({ layerId, layerName: layerId }), this.getLanguage(), this, parentNode)!;
+      return this.createLeafNode(toJsonObject({ layerId, layerName: layerId }), this, parentNode)!;
 
     // If we cannot find the layerId in the layer definitions, throw an error.
     const layerFound = this.findLayerMetadataEntry(layerId);
@@ -193,8 +185,8 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
       return undefined;
     });
 
-    if (layerEntryIsGroupLayer(layerFound)) return this.createGroupNode(layerConfig, this.getLanguage(), this, parentNode);
-    return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
+    if (layerEntryIsGroupLayer(layerFound)) return this.createGroupNode(layerConfig, this, parentNode);
+    return this.createLeafNode(layerConfig, this, parentNode)!;
   }
 
   /**
@@ -204,23 +196,21 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    * @protected @override
    */
   protected override createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[] {
-    let layerTree = this.getServiceMetadata()?.listOfLayerEntryConfig as TypeJsonArray;
-    if (!layerTree) return [];
-    if (layerTree.length > 1)
-      layerTree = Cast<TypeJsonArray>({
-        layerId: 'base-group',
-        layerName: 'Layer Tree',
-        isLayerGroup: true,
-        listOfLayerEntryConfig: layerTree,
-      });
+    const listOfLayerEntryConfig: TypeJsonObject[] | undefined = this.getServiceMetadata()?.listOfLayerEntryConfig as TypeJsonObject[];
+    if (!listOfLayerEntryConfig) return [];
 
-    const layerConfig = mergeWith({}, layerTree, (destValue, sourceValue, key) => {
-      if (key === 'layerName') return sourceValue;
-      return undefined;
-    }) as TypeJsonObject;
+    const layerTree: EntryConfigBaseClass[] = [];
+    listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+      const layerConfig = mergeWith({}, layerEntryConfig, (destValue, sourceValue, key) => {
+        if (key === 'layerName') return sourceValue;
+        return undefined;
+      }) as TypeJsonObject;
 
-    if (layerEntryIsGroupLayer(layerConfig)) return [this.createGroupNode(layerConfig, this.getLanguage(), this)];
-    return [this.createLeafNode(layerConfig, this.getLanguage(), this)!];
+      if (layerEntryIsGroupLayer(layerConfig)) layerTree.push(this.createGroupNode(layerConfig, this));
+      else layerTree.push(this.createLeafNode(layerConfig, this));
+    });
+
+    return layerTree;
   }
   // #endregion OVERRIDE
 

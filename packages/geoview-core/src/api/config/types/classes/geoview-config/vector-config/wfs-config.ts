@@ -2,7 +2,6 @@ import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@/api/config/types
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { WfsGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/wfs-group-layer-config';
 import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { WfsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
@@ -56,7 +55,6 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
    * type needed.
    *
    * @param {TypeJsonObject} layerConfig The sublayer configuration.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    *
@@ -65,11 +63,10 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
    */
   override createLeafNode(
     layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new WfsLayerEntryConfig(layerConfig, language, geoviewConfig, parentNode);
+    return new WfsLayerEntryConfig(layerConfig, geoviewConfig, parentNode);
   }
 
   /**
@@ -77,7 +74,6 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
    * type needed.
    *
    * @param {TypeJsonObject} layerConfig The group node configuration.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    *
@@ -86,11 +82,10 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
    */
   override createGroupNode(
     layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new WfsGroupLayerConfig(layerConfig, language, geoviewConfig, parentNode);
+    return new WfsGroupLayerConfig(layerConfig, geoviewConfig, parentNode);
   }
 
   /**
@@ -133,28 +128,16 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     // Extract FeatureType array that list all available layers.
     const featureType = findPropertyNameByRegex(this.getServiceMetadata(), [/(?:FeatureTypeList)/, /(?:FeatureType)/]) as TypeJsonArray;
 
-    // If the feature list contains more than one layer, create a group node.
-    if (featureType.length > 1) {
-      const groupConfig = toJsonObject({
-        layerId: 'base-group',
-        layerName: this.getLanguage() === 'en' ? 'Layer Group' : 'Groupe de couches',
-        isLayerGroup: true,
-        listOfLayerEntryConfig: featureType.map((layerMetadata) => {
-          return toJsonObject({
-            layerId: layerMetadata.Name['#text'],
-            layerName: layerMetadata.Title['#text'],
-          });
-        }),
+    const layerTree: EntryConfigBaseClass[] = [];
+    featureType.forEach((feature) => {
+      const layerConfig = toJsonObject({
+        layerId: feature.Name['#text'],
+        layerName: feature.Title['#text'],
       });
-      return [this.createGroupNode(groupConfig, this.getLanguage(), this)!];
-    }
-
-    // Create a single layer using the metadata.
-    const layerConfig = toJsonObject({
-      layerId: featureType[0].Name['#text'],
-      layerName: featureType[0].Title['#text'],
+      layerTree.push(this.createLeafNode(layerConfig, this));
     });
-    return [this.createLeafNode(layerConfig, this.getLanguage(), this)!];
+
+    return layerTree;
   }
 
   /**
@@ -179,7 +162,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
       layerId,
       layerName: layerFound.Title['#text'],
     });
-    return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
+    return this.createLeafNode(layerConfig, this, parentNode)!;
   }
 
   // #endregion OVERRIDE

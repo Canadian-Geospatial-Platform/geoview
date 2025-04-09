@@ -1851,8 +1851,12 @@
         "default": {
           "type": "string"
         },
-        "unitSymbol": {
-          "type": "string"
+        "displayPattern": {
+          "type": "array",
+          "items": {
+            "datePrecision": "#/definitions/TypeDatePrecision",
+            "timePrecision": "#/definitions/TypeTimePrecision"
+          }
         },
         "range": {
           "$ref": "#/definitions/TypeRangeItems"
@@ -1865,6 +1869,9 @@
         },
         "singleHandle": {
           "type": "boolean"
+        },
+        "unitSymbol": {
+          "type": "string"
         }
       }
     },
@@ -1883,6 +1890,22 @@
           }
         }
       }
+    },
+    "TypeDatePrecision": {
+      "description": "Level of precision to show for date.",
+      "enum": [
+        "year",
+        "month",
+        "day"
+      ]
+    },
+    "TypeTimePrecision": {
+      "description": "Level of precision to show for time.",
+      "enum": [
+        "hour",
+        "minute",
+        "second"
+      ]
     },
     "TypeLayerStyleConfig": {
       "additionalProperties": false,
