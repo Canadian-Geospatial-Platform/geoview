@@ -134,7 +134,7 @@ export class WMS extends AbstractGeoViewRaster {
         // Set it
         this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
 
-        // TODO: Check - The following really, really could use more code documentation
+        // TODO: Check - The following code really could use more code documentation
         // If set
         if (this.metadata) {
           // Loop

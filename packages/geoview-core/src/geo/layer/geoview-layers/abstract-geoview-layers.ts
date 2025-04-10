@@ -808,8 +808,10 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Adds an error in the internal list of errors for a layer being loaded. It also sets the layer status to error.
-   * If the error is already a GeoViewLayerLoadedFailedError, that error is added as-is.
+   * Adds an Error in the internal list of errors for a layer being loaded.
+   * If the Error is already a GeoViewLayerLoadedFailedError, that Error is added as-is.
+   * Otherwise, a new GeoViewLayerLoadedFailedError will be added in the internal list.
+   * The layerConfig also gets its status set to error in the process.
    */
   addLayerLoadErrorError(layerConfig: TypeLayerEntryConfig, error: unknown): void {
     // If it's already a GeoViewLayerLoadedFailedError
@@ -823,7 +825,8 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Adds an error in the internal list of errors for a layer being loaded. It also sets the layer status to error.
+   * Adds an new GeoViewLayerLoadedFailedError with the given message in the internal list of errors for a layer being loaded.
+   * The layerConfig also gets its status set to error in the process.
    */
   addLayerLoadError(layerConfig: TypeLayerEntryConfig, message: string): void {
     // Redirect
@@ -831,7 +834,8 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Adds an error in the internal list of errors for a layer being loaded. It also sets the layer status to error.
+   * Adds a GeoViewLayerLoadedFailedError in the internal list of errors for a layer being loaded.
+   * It also sets the layer status to error.
    */
   #addLayerLoadErrorGo(layerConfig: TypeLayerEntryConfig, error: GeoViewLayerLoadedFailedError): void {
     // Add the error to the list

@@ -50,7 +50,7 @@ import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-i
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
-import { GeoViewLayerCreatedTwiceError } from '@/core/exceptions/layer-exceptions';
+import { GeoViewLayerCreatedTwiceError, GeoViewLayerLoadedFailedError } from '@/core/exceptions/layer-exceptions';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer, LayerMessageEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
@@ -540,6 +540,12 @@ export class LayerApi {
       // Read the message
       const errorMessage = error as string;
 
+      // Read the layer path if possible, more precise
+      let layerPathOrId = geoviewLayerId;
+      if (error instanceof GeoViewLayerLoadedFailedError) {
+        layerPathOrId = error.layerConfig.layerPath;
+      }
+
       // Log in the console
       logger.logError(errorMessage);
 
@@ -547,7 +553,7 @@ export class LayerApi {
       this.mapViewer.notifications.showError(errorMessage, [], true);
 
       // Emit about it
-      this.#emitLayerError({ geoviewLayerId, error: errorMessage });
+      this.#emitLayerError({ layerPath: layerPathOrId, error: errorMessage });
     }
   }
 
@@ -761,14 +767,6 @@ export class LayerApi {
 
     // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
     if (this.getGeoviewLayerIds().includes(geoviewLayerConfig.geoviewLayerId)) {
-      // TODO: Check - Are we sure we want to remove it if we're going to throw an error about it? (previously we were simply logging about it)
-      // TO.DOCONT: Does that mean if the user retries it'd go through?
-      // TO.DOCONT: Or does that mean that it was already added (duplicated!?) and now we have to remove the twin later!?
-      // TO.DOCONT: Seems like we should leave it there until the user removes it himself before trying to add it again, no?
-      // Remove geoCore ordered layer info placeholder
-      if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId))
-        MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId, false);
-
       // Throw that the geoview layer id was already created
       throw new GeoViewLayerCreatedTwiceError(this.getMapId(), geoviewLayerConfig.geoviewLayerId);
     } else {
@@ -2117,8 +2115,8 @@ type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, void>;
  * Define an event for the delegate
  */
 export type LayerErrorEvent = {
-  // The geoview layer id
-  geoviewLayerId: string;
+  // The layer path (or the geoview layer id) depending when the error occurs in the process
+  layerPath: string;
   // The error
   error: string;
 };
