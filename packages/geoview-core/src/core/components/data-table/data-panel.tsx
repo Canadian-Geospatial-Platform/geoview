@@ -169,6 +169,16 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
     return () => orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer?.features?.length);
   }, [selectedLayerPath, orderedLayerData]);
 
+  // If has selected layer on load and the data for selectedLayerPath is empty, trigger a query
+  useEffect(() => {
+    if (selectedLayerPath && orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath)) {
+      setIsLoading(true);
+      triggerGetAllFeatureInfo(selectedLayerPath).catch((err) => {
+        logger.logError(err);
+      });
+    }
+  }, [triggerGetAllFeatureInfo]);
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
