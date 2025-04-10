@@ -188,6 +188,18 @@ const config = {
         { from: './public/plugins', to: 'plugins', noErrorOnMissing: true },
         { from: './public/favicon.ico' },
         { from: './public/templates/codedoc.js' },
+        {
+          from: path.join('node_modules', '@cesium/engine', 'Source', 'Assets'),
+          to: 'Assets',
+        },
+        {
+          from: path.join('node_modules', '@cesium/engine', 'Source', 'Widget'),
+          to: 'Widget',
+        },
+        {
+          from: path.join('node_modules', '@cesium/engine', 'Source', 'ThirdParty'),
+          to: 'ThirdParty',
+        },
       ],
     }),
     new webpack.BannerPlugin({
@@ -203,6 +215,7 @@ const config = {
         patch,
         timestamp: Date.now(),
       },
+      CESIUM_BASE_URL: JSON.stringify('/'),
     }),
   ]
     .concat(multipleHtmlPluginsSamples)

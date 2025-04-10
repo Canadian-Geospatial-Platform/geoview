@@ -1,4 +1,6 @@
 import { Root } from 'react-dom/client';
+import TileLayer from 'ol/layer/Tile';
+import OSM from 'ol/source/OSM';
 
 import { i18n } from 'i18next';
 
@@ -6,6 +8,8 @@ import { debounce } from 'lodash';
 import { MapBrowserEvent, MapEvent } from 'ol';
 import { ObjectEvent } from 'ol/Object';
 import OLMap from 'ol/Map';
+import * as Cesium from 'cesium';
+import OLCesium from 'olcs';
 import View, { FitOptions, ViewOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
@@ -63,6 +67,8 @@ import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
 import { GVGroupLayer } from '../layer/gv-layers/gv-group-layer';
 
+window.Cesium = Cesium;
+
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
   msExitFullscreen: () => void;
@@ -91,6 +97,8 @@ export class MapViewer {
   // the openlayer map
   // Note: The '!' is used here, because it's being created just a bit late, but not late enough that we want to keep checking for undefined throughout the code base
   map!: OLMap;
+
+  cmap!: OLCesium;
 
   // plugins attach to the map
   plugins: TypeRecordOfPlugin = {};
@@ -274,11 +282,12 @@ export class MapViewer {
       controls: [],
       keyboardEventTarget: document.getElementById(`map-${this.mapId}`) as HTMLElement,
     });
+    //Set the map
 
-    // Set the map
     this.map = initialMap;
     this.initMap();
-
+    this.cmap = new OLCesium({ map: initialMap, target: `mapTargetElement-${this.mapId}` });
+    // ol3d.setEnabled(true);
     return initialMap;
   }
 
