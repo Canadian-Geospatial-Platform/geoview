@@ -381,9 +381,6 @@ export abstract class AbstractGeoViewLayer {
 
     // Log the time it took thus far
     if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
-
-    // Throw an aggregate error if any errors were compiled up until now
-    this.throwAggregatedLayerLoadErrors();
   }
 
   /**
@@ -540,8 +537,9 @@ export abstract class AbstractGeoViewLayer {
         layerConfig.setLayerStatusProcessed();
         this.#emitLayerEntryProcessed({ config: layerConfig });
       } else {
-        // All reasons are 'GeoViewLayerLoadedFailedError', flag the error
-        this.onError((promise.reason as GeoViewLayerLoadedFailedError).layerConfig as AbstractBaseLayerEntryConfig);
+        // All reasons are 'GeoViewLayerLoadedFailedError', get the reason
+        const reason = promise.reason as GeoViewLayerLoadedFailedError;
+        this.addLayerLoadError(reason.layerConfig, reason.message);
       }
     });
   }
@@ -818,14 +816,15 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Throws an aggregate error based on the 'layerLoadError' list.
+   * Builds an aggregate error based on the 'layerLoadError' list, if any is needed.
    */
-  throwAggregatedLayerLoadErrors(): void {
+  buildAggregatedLayerLoadErrors(): AggregateError | undefined {
     // If any errors compiled up
     if (this.layerLoadError.length > 0) {
       // Throw an aggregated exception
-      throw new AggregateError(this.layerLoadError, 'Multiple errors happened. See this.layerLoadError for the list.');
+      return new AggregateError(this.layerLoadError, 'Multiple errors happened. See this.layerLoadError for the list.');
     }
+    return undefined;
   }
 
   /**

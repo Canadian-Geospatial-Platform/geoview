@@ -512,10 +512,19 @@ export class LayerApi {
             const addedResult = this.addGeoviewLayer(geoviewLayerConfig);
 
             // Catch a problem with the promise if any
-            addedResult.promiseLayer.catch((error) => {
-              // Log and show the error
-              this.logAndShowLayerError(error, geoviewLayerConfig.geoviewLayerId);
-            });
+            addedResult.promiseLayer
+              .then(() => {
+                // Time to throw to log/show any/all errors that happened during the layer processing
+                const errorIfAny = addedResult.layer.buildAggregatedLayerLoadErrors();
+                if (errorIfAny) {
+                  // Log and show the error
+                  this.logAndShowLayerError(errorIfAny, geoviewLayerConfig.geoviewLayerId);
+                }
+              })
+              .catch((error) => {
+                // Log and show the error
+                this.logAndShowLayerError(error, geoviewLayerConfig.geoviewLayerId);
+              });
           } catch (error) {
             // Log and show the error
             this.logAndShowLayerError(error, geoviewLayerConfig.geoviewLayerId);
@@ -742,10 +751,19 @@ export class LayerApi {
         const addedResult = this.addGeoviewLayer(geoviewLayerConfig);
 
         // Catch an error during later processing of the layer
-        addedResult.promiseLayer.catch((error) => {
-          // Log and show the error
-          this.logAndShowLayerError(error, geoviewLayerConfig.geoviewLayerId);
-        });
+        addedResult.promiseLayer
+          .then(() => {
+            // Time to throw to log/show any/all errors that happened during the layer processing
+            const errorIfAny = addedResult.layer.buildAggregatedLayerLoadErrors();
+            if (errorIfAny) {
+              // Log and show the error
+              this.logAndShowLayerError(errorIfAny, geoviewLayerConfig.geoviewLayerId);
+            }
+          })
+          .catch((error) => {
+            // Log and show the error
+            this.logAndShowLayerError(error, uuid);
+          });
       });
     } catch (error) {
       // Log and show the error
@@ -915,7 +933,10 @@ export class LayerApi {
           // Emit about it
           this.#emitLayerAdded({ layer: layerBeingAdded });
         })
-        .catch(reject); // Reject it higher, because that's not where we want to handle the promise failure, we're returning the promise higher
+        .catch((error) => {
+          // Reject it higher, because that's not where we want to handle the promise failure, we're returning the promise higher
+          reject(error);
+        });
     });
 
     // Return the layer with the promise it'll be on the map
