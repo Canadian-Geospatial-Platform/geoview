@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import * as htmlToImage from 'html-to-image';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField } from '@/ui';
-import { exportPNG } from '@/core/utils/utilities';
+import { exportPNG, delay } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { useUIActiveAppBarTab, useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -15,6 +15,10 @@ import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArr
 import { logger } from '@/core/utils/logger';
 
 /**
+ * @typedef {{IAsyncContentCreation: import("Code\resources\app\extensions\node_modules\typescript\lib\lib.dom.d.ts").IAsyncContentCreation}} CoreLib
+ */
+
+/**
  * Export modal window component to export the viewer information in a PNG file
  *
  * @returns {JSX.Element} the export modal component
@@ -23,7 +27,7 @@ export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
   const mapId = useGeoViewMapId();
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
-
+  const imageDefaultWidth = 1478;
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
   const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
@@ -32,43 +36,33 @@ export default function ExportModal(): JSX.Element {
 
   const theme = useTheme();
 
-  // dummy promise to wait for the timeout complete
-  function resolveAfter2Seconds(): Promise<unknown> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve('resolved');
-      }, 2000);
-    });
-  }
-
   // resising image from dataurl
   async function resizeImageData(imageUri: string, inFileName: string): Promise<void> {
     const img = new Image();
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const imgCanvas = document.createElement('canvas');
+    const ctx = imgCanvas.getContext('2d');
 
     img.addEventListener('load', () => {
-      const width = 1478; // Math.ceil(img.naturalWidth * 0.5),
-      const scale = width / img.naturalWidth;
-      const height = Math.ceil(img.naturalHeight * scale);
+      const dx = (imageDefaultWidth - img.naturalWidth) / 2;
+      const dy = 0;
+      const dHeight = img.naturalHeight;
 
       // IMAGE TO CANVAS
-      canvas.width = width;
-      canvas.height = height;
+      imgCanvas.width = imageDefaultWidth;
+      imgCanvas.height = dHeight;
 
       if (ctx) {
-        ctx.drawImage(img, 0, 0, width, height);
-        ctx.getImageData(0, 0, width, height);
-        // Generate the image data
-        const imgurl = canvas.toDataURL('image/png');
+        // Optional: fill background if you want a color behind
+        ctx.fillStyle = theme.palette.common.white; // or any background color
+        ctx.fillRect(0, 0, imgCanvas.width, imgCanvas.height);
+        ctx.drawImage(img, dx, dy); // Draw image to canvas
+        const imgurl = imgCanvas.toDataURL('image/png');
         // Download png file from dataurl
         exportPNG(imgurl, inFileName);
       }
     });
     img.src = imageUri; // load image
-    console.log('calling'); // eslint-disable-line no-console
-    const result = await resolveAfter2Seconds();
-    console.log(result); // eslint-disable-line no-console
+    await delay(1500);
   }
 
   const [isMapLoading, setIsMapLoading] = useState(true);
@@ -94,6 +88,10 @@ export default function ExportModal(): JSX.Element {
   const { disableFocusTrap, setActiveAppBarTab } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const { isOpen } = useUIActiveAppBarTab();
+
+  if (exportContainerRef && exportContainerRef.current) {
+    exportContainerRef.current.style.width = `${imageDefaultWidth}px`;
+  }
 
   const exportMap = ((): void => {
     if (exportContainerRef.current && textFieldRef.current && exportTitleRef.current) {
@@ -138,6 +136,7 @@ export default function ExportModal(): JSX.Element {
 
     return dialogBox.clientWidth - paddingLeft - paddingRight;
   };
+  console.log(getCanvasWidth); // eslint-disable-line no-console
 
   useEffect(() => {
     // Log
@@ -148,7 +147,6 @@ export default function ExportModal(): JSX.Element {
     let timer: NodeJS.Timeout;
     if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
       const mapImage = mapImageRef.current;
-      const dialogBox = dialogRef.current;
 
       if (overviewMap) overviewMap.style.visibility = 'hidden';
 
@@ -166,7 +164,7 @@ export default function ExportModal(): JSX.Element {
             setIsMapLoading(false);
             const img = new Image();
             img.src = dataUrl;
-            img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
+            img.style.maxWidth = `${imageDefaultWidth}px`; // img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
             mapImage.appendChild(img);
           })
           .catch((error: Error) => {
@@ -177,7 +175,6 @@ export default function ExportModal(): JSX.Element {
         // check if footer tab exist then we don't need appBar Legend.
         const legendContainer = (footerbarLegendContainer ?? appBarLegendContainer) as HTMLElement;
         if (legendContainer && legendContainerRef.current) {
-          legendContainer.removeAttribute('style');
           setIsLegendLoading(true);
           // remove hidden attribute from document legend, so that html-to-image can copy the legend container.
           const legendTab = document.getElementById(`shell-${mapId}-legend`) as HTMLElement;
@@ -185,12 +182,12 @@ export default function ExportModal(): JSX.Element {
           if (hasHiddenAttr) legendTab.removeAttribute('hidden');
 
           htmlToImage
-            .toPng(legendContainer, { fontEmbedCSS: '' })
+            .toPng(legendContainer, { fontEmbedCSS: '', style: { overflow: 'hidden' } })
             .then((dataUrl) => {
               setIsLegendLoading(false);
               const img = new Image();
               img.src = dataUrl;
-              img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
+              img.style.maxWidth = `${imageDefaultWidth}px`; // img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
               legendContainerRef.current?.appendChild(img);
               if (hasHiddenAttr) legendTab.hidden = true;
             })
