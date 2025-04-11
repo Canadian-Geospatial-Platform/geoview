@@ -179,7 +179,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
         setIsLoading(true);
         triggerGetAllFeatureInfo(selectedLayerPath)
           .catch((err) => {
-            logger.logError(err);
+            logger.logError(`Data panel has failed to get all feature info, error: ${err}`);
           })
           .finally(() => {
             setIsLoading(false);

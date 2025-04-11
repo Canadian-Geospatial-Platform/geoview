@@ -56,7 +56,7 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
       set({
         geochartState: {
           ...get().geochartState,
-          selectedLayerPath: geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath || '',
+          selectedLayerPath: geoviewConfig.footerBar?.selectedGeoChartLayerPath || geoviewConfig.appBar?.selectedGeoChartLayerPath || '',
         },
       });
     },

@@ -143,7 +143,7 @@
       "core": ["legend", "layers", "details", "data-table"]
     },
     "selectedTab": "data-table",
-    "selectedLayersLayerPath": "airborne_radioactivity/1"
+    "selectedDataTableLayerPath": "airborne_radioactivity/1"
   },
   "corePackages": [],
   "externalPackages": [],

@@ -106,7 +106,7 @@
       "core": ["legend", "layers", "details", "geochart"]
     },
     "selectedTab": "geochart",
-    "selectedLayersLayerPath": "airborne_radioactivity/1"
+    "selectedGeoChartLayerPath": "airborne_radioactivity/1"
   },
   "corePackages": []
 }

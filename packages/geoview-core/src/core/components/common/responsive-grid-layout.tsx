@@ -13,7 +13,6 @@ import { useUIFooterPanelResizeValue, useUISelectedFooterLayerListItemId } from 
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { useDataTableSelectedLayerPath } from '@/app';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -62,7 +61,6 @@ const ResponsiveGridLayout = forwardRef(
     // Store
     const guide = useAppGuide();
     const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
-    const dataTableSelectedLayerPath = useDataTableSelectedLayerPath();
 
     // States
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
@@ -89,12 +87,12 @@ const ResponsiveGridLayout = forwardRef(
     useEffect(() => {
       if (rightMain) {
         setIsGuideOpen(false);
-      } else if (guideContentIds && !dataTableSelectedLayerPath) {
+      } else if (guideContentIds) {
         setIsGuideOpen(true);
       } else {
         setIsGuideOpen(false);
       }
-    }, [rightMain, guideContentIds, dataTableSelectedLayerPath]);
+    }, [rightMain, guideContentIds]);
 
     useEffect(() => {
       onGuideIsOpen?.(isGuideOpen);
