@@ -209,7 +209,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
     if (!layerTree) return [];
     if (layerTree.length > 1)
       layerTree = Cast<TypeJsonArray>({
-        layerId: this.geoviewLayerId,
+        layerId: 'base-group',
         layerName: 'Layer Tree',
         isLayerGroup: true,
         listOfLayerEntryConfig: layerTree,

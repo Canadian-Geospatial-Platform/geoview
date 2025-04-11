@@ -24,7 +24,8 @@ import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import i18n from '@/core/translation/i18n';
 import { logger } from '@/core/utils/logger';
-import { removeCommentsFromJSON } from '@/core/utils/utilities';
+import { removeCommentsFromJSON, whenThisThen } from '@/core/utils/utilities';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/external-types';
@@ -148,12 +149,34 @@ async function renderMap(mapElement: Element): Promise<void> {
   // TODO: refactor - remove this config once we get layers from the new one
   // create a new config for this map element
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
-  const config = new Config(lang);
-  const configObj = config.initializeMapConfig(configuration.mapId, configuration!.map!.listOfGeoviewLayerConfig!);
-  configuration.map.listOfGeoviewLayerConfig = configObj!;
 
   // Set the i18n language to the language specified in the config
   await i18n.changeLanguage(lang);
+
+  const config = new Config(lang);
+  const configObj = config.initializeMapConfig(
+    configuration.mapId,
+    configuration!.map!.listOfGeoviewLayerConfig!,
+    (errorKey: string, params: string[]) => {
+      // Wait for the map viewer to get loaded in the api
+      whenThisThen(() => api.maps[configuration.mapId])
+        .then(() => {
+          // Create the error
+          const error = new GeoViewError(configuration.mapId, errorKey, params);
+
+          // Log it
+          logger.logWarning(`- Map ${configuration.mapId}: ${error.message}`);
+
+          // Show the error
+          api.maps[configuration.mapId].notifications.showError(error.message);
+        })
+        .catch((error) => {
+          // Log promise failed
+          logger.logPromiseFailed('Promise failed in whenThisThen in initializeMapConfig in app.renderMap', error);
+        });
+    }
+  );
+  configuration.map.listOfGeoviewLayerConfig = configObj!;
 
   // if valid config was provided - mapId is now part of config
   if (configuration) {

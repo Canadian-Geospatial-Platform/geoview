@@ -230,7 +230,7 @@ export function AddNewLayer(): JSX.Element {
       }
 
       supportedProj = wmsMetadata.Capability.Layer.CRS as string[];
-      if (!supportedProj.includes(proj)) throw new Error('proj');
+      if (!supportedProj.includes(proj)) throw new Error('proj'); // TODO: Check - What is this error?
 
       const layers: OgcWmsLayerEntryConfig[] = [];
 
@@ -241,7 +241,6 @@ export function AddNewLayer(): JSX.Element {
 
             // if there is no paramLayers, take them all; If there is paramLayers must be included in layers parameter from url
             if (paramLayers.length === 0 || paramLayers.includes(name)) {
-              logger.logDebug('NAME', name);
               layers.push(
                 new OgcWmsLayerEntryConfig({
                   geoviewLayerConfig: wmsGeoviewLayerConfig,
@@ -371,7 +370,7 @@ export function AddNewLayer(): JSX.Element {
 
       const keys = ['collections', 'links'];
       const isCollectionValid = keys.every((key) => Object.keys(ogcFeatureMetadata).includes(key));
-      if (!isCollectionValid) throw new Error('err');
+      if (!isCollectionValid) throw new Error('err'); // TODO: Check - What is this error?
 
       // If there is collections, only the selected collection is set
       let layers: OgcFeatureLayerEntryConfig[] = [];
@@ -424,7 +423,7 @@ export function AddNewLayer(): JSX.Element {
   const geocoreValidation = async (): Promise<boolean> => {
     try {
       const isValid = layerURL.indexOf('/') === -1 && layerURL.replaceAll('-', '').length === 32;
-      if (!isValid) throw new Error('err');
+      if (!isValid) throw new Error('err'); // TODO: Check - What is this error?
 
       const geoCoreGeoviewLayerInstance = new GeoCore(mapId, api.maps[mapId].getDisplayLanguage());
       const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(layerURL);
@@ -514,7 +513,7 @@ export function AddNewLayer(): JSX.Element {
           }
         }
       } else {
-        throw new Error('err');
+        throw new Error('err'); // TODO: Check - What is this error?
       }
     } catch (error) {
       emitErrorServer(esriOptions(type).err);
