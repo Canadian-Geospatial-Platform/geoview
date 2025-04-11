@@ -499,9 +499,6 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async processListOfLayerEntryMetadata(listOfLayerEntryConfig: ConfigBaseClass[]): Promise<void> {
-    // When no metadata is provided, no need to continue here
-    if (!this.metadata) return;
-
     // Log
     logger.logDebug(
       `LAYERS - 4 - Processing list of layer entry metadata, building promises, for: ${this.geoviewLayerId}}`,
@@ -840,6 +837,11 @@ export abstract class AbstractGeoViewLayer {
   #addLayerLoadErrorGo(layerConfig: TypeLayerEntryConfig, error: GeoViewLayerLoadedFailedError): void {
     // Add the error to the list
     this.layerLoadError.push(error);
+
+    // Log it straight right away at the moment it happened
+    let { message } = error;
+    if (error.cause) message += ` | ${error.cause}`;
+    logger.logError(message);
 
     // Set the layer status to error
     layerConfig.setLayerStatusError();

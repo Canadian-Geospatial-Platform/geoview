@@ -1,3 +1,4 @@
+/* eslint-disable no-console */ // Point of this class is to console.log
 import { isArray } from 'lodash';
 import { getItemAsNumber, getItemAsNumberOrNumberArraySetValue } from './localStorage';
 
@@ -393,9 +394,7 @@ export class ConsoleLogger {
    */
   #logLevel(level: number, header: string, color: keyof ColorCode, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
-    if (this.#checkLevel(level))
-      // eslint-disable-next-line no-console
-      console.log(`%c${ConsoleLogger.#formatTime(new Date())} ${header}`, `color: ${color}`, ...messages);
+    if (this.#checkLevel(level)) console.log(`%c${ConsoleLogger.#formatTime(new Date())} ${header}`, `color: ${color}`, ...messages);
   }
 
   /**
@@ -407,7 +406,6 @@ export class ConsoleLogger {
    */
   #warnLevel(level: number, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
-    // eslint-disable-next-line no-console
     if (this.#checkLevel(level)) console.warn(`${ConsoleLogger.#formatTime(new Date())}`, ...messages);
   }
 
@@ -420,7 +418,6 @@ export class ConsoleLogger {
    */
   #errorLevel(level: number, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
-    // eslint-disable-next-line no-console
     if (this.#checkLevel(level)) console.error(`${ConsoleLogger.#formatTime(new Date())}`, ...messages);
   }
 

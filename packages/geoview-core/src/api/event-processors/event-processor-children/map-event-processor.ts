@@ -61,6 +61,7 @@ import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vecto
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -466,8 +467,25 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // Before changing the view, clear the basemaps right away to prevent a moment where a
       // vector tile basemap might, momentarily, be in different projection than the view.
-      // Note: It seems that since OpenLayers 10.5 OpenLayers throws an exception about this? So this line was added.
+      // Note: It seems that since OpenLayers 10.5 OpenLayers throws an exception about this. So this line was added.
       this.getMapViewer(mapId).basemap.clearBasemaps();
+
+      // Remove all vector tiles from the map, because they don't allow on-the-fly reprojection (OpenLayers 10.5 exception issue)
+      // GV Experimental code, to test further... not problematic to keep it for now
+      this.getMapViewerLayerAPI(mapId)
+        .getGeoviewLayers()
+        .filter((layer) => layer instanceof AbstractGVVectorTile)
+        .forEach((layer) => {
+          // Remove the layer
+          this.getMapViewerLayerAPI(mapId).removeLayerUsingPath(layer.getLayerPath());
+
+          // Log
+          this.getMapViewer(mapId).notifications.showWarning(
+            `The vector tile ${layer.getLayerName()} had to be removed due to a projection conflict.`,
+            [],
+            true
+          );
+        });
 
       // set new view
       this.getMapViewer(mapId).setView(newView);
