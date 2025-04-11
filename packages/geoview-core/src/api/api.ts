@@ -13,7 +13,6 @@ import * as GeoUtilities from '@/geo/utils/utilities';
 
 import { initMapDivFromFunctionCall } from '@/app';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to handle api calls (events, functions etc...)
