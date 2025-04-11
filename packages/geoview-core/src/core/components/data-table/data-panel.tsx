@@ -41,6 +41,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   const dataTableRef = useRef<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(false);
+  const isFirstLoad = useRef(true);
 
   const mapId = useGeoViewMapId();
   const layerData = useDataTableAllFeaturesDataArray();
@@ -171,13 +172,21 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   // If has selected layer on load and the data for selectedLayerPath is empty, trigger a query
   useEffect(() => {
-    if (selectedLayerPath && orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath)) {
-      setIsLoading(true);
-      triggerGetAllFeatureInfo(selectedLayerPath).catch((err) => {
-        logger.logError(err);
-      });
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+
+      if (selectedLayerPath && orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath)) {
+        setIsLoading(true);
+        triggerGetAllFeatureInfo(selectedLayerPath)
+          .catch((err) => {
+            logger.logError(err);
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      }
     }
-  }, [triggerGetAllFeatureInfo]);
+  }, [orderedLayerData, selectedLayerPath, triggerGetAllFeatureInfo]);
 
   useEffect(() => {
     // Log
