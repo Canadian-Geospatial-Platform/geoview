@@ -50,9 +50,7 @@ async function queryEsriFeatures(params: QueryParams): Promise<TypeJsonObject> {
   const urlParam = `?objectIds=${params.objectIds}&outFields=*&returnGeometry=${params.queryGeometry}&outSR=${params.projection}&geometryPrecision=1&maxAllowableOffset=${params.maxAllowableOffset}&f=json`;
 
   const identifyResponse = await fetch(`${params.url}/query${urlParam}`);
-  const identifyJsonResponse = await identifyResponse.json();
-
-  return identifyJsonResponse;
+  return identifyResponse.json();
 }
 
 /**
@@ -207,11 +205,8 @@ const worker = {
    * Initializes the worker.
    */
   init(): void {
-    try {
-      logger.logTrace('FetchEsriWorker initialized');
-    } catch {
-      logger.logError('FetchEsriWorker failed to initialize');
-    }
+    // Log
+    logger.logTrace('FetchEsriWorker initialized');
   },
 
   /**
@@ -221,14 +216,12 @@ const worker = {
    * @throws {Error} When the query processing fails
    */
   process(params: QueryParams): Promise<TypeJsonObject> {
-    try {
-      logger.logTrace('Starting query processing', JSON.stringify(params));
-      const response = params.objectIds === 'all' ? queryAllEsriFeatures(params) : queryEsriFeatures(params);
-      return response;
-    } catch (error) {
-      logger.logError('Query processing failed', error);
-      throw error;
-    }
+    // Log
+    logger.logTrace('Starting query processing', JSON.stringify(params));
+
+    // Launch the query and return the promise about it
+    const promise = params.objectIds === 'all' ? queryAllEsriFeatures(params) : queryEsriFeatures(params);
+    return promise;
   },
 };
 

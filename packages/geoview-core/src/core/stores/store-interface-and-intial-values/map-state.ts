@@ -51,6 +51,7 @@ export interface IMapState {
   interaction: TypeInteraction;
   mapExtent: Extent | undefined;
   mapLoaded: boolean;
+  mapDisplayed: boolean;
   northArrow: boolean;
   northArrowElement: TypeNorthArrow;
   orderedLayerInfo: TypeOrderedLayerInfo[];
@@ -106,6 +107,7 @@ export interface IMapState {
   setterActions: {
     setMapChangeSize: (size: [number, number], scale: TypeScaleInfo) => void;
     setMapLoaded: (mapLoaded: boolean) => void;
+    setMapDisplayed: () => void;
     setAttribution: (attribution: string[]) => void;
     setInitialFilters: (filters: Record<string, string>) => void;
     setInitialView: (view: TypeZoomAndCenter | Extent) => void;
@@ -172,6 +174,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     isMouseInsideMap: false,
     mapExtent: undefined,
     mapLoaded: false,
+    mapDisplayed: false,
     northArrow: false,
     northArrowElement: { degreeRotation: '180.0', isNorthVisible: true } as TypeNorthArrow,
     orderedLayerInfo: [],
@@ -555,6 +558,18 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
+       * Sets whether the map is displayed.
+       */
+      setMapDisplayed: (): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            mapDisplayed: true,
+          },
+        });
+      },
+
+      /**
        * Sets the attribution of the map.
        * @param {string[]} attribution - The attribution information.
        */
@@ -862,20 +877,29 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         // Get all layers as specified in the order layer info we're updating
         const orderedLayers = orderedLayerInfo.map((layer) => layer.layerPath);
 
-        // Set the readonly representation of ordered layers array according to the order the layers are
-        get().mapState.setterActions.setOrderedLayers(orderedLayers);
+        // Check if the order of the layers has changed
+        if (JSON.stringify(orderedLayers) !== JSON.stringify(get().mapState.orderedLayers)) {
+          // Set the readonly representation of ordered layers array according to the order the layers are
+          get().mapState.setterActions.setOrderedLayers(orderedLayers);
+        }
 
         // Get all visible layers as specified in the order layer info we're updating
         const visibleLayers = orderedLayerInfo.filter((layer) => layer.visible).map((layer) => layer.layerPath);
 
-        // Set the readonly representation of visibile layers array according to the visibile layers
-        get().mapState.setterActions.setVisibleLayers(visibleLayers);
+        // Check if the order of the layers has changed
+        if (JSON.stringify(visibleLayers) !== JSON.stringify(get().mapState.visibleLayers)) {
+          // Set the readonly representation of visibile layers array according to the visibile layers
+          get().mapState.setterActions.setVisibleLayers(visibleLayers);
+        }
 
         // Get all layers in visible range as specified in the order layer info we're updating
         const inVisibleRange = orderedLayerInfo.filter((layer) => layer.inVisibleRange).map((layer) => layer.layerPath);
 
-        // Set the readonly representation of visibile range layers array according to the visibile range layers
-        get().mapState.setterActions.setVisibleRangeLayers(inVisibleRange);
+        // Check if the order of the layers has changed
+        if (JSON.stringify(inVisibleRange) !== JSON.stringify(get().mapState.visibleRangeLayers)) {
+          // Set the readonly representation of visibile range layers array according to the visibile range layers
+          get().mapState.setterActions.setVisibleRangeLayers(inVisibleRange);
+        }
       },
 
       /**
@@ -1007,6 +1031,7 @@ export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore
 export const useMapIsMouseInsideMap = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.isMouseInsideMap);
 export const useMapHoverFeatureInfo = (): TypeHoverFeatureInfo => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
 export const useMapLoaded = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
+export const useMapDisplayed = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapDisplayed);
 export const useMapNorthArrow = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
 export const useMapNorthArrowElement = (): TypeNorthArrow => useStore(useGeoViewStore(), (state) => state.mapState.northArrowElement);
 export const useMapOverviewMap = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.overviewMap);

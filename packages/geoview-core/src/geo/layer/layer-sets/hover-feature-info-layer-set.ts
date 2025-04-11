@@ -1,5 +1,3 @@
-import debounce from 'lodash/debounce';
-
 import { Coordinate } from 'ol/coordinate';
 import { logger } from '@/core/utils/logger';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -9,7 +7,7 @@ import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstra
 import { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { TypeMapMouseInfo } from '@/app';
+import { AbortError } from '@/core/exceptions/core-exceptions';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -21,6 +19,9 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
   declare resultSet: TypeHoverResultSet;
 
+  // Keep all abort controllers per layer path
+  #abortControllers: { [layerPath: string]: AbortController } = {};
+
   /**
    * The class constructor that instanciate a set of layer.
    * @param {LayerApi} layerApi - The layer Api to work with.
@@ -28,22 +29,17 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   constructor(layerApi: LayerApi) {
     super(layerApi);
 
-    // Register a handler on the map pointer move
-    layerApi.mapViewer.onMapPointerMove((mapViewer, payload) => {
+    // Register a handler when the map pointer moves
+    layerApi.mapViewer.onMapPointerMove(() => {
       // This will execute immediately on every pointer move to clear the HoverFeatureInfo
       MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), null);
-
-      // This will be debounced
-      this.#debouncedQuery(payload);
     });
-  }
 
-  /**
-   * This will debounce the query when pointer stop moving for 750ms
-   * @param {TypeMapMouseInfo} payload - The pointer move payload
-   */
-  #debouncedQuery(payload: TypeMapMouseInfo): void {
-    debounce(() => this.queryLayers(payload.pixel), 1000).bind(this)();
+    // Register a handler when the map pointer stops
+    layerApi.mapViewer.onMapPointerStop((mapViewer, payload) => {
+      // Query
+      this.queryLayers(payload.pixel);
+    });
   }
 
   /**
@@ -131,33 +127,40 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       // Get the layer config and layer associated with the layer path
       const layer = this.layerApi.getGeoviewLayer(layerPath);
 
+      // Flag processing
+      this.resultSet[layerPath].feature = undefined;
+      this.resultSet[layerPath].queryStatus = 'error';
+
       // If layer was found
       if (layer && layer instanceof AbstractGVLayer) {
         // Flag processing
-        this.resultSet[layerPath].feature = undefined;
         this.resultSet[layerPath].queryStatus = 'init';
 
-        // Process query on results data
-        AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layer, queryType, pixelCoordinate, false)
-          .then((arrayOfRecords) => {
-            if (arrayOfRecords === null) {
-              this.resultSet[layerPath].queryStatus = 'error';
-              this.resultSet[layerPath].feature = null;
-            } else {
-              if (arrayOfRecords?.length) {
-                const nameField = arrayOfRecords![0].nameField || (Object.entries(arrayOfRecords![0].fieldInfo)[0] as unknown as string);
-                const fieldInfo = arrayOfRecords![0].fieldInfo[nameField as string];
+        // If the layer path has an abort controller
+        if (Object.keys(this.#abortControllers).includes(layerPath)) {
+          // Abort it
+          this.#abortControllers[layerPath].abort();
+        }
 
-                this.resultSet[layerPath].feature = {
-                  featureIcon: arrayOfRecords![0].featureIcon,
-                  fieldInfo,
-                  geoviewLayerType: arrayOfRecords![0].geoviewLayerType,
-                  nameField,
-                };
-              } else {
-                this.resultSet[layerPath].feature = undefined;
-              }
+        // Create an AbortController for the query
+        this.#abortControllers[layerPath] = new AbortController();
+
+        // Process query on results data
+        AbstractLayerSet.queryLayerFeatures(layer, queryType, pixelCoordinate, false, this.#abortControllers[layerPath])
+          .then((arrayOfRecords) => {
+            if (arrayOfRecords.length) {
+              const nameField = arrayOfRecords![0].nameField || (Object.entries(arrayOfRecords![0].fieldInfo)[0] as unknown as string);
+              const fieldInfo = arrayOfRecords![0].fieldInfo[nameField as string];
+
+              this.resultSet[layerPath].feature = {
+                featureIcon: arrayOfRecords![0].featureIcon,
+                fieldInfo,
+                geoviewLayerType: arrayOfRecords![0].geoviewLayerType,
+                nameField,
+              };
               this.resultSet[layerPath].queryStatus = 'processed';
+            } else {
+              this.resultSet[layerPath].feature = undefined;
             }
 
             // Check if this layer should update the store
@@ -173,18 +176,26 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
               );
             });
 
-            // If it should update ans there is a feature to propagate
+            // If it should update and there is a feature to propagate
             if (shouldUpdate && this.resultSet[layerPath].queryStatus === 'processed' && this.resultSet[layerPath].feature) {
               MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
             }
           })
           .catch((error) => {
-            // Log
-            logger.logPromiseFailed('queryLayerFeatures in queryLayers in hoverFeatureInfoLayerSet', error);
+            // If aborted
+            if (AbortError.isAbortError(error)) {
+              // Log
+              logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
+            } else {
+              // Error
+              this.resultSet[layerPath].queryStatus = 'error';
+              this.resultSet[layerPath].feature = undefined;
+
+              // Log
+              logger.logPromiseFailed('queryLayerFeatures in queryLayers in hoverFeatureInfoLayerSet', error);
+            }
           });
       }
-      this.resultSet[layerPath].feature = null;
-      this.resultSet[layerPath].queryStatus = 'error';
     });
   }
 

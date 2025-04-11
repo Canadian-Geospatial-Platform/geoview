@@ -1,6 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassing for layerPath-layerConfig. We keep it global..
-// TODO: refactor eslint - we have few files with many reassing should wee if we can build better...
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
@@ -24,12 +21,12 @@ import {
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
-import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GeoViewLayerError, GeoViewLayerLoadedFailedError } from '@/core/exceptions/layer-exceptions';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { SnackbarType } from '@/core/utils/notifications';
+import { AbortError, EmptyResponseError } from '@/core/exceptions/core-exceptions';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -89,8 +86,8 @@ export abstract class AbstractGeoViewLayer {
   /** Initial settings to apply to the GeoView layer at creation time. This attribute is allowed only if listOfLayerEntryConfig.length > 1. */
   initialSettings?: TypeLayerInitialSettings;
 
-  /** layers of listOfLayerEntryConfig that did not load. */
-  layerLoadError: { layer: string; layerName?: string | undefined; loggerMessage: string }[] = [];
+  /** List of errors for the layers that did not load. */
+  layerLoadError: GeoViewLayerLoadedFailedError[] = [];
 
   /** The OpenLayer root layer representing this GeoView Layer. */
   olRootLayer?: BaseLayer;
@@ -137,9 +134,8 @@ export abstract class AbstractGeoViewLayer {
   // Keep all callback delegates references
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
-  /** ***************************************************************************************************************************
-   * The class constructor saves parameters and common configuration parameters in attributes.
-   *
+  /**
+   * Constructor
    * @param {TypeGeoviewLayerType} type - The type of GeoView layer that is instantiated.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration options.
    * @param {string} mapId - The unique identifier of the map on which the GeoView layer will be drawn.
@@ -159,7 +155,7 @@ export abstract class AbstractGeoViewLayer {
     this.#setListOfLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Set the list of layer entry configuration and initialize the registered layer object and register all layers to layer sets.
    *
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration options.
@@ -182,11 +178,20 @@ export abstract class AbstractGeoViewLayer {
 
       this.listOfLayerEntryConfig = [layerGroup];
       layerGroup.listOfLayerEntryConfig.forEach((layerConfig) => {
-        (layerConfig as AbstractBaseLayerEntryConfig).parentLayerConfig = layerGroup;
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.parentLayerConfig = layerGroup;
       });
     }
 
     this.listOfLayerEntryConfig[0].geoviewLayerConfig.listOfLayerEntryConfig = listOfLayerEntryConfig;
+  }
+
+  /**
+   * A quick getter to help identify which layer class the current instance is coming from.
+   */
+  public getClassName(): string {
+    // Return the name of the class
+    return this.constructor.name;
   }
 
   /**
@@ -207,7 +212,7 @@ export abstract class AbstractGeoViewLayer {
     return this.geoviewLayerId;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Gets the layer configuration of the specified layer path.
    *
    * @param {string} layerPath The layer path.
@@ -219,7 +224,7 @@ export abstract class AbstractGeoViewLayer {
     return this.getMapViewer().layer.getLayerEntryConfig(layerPath);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Gets the OpenLayer of the specified layer path.
    *
    * @param {string} layerPath The layer path.
@@ -273,7 +278,7 @@ export abstract class AbstractGeoViewLayer {
     this.#attributions = attributions;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Get the layer metadata that is associated to the layer.
    *
    * @param {string} layerPath The layer path to the layer's configuration.
@@ -284,7 +289,7 @@ export abstract class AbstractGeoViewLayer {
     return this.#layerMetadata[layerPath];
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Set the layer metadata for the layer identified by specified layerPath.
    *
    * @param {string} layerPath The layer path to the layer's configuration affected by the change.
@@ -294,7 +299,7 @@ export abstract class AbstractGeoViewLayer {
     this.#layerMetadata[layerPath] = layerMetadata;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Get the temporal dimension that is associated to the layer. Returns undefined when the layer config can't be found using the layer
    * path.
    *
@@ -306,7 +311,7 @@ export abstract class AbstractGeoViewLayer {
     return this.#layerTemporalDimension[layerPath];
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Set the layerTemporalDimension for the layer identified by specified layerPath.
    *
    * @param {string} layerPath The layer path to the layer's configuration affected by the change.
@@ -324,23 +329,7 @@ export abstract class AbstractGeoViewLayer {
     return this.#isTimeAware;
   }
 
-  /** ***************************************************************************************************************************
-   * Recursively process the list of layer entries to count all layers in error.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration
-   *                                                        (default: this.listOfLayerEntryConfig).
-   *
-   * @returns {number} The number of layers in error.
-   */
-  countErrorStatus(listOfLayerEntryConfig: TypeLayerEntryConfig[] = this.listOfLayerEntryConfig): number {
-    return listOfLayerEntryConfig.reduce((counter: number, layerConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig)) return counter + this.countErrorStatus(layerConfig.listOfLayerEntryConfig);
-      if ((layerConfig as AbstractBaseLayerEntryConfig).layerStatus === 'error') return counter + 1;
-      return counter;
-    }, 0);
-  }
-
-  /** ***************************************************************************************************************************
+  /**
    * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
    * Its code is the same for all child classes. It must first validate that the olLayers attribute is null indicating
@@ -359,314 +348,400 @@ export abstract class AbstractGeoViewLayer {
    * the details-panel.
    */
   async createGeoViewLayers(): Promise<void> {
-    if (!this.olRootLayer) {
-      // Log
-      logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
+    // Log
+    logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
 
-      // Try to get a key for logging timings
-      let logTimingsKey;
-      if (this.listOfLayerEntryConfig.length > 0) logTimingsKey = `${this.mapId} | ${this.listOfLayerEntryConfig[0].layerPath}`;
+    // Log
+    logger.logDebug(`LAYERS - 2 - Creating GeoViewLayers for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
 
-      // Log
-      if (logTimingsKey) logger.logMarkerStart(logTimingsKey);
+    // Try to get a key for logging timings
+    let logTimingsKey;
+    if (this.listOfLayerEntryConfig.length > 0) logTimingsKey = `${this.mapId} | ${this.listOfLayerEntryConfig[0].layerPath}`;
 
-      // Get additional service and await
-      await this.getAdditionalServiceDefinition();
+    // Log
+    if (logTimingsKey) logger.logMarkerStart(logTimingsKey);
 
-      // Log the time it took thus far
-      if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to get additional service definition');
+    // Fetch and set the service metadata
+    await this.fetchAndSetServiceMetadata();
 
-      // Process list of layers and await
-      this.olRootLayer = await this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
-
-      // Log the time it took thus far
-      if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
-    } else {
-      // Raise error
-      throw new GeoViewLayerCreatedTwiceError(this as unknown as AbstractGVLayer, this.mapId);
-    }
-  }
-
-  /** ***************************************************************************************************************************
-   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
-   */
-  protected async getAdditionalServiceDefinition(): Promise<void> {
-    try {
-      await this.fetchServiceMetadata();
-      if (this.listOfLayerEntryConfig.length) await this.validateAndExtractLayerMetadata();
-    } catch (error) {
-      // Log
-      logger.logError(error);
-    }
-  }
-
-  /** ***************************************************************************************************************************
-   * This method Validate the list of layer configs and extract them in the geoview instance.
-   */
-  async validateAndExtractLayerMetadata(): Promise<void> {
-    try {
+    // If layers, validate the metadata
+    if (this.listOfLayerEntryConfig.length) {
       // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
       this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+
+      // Process the layer entry metadata for each layer entry
       await this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig);
+    }
+
+    // Log the time it took thus far
+    if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to get additional service definition');
+
+    // Process list of layers and await
+    this.olRootLayer = await this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+
+    // Log the time it took thus far
+    if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
+  }
+
+  /**
+   * This method reads the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
+   * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
+   */
+  async fetchAndSetServiceMetadata(): Promise<void> {
+    try {
+      // If there's a metadata access path
+      if (this.metadataAccessPath) {
+        // Log
+        logger.logDebug(`LAYERS - 3 - Fetching and setting service metadata for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
+
+        // Process and, yes, keep the await here, because we want to make extra sure the onFetchAndSetServiceMetadata is
+        // executed asynchronously, even if the implementation of the overriden method is synchronous.
+        // All so that the try/catch works nicely here.
+        await this.onFetchAndSetServiceMetadata();
+      }
     } catch (error) {
-      // Log
-      logger.logError(error);
+      // If empty response error
+      if (error instanceof EmptyResponseError) {
+        // eslint-disable-next-line no-ex-assign
+        error = new GeoViewLayerError(this.mapId, this.geoviewLayerId, 'Metadata was empty');
+      }
+
+      // Set the layer status to error
+      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, `Unable to fetch and read metadata | ${error}`);
     }
   }
 
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
+  /**
+   * Overridable method to read the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
+   * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
    */
-  protected async fetchServiceMetadata(): Promise<void> {
-    if (this.metadataAccessPath) {
-      try {
-        const url = this.metadataAccessPath.toLowerCase().endsWith('json') ? this.metadataAccessPath : `${this.metadataAccessPath}?f=json`;
-        const response = await fetch(url);
-        const metadataJson: TypeJsonObject = await response.json();
-        if (!metadataJson) this.metadata = null;
-        else {
-          this.metadata = metadataJson;
-          const copyrightText = this.metadata.copyrightText as string;
-          const attributions = this.getAttributions();
-          if (copyrightText && !attributions.includes(copyrightText)) {
-            // Add it
-            attributions.push(copyrightText);
-            this.setAttributions(attributions);
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected onFetchAndSetServiceMetadata(): Promise<void> {
+    // Default, no metadata fetching
+    return Promise.resolve();
+  }
+
+  /**
+   * Recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
+   *
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   */
+  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+    // Log
+    logger.logDebug(`LAYERS - 4 - Validating list of layer entry configs for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
+
+    // When no metadata is provided, all layers are considered valid.
+    if (!this.metadata) return;
+
+    // Redirect to overridable method
+    this.onValidateListOfLayerEntryConfig(listOfLayerEntryConfig);
+  }
+
+  /**
+   * Overridable method to validate the configuration of the layer entries to ensure that each layer is correctly defined.
+   */
+  protected onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+    // Loop on each layer entry config
+    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+      // If is a group layer
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        // Set the layer status to processing
+        layerConfig.setLayerStatusProcessing();
+
+        // Recursive call
+        this.onValidateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig);
+
+        // If empty list, for a group layer, not good
+        if (!layerConfig?.listOfLayerEntryConfig?.length) {
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+        }
+      } else {
+        try {
+          // Single entry layer
+          this.validateLayerEntryConfig(layerConfig);
+        } catch (error) {
+          // If abort error
+          if (AbortError.isAbortError(error)) {
+            // Cancelled.. skip (this is notably to support WMS special grouping)
+          } else {
+            // A validation of a layer entry config failed
+            this.addLayerLoadErrorError(layerConfig, error);
           }
         }
-      } catch (error) {
-        // Log
-        logger.logError(error);
-        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
-    }
+    });
   }
 
-  /** ***************************************************************************************************************************
-   * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
-   * necessary, additional code can be executed in the child method to complete the layer configuration.
-   *
-   * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+  /**
+   * Validates the configuration of the layer entries to ensure that each layer is correctly defined.
+   * @param layerConfig - The layer entry config to validate
    */
-  protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void;
+  validateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+    // Set the layer status to processing
+    layerConfig.setLayerStatusProcessing();
 
-  /** ***************************************************************************************************************************
-   * This method processes recursively the metadata of each layer in the "layer list" configuration.
-   *
-   * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layers to process.
-   *
+    // Redirect to overridable method
+    this.onValidateLayerEntryConfig(layerConfig);
+  }
+
+  /**
+   * Overridable method to validate the configuration of the layer entries to ensure that each layer is correctly defined.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
+  protected onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+    // Override to perform a validation on the layer entry config
+  }
+
+  /**
+   * Recursively processes the metadata of each layer in the "layer list" configuration.
+   * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layers to process.
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async processListOfLayerEntryMetadata(listOfLayerEntryConfig: ConfigBaseClass[]): Promise<void> {
-    try {
-      const promisedAllLayerDone: Promise<ConfigBaseClass>[] = [];
-      for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
-        const layerConfig = listOfLayerEntryConfig[i];
-        if (layerEntryIsGroupLayer(layerConfig))
-          if (layerConfig.isMetadataLayerGroup) promisedAllLayerDone.push(this.#processMetadataGroupLayer(layerConfig));
-          // eslint-disable-next-line no-await-in-loop
-          else await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig);
-        else promisedAllLayerDone.push(this.processLayerMetadata(layerConfig as AbstractBaseLayerEntryConfig));
+    // Log
+    logger.logDebug(
+      `LAYERS - 4 - Processing list of layer entry metadata, building promises, for: ${this.geoviewLayerId}}`,
+      listOfLayerEntryConfig
+    );
+
+    // Create a promise for each metadata layer found throughout the recursive config
+    const allPromises: Promise<ConfigBaseClass>[] = [];
+    this.#processLayerMetadataRec(listOfLayerEntryConfig, allPromises);
+
+    // Wait for all the layers to be processed
+    const arrayOfLayerConfigs = await Promise.allSettled(allPromises);
+
+    // Log
+    logger.logDebug(
+      `LAYERS - 5 - Processing list of layer entry metadata, promises done, for: ${this.geoviewLayerId}`,
+      listOfLayerEntryConfig
+    );
+
+    // For each promise
+    arrayOfLayerConfigs.forEach((promise) => {
+      // If the promise fulfilled
+      if (promise.status === 'fulfilled') {
+        // When we get here, we know that the metadata (if the service provide some) are processed.
+        const layerConfig = promise.value;
+
+        //
+        // TODO: Refactor - Layers refactoring. Make it a super clear function when moving config information in the layer for real.
+        // TO.DOCONT: After this point(?) the layerConfig should be full static and the system should rely on the Layer class to do stuff.
+        //
+
+        // Save the style in the layer as we're done processing style found in metadata
+        if (layerConfig instanceof AbstractBaseLayerEntryConfig) this.setStyle(layerConfig.layerPath, layerConfig.layerStyle!);
+
+        // We need to signal to the layer sets that the 'processed' phase is done.
+        layerConfig.setLayerStatusProcessed();
+        this.#emitLayerEntryProcessed({ config: layerConfig });
+      } else {
+        // All reasons are 'GeoViewLayerLoadedFailedError', get the reason
+        const reason = promise.reason as GeoViewLayerLoadedFailedError;
+        this.addLayerLoadErrorError(reason.layerConfig, reason);
       }
-      const arrayOfLayerConfigs = await Promise.all(promisedAllLayerDone);
-      arrayOfLayerConfigs.forEach((layerConfig) => {
-        if (layerConfig.layerStatus === 'error') {
-          // TODO: refactor - create meaningful message and centralize dispatch for layer - config
-          // We do not log the error here, it will be trapped in setAllLayerStatusTo
-          const message = `Error while loading layer path ${layerConfig.layerPath} on map ${this.mapId}`;
-          throw new Error(message);
-        } else {
-          // When we get here, we know that the metadata (if the service provide some) are processed.
-
-          //
-          // TODO: Refactor - Layers refactoring. Make it a super clear function when moving config information in the layer for real.
-          // TO.DOCONT: After this point(?) the layerConfig should be full static and the system should rely on the Layer class to do stuff.
-          //
-          // Save the style in the layer as we're done processing style found in metadata
-          if (layerConfig instanceof AbstractBaseLayerEntryConfig) this.setStyle(layerConfig.layerPath, layerConfig.layerStyle!);
-
-          // We need to signal to the layer sets that the 'processed' phase is done.
-          // GV TODO: For the moment, be aware that the layerStatus setter is doing a lot of things behind the scene.
-          // GV       The layerStatus setter contains a lot of code and we will change it in favor of a method.
-          layerConfig.layerStatus = 'processed';
-          this.#emitLayerEntryProcessed({ config: layerConfig });
-        }
-      });
-    } catch (error) {
-      // Log
-      logger.logError(error);
-    }
+    });
   }
 
-  /** ***************************************************************************************************************************
-   * This method is used to process metadata group layer entries. These layers behave as a GeoView group layer and also as a data
-   * layer (i.e. they have extent, visibility and query flag definition). Metadata group layers can be identified by
-   * the presence of an isMetadataLayerGroup attribute set to true.
-   *
-   * @param {GroupLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<GroupLayerEntryConfig>} A promise that the vector layer configuration has its metadata and group layers processed.
-   * @private
+  /**
+   * Recursively gathers all the promises of layer metadata for all the layer entry configs.
+   * @param listOfLayerEntryConfig - The list of layer entry config currently being processed.
+   * @param promisesEntryMetadata - The gathered promises as the recursive function is called.
    */
-  async #processMetadataGroupLayer(layerConfig: GroupLayerEntryConfig): Promise<GroupLayerEntryConfig> {
-    try {
-      // TODO: Check - Does this call makes sense for a metadata group layer? I'm not sure the "TypeScript" works here?
-      // TO.DOCONT: Seems to be wrong type? I'm commenting line to see.. 2024-06-05
-      // await this.processLayerMetadata(layerConfig);
-      await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig!);
-      layerConfig.layerStatus = 'processed';
-      this.#emitLayerEntryProcessed({ config: layerConfig });
-      return layerConfig;
-    } catch (error) {
-      // Log
-      logger.logError(error);
-    }
-    return layerConfig;
+  #processLayerMetadataRec(listOfLayerEntryConfig: ConfigBaseClass[], promisesEntryMetadata: Promise<ConfigBaseClass>[]): void {
+    // For each layer entry in the config
+    listOfLayerEntryConfig.forEach((layerConfig) => {
+      // If is a group layer
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        // Add it
+        promisesEntryMetadata.push(Promise.resolve(layerConfig));
+
+        // Go recursively in the group
+        this.#processLayerMetadataRec(layerConfig.listOfLayerEntryConfig, promisesEntryMetadata);
+      } else {
+        // Not a group layer, process the layer metadata normally
+        promisesEntryMetadata.push(this.processLayerMetadata(layerConfig as AbstractBaseLayerEntryConfig));
+      }
+    });
   }
 
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
-   * layer's configuration when applicable.
-   *
+  /**
+   * Processes the layer metadata. It will fill the empty outfields and aliasFields properties of the
+   * layer configuration when applicable.
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
    * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    if (!layerConfig.source) layerConfig.source = {};
-    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: false };
+  async processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    try {
+      // Process and, yes, keep the await here, because we want to make extra sure the onProcessLayerMetadata is
+      // executed asynchronously, even if the implementation of the overriden method is synchronous.
+      // All so that the try/catch works nicely here.
+      return await this.onProcessLayerMetadata(layerConfig);
+    } catch (error) {
+      // Raise higher
+      throw new GeoViewLayerLoadedFailedError(this.mapId, layerConfig, error as string);
+    }
+  }
 
+  /**
+   * Overridable method to process a layer entry and return a Promise of an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Override this function to process layer metadata
     return Promise.resolve(layerConfig);
   }
 
-  /** ***************************************************************************************************************************
-   * Process recursively the list of layer Entries to create the layers and the layer groups.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries to process.
-   * @param {LayerGroup} layerGroup Optional layer group to use when we have many layers. The very first call to
+  /**
+   * Recursively processes the list of layer Entries to create the layers and the layer groups.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entries to process.
+   * @param {LayerGroup} layerGroup - Optional layer group to use when we have many layers. The very first call to
    *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
-   *
-   * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
+   * @returns {Promise<BaseLayer | undefined>} The promise that the layers were processed.
+   * @private
    */
-  async processListOfLayerEntryConfig(
+  async #processListOfLayerEntryConfig(
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | undefined> {
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - processListOfLayerEntryConfig', listOfLayerEntryConfig);
 
+    // Log
+    logger.logDebug(`LAYERS - 7 - Loading list of layer entry for the Open Layer, for: ${this.geoviewLayerId}`, listOfLayerEntryConfig);
+
     try {
       if (listOfLayerEntryConfig.length === 0) return undefined;
       if (listOfLayerEntryConfig.length === 1) {
-        if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
-          const groupReturned = await this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup);
+        // Get the config to process
+        const layerConfig = listOfLayerEntryConfig[0];
+
+        // If working on a group layer
+        if (layerEntryIsGroupLayer(layerConfig)) {
+          const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
+          const groupReturned = await this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup);
           if (groupReturned) {
             if (layerGroup) layerGroup.getLayers().push(groupReturned);
             return groupReturned;
           }
-          this.layerLoadError.push({
-            layer: listOfLayerEntryConfig[0].layerPath,
-            layerName: listOfLayerEntryConfig[0].layerName,
-            loggerMessage: `Unable to create group layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
-          });
+
+          // Add a layer load error
+          this.addLayerLoadError(layerConfig, `Unable to create group layer ${layerConfig.layerPath} on map ${this.mapId}`);
           return undefined;
         }
 
-        if ((listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig).layerStatus === 'error') return undefined;
-        const { layerPath } = listOfLayerEntryConfig[0];
-        const baseLayer = await this.processOneLayerEntry(listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig);
-        if (baseLayer) {
-          // FIXME: Temporary patch to keep the behavior until those layer classes don't exist. Looks like we won't need this anymore afterall!
-          // GV Why did we need this? For the layer-sets?
-          // MapEventProcessor.getMapViewerLayerAPI(this.mapId).registerLayerConfigUpdate(
-          //   listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig
-          // );
+        if (layerConfig.layerStatus === 'error') return undefined;
 
-          if (layerGroup) layerGroup!.getLayers().push(baseLayer!);
+        try {
+          // Process entry and catch possible error
+          const baseLayer = await this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig);
+          if (layerGroup) layerGroup.getLayers().push(baseLayer);
           return layerGroup || baseLayer;
+        } catch (error) {
+          // Add a layer load error
+          this.addLayerLoadErrorError(layerConfig, error);
+          return undefined;
         }
-        this.layerLoadError.push({
-          layer: listOfLayerEntryConfig[0].layerPath,
-          layerName: listOfLayerEntryConfig[0].layerName,
-          loggerMessage: `Unable to create layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
-        });
-        this.getLayerConfig(layerPath)!.layerStatus = 'error';
-        return undefined;
       }
+
+      // HERE, listOfLayerEntryConfig.length is >= 2
 
       if (!layerGroup) {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
+        // eslint-disable-next-line no-param-reassign
         layerGroup = this.createLayerGroup(
-          (listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig).parentLayerConfig as TypeLayerEntryConfig,
+          listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
           listOfLayerEntryConfig[0].initialSettings!
         );
       }
+
       const promiseOfLayerCreated: Promise<BaseLayer | undefined>[] = [];
-      listOfLayerEntryConfig.forEach((layerConfig, i) => {
+      listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) {
-          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i], listOfLayerEntryConfig[i].initialSettings!);
-          promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup));
-        } else if ((listOfLayerEntryConfig[i] as AbstractBaseLayerEntryConfig).layerStatus === 'error')
+          const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
+          promiseOfLayerCreated.push(this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup));
+        } else if (layerConfig.layerStatus === 'error') {
           promiseOfLayerCreated.push(Promise.resolve(undefined));
-        else {
-          promiseOfLayerCreated.push(this.processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig));
-        }
-      });
-      const listOfLayerCreated = await Promise.all(promiseOfLayerCreated);
-      listOfLayerCreated.forEach((baseLayer, i) => {
-        const { layerPath } = listOfLayerEntryConfig[i];
-        if (baseLayer) {
-          // FIXME: Temporary patch to keep the behavior until those layer classes don't exist. Looks like we won't need this anymore afterall!
-          // GV Why did we need this? For the layer-sets?
-          // const layerConfig = baseLayer?.get('layerConfig') as AbstractBaseLayerEntryConfig;
-          // if (layerConfig) {
-          //   if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
-          //     MapEventProcessor.getMapViewerLayerAPI(this.mapId).registerLayerConfigUpdate(layerConfig);
-          //   }
-          layerGroup!.getLayers().push(baseLayer);
-          // }
         } else {
-          this.layerLoadError.push({
-            layer: listOfLayerEntryConfig[i].layerPath,
-            layerName: listOfLayerEntryConfig[i].layerName,
-            loggerMessage: `Unable to create ${
-              layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? CONST_LAYER_ENTRY_TYPES.GROUP : ''
-            } layer ${listOfLayerEntryConfig[i].layerPath} on map ${this.mapId}`,
+          // Create promise and catch possible error
+          const promise = this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig).catch((error) => {
+            // Add a layer load error
+            this.addLayerLoadErrorError(layerConfig, error);
+            return undefined;
           });
-          this.getLayerConfig(layerPath)!.layerStatus = 'error';
+
+          // Add the promise
+          promiseOfLayerCreated.push(promise);
         }
       });
 
-      return layerGroup!;
+      // Wait until all promises resolve
+      const listOfLayerCreated = await Promise.all(promiseOfLayerCreated);
+
+      // For each resolved promise result
+      // TODO: Check - Do we still need that? This whole function is very confusing to me. I've tried adding a lot of
+      // TO.DOCONT: comments and cleared the logic, but there's likely more work to be done here...
+      // TO.DOCONT: At least now the real error exception that gets thrown gets logged in console.
+      // TO.DOCONT: Code in the else commented out for now, to see, 2025-04-04
+      listOfLayerCreated.forEach((baseLayer) => {
+        if (baseLayer) {
+          layerGroup!.getLayers().push(baseLayer);
+        } // else {
+        //  this.layerLoadError.push({
+        //    layer: listOfLayerEntryConfig[i].layerPath,
+        //    layerName: listOfLayerEntryConfig[i].layerName,
+        //    loggerMessage: `Unable to create ${
+        //      layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? CONST_LAYER_ENTRY_TYPES.GROUP : ''
+        //    } layer ${listOfLayerEntryConfig[i].layerPath} on map ${this.mapId}`,
+        //  });
+
+        //  // Set the layer status to error
+        //  this.getLayerConfig(layerPath)!.setLayerStatusError();
+        // }
+      });
+
+      return layerGroup;
     } catch (error) {
       // Log
       logger.logError(error);
+
+      // For now, we return undefined when a layer entry config failed..
       return undefined;
     }
   }
 
-  /** ***************************************************************************************************************************
-   * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
-   *
+  /**
+   * Processes a layer entry and returns a Promise of an Open Layer Base Layer object.
+   * This method sets the 'loading' status on the layer config and then calls the overridable method 'onProcessOneLayerEntry'.
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   *
-   * @returns {Promise<BaseLayer | undefined>} The GeoView layer that has been created.
+   * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
    */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
-    // GV IMPORTANT: The processOneLayerEntry method of all the children must call this method to ensure that the flow of
-    // GV            layerStatus values is correctly sequenced.
-    layerConfig.layerStatus = 'loading';
-    return Promise.resolve(undefined);
+  async #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer> {
+    // Indicate that the layer config has entered the 'loading' status
+    layerConfig.setLayerStatusLoading();
+
+    try {
+      // Process and, yes, keep the await here, because we want to make extra sure the onProcessOneLayerEntry is
+      // executed asynchronously, even if the implementation of the overriden method is synchronous.
+      // All so that the try/catch works nicely here.
+      return await this.onProcessOneLayerEntry(layerConfig);
+    } catch (error) {
+      // Raise higher
+      throw new GeoViewLayerLoadedFailedError(this.mapId, layerConfig, error as string);
+    }
   }
 
-  /** ***************************************************************************************************************************
+  /**
+   * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
+   */
+  protected abstract onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer>;
+
+  /**
    * Creates a layer group.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    * @param {TypeLayerInitialSettings } initialSettings Initial settings to apply to the layer.
@@ -694,7 +769,7 @@ export abstract class AbstractGeoViewLayer {
    * Emits a layer-specific message event with localization support
    * @protected
    * @param {string} messageKey - The key used to lookup the localized message OR message
-   * @param {string[]} messageParams - Array of parameters to be interpolated into the localized message
+   * @param {string[] | undefined} messageParams - Array of parameters to be interpolated into the localized message
    * @param {SnackbarType} messageType - The message type
    * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
    * @returns {void}
@@ -709,7 +784,12 @@ export abstract class AbstractGeoViewLayer {
    *
    * @fires LayerMessageEvent
    */
-  protected emitMessage(messageKey: string, messageParams: string[], messageType = 'info' as SnackbarType, notification = false): void {
+  protected emitMessage(
+    messageKey: string,
+    messageParams: string[] | undefined = [],
+    messageType: SnackbarType = 'info' as SnackbarType,
+    notification: boolean = false
+  ): void {
     this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
   }
 
@@ -719,38 +799,96 @@ export abstract class AbstractGeoViewLayer {
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  onError(layerConfig: AbstractBaseLayerEntryConfig): void {
-    // Set error
-    layerConfig.layerStatus = 'error';
+  protected onError(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // Set the layer status to error
+    layerConfig.setLayerStatusError();
   }
 
-  /** ***************************************************************************************************************************
-   * Set the layerStatus code of all layers in the listOfLayerEntryConfig.
-   *
-   * @param {TypeLayerStatus} newStatus The new status to assign to the layers.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration.
-   * @param {string} errorMessage The error message.
+  /**
+   * Adds an Error in the internal list of errors for a layer being loaded.
+   * If the Error is already a GeoViewLayerLoadedFailedError, that Error is added as-is.
+   * Otherwise, a new GeoViewLayerLoadedFailedError will be added in the internal list.
+   * The layerConfig also gets its status set to error in the process.
+   */
+  addLayerLoadErrorError(layerConfig: TypeLayerEntryConfig, error: unknown): void {
+    // If it's already a GeoViewLayerLoadedFailedError
+    if (error instanceof GeoViewLayerLoadedFailedError) {
+      // Redirect
+      this.#addLayerLoadErrorGo(layerConfig, error);
+    } else {
+      // Redirect
+      this.addLayerLoadError(layerConfig, (error as Error).message);
+    }
+  }
+
+  /**
+   * Adds an new GeoViewLayerLoadedFailedError with the given message in the internal list of errors for a layer being loaded.
+   * The layerConfig also gets its status set to error in the process.
+   */
+  addLayerLoadError(layerConfig: TypeLayerEntryConfig, message: string): void {
+    // Redirect
+    this.#addLayerLoadErrorGo(layerConfig, new GeoViewLayerLoadedFailedError(this.mapId, layerConfig, message));
+  }
+
+  /**
+   * Adds a GeoViewLayerLoadedFailedError in the internal list of errors for a layer being loaded.
+   * It also sets the layer status to error.
+   */
+  #addLayerLoadErrorGo(layerConfig: TypeLayerEntryConfig, error: GeoViewLayerLoadedFailedError): void {
+    // Add the error to the list
+    this.layerLoadError.push(error);
+
+    // Log it straight right away at the moment it happened
+    let { message } = error;
+    if (error.cause) message += ` | ${error.cause}`;
+    logger.logError(message);
+
+    // Set the layer status to error
+    layerConfig.setLayerStatusError();
+  }
+
+  /**
+   * Throws an aggregate error based on the 'layerLoadError' list, if any.
+   */
+  throwAggregatedLayerLoadErrors(): void {
+    // If any errors compiled up
+    if (this.layerLoadError.length > 0) {
+      // Throw an aggregated exception
+      throw new AggregateError(this.layerLoadError, 'Multiple errors happened. See this.layerLoadError for the list.');
+    }
+  }
+
+  /**
+   * Sets the layerStatus code of all layers in the listOfLayerEntryConfig and the children.
+   * If the error status of the layer entry is already 'error' the new status isn't applied.
+   * If the new status is error, compile the error in the 'layerLoadError' using 'errorMessage' as the text.
+   * @param {TypeLayerStatus} newStatus - The new status to assign to the layers.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer's configuration.
+   * @param {string} errorMessage - The error message.
    */
   setAllLayerStatusTo(newStatus: TypeLayerStatus, listOfLayerEntryConfig: TypeLayerEntryConfig[], errorMessage?: string): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig)) this.setAllLayerStatusTo(newStatus, layerConfig.listOfLayerEntryConfig, errorMessage);
-      else {
+      // If the layer entry is a group
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        // Recursively set the status to the children
+        this.setAllLayerStatusTo(newStatus, layerConfig.listOfLayerEntryConfig, errorMessage);
+      } else {
+        // If already set to error, don't touch it
         if (layerConfig.layerStatus === 'error') return;
-        layerConfig.layerStatus = newStatus;
+
+        // Update the layer status
+        layerConfig.setLayerStatus(newStatus);
+
+        // If the status is error
         if (newStatus === 'error') {
-          const { layerPath, layerName } = layerConfig;
-          const useLayerName = layerName === undefined ? layerConfig.geoviewLayerConfig.geoviewLayerName : layerName;
-          this.layerLoadError.push({
-            layer: layerPath,
-            layerName: useLayerName || layerPath,
-            loggerMessage: `${errorMessage} for layer ${layerPath} of map ${this.mapId}`,
-          });
+          // Compile the error
+          this.addLayerLoadError(layerConfig, errorMessage || 'Generic error happened on layer');
         }
       }
     });
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Recursively processes the list of layer entries to see if all of them are greater than or equal to the provided layer status.
    * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
    * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
@@ -852,7 +990,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {LayerRequestingEvent} event The event to emit
    * @private
    */
-  protected emitLayerRequesting(event: LayerRequestingEvent): (BaseLayer | undefined)[] {
+  protected emitLayerRequesting(event: LayerRequestingEvent): BaseLayer[] {
     // Emit the event for all handlers
     return EventHelper.emitEvent(this, this.#onLayerRequestingHandlers, event);
   }
@@ -979,6 +1117,8 @@ export abstract class AbstractGeoViewLayer {
   // #endregion
 }
 
+// #region EVENT DEFINITIONS
+
 /**
  * Define an event for the delegate
  */
@@ -1029,7 +1169,7 @@ export type LayerRequestingEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerRequestingDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerRequestingEvent, BaseLayer | undefined>;
+type LayerRequestingDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerRequestingEvent, BaseLayer>;
 
 /**
  * Define an event for the delegate
@@ -1062,8 +1202,6 @@ type LayerStyleChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerSt
 export type LayerStyleChangedEvent = {
   // The style
   style: TypeLayerStyleConfig;
-
-  // TODO: Refactor - After layers refactoring, remove the layerPath parameter here
   layerPath: string;
 };
 
@@ -1096,6 +1234,8 @@ export type LayerMessageEvent = {
   notification: boolean;
 };
 
+// #endregion
+
 export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
   legend: HTMLCanvasElement | null;
   styles?: TypeWmsLegendStyle[];
@@ -1119,7 +1259,7 @@ export type TypeStyleRepresentation = {
 };
 export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
 
-/** ******************************************************************************************************************************
+/**
  * GeoViewAbstractLayers types
  */
 

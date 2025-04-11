@@ -45,6 +45,7 @@ import {
 } from './geoview-renderer-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -176,7 +177,7 @@ async function createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement |
       const drawingCanvas = document.createElement('canvas');
       drawingCanvas.width = width;
       drawingCanvas.height = height;
-      const drawingContext = drawingCanvas.getContext('2d')!;
+      const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
       drawingContext.globalAlpha = iconStyle.getOpacity();
       drawingContext.drawImage(image, 0, 0);
       return drawingCanvas;
@@ -202,7 +203,7 @@ function createPointCanvas(pointStyle?: Style): HTMLCanvasElement {
   const drawingCanvas = document.createElement('canvas');
   drawingCanvas.width = width + 4;
   drawingCanvas.height = height + 4;
-  const drawingContext = toContext(drawingCanvas.getContext('2d')!);
+  const drawingContext = toContext(drawingCanvas.getContext('2d', { willReadFrequently: true })!);
   drawingContext.setStyle(pointStyle!);
   drawingContext.setTransform([1, 0, 0, 1, 0, 0]);
   drawingContext.drawGeometry(new Point([drawingCanvas.width / 2, drawingCanvas.width / 2]));
@@ -220,7 +221,7 @@ function createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
   const drawingCanvas = document.createElement('canvas');
   drawingCanvas.width = LEGEND_CANVAS_WIDTH;
   drawingCanvas.height = LEGEND_CANVAS_HEIGHT;
-  const context = drawingCanvas.getContext('2d')!;
+  const context = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
   const gradient = context.createLinearGradient(0, drawingCanvas.height, drawingCanvas.width, 0);
   gradient.addColorStop(0, '#7f7f7f');
   gradient.addColorStop(0.667, '#ffffff');
@@ -250,7 +251,7 @@ function createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
   const drawingCanvas = document.createElement('canvas');
   drawingCanvas.width = LEGEND_CANVAS_WIDTH;
   drawingCanvas.height = LEGEND_CANVAS_HEIGHT;
-  const context = drawingCanvas.getContext('2d')!;
+  const context = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
   const gradient = context.createLinearGradient(0, drawingCanvas.height, drawingCanvas.width, 0);
   gradient.addColorStop(0, '#7f7f7f');
   gradient.addColorStop(0.667, '#ffffff');
@@ -487,7 +488,7 @@ function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayTyp
           else dataStack.push({ nodeType: NodeType.variable, nodeValue: operand.nodeValue.toLowerCase() });
           break;
         default:
-          throw new Error(`unknown operator error`);
+          throw new NotImplementedError(`unknown operator error`);
       }
     }
   }
@@ -868,7 +869,7 @@ function processPaternFill(settings: TypePolygonVectorConfig, fillPaternLines: F
   const drawingCanvas = document.createElement('canvas');
   drawingCanvas.width = paternSize * 2;
   drawingCanvas.height = paternSize * 2;
-  const context = drawingCanvas.getContext('2d');
+  const context = drawingCanvas.getContext('2d', { willReadFrequently: true });
   context!.strokeStyle = settings.color;
   context!.lineCap = 'butt';
   context!.lineWidth = settings.paternWidth !== undefined ? settings.paternWidth : 1;
@@ -884,7 +885,7 @@ function processPaternFill(settings: TypePolygonVectorConfig, fillPaternLines: F
   const outputCanvas = document.createElement('canvas');
   outputCanvas.width = paternSize;
   outputCanvas.height = paternSize;
-  const outputContext = outputCanvas.getContext('2d');
+  const outputContext = outputCanvas.getContext('2d', { willReadFrequently: true });
   outputContext!.putImageData(context!.getImageData(paternSize / 2, paternSize / 2, paternSize, paternSize), 0, 0);
 
   fillOptions.color = outputContext!.createPattern(outputCanvas, 'repeat');

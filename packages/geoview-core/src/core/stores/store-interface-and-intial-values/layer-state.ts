@@ -24,6 +24,7 @@ import { LegendEventProcessor } from '@/api/event-processors/event-processor-chi
 import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { TypeLayerControls } from '@/api/config/types/map-schema-types';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 // #region INTERFACES & TYPES
 
@@ -138,7 +139,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         }
 
         // Not an EsriDynamic layer
-        return Promise.reject(new Error('Not an EsriDynamic layer'));
+        return Promise.reject(new GeoViewError(get().mapId, 'Not an EsriDynamic layer'));
       },
 
       /**
