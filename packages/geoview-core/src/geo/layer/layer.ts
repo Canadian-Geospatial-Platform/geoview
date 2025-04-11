@@ -522,7 +522,7 @@ export class LayerApi {
   }
 
   /**
-   * Logs and shows the error(s).
+   * Show the errors that happened during layers loading.
    * If it's an aggregate error, log and show all of them.
    * If it's a regular error, log and show only that error.
    * @param error - The error to log and show.
@@ -545,9 +545,6 @@ export class LayerApi {
       if (error instanceof GeoViewLayerLoadedFailedError) {
         layerPathOrId = error.layerConfig.layerPath;
       }
-
-      // Log in the console
-      logger.logError(errorMessage);
 
       // Show error
       this.mapViewer.notifications.showError(errorMessage, [], true);
