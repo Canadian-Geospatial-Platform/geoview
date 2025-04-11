@@ -297,12 +297,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
 
-    // render footer bar tabs
+    // render app bar tabs
     const appBarConfigTabs = appBarConfig?.tabs.core ?? [];
     if (footerBarConfig?.tabs.core === undefined && !appBarConfigTabs.includes('guide')) {
       // inject guide tab if no footer bar config
       appBarConfigTabs.push('guide');
     }
+
     appBarConfigTabs
       .filter((tab) => CV_DEFAULT_APPBAR_TABS_ORDER.includes(tab) && memoPanels[tab])
       .map((tab): [IconButtonPropsExtend, TypePanelProps, string] => {
@@ -326,7 +327,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         };
         return [button, panel, tab];
       })
-      .forEach((footerGroup) => appBarApi.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
+      .forEach((appBarGroup) => appBarApi.createAppbarPanel(appBarGroup[0], appBarGroup[1], appBarGroup[2]));
   }, [footerBarConfig?.tabs.core, appBarConfig?.tabs.core, appBarApi, t, memoPanels, geoviewElement, getPanelWidth]);
 
   // #endregion
@@ -392,7 +393,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
       <Box sx={sxClasses.appBarButtons}>
         {renderButtonGroup(topGroupNames)}
         <Box sx={sxClasses.versionButtonDiv}>
-          {renderButtonGroup(bottomGroupNames)}
           {appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic' && (
             <List sx={sxClasses.appBarList}>
               <ListItem>
@@ -400,6 +400,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
               </ListItem>
             </List>
           )}
+          {renderButtonGroup(bottomGroupNames)}
           <List sx={sxClasses.appBarList}>
             {interaction === 'dynamic' && <hr />}
             <ListItem>

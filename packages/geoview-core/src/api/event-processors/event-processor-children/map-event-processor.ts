@@ -995,7 +995,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // If layer IDs are in the config, use them
     if (homeView!.layerIds) extent = this.getMapViewerLayerAPI(mapId).getExtentOfMultipleLayers(homeView!.layerIds);
 
-    if (extent.length !== 4) extent = Projection.transformFromLonLat(CV_MAP_EXTENTS[currProjection], `EPSG:${currProjection}`);
+    // If extent is not valid, take the default one for the current projection
+    if (extent.length !== 4 || extent.includes(Infinity))
+      extent = Projection.transformExtentFromProj(CV_MAP_EXTENTS[currProjection], `EPSG:4326`, `EPSG:${currProjection}`);
     return this.zoomToExtent(mapId, extent, options);
   }
 
@@ -1035,12 +1037,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Set the right zoom (Infinity will act as a no change in zoom level)
     let layerZoom = Infinity;
-    if (layerMinZoom !== -Infinity && layerMinZoom >= mapZoom!) layerZoom = layerMinZoom + 0.1;
-    else if (layerMaxZoom !== Infinity && layerMaxZoom <= mapZoom!) layerZoom = layerMaxZoom - 0.1;
+    if (layerMinZoom !== -Infinity && layerMinZoom >= mapZoom!) layerZoom = layerMinZoom + 0.25;
+    else if (layerMaxZoom !== Infinity && layerMaxZoom <= mapZoom!) layerZoom = layerMaxZoom - 0.25;
 
     // Change view to go to proper zoom centered in the middle of layer extent
     // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
-    // Check if the map center is already ib the layer extent and if so, do not center
+    // Check if the map center is already in the layer extent and if so, do not center
     const layerExtent = (geoviewLayer! as AbstractGVLayer).getBounds();
     const centerExtent =
       layerExtent && layerMinZoom > mapZoom! && !isPointInExtent(view.getCenter()!, layerExtent)

@@ -7,7 +7,7 @@ import { SxStyles } from '@/ui/style/types';
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, footerPanelResizeValue: number): SxStyles => ({
+export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, footerPanelResizeValue: number, mapHeight: number): SxStyles => ({
   rightButtonsContainer: {
     display: 'flex',
     flexDirection: 'row',
@@ -27,7 +27,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, footerPanel
   rightGridContentHeight: {
     zIndex: isMapFullScreen ? 'unset' : 100, // should be is full screen fialog
     '& > div:first-of-type': {
-      maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : '585px', // maxHeight only when not fullscreen
+      maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : `calc(${mapHeight}px - 245px)`, // maxHeight only when not fullscreen
       height: isMapFullScreen ? 'fit-content' : undefined, // height only when fullscreen (- padding)
       overflowY: 'auto',
     },
