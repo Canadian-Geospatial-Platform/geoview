@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { CanceledError } from 'axios';
 
 import ImageLayer from 'ol/layer/Image';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
@@ -10,8 +10,9 @@ import { Extent } from 'ol/extent';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { xmlToJson } from '@/core/utils/utilities';
-import { DateMgt } from '@/core/utils/date-mgt';
+import { AbortError } from '@/core/exceptions/core-exceptions';
 import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
@@ -20,6 +21,7 @@ import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raste
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
 import { WMS_PROXY_URL } from '@/app';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Manages a WMS layer.
@@ -28,9 +30,6 @@ import { WMS_PROXY_URL } from '@/app';
  * @class GVWMS
  */
 export class GVWMS extends AbstractGVRaster {
-  // TODO: Refactor - Layers refactoring. Fix the WMSStyles initialization here
-  WMSStyles = [];
-
   /**
    * Constructs a GVWMS layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
@@ -39,9 +38,6 @@ export class GVWMS extends AbstractGVRaster {
    */
   public constructor(mapId: string, olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig, layerCapabilities: TypeJsonObject) {
     super(mapId, olSource, layerConfig);
-
-    // Validate
-    if (!layerCapabilities) throw new Error('No layer capabilities were provided');
 
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageWMS> = {
@@ -85,33 +81,52 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the return of feature information at a given pixel location.
-   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {Pixel} location - The pixel coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtPixel(
+    location: Pixel,
+    queryGeometry: boolean = true,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Redirect to getFeatureInfoAtCoordinate
-    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location));
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), queryGeometry, abortController);
   }
 
   /**
    * Overrides the return of feature information at a given coordinate.
    * @param {Coordinate} location - The coordinate that will be used by the query.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtCoordinate(
+    location: Coordinate,
+    queryGeometry: boolean = true,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Transform coordinate from map project to lntlat
     const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
 
     // Redirect to getFeatureInfoAtLongLat
-    return this.getFeatureInfoAtLongLat(projCoordinate);
+    return this.getFeatureInfoAtLongLat(projCoordinate, queryGeometry, abortController);
   }
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override async getFeatureInfoAtLongLat(lnglat: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override async getFeatureInfoAtLongLat(
+    lnglat: Coordinate,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry: boolean = true,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     try {
       // If the layer is invisible
       if (!this.getVisible()) return [];
@@ -146,7 +161,12 @@ export class GVWMS extends AbstractGVRaster {
         if (featureInfoFormat.includes('text/xml' as TypeJsonObject)) infoFormat = 'text/xml';
         else if (featureInfoFormat.includes('text/html' as TypeJsonObject)) infoFormat = 'text/html';
         else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
-        else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml, text/html and text/plain for WMS services.');
+        else {
+          throw new GeoViewError(
+            this.getMapId(),
+            'Parameter info_format of GetFeatureInfo only support text/xml, text/html and text/plain for WMS services.'
+          );
+        }
 
       const wmsSource = this.getOLSource();
       const viewResolution = this.getMapViewer().getView().getResolution()!;
@@ -155,7 +175,9 @@ export class GVWMS extends AbstractGVRaster {
       });
       if (featureInfoUrl) {
         let featureMember: TypeJsonObject | undefined;
-        const response = await axios(featureInfoUrl);
+
+        // Perform query
+        const response = await axios(featureInfoUrl, { signal: abortController?.signal });
         if (infoFormat === 'text/xml') {
           const xmlDomResponse = new DOMParser().parseFromString(response.data, 'text/xml');
           const jsonResponse = xmlToJson(xmlDomResponse);
@@ -196,9 +218,15 @@ export class GVWMS extends AbstractGVRaster {
 
       return [];
     } catch (error) {
-      // Log
-      logger.logError('gv-wms.getFeatureInfoAtLongLat()\n', error);
-      return null;
+      // If cancelled
+      if (error instanceof CanceledError) {
+        // Raise an Abort Error to standardize the error with an error coming from
+        // a fetch() instead of axios (to standardize support accross layer classes)
+        throw new AbortError('Cancelled', abortController?.signal);
+      }
+
+      // Raise higher
+      throw error;
     }
   }
 
@@ -215,28 +243,13 @@ export class GVWMS extends AbstractGVRaster {
       const legendImage = await this.#getLegendImage(layerConfig!);
       const styleLegends: TypeWmsLegendStyle[] = [];
 
-      // If more than 1
-      if (this.WMSStyles.length > 1) {
-        for (let i = 0; i < this.WMSStyles.length; i++) {
-          // TODO: refactor - does this await in a loop may have an impact on performance?
-          // TO.DOCONT: In this case here, when glancing at the code, the only reason to await would be if the order that the styleLegend
-          // TO.DOCONT: get added to the styleLegends array MUST be the same order as they are in the WMSStyles array (as in they are 2 arrays with same indexes pointers).
-          // TO.DOCONT: Without the await, WMSStyles[2] stuff could be associated with something in styleLegends[1] position for example (1<>2).
-          // TO.DOCONT: If we remove the await, be mindful of that (maybe add this remark in the TODO?).
-          // TO.DOCONT: In any case, I'd suggest to remove the await indeed, for performance, and rewrite the code to make it work (probably not 2 distinct arrays).
-          // eslint-disable-next-line no-await-in-loop
-          const styleLegend = await this.#getStyleLegend(layerConfig!, this.WMSStyles[i]);
-          styleLegends.push(styleLegend);
-        }
-      }
-
       if (legendImage) {
         const image = await loadImage(legendImage as string);
         if (image) {
           const drawingCanvas = document.createElement('canvas');
           drawingCanvas.width = image.width;
           drawingCanvas.height = image.height;
-          const drawingContext = drawingCanvas.getContext('2d')!;
+          const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
           drawingContext.drawImage(image, 0, 0);
           legend = {
             type: CONST_LAYER_TYPES.WMS,
@@ -252,6 +265,7 @@ export class GVWMS extends AbstractGVRaster {
         legend: null,
         styles: styleLegends.length > 1 ? styleLegends : undefined,
       };
+
       return legend;
     } catch (error) {
       // Log
@@ -397,53 +411,6 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Gets the legend info of a style.
-   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
-   * @param {string} wmsStyle - The wms style name
-   * @returns {Promise<TypeWmsLegendStylel>} A promise of a TypeWmsLegendStyle.
-   * @private
-   */
-  async #getStyleLegend(layerConfig: OgcWmsLayerEntryConfig, wmsStyle: string): Promise<TypeWmsLegendStyle> {
-    try {
-      const chosenStyle: string | undefined = wmsStyle;
-      let styleLegend: TypeWmsLegendStyle;
-      const styleLegendImage = await this.#getLegendImage(layerConfig!, chosenStyle);
-      if (!styleLegendImage) {
-        styleLegend = {
-          name: wmsStyle,
-          legend: null,
-        };
-        return styleLegend;
-      }
-
-      const styleImage = await loadImage(styleLegendImage as string);
-      if (styleImage) {
-        const drawingCanvas = document.createElement('canvas');
-        drawingCanvas.width = styleImage.width;
-        drawingCanvas.height = styleImage.height;
-        const drawingContext = drawingCanvas.getContext('2d')!;
-        drawingContext.drawImage(styleImage, 0, 0);
-        styleLegend = {
-          name: wmsStyle,
-          legend: drawingCanvas,
-        };
-        return styleLegend;
-      }
-
-      return {
-        name: wmsStyle,
-        legend: null,
-      } as TypeWmsLegendStyle;
-    } catch (error) {
-      logger.logError('gv-wms.#getStyleLegend()\n', error);
-      return {
-        name: wmsStyle,
-        legend: null,
-      } as TypeWmsLegendStyle;
-    }
-  }
-
-  /**
    * Translates the get feature information result set to the TypeFeatureInfoEntry[] used by GeoView.
    * @param {TypeJsonObject} featureMember - An object formatted using the query syntax.
    * @param {Coordinate} clickCoordinate - The coordinate where the user has clicked.
@@ -541,39 +508,29 @@ export class GVWMS extends AbstractGVRaster {
    * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(filter: string, combineLegendFilter = true): void {
+  applyViewFilter(filter: string, combineLegendFilter: boolean = true): void {
+    // Log
+    logger.logTraceCore('GV-WMS - applyViewFilter', this.getLayerPath());
+
     const layerConfig = this.getLayerConfig();
     const olLayer = this.getOLLayer();
-
-    // Log
-    logger.logTraceCore('GVWMS - applyViewFilter', this.getLayerPath());
 
     // Get source
     const source = olLayer.getSource();
     if (source) {
-      let filterValueToUse = filter;
+      // Update the layer config on the fly (maybe not ideal to do this?)
       layerConfig.legendFilterIsOff = !combineLegendFilter;
       if (combineLegendFilter) layerConfig.layerFilter = filter;
 
-      if (filterValueToUse) {
-        filterValueToUse = filterValueToUse.replaceAll(/\s{2,}/g, ' ').trim();
+      if (filter) {
+        let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
         const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
         const dimension = queryElements[0].trim();
         filterValueToUse = queryElements[1].trim();
 
-        // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
-        const searchDateEntry = [
-          ...`${filterValueToUse} `.matchAll(/(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi),
-        ];
-        searchDateEntry.reverse();
-        searchDateEntry.forEach((dateFound) => {
-          // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
-          const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-          const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.getExternalFragmentsOrder(), reverseTimeZone);
-          filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
-            dateFound.index! + dateFound[0].length + 2
-          )}`;
-        });
+        // Parse the filter value to use
+        filterValueToUse = parseDateTimeValuesEsriImageOrWMS(filterValueToUse, this.getExternalFragmentsOrder());
+
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
         olLayer.changed();
 
@@ -586,11 +543,10 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds.
+   * Overrides the way to get the bounds for this layer type.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getBounds(): Extent | undefined {
+  override onGetBounds(): Extent | undefined {
     const layerConfig = this.getLayerConfig();
 
     // Get the layer config bounds

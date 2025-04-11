@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for sourceOptions-layerConfig. We keep it global...
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WKB as FormatWKB } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -12,7 +10,7 @@ import initSqlJs, { SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
@@ -24,7 +22,6 @@ import {
   TypePolygonVectorConfig,
   TypeFillStyle,
   CONST_LAYER_ENTRY_TYPES,
-  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -58,61 +55,15 @@ type TableInfo = {
   geometry_column_name: SqlValue;
 };
 
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoPackageFeatureLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is GEOPACKAGE. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsGeoPackage = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoPackageLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as a GeoPackage
- * if the type attribute of the verifyIfGeoViewLayer parameter is GEOPACKAGE. The type ascention
- * applies only to the true block of the if clause that use this function.
- *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewLayerIsGeoPackage = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is GeoPackage => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.GEOPACKAGE;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a GeoPackageLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOPACKAGE. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsGeoPackage = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is GeoPackageLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
-};
-
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
-/** ******************************************************************************************************************************
+/**
  * A class to add GeoPackage api feature layer.
  *
  * @exports
  * @class GeoPackage
  */
-// ******************************************************************************************************************************
 export class GeoPackage extends AbstractGeoViewVector {
-  /** ***************************************************************************************************************************
-   * Initialize layer
+  /**
+   * Constructs a GeoPackage Layer configuration processor.
    *
    * @param {string} mapId the id of the map
    * @param {TypeGeoPackageFeatureLayerConfig} layerConfig the layer configuration
@@ -121,151 +72,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.GEOPACKAGE, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
-   * Geopackages have no metadata.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected override fetchServiceMetadata(): Promise<void> {
-    // Return resolved promise
-    return Promise.resolve();
-  }
-
-  /** ***************************************************************************************************************************
-   * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
-   * with a numeric layerId and creates a group entry when a layer is a group.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-          layerConfig.layerStatus = 'error';
-          return;
-        }
-      }
-
-      layerConfig.layerStatus = 'processing';
-    });
-  }
-
-  /** ***************************************************************************************************************************
-   * Process recursively the list of layer Entries to create the layers and the layer groups.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries to process.
-   * @param {LayerGroup} layerGroup Optional layer group to use when we have many layers. The very first call to
-   *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
-   *
-   * @returns {Promise<BaseLayer | undefined>} The promise that the layers were processed.
-   */
-  // TODO: Question - Is this function still used or should it be removed in favor of the mother class implementation?
-  override processListOfLayerEntryConfig(
-    listOfLayerEntryConfig: TypeLayerEntryConfig[],
-    layerGroup?: LayerGroup
-  ): Promise<BaseLayer | undefined> {
-    const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | undefined>((resolve) => {
-      // Single group layer handled recursively
-      if (listOfLayerEntryConfig.length === 1 && layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-        const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
-
-        this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup)
-          .then((groupReturned) => {
-            if (groupReturned) {
-              if (layerGroup) layerGroup.getLayers().push(groupReturned);
-              resolve(groupReturned);
-            } else {
-              this.layerLoadError.push({
-                layer: listOfLayerEntryConfig[0].layerPath,
-                loggerMessage: `Unable to create group layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
-              });
-              resolve(undefined);
-            }
-          })
-          .catch((error) => {
-            // Log
-            logger.logPromiseFailed('processListOfLayerEntryConfig (1) in processListOfLayerEntryConfig in GeoPackage', error);
-          });
-        // Multiple layer configs are processed individually and added to layer group
-      } else if (listOfLayerEntryConfig.length > 1) {
-        if (!layerGroup)
-          layerGroup = this.createLayerGroup(
-            listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
-            listOfLayerEntryConfig[0].initialSettings!
-          );
-
-        listOfLayerEntryConfig.forEach((layerConfig) => {
-          if (layerEntryIsGroupLayer(layerConfig)) {
-            const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
-            this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup)
-              .then((groupReturned) => {
-                if (groupReturned) {
-                  layerGroup!.getLayers().push(groupReturned);
-                } else {
-                  this.layerLoadError.push({
-                    layer: listOfLayerEntryConfig[0].layerPath,
-                    loggerMessage: `Unable to create group layer ${layerConfig.layerPath} on map ${this.mapId}`,
-                  });
-                  resolve(undefined);
-                }
-              })
-              .catch((error) => {
-                // Log
-                logger.logPromiseFailed('processListOfLayerEntryConfig (2) in processListOfLayerEntryConfig in GeoPackage', error);
-              });
-          } else {
-            this.processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig)
-              .then((layers) => {
-                if (layers) {
-                  layerGroup!.getLayers().push(layers);
-                  layerConfig.layerStatus = 'processed';
-                } else {
-                  this.layerLoadError.push({
-                    layer: listOfLayerEntryConfig[0].layerPath,
-                    loggerMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
-                  });
-                  layerConfig.layerStatus = 'error';
-                }
-              })
-              .catch((error) => {
-                // Log
-                logger.logPromiseFailed('processListOfLayerEntryConfig (3) in processListOfLayerEntryConfig in GeoPackage', error);
-              });
-          }
-        });
-        if (layerGroup) resolve(layerGroup);
-        // Single non-group config
-      } else {
-        this.processOneLayerEntry(listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig, layerGroup)
-          .then((layer) => {
-            if (layer) {
-              listOfLayerEntryConfig[0].layerStatus = 'processed';
-              resolve(layer);
-            } else {
-              this.layerLoadError.push({
-                layer: listOfLayerEntryConfig[0].layerPath,
-                loggerMessage: `Unable to create layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
-              });
-              listOfLayerEntryConfig[0].layerStatus = 'error';
-            }
-          })
-          .catch((error) => {
-            // Log
-            logger.logPromiseFailed('processListOfLayerEntryConfig (4) in processListOfLayerEntryConfig in GeoPackage', error);
-          });
-      }
-    });
-
-    return promisedListOfLayerEntryProcessed;
-  }
-
-  /** ***************************************************************************************************************************
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
@@ -280,6 +87,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     const promisedGeopackageData = new Promise<[LayerData[], SldsInterface]>((resolve) => {
       const url = layerConfig.source!.dataAccessPath!;
       const attributions = this.getAttributions();
+      // eslint-disable-next-line no-param-reassign
       if (attributions.length > 0) sourceOptions.attributions = attributions;
       const layersInfo: LayerData[] = [];
       const styleSlds: SldsInterface = {};
@@ -387,7 +195,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     return promisedGeopackageData;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
@@ -396,6 +204,7 @@ export class GeoPackage extends AbstractGeoViewVector {
   protected static processGeopackageStyle(layerConfig: AbstractBaseLayerEntryConfig, sld: string | number | Uint8Array): void {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
+    // eslint-disable-next-line no-param-reassign
     if ((layerConfig as VectorLayerEntryConfig).layerStyle === undefined) (layerConfig as VectorLayerEntryConfig).layerStyle = {};
 
     for (let i = 0; i < rules.length; i++) {
@@ -465,6 +274,7 @@ export class GeoPackage extends AbstractGeoViewVector {
             paternWidth: patternWidth || 1,
             fillStyle: fillStyle || 'solid',
           };
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStyle!.Polygon = {
             type: 'simple',
             fields: [],
@@ -482,6 +292,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           }
 
           const styles: TypeLineStringVectorConfig = { type: 'lineString', stroke };
+          // eslint-disable-next-line no-param-reassign
           (layerConfig as VectorLayerEntryConfig).layerStyle!.LineString = {
             type: 'simple',
             fields: [],
@@ -527,6 +338,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                 if (graphic.mark.stroke.styling?.strokeWidth) stroke.width = graphic.mark.stroke.styling.strokeWidth;
               }
 
+              // eslint-disable-next-line no-param-reassign
               (layerConfig as VectorLayerEntryConfig).layerStyle!.Point = {
                 type: 'simple',
                 fields: [],
@@ -540,7 +352,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     }
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
    * @param {AbstractLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
@@ -569,102 +381,115 @@ export class GeoPackage extends AbstractGeoViewVector {
     }
 
     const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, source);
-    layerConfig.layerStatus = 'processed';
+
+    // Set the layer status to processed
+    layerConfig.setLayerStatusProcessed();
 
     return Promise.resolve(vectorLayer);
   }
 
-  /** ***************************************************************************************************************************
-   * This method creates all layers from a single geopackage.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+  /**
+   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
-   *
-   * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
+   * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
    */
-  protected override async processOneLayerEntry(
-    layerConfig: AbstractBaseLayerEntryConfig,
-    layerGroup?: LayerGroup
-  ): Promise<BaseLayer | undefined> {
-    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // GV            layerStatus values is correctly sequenced.
-    await super.processOneLayerEntry(layerConfig);
-    const promisedLayers = new Promise<BaseLayer | undefined>((resolve) => {
+  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer> {
+    // TODO: Refactor - This function implementation needs revision, because it doesn't return a single 'BaseLayer', it can
+    // TO.DOCONT: create more than one layer which seems to differ from the other layer classes.
+
+    // Prepare a promise
+    const promisedLayers = new Promise<BaseLayer>((resolve, reject) => {
       this.extractGeopackageData(layerConfig)
-        .then(([layers, slds]) => {
+        .then(async ([layers, slds]) => {
           if (layers.length === 1) {
             this.processOneGeopackageLayer(layerConfig, layers[0], slds)
               .then((baseLayer) => {
                 if (baseLayer) {
-                  layerConfig.layerStatus = 'processed';
+                  // Set the layer status to processed
+                  layerConfig.setLayerStatusProcessed();
+
                   if (layerGroup) layerGroup.getLayers().push(baseLayer);
                   resolve(layerGroup || baseLayer);
                 } else {
-                  this.layerLoadError.push({
-                    layer: layerConfig.layerPath,
-                    loggerMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
-                  });
-                  layerConfig.layerStatus = 'error';
-                  resolve(undefined);
+                  // Add a layer load error
+                  this.addLayerLoadError(layerConfig, `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`);
+                  reject();
                 }
               })
               .catch((error) => {
                 // Log
                 logger.logPromiseFailed('processOneGeopackageLayer (1) in processOneLayerEntry in GeoPackage', error);
+                reject();
               });
           } else {
+            // eslint-disable-next-line no-param-reassign
             layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
+            // eslint-disable-next-line no-param-reassign
             (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
             const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
-            for (let i = 0; i < layers.length; i++) {
-              // "Clone" the config, patch until that layer type logic is rebuilt
-              const newLayerEntryConfig = new GeoPackageLayerEntryConfig(layerConfig as GeoPackageLayerEntryConfig);
-              newLayerEntryConfig.layerId = layers[i].name;
-              newLayerEntryConfig.layerName = layers[i].name;
-              newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-              newLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
 
-              this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds)
-                .then((baseLayer) => {
-                  if (baseLayer) {
-                    (layerConfig as unknown as GroupLayerEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
-                    newLayerGroup.getLayers().push(baseLayer);
-                    layerConfig.layerStatus = 'processed';
-                  } else {
-                    this.layerLoadError.push({
-                      layer: layerConfig.layerPath,
-                      loggerMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
+            // For each layer
+            const promises: Promise<BaseLayer>[] = [];
+            for (let i = 0; i < layers.length; i++) {
+              promises.push(
+                new Promise<BaseLayer>((resolve2, reject2) => {
+                  // "Clone" the config, patch until that layer type logic is rebuilt
+                  const newLayerEntryConfig = layerConfig.clone() as AbstractBaseLayerEntryConfig;
+                  newLayerEntryConfig.layerId = layers[i].name;
+                  newLayerEntryConfig.layerName = layers[i].name;
+                  newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
+                  newLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
+
+                  this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds)
+                    .then((baseLayer) => {
+                      if (baseLayer) {
+                        (layerConfig as unknown as GroupLayerEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
+                        newLayerGroup.getLayers().push(baseLayer);
+
+                        // Set the layer status to processed
+                        layerConfig.setLayerStatusProcessed();
+
+                        resolve2(baseLayer);
+                      } else {
+                        // Add a layer load error
+                        this.addLayerLoadError(layerConfig, `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`);
+                        reject2();
+                      }
+                    })
+                    .catch((error) => {
+                      // Log
+                      logger.logPromiseFailed('processOneGeopackageLayer (2) in processOneLayerEntry in GeoPackage', error);
+
+                      // Set the layer status to error
+                      layerConfig.setLayerStatusError();
+                      reject2();
                     });
-                    layerConfig.layerStatus = 'error';
-                    // FIXME: This resolve of the promise seems wrong as it's in a loop here, resolving a single promise multiple times?
-                    // FIX.MECONT: Should probably reject instead of resolve too?
-                    resolve(undefined);
-                  }
                 })
-                .catch((error) => {
-                  // Log
-                  logger.logPromiseFailed('processOneGeopackageLayer (2) in processOneLayerEntry in GeoPackage', error);
-                  layerConfig.layerStatus = 'error';
-                  // FIXME: This resolve of the promise seems wrong as it's in a loop here, resolving a single promise multiple times?
-                  // FIX.MECONT: Should probably reject instead of resolve too?
-                  resolve(undefined);
-                });
+              );
             }
+
+            // Wait for all layer to be resolved
+            await Promise.all(promises);
+
+            // Resolve the OpenLayer layer
             resolve(newLayerGroup);
           }
         })
         .catch((error) => {
           // Log
           logger.logPromiseFailed('extractGeopackageData in processOneLayerEntry in GeoPackage', error);
-          layerConfig.layerStatus = 'error';
-          resolve(undefined);
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
+          reject();
         });
     });
 
     return promisedLayers;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
@@ -672,11 +497,14 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @private
    */
   static #processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
 
     // Process undefined outfields or aliasFields
     if (!layerConfig.source.featureInfo.outfields?.length) {
+      // eslint-disable-next-line no-param-reassign
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
 
       Object.keys(fields).forEach((fieldEntryKey) => {
@@ -700,15 +528,17 @@ export class GeoPackage extends AbstractGeoViewVector {
     }
 
     layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
 
     // Set name field to first value
     if (!layerConfig.source.featureInfo.nameField)
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {Uint8Array} gpkgBinGeom Binary geometry array to be parsed.
@@ -740,3 +570,32 @@ export class GeoPackage extends AbstractGeoViewVector {
     return gpkgBinGeom.subarray(envelopeSize + 8);
   }
 }
+
+/**
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoPackageFeatureLayerConfig if the geoviewLayerType attribute of
+ * the verifyIfLayer parameter is GEOPACKAGE. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerConfigIsGeoPackage = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoPackageLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
+};
+
+/**
+ * type guard function that redefines a TypeLayerEntryConfig as a GeoPackageLayerEntryConfig if the geoviewLayerType attribute
+ * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOPACKAGE. The type ascention applies only to the true block of
+ * the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
+ * valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const geoviewEntryIsGeoPackage = (
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
+): verifyIfGeoViewEntry is GeoPackageLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
+};

@@ -114,7 +114,7 @@ export class NavBarApi {
   ): TypeButtonPanel | null {
     if (buttonProps) {
       // generate an id if not provided
-      const buttonPanelId = generateId(buttonProps.id);
+      const buttonPanelId = buttonProps.id || generateId(18);
 
       // if group was not specified then add button panels to the default group
       const group = groupName || 'default';

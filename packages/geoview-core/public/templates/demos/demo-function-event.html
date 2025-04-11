@@ -81,7 +81,7 @@
           cgpv.api.maps.Map1.layer.addGeoviewLayer(config)
         </li>
         <li><button id="Remove-layer">Remove GeoJSON layer</button><br />
-          cgpv.api.maps.Map1.layer.removeLayerUsingPath('geojsonLYR1/geojsonLYR1')
+          cgpv.api.maps.Map1.layer.removeLayerUsingPath('geojsonLYR1/base-group')
         </li>
         <li><button id="Remove-all-layers">Remove All layers</button><br />
           cgpv.api.maps.Map1.layer.removeAllGeoviewLayers()
@@ -114,7 +114,7 @@
           cgpv.api.utilities.geo.polygonToExtent(polygon)
         </li>
         <li><button id="Redefine-alias-fields">Redefine alias fields for polygons layer</button><br />
-          cgpv.api.maps.Map1.layer.redefineFeatureFields('geojsonLYR1/geojsonLYR1/polygons.json', 'Location Province,Date Created,Images', 'alias')
+          cgpv.api.maps.Map1.layer.redefineFeatureFields('geojsonLYR1/base-group/polygons.json', 'Location Province,Date Created,Images', 'alias')
         </li>
         <li><button id="Open-details">Open details tab in footer</button><br />
           cgpv.api.maps.Map1.footerBarApi.selectTab('details')
@@ -264,7 +264,7 @@
         // listen to layer error events
         cgpv.api.maps.Map1.layer.onLayerError((sender, payload) => {
           // NOTE: The event added layer will be trigger first as the layer, even in error, has been added to ui
-          cgpv.api.maps.Map1.notifications.addNotificationError(payload.layerPath + ' error');
+          cgpv.api.maps.Map1.notifications.addNotificationError(payload.geoviewLayerId + ' | ' + payload.error);
         });
 
         // listen to layer removed event
@@ -312,10 +312,10 @@
 
         // listen to individual layer loaded event
         // TODO: The gv layer does not exist at the time we attach the event. To make this work, we would
-        // TODO.CONT: need to implement a when-this-then internal approach.
+        // TO.DOCONT: need to implement a when-this-then internal approach.
         cgpv.api.maps.Map1.layer.getGeoviewLayer(LYR_PATH_NON_METAL)?.onIndividualLayerLoaded((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess('Nonmetal mines has finished loading');
-          console.log(sender.olRootLayer.getSource().getFeatures());
+          console.log(sender.getOLLayer().getSource().getFeatures());
         });
 
         // Add more registrations of listeners when the map is ready / layers registered here...
@@ -416,8 +416,8 @@
 
       // add an event listener when a button is clicked
       removeLayerButton.addEventListener('click', async () => {
-        const geojsonLayerAlreadyExists = cgpv.api.maps.Map1.layer.getLayerEntryConfigIds().includes('geojsonLYR1/geojsonLYR1');
-        if (geojsonLayerAlreadyExists) cgpv.api.maps.Map1.layer.removeLayerUsingPath('geojsonLYR1/geojsonLYR1');
+        const geojsonLayerAlreadyExists = cgpv.api.maps.Map1.layer.getLayerEntryConfigIds().includes('geojsonLYR1/base-group');
+        if (geojsonLayerAlreadyExists) cgpv.api.maps.Map1.layer.removeLayerUsingPath('geojsonLYR1/base-group');
         else console.log('GeoJSON layer does not exist');
       });
 
@@ -519,7 +519,7 @@
 
       // add an event listener when a button is clicked
       redefineAliasFieldsButton.addEventListener('click', async () => {
-        cgpv.api.maps.Map1.layer.redefineFeatureFields('geojsonLYR1/geojsonLYR1/polygons.json', 'Location Province,Date Created,Images', 'alias')
+        cgpv.api.maps.Map1.layer.redefineFeatureFields('geojsonLYR1/base-group/polygons.json', 'Location Province,Date Created,Images', 'alias')
       });
 
       // Open details Button========================================================================================================

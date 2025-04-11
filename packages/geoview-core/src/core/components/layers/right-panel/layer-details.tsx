@@ -483,7 +483,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                       fontSize: theme.palette.geoViewFontSize.sm,
                       textAlign: 'center',
                     }}
-                    key={generateId()}
+                    key={generateId(18)}
                   >
                     {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
                   </Typography>
