@@ -13,6 +13,7 @@ import * as GeoUtilities from '@/geo/utils/utilities';
 
 import { initMapDivFromFunctionCall } from '@/app';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -75,6 +76,7 @@ export class API {
    */
   getMapViewer(mapId: string): MapViewer {
     const map = this.#maps[mapId];
+    // We use regular error because there is no valid mapId
     if (!map) throw new Error(`Map with ID ${mapId} not found`);
 
     return map;
@@ -87,10 +89,10 @@ export class API {
    * @param {boolean} deleteContainer - True if we want to delete div from the page
    * @returns {Promise<HTMLElement>} The Promise containing the HTML element
    */
-  deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement | void> {
+  deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement> {
     if (!this.hasMapViewer(mapId)) {
-      logger.logWarning(`Cannot delete map. Map with ID ${mapId} does not exist`);
-      return Promise.resolve();
+      // We use regular error because there is no valid mapId
+      throw new Error(`Map with ID ${mapId} not found`);
     }
 
     // Only delete from #maps after successful removal

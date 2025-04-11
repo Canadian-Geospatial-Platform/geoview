@@ -68,7 +68,7 @@ export const FeatureItem = memo(function FeatureItem({
 
   if (typeof item === 'string' && isImage(item)) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginBottom: '5px' }}>
         <CardMedia
           key={generateId()}
           sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}

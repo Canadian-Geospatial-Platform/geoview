@@ -311,10 +311,10 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
        * @param map The map id.
        * @returns Promise<void>
        */
-      function removeMap(map) {
+      function removeMap(mapId) {
         return new Promise((resolve) => {
-          if (cgpv.api.hasMapViewer(map)) {
-            cgpv.api.deleteMapViewer(map, false).then(() => {
+          if (cgpv.api.hasMapViewer(mapId)) {
+            cgpv.api.deleteMapViewer(mapId, false).then(() => {
               resolve();
             });
           } else {

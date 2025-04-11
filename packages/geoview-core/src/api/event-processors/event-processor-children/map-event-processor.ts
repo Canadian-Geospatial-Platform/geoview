@@ -182,7 +182,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the Map Viewer plugins instance for a given map id
-   * This is use to reduce the use of apigetMapViewer(mapId).plugins and be more explicit
+   * This is use to reduce the use of api.getMapViewer(mapId).plugins and be more explicit
    * @param {string} mapId - map Id
    * @returns {TypeRecordOfPlugin} The map plugins record
    */
