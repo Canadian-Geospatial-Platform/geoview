@@ -41,6 +41,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   const dataTableRef = useRef<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(false);
+  const isFirstLoad = useRef(true);
 
   const mapId = useGeoViewMapId();
   const layerData = useDataTableAllFeaturesDataArray();
@@ -168,6 +169,24 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
     return () => orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer?.features?.length);
   }, [selectedLayerPath, orderedLayerData]);
+
+  // If has selected layer on load and the data for selectedLayerPath is empty, trigger a query
+  useEffect(() => {
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+
+      if (selectedLayerPath && orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath)) {
+        setIsLoading(true);
+        triggerGetAllFeatureInfo(selectedLayerPath)
+          .catch((err) => {
+            logger.logError(`Data panel has failed to get all feature info, error: ${err}`);
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      }
+    }
+  }, [orderedLayerData, selectedLayerPath, triggerGetAllFeatureInfo]);
 
   useEffect(() => {
     // Log

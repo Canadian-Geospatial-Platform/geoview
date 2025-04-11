@@ -136,7 +136,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     // If the feature list contains more than one layer, create a group node.
     if (featureType.length > 1) {
       const groupConfig = toJsonObject({
-        layerId: this.geoviewLayerId,
+        layerId: 'base-group',
         layerName: this.getLanguage() === 'en' ? 'Layer Group' : 'Groupe de couches',
         isLayerGroup: true,
         listOfLayerEntryConfig: featureType.map((layerMetadata) => {

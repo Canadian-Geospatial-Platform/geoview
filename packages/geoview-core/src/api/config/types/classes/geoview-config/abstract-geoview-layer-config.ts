@@ -123,7 +123,7 @@ export abstract class AbstractGeoviewLayerConfig {
         // We create a group because the node at the top of the layer tree cannot be an array.
         (this.#userGeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray) = [
           Cast<TypeJsonObject>({
-            layerId: this.#userGeoviewLayerConfig.geoviewLayerId,
+            layerId: 'base-group',
             layerName: this.#userGeoviewLayerConfig.geoviewLayerName,
             isLayerGroup: true,
             listOfLayerEntryConfig: this.#userGeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray,

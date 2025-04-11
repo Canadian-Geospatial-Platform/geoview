@@ -1,5 +1,4 @@
 import { Extent } from 'ol/extent';
-import BaseLayer from 'ol/layer/Base';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { Coordinate } from 'ol/coordinate';
@@ -186,7 +185,8 @@ export const layerEntryIsImageStatic = (verifyIfLayer: TypeLayerEntryConfig): ve
   return verifyIfLayer?.schemaTag === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
-export type TypeLayerStatus = 'registered' | 'newInstance' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
+// The layer statuses
+export type TypeLayerStatus = 'newInstance' | 'registered' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
 
 // TODO: Refactor - Config refactoring. The types below MUST be migrated to the config map-schema-type
 export type TypeResultSetEntry = {
@@ -200,7 +200,7 @@ export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
 };
 
 // TODO: Refactor - Check if this type is still used and replace it with something like TypeAllFeatureInfoResultSetEntry?
-// TODO.CONT:  Still use in data-table-state and detail.tsx
+// TO.DOCONT:  Still use in data-table-state and detail.tsx
 export type TypeLayerData = {
   eventListenerEnabled: boolean;
   // When property features is undefined, we are waiting for the query result.
@@ -363,8 +363,6 @@ export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntr
  *  Definition of a single Geoview layer configuration.
  */
 export type TypeGeoviewLayerConfig = {
-  /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-  olLayer?: Promise<BaseLayer>;
   /** The GeoView layer identifier. */
   geoviewLayerId: string;
   /**

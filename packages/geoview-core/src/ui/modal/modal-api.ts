@@ -25,7 +25,7 @@ export class ModalApi {
    */
   createModal = (modal: TypeModalProps): string | undefined => {
     if (!modal.content) return undefined;
-    const modalId = modal.modalId ? modal.modalId : generateId('');
+    const modalId = modal.modalId ? modal.modalId : generateId(18);
 
     // Make sure we handle the close
     if (!modal.close) {
