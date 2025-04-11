@@ -181,7 +181,7 @@ async function renderMap(mapElement: Element): Promise<void> {
     configuration!.map!.listOfGeoviewLayerConfig!,
     (errorKey: string, params: string[]) => {
       // Wait for the map viewer to get loaded in the api
-      whenThisThen(() => api.maps[configuration.mapId])
+      whenThisThen(() => api.getMapViewer(configuration.mapId))
         .then(() => {
           // Create the error
           const error = new GeoViewError(configuration.mapId, errorKey, params);
@@ -190,7 +190,7 @@ async function renderMap(mapElement: Element): Promise<void> {
           logger.logWarning(`- Map ${configuration.mapId}: ${error.message}`);
 
           // Show the error
-          api.maps[configuration.mapId].notifications.showError(error.message);
+          api.getMapViewer(configuration.mapId).notifications.showError(error.message);
         })
         .catch((error) => {
           // Log promise failed
