@@ -7,6 +7,7 @@ import { Extent } from 'ol/extent';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import {
   layerEntryIsEsriDynamic,
@@ -38,6 +39,7 @@ export interface ILayerState {
   displayState: TypeLayersViewDisplayState;
   layerDeleteInProgress: boolean;
   selectedLayerSortingArrowId: string;
+  setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
     deleteLayer: (layerPath: string) => void;
@@ -85,6 +87,16 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     displayState: 'view',
     layerDeleteInProgress: false,
     selectedLayerSortingArrowId: '',
+    // Initialize default
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      set({
+        layerState: {
+          ...get().layerState,
+          selectedLayerPath: geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath || null,
+        },
+      });
+    },
+
     // #region ACTIONS
     actions: {
       /**
