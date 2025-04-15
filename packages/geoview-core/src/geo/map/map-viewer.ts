@@ -67,7 +67,7 @@ import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
 import { GVGroupLayer } from '../layer/gv-layers/gv-group-layer';
 
-window.Cesium = Cesium;
+// window.Cesium = Cesium;
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -264,7 +264,11 @@ export class MapViewer {
 
     const initialMap = new OLMap({
       target: mapElement,
-      layers: [createEmptyBasemap()],
+      layers: [
+        new TileLayer({
+          source: new OSM(),
+        }),
+      ],
       view: new View({
         projection,
         center: Projection.transformFromLonLat(
@@ -282,7 +286,7 @@ export class MapViewer {
       controls: [],
       keyboardEventTarget: document.getElementById(`map-${this.mapId}`) as HTMLElement,
     });
-    //Set the map
+    // Set the map
 
     this.map = initialMap;
     this.initMap();

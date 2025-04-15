@@ -94,9 +94,8 @@ export function Map(props: MapProps): JSX.Element {
       viewer.createMap(mapElement.current!);
       initCGPVMap();
       isMapInitialized.current = true;
-      viewer.cmap.setEnabled(true);
     } else {
-      alert('Map already initialized');
+      // alert('Map already initialized');
       // viewer.cmap.setEnabled(true);
     }
   }, [initCGPVMap, viewer]);

@@ -14,6 +14,7 @@ import {
   LegendIcon,
   StorageIcon,
   SearchIcon,
+  SendIcon,
   LayersOutlinedIcon,
 } from '@/ui';
 
@@ -43,6 +44,8 @@ import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/conf
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import { OpenIn3dButton } from '../open-in-3d-button/open-in-3d-button';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -109,6 +112,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     }
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
+      openIn3dButton: { icon: <SendIcon />, content: <OpenIn3dButton key="openIn3dButton" /> },
       guide: { icon: <QuestionMarkIcon />, content: <Guide fullWidth /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
       legend: { icon: <LegendIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
@@ -155,6 +159,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
       // Get the button panel
       const buttonPanel = buttonPanelGroups[groupName][buttonId];
+      if (groupName === 'openIn3dButton') {
+        MapEventProcessor.getMapViewer(mapId).cmap.setEnabled(!buttonPanel.panel?.status);
+      }
       setActiveAppBarTab(buttonId, groupName, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
     [buttonPanelGroups, setActiveAppBarTab]
@@ -421,6 +428,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
               let content = null;
               const buttonPanel = buttonPanels[buttonPanelsKey];
               if (buttonPanel?.groupName === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR) {
+                content = buttonPanel?.panel?.content ?? '';
+              } else if (buttonPanel?.groupName === CV_DEFAULT_APPBAR_CORE.OPEN_3D) {
                 content = buttonPanel?.panel?.content ?? '';
               } else if (buttonPanel?.panel) {
                 content = (

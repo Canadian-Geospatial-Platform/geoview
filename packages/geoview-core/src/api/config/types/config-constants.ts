@@ -190,7 +190,7 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
     collapsed: false,
   },
   components: ['north-arrow', 'overview-map'],
-  appBar: { tabs: { core: ['geolocator'] } },
+  appBar: { tabs: { core: ['geolocator', 'openIn3dButton'] } },
   corePackages: [],
   corePackagesConfig: [],
   overviewMap: { hideOnZoom: 0 },
@@ -229,10 +229,20 @@ export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
 /**
  * Definition of the default order of the tabs inside appbar
  */
-export const CV_DEFAULT_APPBAR_TABS_ORDER = ['geolocator', 'aoi-panel', 'legend', 'layers', 'details', 'data-table', 'guide'];
+export const CV_DEFAULT_APPBAR_TABS_ORDER = [
+  'geolocator',
+  'openIn3dButton',
+  'aoi-panel',
+  'legend',
+  'layers',
+  'details',
+  'data-table',
+  'guide',
+];
 
 export const CV_DEFAULT_APPBAR_CORE = {
   GEOLOCATOR: 'geolocator',
+  OPEN_3D: 'openIn3dButton',
   EXPORT: 'export',
   GUIDE: 'guide',
   DETAILS: 'details',
