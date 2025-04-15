@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useCallback, MutableRefObject, useMemo } from 'react';
 import './tempbutt.css';
 
 import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import OLCesium from 'olcs';
 import * as Cesium from 'cesium';
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
@@ -26,7 +26,7 @@ type MapProps = {
 };
 Cesium.Ion.defaultAccessToken =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2OWJhMWNjZS03NmNjLTQ0OGItOGE5MC02MzVmNjVjZjBlM2UiLCJpZCI6MTEwMDMwLCJpYXQiOjE2NjQ4NzQwNDB9.3spD2Vvdc267VZFFQozH0nxmeJRlE7dQC5QsKeiJMiY';
-window.Cesium = Cesium;
+(window as any).Cesium = Cesium;
 /**
  * Create a map component
  * @param {MapProps} props - Map props containing the viewer
@@ -44,7 +44,6 @@ export function Map(props: MapProps): JSX.Element {
 
   // internal state - get ref to div element
   const mapElement = useRef<HTMLElement | undefined>();
-  const cesiumElement = useRef<HTMLElement | undefined>();
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md')); // if screen size is medium and up
 
   // get values from the store

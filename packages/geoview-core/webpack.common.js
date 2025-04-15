@@ -9,6 +9,8 @@ const LodashWebpackPlugin = require('lodash-webpack-plugin');
 const glob = require('glob');
 const childProcess = require('child_process');
 const packageJSON = require('./package.json');
+const cesiumSource = 'node_modules/cesium/Source';
+const cesiumWorkers = '../Build/Cesium/Workers';
 
 // get date, version numbers and the hash of the current commit
 const date = new Date().toISOString();
@@ -98,6 +100,7 @@ const config = {
       '@': path.resolve(__dirname, 'src'),
       '@public': path.resolve(__dirname, 'public'),
       '@config': path.resolve(__dirname, 'src/api/config'),
+      'cesium:': path.resolve(__dirname, cesiumSource),
     },
   },
   module: {
@@ -189,17 +192,33 @@ const config = {
         { from: './public/favicon.ico' },
         { from: './public/templates/codedoc.js' },
         {
-          from: path.join('node_modules', '@cesium/engine', 'Source', 'Assets'),
-          to: 'Assets',
+          from: path.join(cesiumSource, 'Assets'),
+          to: 'cesium/Assets',
         },
         {
-          from: path.join('node_modules', '@cesium/engine', 'Source', 'Widget'),
-          to: 'Widget',
+          from: path.join(cesiumSource, 'Widgets'),
+          to: 'cesium/Widgets',
         },
         {
-          from: path.join('node_modules', '@cesium/engine', 'Source', 'ThirdParty'),
-          to: 'ThirdParty',
+          from: path.join(cesiumSource, 'ThirdParty'),
+          to: 'cesium/ThirdParty',
         },
+        {
+          from: path.join(cesiumSource, cesiumWorkers),
+          to: 'cesium/Workers',
+        },
+        // {
+        //   from: path.join('node_modules', '@cesium/engine', 'Source', 'Widget'),
+        //   to: 'cesium/Widget',
+        // },
+        // {
+        //   from: path.join('node_modules', '@cesium/engine', 'Source', 'ThirdParty'),
+        //   to: 'cesium/ThirdParty',
+        // },
+        // {
+        //   from: path.join('node_modules', '@cesium/engine', 'Source', 'Workers'),
+        //   to: 'cesium/Workers',
+        // },
       ],
     }),
     new webpack.BannerPlugin({
@@ -215,7 +234,7 @@ const config = {
         patch,
         timestamp: Date.now(),
       },
-      CESIUM_BASE_URL: JSON.stringify('/'),
+      CESIUM_BASE_URL: JSON.stringify('/cesium/'),
     }),
   ]
     .concat(multipleHtmlPluginsSamples)

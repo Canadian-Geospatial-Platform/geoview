@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Root } from 'react-dom/client';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
@@ -57,7 +58,7 @@ import { Translate } from '@/geo/interaction/translate';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
-import { createEmptyBasemap } from '@/geo/utils/utilities';
+// import { createEmptyBasemap } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
@@ -67,7 +68,7 @@ import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
 import { GVGroupLayer } from '../layer/gv-layers/gv-group-layer';
 
-// window.Cesium = Cesium;
+(window as any).Cesium = Cesium;
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -261,9 +262,21 @@ export class MapViewer {
         Projection.PROJECTION_NAMES.LNGLAT,
         projection.getCode()
       );
-
+    // const initialMap = new OLMap({
+    //   target: mapElement,
+    //   layers: [
+    //     new TileLayer({
+    //       source: new OSM(),
+    //     }),
+    //   ],
+    //   view: new View({
+    //     center: [0, 0],
+    //     zoom: 2,
+    //   }),
+    // });
     const initialMap = new OLMap({
       target: mapElement,
+      // layers: [createEmptyBasemap()],
       layers: [
         new TileLayer({
           source: new OSM(),
@@ -291,7 +304,6 @@ export class MapViewer {
     this.map = initialMap;
     this.initMap();
     this.cmap = new OLCesium({ map: initialMap, target: `mapTargetElement-${this.mapId}` });
-    // ol3d.setEnabled(true);
     return initialMap;
   }
 
