@@ -90,8 +90,12 @@ export class API {
    */
   deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement> {
     if (!this.hasMapViewer(mapId)) {
-      // We use regular error because there is no valid mapId
-      throw new Error(`Map with ID ${mapId} not found`);
+      // We cannot throw an error because the mapdId may not exist and we do not want to crash the viewer.
+      logger.logWarning(`Cannot delete map. Map with ID ${mapId} not found`);
+
+      // Return an empty div
+      const div = document.createElement('div');
+      return Promise.resolve(div);
     }
 
     // Only delete from #maps after successful removal
