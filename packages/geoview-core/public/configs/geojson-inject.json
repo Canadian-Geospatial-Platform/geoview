@@ -39,8 +39,8 @@
       "core": [
         "geolocator",
         "export",
-        "legend",
         "layers",
+        "legend",
         "details",
         "guide"
       ]

@@ -49,7 +49,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
-      id="UI1"
+      id="map1"
       class="geoview-map"
       data-lang="en"
       data-config="{
@@ -149,7 +149,7 @@
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'UI1') {
+        if (mapId === 'map1') {
           /**
            * RANGE SLIDER UI SECTION START
            */
@@ -157,7 +157,7 @@
           cgpv.api.utilities.core.addUiComponent(
             'UI1-rangeslider1',
             cgpv.react.createElement(cgpv.ui.elements.Slider, {
-              mapId: 'UI1',
+              mapId: 'map1',
               id: 'UI1-slider-flood',
               min: 1696,
               max: 2023,
@@ -172,10 +172,10 @@
               ],
               track: 'normal',
               onChange: (dates) => {
-                const field = cgpv.api.maps.UI1.layer
+                const field = cgpv.api.getMapViewer('map1').layer
                   .getGeoviewLayer('historical-flood/0')
                   .getTemporalDimension().field;
-                cgpv.api.maps.UI1.layer
+                cgpv.api.getMapViewer('map1').layer
                   .getGeoviewLayer('historical-flood/0')
                   .applyViewFilter(`${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
               },
@@ -194,7 +194,7 @@
 
           // Props for slider 1
           const propsSlider1 = {
-            mapId: 'UI1',
+            mapId: 'map1',
             id: 'UI1-slider1',
             min: 0,
             max: 18,
@@ -209,7 +209,7 @@
             onChange: (zoomLevel) => {
               const lat = 50;
               const lng = -95;
-              cgpv.api.maps['UI1'].getView().animate({ zoom: zoomLevel });
+              cgpv.api.getMapViewer('map1').getView().animate({ zoom: zoomLevel });
             },
           };
 

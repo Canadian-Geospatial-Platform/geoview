@@ -11,7 +11,7 @@
           ]
         ]
       },
-      "projection": 3857
+      "projection": 3978
     },
     "basemapOptions": {
       "basemapId": "transport",

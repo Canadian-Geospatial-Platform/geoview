@@ -46,7 +46,7 @@
       <h5 id="HUC3-state">(undefined)</h5>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="mapWM3" class="geoview-map" data-lang="en" data-config-url="./configs/package-swiper3-config.json"></div>
+    <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/package-swiper3-config.json"></div>
     <p>Configuration with supported layers type (WMS, XYZ, WFS, GeoJSON, OGC Feature API and GeoCore)</p>
     <input id="mapWM3Input" placeholder="Type a layer path" />
     <button onclick="addSwiper()">Add swiper functionality</button>
@@ -70,10 +70,10 @@
           // write some code ...
         },
         (mapId) => {
-          if (mapId === 'mapWM3') {
+          if (mapId === 'map1') {
             window.setInterval(() => {
               const displayField1 = document.getElementById('HUC3-state');
-              const featureInfoLayerSet = cgpv.api.maps['mapWM3'].layer.featureInfoLayerSet.resultSet;
+              const featureInfoLayerSet = cgpv.api.getMapViewer('map1').layer.featureInfoLayerSet.resultSet;
               if (featureInfoLayerSet) {
                 const output = Object.keys(featureInfoLayerSet).reduce((outputValue, layerId) => {
                   const { layerStatus } = featureInfoLayerSet[layerId];
@@ -87,15 +87,15 @@
       );
 
       function addSwiper() {
-        cgpv.api.maps['mapWM3'].plugins['swiper'].activateForLayer(document.getElementById('mapWM3Input').value);
+        cgpv.api.getMapViewer('map1').plugins['swiper'].activateForLayer(document.getElementById('mapWM3Input').value);
       }
 
       function removeSwiper() {
-        cgpv.api.maps['mapWM3'].plugins['swiper'].deActivateForLayer(document.getElementById('mapWM3Input').value);
+        cgpv.api.getMapViewer('map1').plugins['swiper'].deActivateForLayer(document.getElementById('mapWM3Input').value);
       }
 
       function removeSwiperAll() {
-        cgpv.api.maps['mapWM3'].plugins['swiper'].deActivateAll();
+        cgpv.api.getMapViewer('map1').plugins['swiper'].deActivateAll();
       }
 
       // create snippets

@@ -21,7 +21,7 @@ const MAP_INFO_BASE_STYLES = {
   left: '64px',
   right: 0,
   px: '1rem',
-  zIndex: 1500,
+  zIndex: 1000,
 } as const;
 
 const FLEX_STYLE = { flexGrow: 1, height: '100%' };
@@ -53,8 +53,9 @@ export const MapInfo = memo(function MapInfo(): JSX.Element {
       height: expanded ? '6rem' : '3rem',
       background: theme.palette.geoViewColor.bgColor.dark[800],
       color: theme.palette.geoViewColor.bgColor.light[800],
+      width: interaction === 'dynamic' ? '100%' : 'fit-content',
     }),
-    [expanded, theme.palette.geoViewColor.bgColor]
+    [expanded, theme.palette.geoViewColor.bgColor, interaction]
   );
 
   // Scroll the map into view on mouse click in the flex area
@@ -89,7 +90,7 @@ export const MapInfo = memo(function MapInfo(): JSX.Element {
 
   return (
     <Box ref={mapInfoRef as MutableRefObject<HTMLDivElement>} id={`${mapId}-mapInfo`} sx={containerStyles}>
-      <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />
+      {interaction === 'dynamic' && <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />}
       <Attribution />
       {interaction === 'dynamic' && (
         <>

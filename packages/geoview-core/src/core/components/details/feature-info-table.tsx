@@ -10,6 +10,7 @@ import { logger } from '@/core/utils/logger';
 import { TypeFieldEntry } from '@/geo/map/map-schema-types';
 import { getSxClasses } from './details-style';
 import { useLightBox } from '@/core/components/common';
+import { Button } from '@/ui/button/button';
 
 interface FeatureInfoTableProps {
   featureInfoList: TypeFieldEntry[];
@@ -67,20 +68,30 @@ export const FeatureItem = memo(function FeatureItem({
 
   if (typeof item === 'string' && isImage(item)) {
     return (
-      <CardMedia
-        key={generateId()}
-        sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
-        alt={`${alias} ${index}`}
-        className={`returnLightboxFocusItem-${index}`}
-        src={item}
-        tabIndex={0}
-        onClick={() => onInitLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
-        onKeyDown={(event: React.KeyboardEvent) => {
-          if (event.key === 'Enter') {
-            onInitLightBox(featureInfoItem.value as string, `${index}_${featureInfoItem.alias}`, index);
-          }
-        }}
-      />
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginBottom: '5px' }}>
+        <CardMedia
+          key={generateId()}
+          sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
+          alt={`${alias} ${index}`}
+          className={`returnLightboxFocusItem-${index}`}
+          src={item}
+          tabIndex={0}
+          title={t('general.clickEnlarge')!}
+          onClick={() => onInitLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
+          onKeyDown={(event: React.KeyboardEvent) => {
+            if (event.key === 'Enter') {
+              onInitLightBox(featureInfoItem.value as string, `${index}_${featureInfoItem.alias}`, index);
+            }
+          }}
+        />
+        <Button
+          type="text"
+          sx={{ fontSize: theme.palette.geoViewFontSize.xs }}
+          onClick={() => onInitLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
+        >
+          {t('general.clickEnlarge')!}
+        </Button>
+      </Box>
     );
   }
 

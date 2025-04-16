@@ -175,7 +175,7 @@
     <button type="button" class="collapsible">Layers Status</button>
     <pre id="sandboxMap-state" class="panel map-title-holder"></pre>
     <div id="mapSection">
-      <div id="sandboxMap"></div>
+      <div id="map1"></div>
     </div>
     <p>This map loads it's configurations from the text area.</p>
     <hr />
@@ -223,12 +223,12 @@
       // add an event listener when a button is clicked
       createMapButton.addEventListener('click', function (e) {
         // delete old map
-        cgpv.api.maps['sandboxMap']?.remove(true);
+        cgpv.api.deleteMapViewer('map1', true);
 
         // create new map in a new dom node
         const newDiv = document.createElement('div');
         const a = document.createAttribute('id');
-        a.value = 'sandboxMap';
+        a.value = 'map1';
         newDiv.setAttributeNode(a);
 
         const mapWidth = `${document.getElementById('mapWidth')?.value}px`;
@@ -247,8 +247,8 @@
         setTimeout(() => {
           // Regex expression to cature all single quotes (') except those preceded by a backslash (\)
           const regexExp = /(?<!\\)'/g
-          cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value.replaceAll(regexExp, '"'))
-            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'sandboxMap'));
+          cgpv.api.createMapFromConfig('map1', document.getElementById('configGeoview').value.replaceAll(regexExp, '"'))
+            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
         }, 1500);
       });
 
@@ -290,7 +290,7 @@
 
       document.getElementById('mapHeight').value = '900';
 
-      const sandboxMap = document.getElementById('sandboxMap');
+      const sandboxMap = document.getElementById('map1');
       if (sandboxMap) {
         sandboxMap.dataset.height = '900px';
       }
@@ -302,7 +302,7 @@
       // add an event listener when a button is clicked
       deleteMapButton.addEventListener('click', function (e) {
         // Delete the map
-        cgpv.api.maps['sandboxMap'].remove(true);
+        cgpv.api.deleteMapViewer('map1', true);
       });
 
       // Editor script section===================================================================================================
@@ -323,7 +323,7 @@
       });
 
       // Create default map==========================================================================================================
-      cgpv.api.createMapFromConfig('sandboxMap', JSON.stringify({
+      cgpv.api.createMapFromConfig('map1', JSON.stringify({
               'map': {
                 'interaction': 'dynamic',
                 'viewSettings': {
@@ -335,27 +335,86 @@
                   'labeled': true
                 },
                 'listOfGeoviewLayerConfig': [{
-                  'geoviewLayerId': 'wmsLYR1',
-                  'geoviewLayerName': 'earthquakes',
-                  'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
-                  'geoviewLayerType': 'esriDynamic',
+                  'geoviewLayerId':'airborne_radioactivity',
+                  'geoviewLayerName':'Airborne Radioactivity',
+                  'metadataAccessPath':'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer',
+                  'geoviewLayerType':'esriDynamic',
                   'listOfLayerEntryConfig': [
                     {
-                      'layerId': '0'
+                        'layerId':'1'
                     }
                   ]
-                }]
+              }]
               },
               'components': ['overview-map'],
               'footerBar': {
                 'tabs': {
-                  'core': ['legend', 'layers', 'details', 'data-table']
+                  'core': ['legend', 'layers', 'details', 'data-table', 'geochart']
                 }
               },
               'corePackages': [],
+              'corePackagesConfig':[
+                  {
+                    'geochart': { 'charts': [
+                        {
+                          'layers':[{
+                              'layerId':'airborne_radioactivity/1',
+                              'propertyValue': 'OBJECTID',
+                              'propertyDisplay': 'Location_Emplacement'
+                          }],
+                          'chart': 'line',
+                          'query': {
+                              'type': 'esriRegular',
+                              'url': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3',
+                              'queryOptions': {
+                                'whereClauses': [
+                                    {
+                                      'field': 'Location_Emplacement',
+                                      'prefix': '\u0027',
+                                      'valueFrom': 'Location_Emplacement',
+                                      'suffix': '\u0027'
+                                    }
+                                ],
+                                'orderByField': 'CollectionStart_DebutPrelevement'
+                              }
+                          },
+                          'geochart': {
+                              'xAxis': {
+                                'type': 'time',
+                                'property': 'CollectionStart_DebutPrelevement',
+                                'label': 'Collected date'
+                              },
+                              'yAxis': {
+                                'type': 'linear',
+                                'property': 'Activity_Activite_mBqm3',
+                                'label': 'Activity (mBqm3)',
+                                'tooltipSuffix': 'mBqm3'
+                              },
+                              'borderWidth': 1
+                          },
+                          'category': {
+                              'property': 'Radionuclide_Radionucleide',
+                              'usePalette': false
+                          },
+                          'ui': {
+                              'xSlider': {
+                                'display': true
+                              },
+                              'ySlider': {
+                                'display': true
+                              },
+                              'stepsSwitcher': true,
+                              'resetStates': true,
+                              'description': 'This is a description text',
+                              'download': true
+                          }
+                        }
+                    ]}
+                  }
+              ],
               'theme': 'geo.ca'
         })
-      ).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'sandboxMap'));
+      ).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {

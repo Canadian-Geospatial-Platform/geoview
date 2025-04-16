@@ -3,6 +3,10 @@
 We use [Zustand](https://github.com/pmndrs/zustand) store for our state management. We define a list of functions and concept to follow....
 For this reason we have put together some explanations here to help you use store functionnalities when programming.
 
+## Dev tools ##
+For access to store values from within the browser you should use React Developer Tools to inspect React components.
+The `store` is active when (1) running in dev environment or (2) the local storage `GEOVIEW_DEVTOOLS` key is set.
+
 ## Characteristics to know when using the React and Zustand store ##
 
 useStore hook for variable linked to UI and can be updated from another component.

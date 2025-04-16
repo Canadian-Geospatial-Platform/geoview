@@ -67,7 +67,8 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       set({
         timeSliderState: {
           ...get().timeSliderState,
-          selectedLayerPath: geoviewConfig.footerBar?.selectedTimeSliderLayerPath || geoviewConfig.appBar?.selectedTimeSliderLayerPath || '',
+          selectedLayerPath:
+            geoviewConfig.footerBar?.selectedTimeSliderLayerPath || geoviewConfig.appBar?.selectedTimeSliderLayerPath || '',
         },
       });
     },
