@@ -1,27 +1,15 @@
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable react/jsx-no-useless-fragment */
+import { Key } from 'react';
+import { InfoSection } from './infosection';
 import { getSxClasses } from './custom-legend-style';
 
 interface CustomLegendPanelProps {
   mapId: string;
-  config: TypeLegendProps;
 }
-
-interface LegendItem {
-  legendTitle: string;
-  symbolUrl: string;
-  description?: string;
-}
-
-type LegendListItems = LegendItem[];
-
-type TypeLegendProps = {
-  isOpen: boolean;
-  legendList: LegendListItems;
-  version: string;
-};
 
 export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
-  const { mapId, config } = props;
-  const legendList = config.legendList as LegendListItems;
+  const { mapId } = props;
 
   const { cgpv } = window;
   const { api, ui } = cgpv;
@@ -30,34 +18,62 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // Get layers from the map
+  const layers = api.maps[mapId]?.layer?.layers || [];
+  console.log('Layers:', layers); // Debugging: Log layers
+
   return (
     <Box sx={sxClasses.legendCard}>
-      {legendList.map((legendItem: LegendItem, index) => {
-        return (
-          <Card
-            tabIndex={0}
-            className="legendCardItem"
-            // eslint-disable-next-line react/no-array-index-key
-            key={index}
-            title={legendItem.legendTitle}
-            contentCard={
-              // eslint-disable-next-line react/jsx-no-useless-fragment
-              <>
-                {typeof legendItem.symbolUrl === 'string' && (
-                  <div className="legend-item-container">
-                    {/* eslint-disable-next-line react/no-array-index-key */}
-                    <Box component="img" key={index} src={legendItem.symbolUrl} alt="" className="legendSymbol" />
-                    <div className="legend-text">
-                      <span className="legend-title">{legendItem.legendTitle}</span>
-                      {legendItem.description && <span className="legend-description">{legendItem.description}</span>}
-                    </div>
-                  </div>
-                )}
-              </>
-            }
-          />
-        );
-      })}
+      {layers.map(
+        (
+          layer: { getLegend: () => { symbolUrl: string; legendTitle: string; description: string | null }[]; name: string },
+          index: number
+        ) => {
+          const legendItems = layer.getLegend(); // Assuming `getLegend` returns legend items for the layer
+          console.log(`Legend Items for Layer ${layer.name}:`, legendItems); // Debugging: Log legend items
+          return (
+            <Card
+              tabIndex={0}
+              className="legendCardItem"
+              key={index}
+              title={String(layer.name)}
+              contentCard={
+                <>
+                  {legendItems.map(
+                    (item: { symbolUrl: string; legendTitle: string; description: string | null }, itemIndex: Key | null | undefined) => (
+                      <div key={itemIndex} className="legend-item-container">
+                        <Box component="img" src={item.symbolUrl} alt="" className="legendSymbol" />
+                        <div className="legend-text">
+                          {/* Use InfoSection for title */}
+                          <InfoSection
+                            infoType="legend"
+                            section={{
+                              title: item.legendTitle,
+                              symbols: [],
+                              content: null,
+                            }}
+                          />
+                          {/* Use InfoSection for description */}
+                          {item.description && (
+                            <InfoSection
+                              infoType="description"
+                              section={{
+                                title: '',
+                                symbols: [],
+                                content: item.description,
+                              }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )
+                  )}
+                </>
+              }
+            />
+          );
+        }
+      )}
     </Box>
   );
 }

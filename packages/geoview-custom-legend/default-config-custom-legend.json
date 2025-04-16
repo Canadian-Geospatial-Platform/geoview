@@ -1,7 +1,13 @@
 {
+  "layers": [],
   "id": "custom-legend",
   "enabled": true,
-  "isOpen": false,
-  "legendList": [],
+  "footerBar": {
+    "tabs": {
+      "core": ["custom-legend"]
+    }
+  },
+  "isOpen": true,
   "version": "1.0"
+  
 }

@@ -68,7 +68,8 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
   }
 
   override onCreateContent = (): JSX.Element => {
-    return <CustomLegendPanel mapId={this.pluginProps.mapId} config={this.configObj || {}} />;
+    // Render the CustomLegendPanel with the provided configuration
+    return <CustomLegendPanel mapId={this.pluginProps.mapId} config={this.configObj || { isOpen: true, legendList: [], version: '1.0' }} />;
   };
 
   /**

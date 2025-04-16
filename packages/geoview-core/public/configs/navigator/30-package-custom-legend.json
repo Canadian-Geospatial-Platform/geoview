@@ -10,6 +10,16 @@
       "labeled": true
     }
   },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "time-slider"
+      ]
+    }
+  },
   "theme": "geo.ca",
   "components": ["north-arrow", "overview-map"],
   "corePackages": [],
