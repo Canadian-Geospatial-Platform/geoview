@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Root } from 'react-dom/client';
-import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
-
+import { get as getProjection } from 'ol/proj.js';
 import { i18n } from 'i18next';
 
 import { debounce } from 'lodash';
@@ -58,7 +56,7 @@ import { Translate } from '@/geo/interaction/translate';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
-// import { createEmptyBasemap } from '@/geo/utils/utilities';
+import { createEmptyBasemap } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
@@ -276,12 +274,7 @@ export class MapViewer {
     // });
     const initialMap = new OLMap({
       target: mapElement,
-      // layers: [createEmptyBasemap()],
-      layers: [
-        new TileLayer({
-          source: new OSM(),
-        }),
-      ],
+      layers: [createEmptyBasemap()],
       view: new View({
         projection,
         center: Projection.transformFromLonLat(
