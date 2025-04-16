@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -167,7 +167,7 @@
           <option value="fr">French</option>
           <option value="unsupported">Not Supported</option>
         </select>
-        <input type="checkbox" id="resetLayer" name="resetLayer" checked>
+        <input type="checkbox" id="resetLayer" name="resetLayer" checked />
         <label for="resetLayer">Reset Layers</label>
       </div>
       <p>Display Theme:</p>
@@ -194,7 +194,7 @@
     <pre id="sandboxMap-state" class="panel map-title-holder"></pre>
 
     <div id="mapSection">
-      <div id="sandboxMap"></div>
+      <div id="map1"></div>
     </div>
     <p>This map loads it's configurations from a selected configuration file.</p>
     <hr />
@@ -221,21 +221,22 @@
       const configLoader = document.getElementById('configLoader');
       configLoader.addEventListener('change', (e) => {
         // delete old map
-        cgpv.api.maps['sandboxMap']?.remove(true);
-
-        // create new map in a new dom node
-        const newDiv = document.createElement('div');
-        const id = document.createAttribute('id');
-        const style = document.createAttribute('style');
-        id.value = 'sandboxMap';
-        newDiv.setAttributeNode(id);
-        document.getElementById('mapSection').appendChild(newDiv);
+        cgpv.api.deleteMapViewer('map1', true);
 
         // wait until map is removed before recreating it
         setTimeout(() => {
+          // create new map in a new dom node
+          if (document.getElementById('map1') === null) {
+            const newDiv = document.createElement('div');
+            const id = document.createAttribute('id');
+            const style = document.createAttribute('style');
+            id.value = 'map1';
+            newDiv.setAttributeNode(id);
+            document.getElementById('mapSection').appendChild(newDiv);
+          }
+
           // create map
-          cgpv.api.createMapFromConfig('sandboxMap', e.target.value, 800)
-            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'sandboxMap'));
+          cgpv.api.createMapFromConfig('map1', e.target.value, 800).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
         }, 1500);
 
         // fetch JSON config file to show in the text are section
@@ -281,28 +282,28 @@
       const switchLang = document.getElementById('switchLang');
       const resetLayer = document.getElementById('resetLayer');
       switchLang.addEventListener('change', (e) => {
-        cgpv.api.maps['sandboxMap'].setLanguage(e.target.value, resetLayer.checked);
+        cgpv.api.getMapViewer('map1').setLanguage(e.target.value, resetLayer.checked);
       });
 
       const switchThemeElem = document.getElementById('switchTheme');
       switchThemeElem.addEventListener('change', (e) => {
-        cgpv.api.maps['sandboxMap'].setTheme(e.target.value);
+        cgpv.api.getMapViewer('map1').setTheme(e.target.value);
       });
 
       const switchProjectioneElem = document.getElementById('switchProjection');
       switchProjectioneElem.addEventListener('change', (e) => {
-        cgpv.api.maps['sandboxMap'].setProjection(e.target.value);
+        cgpv.api.getMapViewer('map1').setProjection(e.target.value);
       });
       // ------------------ SWITCHER SECTION END -----------------------------------------
 
       const reload = document.getElementById('Reload-Button');
       reload.addEventListener('click', (e) => {
-        cgpv.api.maps['sandboxMap'].reload();
+        cgpv.api.getMapViewer('map1').reload();
       });
 
       const remove = document.getElementById('Remove-Button');
       remove.addEventListener('click', (e) => {
-        cgpv.api.maps['sandboxMap'].remove(true);
+        cgpv.api.deleteMapViewer('map1', true);
       });
 
       // create snippets

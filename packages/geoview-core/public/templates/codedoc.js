@@ -196,7 +196,7 @@ function addRectangle(map, groupKey) {
 
 function listenToLegendLayerSetChanges(elementId, handlerName) {
   const mapId = handlerName.split('/')[0];
-  cgpv.api.maps[mapId].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+  cgpv.api.getMapViewer(mapId).layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
     const { resultSet } = payload;
     const outputHeader = '<table class="state"><tr class="state"><th class="state">Name</th><th class="state">Status</th></tr>';
     const displayField = document.getElementById(elementId);

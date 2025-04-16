@@ -1253,7 +1253,7 @@ export class MapViewer {
    * Remove map
    *
    * @param {boolean} deleteContainer - True if we want to delete div from the page
-   * @returns {HTMLElement} The HTML element
+   * @returns {Promise<HTMLElement>} The Promise containing the HTML element
    */
   async remove(deleteContainer: boolean): Promise<HTMLElement> {
     // Get the map container to unmount
@@ -1264,7 +1264,7 @@ export class MapViewer {
     // GV If this is done after plugin removal, it triggers a rerender, and the plugins can cause an error, depending on state
     // Remove the dom element (remove rendered map and overview map)
     if (this.overviewRoot) this.overviewRoot.unmount();
-    unmountMap(this.mapId);
+    unmountMap(this.mapId, mapContainer);
 
     // Unload all loaded plugins on the map
     await Plugin.removePlugins(this.mapId);
@@ -1282,9 +1282,6 @@ export class MapViewer {
 
     // If deleteContainer, delete the HTML div
     if (deleteContainer) mapContainer.remove();
-
-    // Delete the map instance from the maps array, will delete attached plugins
-    api.setMapViewer(this.mapId, null);
 
     // Return the map container to be remove
     return mapContainer;

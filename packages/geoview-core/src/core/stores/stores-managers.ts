@@ -9,6 +9,7 @@ import { MapContext } from '@/core/app-start';
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { getItemAsNumber } from '@/core//utils/localStorage';
 
 export interface StoresManagerState {
   stores: Record<string, GeoviewStoreType>;
@@ -17,6 +18,33 @@ export interface StoresManagerState {
 export const useStoresManager = createStore<StoresManagerState>(() => ({
   stores: {},
 }));
+
+// Check if running in dev or if the key is set in the local storage
+const LOCAL_STORAGE_KEY_DEVTOOLS = 'GEOVIEW_DEVTOOLS';
+const DEVTOOLS_ACTIVE = process.env.NODE_ENV === 'development' || !!getItemAsNumber(LOCAL_STORAGE_KEY_DEVTOOLS);
+
+/**
+ * Mounts Zustand DevTools for a specific store instance.
+ *
+ * @param {string} instanceName - Unique name for this store instance
+ * @param {any} store - The Zustand store
+ * @param {HTMLElement} container - The container element
+ */
+const mountZustandDevTools = (instanceName: string, store: GeoviewStoreType, container: HTMLElement): void => {
+  if (DEVTOOLS_ACTIVE) {
+    // Check if container already has devtools
+    if (!container.hasAttribute('data-zustand-devtools')) {
+      // Create new DevTools container
+      const devToolsContainer = document.createElement('div');
+      devToolsContainer.id = `devtools-${instanceName}`;
+      container.appendChild(devToolsContainer);
+
+      // Mount and mark container as having devtools mounted
+      mountStoreDevtool(instanceName, store, devToolsContainer);
+      container.setAttribute('data-zustand-devtools', 'true');
+    }
+  }
+};
 
 export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   if (!config.mapId) {
@@ -39,12 +67,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
     },
   }));
 
-  // TODO Revert back this code and delete line before. Issue #1559
-  /*
-  if (process.env.NODE_ENV === 'development') {
-    mountStoreDevtool(`getViewStore-${config.mapId}`, geoviewStore);
-  } */
-  mountStoreDevtool(`getViewStore-${config.mapId}`, geoviewStore);
+  mountZustandDevTools(`getViewStore-${config.mapId}`, geoviewStore, geoviewStore.getState().appState.geoviewHTMLElement);
 };
 
 export const getGeoViewStore = (id: string | undefined): GeoviewStoreType => {

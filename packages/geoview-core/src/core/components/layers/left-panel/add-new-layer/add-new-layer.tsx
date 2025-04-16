@@ -142,7 +142,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorEmpty = (textField: string): void => {
     setIsLoading(false);
-    api.maps[mapId].notifications.showError(`${textField} ${t('layers.errorEmpty')}`, [], false);
+    api.getMapViewer(mapId).notifications.showError(`${textField} ${t('layers.errorEmpty')}`, [], false);
   };
 
   /**
@@ -152,7 +152,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorNone = (): void => {
     setIsLoading(false);
-    api.maps[mapId].notifications.showError('layers.errorNone', [], false);
+    api.getMapViewer(mapId).notifications.showError('layers.errorNone', [], false);
   };
 
   /**
@@ -161,7 +161,7 @@ export function AddNewLayer(): JSX.Element {
    * @param textField label for the TextField input that cannot be empty
    */
   const emitErrorFile = (): void => {
-    api.maps[mapId].notifications.showError('layers.errorFile', [], false);
+    api.getMapViewer(mapId).notifications.showError('layers.errorFile', [], false);
   };
 
   /**
@@ -171,7 +171,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
-    api.maps[mapId].notifications.showError(`${serviceName} ${t('layers.errorServer')}`, [], false);
+    api.getMapViewer(mapId).notifications.showError(`${serviceName} ${t('layers.errorServer')}`, [], false);
   };
 
   /**
@@ -183,7 +183,7 @@ export function AddNewLayer(): JSX.Element {
   const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: TypeJsonArray | string[]): void => {
     setIsLoading(false);
     const message = `${serviceName} ${t('layers.errorProj')} ${proj}, ${t('layers.only')} ${supportedProj.join(', ')}`;
-    api.maps[mapId].notifications.showError(message, [], false);
+    api.getMapViewer(mapId).notifications.showError(message, [], false);
   };
 
   // TODO: REFACTOR ALL VALIDATION!!!
@@ -202,7 +202,7 @@ export function AddNewLayer(): JSX.Element {
   // TODO: Move all the validations in a utility add layer file inside geo. Also delete old utilities that were used
   // TO.DOCONT: in the previous version.
   const wmsValidation = async (): Promise<boolean> => {
-    const proj = Projection.PROJECTIONS[api.maps[mapId].getMapState().currentProjection].getCode();
+    const proj = Projection.PROJECTIONS[api.getMapViewer(mapId).getMapState().currentProjection].getCode();
     let supportedProj: string[] = [];
 
     try {
@@ -425,7 +425,7 @@ export function AddNewLayer(): JSX.Element {
       const isValid = layerURL.indexOf('/') === -1 && layerURL.replaceAll('-', '').length === 32;
       if (!isValid) throw new Error('err'); // TODO: Check - What is this error?
 
-      const geoCoreGeoviewLayerInstance = new GeoCore(mapId, api.maps[mapId].getDisplayLanguage());
+      const geoCoreGeoviewLayerInstance = new GeoCore(mapId, api.getMapViewer(mapId).getDisplayLanguage());
       const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(layerURL);
       if (layers.length === 1) {
         if (layers.length === 1) {
@@ -675,7 +675,7 @@ export function AddNewLayer(): JSX.Element {
         const geojsonFeatureMetadata = geojsonGeoviewLayerInstance.metadata!;
         geojsonGeoviewLayerConfig.listOfLayerEntryConfig = Cast<GeoJSONLayerEntryConfig[]>(geojsonFeatureMetadata.listOfLayerEntryConfig);
         // validate and instanciate layer configs
-        ConfigValidation.validateListOfGeoviewLayerConfig(api.maps[mapId].getDisplayLanguage(), [geojsonGeoviewLayerConfig]);
+        ConfigValidation.validateListOfGeoviewLayerConfig(api.getMapViewer(mapId).getDisplayLanguage(), [geojsonGeoviewLayerConfig]);
         const layers = geojsonGeoviewLayerConfig.listOfLayerEntryConfig;
         if (layers.length === 1) {
           setLayerName(layers[0].layerName as string);
@@ -866,10 +866,10 @@ export function AddNewLayer(): JSX.Element {
 
   const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer): void => {
     if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
-      api.maps[mapId].notifications.showError('layers.layerAddedWithError', [layerName]);
+      api.getMapViewer(mapId).notifications.showError('layers.layerAddedWithError', [layerName]);
     else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
-      api.maps[mapId].notifications.showMessage('layers.layerAdded', [layerName]);
-    else api.maps[mapId].notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
+      api.getMapViewer(mapId).notifications.showMessage('layers.layerAdded', [layerName]);
+    else api.getMapViewer(mapId).notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
   };
 
   /**
@@ -882,7 +882,7 @@ export function AddNewLayer(): JSX.Element {
       const addedLayers: GeoViewLayerAddedResult[] = [];
       if (layerList.length > 1) {
         (layerList as TypeGeoviewLayerConfig[]).forEach((geoviewLayerConfig) => {
-          const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+          const addedLayer = api.getMapViewer(mapId).layer.addGeoviewLayer(geoviewLayerConfig);
           if (addedLayer) addedLayers.push(addedLayer);
         });
       } else if (layerEntries.length > 0) {
@@ -894,10 +894,10 @@ export function AddNewLayer(): JSX.Element {
             } else {
               tempConfig.listOfLayerEntryConfig[0].layerName = layerName;
             }
-            const addedLayer = api.maps[mapId].layer.addGeoviewLayer(tempConfig);
+            const addedLayer = api.getMapViewer(mapId).layer.addGeoviewLayer(tempConfig);
             if (addedLayer) addedLayers.push(addedLayer);
           } else {
-            const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+            const addedLayer = api.getMapViewer(mapId).layer.addGeoviewLayer(geoviewLayerConfig);
             if (addedLayer) addedLayers.push(addedLayer);
           }
         });
@@ -932,7 +932,7 @@ export function AddNewLayer(): JSX.Element {
         geoviewLayerConfig.listOfLayerEntryConfig[0].layerName = geoviewLayerConfig.geoviewLayerName;
 
       // Add the layer using the proper function
-      const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+      const addedLayer = api.getMapViewer(mapId).layer.addGeoviewLayer(geoviewLayerConfig);
       if (addedLayer) {
         // Wait on the promise
         addedLayer.promiseLayer

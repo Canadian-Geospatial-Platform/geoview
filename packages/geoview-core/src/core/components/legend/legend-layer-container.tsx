@@ -1,5 +1,6 @@
 import { useTheme } from '@mui/material';
 import { memo, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Collapse, List } from '@/ui';
 import { getSxClasses } from './legend-styles';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
@@ -22,6 +23,7 @@ interface CollapsibleContentProps {
 
 interface WMSLegendImageProps {
   imgSrc: string;
+  title: string;
   initLightBox: (imgSrc: string, title: string, index: number, total: number) => void;
   legendExpanded: boolean;
   sxClasses: Record<string, object>;
@@ -37,13 +39,14 @@ const styles = {
 
 // Extracted WMS Legend Component
 const WMSLegendImage = memo(
-  ({ imgSrc, initLightBox, legendExpanded, sxClasses }: WMSLegendImageProps): JSX.Element => (
+  ({ imgSrc, initLightBox, legendExpanded, sxClasses, title }: WMSLegendImageProps): JSX.Element => (
     <Collapse in={legendExpanded} sx={sxClasses!.collapsibleContainer} timeout="auto">
       <Box
         component="img"
         tabIndex={0}
         src={imgSrc}
         sx={styles.wmsImage}
+        title={title}
         onClick={() => initLightBox(imgSrc, '', 0, 2)}
         onKeyDown={(e) => (e.code === 'Space' || e.code === 'Enter' ? initLightBox(imgSrc, '', 0, 2) : null)}
       />
@@ -58,6 +61,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   LegendLayerComponent,
 }: CollapsibleContentProps): JSX.Element | null {
   // Hooks
+  const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const layerType = useSelectorLayerType(layerPath);
@@ -82,6 +86,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
         initLightBox={initLightBox}
         legendExpanded={!isCollapsed}
         sxClasses={sxClasses}
+        title={t('general.clickEnlarge')!}
       />
     );
   }

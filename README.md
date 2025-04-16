@@ -163,7 +163,7 @@ For the viewer to recognize that you are trying to render a map on the page, you
 
 It's **recommended** to pass in an **id attribute**, if an id is not passed then the viewer will auto generate an id for you. If you want to use APIs that control this map then you will need to view all created maps on the page and figure out the id of the created map.
 
-_Tip: to view all maps on the page you can console out the maps using this function: console.log(cgpv.api.maps)_
+_Tip: to view all maps on the page you can console out the maps using this function: console.log(cgpv.api.getMapViewerIds())_
 
 Below is an example of a simple map, with an id **mapOne**. This map will be using LCC projection (EPSG:3978) and will have a zoom of 4, a center of 60 latitude and -100 longtitude. The interaction of the map will be dynamic (meaning that you can move around and zoom in/out). It will use the transport, shaded with labels as the basemap. It will display an esri dynamic layer with multiple sub layers. The language of the map will be English.
 
