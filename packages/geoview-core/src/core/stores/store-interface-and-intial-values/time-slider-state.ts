@@ -1,6 +1,7 @@
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { DatePrecision, TimePrecision } from '@/core/utils/date-mgt';
 
@@ -14,6 +15,7 @@ export interface ITimeSliderState {
   timeSliderLayers: TimeSliderLayerSet;
   selectedLayerPath: string;
   sliderFilters: Record<string, string>;
+  setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
     addOrUpdateSliderFilter(layerPath: string, filter: string): void;
@@ -61,6 +63,14 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
     timeSliderLayers: {},
     selectedLayerPath: '',
     sliderFilters: {},
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      set({
+        timeSliderState: {
+          ...get().timeSliderState,
+          selectedLayerPath: geoviewConfig.footerBar?.selectedTimeSliderLayerPath || geoviewConfig.appBar?.selectedTimeSliderLayerPath || '',
+        },
+      });
+    },
 
     // #region ACTIONS
     actions: {

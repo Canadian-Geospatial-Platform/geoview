@@ -13,7 +13,7 @@ import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interfac
 import { logger } from 'geoview-core/src/core/utils/logger';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { useMapVisibleLayers, useMapLoaded } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
+import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { sxClasses } from './swiper-style';
 
@@ -48,7 +48,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const layerPaths = useSwiperLayerPaths();
   const displayLanguage = useAppDisplayLanguage();
   const visibleLayers = useMapVisibleLayers();
-  const mapLoaded = useMapLoaded();
 
   /**
    * Pre compose, Pre render event callback
@@ -117,7 +116,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
   /**
    * On Drag and Drag Stop, calculate the clipping extent
    * @param {MouseEvent} evt The mouse event to calculate the clipping
-   * @param {Boolean} keyboard true if function is called from keyboard event
    */
   const onStop = debounce(() => {
     if (layerPaths.length) {
@@ -137,14 +135,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
       });
     }
   }, 100);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('SWIPER - mapLoaded', mapLoaded);
-    // Map is created after mapLoaded is set to true, so we need a delay to wait for the map size to be set
-    // TODO: Add a new state/event for when the map is set? Maybe change mapLoaded to mapProcessed and add a real mapLoaded?
-    setTimeout(onStop, 100);
-  }, [mapLoaded, onStop]);
 
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key

@@ -44,6 +44,7 @@ import {
 } from '@config/types/map-schema-types';
 
 import { logger } from '@/core/utils/logger';
+import { generateId } from '@/core/utils/utilities';
 import { ConfigApi } from '@/api/config/config-api';
 
 // ========================
@@ -150,7 +151,7 @@ export class MapFeatureConfig {
           if (layerConfig.geoviewLayerId in this.#registeredLayerPaths) {
             // Add duplicate marker ('geoviewId:uuid') so the ID is unique
             // eslint-disable-next-line no-param-reassign
-            layerConfig.geoviewLayerId = `${layerConfig.geoviewLayerId}:${crypto.randomUUID().substring(0, 8)}`;
+            layerConfig.geoviewLayerId = `${layerConfig.geoviewLayerId}:${generateId(8)}`;
           }
           this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
         }

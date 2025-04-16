@@ -11,7 +11,6 @@ import Geometry from 'ol/geom/Geometry';
 import { getMetersPerPixel, validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
-import { DateMgt } from '@/core/utils/date-mgt';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
   TypeLayerStyleSettings,
@@ -22,7 +21,7 @@ import {
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
 } from '@/geo/map/map-schema-types';
-import { esriGetFieldType, esriGetFieldDomain } from '@/geo/layer/gv-layers/utils';
+import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeOutfieldsType, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
@@ -34,6 +33,8 @@ import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { fetchWithTimeout } from '@/core/utils/fetch-helper';
+import { AbortError } from '@/core/exceptions/core-exceptions';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -63,7 +64,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     super(mapId, olSource, layerConfig);
 
     // TODO: Performance - Do we need worker pool or one worker per layer is enough. If a worker is already working we should terminate it
-    // TODO.CONT: and use the abort controller to cancel the fetch and start a new one. So every esriDynamic layer has it's own worker.
+    // TO.DOCONT: and use the abort controller to cancel the fetch and start a new one. So every esriDynamic layer has it's own worker.
     // Setup the worker pool
     this.#fetchWorkerPool = new FetchEsriWorkerPool();
     this.#fetchWorkerPool
@@ -75,9 +76,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
     this.#fetchWorkerPool.addMessageHandler(this.#handleWorkerMessage.bind(this));
 
     // TODO: Performance - Investigate to see if we can call the export map for the whole service at once instead of making many call
-    // TODO.CONT: We can use the layers and layersDef parameters to set what should be visible.
-    // TODO.CONT: layers=show:layerId ; layerDefs={ "layerId": "layer def" }
-    // TODO.CONT: There is no allowableOffset on esri dynamic to speed up. We will need to see what can be done for layers in wrong projection
+    // TO.DOCONT: We can use the layers and layersDef parameters to set what should be visible.
+    // TO.DOCONT: layers=show:layerId ; layerDefs={ "layerId": "layer def" }
+    // TO.DOCONT: There is no allowableOffset on esri dynamic to speed up. We will need to see what can be done for layers in wrong projection
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
       source: olSource,
@@ -104,6 +105,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {void}
    */
   #handleWorkerMessage(event: MessageEvent): void {
+    // Log
+    logger.logDebug('Handling worker message', event);
+
     // Early return if not a FetchEsriWorker message
     const workerLog = event.data;
     if (workerLog.type !== 'message' || workerLog.message[0] !== 'FetchEsriWorker') {
@@ -183,39 +187,41 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the get all feature information for all the features stored in the layer.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override async getAllFeatureInfo(): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    try {
-      // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig();
+  protected override async getAllFeatureInfo(abortController: AbortController | undefined = undefined): Promise<TypeFeatureInfoEntry[]> {
+    // Get the layer config in a loaded phase
+    const layerConfig = this.getLayerConfig();
 
-      // Fetch the features with worker
-      const jsonResponse = await this.fetchAllFeatureInfoWithWorker(layerConfig);
+    // Fetch the features with worker
+    const jsonResponse = await this.fetchAllFeatureInfoWithWorker(layerConfig);
 
-      // If any features
-      if (jsonResponse.features) {
-        // Parse the JSON response and create features
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const features = (jsonResponse.features as TypeJsonObject[]).map((featureData: any) => {
-          // We do not query the geometry anymore (set as undefined). It will query if needed by later
-          const properties = featureData.attributes;
-          return new Feature({ ...properties, undefined });
-        });
-
-        // Format and return the result
-        // Not having geometry have an effect on the style as it use the geometry to define wich one to use
-        // The formatFeatureInfoResult (abstact-geoview-layer) / getFeatureCanvas (geoview-renderer) use geometry stored in style
-        return this.formatFeatureInfoResult(features, layerConfig);
-      }
-
-      // Error
-      throw new Error('Error querying service. No features were returned.');
-    } catch (error) {
-      // Log
-      logger.logError('gv-esri-dynamic.getAllFeatureInfo()\n', error);
-      return null;
+    // If was aborted
+    // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
+    if (abortController?.signal.aborted) {
+      // Raise error
+      throw new AbortError('Cancelled', abortController.signal);
     }
+
+    // If any features
+    if (jsonResponse.features) {
+      // Parse the JSON response and create features
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const features = (jsonResponse.features as TypeJsonObject[]).map((featureData: any) => {
+        // We do not query the geometry anymore (set as undefined). It will query if needed by later
+        const properties = featureData.attributes;
+        return new Feature({ ...properties, undefined });
+      });
+
+      // Format and return the result
+      // Not having geometry have an effect on the style as it use the geometry to define wich one to use
+      // The formatFeatureInfoResult (abstact-geoview-layer) / getFeatureCanvas (geoview-renderer) use geometry stored in style
+      return this.formatFeatureInfoResult(features, layerConfig);
+    }
+
+    // Error
+    throw new GeoViewError(this.getMapId(), 'Error querying service. No features were returned.');
   }
 
   /**
@@ -223,7 +229,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
    * @returns {TypeJsonObject} A promise of esri response for query.
    */
-  async fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeJsonObject> {
+  fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeJsonObject> {
     try {
       const params: QueryParams = {
         url: layerConfig.source.dataAccessPath + layerConfig.layerId,
@@ -235,7 +241,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         maxRecordCount: layerConfig.maxRecordCount || 1000,
       };
 
-      return await this.#fetchWorkerPool.process(params);
+      return this.#fetchWorkerPool.process(params);
     } catch (error) {
       logger.logError('Query processing failed:', error);
       throw error;
@@ -244,33 +250,37 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the return of feature information at a given pixel location.
-   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - The query geometry boolean.
+   * @param {Pixel} location - The pixel coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtPixel(
     location: Pixel,
-    queryGeometry: boolean = true
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+    queryGeometry: boolean = true,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Redirect to getFeatureInfoAtCoordinate
-    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), queryGeometry);
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), queryGeometry, abortController);
   }
 
   /**
    * Overrides the return of feature information at a given coordinate.
    * @param {Coordinate} location - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - The query geometry boolean.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtCoordinate(
     location: Coordinate,
-    queryGeometry: boolean = true
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+    queryGeometry: boolean = true,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Transform coordinate from map project to lntlat
     const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
 
     // Redirect to getFeatureInfoAtLongLat
-    return this.getFeatureInfoAtLongLat(projCoordinate, queryGeometry);
+    return this.getFeatureInfoAtLongLat(projCoordinate, queryGeometry, abortController);
   }
 
   /**
@@ -310,153 +320,174 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - The query geometry boolean.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} abortController - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override async getFeatureInfoAtLongLat(
     lnglat: Coordinate,
-    queryGeometry: boolean = true
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    try {
-      // If invisible
-      if (!this.getVisible()) return [];
+    queryGeometry: boolean = true,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoEntry[]> {
+    // If invisible
+    if (!this.getVisible()) return [];
 
-      // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig();
+    // Get the layer config in a loaded phase
+    const layerConfig = this.getLayerConfig();
 
-      // If not queryable or there no url access path to query return []
-      if (!layerConfig.source.featureInfo?.queryable) return [];
+    // If not queryable or there no url access path to query return []
+    if (!layerConfig.source.featureInfo?.queryable) return [];
 
-      let identifyUrl = layerConfig.source.dataAccessPath;
-      if (!identifyUrl) return [];
+    let identifyUrl = layerConfig.source.dataAccessPath;
+    if (!identifyUrl) return [];
 
-      identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
+    identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
 
-      // GV: We cannot directly use the view extent and reproject. If we do so some layers (issue #2413) identify will return empty resultset
-      // GV.CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the repojection it works
-      const mapViewer = this.getMapViewer();
-      const mapExtent = mapViewer.getView().calculateExtent();
-      const boundsLL = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[0], mapExtent[1]]);
-      const boundsUR = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[2], mapExtent[3]]);
-      const extent = { xmin: boundsLL[0], ymin: boundsLL[1], xmax: boundsUR[0], ymax: boundsUR[1] };
-      const layerDefs = this.getOLSource()?.getParams()?.layerDefs || '';
-      const size = mapViewer.map.getSize()!;
+    // GV: We cannot directly use the view extent and reproject. If we do so some layers (issue #2413) identify will return empty resultset
+    // GV.CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the repojection it works
+    const mapViewer = this.getMapViewer();
+    const mapExtent = mapViewer.getView().calculateExtent();
+    const boundsLL = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[0], mapExtent[1]]);
+    const boundsUR = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[2], mapExtent[3]]);
+    const extent = { xmin: boundsLL[0], ymin: boundsLL[1], xmax: boundsUR[0], ymax: boundsUR[1] };
+    const layerDefs = this.getOLSource()?.getParams()?.layerDefs || '';
+    const size = mapViewer.map.getSize()!;
 
-      // Identify query to get oid features value and attributes, at this point we do not query geometry
-      identifyUrl =
-        `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
-        `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
-        `&imageDisplay=${size[0]},${size[1]},96` +
-        `&layers=visible:${layerConfig.layerId}` +
-        `&layerDefs=${encodeURI(layerDefs)}` +
-        `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
-        `&returnGeometry=false&sr=4326&returnFieldName=true`;
+    // Identify query to get oid features value and attributes, at this point we do not query geometry
+    identifyUrl =
+      `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
+      `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
+      `&imageDisplay=${size[0]},${size[1]},96` +
+      `&layers=visible:${layerConfig.layerId}` +
+      `&layerDefs=${encodeURI(layerDefs)}` +
+      `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}` +
+      `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
-      // If it takes more then 10 seconds it means the server is unresponsive and we should not continue. This will throw an error...
-      const identifyJsonResponse = await fetchWithTimeout<TypeJsonObject>(identifyUrl, {}, 10000);
-      if (identifyJsonResponse.error) {
-        logger.logInfo('There is a problem with this query: ', identifyUrl);
-        throw new Error(`Error code = ${identifyJsonResponse.error.code} ${identifyJsonResponse.error.message}` || '');
-      }
+    // If it takes more then 10 seconds it means the server is unresponsive and we should not continue. This will throw an error...
+    const identifyJsonResponse = await fetchWithTimeout<TypeJsonObject>(identifyUrl, {}, 10000);
 
-      // If no features identified return []
-      if (identifyJsonResponse.results.length === 0) return [];
-
-      // Extract OBJECTIDs
-      const oidField = layerConfig.source.featureInfo.outfields
-        ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
-        : 'OBJECTID';
-      const objectIds = (identifyJsonResponse.results as TypeJsonObject[]).map((result: TypeJsonObject) =>
-        String(result.attributes[oidField]).replace(',', '')
-      );
-
-      // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
-      const maxAllowableOffset = queryGeometry
-        ? getMetersPerPixel(
-            mapViewer.getMapState().currentProjection as TypeValidMapProjectionCodes,
-            mapViewer.getView().getResolution() || 7000,
-            lnglat[1]
-          )
-        : 0;
-
-      // TODO: Performance - We need to separate the query attribute from geometry. We can use the attributes returned by identify to show details panel
-      // TODO.CONT: or create 2 distinc query one for attributes and one for geometry. This way we can display the panel faster and wait later for geometry
-      // TODO.CONT: We need to see if we can fetch in async mode without freezing the ui. If not we will need a web worker for the fetch.
-      // TODO.CONT: If we go with web worker, we need a reusable approach so we can use with all our queries
-      // Get features
-      // const response = await esriQueryRecordsByUrlObjectIds(
-      //   layerConfig.source.dataAccessPath + layerConfig.layerId,
-      //   (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', '') as TypeStyleGeometry,
-      //   objectIds,
-      //   '*',
-      //   false,
-      //   mapViewer.getMapState().currentProjection,
-      //   maxAllowableOffset,
-      //   false
-      // );
-
-      // TODO: Performance - This is also time consuming, the creation of the feature can take several seconds, check web worker
-      // TODO.CONT: Because web worker can only use sereialize date and not object with function it may be difficult for this...
-      // TODO.CONT: For the moment, the feature is created without a geometry. This should be added by web worker
-      // TODO.CONT: Splitting the query will help avoid layer details error when geometry is big anf let ui not frezze. The Web worker
-      // TODO.CONT: geometry assignement must not be in an async function.
-      // Transform the features in an OL feature - at this point, there is no geometry associated with the feature
-      const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results }) as Feature<Geometry>[];
-      const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(features, layerConfig);
-
-      // If geometry is needed, use web worker to query and assign geometry later
-      if (queryGeometry)
-        // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
-        // TODO.CONT: the esri query (was working with identify). But identify was failing on huge geometry...
-        this.fetchFeatureInfoGeometryWithWorker(
-          layerConfig,
-          objectIds.map(Number),
-          true,
-          mapViewer.getMapState().currentProjection,
-          maxAllowableOffset
-        )
-          .then((featuresJSON) => {
-            (featuresJSON.features as TypeJsonObject[]).forEach((feat: TypeJsonObject, index: number) => {
-              // TODO: Performance - There is still a problem when we create the feature with new EsriJSON().readFeature. It goes trought a loop and take minutes on the deflate function
-              // TODO.CONT: 1dcd28aa-99da-4f62-b157-15631379b170, ocean biology layer has huge amount of verticies and when zoomed in we require more
-              // TODO.CONT: more definition so the feature creation take more time. Investigate if we can create the geometry instead
-              // TODO.CONT: Investigate using this approach in esri-feature.ts
-              // const geom = new EsriJSON().readFeature(feat, {
-              //   dataProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
-              //   featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
-              // }) as Feature<Geometry>;
-
-              // TODO: Performance - Relying on style to get geometry is not good. We should extract it from metadata and keep it in dedicated attribute
-              const geomType = Object.keys(layerConfig?.layerStyle || []);
-
-              // Get coordinates in right format and create geometry
-              const coordinates = (feat.geometry?.points ||
-                feat.geometry?.paths ||
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                feat.geometry?.rings || [feat.geometry?.x, feat.geometry?.y]) as any; // MultiPoint or Line or Polygon or Point schema
-              const newGeom: Geometry | null =
-                geomType.length > 0
-                  ? (GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) as unknown as Geometry)
-                  : null;
-
-              // TODO: Perfromance - We will need a trigger to refresh the highlight and details panel (for zoom button) when extent and
-              // TODO.CONT: is applied. Sometime the delay is too big so we need to change tab or layer in layer list to trigger the refresh
-              // We assume order of arrayOfFeatureInfoEntries is the same as featuresJSON.features as they are process in same order
-              const entry = arrayOfFeatureInfoEntries![index];
-              if (newGeom !== null && entry.geometry && entry.geometry instanceof Feature) {
-                entry.extent = newGeom.getExtent();
-                entry.geometry.setGeometry(newGeom);
-              }
-            });
-          })
-          .catch((err) => logger.logError('Features worker', err));
-
-      return arrayOfFeatureInfoEntries;
-    } catch (error) {
-      // Log
-      logger.logError('gv-esri-dynamic.getFeatureInfoAtLongLat()\n', error);
-      return null;
+    // If was aborted
+    // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
+    if (abortController?.signal.aborted) {
+      // Raise error
+      throw new AbortError('Cancelled', abortController.signal);
     }
+
+    if (identifyJsonResponse.error) {
+      logger.logInfo('There is a problem with this query: ', identifyUrl);
+      throw new GeoViewError(
+        this.getMapId(),
+        `Error code = ${identifyJsonResponse.error.code} ${identifyJsonResponse.error.message}` || ''
+      );
+    }
+
+    // If no features identified return []
+    if (identifyJsonResponse.results.length === 0) return [];
+
+    // Extract OBJECTIDs
+    const oidField = layerConfig.source.featureInfo.outfields
+      ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
+      : 'OBJECTID';
+    const objectIds = (identifyJsonResponse.results as TypeJsonObject[]).map((result: TypeJsonObject) =>
+      String(result.attributes[oidField]).replace(',', '')
+    );
+
+    // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
+    const maxAllowableOffset = queryGeometry
+      ? getMetersPerPixel(
+          mapViewer.getMapState().currentProjection as TypeValidMapProjectionCodes,
+          mapViewer.getView().getResolution() || 7000,
+          lnglat[1]
+        )
+      : 0;
+
+    // TODO: Performance - We need to separate the query attribute from geometry. We can use the attributes returned by identify to show details panel
+    // TO.DOCONT: or create 2 distinc query one for attributes and one for geometry. This way we can display the panel faster and wait later for geometry
+    // TO.DOCONT: We need to see if we can fetch in async mode without freezing the ui. If not we will need a web worker for the fetch.
+    // TO.DOCONT: If we go with web worker, we need a reusable approach so we can use with all our queries
+    // Get features
+    // const response = await esriQueryRecordsByUrlObjectIds(
+    //   layerConfig.source.dataAccessPath + layerConfig.layerId,
+    //   (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', '') as TypeStyleGeometry,
+    //   objectIds,
+    //   '*',
+    //   false,
+    //   mapViewer.getMapState().currentProjection,
+    //   maxAllowableOffset,
+    //   false
+    // );
+
+    // TODO: Performance - This is also time consuming, the creation of the feature can take several seconds, check web worker
+    // TO.DOCONT: Because web worker can only use sereialize date and not object with function it may be difficult for this...
+    // TO.DOCONT: For the moment, the feature is created without a geometry. This should be added by web worker
+    // TO.DOCONT: Splitting the query will help avoid layer details error when geometry is big anf let ui not frezze. The Web worker
+    // TO.DOCONT: geometry assignement must not be in an async function.
+    // Transform the features in an OL feature - at this point, there is no geometry associated with the feature
+    const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results }) as Feature<Geometry>[];
+    const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(features, layerConfig);
+
+    // If cancelled
+    // Explicitely checking the abort condition here, after reading the features, because the processing above is time consuming and maybe things have become aborted meanwhile.
+    if (abortController?.signal.aborted) {
+      // Raise error
+      throw new AbortError('Cancelled', abortController.signal);
+    }
+
+    // If geometry is needed, use web worker to query and assign geometry later
+    if (queryGeometry)
+      // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
+      // TO.DOCONT: the esri query (was working with identify). But identify was failing on huge geometry...
+      this.fetchFeatureInfoGeometryWithWorker(
+        layerConfig,
+        objectIds.map(Number),
+        true,
+        mapViewer.getMapState().currentProjection,
+        maxAllowableOffset
+      )
+        .then((featuresJSON) => {
+          (featuresJSON.features as TypeJsonObject[]).forEach((feat: TypeJsonObject, index: number) => {
+            // If cancelled
+            // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
+            if (abortController?.signal.aborted) {
+              // Raise error
+              throw new AbortError('Cancelled', abortController.signal);
+            }
+
+            // TODO: Performance - There is still a problem when we create the feature with new EsriJSON().readFeature. It goes trought a loop and take minutes on the deflate function
+            // TO.DOCONT: 1dcd28aa-99da-4f62-b157-15631379b170, ocean biology layer has huge amount of verticies and when zoomed in we require more
+            // TO.DOCONT: more definition so the feature creation take more time. Investigate if we can create the geometry instead
+            // TO.DOCONT: Investigate using this approach in esri-feature.ts
+            // const geom = new EsriJSON().readFeature(feat, {
+            //   dataProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
+            //   featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
+            // }) as Feature<Geometry>;
+
+            // TODO: Performance - Relying on style to get geometry is not good. We should extract it from metadata and keep it in dedicated attribute
+            const geomType = Object.keys(layerConfig?.layerStyle || []);
+
+            // Get coordinates in right format and create geometry
+            const coordinates = (feat.geometry?.points ||
+              feat.geometry?.paths ||
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              feat.geometry?.rings || [feat.geometry?.x, feat.geometry?.y]) as any; // MultiPoint or Line or Polygon or Point schema
+            const newGeom: Geometry | null =
+              geomType.length > 0
+                ? (GeometryApi.createGeometryFromType(geomType[0] as TypeStyleGeometry, coordinates) as unknown as Geometry)
+                : null;
+
+            // TODO: Performance - We will need a trigger to refresh the higight and details panel (for zoom button) when extent and
+            // TO.DOCONT: is applied. Sometimes the delay is too big so we need to change tab or layer in layer list to trigger the refresh
+            // We assume order of arrayOfFeatureInfoEntries is the same as featuresJSON.features as they are processed in the same order
+            const entry = arrayOfFeatureInfoEntries![index];
+            if (newGeom !== null && entry.geometry && entry.geometry instanceof Feature) {
+              entry.extent = newGeom.getExtent();
+              entry.geometry.setGeometry(newGeom);
+            }
+          });
+        })
+        .catch((err) => logger.logError('Features worker', err));
+
+    return arrayOfFeatureInfoEntries;
   }
 
   /**
@@ -879,10 +910,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
         Point: styleSettings,
       };
 
-      // TODO: Refactor - Find a better place to set the style than in a getter or rename this function like another TODO suggests
-      // Set the style
-      this.setStyle(styleConfig);
-
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
         styleConfig,
@@ -894,6 +921,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
       logger.logError(`Get Legend for ${layerConfig.layerPath} error`, error);
       return null;
     }
+  }
+
+  /**
+   * Overrides when the style should be set by the fetched legend.
+   * @param legend
+   */
+  override onSetStyleAccordingToLegend(legend: TypeLegend): void {
+    // Set the style
+    this.setStyle(legend.styleConfig!);
   }
 
   /**
@@ -915,43 +951,24 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(filter: string, combineLegendFilter = true): void {
+  applyViewFilter(filter: string, combineLegendFilter: boolean = true): void {
     // Log
     logger.logTraceCore('GV-ESRI-DYNAMIC - applyViewFilter', this.getLayerPath());
 
     const layerConfig = this.getLayerConfig();
-    const olLayer = this.getOLLayer() as ImageLayer<ImageArcGISRest>;
+    const olLayer = this.getOLLayer();
 
+    // TODO: Check - applyViewFilter implementation? Read the GV notes here
+    // GV This code section differs from example GVEsriImage and GVWMS with the way the source is checked in the other classes implementation
+    // GV Also, in this implementation, the layerConfig.layerFilter is updated with the timmed filter, not in the other classes implementations
+    // GV ..which furthermore is actually only set in the `if (combineLegendFilter)` clause in the other classes implementations
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.legendFilterIsOff = !combineLegendFilter;
     layerConfig.layerFilter = filterValueToUse;
     if (combineLegendFilter) filterValueToUse = this.getViewFilter();
 
-    // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
-    // TODO: Standardize the regex across all layer types
-    // OLD REGEX, not working anymore, test before standardization
-    //   ...`${filterValueToUse?.replaceAll(/\s{2,}/g, ' ').trim()} `.matchAll(
-    //     /(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi
-    //   ),
-    const searchDateEntry = [
-      ...filterValueToUse.matchAll(
-        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi
-      ),
-    ];
-
-    searchDateEntry.reverse();
-    searchDateEntry.forEach((dateFound) => {
-      // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
-      const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-      let reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.getExternalFragmentsOrder(), reverseTimeZone);
-      // GV ESRI Dynamic layers doesn't accept the ISO date format. The time zone must be removed. The 'T' separator
-      // GV normally placed between the date and the time must be replaced by a space.
-      reformattedDate = reformattedDate.slice(0, reformattedDate.length === 20 ? -1 : -6); // drop time zone.
-      reformattedDate = reformattedDate.replace('T', ' ');
-      filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
-        dateFound.index! + dateFound[0].length
-      )}`;
-    });
+    // Parse the filter value to use
+    filterValueToUse = parseDateTimeValuesEsriDynamic(filterValueToUse, this.getExternalFragmentsOrder());
 
     // Raster layer queries do not accept any layerDefs
     const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
@@ -965,11 +982,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds.
+   * Overrides the way to get the bounds for this layer type.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getBounds(): Extent | undefined {
+  override onGetBounds(): Extent | undefined {
     // Get the metadata extent
     const metadataExtent = this.getMetadataExtent();
 
@@ -1024,7 +1040,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         logger.logError(`Error fetching geometry from ${queryUrl}`, error);
       }
 
-      // TODO: Cleanup - Keep fo reference
+      // TODO: Cleanup - Keep for reference
       // // GV: outFields here is not wanted, it is included because some sevices require it in the query. It would be possible to use
       // // GV cont: OBJECTID, but it is not universal through the services, so we pass a value through.
       // const outfieldQuery = outfield ? `&outFields=${outfield}` : '';

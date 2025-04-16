@@ -7,6 +7,7 @@ import { Extent } from 'ol/extent';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import {
   layerEntryIsEsriDynamic,
@@ -24,6 +25,7 @@ import { LegendEventProcessor } from '@/api/event-processors/event-processor-chi
 import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { TypeLayerControls } from '@/api/config/types/map-schema-types';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 // #region INTERFACES & TYPES
 
@@ -37,6 +39,7 @@ export interface ILayerState {
   displayState: TypeLayersViewDisplayState;
   layerDeleteInProgress: boolean;
   selectedLayerSortingArrowId: string;
+  setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
     deleteLayer: (layerPath: string) => void;
@@ -84,6 +87,16 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     displayState: 'view',
     layerDeleteInProgress: false,
     selectedLayerSortingArrowId: '',
+    // Initialize default
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      set({
+        layerState: {
+          ...get().layerState,
+          selectedLayerPath: geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath || null,
+        },
+      });
+    },
+
     // #region ACTIONS
     actions: {
       /**
@@ -138,7 +151,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         }
 
         // Not an EsriDynamic layer
-        return Promise.reject(new Error('Not an EsriDynamic layer'));
+        return Promise.reject(new GeoViewError(get().mapId, 'Not an EsriDynamic layer'));
       },
 
       /**
