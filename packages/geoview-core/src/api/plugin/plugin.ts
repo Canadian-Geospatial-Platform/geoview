@@ -166,7 +166,7 @@ export abstract class Plugin {
 
               // Log
               logger.logError(errorMessage);
-              api.maps[mapId].notifications.showError(errorMessage);
+              api.getMapViewer(mapId).notifications.showError(errorMessage);
             }
           }
         }

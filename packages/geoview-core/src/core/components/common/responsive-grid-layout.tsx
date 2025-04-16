@@ -13,6 +13,7 @@ import { useUIFooterPanelResizeValue, useUISelectedFooterLayerListItemId } from 
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -53,9 +54,10 @@ const ResponsiveGridLayout = forwardRef(
     const theme = useTheme();
     const isMapFullScreen = useAppFullscreenActive();
     const footerPanelResizeValue = useUIFooterPanelResizeValue();
+    const mapSize = useMapSize();
     const sxClasses = useMemo(
-      () => getSxClasses(theme, isMapFullScreen, footerPanelResizeValue),
-      [theme, isMapFullScreen, footerPanelResizeValue]
+      () => getSxClasses(theme, isMapFullScreen, footerPanelResizeValue, mapSize[1]),
+      [theme, isMapFullScreen, footerPanelResizeValue, mapSize]
     );
 
     // Store

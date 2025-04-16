@@ -64,7 +64,7 @@ export abstract class AbstractPlugin {
    * @returns MapViewer The MapViewer used by this Plugin
    */
   mapViewer(): MapViewer {
-    return this.api.maps[this.pluginProps.mapId];
+    return this.api.getMapViewer(this.pluginProps.mapId);
   }
 
   /**

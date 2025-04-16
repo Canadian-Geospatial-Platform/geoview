@@ -12,8 +12,6 @@ import { useEventListener } from '@/core/components/common/hooks/use-event-liste
  * Properties for the Slider
  */
 type SliderProps = {
-  sliderId?: string;
-
   // Important props: min, max, value
   min: number;
   max: number;
@@ -39,10 +37,6 @@ type SliderProps = {
   ariaLabelledby?: string;
   valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
   valueLabelDisplay?: 'auto' | 'on';
-
-  // optional map id to link the slider to
-  // TODO: Refactor - No mapId inside a ui component in ui folder.
-  mapId?: string;
 };
 
 /**
@@ -77,7 +71,7 @@ function SliderUI(props: SliderProps): JSX.Element {
   // Ref
   const sliderRef = useRef<HTMLDivElement>(null);
 
-  const containerId = `${properties.mapId}-${properties?.sliderId ?? generateId(18)}` || '';
+  const containerId = generateId(18);
   const valueLabelDisplayOption = valueLabelDisplay === undefined ? 'on' : 'auto';
 
   // State
@@ -214,7 +208,7 @@ function SliderUI(props: SliderProps): JSX.Element {
     }
 
     // Handle middle element if odd number of markers
-    // TODO: there is still issue when previous to middle interfere with lst in Ontario ring of fire (time slider config- small screen)
+    // TODO: there is still issue when previous to middle interfere with last in Ontario ring of fire (time slider config- small screen)
     if (left === right) {
       const middleElement = markerArray[left];
       const overlapWithLeft = checkOverlap(markerArray[lastVisibleLeft], middleElement, orientationIn);

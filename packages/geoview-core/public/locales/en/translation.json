@@ -15,7 +15,8 @@
     "openGuide": "Open guide",
     "guide": "Guide",
     "fullScreen": "Full screen",
-    "processing": "Processing __param__ element(s) of __param__"
+    "processing": "Processing __param__ element(s) of __param__",
+    "clickEnlarge": "Click to enlarge"
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -256,7 +257,9 @@
       "emptyGroup": "Empty layer group",
       "esriId": "ESRI layerId must be a number",
       "esriIdNotFound": "ESRI layerId not found",
-      "notAbleToQuery": "Not able to download records for __param__"
+      "notAbleToQuery": "Not able to download records for __param__",
+      "unsuportedProjection": "Layer __param__ projection does not match map projection",
+      "noCSVGeometry": "Could not find geographic data in the CSV layer __param__"
     },
     "geocore": {
       "noLayer": "No layers returned by GeoCore service"

@@ -40,13 +40,35 @@ let cgpvCallbackLayersProcessed: (mapId: string) => void | undefined;
 let cgpvCallbackLayersLoaded: (mapId: string) => void | undefined;
 
 /**
- * Function to unmount a map element
+ * Checks if a root is mounted for a given map ID
+ *
+ * @param {string} mapId - The map identifier
+ * @returns {boolean} True if the root exists and is mounted
+ */
+const isRootMounted = (mapId: string): boolean => {
+  return !!reactRoot[mapId];
+};
+
+/**
+ * Safely unmounts a map and cleans up its resources
  *
  * @param {string} mapId - The map id to unmount
  */
-export function unmountMap(mapId: string): void {
-  // Unmount the react root
-  reactRoot[mapId]?.unmount();
+export function unmountMap(mapId: string, mapContainer: HTMLElement): void {
+  if (isRootMounted(mapId)) {
+    try {
+      reactRoot[mapId].unmount();
+      logger.logInfo(`Map ${mapId} is unmounted...`);
+    } catch (error) {
+      logger.logError(`Error unmounting map ${mapId}:`, error);
+    } finally {
+      // Remove React-specific attributes
+      mapContainer.removeAttribute('data-react-root');
+      mapContainer.removeAttribute('data-zustand-devtools');
+
+      delete reactRoot[mapId];
+    }
+  }
 }
 
 /**
@@ -159,7 +181,7 @@ async function renderMap(mapElement: Element): Promise<void> {
     configuration!.map!.listOfGeoviewLayerConfig!,
     (errorKey: string, params: string[]) => {
       // Wait for the map viewer to get loaded in the api
-      whenThisThen(() => api.maps[configuration.mapId])
+      whenThisThen(() => api.getMapViewer(configuration.mapId))
         .then(() => {
           // Create the error
           const error = new GeoViewError(configuration.mapId, errorKey, params);
@@ -168,7 +190,7 @@ async function renderMap(mapElement: Element): Promise<void> {
           logger.logWarning(`- Map ${configuration.mapId}: ${error.message}`);
 
           // Show the error
-          api.maps[configuration.mapId].notifications.showError(error.message);
+          api.getMapViewer(configuration.mapId).notifications.showError(error.message);
         })
         .catch((error) => {
           // Log promise failed
@@ -182,15 +204,14 @@ async function renderMap(mapElement: Element): Promise<void> {
   if (configuration) {
     const { mapId } = configuration;
 
-    // add config to store
-    addGeoViewStore(configuration);
-
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
 
+    // add config to store
+    addGeoViewStore(configuration);
+
     // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
     return new Promise<void>((resolve) => {
-      // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
       reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} onMapViewerInit={(): void => resolve()} />);
     });
   }
@@ -276,7 +297,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           callbackMapInit?.(mapId); // TODO: Obsolete call, remove it eventually
 
           // Register when the map viewer will have a map ready
-          api.maps[mapId].onMapReady((mapViewer) => {
+          api.getMapViewer(mapId).onMapReady((mapViewer) => {
             logger.logInfo('Map ready / layers registered', mapViewer.mapId);
 
             // Callback for that particular map
@@ -284,7 +305,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           });
 
           // Register when the map viewer will have loaded layers
-          api.maps[mapId].onMapLayersProcessed((mapViewer) => {
+          api.getMapViewer(mapId).onMapLayersProcessed((mapViewer) => {
             logger.logInfo('Map layers processed', mapViewer.mapId);
 
             // Callback for that particular map
@@ -292,7 +313,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           });
 
           // Register when the map viewer will have loaded layers
-          api.maps[mapId].onMapLayersLoaded((mapViewer) => {
+          api.getMapViewer(mapId).onMapLayersLoaded((mapViewer) => {
             logger.logInfo('Map layers loaded', mapViewer.mapId);
 
             // Callback for that particular map
