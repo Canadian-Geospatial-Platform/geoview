@@ -60,6 +60,8 @@ import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -221,12 +223,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Get metric values
     const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
     const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
-    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')!.lastChild as HTMLElement)?.innerHTML;
+    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
 
     // Get metric values
     const scaleControlBarImperial = document.getElementById(`${mapId}-scaleControlBarImperial`);
     const lineWidthImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
-    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')!.lastChild as HTMLElement)?.innerHTML;
+    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
 
     // get resolution value (same for metric and imperial)
     const labelNumeric = (scaleControlBarMetric?.querySelector('.ol-scale-text') as HTMLElement)?.innerHTML;
@@ -346,6 +348,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setMapLoaded(mapLoaded);
   }
 
+  static setMapDisplayed(mapId: string): void {
+    // Save in store
+    this.getMapStateProtected(mapId).setterActions.setMapDisplayed();
+  }
+
   static setMapPointerPosition(mapId: string, pointerPosition: TypeMapMouseInfo): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setPointerPosition(pointerPosition);
@@ -457,6 +464,28 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // use store action to set projection value in store and apply new view to the map
       this.getMapStateProtected(mapId).setterActions.setProjection(projectionCode);
+
+      // Before changing the view, clear the basemaps right away to prevent a moment where a
+      // vector tile basemap might, momentarily, be in different projection than the view.
+      // Note: It seems that since OpenLayers 10.5 OpenLayers throws an exception about this. So this line was added.
+      this.getMapViewer(mapId).basemap.clearBasemaps();
+
+      // Remove all vector tiles from the map, because they don't allow on-the-fly reprojection (OpenLayers 10.5 exception issue)
+      // GV Experimental code, to test further... not problematic to keep it for now
+      this.getMapViewerLayerAPI(mapId)
+        .getGeoviewLayers()
+        .filter((layer) => layer instanceof AbstractGVVectorTile)
+        .forEach((layer) => {
+          // Remove the layer
+          this.getMapViewerLayerAPI(mapId).removeLayerUsingPath(layer.getLayerPath());
+
+          // Log
+          this.getMapViewer(mapId).notifications.showWarning(
+            `The vector tile ${layer.getLayerName()} had to be removed due to a projection conflict.`,
+            [],
+            true
+          );
+        });
 
       // set new view
       this.getMapViewer(mapId).setView(newView);
@@ -723,7 +752,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   ): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const layerPath = (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
-      ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}`
+      ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/base-group`
       : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
     const pathToSearch = layerPathToReplace || layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, pathToSearch);
@@ -882,7 +911,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     // Invalid extent
-    throw new Error(`Couldn't zoom to extent, invalid extent: ${extent}`);
+    throw new GeoViewError(mapId, `Couldn't zoom to extent, invalid extent: ${extent}`);
   }
 
   static async zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void> {
@@ -1070,16 +1099,31 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath The path of the layer to apply filters to.
    */
   static applyLayerFilters(mapId: string, layerPath: string): void {
+    // Get the Geoview layer
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
-    if (geoviewLayer) {
+
+    // If found it and of right type
+    if (
+      geoviewLayer &&
+      (geoviewLayer instanceof AbstractGVVector ||
+        geoviewLayer instanceof GVWMS ||
+        geoviewLayer instanceof GVEsriImage ||
+        geoviewLayer instanceof GVEsriDynamic)
+    ) {
+      // Depending on the instance
       if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
+        // Read filter information
         const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+
+        // If filter was defined
         if (filter) geoviewLayer.applyViewFilter(filter);
       } else {
+        // Read filter information
         const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
+        const filter = filters.join(' and ');
 
         // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
-        (geoviewLayer as AbstractGVVector | GVEsriDynamic).applyViewFilter(filters.join(' and '));
+        geoviewLayer.applyViewFilter(filter);
       }
     }
   }

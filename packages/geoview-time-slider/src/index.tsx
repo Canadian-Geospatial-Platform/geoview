@@ -1,6 +1,7 @@
 import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/core/types/global-types';
 import { TimeDimension, DateMgt } from 'geoview-core/src/core/utils/date-mgt';
 import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
+import { AbstractGVLayer } from 'geoview-core/src/geo/layer/gv-layers/abstract-gv-layer';
 import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 import { TimeSliderEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/time-slider-event-processor';
@@ -215,8 +216,17 @@ class TimeSliderPlugin extends FooterPlugin {
    */
   #filterTimeSliderLayers(layerPaths: string[]): string[] {
     const filteredLayerPaths = layerPaths.filter((layerPath) => {
-      // Return the temporal dimension for the layer if any
-      return this.mapViewer().layer.getGeoviewLayer(layerPath)?.getTemporalDimension();
+      // Get the layer
+      const layer = this.mapViewer().layer.getGeoviewLayer(layerPath);
+
+      // If of the right type
+      if (layer instanceof AbstractGVLayer) {
+        // Return the temporal dimension for the layer if any
+        return layer.getTemporalDimension();
+      }
+
+      // Skip
+      return undefined;
     });
     return filteredLayerPaths;
   }

@@ -89,33 +89,58 @@ export default function ExportModal(): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const { isOpen } = useUIActiveAppBarTab();
 
-  if (exportContainerRef && exportContainerRef.current) {
-    exportContainerRef.current.style.width = `${imageDefaultWidth}px`;
-  }
-
   const exportMap = ((): void => {
-    if (exportContainerRef.current && textFieldRef.current && exportTitleRef.current) {
+    if (exportContainerRef?.current && textFieldRef.current && exportTitleRef.current) {
+      // Hide the text field
       textFieldRef.current.style.display = 'none';
+
+      // Update the title
       exportTitleRef.current.style.padding = '1rem';
       exportTitleRef.current.innerHTML = exportTitle;
+
       setIsMapExporting(true);
 
-      htmlToImage
-        .toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white, fontEmbedCSS: '' })
-        .then((dataUrl) => {
-          setIsMapExporting(false);
-          resizeImageData(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`)
-            .then(() => {
-              setActiveAppBarTab(legendId, 'legend', false, false);
-              disableFocusTrap();
-            })
-            .catch((error: Error) => {
-              logger.logError('Error while resizing the image', error);
-            });
-        })
-        .catch((error: Error) => {
-          logger.logError('Error while exporting the image', error);
-        });
+      // Create a temporary container
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.width = `${imageDefaultWidth}px`;
+
+      // Clone the content
+      const clonedContent = exportContainerRef.current.cloneNode(true) as HTMLDivElement;
+      tempContainer.appendChild(clonedContent);
+      document.body.appendChild(tempContainer);
+
+      // Small delay to ensure content is rendered
+      setTimeout(() => {
+        htmlToImage
+          .toPng(clonedContent, {
+            backgroundColor: theme.palette.common.white,
+            fontEmbedCSS: '',
+            width: imageDefaultWidth,
+            height: clonedContent.offsetHeight,
+          })
+          .then((dataUrl) => {
+            setIsMapExporting(false);
+            // Clean up
+            document.body.removeChild(tempContainer);
+
+            resizeImageData(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`)
+              .then(() => {
+                setActiveAppBarTab(legendId, 'legend', false, false);
+                disableFocusTrap();
+              })
+              .catch((error: Error) => {
+                logger.logError('Error while resizing the image', error);
+              });
+          })
+          .catch((error: Error) => {
+            // Clean up on error too
+            document.body.removeChild(tempContainer);
+            setIsMapExporting(false);
+            logger.logError('Error while exporting the image', error);
+          });
+      }, 100);
     }
   }) as MouseEventHandler<HTMLButtonElement>;
 
@@ -147,7 +172,7 @@ export default function ExportModal(): JSX.Element {
     let timer: NodeJS.Timeout;
     if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
       const mapImage = mapImageRef.current;
-
+      const dialogBox = dialogRef.current;
       if (overviewMap) overviewMap.style.visibility = 'hidden';
 
       // open legend in appbar when only appbar exists
@@ -164,7 +189,8 @@ export default function ExportModal(): JSX.Element {
             setIsMapLoading(false);
             const img = new Image();
             img.src = dataUrl;
-            img.style.maxWidth = `${imageDefaultWidth}px`; // img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
+            // img.style.maxWidth = `${imageDefaultWidth}px`;
+            img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
             mapImage.appendChild(img);
           })
           .catch((error: Error) => {
@@ -187,7 +213,8 @@ export default function ExportModal(): JSX.Element {
               setIsLegendLoading(false);
               const img = new Image();
               img.src = dataUrl;
-              img.style.maxWidth = `${imageDefaultWidth}px`; // img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
+              // img.style.maxWidth = `${imageDefaultWidth}px`;
+              img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
               legendContainerRef.current?.appendChild(img);
               if (hasHiddenAttr) legendTab.hidden = true;
             })

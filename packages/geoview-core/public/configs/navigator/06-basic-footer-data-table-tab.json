@@ -141,7 +141,9 @@
   "footerBar": {
     "tabs": {
       "core": ["legend", "layers", "details", "data-table"]
-    }
+    },
+    "selectedTab": "data-table",
+    "selectedDataTableLayerPath": "airborne_radioactivity/1"
   },
   "corePackages": [],
   "externalPackages": [],

@@ -279,7 +279,7 @@
     {
       "layers": [
         {
-          "layerId": "geojsonLYR5/geojsonLYR5/point-feature-group/points.json"
+          "layerId": "geojsonLYR5/base-group/point-feature-group/points.json"
         }
       ],
       "chart": "bar",

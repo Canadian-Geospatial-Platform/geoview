@@ -14,17 +14,15 @@ import { logger } from '@/core/utils/logger';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { generateId } from '@/core/utils/utilities';
 
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
-/** *****************************************************************************************************************************
+/**
  * Class to read and validate the GeoView map features configuration. Will validate every item for structure and valid values.
  * If error found, will replace by default values and sent a message in the console for developers to know something went wrong.
  *
  * @exports
  * @class Config
  */
-// ******************************************************************************************************************************
 export class Config {
   /** The element associated to the map properties configuration.. */
   // #mapElement: Element;
@@ -32,11 +30,9 @@ export class Config {
   /** Config validation object used to validate the configuration and define default values */
   configValidation: ConfigValidation;
 
-  /** ***************************************************************************************************************************
-   * The Config class constructor used to instanciate an object of this type.
-   * @param {Element} mapElement The map element.
-   *
-   * @returns {Config} An instance of the Config class.
+  /**
+   * Constructor
+   * @param {TypeDisplayLanguage} language - The language
    */
   constructor(language: TypeDisplayLanguage) {
     // Instanciate the configuration validator.
@@ -45,19 +41,20 @@ export class Config {
 
   /** ***************************************************************************************************************************
    * Get a valid map configuration.
-   *
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfig Config object to validate.
-   *
-   * @returns {TypeMapFeaturesConfig} A valid map config.
+   * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig Config object to validate.
+   * @returns {MapConfigLayerEntry} A valid map config layer entry.
    */
-  getValidMapConfig(listOfGeoviewLayerConfig: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
+  getValidMapConfig(
+    listOfGeoviewLayerConfig: MapConfigLayerEntry[],
+    onErrorCallback: (errorKey: string, params: string[]) => void
+  ): MapConfigLayerEntry[] {
     if (listOfGeoviewLayerConfig) {
       listOfGeoviewLayerConfig.forEach((geoviewLayerEntry, index, layerArray) => {
         // Add duplicate marker for duplicate IDs
         const firstIndex = layerArray.findIndex((layerEntry) => geoviewLayerEntry.geoviewLayerId === layerEntry.geoviewLayerId);
         if (firstIndex !== index && mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {
           // eslint-disable-next-line no-param-reassign
-          geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${crypto.randomUUID().substring(0, 8)}`;
+          geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${generateId(8)}`;
         }
 
         if (mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {
@@ -71,8 +68,8 @@ export class Config {
     }
 
     // TODO: refactor - return only the layers
-    const validLayers = this.configValidation.validateMapConfigAgainstSchema(listOfGeoviewLayerConfig);
-    logger.logDebug('Config', validLayers);
+    const validLayers = this.configValidation.validateMapConfigAgainstSchema(listOfGeoviewLayerConfig, onErrorCallback);
+    logger.logDebug('CONFIG', validLayers);
 
     return validLayers;
   }
@@ -101,12 +98,16 @@ export class Config {
    *
    * @returns {Promise<TypeMapFeaturesConfig | undefined>} The initialized valid map config.
    */
-  initializeMapConfig(mapId: string, listOfGeoviewLayerConfig: MapConfigLayerEntry[]): MapConfigLayerEntry[] | undefined {
+  initializeMapConfig(
+    mapId: string,
+    listOfGeoviewLayerConfig: MapConfigLayerEntry[],
+    onErrorCallback: (errorKey: string, params: string[]) => void
+  ): MapConfigLayerEntry[] | undefined {
     // NOTE: URL config has precedence on JSON file config that has precedence on inline config
     if (!listOfGeoviewLayerConfig) {
       logger.logInfo(`- Map: ${mapId} - Empty JSON configuration object, using default -`);
     }
 
-    return this.getValidMapConfig(listOfGeoviewLayerConfig!);
+    return this.getValidMapConfig(listOfGeoviewLayerConfig!, onErrorCallback);
   }
 }

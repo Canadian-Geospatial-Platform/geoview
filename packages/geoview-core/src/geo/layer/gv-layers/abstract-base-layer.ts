@@ -49,6 +49,14 @@ export abstract class AbstractBaseLayer {
   abstract getAttributions(): string[];
 
   /**
+   * A quick getter to help identify which layer class the current instance is coming from.
+   */
+  public getClassName(): string {
+    // Return the name of the class
+    return this.constructor.name;
+  }
+
+  /**
    * Gets the Map Id
    * @returns The Map id
    */

@@ -50,9 +50,6 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
   return {
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
-      // Log (leaving the logDebug for now until more tests are done with the config 2024-02-28)
-      logger.logDebug('Sending the map config to the store...', config.mapId);
-
       // GV this is a copy of the original map configuration, no modifications is allowed
       // ? this configuration is use to reload the map
       const clonedConfig = cloneDeep(config);
@@ -75,11 +72,19 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
       get().appState.setDefaultConfigValues(config);
       get().mapState.setDefaultConfigValues(config);
       get().uiState.setDefaultConfigValues(config);
+      get().layerState.setDefaultConfigValues(config);
+      get().dataTableState.setDefaultConfigValues(config);
 
       // packages states, only create if needed
       // TODO: Change this check for something more generic that checks in appBar too
-      if (config.footerBar?.tabs.core.includes('time-slider')) set({ timeSliderState: initializeTimeSliderState(set, get) });
-      if (config.footerBar?.tabs.core.includes('geochart')) set({ geochartState: initializeGeochartState(set, get) });
+      if (config.footerBar?.tabs.core.includes('time-slider')) {
+        set({ timeSliderState: initializeTimeSliderState(set, get) });
+        get().timeSliderState.setDefaultConfigValues(config);
+      }
+      if (config.footerBar?.tabs.core.includes('geochart')) {
+        set({ geochartState: initializeGeochartState(set, get) });
+        get().geochartState.setDefaultConfigValues(config);
+      }
       if (config.corePackages?.includes('swiper')) set({ swiperState: initializeSwiperState(set, get) });
     },
 
