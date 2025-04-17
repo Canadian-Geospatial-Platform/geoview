@@ -1,5 +1,5 @@
+/* eslint-disable react/no-unused-prop-types */
 /* eslint-disable react/function-component-definition */
-import React from 'react';
 import { LegendSection, StyleOptions } from './types/legend';
 
 interface InfoSectionProps {
@@ -8,11 +8,26 @@ interface InfoSectionProps {
   styleOptions?: StyleOptions;
 }
 
-export const InfoSection: React.FC<InfoSectionProps> = ({ infoType, section, styleOptions = {} }) => {
+export function InfoSection(props: InfoSectionProps): JSX.Element {
+  const { infoType, section } = props;
+
+  const { cgpv } = window;
+  const { react } = cgpv;
+  const { Fragment } = react;
+
   return (
-    <div>
-      <h3>{infoType}</h3>
-      <p>{section.content}</p>
-    </div>
+    <Fragment>
+      {infoType === 'legend' && (
+        <div className="info-section">
+          <h3>{section.title}</h3>
+          {/* Render symbols if any */}
+        </div>
+      )}
+      {infoType === 'description' && (
+        <div className="info-section">
+          <p>{section.content}</p>
+        </div>
+      )}
+    </Fragment>
   );
-};
+}

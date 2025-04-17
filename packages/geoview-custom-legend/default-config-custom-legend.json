@@ -1,5 +1,21 @@
 {
-  "layers": [],
+  "legend": [
+    {
+      "symbolUrl": "/path/to/city-icon.png",
+      "legendTitle": "Cities",
+      "description": "Major metropolitan areas"
+    },
+    {
+      "symbolUrl": "/path/to/river-icon.png",
+      "legendTitle": "Rivers",
+      "description": "Major waterways"
+    },
+    {
+      "symbolUrl": "/path/to/mountain-icon.png",
+      "legendTitle": "Mountains",
+      "description": "High-altitude regions"
+    }
+  ],
   "id": "custom-legend",
   "enabled": true,
   "footerBar": {
@@ -9,5 +25,4 @@
   },
   "isOpen": true,
   "version": "1.0"
-  
 }

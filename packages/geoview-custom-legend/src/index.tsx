@@ -58,7 +58,7 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
   }
 
   override onCreateContentProps(): TypePanelProps {
-    // Panel props
+    // Panel props for the footerBar
     return {
       title: 'CustomLegend.title',
       icon: <LegendIcon />,
@@ -68,8 +68,8 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
   }
 
   override onCreateContent = (): JSX.Element => {
-    // Render the CustomLegendPanel with the provided configuration
-    return <CustomLegendPanel mapId={this.pluginProps.mapId} config={this.configObj || { isOpen: true, legendList: [], version: '1.0' }} />;
+    // Pass the configuration to the CustomLegendPanel
+    return <CustomLegendPanel mapId={this.pluginProps.mapId} config={this.configObj} />;
   };
 
   /**
