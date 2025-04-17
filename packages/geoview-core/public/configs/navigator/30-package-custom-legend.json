@@ -15,7 +15,9 @@
   "corePackages": [],
   "appBar": {
     "tabs": {
-      "core": ["custom-legend"]
-    }
+      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
+    },
+    "selectedTab": "layers",
+    "selectedLayersLayerPath": "uniqueValueId/1"
   }
 }

@@ -48,8 +48,10 @@
   "navBar": ["zoom", "fullscreen", "home"],
   "appBar": {
     "tabs": {
-      "core": ["geolocator"]
-    }
+      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
+    },
+    "selectedTab": "layers",
+    "selectedLayersLayerPath": "uniqueValueId/1"
   },
   "overviewMap": {
     "hideOnZoom": 0

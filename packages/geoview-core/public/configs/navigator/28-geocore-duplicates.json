@@ -274,5 +274,12 @@
   "serviceUrls": {
     "metadataUrl": "https://open.canada.ca/data/en/dataset/"
   },
-  "theme": "geo.ca"
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
+    },
+    "selectedTab": "layers",
+    "selectedLayersLayerPath": "uniqueValueId/1"
+  }
 }
