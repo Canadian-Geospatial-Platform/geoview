@@ -13,6 +13,9 @@ import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 import { useMapAttribution, useMapNorthArrow, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
 import { logger } from '@/core/utils/logger';
+import { useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { LegendContainer } from '@/core/components/legend/legend-export-utils';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -29,13 +32,14 @@ export default function ExportModal(): JSX.Element {
   const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
   const appBarLegendContainer = mapElement.querySelector(`[id^="${mapId}-appBar-legendContainer"]`);
   const legendId = `${mapId}AppbarPanelButtonLegend`;
-
+  // Get layers from the store
+  const layersList = useLayerLegendLayers();
+  const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
   const theme = useTheme();
 
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [isLegendLoading, setIsLegendLoading] = useState(true);
   const [isMapExporting, setIsMapExporting] = useState(false);
-
   // export template variables
   const [exportTitle, setExportTitle] = useState<string>('');
   const exportContainerRef = useRef(null) as RefObject<HTMLDivElement>;
@@ -83,6 +87,7 @@ export default function ExportModal(): JSX.Element {
     setActiveAppBarTab(legendId, 'legend', false, false);
     disableFocusTrap();
   };
+
   /**
    * Calculate the width of the canvas based on dialog box container width.
    * @param {HTMLDivElement} dialogBox - Container where canvas will be rendered.
@@ -100,7 +105,7 @@ export default function ExportModal(): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('Export Modal - mount');
-
+    setLegendLayers(layersList);
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
     let timer: NodeJS.Timeout;
@@ -131,34 +136,9 @@ export default function ExportModal(): JSX.Element {
             logger.logError('Error occured while converting map to image', error);
           });
 
-        // add legend
-        // check if footer tab exist then we don't need appBar Legend.
-        const legendContainer = (footerbarLegendContainer ?? appBarLegendContainer) as HTMLElement;
-        if (legendContainer && legendContainerRef.current) {
-          legendContainer.removeAttribute('style');
-          setIsLegendLoading(true);
-          // remove hidden attribute from document legend, so that html-to-image can copy the legend container.
-          const legendTab = document.getElementById(`shell-${mapId}-legend`) as HTMLElement;
-          const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
-          if (hasHiddenAttr) legendTab.removeAttribute('hidden');
-
-          htmlToImage
-            .toPng(legendContainer, { fontEmbedCSS: '' })
-            .then((dataUrl) => {
-              setIsLegendLoading(false);
-              const img = new Image();
-              img.src = dataUrl;
-              img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
-              legendContainerRef.current?.appendChild(img);
-              if (hasHiddenAttr) legendTab.hidden = true;
-            })
-            .catch((error: Error) => {
-              logger.logError('Error occured while converting legend to image', error);
-            });
-        } else {
-          setIsLegendLoading(false);
-        }
-      }, 500);
+        setIsLegendLoading(false);
+        // }
+      }, 100);
     }
     return () => {
       if (overviewMap) overviewMap.style.visibility = 'visible';
@@ -185,9 +165,13 @@ export default function ExportModal(): JSX.Element {
             />
           </Box>
           <Box ref={exportTitleRef} />
-
           <Box ref={mapImageRef}>
             {isMapLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
+          </Box>
+          {/* Legend display using new React component */}
+          <Box>
+            {/* Render the legend hierarchy */}
+            <LegendContainer layers={legendLayers} />
           </Box>
           <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ padding: '1rem', paddingBottom: 0 }}>
             <Box>
