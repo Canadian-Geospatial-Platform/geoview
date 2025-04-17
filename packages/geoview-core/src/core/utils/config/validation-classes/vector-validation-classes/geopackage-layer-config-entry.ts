@@ -1,6 +1,6 @@
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceGeoPackageInitialConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
-import { CONST_LAYER_ENTRY_TYPES } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES } from '@/api/config/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
 export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {

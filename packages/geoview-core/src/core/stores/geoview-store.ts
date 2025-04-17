@@ -15,7 +15,7 @@ import { IUIState, initializeUIState } from '@/core/stores/store-interface-and-i
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
-import { serializeTypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { serializeTypeGeoviewLayerConfig, MapConfigLayerEntry } from '@/api/config/types/map-schema-types';
 
 export type TypeSetStore = (
   partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>),
@@ -60,7 +60,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
       // TO.DOCONT: Configurations should be as losely coupled as possible.
       for (let i = 0; i < (clonedConfig.map?.listOfGeoviewLayerConfig?.length || 0); i++) {
         // Serialize the GeoviewLayerConfig
-        const serialized = serializeTypeGeoviewLayerConfig(clonedConfig.map!.listOfGeoviewLayerConfig![i]);
+        const serialized = serializeTypeGeoviewLayerConfig(clonedConfig.map!.listOfGeoviewLayerConfig![i] as MapConfigLayerEntry); // TODO: refactor - remove cast
 
         // Reassign
         clonedConfig.map.listOfGeoviewLayerConfig![i] = serialized as never;

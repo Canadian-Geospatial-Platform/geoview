@@ -6,7 +6,7 @@ import Ajv from 'ajv';
 
 import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
 import { api } from '@/app';
-import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractPlugin } from './abstract-plugin';

@@ -1,4 +1,4 @@
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+// import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
 
 import {
   convertLayerTypeToEntry,
@@ -7,13 +7,13 @@ import {
   TypeGeoviewLayerConfig,
   MapConfigLayerEntry,
   layerEntryIsGroupLayer,
-} from '@/geo/map/map-schema-types';
+  TypeDisplayLanguage,
+} from '@/api/config/types/map-schema-types';
 import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { generateId } from '@/core/utils/utilities';
 
 /**

@@ -5,8 +5,8 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 
 dayjs.extend(duration);
 

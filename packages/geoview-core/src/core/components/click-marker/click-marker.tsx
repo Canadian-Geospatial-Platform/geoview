@@ -5,7 +5,7 @@ import { Box, ClickMapMarker } from '@/ui';
 
 import { useMapClickMarker, useMapClickCoordinates, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 export type TypeClickMarker = {

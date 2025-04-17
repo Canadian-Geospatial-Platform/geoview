@@ -31,7 +31,7 @@ import {
   layerEntryIsGroupLayer,
   TypeLayerStatus,
   GeoCoreLayerConfig,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { layerConfigIsWMS, WMS } from '@/geo/layer/geoview-layers/raster/wms';
@@ -1435,8 +1435,9 @@ export class LayerApi {
         delete this.#geoviewLayers[layerPathNodes[0]];
         const { mapFeaturesConfig } = this.mapViewer;
 
+        // TODO: refactor - remove cast
         if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
-          mapFeaturesConfig.map.listOfGeoviewLayerConfig = mapFeaturesConfig.map.listOfGeoviewLayerConfig.filter(
+          mapFeaturesConfig.map.listOfGeoviewLayerConfig = (mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[]).filter(
             (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== layerPath
           );
       } else if (layerPathNodes.length === 2) {

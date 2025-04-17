@@ -18,7 +18,7 @@ import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
 import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useFeatureFieldInfos } from './hooks';
-import { TypeFieldEntry } from '@/geo/map/map-schema-types';
+import { TypeFieldEntry } from '@/api/config/types/map-schema-types';
 
 interface ColumnsType {
   [key: string]: TypeFieldEntry;

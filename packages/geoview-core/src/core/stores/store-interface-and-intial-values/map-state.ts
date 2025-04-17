@@ -11,7 +11,9 @@ import {
   TypeMapViewSettings,
   TypeValidMapProjectionCodes,
   TypeZoomAndCenter,
-} from '@config/types/map-schema-types';
+  TypeFeatureInfoEntry,
+  TypePointMarker,
+} from '@/api/config/types/map-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
@@ -20,8 +22,6 @@ import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
-import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
-import { TypePointMarker } from '@/api/config/types/map-schema-types';
 import { TypeHoverFeatureInfo } from './feature-info-state';
 import { CV_MAP_CENTER } from '@/api/config/types/config-constants';
 import { logger } from '@/core/utils/logger';

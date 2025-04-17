@@ -1,4 +1,4 @@
-import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/core/types/global-types';
+import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
 import { TimeDimension, DateMgt } from 'geoview-core/src/core/utils/date-mgt';
 import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { AbstractGVLayer } from 'geoview-core/src/geo/layer/gv-layers/abstract-gv-layer';

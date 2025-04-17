@@ -1,3 +1,4 @@
+import { TypeWindow } from 'geoview-core/src/core/types/global-types';
 import { getSxClasses } from './custom-legend-style';
 
 interface CustomLegendPanelProps {
@@ -22,7 +23,7 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
   const { config } = props;
   const legendList = config.legendList as LegendListItems;
 
-  const { cgpv } = window;
+  const { cgpv } = window as TypeWindow;
   const { ui } = cgpv;
   const { Card, Box } = ui.elements;
 

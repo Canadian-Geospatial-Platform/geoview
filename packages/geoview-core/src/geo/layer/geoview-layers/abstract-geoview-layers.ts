@@ -4,7 +4,7 @@ import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Source from 'ol/source/Source';
 
 import { generateId, whenThisThen } from '@/core/utils/utilities';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TimeDimension, TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -20,7 +20,7 @@ import {
   TypeLayerStatus,
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import { GeoViewLayerError, GeoViewLayerLoadedFailedError } from '@/core/exceptions/layer-exceptions';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';

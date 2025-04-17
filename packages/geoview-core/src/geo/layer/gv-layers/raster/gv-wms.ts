@@ -7,7 +7,7 @@ import { Pixel } from 'ol/pixel';
 import { ImageWMS } from 'ol/source';
 import { Extent } from 'ol/extent';
 
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { xmlToJson } from '@/core/utils/utilities';
 import { AbortError } from '@/core/exceptions/core-exceptions';
@@ -15,12 +15,12 @@ import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/ut
 import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
-import { WMS_PROXY_URL } from '@/app';
+import { CV_CONFIG_PROXY_URL } from '@/api/config/types/config-constants';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
@@ -386,7 +386,7 @@ export class GVWMS extends AbstractGVRaster {
              */
             if (error.code === 'ERR_NETWORK') {
               // Try appending link with proxy url to avoid CORS issues
-              queryUrl = `${WMS_PROXY_URL}${queryUrl}`;
+              queryUrl = `${CV_CONFIG_PROXY_URL}${queryUrl}`;
 
               axios
                 .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })

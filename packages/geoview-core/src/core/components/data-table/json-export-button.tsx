@@ -5,9 +5,9 @@ import { MenuItem } from '@/ui';
 
 import { logger } from '@/core/utils/logger';
 import { JsonExportWorker } from '@/core/workers/json-export-worker';
-import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';

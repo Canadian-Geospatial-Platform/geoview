@@ -1,5 +1,3 @@
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 import { Config } from '@/core/utils/config/config';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
@@ -8,7 +6,7 @@ import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { TypeDisplayLanguage, GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**

@@ -1,15 +1,14 @@
 import axios from 'axios';
 
-import { TypeJsonObject } from '@config/types/config-types';
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
-import { Extent } from '@config/types/map-schema-types';
-import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
-import { isvalidComparedToInternalSchema } from '@config/utils';
+import { TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
+import { GroupLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
+import { Extent } from '@/api/config/types/map-schema-types';
+import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
+import { isvalidComparedToInternalSchema } from '@/api/config/utils';
 
 import { logger } from '@/core/utils/logger';
 import { Projection } from '@/geo/utils/projection';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { TypeJsonArray } from '@/app';
 
 // ========================
 // #region CLASS HEADER

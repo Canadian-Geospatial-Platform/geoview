@@ -1,16 +1,16 @@
 import cloneDeep from 'lodash/cloneDeep';
 
-import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@config/types/config-constants';
-import { toJsonObject, TypeJsonObject } from '@config/types/config-types';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@/api/config/types/config-constants';
+import { toJsonObject, TypeJsonObject } from '@/api/config/types/config-types';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
 import {
   TypeGeoviewLayerType,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeDisplayLanguage,
   Extent,
-} from '@config/types/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import { isvalidComparedToInputSchema } from '@/api/config/utils';
 
 // ========================

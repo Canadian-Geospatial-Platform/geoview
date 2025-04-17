@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Extent } from 'ol/extent';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
@@ -18,7 +18,9 @@ import {
   codedValueType,
   layerEntryIsGroupLayer,
   rangeDomainType,
-} from '@/geo/map/map-schema-types';
+  TypeOutfields,
+  TypeOutfieldsType,
+} from '@/api/config/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   esriConvertEsriGeometryTypeToOLGeometryType,
@@ -31,7 +33,6 @@ import { EsriDynamic, geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-laye
 import { EsriFeature, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { fetchJson } from '@/core/utils/utilities';
 import { EmptyResponseError } from '@/core/exceptions/core-exceptions';
 import { GeoViewLayerError } from '@/core/exceptions/layer-exceptions';

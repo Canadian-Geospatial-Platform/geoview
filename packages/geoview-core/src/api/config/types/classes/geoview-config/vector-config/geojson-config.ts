@@ -1,17 +1,16 @@
-import { CV_CONST_LAYER_TYPES, CV_CONST_SUB_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@config/types/config-constants';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { GeoJsonGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/geojson-group-layer-config';
-import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { GeoJsonLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
-import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
-import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
-
-import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { mergeWith } from 'lodash';
+import { CV_CONST_LAYER_TYPES, CV_CONST_SUB_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@/api/config/types/config-constants';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { GeoJsonGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/geojson-group-layer-config';
+import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { GeoJsonLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
+import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
+import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
+
+import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
 import { isJsonString } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { Cast } from '@/app';
 
 export type TypeGeoJsonLayerNode = GeoJsonGroupLayerConfig | GeoJsonLayerEntryConfig;
 

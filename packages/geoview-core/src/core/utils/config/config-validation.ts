@@ -7,8 +7,6 @@ import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-
 import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
 import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
@@ -21,13 +19,14 @@ import { geoviewEntryIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson
 import { geoviewEntryIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { geoviewEntryIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
 import {
+  TypeDisplayLanguage,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
   mapConfigLayerEntryIsGeoCore,
   layerEntryIsGroupLayer,
-} from '@/geo/map/map-schema-types';
-import { TypeJsonObject } from '@/core/types/global-types';
+} from '@/api/config/types/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';

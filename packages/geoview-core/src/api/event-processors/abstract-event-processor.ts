@@ -5,7 +5,7 @@ import { TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-in
 import { getGeoViewStore, getGeoViewStoreAsync } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';
-import { TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import { TypeResultSetEntry } from '@/api/config/types/map-schema-types';
 
 /**
  * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store

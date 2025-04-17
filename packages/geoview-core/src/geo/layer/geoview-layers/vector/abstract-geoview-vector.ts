@@ -10,10 +10,9 @@ import { ProjectionLike } from 'ol/proj';
 import { Geometry, Point } from 'ol/geom';
 import { getUid } from 'ol/util';
 
-import { TypeFeatureInfoLayerConfig, TypeOutfields } from '@config/types/map-schema-types';
+import { TypeBaseVectorSourceInitialConfig, TypeFeatureInfoLayerConfig, TypeOutfields } from '@/api/config/types/map-schema-types';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeBaseSourceVectorInitialConfig } from '@/geo/map/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -75,7 +74,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Set loading strategy option
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.strategy = (layerConfig.source! as TypeBaseSourceVectorInitialConfig).strategy === 'bbox' ? bbox : all;
+    sourceOptions.strategy = (layerConfig.source! as TypeBaseVectorSourceInitialConfig).strategy === 'bbox' ? bbox : all;
 
     // eslint-disable-next-line no-param-reassign
     sourceOptions.loader = (extent, resolution, projection, success, failure) => {
@@ -83,8 +82,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       if (typeof url === 'function') url = url(extent, resolution, projection);
 
       const xhr = new XMLHttpRequest();
-      if ((layerConfig.source as TypeBaseSourceVectorInitialConfig)?.postSettings) {
-        const { postSettings } = layerConfig.source as TypeBaseSourceVectorInitialConfig;
+      if ((layerConfig.source as TypeBaseVectorSourceInitialConfig)?.postSettings) {
+        const { postSettings } = layerConfig.source as TypeBaseVectorSourceInitialConfig;
         xhr.open('POST', url as string);
         if (postSettings!.header)
           Object.keys(postSettings!.header).forEach((headerParameter) => {
@@ -158,7 +157,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
             // If feature info is queryable
             if (layerConfig.source?.featureInfo?.queryable) {
-              const { outfields } = (layerConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
+              const { outfields } = (layerConfig.source as TypeBaseVectorSourceInitialConfig).featureInfo!;
               const dateFields = outfields?.filter((outfield) => outfield.type === 'date');
               if (dateFields?.length) {
                 features.forEach((feature) => {
@@ -190,7 +189,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           onError();
         }
       };
-      xhr.send(JSON.stringify((layerConfig.source as TypeBaseSourceVectorInitialConfig).postSettings?.data));
+      xhr.send(JSON.stringify((layerConfig.source as TypeBaseVectorSourceInitialConfig).postSettings?.data));
     };
 
     vectorSource = new VectorSource(sourceOptions);
@@ -466,8 +465,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // TO.DOCONT: We already create the internalGeoviewId but we should make this more officiel by assigning a type of oid
   static #getEsriOidField(layerConfig: AbstractBaseLayerEntryConfig): string {
     // Get oid field
-    return layerConfig.source?.featureInfo && (layerConfig.source.featureInfo as TypeFeatureInfoLayerConfig).outfields !== undefined
-      ? (layerConfig.source.featureInfo as TypeFeatureInfoLayerConfig).outfields.filter((field) => field.type === 'oid')[0]?.name
-      : 'OBJECTID';
+    const featureInfo = layerConfig.source?.featureInfo as TypeFeatureInfoLayerConfig;
+    const outfields = featureInfo?.outfields;
+
+    if (featureInfo && outfields && outfields.length > 0) {
+      const oidField = outfields.find((field) => field.type === 'oid');
+      return oidField?.name ?? 'OBJECTID';
+    }
+
+    return 'OBJECTID';
   }
 }

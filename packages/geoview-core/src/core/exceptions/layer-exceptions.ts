@@ -4,7 +4,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { getLocalizedMessage } from '@/core/utils/utilities';
 import { TypeJsonArray, TypeJsonValue } from '@/api/config/types/config-types';
-import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 
 export class GeoViewLayerError extends GeoViewError {
   // The layer id

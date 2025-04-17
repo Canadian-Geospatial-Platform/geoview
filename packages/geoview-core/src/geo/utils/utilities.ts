@@ -14,17 +14,16 @@ import { LineString, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
 import View from 'ol/View';
 
-import { Cast, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 
 import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 
 import { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
-import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 
 /**

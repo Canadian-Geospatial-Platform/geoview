@@ -6,7 +6,7 @@ import { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 
-import { CV_MAP_EXTENTS } from '@config/types/config-constants';
+import { CV_MAP_EXTENTS } from '@/api/config/types/config-constants';
 import {
   TypeBasemapOptions,
   TypeInteraction,
@@ -18,11 +18,6 @@ import {
   TypePointMarker,
   TypeHighlightColors,
   TypeMapViewSettings,
-} from '@config/types/map-schema-types';
-import { api } from '@/app';
-import { LayerApi } from '@/geo/layer/layer';
-import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import {
   MapConfigLayerEntry,
   TypeFeatureInfoEntry,
   TypeGeometry,
@@ -30,7 +25,10 @@ import {
   TypeLayerEntryConfig,
   TypeMapConfig,
   TypeMapFeaturesInstance,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
+import { api } from '@/app';
+import { LayerApi } from '@/geo/layer/layer';
+import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
@@ -1431,7 +1429,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // eslint-disable-next-line no-param-reassign
       else if (removeUnlisted) geoviewLayerConfig.geoviewLayerName = '';
       if (geoviewLayerConfig.listOfLayerEntryConfig?.length)
-        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig, removeUnlisted);
+        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig as TypeLayerEntryConfig[], removeUnlisted);
     });
 
     return mapConfig;

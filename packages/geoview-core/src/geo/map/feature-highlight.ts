@@ -9,10 +9,9 @@ import { fromExtent } from 'ol/geom/Polygon';
 import { Coordinate } from 'ol/coordinate';
 import { Color } from 'ol/color';
 
-import { TypeHighlightColors } from '@config/types/map-schema-types';
+import { TypeHighlightColors, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeFeatureInfoEntry } from './map-schema-types';
 import { PointMarkers } from './point-markers';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 

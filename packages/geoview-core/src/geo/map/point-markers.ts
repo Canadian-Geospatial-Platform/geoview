@@ -6,7 +6,9 @@ import { Extent } from 'ol/extent';
 import { Projection } from '@/geo/utils/projection';
 import { getExtentUnion } from '@/geo/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { FeatureHighlight, getScriptAndAssetURL, MapViewer } from '@/app';
+import { FeatureHighlight } from '@/geo/map/feature-highlight';
+import { getScriptAndAssetURL } from '@/core/utils/utilities';
+import { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
 import { TypePointMarker } from '@/api/config/types/map-schema-types';
 

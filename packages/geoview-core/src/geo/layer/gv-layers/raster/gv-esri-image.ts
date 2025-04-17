@@ -6,7 +6,12 @@ import { Extent } from 'ol/extent';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleSettings } from '@/geo/map/map-schema-types';
+import {
+  TypeIconSymbolVectorConfig,
+  TypeLayerStyleConfig,
+  TypeLayerStyleConfigInfo,
+  TypeLayerStyleSettings,
+} from '@/api/config/types/map-schema-types';
 import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { validateExtent } from '@/geo/utils/utilities';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
@@ -107,7 +112,7 @@ export class GVEsriImage extends AbstractGVRaster {
             src: info.imageData,
             width: info.width,
             height: info.height,
-          },
+          } as TypeIconSymbolVectorConfig,
         };
         uniqueValueStyleInfo.push(styleInfo);
       });

@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
 import { capitalize } from 'lodash';
-import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@config/types/map-schema-types';
+import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
