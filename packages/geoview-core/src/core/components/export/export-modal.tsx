@@ -13,6 +13,8 @@ import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 import { useMapAttribution, useMapNorthArrow, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
 import { logger } from '@/core/utils/logger';
+import { useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { buildLegendContainer } from '@/core/components/legend/legend-export-utils';
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -29,7 +31,8 @@ export default function ExportModal(): JSX.Element {
   const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
   const appBarLegendContainer = mapElement.querySelector(`[id^="${mapId}-appBar-legendContainer"]`);
   const legendId = `${mapId}AppbarPanelButtonLegend`;
-
+  // Get layers from the store
+  const arrayLayers = useLayerLegendLayers();
   const theme = useTheme();
 
   const [isMapLoading, setIsMapLoading] = useState(true);
@@ -83,6 +86,7 @@ export default function ExportModal(): JSX.Element {
     setActiveAppBarTab(legendId, 'legend', false, false);
     disableFocusTrap();
   };
+
   /**
    * Calculate the width of the canvas based on dialog box container width.
    * @param {HTMLDivElement} dialogBox - Container where canvas will be rendered.
@@ -133,29 +137,11 @@ export default function ExportModal(): JSX.Element {
 
         // add legend
         // check if footer tab exist then we don't need appBar Legend.
-        const legendContainer = (footerbarLegendContainer ?? appBarLegendContainer) as HTMLElement;
-        if (legendContainer && legendContainerRef.current) {
-          legendContainer.removeAttribute('style');
+        const legendContainer = buildLegendContainer(arrayLayers) as HTMLElement;
+        if (legendContainer) {
+          // legendContainer.removeAttribute('style');
           setIsLegendLoading(true);
-          // remove hidden attribute from document legend, so that html-to-image can copy the legend container.
-          const legendTab = document.getElementById(`shell-${mapId}-legend`) as HTMLElement;
-          const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
-          if (hasHiddenAttr) legendTab.removeAttribute('hidden');
-
-          htmlToImage
-            .toPng(legendContainer, { fontEmbedCSS: '' })
-            .then((dataUrl) => {
-              setIsLegendLoading(false);
-              const img = new Image();
-              img.src = dataUrl;
-              img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
-              legendContainerRef.current?.appendChild(img);
-              if (hasHiddenAttr) legendTab.hidden = true;
-            })
-            .catch((error: Error) => {
-              logger.logError('Error occured while converting legend to image', error);
-            });
-        } else {
+          legendContainerRef.current?.appendChild(legendContainer);
           setIsLegendLoading(false);
         }
       }, 500);
