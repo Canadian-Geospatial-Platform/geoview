@@ -120,6 +120,11 @@
     ]
   },
   "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
+    }
+  },
   "components": [],
   "footerBar": {
     "tabs": {

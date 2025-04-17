@@ -22,17 +22,6 @@
         ]
       },
       {
-        "geoviewLayerId": "esriFeatureLYR1",
-        "geoviewLayerName": "Temporal_Test_Bed_en",
-        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/",
-        "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0"
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": "Historical Flood Events (HFE)",
         "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
@@ -321,5 +310,10 @@
     }
   },
   "corePackages": [],
-  "theme": "geo.ca"
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
+    }
+  }
 }

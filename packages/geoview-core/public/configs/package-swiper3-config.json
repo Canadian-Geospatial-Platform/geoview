@@ -90,6 +90,11 @@
     ]
   },
   "theme": "light",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
+    }
+  },
   "components": ["north-arrow", "overview-map"],
   "corePackages": ["swiper"],
   "externalPackages": []
