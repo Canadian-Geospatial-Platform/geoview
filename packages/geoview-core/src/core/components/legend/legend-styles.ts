@@ -49,9 +49,10 @@ export const getSxClasses = (theme: Theme, isFullScreen?: boolean, footerPanelRe
     '& .layerTitle': {
       fontSize: theme.palette.geoViewFontSize.md,
       fontWeight: '600',
-      textOverflow: 'ellipsis',
+      textOverflow: 'ellipsis', // 'textOverflow' doesn't work with 'whiteSpace: nowrap' so we use 'textOverflow: ellipsord',
       whiteSpace: 'nowrap',
-      overflow: 'hidden',
+      overflow: 'wrap',
+      wordBreak: 'break-word', // add this line
       '>p': {
         margin: 0,
         color: theme.palette.geoViewColor.textColor.light[400],
