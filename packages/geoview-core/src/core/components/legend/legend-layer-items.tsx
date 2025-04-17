@@ -31,10 +31,13 @@ export const ItemsList = memo(function ItemsList({ items }: ItemsListProps): JSX
   // Early returns
   if (!items?.length) return null;
 
+  // Filter only visible items
+  const visibleItems = items.filter((item) => item.isVisible);
+
   // Direct mapping since we only reach this code if items has content
   return (
     <List sx={sxClasses.subList}>
-      {items.map((item) => (
+      {visibleItems.map((item) => (
         <LegendListItem item={item} key={`${item.icon}-${item.name}`} />
       ))}
     </List>
