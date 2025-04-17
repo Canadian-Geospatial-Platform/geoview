@@ -33,9 +33,7 @@
   ],
   "appBar": {
     "tabs": {
-      "core": [
-        "legend"
-      ]
+      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
     }
   },
   "corePackages": [

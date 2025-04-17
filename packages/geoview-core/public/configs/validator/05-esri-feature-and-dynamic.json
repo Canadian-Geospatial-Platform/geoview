@@ -12,67 +12,6 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "LYR1",
-        "geoviewLayerName": "Temporal Test Bed",
-        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/",
-        "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0",
-            "layerName": "stations-Temporal",
-            "initialSettings": {
-              "controls": {
-                "query": false
-              },
-              "states": {
-                "queryable": false
-              }
-            },
-            "attributions": [],
-            "temporalDimension": {
-              "range": {
-                "range": [
-                  "2020-01-01T00:00:00Z",
-                  "2020-03-01T00:00:00Z",
-                  "2020-05-01T00:00:00Z",
-                  "2020-07-01T00:00:00Z",
-                  "2020-09-01T00:00:00Z",
-                  "2020-11-01T00:00:00Z",
-                  "2021-01-01T00:00:00Z",
-                  "2021-03-01T00:00:00Z",
-                  "2021-05-01T00:00:00Z",
-                  "2021-07-01T00:00:00Z",
-                  "2021-09-01T00:00:00Z"
-                ]
-              }
-            },
-            "source": {
-              "layerFilter": "Province = \\'Alberta\\' or Province = \\'Manitoba\\'"
-            },
-            "layerStyle": {
-              "Point": {
-                "type": "simple",
-                "hasDefault": false,
-                "fields": [],
-                "info": [
-                  {
-                    "label": "",
-                    "visible": false,
-                    "values": [],
-                    "settings": {
-                      "symbol": "square",
-                      "stroke": {
-                        "color": "rgba(128,128,128,1)"
-                      }
-                    }
-                  }
-                ]
-              }
-            }
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "LYR2",
         "geoviewLayerName": "Metadata Group",
         "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
@@ -99,5 +38,10 @@
     }
   },
   "corePackages": [],
-  "theme": "geo.ca"
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": [ "export" ]
+    }
+  }
 }

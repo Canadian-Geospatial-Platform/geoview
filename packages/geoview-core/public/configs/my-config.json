@@ -52,6 +52,11 @@
     ]
   },
   "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": [ "export" ]
+    }
+  },
   "components": [],
   "corePackages": []
 }

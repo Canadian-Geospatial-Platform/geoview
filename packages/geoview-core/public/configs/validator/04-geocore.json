@@ -16,27 +16,6 @@
         "geoviewLayerType": "geoCore"
       },
       {
-        "geoviewLayerId": "LYR1",
-        "geoviewLayerName": "Temporal Test Bed",
-        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/",
-        "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0",
-            "layerName": "stations-Temporal",
-            "initialSettings": {
-              "controls": {
-                "query": true
-              },
-              "states": {
-                "queryable": true
-              }
-            },
-            "attributions": []
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9",
         "geoviewLayerType": "geoCore"
       }
@@ -48,7 +27,7 @@
   "navBar": ["zoom", "fullscreen", "home"],
   "appBar": {
     "tabs": {
-      "core": ["geolocator"]
+      "core": ["geolocator", "export"]
     }
   },
   "overviewMap": {

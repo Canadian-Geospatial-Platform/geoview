@@ -51,5 +51,10 @@
   "components": ["overview-map"],
   "overviewMap": { "hideOnZoom": 7 },
   "corePackages": [],
-  "theme": "geo.ca"
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": [ "export" ]
+    }
+  }
 }

@@ -70,20 +70,6 @@
         ]
       },
       {
-        "geoviewLayerId": "esriDynamicLYR1",
-        "geoviewLayerName": "Temporal_Test_Bed_en",
-        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
-        "geoviewLayerType": "esriDynamic",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "4",
-            "layerName": "Esri Dynamic - Water Quality",
-            "initialSettings": { "maxZoom": 8 },
-            "minScale": 10000000
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": "Historical Flood Events (HFE)",
         "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
@@ -237,5 +223,10 @@
     }
   },
   "corePackages": [],
-  "theme": "geo.ca"
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
+    }
+  }
 }

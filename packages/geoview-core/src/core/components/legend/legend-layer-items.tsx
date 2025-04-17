@@ -28,15 +28,19 @@ export const ItemsList = memo(function ItemsList({ items }: ItemsListProps): JSX
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
+  // Memoize the items array to ensure referential stability
+  const memoizedItems = useMemo(() => items, [items]);
+
   // Early returns
-  if (!items?.length) return null;
+  if (!memoizedItems?.length) return null;
 
   // Direct mapping since we only reach this code if items has content
   return (
     <List sx={sxClasses.subList}>
-      {items.map((item) => (
+      {memoizedItems.map((item) => (
         <LegendListItem item={item} key={`${item.icon}-${item.name}`} />
       ))}
     </List>
   );
 });
+ItemsList.displayName = 'ItemsList';

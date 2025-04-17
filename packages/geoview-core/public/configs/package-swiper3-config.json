@@ -90,6 +90,11 @@
     ]
   },
   "theme": "light",
+  "appBar": {
+    "tabs": {
+      "core": [ "export" ]
+    }
+  },
   "components": ["north-arrow", "overview-map"],
   "corePackages": ["swiper"],
   "externalPackages": []

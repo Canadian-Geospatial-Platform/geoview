@@ -24,6 +24,11 @@
     ]
   },
   "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": [ "export"]
+    }
+  },
   "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
