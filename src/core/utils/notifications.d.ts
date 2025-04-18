@@ -42,41 +42,55 @@ export declare class Notifications {
      */
     addNotificationError(message: string, params?: TypeJsonValue[] | TypeJsonArray | string[]): void;
     /**
-     * Display a message in the snackbar
+     * Displays a message in the snackbar
      *
      * @param {string} message - The message or a locale key to retrieve
      * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-     * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+     * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
      * @param {ISnackbarButton} button - Optional snackbar button
      */
-    showMessage(message: string, params?: TypeJsonValue[] | TypeJsonArray | string[], withNotification?: boolean, button?: {}): void;
+    showMessage(message: string, params?: TypeJsonValue[] | TypeJsonArray | string[], withNotification?: boolean, button?: ISnackbarButton): void;
     /**
-     * Display an success message in the snackbar
+     * Displays an success message in the snackbar
      *
      * @param {string} message - The message or a locale key to retrieve
      * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-     * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+     * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
      * @param {ISnackbarButton} button - Optional snackbar button
      */
-    showSuccess(message: string, params?: TypeJsonValue[] | TypeJsonArray | string[], withNotification?: boolean, button?: {}): void;
+    showSuccess(message: string, params?: TypeJsonValue[] | TypeJsonArray | string[], withNotification?: boolean, button?: ISnackbarButton): void;
     /**
-     * Display an warning message in the snackbar
+     * Displays an warning message in the snackbar
      *
      * @param {string} message - The message or a locale key to retrieve
      * @param {sTypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-     * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+     * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
      * @param {ISnackbarButton} button - Optional snackbar button
      */
-    showWarning(message: string, params?: TypeJsonValue[] | TypeJsonArray | string[], withNotification?: boolean, button?: {}): void;
+    showWarning(message: string, params?: TypeJsonValue[] | TypeJsonArray | string[], withNotification?: boolean, button?: ISnackbarButton): void;
     /**
-     * Display an error message in the snackbar
+     * Displays an error message in the snackbar
      *
      * @param {string} message - The message or a locale key to retrieve
      * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - Optional, array of parameters to replace, i.e. ['short']
-     * @param {string} withNotification - Optional, indicates if the message should also be added as a notification, default true
+     * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
      * @param {ISnackbarButton} button - Optional snackbar button
      */
-    showError(message: string, params?: TypeJsonValue[] | TypeJsonArray | string[], withNotification?: boolean, button?: {}): void;
+    showError(message: string, params?: TypeJsonValue[] | TypeJsonArray | string[], withNotification?: boolean, button?: ISnackbarButton): void;
+    /**
+     * Displays an error which can be a GeoViewError or a generic Error.
+     *
+     * @param {Error | unknown} error - The error containing the message already formatted to display
+     * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
+     * @param {ISnackbarButton} button - Optional snackbar button
+     */
+    showErrorGeoView(error: Error | unknown, withNotification?: boolean, button?: ISnackbarButton): void;
+    /**
+     * Displays a generic error message in the snackbar
+     *
+     * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
+     */
+    showErrorGeneric(withNotification?: boolean, button?: ISnackbarButton): void;
     /**
      * Registers a snackbar open event handler.
      * @param {SnackBarOpenDelegate} callback - The callback to be executed whenever the event is emitted

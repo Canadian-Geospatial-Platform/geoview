@@ -1,10 +1,12 @@
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { DatePrecision, TimePrecision } from '@/core/utils/date-mgt';
 type TimeSliderActions = ITimeSliderState['actions'];
 export interface ITimeSliderState {
     timeSliderLayers: TimeSliderLayerSet;
     selectedLayerPath: string;
     sliderFilters: Record<string, string>;
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         addOrUpdateSliderFilter(layerPath: string, filter: string): void;
         setTitle: (layerPath: string, title: string) => void;

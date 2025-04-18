@@ -3,7 +3,7 @@ import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geovie
 import { TypeGeoviewLayerConfig, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
-/** ******************************************************************************************************************************
+/**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
 export declare abstract class ConfigBaseClass {
@@ -64,10 +64,34 @@ export declare abstract class ConfigBaseClass {
      */
     get layerStatus(): TypeLayerStatus;
     /**
+     * Sets the layer status to registered.
+     */
+    setLayerStatusRegistered(): void;
+    /**
+     * Sets the layer status to processing.
+     */
+    setLayerStatusProcessing(): void;
+    /**
+     * Sets the layer status to processed.
+     */
+    setLayerStatusProcessed(): void;
+    /**
+     * Sets the layer status to loading.
+     */
+    setLayerStatusLoading(): void;
+    /**
+     * Sets the layer status to loaded.
+     */
+    setLayerStatusLoaded(): void;
+    /**
+     * Sets the layer status to error.
+     */
+    setLayerStatusError(): void;
+    /**
      * Sets the layer status and emits an event when changed.
      * @param {string} newLayerStatus - The new layerId value.
      */
-    set layerStatus(newLayerStatus: TypeLayerStatus);
+    setLayerStatus(newLayerStatus: TypeLayerStatus): void;
     /**
      * This method compares the internal layer status of the config with the layer status passed as a parameter and it
      * returns true if the internal value is greater or equal to the value of the parameter.

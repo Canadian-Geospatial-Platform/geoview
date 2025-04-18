@@ -30,6 +30,7 @@ export interface IMapState {
     interaction: TypeInteraction;
     mapExtent: Extent | undefined;
     mapLoaded: boolean;
+    mapDisplayed: boolean;
     northArrow: boolean;
     northArrowElement: TypeNorthArrow;
     orderedLayerInfo: TypeOrderedLayerInfo[];
@@ -82,6 +83,7 @@ export interface IMapState {
     setterActions: {
         setMapChangeSize: (size: [number, number], scale: TypeScaleInfo) => void;
         setMapLoaded: (mapLoaded: boolean) => void;
+        setMapDisplayed: () => void;
         setAttribution: (attribution: string[]) => void;
         setInitialFilters: (filters: Record<string, string>) => void;
         setInitialView: (view: TypeZoomAndCenter | Extent) => void;
@@ -151,6 +153,7 @@ export declare const useMapInteraction: () => TypeInteraction;
 export declare const useMapIsMouseInsideMap: () => boolean;
 export declare const useMapHoverFeatureInfo: () => TypeHoverFeatureInfo;
 export declare const useMapLoaded: () => boolean;
+export declare const useMapDisplayed: () => boolean;
 export declare const useMapNorthArrow: () => boolean;
 export declare const useMapNorthArrowElement: () => TypeNorthArrow;
 export declare const useMapOverviewMap: () => boolean;

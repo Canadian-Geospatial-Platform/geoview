@@ -4,7 +4,6 @@ import { Mark } from '@mui/base';
  * Properties for the Slider
  */
 type SliderProps = {
-    sliderId?: string;
     min: number;
     max: number;
     value: Array<number> | number;
@@ -23,7 +22,6 @@ type SliderProps = {
     ariaLabelledby?: string;
     valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
     valueLabelDisplay?: 'auto' | 'on';
-    mapId?: string;
 };
 /**
  * Create a customized Material UI Slider (https://mui.com/material-ui/api/slider/)

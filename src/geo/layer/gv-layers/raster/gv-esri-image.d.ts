@@ -2,10 +2,8 @@ import { ImageArcGISRest } from 'ol/source';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /**
  * Manages an Esri Image layer.
  *
@@ -36,22 +34,15 @@ export declare class GVEsriImage extends AbstractGVRaster {
      */
     getLayerConfig(): EsriImageLayerEntryConfig;
     /**
-     * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-     * @param {string} fieldName - The field name for which we want to get the type.
-     * @returns {TypeOutfieldsType} The type of the field.
-     */
-    protected getFieldType(fieldName: string): TypeOutfieldsType;
-    /**
-     * Overrides the return of the domain of the specified field.
-     * @param {string} fieldName - The field name for which we want to get the domain.
-     * @returns {codedValueType | rangeDomainType | null} The domain of the field.
-     */
-    protected getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType;
-    /**
      * Overrides the fetching of the legend for an Esri image layer.
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
      */
     onFetchLegend(): Promise<TypeLegend | null>;
+    /**
+     * Overrides when the style should be set by the fetched legend.
+     * @param legend
+     */
+    onSetStyleAccordingToLegend(legend: TypeLegend): void;
     /**
      * Overrides when the layer gets in loaded status.
      */
@@ -66,10 +57,10 @@ export declare class GVEsriImage extends AbstractGVRaster {
      */
     applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
     /**
-     * Gets the bounds of the layer and returns updated bounds.
+     * Overrides the way to get the bounds for this layer type.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    getBounds(): Extent | undefined;
+    onGetBounds(): Extent | undefined;
 }
 export interface TypeEsriImageLayerLegend {
     layers: {

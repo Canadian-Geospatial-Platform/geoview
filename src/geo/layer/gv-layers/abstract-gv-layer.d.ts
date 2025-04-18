@@ -32,10 +32,15 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     protected constructor(mapId: string, olSource: Source, layerConfig: AbstractBaseLayerEntryConfig);
     /**
-     * Gets the bounds of the layer.
+     * Gets the bounds for the layer.
+     * @returns {Extent | undefined} The layer bounding box.
+     */
+    getBounds(): Extent | undefined;
+    /**
+     * Must override method to return the bounds of a layer.
      * @returns {Extent} The layer bounding box.
      */
-    abstract getBounds(): Extent | undefined;
+    abstract onGetBounds(): Extent | undefined;
     /**
      * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
      * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
@@ -137,51 +142,58 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     /**
      * Returns feature information for the layer specified.
      * @param {QueryType} queryType - The type of query to perform.
-     * @param {TypeLocation} location - An optionsl pixel, coordinate or polygon that will be used by the query.
-     * @param {boolean} queryGeometry - The query geometry boolean
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
+     * @param {TypeLocation} location - An pixel, coordinate or polygon that will be used by the query.
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} The feature info table.
      */
-    getFeatureInfo(queryType: QueryType, location?: TypeLocation, queryGeometry?: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    getFeatureInfo(queryType: QueryType, location: TypeLocation, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to get all feature information for all the features stored in the layer.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getAllFeatureInfo(): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getAllFeatureInfo(abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at a given pixel location.
-     * @param {Coordinate} location - The pixel coordinate that will be used by the query.
-     * @param {boolean} queryGeometry - The query geometry boolean.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {Pixel} location - The pixel coordinate that will be used by the query.
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtPixel(location: Pixel, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtPixel(location: Pixel, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at a given coordinate.
      * @param {Coordinate} location - The coordinate that will be used by the query.
-     * @param {boolean} queryGeometry - The query geometry boolean.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at the provided long lat coordinate.
      * @param {Coordinate} lnglat - The coordinate that will be used by the query.
-     * @param {boolean} queryGeometry - The query geometry boolean
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtLongLat(location: Coordinate, queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtLongLat(lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at the provided bounding box.
      * @param {Coordinate} location - The bounding box that will be used by the query.
-     * @param {boolean} queryGeometry - The query geometry boolean.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoUsingBBox(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoUsingBBox(location: Coordinate[], queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at the provided polygon.
      * @param {Coordinate} location - The polygon that will be used by the query.
-     * @param {boolean} queryGeometry - The query geometry boolean.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoUsingPolygon(location: Coordinate[], queryGeometry: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoUsingPolygon(location: Coordinate[], queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return the domain of the specified field or null if the field has no domain.
      * @param {string} fieldName - The field name for which we want to get the domain.
@@ -213,6 +225,12 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     onFetchLegend(): Promise<TypeLegend | null>;
     /**
+     * Overridable function set the style according to the fetched legend information
+     *
+     * @param {TypeLegend} legend - The fetched legend information
+     */
+    onSetStyleAccordingToLegend(legend: TypeLegend): void;
+    /**
      * Gets and formats the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
      * since the base date. Vector feature dates must be in ISO format.
      * @param {Feature} features - The features that hold the field values.
@@ -225,9 +243,9 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * Converts the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
      * @param {Feature[]} features - The array of features to convert.
      * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The layer configuration.
-     * @returns {TypeFeatureInfoEntry[] | undefined | null} The Array of feature information.
+     * @returns {TypeFeatureInfoEntry[]} The Array of feature information.
      */
-    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig): TypeFeatureInfoEntry[] | undefined | null;
+    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig): TypeFeatureInfoEntry[];
     /**
      * Gets the layerFilter that is associated to the layer.
      * @returns {string | undefined} The filter associated to the layer or undefined.

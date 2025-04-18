@@ -40,8 +40,8 @@ export declare class GVImageStatic extends AbstractGVRaster {
      */
     onFetchLegend(): Promise<TypeLegend | null>;
     /**
-     * Gets the bounds of the layer and returns updated bounds.
+     * Overrides the way to get the bounds for this layer type.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    getBounds(): Extent | undefined;
+    onGetBounds(): Extent | undefined;
 }

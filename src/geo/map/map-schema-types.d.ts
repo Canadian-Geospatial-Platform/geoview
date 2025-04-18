@@ -1,5 +1,4 @@
 import { Extent } from 'ol/extent';
-import BaseLayer from 'ol/layer/Base';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { Coordinate } from 'ol/coordinate';
@@ -85,7 +84,7 @@ export declare const layerEntryIsOgcWms: (verifyIfLayer: TypeLayerEntryConfig) =
 export declare const layerEntryIsEsriDynamic: (verifyIfLayer: TypeLayerEntryConfig) => verifyIfLayer is EsriDynamicLayerEntryConfig;
 export declare const layerEntryIsEsriimage: (verifyIfLayer: TypeLayerEntryConfig) => verifyIfLayer is EsriImageLayerEntryConfig;
 export declare const layerEntryIsImageStatic: (verifyIfLayer: TypeLayerEntryConfig) => verifyIfLayer is ImageStaticLayerEntryConfig;
-export type TypeLayerStatus = 'registered' | 'newInstance' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
+export type TypeLayerStatus = 'newInstance' | 'registered' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
 export type TypeResultSetEntry = {
     layerPath: string;
     layerName: string;
@@ -227,8 +226,6 @@ export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntr
  *  Definition of a single Geoview layer configuration.
  */
 export type TypeGeoviewLayerConfig = {
-    /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-    olLayer?: Promise<BaseLayer>;
     /** The GeoView layer identifier. */
     geoviewLayerId: string;
     /**

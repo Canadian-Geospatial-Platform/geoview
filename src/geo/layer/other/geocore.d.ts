@@ -15,8 +15,8 @@ export declare class GeoCore {
     constructor(mapId: string, displayLanguage: TypeDisplayLanguage);
     /**
      * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
-     * @param {string} uuid the UUID of the layer
-     * @param {GeoCoreLayerConfig} layerConfig the layer configuration
+     * @param {string} uuid - The UUID of the layer
+     * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration
      * @returns {Promise<TypeGeoviewLayerConfig[]>} list of layer configurations to add to the map
      */
     createLayersFromUUID(uuid: string, layerConfig?: GeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig[]>;

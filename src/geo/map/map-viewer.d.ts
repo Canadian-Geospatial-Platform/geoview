@@ -7,7 +7,7 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
 import { TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapViewSettings } from '@config/types/map-schema-types';
-import { Basemap } from '@/geo/layer/basemap/basemap';
+import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { TypeMapFeaturesInstance, TypeOrderedLayerInfo } from '@/app';
@@ -45,7 +45,7 @@ export declare class MapViewer {
     navBarApi: NavBarApi;
     footerBarApi: FooterBarApi;
     stateApi: StateApi;
-    basemap: Basemap;
+    basemap: BasemapApi;
     notifications: Notifications;
     layer: LayerApi;
     modal: ModalApi;
@@ -234,7 +234,7 @@ export declare class MapViewer {
      * Remove map
      *
      * @param {boolean} deleteContainer - True if we want to delete div from the page
-     * @returns {HTMLElement} The HTML element
+     * @returns {Promise<HTMLElement>} The Promise containing the HTML element
      */
     remove(deleteContainer: boolean): Promise<HTMLElement>;
     /**
@@ -444,6 +444,16 @@ export declare class MapViewer {
      * @param {MapPointerMoveDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offMapPointerMove(callback: MapPointerMoveDelegate): void;
+    /**
+     * Registers a map pointer stop event callback.
+     * @param {MapPointerMoveDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapPointerStop(callback: MapPointerMoveDelegate): void;
+    /**
+     * Unregisters a map pointer stop event callback.
+     * @param {MapPointerMoveDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapPointerStop(callback: MapPointerMoveDelegate): void;
     /**
      * Registers a map single click event callback.
      * @param {MapSingleClickDelegate} callback - The callback to be executed whenever the event is emitted

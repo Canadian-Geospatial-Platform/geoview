@@ -4,53 +4,22 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
-import LayerGroup from 'ol/layer/Group';
 import { Geometry } from 'ol/geom';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-export type TypeVectorLayerGroup = LayerGroup;
-export type TypeVectorLayer = VectorSource<Feature>;
-export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 /**
- * Determine if layer instance is a vector layer
- *
- * @param {AbstractGeoViewLayer} layer the layer to check
- * @returns {boolean} true if layer is a vector layer
- */
-export declare const isVectorLayer: (layer: AbstractGeoViewLayer) => boolean;
-/** *****************************************************************************************************************************
- * The AbstractGeoViewVector class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
- * instanciate GeoView vector layers. It inherits from its parent class an attribute named olLayers where the vector elements
- * of the class will be kept.
- *
- * The olLayers attribute has a hierarchical structure. Its data type is TypeBaseVectorLayer. Subclasses of this type are
- * BaseLayer, TypeVectorLayerGroup and TypeVectorLayer. The TypeVectorLayerGroup is a collection of TypeBaseVectorLayer. It is
- * important to note that a TypeBaseVectorLayer attribute can polymorphically refer to a TypeVectorLayerGroup or a
- * TypeVectorLayer. Here, we must not confuse instantiation and declaration of a polymorphic attribute.
- *
- * All leaves of the tree structure stored in the olLayers attribute must be of type TypeVectorLayer. This is where the
- * features are placed and can be considered as a feature group.
+ * The AbstractGeoViewVector class.
  */
 export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     #private;
-    /** ***************************************************************************************************************************
-     * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
-     * necessary, additional code can be executed in the child method to complete the layer configuration.
-     *
-     * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+    /**
+     * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+     * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
      */
-    protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
-    /** ***************************************************************************************************************************
-     * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
-     *
-     * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-     *
-     * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
-     */
-    protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined>;
-    /** ***************************************************************************************************************************
+    protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer>;
+    /**
      * Create a source configuration for the vector layer.
      *
      * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
@@ -60,7 +29,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
      */
     protected createVectorSource(layerConfig: AbstractBaseLayerEntryConfig, sourceOptions?: SourceOptions<Feature>, readOptions?: ReadOptions): VectorSource<Feature>;
-    /** ***************************************************************************************************************************
+    /**
      * Fetch features from ESRI Feature services with query and feature limits.
      *
      * @param {string} url - The base url for the service.
@@ -72,7 +41,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @private
      */
     getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit?: number): Promise<string[]>;
-    /** ***************************************************************************************************************************
+    /**
      * Create a vector layer. The layer has in its properties a reference to the layer configuration used at creation time.
      * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
      *
@@ -88,7 +57,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @returns {JSON} Layer's features as GeoJSON
      */
     getFeaturesAsGeoJSON(layerPath: string): JSON;
-    /** ***************************************************************************************************************************
+    /**
      * Converts csv text to feature array.
      *
      * @param {string} csvData The data from the .csv file.

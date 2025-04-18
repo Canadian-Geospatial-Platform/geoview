@@ -15,7 +15,6 @@ import { EventDelegateBase } from '@/api/events/event-helper';
 export declare class API {
     #private;
     config: typeof ConfigApi;
-    maps: Record<string, MapViewer>;
     plugin: typeof Plugin;
     utilities: {
         core: typeof Utilities;
@@ -28,12 +27,41 @@ export declare class API {
      */
     constructor();
     /**
-     * Sets a map viewer in maps, or removes one if the mapViewer property is null.
+     * Gets the list of all map IDs currently in the collection.
+     *
+     * @returns {string[]} Array of map IDs
+     */
+    getMapViewerIds(): string[];
+    /**
+     * Gets a map viewer instance by its ID.
+     *
+     * @param {string} mapId - The unique identifier of the map to retrieve
+     * @returns {MapViewer} The map viewer instance if found
+     * @throws {Error} If the map with the specified ID is not found
+     */
+    getMapViewer(mapId: string): MapViewer;
+    /**
+     * Delete a map viewer instance by its ID.
+     *
+     * @param {string} mapId - The unique identifier of the map to delete
+     * @param {boolean} deleteContainer - True if we want to delete div from the page
+     * @returns {Promise<HTMLElement>} The Promise containing the HTML element
+     */
+    deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement>;
+    /**
+     * Return true if a map id is already registered.
+     *
+     * @param {string} mapId - The unique identifier of the map to retrieve
+     * @returns {boolean} True if map exist
+     */
+    hasMapViewer(mapId: string): boolean;
+    /**
+     * Sets a map viewer in maps.
      * @param {string} mapId - ID of the map
-     * @param {MapViewer | null} mapViewer - The viewer to be added or null to remove
+     * @param {MapViewer} mapViewer - The viewer to be added
      * @param {(mapViewer: MapViewer) => void} onMapViewerInit - Function to run on map init
      */
-    setMapViewer(mapId: string, mapViewer: MapViewer | null, onMapViewerInit?: (mapViewer: MapViewer) => void): void;
+    setMapViewer(mapId: string, mapViewer: MapViewer, onMapViewerInit?: (mapViewer: MapViewer) => void): void;
     /**
      * Create a new map in a given div id.
      * GV The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.

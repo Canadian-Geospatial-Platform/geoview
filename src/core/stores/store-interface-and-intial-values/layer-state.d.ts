@@ -1,5 +1,6 @@
 import { Extent } from 'ol/extent';
 import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeFeatureInfoEntryPartial, TypeLayerStatus, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
 import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -13,6 +14,7 @@ export interface ILayerState {
     displayState: TypeLayersViewDisplayState;
     layerDeleteInProgress: boolean;
     selectedLayerSortingArrowId: string;
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         deleteLayer: (layerPath: string) => void;
         getExtentFromFeatures: (layerPath: string, featureIds: string[], outfield?: string) => Promise<Extent | undefined>;

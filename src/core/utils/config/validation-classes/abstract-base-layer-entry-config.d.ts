@@ -20,11 +20,6 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
     listOfLayerEntryConfig: never;
     /**
-     * The class constructor.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
-     */
-    protected constructor(layerConfig: AbstractBaseLayerEntryConfig);
-    /**
      * Gets the service metadata that is associated to the service.
      * @returns {TypeJsonObject} The service metadata.
      */

@@ -1,5 +1,6 @@
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 type DataTableActions = IDataTableState['actions'];
 export interface IDataTableState {
     allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[];
@@ -8,6 +9,7 @@ export interface IDataTableState {
     selectedFeature: TypeFeatureInfoEntry | null;
     selectedLayerPath: string;
     tableFilters: Record<string, string>;
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         addOrUpdateTableFilter(layerPath: string, filter: string): void;
         applyMapFilters: (filterStrings: string) => void;

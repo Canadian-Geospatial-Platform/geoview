@@ -1,5 +1,6 @@
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 type GeochartActions = IGeochartState['actions'];
 export interface IGeochartState {
@@ -8,6 +9,7 @@ export interface IGeochartState {
     layerDataArrayBatch: TypeGeochartResultSetEntry[];
     layerDataArrayBatchLayerPathBypass: string;
     selectedLayerPath: string;
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         setGeochartCharts: (charts: GeoChartStoreByLayerPath) => void;
         setLayerDataArray: (layerDataArray: TypeGeochartResultSetEntry[]) => void;

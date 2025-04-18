@@ -28,21 +28,21 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     protected static getMapStateProtected(mapId: string): IMapState;
     /**
      * Shortcut to get the Map Viewer instance for a given map id
-     * This is use to reduce the use of api.maps[mapId] and be more explicit
+     * This is use to reduce the use of api.getMapViewer(mapId) and be more explicit
      * @param {string} mapId - map Id
      * @returns {MapViewer} The Map viewer instance
      */
     static getMapViewer(mapId: string): MapViewer;
     /**
      * Shortcut to get the Map Viewer layer api instance for a given map id
-     * This is use to reduce the use of api.maps[mapId].layer and be more explicit
+     * This is use to reduce the use of api.getMapViewer(mapId).layer and be more explicit
      * @param {string} mapId - map Id
      * @returns {LayerApi} The Map viewer layer API instance
      */
     static getMapViewerLayerAPI(mapId: string): LayerApi;
     /**
      * Shortcut to get the Map Viewer plugins instance for a given map id
-     * This is use to reduce the use of api.maps[mapId].plugins and be more explicit
+     * This is use to reduce the use of api.getMapViewer(mapId).plugins and be more explicit
      * @param {string} mapId - map Id
      * @returns {TypeRecordOfPlugin} The map plugins record
      */
@@ -88,6 +88,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static getMapState(mapId: string): TypeMapState;
     static setMapAttribution(mapId: string, attribution: string[]): void;
     static setMapLoaded(mapId: string, mapLoaded: boolean): void;
+    static setMapDisplayed(mapId: string): void;
     static setMapPointerPosition(mapId: string, pointerPosition: TypeMapMouseInfo): void;
     static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): void;
     static getLayersInVisibleRange: (mapId: string) => string[];

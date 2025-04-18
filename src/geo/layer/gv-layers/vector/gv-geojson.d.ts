@@ -21,9 +21,10 @@ export declare class GVGeoJSON extends AbstractGVVector {
      * @returns {GeoJSONLayerEntryConfig} The layer configuration or undefined if not found.
      */
     getLayerConfig(): GeoJSONLayerEntryConfig;
-    /** ***************************************************************************************************************************
-     * Override the features of a geojson layer with new geojson.
+    /**
+     * Overrides the features of a geojson layer with new geojson.
+     *
      * @param {GeoJSONObject | string} geojson - The new geoJSON.
      */
-    overrideGeojsonSource(geojson: GeoJSONObject | string): void;
+    setGeojsonSource(geojson: GeoJSONObject | string): void;
 }

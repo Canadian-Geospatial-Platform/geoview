@@ -37,4 +37,5 @@ export type TypeBasemapLayer = {
     minScale: number;
     maxScale: number;
     extent: Extent;
+    copyright?: string;
 };

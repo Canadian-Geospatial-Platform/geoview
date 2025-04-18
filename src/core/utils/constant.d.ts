@@ -13,7 +13,9 @@ export declare const OL_OVERVIEWMAP_SIZE: {
 };
 export declare const LAYER_STATUS: {
     readonly NEW_INSTANCE: "newInstance";
+    readonly REGISTERED: "registered";
     readonly PROCESSING: "processing";
+    readonly PROCESSED: "processed";
     readonly LOADING: "loading";
     readonly LOADED: "loaded";
     readonly ERROR: "error";

@@ -17,8 +17,8 @@ export declare abstract class AbstractGVVectorTile extends AbstractGVLayer {
      */
     getOLSource(): VectorTile;
     /**
-     * Gets the bounds of the layer and returns updated bounds.
+     * Overrides the way to get the bounds for this layer type.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    getBounds(): Extent | undefined;
+    onGetBounds(): Extent | undefined;
 }

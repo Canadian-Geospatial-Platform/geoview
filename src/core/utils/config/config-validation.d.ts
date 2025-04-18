@@ -1,6 +1,6 @@
 import { TypeDisplayLanguage } from '@config/types/map-schema-types';
 import { TypeGeoviewLayerConfig, MapConfigLayerEntry } from '@/geo/map/map-schema-types';
-/** *****************************************************************************************************************************
+/**
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.
  * @exports
  * @class DefaultConfig
@@ -10,8 +10,6 @@ export declare class ConfigValidation {
     displayLanguage: TypeDisplayLanguage;
     /** ***************************************************************************************************************************
      * The ConfigValidation class constructor used to instanciate an object of this type.
-     *
-     * @returns {ConfigValidation} A ConfigValidation instance.
      */
     constructor(language: TypeDisplayLanguage);
     /** ***************************************************************************************************************************
@@ -31,7 +29,7 @@ export declare class ConfigValidation {
      *
      * @returns {TypeMapFeaturesConfig} A valid map features configuration.
      */
-    validateMapConfigAgainstSchema(listOfGeoviewLayerConfig: MapConfigLayerEntry[]): MapConfigLayerEntry[];
+    validateMapConfigAgainstSchema(listOfGeoviewLayerConfig: MapConfigLayerEntry[], onErrorCallback: (errorKey: string, params: string[]) => void): MapConfigLayerEntry[];
     /** ***************************************************************************************************************************
      * Validate and adjust the list of GeoView layer configuration.
      * @param {TypeGeoviewLayerConfig[]} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and

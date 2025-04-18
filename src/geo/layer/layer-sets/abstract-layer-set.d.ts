@@ -1,7 +1,5 @@
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { QueryType, TypeFeatureInfoEntry, TypeLayerEntryConfig, TypeLayerStatus, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
-import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { LayerApi } from '@/geo/layer/layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -9,7 +7,7 @@ import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 /**
  * A class to hold a set of layers associated with a value of any type.
  * Layers are added/removed to the layer-set via the registerOrUnregisterLayer function.
- * @class LayerSet
+ * @class AbstractLayerSet
  * @exports
  */
 export declare abstract class AbstractLayerSet {
@@ -24,6 +22,10 @@ export declare abstract class AbstractLayerSet {
      */
     constructor(layerApi: LayerApi);
     /**
+     * A quick getter to help identify which layerset class the current instance is coming from.
+     */
+    getClassName(): string;
+    /**
      * A must-override method called to propagate the result set entry to the store
      * @param {TypeResultSetEntry} resultSetEntry - The result set entry to propagate
      */
@@ -33,7 +35,16 @@ export declare abstract class AbstractLayerSet {
      * @param {string} layerPath - The layer path to delete from store
      */
     protected abstract onDeleteFromStore(layerPath: string): void;
+    /**
+     * Gets the MapId for the layer set
+     * @returns
+     */
     protected getMapId(): string;
+    /**
+     * Gets the registered layer paths based on the registered layers
+     * @returns {string[]} An array of layer paths
+     */
+    getRegisteredLayerPaths(): string[];
     /**
      * Registers the layer config in the layer-set.
      * @param {ConfigBaseClass} layerConfig - The layer config
@@ -106,14 +117,14 @@ export declare abstract class AbstractLayerSet {
     protected onLayerSetUpdatedProcess(layerPath: string): void;
     /**
      * Processes layer data to query features on it, if the layer path can be queried.
-     * @param {TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry} data - The layer data
      * @param {AbstractGVLayer} geoviewLayer - The geoview layer
      * @param {QueryType} queryType - The query type
      * @param {TypeLocation} location - The location for the query
      * @param {boolean} queryGeometry - The query geometry boolean
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise resolving to the query results
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise resolving to the query results
      */
-    protected static queryLayerFeatures(data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry, geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation, queryGeometry?: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected static queryLayerFeatures(geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Checks if the layer is of queryable type based on its class definition
      * @param {AbstractBaseLayer} layer - The layer

@@ -1,4 +1,5 @@
 import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeStyleGeometry, TypeFeatureInfoEntryPartial, codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -70,3 +71,24 @@ export declare function esriQueryRelatedRecordsByUrl(url: string, recordGroupInd
  * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
  */
 export declare function esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry;
+/**
+ * Parses a datetime filter for use in a Vector Geoviewlayer.
+ *
+ * @param {string} filter - The filter containing datetimes to parse
+ * @returns {TypeDateFragments | undefined} externalFragmentsOrder - The external fragments order of the layer
+ */
+export declare function parseDateTimeValuesVector(filter: string, externalFragmentsOrder: TypeDateFragments | undefined): string;
+/**
+ * Parses a datetime filter for use in an Esri Dynamic layer.
+ *
+ * @param {string} filter - The filter containing datetimes to parse
+ * @returns {TypeDateFragments | undefined} externalFragmentsOrder - The external fragments order of the layer
+ */
+export declare function parseDateTimeValuesEsriDynamic(filter: string, externalFragmentsOrder: TypeDateFragments | undefined): string;
+/**
+ * Parses a datetime filter for use in an Esri Image or WMS layer.
+ *
+ * @param {string} filter - The filter containing datetimes to parse
+ * @returns {TypeDateFragments | undefined} externalFragmentsOrder - The external fragments order of the layer
+ */
+export declare function parseDateTimeValuesEsriImageOrWMS(filter: string, externalFragmentsOrder: TypeDateFragments | undefined): string;
