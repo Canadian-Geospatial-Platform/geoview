@@ -86,3 +86,7 @@ common/config/rush/pnpm-lock.yaml
 packages/geoview-core/public/docs/
 
 .direnv/
+
+# vscode settings files
+.vscode
+
