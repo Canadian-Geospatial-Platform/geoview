@@ -2,7 +2,7 @@ import { TypeTabs } from '@/ui/tabs/tabs';
 import { AbstractPlugin } from './abstract-plugin';
 import { logger } from '@/core/utils/logger';
 
-/** ******************************************************************************************************************************
+/**
  * Footer Plugin abstract class.
  */
 export abstract class FooterPlugin extends AbstractPlugin {

@@ -9,6 +9,7 @@ import { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/config/types/map
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 import { logger } from '@/core/utils/logger';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 type NewType = TypeGeoviewLayerType;
 
@@ -35,7 +36,7 @@ export const convertLayerTypeToEntry = (layerType: NewType): TypeLayerEntryType 
       return CV_CONST_SUB_LAYER_TYPES.RASTER_TILE;
     default:
       // Throw unsupported error
-      throw new Error(`Unsupported layer type ${layerType} to convert to layer entry`);
+      throw new NotSupportedError(`Unsupported layer type ${layerType} to convert to layer entry`);
   }
 };
 

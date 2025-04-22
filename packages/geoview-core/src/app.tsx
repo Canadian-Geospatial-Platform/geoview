@@ -24,8 +24,10 @@ import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import i18n from '@/core/translation/i18n';
 import { logger } from '@/core/utils/logger';
-import { removeCommentsFromJSON, whenThisThen } from '@/core/utils/utilities';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { getLocalizedMessage, removeCommentsFromJSON } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/external-types';
@@ -72,19 +74,6 @@ export function unmountMap(mapId: string, mapContainer: HTMLElement): void {
 }
 
 /**
- * Function to read the configuration specified
- *
- * @param {string} configUrl - url to fetch the config from
- * @returns configuration string
- */
-async function fetchConfigFile(configUrl: string): Promise<string> {
-  const response = await fetch(configUrl);
-  const result = await response.json();
-
-  return result;
-}
-
-/**
  * Function to get a configuration from a div element who contains attributes to read from.
  * If the div has one of the following atttributes data-config, data-config-url or data-shared,
  * it will try to get a valid configuration from the attribute content. If there is no such attributes,
@@ -120,7 +109,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
   } else if (mapElement.hasAttribute('data-config-url')) {
     // configurations file url is provided, fetch then process
     const configUrl = mapElement.getAttribute('data-config-url');
-    const configObject = await fetchConfigFile(configUrl!);
+    const configObject = await Fetch.fetchJsonAs<string | TypeJsonObject>(configUrl!);
     mapConfig = await api.config.createMapConfig(configObject, lang);
 
     // TODO: refactor - remove this injection once config is done, remove the casting to unknown
@@ -168,6 +157,9 @@ async function renderMap(mapElement: Element): Promise<void> {
   // otherwise return the default config
   const configuration = await getMapConfig(mapElement);
 
+  // Read the map id
+  const { mapId } = configuration;
+
   // TODO: refactor - remove this config once we get layers from the new one
   // create a new config for this map element
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
@@ -177,47 +169,37 @@ async function renderMap(mapElement: Element): Promise<void> {
 
   const config = new Config(lang);
   const configObj = config.initializeMapConfig(
-    configuration.mapId,
+    mapId,
     configuration!.map!.listOfGeoviewLayerConfig! as MapConfigLayerEntry[], // TODO: refactor - remove cast after
     (errorKey: string, params: string[]) => {
       // Wait for the map viewer to get loaded in the api
-      whenThisThen(() => api.getMapViewer(configuration.mapId))
+      api
+        .getMapViewerAsync(mapId)
         .then(() => {
-          // Create the error
-          const error = new GeoViewError(configuration.mapId, errorKey, params);
-
           // Log it
-          logger.logWarning(`- Map ${configuration.mapId}: ${error.message}`);
+          logger.logError(`- Map ${mapId}: ${getLocalizedMessage(AppEventProcessor.getDisplayLanguage(mapId), errorKey, params)}`);
 
           // Show the error
-          api.getMapViewer(configuration.mapId).notifications.showError(error.message);
+          api.getMapViewer(mapId).notifications.showError(errorKey, params);
         })
         .catch((error) => {
           // Log promise failed
-          logger.logPromiseFailed('Promise failed in whenThisThen in initializeMapConfig in app.renderMap', error);
+          logger.logPromiseFailed('Promise failed in getMapViewerAsync in config.initializeMapConfig in app.renderMap', error);
         });
     }
   );
   configuration.map.listOfGeoviewLayerConfig = configObj!;
 
-  // if valid config was provided - mapId is now part of config
-  if (configuration) {
-    const { mapId } = configuration;
+  // render the map with the config
+  reactRoot[mapId] = createRoot(mapElement!);
 
-    // render the map with the config
-    reactRoot[mapId] = createRoot(mapElement!);
+  // add config to store
+  addGeoViewStore(configuration);
 
-    // add config to store
-    addGeoViewStore(configuration);
-
-    // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
-    return new Promise<void>((resolve) => {
-      reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} onMapViewerInit={(): void => resolve()} />);
-    });
-  }
-
-  // Failed
-  return Promise.reject(new Error('Failed to render the map'));
+  // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
+  return new Promise<void>((resolve) => {
+    reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} onMapViewerInit={(): void => resolve()} />);
+  });
 }
 
 /**
