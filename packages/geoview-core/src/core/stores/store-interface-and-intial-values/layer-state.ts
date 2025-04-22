@@ -17,15 +17,17 @@ import {
   TypeResultSetEntry,
   TypeLayerControls,
   layerEntryIsEsriDynamic,
+  TypeGeoviewLayerType,
 } from '@/api/config/types/map-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { LayerNotEsriDynamicError } from '@/core/exceptions/layer-exceptions';
+import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 
 // #region INTERFACES & TYPES
 
@@ -151,7 +153,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         }
 
         // Not an EsriDynamic layer
-        return Promise.reject(new GeoViewError(get().mapId, 'Not an EsriDynamic layer'));
+        throw new LayerNotEsriDynamicError(layerPath);
       },
 
       /**
@@ -291,12 +293,14 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         }
 
         // Failed
-        return Promise.resolve();
+        throw new NoBoundsError(layerPath);
       },
+
       zoomToLayerVisibleScale: (layerPath: string): void => {
         // Redirect
         MapEventProcessor.zoomToLayerVisibleScale(get().mapId, layerPath);
       },
+
       setSelectedLayerSortingArrowId: (arrowId: string): void => {
         // Redirect to setter
         get().layerState.setterActions.setSelectedLayerSortingArrowId(arrowId);

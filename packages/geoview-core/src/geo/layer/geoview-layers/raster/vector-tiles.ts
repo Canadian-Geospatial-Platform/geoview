@@ -5,21 +5,23 @@ import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import { applyStyle } from 'ol-mapbox-style';
 
 import { MVT } from 'ol/format';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
   TypeGeoviewLayerConfig,
   TypeTileGrid,
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -57,92 +59,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @returns {Promise<VectorTileLayer<VectorTileSource>>} The GeoView raster layer that has been created.
-   */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<VectorTileLayer<VectorTileSource>> {
-    // Instance check
-    if (!(layerConfig instanceof VectorTilesLayerEntryConfig))
-      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
-
-    const sourceOptions: SourceOptions = {
-      url: layerConfig.source.dataAccessPath,
-    };
-
-    if (
-      this.metadata?.tileInfo?.spatialReference?.wkid &&
-      this.getMapViewer().getProjection().getCode().replace('EPSG:', '') !== this.metadata.tileInfo.spatialReference.wkid.toString()
-    ) {
-      // Set the layer status to error
-      layerConfig.setLayerStatusError();
-
-      // Raise error
-      throw new GeoViewError(this.mapId, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
-    }
-
-    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-
-    if (layerConfig.source.tileGrid) {
-      const tileGridOptions: TileGridOptions = {
-        origin: layerConfig.source.tileGrid?.origin,
-        resolutions: layerConfig.source.tileGrid?.resolutions as number[],
-      };
-      if (layerConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerConfig.source.tileGrid?.tileSize;
-      if (layerConfig.source.tileGrid?.extent) tileGridOptions.extent = layerConfig.source.tileGrid?.extent;
-      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
-    }
-
-    sourceOptions.format = new MVT();
-    sourceOptions.projection = this.getMapViewer().getProjection().getCode();
-    sourceOptions.tileGrid = new TileGrid(layerConfig.source!.tileGrid!);
-
-    // Create the source
-    const source = new VectorTileSource(sourceOptions);
-
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
-
-    // If any response
-    let olLayer: VectorTileLayer<VectorTileSource>;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as VectorTileLayer<VectorTileSource>;
-    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
-
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
-
-    // TODO: Refactor - Layers refactoring. What is this doing? See how we can do this in the new layers. Can it be done before?
-    const resolutions = sourceOptions.tileGrid.getResolutions();
-
-    let appliedStyle = layerConfig.styleUrl || (this.metadata?.defaultStyles as string);
-
-    if (appliedStyle) {
-      if (!appliedStyle.endsWith('/root.json')) appliedStyle = `${appliedStyle}/root.json`;
-
-      applyStyle(olLayer, appliedStyle, {
-        resolutions: resolutions?.length ? resolutions : [],
-      }).catch((error) => {
-        // Log
-        logger.logPromiseFailed('applyStyle in processOneLayerEntry in VectorTiles', error);
-      });
-    }
-
-    // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
-  }
-
-  /**
    * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override async onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof VectorTilesLayerEntryConfig))
-      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
-
+  protected override async onProcessLayerMetadata(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTilesLayerEntryConfig> {
     if (this.metadata) {
       const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = this.metadata;
       const newTileGrid: TypeTileGrid = {
@@ -187,7 +108,129 @@ export class VectorTiles extends AbstractGeoViewRaster {
     }
 
     // Return the layer config
-    return Promise.resolve(layerConfig);
+    return layerConfig;
+  }
+
+  /**
+   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+   * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+   * @returns {Promise<VectorTileLayer<VectorTileSource>>} The GeoView raster layer that has been created.
+   */
+  protected override onProcessOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTileLayer<VectorTileSource>> {
+    // Validate the dataAccessPath exists
+    if (!layerConfig.source?.dataAccessPath) {
+      // Throw error missing dataAccessPath
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+    }
+
+    const sourceOptions: SourceOptions = {
+      url: layerConfig.source.dataAccessPath,
+    };
+
+    if (
+      this.metadata?.tileInfo?.spatialReference?.wkid &&
+      this.getMapViewer().getProjection().getCode().replace('EPSG:', '') !== this.metadata.tileInfo.spatialReference.wkid.toString()
+    ) {
+      // Set the layer status to error
+      layerConfig.setLayerStatusError();
+
+      // Raise error
+      throw new LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError(layerConfig);
+    }
+
+    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+
+    if (layerConfig.source.tileGrid) {
+      const tileGridOptions: TileGridOptions = {
+        origin: layerConfig.source.tileGrid?.origin,
+        resolutions: layerConfig.source.tileGrid?.resolutions as number[],
+      };
+      if (layerConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerConfig.source.tileGrid?.tileSize;
+      if (layerConfig.source.tileGrid?.extent) tileGridOptions.extent = layerConfig.source.tileGrid?.extent;
+      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
+    }
+
+    sourceOptions.format = new MVT();
+    sourceOptions.projection = this.getMapViewer().getProjection().getCode();
+    sourceOptions.tileGrid = new TileGrid(layerConfig.source!.tileGrid!);
+
+    // Create the source
+    const source = new VectorTileSource(sourceOptions);
+
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+
+    // If any response
+    let olLayer: VectorTileLayer<VectorTileSource>;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as VectorTileLayer<VectorTileSource>;
+    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
+
+    // GV Time to emit about the layer creation!
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+
+    // TODO: Refactor - Layers refactoring. What is this doing? See how we can do this in the new layers. Can it be done before?
+    const resolutions = sourceOptions.tileGrid.getResolutions();
+
+    let appliedStyle = layerConfig.styleUrl || (this.metadata?.defaultStyles as string);
+
+    if (appliedStyle) {
+      if (!appliedStyle.endsWith('/root.json')) appliedStyle = `${appliedStyle}/root.json`;
+
+      applyStyle(olLayer, appliedStyle, {
+        resolutions: resolutions?.length ? resolutions : [],
+      }).catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('applyStyle in processOneLayerEntry in VectorTiles', error);
+      });
+    }
+
+    // Return the OpenLayer layer
+    return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Creates a configuration object for a XYZTiles layer.
+   * This function constructs a `TypeVectorTilesConfig` object that describes an XYZTiles layer
+   * and its associated entry configurations based on the provided parameters.
+   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the GeoView layer.
+   * @param {string} metadataAccessPath - The URL or path to access metadata.
+   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @returns {TypeVectorTilesConfig} The constructed configuration object for the XYZTiles layer.
+   */
+  static createVectorTilesLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware: boolean,
+    layerEntries: TypeJsonArray
+  ): TypeVectorTilesConfig {
+    const geoviewLayerConfig: TypeVectorTilesConfig = {
+      geoviewLayerId,
+      geoviewLayerName,
+      metadataAccessPath,
+      geoviewLayerType: CONST_LAYER_TYPES.VECTOR_TILES,
+      isTimeAware,
+      listOfLayerEntryConfig: [],
+    };
+    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      const layerEntryConfig = new VectorTilesLayerEntryConfig({
+        schemaTag: CONST_LAYER_TYPES.VECTOR_TILES,
+        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
+        layerId: layerEntry.id as string,
+        tileGrid: layerEntry.tileGrid as unknown as TypeTileGrid,
+        source: {
+          dataAccessPath: metadataAccessPath,
+        },
+      } as VectorTilesLayerEntryConfig);
+      return layerEntryConfig;
+    });
+
+    // Return it
+    return geoviewLayerConfig;
   }
 }
 

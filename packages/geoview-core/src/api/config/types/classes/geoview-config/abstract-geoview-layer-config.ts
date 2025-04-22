@@ -6,7 +6,7 @@ import { TypeGeoviewLayerType } from '@/api/config/types/map-schema-types';
 import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@/api/config/utils';
 import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
-import { ConfigError, GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
+import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { generateId } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -243,7 +243,7 @@ export abstract class AbstractGeoviewLayerConfig {
 
         await rootLayer.fetchLayerMetadata();
       }
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`An error occured while reading the metadata for the layerPath ${rootLayer.getLayerPath()}.`, error);
       rootLayer.setErrorDetectedFlag();
     }
@@ -304,9 +304,9 @@ export abstract class AbstractGeoviewLayerConfig {
 
       try {
         return this.createLayerEntryNode(subLayer.layerId, subLayer.getParentNode());
-      } catch (error) {
+      } catch (error: unknown) {
         subLayer.setErrorDetectedFlag();
-        logger.logError((error as ConfigError).message, error);
+        logger.logError(error);
         return subLayer;
       }
     });

@@ -103,9 +103,9 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
             })
             .catch(reject);
         });
-      } catch (err) {
+      } catch (error: unknown) {
         // Handle error
-        logger.logError('Failed to query the features to get their geometries. The output will not have the geometries.', err);
+        logger.logError('Failed to query the features to get their geometries. The output will not have the geometries.', error);
         return Promise.resolve(chunk); // Return the original chunk if there's an error
       }
     },
@@ -223,7 +223,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       const fullJson = chunks.join('');
       const blob = new Blob([fullJson], { type: 'application/json' });
       exportBlob(blob, `table-${getLayer(layerPath)?.layerName.replaceAll(' ', '-')}.json`);
-    } catch (error) {
+    } catch (error: unknown) {
       addMessage('error', `${t('dataTable.downloadAsGeoJSON')} ${t('general.failed')}`);
       logger.logError('Download GeoJSON failed:', error);
     } finally {

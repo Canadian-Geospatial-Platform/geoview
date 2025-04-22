@@ -6,6 +6,7 @@ import { getGeoViewStore, getGeoViewStoreAsync } from '@/core/stores/stores-mana
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';
 import { TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { GeoViewStoreOnMapNotFoundError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store
@@ -25,7 +26,14 @@ export abstract class AbstractEventProcessor {
    * @returns {IGeoviewState} the store state
    */
   protected static getState(mapId: string): IGeoviewState {
-    return getGeoViewStore(mapId).getState();
+    // Get the GeoView Store for the given map
+    const gvStore = getGeoViewStore(mapId);
+
+    // If found
+    if (gvStore) return gvStore.getState();
+
+    // Not found
+    throw new GeoViewStoreOnMapNotFoundError(mapId);
   }
 
   /**
@@ -35,8 +43,14 @@ export abstract class AbstractEventProcessor {
    * @returns {IGeoviewState} the store state
    */
   protected static async getStateAsync(mapId: string): Promise<IGeoviewState> {
-    const geoviewState = await getGeoViewStoreAsync(mapId);
-    return geoviewState.getState();
+    // Get the GeoView Store for the given map
+    const gvStore = await getGeoViewStoreAsync(mapId);
+
+    // If found
+    if (gvStore) return gvStore.getState();
+
+    // Not found
+    throw new GeoViewStoreOnMapNotFoundError(mapId);
   }
 
   /**

@@ -46,7 +46,7 @@ import {
 } from './geoview-renderer-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -58,7 +58,7 @@ type TypeStyleProcessor = (
 
 let colorCount = 0;
 
-/** ***************************************************************************************************************************
+/**
  * Get the default color using the default color index.
  *
  * @param {number} alpha - Alpha value to associate to the color.
@@ -74,7 +74,7 @@ function getDefaultColor(alpha: number, increment = false): string {
   return color;
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
  * the same behaviour than a Point.
  *
@@ -135,7 +135,7 @@ const LEGEND_CANVAS_WIDTH = 50;
 /** Default value of the legend canvas height when the settings do not provide one. */
 const LEGEND_CANVAS_HEIGHT = 50;
 
-/** ***************************************************************************************************************************
+/**
  * This method loads the image of an icon that compose the legend.
  *
  * @param {string} src - Source information (base64 image) of the image to load.
@@ -149,7 +149,7 @@ export function loadImage(src: string): Promise<HTMLImageElement | null> {
     image
       .decode()
       .then(() => resolve(image))
-      .catch((error) => {
+      .catch((error: unknown) => {
         logger.logError('GeoviewRenderer.loadImage(src) - Error while loading the src image =', src, error);
         resolve(null);
       });
@@ -157,7 +157,7 @@ export function loadImage(src: string): Promise<HTMLImageElement | null> {
   return promisedImage;
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method creates a canvas with the image of an icon that is defined in the point style.
  *
  * @param {Style} pointStyle - Style associated to the point symbol.
@@ -181,14 +181,14 @@ async function createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement |
       return drawingCanvas;
     }
     return null;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError(`Error creating incon canvas for pointStyle`, error);
     return null;
   }
 }
 
 // #region CREATE CANVAS
-/** ***************************************************************************************************************************
+/**
  * This method creates a canvas with the vector point settings that are defined in the point style.
  *
  * @param {Style} pointStyle - Style associated to the point symbol.
@@ -208,7 +208,7 @@ function createPointCanvas(pointStyle?: Style): HTMLCanvasElement {
   return drawingCanvas;
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method creates a canvas with the lineString settings that are defined in the style.
  *
  * @param {Style} lineStringStyle - Style associated to the lineString.
@@ -238,7 +238,7 @@ function createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
   return drawingCanvas;
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method creates a canvas with the polygon settings that are defined in the style.
  *
  * @param {Style} polygonStyle - Style associated to the polygon.
@@ -276,7 +276,7 @@ function createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
 }
 // #endregion CREATE CANVAS
 
-/** ***************************************************************************************************************************
+/**
  * Create the stroke options using the specified settings.
  *
  * @param {TypeSimpleSymbolVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig} settings - Settings to use
@@ -303,7 +303,7 @@ function createStrokeOptions(settings: TypeSimpleSymbolVectorConfig | TypeLineSt
   return strokeOptions;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Execute an operator using the nodes on the data stack. The filter equation is evaluated using a postfix notation. The result
  * is pushed back on the data stack. If a problem is detected, an error object is thrown with an explanatory message.
  *
@@ -486,13 +486,13 @@ function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayTyp
           else dataStack.push({ nodeType: NodeType.variable, nodeValue: operand.nodeValue.toLowerCase() });
           break;
         default:
-          throw new NotImplementedError(`unknown operator error`);
+          throw new NotSupportedError(`unknown operator error`);
       }
     }
   }
 }
 
-/** ***************************************************************************************************************************
+/**
  * Use the filter equation and the feature fields to determine if the feature is visible.
  *
  * @param {Feature} feature - Feature used to find the visibility value to return.
@@ -562,8 +562,8 @@ function featureIsNotVisible(feature: Feature, filterEquation: FilterNodeArrayTy
     )
       operatorOnTop3 = operatorAt(-2, operatorStack);
     operatorStack.pop();
-  } catch (error) {
-    throw new Error(`Invalid vector layer filter (${(error as { message: string }).message}).`);
+  } catch (error: unknown) {
+    throw new Error(`Invalid vector layer filter (${error}.`);
   }
   if (dataStack.length !== 1 || dataStack[0].nodeType !== NodeType.variable)
     throw new Error(`Invalid vector layer filter (invalid structure).`);
@@ -573,7 +573,7 @@ function featureIsNotVisible(feature: Feature, filterEquation: FilterNodeArrayTy
 
 // #region PROCESS RENDERER
 
-/** ***************************************************************************************************************************
+/**
  * Process a circle symbol using the settings.
  *
  * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
@@ -595,7 +595,7 @@ function processCircleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | un
   });
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a star shape symbol using the settings.
  *
  * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
@@ -624,7 +624,7 @@ function processStarShapeSymbol(settings: TypeSimpleSymbolVectorConfig, points: 
   });
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a star symbol using the settings.
  *
  * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
@@ -635,7 +635,7 @@ function processStarSymbol(settings: TypeSimpleSymbolVectorConfig): Style | unde
   return processStarShapeSymbol(settings, 5, 0);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a X symbol using the settings.
  *
  * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
@@ -646,7 +646,7 @@ function processXSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefin
   return processStarShapeSymbol(settings, 4, Math.PI / 4);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a + symbol using the settings.
  *
  * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
@@ -657,7 +657,7 @@ function processPlusSymbol(settings: TypeSimpleSymbolVectorConfig): Style | unde
   return processStarShapeSymbol(settings, 4, 0);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a regular shape using the settings, the number of points, the angle and the scale.
  *
  * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
@@ -692,7 +692,7 @@ function processRegularShape(
   });
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a square symbol using the settings.
  *
  * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
@@ -703,7 +703,7 @@ function processSquareSymbol(settings: TypeSimpleSymbolVectorConfig): Style | un
   return processRegularShape(settings, 4, Math.PI / 4, [1, 1]);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a Diamond symbol using the settings.
  *
  * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
@@ -714,7 +714,7 @@ function processDiamondSymbol(settings: TypeSimpleSymbolVectorConfig): Style | u
   return processRegularShape(settings, 4, 0, [0.75, 1]);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a triangle symbol using the settings.
  *
  * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
@@ -725,7 +725,7 @@ function processTriangleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | 
   return processRegularShape(settings, 3, 0, [1, 1]);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process an icon symbol using the settings.
  *
  * @param {TypeIconSymbolVectorConfig} settings - Settings to use for the Style creation.
@@ -755,7 +755,7 @@ const processSymbol: Record<TypeSymbol, (settings: TypeSimpleSymbolVectorConfig)
   star: processStarSymbol,
 };
 
-/** ***************************************************************************************************************************
+/**
  * Process a simple point symbol using the settings. Simple point symbol may be an icon or a vector symbol.
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
@@ -781,7 +781,7 @@ function processSimplePoint(
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a simple lineString using the settings.
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
@@ -810,7 +810,7 @@ function processSimpleLineString(
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a simple solid fill (polygon) using the settings.
  *
  * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
@@ -829,7 +829,7 @@ function processSolidFill(settings: TypePolygonVectorConfig, geometry?: Geometry
   });
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a null fill (polygon with fill opacity = 0) using the settings.
  *
  * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
@@ -848,7 +848,7 @@ function processNullFill(settings: TypePolygonVectorConfig, geometry?: Geometry)
   });
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a pattern fill using the settings.
  *
  * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
@@ -894,7 +894,7 @@ function processPaternFill(settings: TypePolygonVectorConfig, fillPaternLines: F
   });
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a backward diagonal fill using the settings.
  *
  * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
@@ -905,7 +905,7 @@ function processBackwardDiagonalFill(settings: TypePolygonVectorConfig, geometry
   return processPaternFill(settings, fillPaternSettings.backwardDiagonal, geometry);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a forward diagonal fill using the settings.
  *
  * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
@@ -916,7 +916,7 @@ function processForwardDiagonalFill(settings: TypePolygonVectorConfig, geometry?
   return processPaternFill(settings, fillPaternSettings.forwardDiagonal, geometry);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a cross fill using the settings.
  *
  * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
@@ -927,7 +927,7 @@ function processCrossFill(settings: TypePolygonVectorConfig, geometry?: Geometry
   return processPaternFill(settings, fillPaternSettings.cross, geometry);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a diagonal cross fill using the settings.
  *
  * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
@@ -938,7 +938,7 @@ function processDiagonalCrossFill(settings: TypePolygonVectorConfig, geometry?: 
   return processPaternFill(settings, fillPaternSettings.diagonalCross, geometry);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a horizontal fill using the settings.
  *
  * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
@@ -949,7 +949,7 @@ function processHorizontalFill(settings: TypePolygonVectorConfig, geometry?: Geo
   return processPaternFill(settings, fillPaternSettings.horizontal, geometry);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process a vertical fill using the settings.
  *
  * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
@@ -972,7 +972,7 @@ const processFillStyle: Record<TypeFillStyle, (settings: TypePolygonVectorConfig
   vertical: processVerticalFill,
 };
 
-/** ***************************************************************************************************************************
+/**
  * Process a simple polygon using the settings.
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
@@ -1006,7 +1006,7 @@ function processSimplePolygon(
 
 // #endregion PROCESS RENDERER
 
-/** ***************************************************************************************************************************
+/**
  * This method is used to process the array of point styles as described in the pointStyleConfig.
  *
  * @param {TypeVectorLayerStyles} layerStyle - Object that will receive the created canvas.
@@ -1041,13 +1041,13 @@ async function processArrayOfPointStyleConfig(
       styleArray.push(canvas);
     });
     return layerStyles;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError('Error processing array of point styles', error);
     return {} as TypeVectorLayerStyles;
   }
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method is a private sub routine used by the getLegendStyles method to gets the style of the layer as specified by the
  * style configuration.
  *
@@ -1092,13 +1092,13 @@ async function getPointStyleSubRoutine(
 
     layerStyles.Point!.arrayOfCanvas = [];
     return await processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig!);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError('Error getPointStyle sub routine', error);
     return {} as TypeVectorLayerStyles;
   }
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method gets the legend styles used by the the layer as specified by the style configuration.
  *
  * @param {TypeStyleConfig} styleConfig - The style configuration.
@@ -1168,13 +1168,13 @@ export async function getLegendStyles(styleConfig: TypeLayerStyleConfig | undefi
       legendStyles.Polygon = layerStyles.Polygon;
     }
     return legendStyles;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError('Error getLegendStyles', error);
     return {};
   }
 }
 
-/** ***************************************************************************************************************************
+/**
  * Create a default style to use with a vector feature that has no style configuration.
  *
  * @param {TypeStyleGeometry} geometryType - Type of geometry (Point, LineString, Polygon).
@@ -1216,7 +1216,7 @@ function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): Typ
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Search the unique value entry using the field values stored in the feature.
  *
  * @param {string[]} fields - Fields involved in the unique value definition.
@@ -1262,7 +1262,7 @@ function searchUniqueValueEntry(
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process the unique value settings using a point feature to get its Style.
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
@@ -1292,7 +1292,7 @@ function processUniqueValuePoint(
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process the unique value settings using a lineString feature to get its Style.
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
@@ -1322,7 +1322,7 @@ function processUniqueLineString(
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process the unique value settings using a polygon feature to get its Style.
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
@@ -1352,7 +1352,7 @@ function processUniquePolygon(
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Search the class breakentry using the field value stored in the feature.
  *
  * @param {string} field - Field involved in the class break definition.
@@ -1392,7 +1392,7 @@ function searchClassBreakEntry(
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process the class break settings using a Point feature to get its Style.
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
@@ -1422,7 +1422,7 @@ function processClassBreaksPoint(
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process the class break settings using a lineString feature to get its Style.
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
@@ -1452,7 +1452,7 @@ function processClassBreaksLineString(
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Process the class break settings using a Polygon feature to get its Style.
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
@@ -1510,7 +1510,7 @@ export const processStyle: Record<TypeLayerStyleConfigType, Record<TypeStyleGeom
   },
 };
 
-/** ***************************************************************************************************************************
+/**
  * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
  * create it using the default style strategy.
  * @param {FeatureLike} feature - Feature that need its style to be defined.
@@ -1569,7 +1569,7 @@ export function getAndCreateFeatureStyle(
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method gets the image source from the style of the feature using the layer entry config.
  * @param {Feature} feature - The feature that need its icon to be defined.
  * @param {TypeStyleConfig} style - The style to use
@@ -1642,7 +1642,7 @@ export function getFeatureImageSource(
   return undefined;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Classify the remaining nodes to complete the classification. The plus and minus can be a unary or a binary operator. It is
  * only at the end that we can determine there node type. Nodes that start with a number are numbers, otherwise they are
  * variables. If a problem is detected, an error object is thrown with an explanatory message.
@@ -1687,7 +1687,7 @@ function classifyUnprocessedNodes(keywordArray: FilterNodeArrayType): FilterNode
   });
 }
 
-/** ***************************************************************************************************************************
+/**
  * Extract the specified keyword and associate a node type to their nodes. In some cases, the extraction uses an optionally
  * regular expression.
  *
@@ -1731,7 +1731,7 @@ function extractKeyword(filterNodeArray: FilterNodeArrayType, keyword: string, r
   }, [] as FilterNodeArrayType);
 }
 
-/** ***************************************************************************************************************************
+/**
  * Extract the string nodes from the keyword array. This operation is done at the beginning of the classification. This allows
  * to considere Keywords in a string as a normal word. If a problem is detected, an error object is thrown with an explanatory
  * message.
@@ -1781,7 +1781,7 @@ function extractStrings(keywordArray: FilterNodeArrayType): FilterNodeArrayType 
   return keywordArrayToReturn;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Analyse the filter and split it in syntaxique nodes.  If a problem is detected, an error object is thrown with an
  * explanatory message.
  *

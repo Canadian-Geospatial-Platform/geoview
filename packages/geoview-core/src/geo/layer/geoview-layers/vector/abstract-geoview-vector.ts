@@ -2,24 +2,33 @@ import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
-import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
-import { ProjectionLike } from 'ol/proj';
+import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import { Geometry, Point } from 'ol/geom';
+import { Extent } from 'ol/extent';
 import { getUid } from 'ol/util';
 
-import { TypeBaseVectorSourceInitialConfig, TypeFeatureInfoLayerConfig, TypeOutfields } from '@/api/config/types/map-schema-types';
+import {
+  CONST_LAYER_TYPES,
+  TypeBaseVectorSourceInitialConfig,
+  TypeFeatureInfoLayerConfig,
+  TypeOutfields,
+} from '@/api/config/types/map-schema-types';
 
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Projection } from '@/geo/utils/projection';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { Fetch } from '@/core/utils/fetch-helper';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { LayerDataAccessPathMandatoryError, LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
+import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -38,12 +47,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
    */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer> {
-    // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
-    // Instance check
-    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+  protected override onProcessOneLayerEntry(layerConfig: VectorLayerEntryConfig): Promise<BaseLayer> {
+    // Validate the dataAccessPath exists
+    if (!layerConfig.source?.dataAccessPath) {
+      // Throw error missing dataAccessPath
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+    }
 
-    const vectorSource = this.createVectorSource(layerConfig);
+    // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
+    const vectorSource = this.onCreateVectorSource(layerConfig);
     const vectorLayer: VectorLayer<VectorSource<Feature<Geometry>>> = this.createVectorLayer(
       layerConfig as VectorLayerEntryConfig,
       vectorSource
@@ -54,208 +66,94 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /**
-   * Create a source configuration for the vector layer.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
-   * @param {SourceOptions} sourceOptions The source options (default: { strategy: all }).
-   * @param {ReadOptions} readOptions The read options (default: {}).
-   *
+   * Overridable function to create a source configuration for the vector layer.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @param {SourceOptions} sourceOptions - The source options (default: { strategy: all }).
+   * @param {ReadOptions} readOptions - The read options (default: {}).
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  // TODO: createVectorSource should be eventually moved to new layers as well,
-  // TODO: so that the new GV Layers receive something else than a OLSource in their constructor
-  protected createVectorSource(
-    layerConfig: AbstractBaseLayerEntryConfig,
+  protected onCreateVectorSource(
+    layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
-    // The line below uses var because a var declaration has a wider scope than a let declaration.
+    // If any attributions
+    if (this.getAttributions().length > 0) {
+      // eslint-disable-next-line no-param-reassign
+      sourceOptions.attributions = this.getAttributions();
+    }
+
+    // Read strategy
+    const sourceConfig = layerConfig.source as TypeBaseVectorSourceInitialConfig;
+    const strategy = sourceConfig.strategy === 'bbox' ? bbox : all;
+
+    // Prepare the sourceOptions
     let vectorSource: VectorSource<Feature>;
-    // eslint-disable-next-line no-param-reassign
-    if (this.getAttributions().length > 0) sourceOptions.attributions = this.getAttributions();
 
     // Set loading strategy option
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.strategy = (layerConfig.source! as TypeBaseVectorSourceInitialConfig).strategy === 'bbox' ? bbox : all;
+    sourceOptions.strategy = strategy;
 
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.loader = (extent, resolution, projection, success, failure) => {
-      let url = vectorSource.getUrl();
-      if (typeof url === 'function') url = url(extent, resolution, projection);
+    // ESlint override about misused-promises, because we're using async in the loader callback instead of returning void, no worries in the end.
+    // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-misused-promises
+    sourceOptions.loader = async (extent: Extent, resolution, projection, successCallback, failureCallback) => {
+      try {
+        // Resolve the url
+        const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
-      const xhr = new XMLHttpRequest();
-      if ((layerConfig.source as TypeBaseVectorSourceInitialConfig)?.postSettings) {
-        const { postSettings } = layerConfig.source as TypeBaseVectorSourceInitialConfig;
-        xhr.open('POST', url as string);
-        if (postSettings!.header)
-          Object.keys(postSettings!.header).forEach((headerParameter) => {
-            xhr.setRequestHeader(headerParameter, postSettings!.header![headerParameter]);
-          });
-      } else xhr.open('GET', url as string);
-      const onError = (): void => {
-        vectorSource.removeLoadedExtent(extent);
-        if (failure) failure();
-      };
-      xhr.onerror = onError;
-      xhr.onload = async () => {
-        if (xhr.status === 200) {
-          let features: Feature[] | undefined;
-          if (layerConfig.schemaTag === CONST_LAYER_TYPES.CSV) {
-            try {
-              // Convert the CSV to features
-              features = AbstractGeoViewVector.convertCsv(this.mapId, xhr.responseText, layerConfig as VectorLayerEntryConfig);
-            } catch (error) {
-              // Set the layer status to error
-              layerConfig.setLayerStatusError();
+        // Fetch the data
+        const responseText = await AbstractGeoViewVector.#fetchData(url, sourceConfig);
 
-              // Emit message about the error
-              this.emitMessage(error as string, undefined, 'error', true);
-            }
-          } else if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
-            // Fetch the features text array
-            const esriFeaturesArray = await this.getEsriFeatures(
-              url as string,
-              JSON.parse(xhr.responseText).count,
-              this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount as number | undefined
-            );
-            // Convert to features
-            features = [];
-            esriFeaturesArray.forEach((responseText: string) => {
-              features!.push(
-                ...(vectorSource.getFormat()!.readFeatures(responseText, {
-                  ...readOptions,
-                  featureProjection: projection,
-                  extent,
-                }) as Feature[])
-              );
-            });
-          } else {
-            features = vectorSource.getFormat()!.readFeatures(xhr.responseText, {
-              ...readOptions,
-              featureProjection: projection,
-              extent,
-            }) as Feature[];
-          }
-          /* For vector layers, all fields of type date must be specified in milliseconds (number) that has elapsed since the epoch,
-               which is defined as the midnight at the beginning of January 1, 1970, UTC (equivalent to the UNIX epoch). If the date type
-               is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
-            */
-          if (features) {
-            // Get oid field
-            const oidField = AbstractGeoViewVector.#getEsriOidField(layerConfig);
+        // Parse the result of the fetch to read the features
+        const features = await this.#parseFeatures(url, responseText, layerConfig, vectorSource, projection, extent, readOptions);
 
-            features.forEach((feature) => {
-              const featureId = feature.get(oidField) ? feature.get(oidField) : getUid(feature);
-              feature.setId(featureId);
-            });
-            // If there's no feature info, build it from features
-            if (!layerConfig.source?.featureInfo && features.length > 0) {
-              // Grab first feature as example
-              const feature = features[0];
-              const headers = Object.keys(feature.getProperties());
-              const values = Object.values(feature.getProperties());
-              AbstractGeoViewVector.#processFeatureInfoConfig(headers, values, EXCLUDED_HEADERS, layerConfig as VectorLayerEntryConfig);
-            }
-
-            // If feature info is queryable
-            if (layerConfig.source?.featureInfo?.queryable) {
-              const { outfields } = (layerConfig.source as TypeBaseVectorSourceInitialConfig).featureInfo!;
-              const dateFields = outfields?.filter((outfield) => outfield.type === 'date');
-              if (dateFields?.length) {
-                features.forEach((feature) => {
-                  dateFields.forEach((dateField) => {
-                    let fieldValue = feature.get(dateField.name);
-                    if (typeof fieldValue === 'number') {
-                      let dateString = DateMgt.convertMilisecondsToDate(fieldValue);
-                      dateString = DateMgt.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
-                      (feature as Feature).set(dateField.name, DateMgt.convertToMilliseconds(dateString), true);
-                    } else {
-                      if (!this.serverDateFragmentsOrder)
-                        this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(fieldValue));
-                      fieldValue = DateMgt.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
-                      (feature as Feature).set(dateField.name, DateMgt.convertToMilliseconds(fieldValue), true);
-                    }
-                  });
-                });
-              }
-            }
-
-            // Add the features to the source
-            vectorSource.addFeatures(features);
-          }
-
-          if (success) success(features as Feature[]);
-          const layer = this.getOLLayer(layerConfig.layerPath);
-          layer?.changed();
-        } else {
-          onError();
+        // If no features read, alright, let's put the layer to loaded right away as it's never going to get loaded otherwise
+        if (!features || features.length === 0) {
+          successCallback?.([]);
+          return;
         }
-      };
-      xhr.send(JSON.stringify((layerConfig.source as TypeBaseVectorSourceInitialConfig).postSettings?.data));
+
+        // Parse the feature metadata
+        AbstractGeoViewVector.#processFeatureMetadata(features, layerConfig);
+
+        // Normalize the date fields
+        this.#normalizeDateFields(features, layerConfig);
+
+        // Add the features in the source
+        vectorSource.addFeatures(features);
+
+        // Call the success callback with the features. This will trigger the onLoad callback on the layer object (though it
+        // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
+        successCallback?.(features);
+
+        // Refresh the OL layer (necessary?)
+        this.getOLLayer(layerConfig.layerPath)?.changed();
+      } catch (error: unknown) {
+        // Log the failure to fetch the vector features
+        logger.logError(error);
+
+        // Call the failed callback, this will trigger the onError callback on the layer object (which will put the layerStatus to error)
+        // and this will remove the failed extent so that OpenLayers may retry loading it later.
+        failureCallback?.();
+
+        // Notify listeners about the error
+        // Commenting it for now (2025-05-08), because we are already emitting in the onError callback now
+        // this.emitMessage('validation.layer.vectorFeaturesFailed', [layerConfig.layerPath], 'error', true);
+      }
     };
 
+    // Create the vector source with the source options
     vectorSource = new VectorSource(sourceOptions);
 
+    // Return the vector source which is still being loaded asynchronously
     return vectorSource;
   }
 
   /**
-   * Fetch features from ESRI Feature services with query and feature limits.
-   *
-   * @param {string} url - The base url for the service.
-   * @param {number} featureCount - The number of features in the layer.
-   * @param {number} maxRecordCount - The max features per query from the service.
-   * @param {number} featureLimit - The maximum number of features to fetch per query.
-   * @param {number} queryLimit - The maximum number of queries to run at once.
-   * @returns {Promise<string[]>} An array of the response text for the features.
-   * @private
-   */
-  // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
-  // TODO: Add options for featureLimit to config
-  // TODO: Will need to move with createVectorSource
-  async getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit: number = 1000): Promise<string[]> {
-    // Update url
-    const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);
-    const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
-
-    // GV: Web worker does not improve the performance of this fetching
-    // Create array of url's to call
-    const urlArray: string[] = [];
-    for (let i = 0; i < featureCount; i += featureFetchLimit) {
-      urlArray.push(`${baseUrl}&resultOffset=${i}&resultRecordCount=${featureFetchLimit}`);
-    }
-
-    // Create interval for logging
-    // TODO: message - Create message for all vector layer fetching. Create a centralized message creator for geoview-layers
-    const timeInterval = setInterval(() => {
-      // Emit message about the fetching being slow
-      this.emitMessage('layers.slowFetch', [this.geoviewLayerName || '...']);
-    }, 15000); // Log every 15 seconds
-
-    try {
-      const promises = urlArray.map((featureUrl) => fetch(featureUrl).then((response) => response.json()));
-
-      // Wait for all promises to complete
-      const results = await Promise.all(promises);
-
-      // Clear the interval when done
-      clearInterval(timeInterval);
-
-      return results;
-    } catch (error) {
-      // Clear interval even if there's an error
-      clearInterval(timeInterval);
-      throw error;
-    }
-  }
-
-  /**
-   * Create a vector layer. The layer has in its properties a reference to the layer configuration used at creation time.
+   * Creates a vector layer. The layer has in its properties a reference to the layer configuration used at creation time.
    * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
-   *
-   * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration used by the source.
-   * @param {VectorSource} vectorSource The source configuration for the vector layer.
-   *
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration used by the source.
+   * @param {VectorSource} vectorSource - The source configuration for the vector layer.
    * @returns {VectorSource<Feature<Geometry>>} The vector layer created.
    */
   protected createVectorLayer(
@@ -272,7 +170,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as VectorLayer<VectorSource<Feature<Geometry>>>;
-    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
+    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });
@@ -284,24 +182,223 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /**
-   * Return the vector layer as a GeoJSON object
-   * @param {string} layerPath - Layer path to get GeoJSON
-   * @returns {JSON} Layer's features as GeoJSON
+   * Parses raw response text into OpenLayers features based on the layer's schema type.
+   * Handles CSV, ESRI feature services, and default formats supported by the vector source.
+   * @param {string} url - The URL used to retrieve the data (relevant for ESRI_FEATURE schema).
+   * @param {string} responseText - The raw text response from the data request.
+   * @param {VectorLayerEntryConfig} layerConfig - The configuration object for the layer.
+   * @param {VectorSource<Feature>} source - The vector source containing format information for parsing.
+   * @param {ProjectionLike} projection - The projection to use when reading features.
+   * @param {Extent} extent - The geographic extent associated with the request.
+   * @param {ReadOptions} readOptions - Options for controlling how features are read from the data.
+   * @returns {Promise<Feature[] | undefined>} A promise resolving to the parsed features or undefined if parsing fails.
+   * @private
    */
-  getFeaturesAsGeoJSON(layerPath: string): JSON {
-    // Get map projection
-    const mapProjection: ProjectionLike = this.getMapViewer().getProjection().getCode();
+  async #parseFeatures(
+    url: string,
+    responseText: string,
+    layerConfig: VectorLayerEntryConfig,
+    source: VectorSource<Feature>,
+    projection: ProjectionLike,
+    extent: Extent,
+    readOptions: ReadOptions
+  ): Promise<Feature[] | undefined> {
+    // TODO: Refactor - Consider changing the return type to Promise<Feature[]>
 
-    const format = new FormatGeoJSON();
-    const geoJsonStr = format.writeFeatures(
-      (this.getOLLayer(layerPath) as VectorLayer<VectorSource<Feature<Geometry>>>).getSource()!.getFeatures(),
-      {
-        dataProjection: 'EPSG:4326', // Output projection,
-        featureProjection: mapProjection,
+    switch (layerConfig.schemaTag) {
+      case CONST_LAYER_TYPES.CSV:
+        // Attempt to convert CSV text to OpenLayers features
+        return AbstractGeoViewVector.convertCsv(this.mapId, responseText, layerConfig);
+
+      case CONST_LAYER_TYPES.ESRI_FEATURE: {
+        // Parse the count of features from the initial ESRI response
+        const { count } = JSON.parse(responseText);
+
+        // Determine the maximum number of records allowed
+        const maxRecords = this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount;
+
+        // Retrieve the full ESRI feature data
+        const esriData = await this.#getEsriFeatures(url, count, maxRecords as number | undefined);
+
+        // Convert each ESRI response chunk to features and flatten the result
+        return esriData.flatMap(
+          (json) =>
+            source.getFormat()!.readFeatures(json, {
+              ...readOptions,
+              featureProjection: projection,
+              extent,
+            }) as Feature[]
+        );
       }
-    );
 
-    return JSON.parse(geoJsonStr);
+      default:
+        // Fallback to using the format's default read method
+        return source.getFormat()!.readFeatures(responseText, {
+          ...readOptions,
+          featureProjection: projection,
+          extent,
+        }) as Feature[];
+    }
+  }
+
+  /**
+   * Normalizes all date fields in the provided features to a standard millisecond timestamp format.
+   * @param {Feature[]} features - The features whose date fields should be normalized.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer configuration containing metadata about the date fields.
+   * @private
+   */
+  #normalizeDateFields(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
+    // Extract the vector source configuration
+    const config = layerConfig.source as TypeBaseVectorSourceInitialConfig;
+
+    // Get all fields declared as type 'date' in the feature info config
+    const dateFields = config.featureInfo?.outfields?.filter((f) => f.type === 'date');
+    if (!dateFields?.length) return;
+
+    // Iterate over each feature to normalize its date fields
+    features.forEach((feature) => {
+      dateFields.forEach((field) => {
+        const value = feature.get(field.name);
+
+        // If the value is already a number, treat it as a timestamp and reformat
+        if (typeof value === 'number') {
+          const dateStr = DateMgt.applyInputDateFormat(DateMgt.convertMilisecondsToDate(value), this.serverDateFragmentsOrder);
+          feature.set(field.name, DateMgt.convertToMilliseconds(dateStr), true);
+        } else {
+          // If the value is a string, determine or reuse the date fragment order
+          if (!this.serverDateFragmentsOrder) {
+            this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(value));
+          }
+
+          const dateStr = DateMgt.applyInputDateFormat(value, this.serverDateFragmentsOrder);
+          feature.set(field.name, DateMgt.convertToMilliseconds(dateStr), true);
+        }
+      });
+    });
+  }
+
+  /**
+   * Fetches features from ESRI Feature services with query and feature limits.
+   * @param {string} url - The base url for the service.
+   * @param {number} featureCount - The number of features in the layer.
+   * @param {number} maxRecordCount - The max features per query from the service.
+   * @param {number} featureLimit - The maximum number of features to fetch per query.
+   * @returns {Promise<TypeJsonObject[]>} An array of the response text for the features.
+   * @private
+   */
+  // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
+  // TODO: Add options for featureLimit to config
+  // TODO: Will need to move with onCreateVectorSource
+  #getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit: number = 1000): Promise<TypeJsonObject[]> {
+    // Update url
+    const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);
+    const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
+
+    // GV: Web worker does not improve the performance of this fetching
+    // Create array of url's to call
+    const urlArray: string[] = [];
+    for (let i = 0; i < featureCount; i += featureFetchLimit) {
+      urlArray.push(`${baseUrl}&resultOffset=${i}&resultRecordCount=${featureFetchLimit}`);
+    }
+
+    // Get array of all the promises
+    const promises = urlArray.map((featureUrl) => Fetch.fetchJsonAsObject(featureUrl));
+
+    // TODO: message - Create message for all vector layer fetching. Create a centralized message creator for geoview-layers
+    // Prepare a setInterval to emitMessage every couple seconds while the promise is ongoing
+    const timeInterval = setInterval(() => {
+      // Emit message about the fetching being slow
+      this.emitMessage('layers.slowFetch', [this.geoviewLayerName || '...']);
+    }, 15000); // Log every 15 seconds
+
+    // Create an all promise for all of them and hook when the promise resolves/rejects
+    const allPromise = Promise.all(promises).finally(() => {
+      // Clear interval even if there's an error
+      clearInterval(timeInterval);
+    });
+
+    // Return the all promise
+    return allPromise;
+  }
+
+  /**
+   * Resolves the URL for the vector source, potentially calling a function if the URL is dynamic.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration used by the source.
+   * @param {VectorSource<Feature>} source - The vector source from which to resolve the URL.
+   * @param {Extent} extent - The geographic extent used in the URL resolution.
+   * @param {number} resolution - The resolution of the map view, used for dynamic URL generation.
+   * @param {OLProjection} projection - The projection system to be used for the URL resolution.
+   * @returns {string} The resolved URL for the vector source.
+   * @throws {Error} If the URL cannot be determined.
+   * @private
+   */
+  static #resolveUrl(
+    layerConfig: VectorLayerEntryConfig,
+    source: VectorSource<Feature>,
+    extent: Extent,
+    resolution: number,
+    projection: OLProjection
+  ): string {
+    // Get the raw URL from the vector source.
+    const rawUrl = source.getUrl();
+
+    // If the raw URL is a function, call it to retrieve the URL, else return the URL as is.
+    const url = typeof rawUrl === 'function' ? rawUrl(extent, resolution, projection) : rawUrl;
+
+    // If no URL is found, throw an error.
+    if (!url) throw new LayerEntryConfigVectorSourceURLNotDefinedError(layerConfig);
+
+    // Return the resolved URL.
+    return url;
+  }
+
+  /**
+   * Fetches text data from the given URL using settings defined in the vector source configuration.
+   * Supports both GET and POST requests depending on the presence of `postSettings`.
+   * @param {string} url - The URL to fetch data from.
+   * @param {TypeBaseVectorSourceInitialConfig} config - The vector source configuration that may define custom POST settings.
+   * @returns {Promise<string>} A promise that resolves to the fetched text response.
+   * @private
+   */
+  static #fetchData(url: string, config: TypeBaseVectorSourceInitialConfig): Promise<string> {
+    // Default to a GET request
+    const fetchOptions: RequestInit = { method: 'GET' };
+
+    // If postSettings are defined, switch to POST and include headers and body
+    if (config.postSettings) {
+      fetchOptions.method = 'POST';
+      fetchOptions.headers = config.postSettings.header;
+      fetchOptions.body = JSON.stringify(config.postSettings.data);
+    }
+
+    // Execute the fetch using the provided options and return the response text
+    return Fetch.fetchText(url, fetchOptions);
+  }
+
+  /**
+   * Processes metadata for a set of features by assigning unique IDs and initializing feature info configuration if needed.
+   * @param {Feature[]} features - The array of vector features to process.
+   * @param {VectorLayerEntryConfig} layerConfig - The configuration object for the vector layer.
+   * @private
+   */
+  static #processFeatureMetadata(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
+    // Get the field name that uniquely identifies each feature (OID) from the layer configuration.
+    const oidField = AbstractGeoViewVector.#getEsriOidField(layerConfig);
+
+    // Assign a unique ID to each feature using the OID field if available, otherwise fall back to OpenLayers' getUid().
+    features.forEach((feature) => {
+      const id = feature.get(oidField) ?? getUid(feature);
+      feature.setId(id);
+    });
+
+    // If the featureInfo config is not defined, generate it from the first feature's properties.
+    if (!layerConfig.source?.featureInfo) {
+      const sample = features[0];
+      const props = sample.getProperties();
+
+      // Use the sample feature's keys and values to infer featureInfo configuration, excluding any blacklisted headers.
+      AbstractGeoViewVector.#processFeatureInfoConfig(Object.keys(props), Object.values(props), EXCLUDED_HEADERS, layerConfig);
+    }
   }
 
   /**
@@ -316,8 +413,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
     // GV: After moving the code to the mother class, it worked. It'll remain here for now until the config refactoring can take care of it in its re-writing
 
-    const inProjection: ProjectionLike = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LNGLAT;
-    const outProjection: ProjectionLike = MapEventProcessor.getMapViewer(mapId).getProjection().getCode();
+    const inProjection: string = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LNGLAT;
+    const outProjection: OLProjection = MapEventProcessor.getMapViewer(mapId).getProjection();
+
+    const inProjectionConv: OLProjection = Projection.getProjectionFromString(inProjection);
 
     const features: Feature[] = [];
     let latIndex: number | undefined;
@@ -330,7 +429,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
 
     if (latIndex === undefined || lonIndex === undefined) {
-      throw new GeoViewError(mapId, `Could not find geographic data in the CSV`);
+      // Failed
+      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath);
     }
 
     AbstractGeoViewVector.#processFeatureInfoConfig(headers, csvRows[1], EXCLUDED_HEADERS, layerConfig);
@@ -347,7 +447,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       const lon = currentRow[lonIndex] ? Number(currentRow[lonIndex]) : Infinity;
       const lat = currentRow[latIndex] ? Number(currentRow[latIndex]) : Infinity;
       if (Number.isFinite(lon) && Number.isFinite(lat)) {
-        const coordinates = inProjection !== outProjection ? Projection.transform([lon, lat], inProjection, outProjection) : [lon, lat];
+        const coordinates =
+          inProjectionConv.getCode() !== outProjection.getCode()
+            ? Projection.transform([lon, lat], inProjectionConv, outProjection)
+            : [lon, lat];
         const feature = new Feature({
           geometry: new Point(coordinates),
           ...properties,

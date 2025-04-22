@@ -7,10 +7,12 @@ import { EsriJSON } from 'ol/format';
 import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
+import { Projection as OLProjection } from 'ol/proj';
 
 import { getMetersPerPixel, validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
   TypeLayerStyleSettings,
@@ -24,20 +26,19 @@ import {
   TypeStyleGeometry,
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
+  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
-import { fetchWithTimeout } from '@/core/utils/fetch-helper';
-import { AbortError } from '@/core/exceptions/core-exceptions';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
+import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -204,7 +205,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
     if (abortController?.signal.aborted) {
       // Raise error
-      throw new AbortError('Cancelled', abortController.signal);
+      throw new RequestAbortedError(abortController.signal);
     }
 
     // If any features
@@ -224,7 +225,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
 
     // Error
-    throw new GeoViewError(this.getMapId(), 'Error querying service. No features were returned.');
+    throw new NoFeaturesPropertyError();
   }
 
   /**
@@ -233,22 +234,18 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {TypeJsonObject} A promise of esri response for query.
    */
   fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeJsonObject> {
-    try {
-      const params: QueryParams = {
-        url: layerConfig.source.dataAccessPath + layerConfig.layerId,
-        geometryType: 'Point',
-        objectIds: 'all',
-        queryGeometry: false,
-        projection: 4326,
-        maxAllowableOffset: 6,
-        maxRecordCount: layerConfig.maxRecordCount || 1000,
-      };
+    const params: QueryParams = {
+      url: layerConfig.source.dataAccessPath + layerConfig.layerId,
+      geometryType: 'Point',
+      objectIds: 'all',
+      queryGeometry: false,
+      projection: 4326,
+      maxAllowableOffset: 6,
+      maxRecordCount: layerConfig.maxRecordCount || 1000,
+    };
 
-      return this.#fetchWorkerPool.process(params);
-    } catch (error) {
-      logger.logError('Query processing failed:', error);
-      throw error;
-    }
+    // Launch
+    return this.#fetchWorkerPool.process(params);
   }
 
   /**
@@ -295,29 +292,25 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {number} maxAllowableOffset - The maximum allowable offset for geometry simplification
    * @returns {TypeJsonObject} A promise of esri response for query.
    */
-  async fetchFeatureInfoGeometryWithWorker(
+  fetchFeatureInfoGeometryWithWorker(
     layerConfig: EsriDynamicLayerEntryConfig,
     objectIds: number[],
     queryGeometry: boolean,
     projection: number,
     maxAllowableOffset: number
   ): Promise<TypeJsonObject> {
-    try {
-      const params: QueryParams = {
-        url: layerConfig.source.dataAccessPath + layerConfig.layerId,
-        geometryType: (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', ''),
-        objectIds,
-        queryGeometry,
-        projection,
-        maxAllowableOffset,
-        maxRecordCount: layerConfig.maxRecordCount || 1000,
-      };
+    const params: QueryParams = {
+      url: layerConfig.source.dataAccessPath + layerConfig.layerId,
+      geometryType: (layerConfig.getLayerMetadata()!.geometryType as string).replace('esriGeometry', ''),
+      objectIds,
+      queryGeometry,
+      projection,
+      maxAllowableOffset,
+      maxRecordCount: layerConfig.maxRecordCount || 1000,
+    };
 
-      return await this.#fetchWorkerPool.process(params);
-    } catch (error) {
-      logger.logError('Query processing failed:', error);
-      throw error;
-    }
+    // Launch
+    return this.#fetchWorkerPool.process(params);
   }
 
   /**
@@ -367,22 +360,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
     // If it takes more then 10 seconds it means the server is unresponsive and we should not continue. This will throw an error...
-    const identifyJsonResponse = await fetchWithTimeout<TypeJsonObject>(identifyUrl, {}, 10000);
-
-    // If was aborted
-    // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
-    if (abortController?.signal.aborted) {
-      // Raise error
-      throw new AbortError('Cancelled', abortController.signal);
-    }
-
-    if (identifyJsonResponse.error) {
-      logger.logInfo('There is a problem with this query: ', identifyUrl);
-      throw new GeoViewError(
-        this.getMapId(),
-        `Error code = ${identifyJsonResponse.error.code} ${identifyJsonResponse.error.message}` || ''
-      );
-    }
+    const identifyJsonResponse = await Fetch.fetchWithTimeout<TypeJsonObject>(identifyUrl, undefined, 10000);
 
     // If no features identified return []
     if (identifyJsonResponse.results.length === 0) return [];
@@ -391,7 +369,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const oidField = layerConfig.source.featureInfo.outfields
       ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
       : 'OBJECTID';
-    const objectIds = (identifyJsonResponse.results as TypeJsonObject[]).map((result: TypeJsonObject) =>
+    const objectIds = (identifyJsonResponse.results as TypeJsonObject[]).map((result) =>
       String(result.attributes[oidField]).replace(',', '')
     );
 
@@ -433,11 +411,18 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Explicitely checking the abort condition here, after reading the features, because the processing above is time consuming and maybe things have become aborted meanwhile.
     if (abortController?.signal.aborted) {
       // Raise error
-      throw new AbortError('Cancelled', abortController.signal);
+      throw new RequestAbortedError(abortController.signal);
     }
 
     // If geometry is needed, use web worker to query and assign geometry later
     if (queryGeometry)
+      // TODO: REFACTOR - Here, we're launching another async task to query the geometries, but the original promise will resolve first, by design.
+      // TO.DOCONT: We should carry this extra promise with the first response so that the caller of 'getFeatureInfoAtLongLat' can know
+      // TO.DOCONT: when the geometries will be done fetching on the features that they've already received as 'resolved'. Carrying the promise
+      // TO.DOCONT: would also allow us to more gracefully handle when the fetching of the geometries has failed, because without a
+      // TO.DOCONT: handle on the promise, the caller of 'getFeatureInfoAtLongLat' have no idea of the 'fetchFeatureInfoGeometryWithWorker.catch()' here.
+      // TO.DOCONT: However, this would mean change the 'getFeatureInfoAtLongLat' function signature with regards to its return type (and affect ALL other sibling classes)
+
       // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
       // TO.DOCONT: the esri query (was working with identify). But identify was failing on huge geometry...
       this.fetchFeatureInfoGeometryWithWorker(
@@ -453,7 +438,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
             // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
             if (abortController?.signal.aborted) {
               // Raise error
-              throw new AbortError('Cancelled', abortController.signal);
+              throw new RequestAbortedError(abortController.signal);
             }
 
             // TODO: Performance - There is still a problem when we create the feature with new EsriJSON().readFeature. It goes trought a loop and take minutes on the deflate function
@@ -488,7 +473,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
             }
           });
         })
-        .catch((err) => logger.logError('Features worker', err));
+        .catch((err) => {
+          // Log
+          logger.logError('The Worker to get the feature geometries has failed', err);
+        });
 
     return arrayOfFeatureInfoEntries;
   }
@@ -864,8 +852,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     try {
       if (!layerConfig) return null;
       const legendUrl = `${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`;
-      const response = await fetch(legendUrl);
-      const legendJson: TypeEsriImageLayerLegend = await response.json();
+      const legendJson = await Fetch.fetchJsonAs<TypeEsriImageLayerLegend>(legendUrl);
 
       let legendInfo;
       if (legendJson.layers && legendJson.layers.length === 1) {
@@ -920,7 +907,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       };
 
       return legend;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`Get Legend for ${layerConfig.layerPath} error`, error);
       return null;
     }
@@ -938,7 +925,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides when the layer gets in loaded status.
    */
-  override onLoaded(): void {
+  protected override onLoaded(): void {
     // Call parent
     super.onLoaded();
 
@@ -986,23 +973,26 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the way to get the bounds for this layer type.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  override onGetBounds(): Extent | undefined {
-    // Get the metadata extent
-    const metadataExtent = this.getMetadataExtent();
+  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
+    // Get the metadata projection
+    const metadataProjection = this.getMetadataProjection();
 
-    // If found
-    let layerBounds;
-    if (metadataExtent) {
-      // Get the metadata projection
-      const metadataProjection = this.getMetadataProjection()?.getCode();
-      layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
-      layerBounds = validateExtent(layerBounds, this.getMapViewer().getProjection().getCode());
+    // Get the metadata extent
+    let metadataExtent = this.getMetadataExtent();
+
+    // If both found
+    if (metadataExtent && metadataProjection) {
+      // Transform extent to given projection
+      metadataExtent = Projection.transformExtentFromProj(metadataExtent, metadataProjection, projection, stops);
+      metadataExtent = validateExtent(metadataExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds
-    return layerBounds;
+    return metadataExtent;
   }
 
   /**
@@ -1027,63 +1017,22 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&objectIds=${idString}${outfieldQuery}&returnExtentOnly=true`;
 
       try {
-        const response = await fetch(queryUrl);
-        const responseJson = await response.json();
+        const responseJson = await Fetch.fetchJsonAsObject(queryUrl);
         const { extent } = responseJson;
 
-        if (extent) {
+        const projectionExtent: OLProjection | undefined = Projection.getProjectionFromObj(extent.spatialReference);
+
+        if (extent && projectionExtent) {
           const projExtent = Projection.transformExtentFromProj(
-            [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
-            `EPSG:${extent.spatialReference.latestWkid || extent.spatialReference.wkid}`,
-            this.getMapViewer().getProjection().getCode()
+            [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number],
+            projectionExtent,
+            this.getMapViewer().getProjection()
           );
           return validateExtent(projExtent, this.getMapViewer().getProjection().getCode());
         }
-      } catch (error) {
+      } catch (error: unknown) {
         logger.logError(`Error fetching geometry from ${queryUrl}`, error);
       }
-
-      // TODO: Cleanup - Keep for reference
-      // // GV: outFields here is not wanted, it is included because some sevices require it in the query. It would be possible to use
-      // // GV cont: OBJECTID, but it is not universal through the services, so we pass a value through.
-      // const outfieldQuery = outfield ? `&outFields=${outfield}` : '';
-      // let precision = '';
-      // let allowableOffset = '';
-      // if ((serviceMetaData?.layers as Array<TypeJsonObject>).every((layer) => layer.geometryType !== 'esriGeometryPoint')) {
-      //   precision = '&geometryPrecision=1';
-      //   allowableOffset = '&maxAllowableOffset=7937.5158750317505';
-      // }
-      // const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=&objectIds=${idString}${outfieldQuery}${precision}&returnGeometry=true${allowableOffset}`;
-
-      // try {
-      //   const response = await fetch(queryUrl);
-      //   const responseJson = await response.json();
-
-      //   // Convert response json to OL features
-      //   const responseFeatures = new EsriJSON().readFeatures(
-      //     { features: responseJson.features },
-      //     {
-      //       dataProjection: wkid ? `EPSG:${wkid}` : `EPSG:${responseJson.spatialReference.wkid}`,
-      //       featureProjection: this.getMapViewer().getProjection().getCode(),
-      //     }
-      //   );
-
-      //   // Determine max extent from features
-      //   let calculatedExtent: Extent | undefined;
-      //   responseFeatures.forEach((feature) => {
-      //     const extent = feature.getGeometry()?.getExtent();
-
-      //     if (extent) {
-      //       // If extent has not been defined, set it to extent
-      //       if (!calculatedExtent) calculatedExtent = extent;
-      //       else getExtentUnion(calculatedExtent, extent);
-      //     }
-      //   });
-
-      //   return calculatedExtent;
-      // } catch (error) {
-      //   logger.logError(`Error fetching geometry from ${queryUrl}`, error);
-      // }
     }
     return undefined;
   }

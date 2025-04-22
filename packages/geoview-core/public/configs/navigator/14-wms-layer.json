@@ -60,7 +60,6 @@
               },
               {
                 "layerId": "GDPS.ETA_ICEC",
-                "layerFilter": "time = date'2023-04-18T07:00:00-04:00'",
                 "layerName": "Ice Cover",
                 "source": {
                   "wmsStyle": "SEA_ICECONC"
