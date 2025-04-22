@@ -37,6 +37,20 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Get a specific state.
+   * @param {string} mapId - The mapId
+   * @param {'timeSliderLayers' | 'selectedLayerPath' | 'sliderFilters'} state - The state to get
+   * @returns {string | TimeSliderLayerSet | Record<string, string> | undefined} The requested state
+   */
+  static getSingleTimeSliderState(
+    mapId: string,
+    state: 'timeSliderLayers' | 'selectedLayerPath' | 'sliderFilters'
+  ): string | TimeSliderLayerSet | Record<string, string> | undefined {
+    if (this.getTimesliderState(mapId)) return this.getTimesliderState(mapId)![state];
+    return undefined;
+  }
+
+  /**
    * Gets time slider layers.
    * @param {string} mapId - The map id of the state to act on
    * @returns {TimeSliderLayerSet | undefined} The time slider layer set or undefined

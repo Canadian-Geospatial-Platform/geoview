@@ -47,6 +47,7 @@ import { DataTableEventProcessor } from '@/api/event-processors/event-processor-
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
@@ -1388,20 +1389,34 @@ export class MapEventProcessor extends AbstractEventProcessor {
         schemaVersionUsed: config.schemaVersionUsed,
       };
 
-      // Set open app bar tab
+      // Set app bar tab settings
       if (newMapConfig.appBar) {
         newMapConfig.appBar.selectedTab = UIEventProcessor.getActiveAppBarTab(mapId).tabGroup as TypeValidAppBarCoreProps;
         newMapConfig.appBar.collapsed = !UIEventProcessor.getActiveAppBarTab(mapId).isOpen;
+
+        const selectedDataTableLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
+        if (selectedDataTableLayerPath) newMapConfig.appBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;
+        const selectedGeoChartLayerPath = GeochartEventProcessor.getSingleGeochartState(mapId, 'selectedLayerPath');
+        if (selectedGeoChartLayerPath) newMapConfig.appBar.selectedGeoChartLayerPath = selectedGeoChartLayerPath as string;
         const selectedLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
         if (selectedLayerPath) newMapConfig.appBar.selectedLayersLayerPath = selectedLayerPath as string;
+        const selectedTimeSliderLayerPath = TimeSliderEventProcessor.getSingleTimeSliderState(mapId, 'selectedLayerPath');
+        if (selectedTimeSliderLayerPath) newMapConfig.appBar.selectedTimeSliderLayerPath = selectedTimeSliderLayerPath as string;
       }
 
-      // Set open footer bar tab
+      // Set footer bar tab settings
       if (newMapConfig.footerBar) {
         newMapConfig.footerBar.selectedTab = UIEventProcessor.getActiveFooterBarTab(mapId) as TypeValidFooterBarTabsCoreProps;
         newMapConfig.footerBar.collapsed = UIEventProcessor.getFooterBarIsCollapsed(mapId);
-        const selectedLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
-        if (selectedLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerPath as string;
+
+        const selectedDataTableLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
+        if (selectedDataTableLayerPath) newMapConfig.footerBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;
+        const selectedGeoChartLayerPath = GeochartEventProcessor.getSingleGeochartState(mapId, 'selectedLayerPath');
+        if (selectedGeoChartLayerPath) newMapConfig.footerBar.selectedGeoChartLayerPath = selectedGeoChartLayerPath as string;
+        const selectedLayerLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
+        if (selectedLayerLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerLayerPath as string;
+        const selectedTimeSliderLayerPath = TimeSliderEventProcessor.getSingleTimeSliderState(mapId, 'selectedLayerPath');
+        if (selectedTimeSliderLayerPath) newMapConfig.footerBar.selectedTimeSliderLayerPath = selectedTimeSliderLayerPath as string;
       }
 
       return newMapConfig;
