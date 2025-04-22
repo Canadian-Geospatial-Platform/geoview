@@ -8,6 +8,7 @@ import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-confi
 import { getXMLHttpRequest } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { Projection } from '@/geo/utils/projection';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 // ========================
 // #region CLASS HEADER
@@ -267,7 +268,8 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         return 'Polygon';
 
       default:
-        throw new Error(`Unsupported geometry type: ${esriGeometryType}`);
+        // Unsupported geometry type
+        throw new NotSupportedError(`Unsupported geometry type: ${esriGeometryType}`);
     }
   }
   // #endregion STATIC

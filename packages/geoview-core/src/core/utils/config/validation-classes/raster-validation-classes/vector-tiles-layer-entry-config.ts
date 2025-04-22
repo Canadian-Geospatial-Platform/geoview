@@ -17,12 +17,6 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
-    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
-      throw new Error(
-        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} when the metadataAccessPath is undefined.`
-      );
-    }
-
     if (!this.source) this.source = {};
     if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
     if (!this.source.dataAccessPath!.toLowerCase().endsWith('.pbf')) {

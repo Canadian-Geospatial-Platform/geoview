@@ -166,7 +166,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
           showClickMarker({ lnglat: newCenter });
           highlightBBox(featureData.extent!, false);
         })
-        .catch((error: unknown) => {
+        .catch((error) => {
           // Log
           logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
         });

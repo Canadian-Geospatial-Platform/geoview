@@ -2,15 +2,17 @@ import ImageLayer from 'ol/layer/Image';
 import Static from 'ol/source/ImageStatic';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Extent } from 'ol/extent';
-import axios from 'axios';
+import { Projection as OLProjection } from 'ol/proj';
 
-import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { Projection } from '@/geo/utils/projection';
+import { validateExtent } from '@/geo/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 /**
  * Manages an Image static layer.
@@ -73,24 +75,24 @@ export class GVImageStatic extends AbstractGVRaster {
    */
   static #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
-      const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = () => resolve(null);
-          reader.readAsDataURL(blob);
-        });
+      // If a data access path is defined
+      if (layerConfig.source.dataAccessPath) {
+        const legendUrl = layerConfig.source.dataAccessPath.toLowerCase().startsWith('http:')
+          ? `https${layerConfig.source.dataAccessPath.slice(4)}`
+          : layerConfig.source.dataAccessPath;
 
-      let legendUrl: string | undefined = layerConfig.source.dataAccessPath;
-
-      if (legendUrl) {
-        legendUrl = legendUrl.toLowerCase().startsWith('http:') ? `https${legendUrl.slice(4)}` : legendUrl;
-
-        axios
-          .get<TypeJsonObject>(legendUrl, { responseType: 'blob', withCredentials: false })
-          .then((response) => {
-            resolve(readImage(Cast<Blob>(response.data)));
+        // Fetch the blob
+        Fetch.fetchBlob(legendUrl, { credentials: 'omit' })
+          .then((blob) => {
+            // The blob has been read, read it with a FileReader
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              resolve(reader.result);
+            };
+            reader.onerror = () => {
+              resolve(null);
+            };
+            reader.readAsDataURL(blob);
           })
           .catch(() => resolve(null));
       } else resolve(null);
@@ -103,34 +105,39 @@ export class GVImageStatic extends AbstractGVRaster {
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
+    // Get the config
     const layerConfig = this.getLayerConfig();
+
     try {
-      const legendImage = await GVImageStatic.#getLegendImage(layerConfig!);
-      if (!legendImage) {
-        const legend: TypeLegend = {
-          type: CONST_LAYER_TYPES.IMAGE_STATIC,
-          legend: null,
-        };
-        return legend;
+      // Get legend image
+      const legendImage = await GVImageStatic.#getLegendImage(layerConfig);
+
+      // If legend image was read
+      if (legendImage) {
+        // Legend was read, load the image
+        const image = await loadImage(legendImage as string);
+
+        // If image was loaded
+        if (image) {
+          const drawingCanvas = document.createElement('canvas');
+          drawingCanvas.width = image.width;
+          drawingCanvas.height = image.height;
+          const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
+          drawingContext.drawImage(image, 0, 0);
+
+          // Return legend information
+          return {
+            type: CONST_LAYER_TYPES.IMAGE_STATIC,
+            legend: drawingCanvas,
+          };
+        }
       }
-      const image = await loadImage(legendImage as string);
-      if (image) {
-        const drawingCanvas = document.createElement('canvas');
-        drawingCanvas.width = image.width;
-        drawingCanvas.height = image.height;
-        const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
-        drawingContext.drawImage(image, 0, 0);
-        const legend: TypeLegend = {
-          type: CONST_LAYER_TYPES.IMAGE_STATIC,
-          legend: drawingCanvas,
-        };
-        return legend;
-      }
-      const legend: TypeLegend = {
+
+      // No good
+      return {
         type: CONST_LAYER_TYPES.IMAGE_STATIC,
         legend: null,
       };
-      return legend;
     } catch (error) {
       logger.logError(`Error getting legend for ${layerConfig.layerPath}`, error);
       return null;
@@ -139,17 +146,22 @@ export class GVImageStatic extends AbstractGVRaster {
 
   /**
    * Overrides the way to get the bounds for this layer type.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  override onGetBounds(): Extent | undefined {
+  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
     // Get the source projection
     const sourceProjection = this.getOLSource().getProjection() || undefined;
 
     // Get the layer bounds
     let sourceExtent = this.getOLSource()?.getImageExtent();
-    if (sourceExtent) {
-      // Make sure we're in the map projection
-      sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
+
+    // If both found
+    if (sourceExtent && sourceProjection) {
+      // Transform extent to given projection
+      sourceExtent = Projection.transformExtentFromProj(sourceExtent, sourceProjection, projection, stops);
+      sourceExtent = validateExtent(sourceExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds

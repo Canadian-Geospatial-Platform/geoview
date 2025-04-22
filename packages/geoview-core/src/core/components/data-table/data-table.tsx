@@ -332,7 +332,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
             removeHighlightedFeature('all');
             addHighlightedFeature(feature);
           })
-          .catch((error: unknown) => {
+          .catch((error) => {
             // Log
             logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
           });

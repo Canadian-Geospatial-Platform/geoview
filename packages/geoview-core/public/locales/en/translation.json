@@ -115,7 +115,7 @@
     "errorEmpty": "cannot be empty",
     "errorNone": "No file or source added",
     "errorFile": "Only geoJSON and CSV files can be used",
-    "errorServer": "source is not valid",
+    "errorServer": "The __param__ source is not valid",
     "errorNotLoaded": "An error occured when loading the layer",
     "errorProj": "does not support current map projection",
     "errorImageLoad": "Error loading source image for layer: __param__ at zoom level __param__",
@@ -181,10 +181,10 @@
     "layer": {
       "loadfailed": "Layer __param__ failed to load on map",
       "notfound": "The sublayer __param__ of the layer __param__ does not exist on the server",
-      "uuidNotFount": "GeoCore layer identifier __param__ does not exist on the server",
       "createtwice": "Can not execute the createGeoViewRasterLayers method twice for the layer __param__ on map",
       "usedtwice": "Duplicate use of layer identifier __param__ on map",
-      "multipleUUID": "GeoCore layers may only have one GeoCore id per layer"
+      "multipleUUID": "GeoCore layers may only have one GeoCore id per layer",
+      "vectorFeaturesFailed": "Failed to load the vector features on layer __param__"
     },
     "schema": {
       "notFound": "A schema error was found, check the console to see what is wrong.",
@@ -265,7 +265,9 @@
       "noCSVGeometry": "Could not find geographic data in the CSV layer __param__"
     },
     "geocore": {
-      "noLayer": "No layers returned by GeoCore service"
+      "uuidNotFound": "GeoCore layer identifier __param__ does not exist on the server",
+      "invalidResponse": "Invalid response (__param__) from GeoCore service pour UUID __param__",
+      "noLayer": "No layers returned by GeoCore service for UUID __param__"
     },
     "geolocator": {
       "noService": "Geolocator service not available"

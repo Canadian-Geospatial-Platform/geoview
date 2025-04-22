@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import Ajv from 'ajv';
 
 import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { api } from '@/app';
 import { TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
@@ -12,6 +13,7 @@ import { logger } from '@/core/utils/logger';
 import { AbstractPlugin } from './abstract-plugin';
 import { TypePluginStructure } from './plugin-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { formatError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Class to manage plugins
@@ -60,8 +62,9 @@ export abstract class Plugin {
           .then(() => {
             resolve(window.geoviewPlugins[pluginId]);
           })
-          .catch((error) => {
-            reject(error);
+          .catch((error: unknown) => {
+            // Reject
+            reject(formatError(error));
           });
       }
     });
@@ -96,7 +99,7 @@ export abstract class Plugin {
 
       if (plugin) {
         // a config object used to store package config
-        let pluginConfigObj: unknown = {};
+        let pluginConfigObj: TypeJsonObject = {};
 
         // if a schema is defined then look for a config for this plugin
         if (plugin.schema && plugin.defaultConfig) {
@@ -144,7 +147,7 @@ export abstract class Plugin {
 
             try {
               // Try to find the custom config from the config path
-              const result = await (await fetch(configPath)).json();
+              const result = await Fetch.fetchJsonAsObject(configPath);
 
               if (result) {
                 logger.logTraceCore('Plugin - addPlugin file config', result);
