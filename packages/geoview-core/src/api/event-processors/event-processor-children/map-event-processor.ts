@@ -1400,7 +1400,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         if (selectedGeoChartLayerPath) newMapConfig.appBar.selectedGeoChartLayerPath = selectedGeoChartLayerPath as string;
         const selectedLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
         if (selectedLayerPath) newMapConfig.appBar.selectedLayersLayerPath = selectedLayerPath as string;
-        const selectedTimeSliderLayerPath = TimeSliderEventProcessor.getSingleTimeSliderState(mapId, 'selectedLayerPath');
+        const selectedTimeSliderLayerPath = TimeSliderEventProcessor.getTimeSliderSelectedLayer(mapId);
         if (selectedTimeSliderLayerPath) newMapConfig.appBar.selectedTimeSliderLayerPath = selectedTimeSliderLayerPath as string;
       }
 
@@ -1415,7 +1415,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         if (selectedGeoChartLayerPath) newMapConfig.footerBar.selectedGeoChartLayerPath = selectedGeoChartLayerPath as string;
         const selectedLayerLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
         if (selectedLayerLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerLayerPath as string;
-        const selectedTimeSliderLayerPath = TimeSliderEventProcessor.getSingleTimeSliderState(mapId, 'selectedLayerPath');
+        const selectedTimeSliderLayerPath = TimeSliderEventProcessor.getTimeSliderSelectedLayer(mapId);
         if (selectedTimeSliderLayerPath) newMapConfig.footerBar.selectedTimeSliderLayerPath = selectedTimeSliderLayerPath as string;
       }
 
