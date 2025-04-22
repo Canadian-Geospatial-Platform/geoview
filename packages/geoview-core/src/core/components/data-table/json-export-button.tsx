@@ -103,9 +103,9 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
             })
             .catch(reject);
         });
-      } catch (err) {
+      } catch (error) {
         // Handle error
-        logger.logError('Failed to query the features to get their geometries. The output will not have the geometries.', err);
+        logger.logError('Failed to query the features to get their geometries. The output will not have the geometries.', error);
         return Promise.resolve(chunk); // Return the original chunk if there's an error
       }
     },

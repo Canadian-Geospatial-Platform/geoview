@@ -208,11 +208,11 @@
           message.classList.remove('config-error');
           message.innerHTML = 'File seems valid, see console for details...';
           document.getElementById('createMap').disabled = 0;
-        } catch (e) {
+        } catch (error) {
           // set class and message
           message.classList.add('config-error');
           message.classList.remove('config-json-valid');
-          message.innerHTML = cgpv.api.utilities.core.escapeRegExp(e.message);
+          message.innerHTML = cgpv.api.utilities.core.escapeRegExp(error.message);
           document.getElementById('createMap').disabled = true;
         }
       });
@@ -248,7 +248,10 @@
           // Regex expression to cature all single quotes (') except those preceded by a backslash (\)
           const regexExp = /(?<!\\)'/g
           cgpv.api.createMapFromConfig('map1', document.getElementById('configGeoview').value.replaceAll(regexExp, '"'))
-            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
+            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'))
+            .catch((error) => {
+              console.error('Failed to create map from config', error);
+            });
         }, 1500);
       });
 
@@ -414,7 +417,11 @@
               ],
               'theme': 'geo.ca'
         })
-      ).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
+      )
+      .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'))
+      .catch((error) => {
+        console.error('Failed to create map from config', error);
+      });
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {

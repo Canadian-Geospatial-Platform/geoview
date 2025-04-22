@@ -54,6 +54,7 @@ import { EsriFeature, TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-lay
 import { GeoJSON, TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { ConfigApi } from '@/api/config/config-api';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 type EsriOptions = {
   err: string;
@@ -184,7 +185,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError(`${serviceName} ${t('layers.errorServer')}`, [], false);
+    api.getMapViewer(mapId).notifications.showError('layers.errorServer', [serviceName], false);
   };
 
   /**
@@ -449,9 +450,10 @@ export function AddNewLayer(): JSX.Element {
         }
       }
     } catch (error) {
-      emitErrorServer('GeoCore UUID');
       // Log error
       logger.logError(error);
+
+      emitErrorServer('GeoCore (UUID)');
       return false;
     }
     return true;
@@ -671,9 +673,8 @@ export function AddNewLayer(): JSX.Element {
    */
   const geoJSONValidation = async (): Promise<boolean> => {
     try {
-      const response = await fetch(layerURL);
-      const json = await response.json();
-      if (!['FeatureCollection', 'Feature'].includes(json.type)) {
+      const json = await Fetch.fetchJsonAsObject(layerURL);
+      if (!['FeatureCollection', 'Feature'].includes(json.type as string)) {
         // We assume that a metadata file is present
         const geojsonGeoviewLayerConfig = {
           geoviewLayerType: GEOJSON,

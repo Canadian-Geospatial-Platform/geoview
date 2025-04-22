@@ -5,12 +5,11 @@ import { Geometry } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
-import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import Style from 'ol/style/Style';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import { ProjectionLike } from 'ol/proj';
+import { Projection as OLProjection } from 'ol/proj';
 
 import { FilterNodeArrayType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
@@ -19,8 +18,9 @@ import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/config/types/map-
 import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { featureInfoGetFieldType, parseDateTimeValuesVector } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { getExtentUnion } from '@/geo/utils/utilities';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { getExtentUnion, validateExtent } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
+import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -206,16 +206,17 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     // Parse the filter value to use
     let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
-    filterValueToUse = parseDateTimeValuesVector(filterValueToUse, this.getExternalFragmentsOrder());
 
     try {
+      // Parse is some more for the dates
+      filterValueToUse = parseDateTimeValuesVector(filterValueToUse, this.getExternalFragmentsOrder());
+
+      // Analyze the layer filter
       const filterEquation = analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
       layerConfig.filterEquation = filterEquation;
     } catch (error) {
-      throw new GeoViewError(
-        this.getMapId(),
-        `Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${this.getLayerFilter()}\ninternal filter = ${filterValueToUse}`
-      );
+      // Failed
+      throw new LayerInvalidLayerFilterError(layerConfig.layerPath, filterValueToUse, this.getLayerFilter(), error as Error);
     }
 
     olLayer.changed();
@@ -228,10 +229,23 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the way to get the bounds for this layer type.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  override onGetBounds(): Extent | undefined {
-    const sourceExtent = this.getOLSource().getExtent();
+  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
+    // Get the source projection
+    const sourceProjection = this.getOLSource().getProjection();
+
+    // Get the layer bounds
+    let sourceExtent = this.getOLSource()?.getExtent();
+
+    // If both found
+    if (sourceExtent && sourceProjection) {
+      // Transform extent to given projection
+      sourceExtent = Projection.transformExtentFromProj(sourceExtent, sourceProjection, projection, stops);
+      sourceExtent = validateExtent(sourceExtent, projection.getCode());
+    }
 
     // Return the calculated layer bounds
     return sourceExtent;
@@ -263,23 +277,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       return Promise.resolve(calculatedExtent);
     }
     return Promise.resolve(undefined);
-  }
-
-  /**
-   * Return the vector layer as a GeoJSON object
-   * @returns {JSON} Layer's features as GeoJSON
-   */
-  getFeaturesAsGeoJSON(): JSON {
-    // Get map projection
-    const mapProjection: ProjectionLike = this.getMapViewer().getProjection().getCode();
-
-    const format = new FormatGeoJSON();
-    const geoJsonStr = format.writeFeatures((this.getOLLayer() as VectorLayer<VectorSource>).getSource()!.getFeatures(), {
-      dataProjection: 'EPSG:4326', // Output projection,
-      featureProjection: mapProjection,
-    });
-
-    return JSON.parse(geoJsonStr);
   }
 
   /**

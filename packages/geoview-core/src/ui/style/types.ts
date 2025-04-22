@@ -1,9 +1,10 @@
-// Can populate using https://www.htmlcsscolor.com/hex/F1F2F5
+import _ from 'lodash';
 import { darken, lighten, alpha } from '@mui/material';
 import { Theme } from '@mui/material/styles';
 import { SxProps } from '@mui/system';
-import _ from 'lodash';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
+// Can populate using https://www.htmlcsscolor.com/hex/F1F2F5
 const ColorKeyValues = _.range(50, 1000, 50);
 type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;
@@ -21,7 +22,7 @@ export class GeoViewColorClass {
 
   constructor(mainColor: string, isInverse = false) {
     if (!GeoViewColorClass.#isValidColor(mainColor)) {
-      throw new Error('Invalid color format');
+      throw new NotSupportedError(`Invalid color format '${mainColor}'`);
     }
     this.main = mainColor;
     this.isInverse = isInverse;

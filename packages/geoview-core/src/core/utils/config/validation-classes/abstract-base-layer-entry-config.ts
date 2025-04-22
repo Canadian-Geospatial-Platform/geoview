@@ -17,7 +17,7 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
 
-/** ******************************************************************************************************************************
+/**
  * Base type used to define a GeoView layer to display on the map.
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {

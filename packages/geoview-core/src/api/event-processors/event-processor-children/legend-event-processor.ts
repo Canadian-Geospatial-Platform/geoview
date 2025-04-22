@@ -226,7 +226,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method propagates the information stored in the legend layer set to the store.
    *
    * @param {string} mapId The map identifier.

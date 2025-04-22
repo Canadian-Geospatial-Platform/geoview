@@ -158,8 +158,11 @@ return new Promise (resolve => {
   removeMap('Map1')
     .then(() => {
       cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800)
-      .then(() => {
-          resolve();
+        .then(() => {
+            resolve();
+        })
+        .catch((error) => {
+          console.error('Failed to create map from config', error);
         });
     });
   });
@@ -345,8 +348,12 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
       function refreshMap() {
         return new Promise((resolve) => {
           removeMap('Map1').then(() => {
-            cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800).then(() => {
+            cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800)
+            .then(() => {
               resolve();
+            })
+            .catch((error) => {
+              console.error('Failed to create map from config', error);
             });
           });
         });

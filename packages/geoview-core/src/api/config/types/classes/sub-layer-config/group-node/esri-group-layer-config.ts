@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import { GroupLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
 import { Extent } from '@/api/config/types/map-schema-types';
 import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
@@ -9,6 +7,7 @@ import { isvalidComparedToInternalSchema } from '@/api/config/utils';
 import { logger } from '@/core/utils/logger';
 import { Projection } from '@/geo/utils/projection';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 // ========================
 // #region CLASS HEADER
@@ -52,7 +51,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
       const queryUrl = serviceUrl.endsWith('/') ? `${serviceUrl}${this.layerId}` : `${serviceUrl}/${this.layerId}`;
 
       try {
-        const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
+        const data = await Fetch.fetchJsonAsObject(`${queryUrl}?f=json`);
         if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
         else {
           // The metadata used are the layer metadata.
@@ -97,7 +96,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else
       this.initialSettings.extent = validateExtentWhenDefined(
-        Projection.transformExtentFromObj(metadataExtent, layerMetadata.initialExtent.spatialReference, Projection.PROJECTION_NAMES.LNGLAT)
+        Projection.transformExtentFromObj(metadataExtent, layerMetadata.initialExtent.spatialReference, Projection.getProjectionLngLat())
       );
 
     if (layerMetadata.defaultVisibility !== undefined) this.initialSettings.states!.visible = layerMetadata.defaultVisibility as boolean;
@@ -132,11 +131,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
     if (sourceProj === '4326') this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     else
       this.initialSettings.extent = validateExtentWhenDefined(
-        Projection.transformExtentFromObj(
-          metadataExtent,
-          serviceMetadata.initialExtent.spatialReference,
-          Projection.PROJECTION_NAMES.LNGLAT
-        )
+        Projection.transformExtentFromObj(metadataExtent, serviceMetadata.initialExtent.spatialReference, Projection.getProjectionLngLat())
       );
 
     this.initialSettings.states!.queryable = (serviceMetadata?.capabilities as string)?.includes('Query') || false;

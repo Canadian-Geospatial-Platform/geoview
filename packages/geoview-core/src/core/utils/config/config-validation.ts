@@ -46,7 +46,9 @@ import { ImageStaticLayerEntryConfig } from './validation-classes/raster-validat
 import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { LayerMetadataAccessPathMandatoryError, LayerMissingGeoviewLayerIdError } from '@/core/exceptions/layer-exceptions';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.
@@ -60,7 +62,7 @@ export class ConfigValidation {
   // The map language
   displayLanguage: TypeDisplayLanguage;
 
-  /** ***************************************************************************************************************************
+  /**
    * The ConfigValidation class constructor used to instanciate an object of this type.
    */
   constructor(language: TypeDisplayLanguage) {
@@ -68,7 +70,7 @@ export class ConfigValidation {
     this.displayLanguage = language;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Get mapId value.
    *
    * @returns {string} The ID of the Geoview map.
@@ -77,7 +79,7 @@ export class ConfigValidation {
     return this.#mapId;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Set mapId value.
    * @param {string} mapId - The ID of the Geoview map.
    */
@@ -85,7 +87,7 @@ export class ConfigValidation {
     this.#mapId = mapId;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Print a trace to help locate schema errors.
    * @param {AnyValidateFunction<unknown>} validate - The Ajv validator.
    * @param {unknown} objectAffected - Object that was validated.
@@ -104,7 +106,7 @@ export class ConfigValidation {
     }
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Validate the configuration of the map features against the TypeMapFeaturesInstance defined in the schema.
    * @param {TypeGeoviewLayerType} geoviewLayerType - The GeoView layer type to validate.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to validate.
@@ -156,7 +158,7 @@ export class ConfigValidation {
     return true;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Validate the map features configuration.
    * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate - The map features configuration to validate.
    *
@@ -195,7 +197,7 @@ export class ConfigValidation {
     return listOfGeoviewLayerConfig;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Validate and adjust the list of GeoView layer configuration.
    * @param {TypeGeoviewLayerConfig[]} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and
    * validate.
@@ -204,7 +206,7 @@ export class ConfigValidation {
     ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Do extra validation that schema can not do.
    * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry - The list of Map Config Layer Entry configuration to adjust and
    * validate.
@@ -212,65 +214,79 @@ export class ConfigValidation {
    */
   static #doExtraValidation(listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
     if (listOfMapConfigLayerEntry) {
-      listOfMapConfigLayerEntry
-        .filter((geoviewLayerConfig) => !mapConfigLayerEntryIsGeoCore(geoviewLayerConfig))
-        .forEach((geoviewLayerConfig) => {
-          // The default value for geoviewLayerConfig.initialSettings.visible is true.
-          const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
-          if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { states: { visible: true } };
-          switch (geoviewLayerConfig.geoviewLayerType) {
-            case CONST_LAYER_TYPES.CSV:
-            case CONST_LAYER_TYPES.GEOJSON:
-            case CONST_LAYER_TYPES.XYZ_TILES:
-            case CONST_LAYER_TYPES.VECTOR_TILES:
-            case CONST_LAYER_TYPES.GEOPACKAGE:
-            case CONST_LAYER_TYPES.IMAGE_STATIC:
-              ConfigValidation.#geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
-              ConfigValidation.#processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
-              break;
-            case CONST_LAYER_TYPES.ESRI_DYNAMIC:
-            case CONST_LAYER_TYPES.ESRI_FEATURE:
-            case CONST_LAYER_TYPES.ESRI_IMAGE:
-            case CONST_LAYER_TYPES.OGC_FEATURE:
-            case CONST_LAYER_TYPES.WFS:
-            case CONST_LAYER_TYPES.WMS:
-              ConfigValidation.#geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
-              ConfigValidation.#metadataAccessPathIsMandatory(geoviewLayerConfigCasted);
-              ConfigValidation.#processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
-              break;
-            default:
-              // Error
-              throw new NotImplementedError('Your not supposed to end here. There is a problem with the schema validator.');
+      // Track only valid entries
+      const validConfigs: typeof listOfMapConfigLayerEntry = [];
+
+      listOfMapConfigLayerEntry.forEach((geoviewLayerConfig) => {
+        if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
+          // As-is we keep it
+          validConfigs.push(geoviewLayerConfig);
+        } else {
+          try {
+            // The default value for geoviewLayerConfig.initialSettings.visible is true.
+            const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
+            if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { states: { visible: true } };
+
+            // Validate the geoview layer id
+            ConfigValidation.#geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
+
+            // Depending on the geoview layer type
+            switch (geoviewLayerConfig.geoviewLayerType) {
+              case CONST_LAYER_TYPES.ESRI_DYNAMIC:
+              case CONST_LAYER_TYPES.ESRI_FEATURE:
+              case CONST_LAYER_TYPES.ESRI_IMAGE:
+              case CONST_LAYER_TYPES.OGC_FEATURE:
+              case CONST_LAYER_TYPES.WFS:
+              case CONST_LAYER_TYPES.WMS:
+                ConfigValidation.#metadataAccessPathIsMandatory(geoviewLayerConfigCasted);
+                break;
+              default:
+                // All good
+                break;
+            }
+
+            // Process the layer entry config
+            ConfigValidation.#processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
+
+            // Add it as a valid entry
+            validConfigs.push(geoviewLayerConfigCasted);
+          } catch (error) {
+            // An error happened with a geoview layer config, log and continue with the others
+            GeoViewError.logError(error);
           }
-        });
+        }
+      });
+
+      // We're done processing the listOfMapConfigLayerEntry and we only have valid ones in the validConfigs list
+      // Repopulate the original array
+      listOfMapConfigLayerEntry.length = 0;
+      listOfMapConfigLayerEntry.push(...validConfigs);
     }
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Verify that the metadataAccessPath has a value.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to validate.
    * @private
    */
   static #metadataAccessPathIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
     if (!geoviewLayerConfig.metadataAccessPath) {
-      throw new Error(
-        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.geoviewLayerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
-      );
+      throw new LayerMetadataAccessPathMandatoryError(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig.geoviewLayerType);
     }
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Verify that the geoviewLayerId has a value.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to validate.
    * @private
    */
   static #geoviewLayerIdIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
     if (!geoviewLayerConfig.geoviewLayerId) {
-      throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${geoviewLayerConfig.geoviewLayerType}.`);
+      throw new LayerMissingGeoviewLayerIdError(geoviewLayerConfig.geoviewLayerType);
     }
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Process recursively the layer entries to create layers and layer groups.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to adjust and validate.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
@@ -350,13 +366,13 @@ export class ConfigValidation {
       } else if (geoviewEntryIsCSV(layerConfig)) {
         listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfig);
       } else {
-        // Unknown
-        logger.logWarning('Unknown layer entry config type', layerConfig);
+        // Unsupported layer type
+        throw new NotSupportedError(`Unsupported layer entry config type '${layerConfig.geoviewLayerConfig?.geoviewLayerType}'`);
       }
     });
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Process recursively the layer entries to set the parents of each entries.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
