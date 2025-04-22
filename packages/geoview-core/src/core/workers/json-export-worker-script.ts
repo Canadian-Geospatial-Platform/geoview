@@ -138,7 +138,7 @@ const worker = {
       sourceCRS = projectionInfo.sourceCRS;
       targetCRS = projectionInfo.targetCRS;
       logger.logTrace('init worker', `Worker initialized with sourceCRS: ${sourceCRS}, targetCRS: ${targetCRS}`);
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('init worker', error);
     }
   },
@@ -173,7 +173,7 @@ const worker = {
 
       logger.logTrace('process worker', `Finished processing`);
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('process worker', error);
       return '';
     }

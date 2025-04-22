@@ -2,12 +2,14 @@ import TileLayer from 'ol/layer/Tile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ from 'ol/source/XYZ';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
 
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { featureInfoGetFieldType } from '@/geo/layer/gv-layers/utils';
 import { validateExtent } from '@/geo/utils/utilities';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { Projection } from '@/geo/utils/projection';
 
 /**
  * Manages a Tile<XYZ> layer.
@@ -74,9 +76,11 @@ export class GVXYZTiles extends AbstractGVTile {
 
   /**
    * Overrides the way to get the bounds for this layer type.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  override onGetBounds(): Extent | undefined {
+  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
     // Get the layer
     const layer = this.getOLLayer() as TileLayer<XYZ> | undefined;
 
@@ -85,10 +89,12 @@ export class GVXYZTiles extends AbstractGVTile {
 
     // Get the layer bounds
     let sourceExtent = layer?.getSource()?.getTileGrid()?.getExtent();
-    if (sourceExtent) {
-      // Make sure we're in the map projection
-      sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
-      sourceExtent = validateExtent(sourceExtent, this.getMapViewer().getProjection().getCode());
+
+    // If both found
+    if (sourceExtent && sourceProjection) {
+      // Transform extent to given projection
+      sourceExtent = Projection.transformExtentFromProj(sourceExtent, sourceProjection, projection, stops);
+      sourceExtent = validateExtent(sourceExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds

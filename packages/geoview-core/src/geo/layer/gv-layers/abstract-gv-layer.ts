@@ -6,6 +6,7 @@ import Feature from 'ol/Feature';
 import { Layer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
+import { Projection as OLProjection } from 'ol/proj';
 
 import { Style } from 'ol/style';
 import cloneDeep from 'lodash/cloneDeep';
@@ -33,8 +34,8 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { SnackbarType } from '@/core/utils/notifications';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
 import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
 
 /**
@@ -107,19 +108,23 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Gets the bounds for the layer.
+   * Gets the bounds for the layer in the given projection.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  getBounds(): Extent | undefined {
+  getBounds(projection: OLProjection, stops: number): Extent | undefined {
     // Redirect to overridable method
-    return this.onGetBounds();
+    return this.onGetBounds(projection, stops);
   }
 
   /**
-   * Must override method to return the bounds of a layer.
+   * Must override method to return the bounds of a layer in the given projection.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
    * @returns {Extent} The layer bounding box.
    */
-  abstract onGetBounds(): Extent | undefined;
+  abstract onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
 
   /**
    * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
@@ -244,23 +249,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Overridable method called when the layer has been loaded correctly
-   */
-  protected onLoaded(): void {
-    // Get the layer config
-    const layerConfig = this.getLayerConfig();
-
-    // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
-    layerConfig.setLayerStatusLoaded();
-
-    // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
-    this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
-
-    // Emit event
-    this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
-  }
-
-  /**
    * Emits a layer-specific message event with localization support
    * @protected
    * @param {string} messageKey - The key used to lookup the localized message OR message
@@ -289,25 +277,85 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Overridable method called when the layer has been loaded correctly
+   */
+  protected onLoaded(): void {
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
+
+    // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
+    layerConfig.setLayerStatusLoaded();
+
+    // Update the parent group if any
+    this.getLayerConfig().updateLayerStatusParent();
+
+    // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
+    this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+
+    // Emit event
+    this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
+  }
+
+  /**
    * Overridable method called when the layer is in error and couldn't be loaded correctly
    */
-  protected onError(): void {
+  protected onError(event: unknown): void {
+    // Log
+    logger.logError(
+      `An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map. Zoom level is: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`,
+      event
+    );
+
+    // Check the layer status before
+    const layerStatusBefore = this.getLayerConfig().layerStatus;
+
     // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
     this.getLayerConfig().setLayerStatusError();
+
+    // Update the parent group if any
+    this.getLayerConfig().updateLayerStatusParent();
+
+    // If we were loaded before
+    if (layerStatusBefore === 'loaded') {
+      // Emit about the error
+      this.emitMessage('layers.errorNotLoaded', [this.getLayerName()!], 'error', true);
+    } else {
+      // We've already emitted an erorr to the user about the layer being in error, skip
+    }
   }
 
   /**
    * Overridable method called when the layer image is in error and couldn't be loaded correctly.
    * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
    */
-  protected onImageLoadError(): void {
+  protected onImageLoadError(event: unknown): void {
     // Log
     logger.logError(
-      `Error loading source image for layer path: ${this.getLayerPath()} at zoom level: ${this.getMapViewer().getView().getZoom()}`
+      `Error loading source image for layer: ${this.getLayerPath()} at zoom level: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`,
+      event
     );
 
-    // Emit about the error
-    this.emitMessage('layers.errorImageLoad', [this.getLayerName()!, this.getMapViewer().getView().getZoom()!.toString()], 'error', true);
+    // Check the layer status before
+    const layerStatusBefore = this.getLayerConfig().layerStatus;
+
+    // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
+    this.getLayerConfig().setLayerStatusError();
+
+    // Update the parent group if any
+    this.getLayerConfig().updateLayerStatusParent();
+
+    // If we were loaded before
+    if (layerStatusBefore === 'loaded') {
+      // Emit about the error
+      this.emitMessage(
+        'layers.errorImageLoad',
+        [this.getLayerName()!, Math.round(this.getMapViewer().getView().getZoom() || 0).toString()],
+        'error',
+        true
+      );
+    } else {
+      // We've already emitted an erorr to the user about the layer being in error, skip
+    }
   }
 
   /**
@@ -330,7 +378,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // If the layer is not queryable
     if (layerConfig.source?.featureInfo?.queryable === false) {
       // Throw error
-      throw new GeoViewError(this.getMapId(), `Layer at path ${layerConfig.layerPath} is not queryable`);
+      throw new LayerNotQueryableError(layerConfig.layerPath);
     }
 
     // Log
@@ -360,7 +408,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         break;
       default:
         // Not implemented
-        throw new NotImplementedError();
+        throw new NotSupportedError(`Unsupported query type '${queryType}'`);
     }
 
     // Wait for results
@@ -530,7 +578,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           this.#emitLegendQueried({ legend });
         }
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('promiseLegend in queryLegend in AbstractGVLayer', error);
       });
@@ -576,7 +624,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         legend: await getLegendStyles(this.getStyle()),
       };
       return legend;
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError(error);
       return null;
@@ -746,7 +794,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       });
 
       return queryResult;
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError(error);
       return [];

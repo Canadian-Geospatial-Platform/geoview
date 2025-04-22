@@ -92,12 +92,12 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    * @param exception unknown The exception if any
    */
   const handleError = useCallback<(error: string, exception: unknown | undefined) => void>(
-    (error: string): void => {
+    (errorMessage: string): void => {
       // Log
-      logger.logTraceUseCallback('GEOVIEW-GEOCHART - handleError', mapId, error);
+      logger.logTraceUseCallback('GEOVIEW-GEOCHART - handleError', mapId, errorMessage);
 
       // Show error
-      addNotification({ key: 'geochart', message: error, notificationType: 'error', count: 0 });
+      addNotification({ key: 'geochart', message: errorMessage, notificationType: 'error', count: 0 });
     },
     [addNotification, mapId]
   );

@@ -278,12 +278,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
               toJsonObject({
                 mapId,
               })
-            ).catch((error) => {
+            ).catch((error: unknown) => {
               // Log
               logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in app-bar for ${pluginName}`, error);
             });
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('api.plugin.loadScript in useEffect in app-bar', error);
           });

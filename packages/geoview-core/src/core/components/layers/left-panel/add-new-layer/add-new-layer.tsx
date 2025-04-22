@@ -21,7 +21,11 @@ import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { Config } from '@/core/utils/config/config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
+  CONST_LAYER_ENTRY_TYPES,
+  TypeLayerEntryConfig,
+  TypeGeoviewLayerConfig,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerTypeWithGeoCore,
   AbstractGeoViewLayer,
@@ -148,7 +152,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError(`${serviceName} ${t('layers.errorServer')}`, [], false);
+    api.getMapViewer(mapId).notifications.showError('layers.errorServer', [serviceName], false);
   };
 
   const setLayerTypeIfAllowed = (layerTypeValue: TypeGeoviewLayerTypeWithGeoCore): boolean => {
@@ -280,7 +284,7 @@ export function AddNewLayer(): JSX.Element {
             setStepButtonEnabled(false);
           }
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('promise of layer validation in handleStep2 in AddNewLayer', error);
         });

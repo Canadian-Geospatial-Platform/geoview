@@ -5,10 +5,10 @@ import { GeoJsonGroupLayerConfig } from '@/api/config/types/classes/sub-layer-co
 import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { GeoJsonLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
-import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
+import { GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
 
 import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
-import { isJsonString } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 
 export type TypeGeoJsonLayerNode = GeoJsonGroupLayerConfig | GeoJsonLayerEntryConfig;
@@ -132,25 +132,16 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
       metadataUrl = this.metadataAccessPath.endsWith('/') ? `${this.metadataAccessPath}?f=json` : `${this.metadataAccessPath}/?f=json`;
     try {
       if (metadataUrl.toLowerCase().endsWith('.meta') || metadataUrl.toLowerCase().endsWith('f=json')) {
-        const fetchResponse = await fetch(metadataUrl);
-        if (fetchResponse.status === 404) throw new GeoviewLayerConfigError('The service metadata fetch returned a 404 status (Not Found)');
-        const layerMetadataString = await fetchResponse.text();
-        let layerMetadata = null;
-        // Check if the response text is valid json. isJsonString will throw an error if it is not, and we want to catch it separately.
-        try {
-          if (isJsonString(layerMetadataString)) layerMetadata = toJsonObject(JSON.parse(layerMetadataString));
-        } catch (err) {
-          logger.logError('Response from metadataAccessPath was not JSON', err);
-        }
-        if (layerMetadata) this.setServiceMetadata(layerMetadata);
-        else throw new GeoviewLayerConfigError('The metadata object returned is undefined');
+        // This was a fetchText which was later converted to a Json, trying to fetchJson straight for simplicity
+        const layerMetadata = await Fetch.fetchJsonAsObject(metadataUrl);
+        this.setServiceMetadata(layerMetadata);
 
         this.listOfLayerEntryConfig = this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
         await this.fetchListOfLayerMetadata();
       }
 
       await this.createLayerTree();
-    } catch (error) {
+    } catch (error: unknown) {
       // GV In the case of a geojson, when the metadata fetching fails, we actually skip it with a warning only.
       // G.VCONT If we want to manage this all the way to the UI (LayerAPI), we'll need a 'addLayerLoadWarning' working
       // G.VCONT like the 'addLayerLoadError' and aggregate errors as the process happens. Okay for now.

@@ -9,8 +9,7 @@ import { Feature } from 'ol';
 import initSqlJs, { SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
-import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
@@ -23,12 +22,14 @@ import {
   TypeFillStyle,
   CONST_LAYER_ENTRY_TYPES,
   TypeOutfields,
+  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
+import { LayerNotCreatedError } from '@/core/exceptions/layer-exceptions';
+import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
@@ -73,14 +74,174 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  protected override onFetchAndSetServiceMetadata(): Promise<void> {
+    // None
+    return Promise.resolve();
+  }
+
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   */
+  protected override onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
+    // Return the layer config
+    return Promise.resolve(layerConfig);
+  }
+
+  /**
+   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+   * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
+   * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
+   */
+  protected override onProcessOneLayerEntry(layerConfig: VectorLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer> {
+    // TODO: Refactor - This function implementation needs revision, because it doesn't return a single 'BaseLayer', it can
+    // TO.DOCONT: create more than one layer which seems to differ from the other layer classes.
+
+    // Prepare a promise
+    const promisedLayers = new Promise<BaseLayer>((resolve, reject) => {
+      this.#extractGeopackageData(layerConfig)
+        .then(async ([layers, slds]) => {
+          if (layers.length === 1) {
+            this.#processOneGeopackageLayer(layerConfig, layers[0], slds)
+              .then((baseLayer) => {
+                if (baseLayer) {
+                  // Set the layer status to processed
+                  layerConfig.setLayerStatusProcessed();
+
+                  if (layerGroup) layerGroup.getLayers().push(baseLayer);
+                  resolve(layerGroup || baseLayer);
+                } else {
+                  // Throw error
+                  throw new LayerNotCreatedError(layerConfig.layerPath);
+                }
+              })
+              .catch((error: unknown) => {
+                // Reject
+                reject(formatError(error));
+              });
+          } else {
+            // eslint-disable-next-line no-param-reassign
+            layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
+            // eslint-disable-next-line no-param-reassign
+            (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
+            const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
+
+            // For each layer
+            const promises: Promise<BaseLayer>[] = [];
+            for (let i = 0; i < layers.length; i++) {
+              promises.push(
+                new Promise<BaseLayer>((resolve2, reject2) => {
+                  // "Clone" the config, patch until that layer type logic is rebuilt
+                  const newLayerEntryConfig = layerConfig.clone() as VectorLayerEntryConfig;
+                  newLayerEntryConfig.layerId = layers[i].name;
+                  newLayerEntryConfig.layerName = layers[i].name;
+                  newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
+                  newLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
+
+                  this.#processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds)
+                    .then((baseLayer) => {
+                      if (baseLayer) {
+                        (layerConfig as unknown as GroupLayerEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
+                        newLayerGroup.getLayers().push(baseLayer);
+
+                        // Set the layer status to processed
+                        layerConfig.setLayerStatusProcessed();
+
+                        resolve2(baseLayer);
+                      } else {
+                        // Throw error
+                        throw new LayerNotCreatedError(layerConfig.layerPath);
+                      }
+                    })
+                    .catch((error: unknown) => {
+                      // Log
+                      logger.logPromiseFailed('processOneGeopackageLayer (2) in processOneLayerEntry in GeoPackage', error);
+
+                      // Set the layer status to error
+                      // TODO: Check - Do we need to set the status to error here if we're doing it later in the other catch? (caught below)
+                      layerConfig.setLayerStatusError();
+
+                      // Reject
+                      reject2(formatError(error));
+                    });
+                })
+              );
+            }
+
+            // Wait for all layer to be resolved
+            await Promise.all(promises);
+
+            // Resolve the OpenLayer layer
+            resolve(newLayerGroup);
+          }
+        })
+        .catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed('extractGeopackageData in processOneLayerEntry in GeoPackage', error);
+
+          // Set the layer status to error
+          layerConfig.setLayerStatusError();
+
+          // Reject
+          reject(formatError(error));
+        });
+    });
+
+    return promisedLayers;
+  }
+
+  /**
+   * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
+   *
+   * @param {VectorLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
+   *
+   * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
+   * @private
+   */
+  #processOneGeopackageLayer(
+    layerConfig: VectorLayerEntryConfig,
+    layerInfo: LayerData,
+    sld?: SldsInterface
+  ): Promise<BaseLayer | undefined> {
+    // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
+    this.getMapViewer().layer.registerLayerConfigInit(layerConfig);
+
+    const { name, source } = layerInfo;
+
+    // Extract layer styles if they exist
+    if (sld && sld[name]) {
+      GeoPackage.processGeopackageStyle(layerConfig, sld[name]);
+    }
+
+    if (layerInfo.properties) {
+      const { properties } = layerInfo;
+      GeoPackage.#processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as VectorLayerEntryConfig);
+    }
+
+    const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, source);
+
+    // Set the layer status to processed
+    layerConfig.setLayerStatusProcessed();
+
+    return Promise.resolve(vectorLayer);
+  }
+
+  /**
    * Create a source configuration for the vector layer.
    *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
+   * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
+   * @private
    */
-  protected extractGeopackageData(
-    layerConfig: AbstractBaseLayerEntryConfig,
+  #extractGeopackageData(
+    layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): Promise<[LayerData[], SldsInterface]> {
@@ -92,6 +253,7 @@ export class GeoPackage extends AbstractGeoViewVector {
       const layersInfo: LayerData[] = [];
       const styleSlds: SldsInterface = {};
 
+      // TODO: Refactor - Rewrite the xhr here to use utilities.fetch instead. XMLHttpRequest shouldn't be used anymore.
       const xhr = new XMLHttpRequest();
       xhr.responseType = 'arraybuffer';
 
@@ -186,7 +348,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           };
           xhr.send();
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('initSqlJs in extractGeopackageData in GeoPackage', error);
         });
@@ -198,10 +360,10 @@ export class GeoPackage extends AbstractGeoViewVector {
   /**
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {VectorLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {string | number | Uint8Array} sld The SLD style associated with the layer
    */
-  protected static processGeopackageStyle(layerConfig: AbstractBaseLayerEntryConfig, sld: string | number | Uint8Array): void {
+  protected static processGeopackageStyle(layerConfig: VectorLayerEntryConfig, sld: string | number | Uint8Array): void {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
     // eslint-disable-next-line no-param-reassign
@@ -353,143 +515,6 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 
   /**
-   * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
-   *
-   * @param {AbstractLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
-   *
-   * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
-   */
-  protected processOneGeopackageLayer(
-    layerConfig: AbstractBaseLayerEntryConfig,
-    layerInfo: LayerData,
-    sld?: SldsInterface
-  ): Promise<BaseLayer | undefined> {
-    // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
-    this.getMapViewer().layer.registerLayerConfigInit(layerConfig);
-
-    const { name, source } = layerInfo;
-
-    // Extract layer styles if they exist
-    if (sld && sld[name]) {
-      GeoPackage.processGeopackageStyle(layerConfig, sld[name]);
-    }
-
-    if (layerInfo.properties) {
-      const { properties } = layerInfo;
-      GeoPackage.#processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as VectorLayerEntryConfig);
-    }
-
-    const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, source);
-
-    // Set the layer status to processed
-    layerConfig.setLayerStatusProcessed();
-
-    return Promise.resolve(vectorLayer);
-  }
-
-  /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
-   * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
-   */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer> {
-    // TODO: Refactor - This function implementation needs revision, because it doesn't return a single 'BaseLayer', it can
-    // TO.DOCONT: create more than one layer which seems to differ from the other layer classes.
-
-    // Prepare a promise
-    const promisedLayers = new Promise<BaseLayer>((resolve, reject) => {
-      this.extractGeopackageData(layerConfig)
-        .then(async ([layers, slds]) => {
-          if (layers.length === 1) {
-            this.processOneGeopackageLayer(layerConfig, layers[0], slds)
-              .then((baseLayer) => {
-                if (baseLayer) {
-                  // Set the layer status to processed
-                  layerConfig.setLayerStatusProcessed();
-
-                  if (layerGroup) layerGroup.getLayers().push(baseLayer);
-                  resolve(layerGroup || baseLayer);
-                } else {
-                  // Add a layer load error
-                  this.addLayerLoadError(layerConfig, `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`);
-                  reject();
-                }
-              })
-              .catch((error) => {
-                // Log
-                logger.logPromiseFailed('processOneGeopackageLayer (1) in processOneLayerEntry in GeoPackage', error);
-                reject();
-              });
-          } else {
-            // eslint-disable-next-line no-param-reassign
-            layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
-            // eslint-disable-next-line no-param-reassign
-            (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
-            const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
-
-            // For each layer
-            const promises: Promise<BaseLayer>[] = [];
-            for (let i = 0; i < layers.length; i++) {
-              promises.push(
-                new Promise<BaseLayer>((resolve2, reject2) => {
-                  // "Clone" the config, patch until that layer type logic is rebuilt
-                  const newLayerEntryConfig = layerConfig.clone() as AbstractBaseLayerEntryConfig;
-                  newLayerEntryConfig.layerId = layers[i].name;
-                  newLayerEntryConfig.layerName = layers[i].name;
-                  newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-                  newLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
-
-                  this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds)
-                    .then((baseLayer) => {
-                      if (baseLayer) {
-                        (layerConfig as unknown as GroupLayerEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
-                        newLayerGroup.getLayers().push(baseLayer);
-
-                        // Set the layer status to processed
-                        layerConfig.setLayerStatusProcessed();
-
-                        resolve2(baseLayer);
-                      } else {
-                        // Add a layer load error
-                        this.addLayerLoadError(layerConfig, `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`);
-                        reject2();
-                      }
-                    })
-                    .catch((error) => {
-                      // Log
-                      logger.logPromiseFailed('processOneGeopackageLayer (2) in processOneLayerEntry in GeoPackage', error);
-
-                      // Set the layer status to error
-                      layerConfig.setLayerStatusError();
-                      reject2();
-                    });
-                })
-              );
-            }
-
-            // Wait for all layer to be resolved
-            await Promise.all(promises);
-
-            // Resolve the OpenLayer layer
-            resolve(newLayerGroup);
-          }
-        })
-        .catch((error) => {
-          // Log
-          logger.logPromiseFailed('extractGeopackageData in processOneLayerEntry in GeoPackage', error);
-
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
-          reject();
-        });
-    });
-
-    return promisedLayers;
-  }
-
-  /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
@@ -565,9 +590,53 @@ export class GeoPackage extends AbstractGeoViewVector {
         envelopeSize = 64;
         break;
       default:
-        throw new Error('Invalid geometry envelope size flag in GeoPackage');
+        throw new NotSupportedError('Invalid geometry envelope size flag in GeoPackage');
     }
     return gpkgBinGeom.subarray(envelopeSize + 8);
+  }
+
+  /**
+   * Creates a configuration object for a Geopackage Feature layer.
+   * This function constructs a `TypeGeoPackageLayerConfig` object that describes an Geopackage Feature layer
+   * and its associated entry configurations based on the provided parameters.
+   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the GeoView layer.
+   * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
+   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @returns {TypeGeoPackageLayerConfig} The constructed configuration object for the Geopackage Feature layer.
+   */
+  static createGeopackageLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware: boolean,
+    layerEntries: TypeJsonArray
+  ): TypeGeoPackageLayerConfig {
+    const geoviewLayerConfig: TypeGeoPackageLayerConfig = {
+      geoviewLayerId,
+      geoviewLayerName,
+      // metadataAccessPath, // Wasn't initialized, originally, so not initializing it now
+      geoviewLayerType: CONST_LAYER_TYPES.GEOPACKAGE,
+      isTimeAware,
+      listOfLayerEntryConfig: [],
+    };
+    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      const layerEntryConfig = new GeoPackageLayerEntryConfig({
+        geoviewLayerConfig,
+        schemaTag: CONST_LAYER_TYPES.GEOPACKAGE,
+        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
+        layerId: layerEntry.id as string,
+        source: {
+          format: 'GeoPackage',
+          dataAccessPath: metadataAccessPath,
+        },
+      } as GeoPackageLayerEntryConfig);
+      return layerEntryConfig;
+    });
+
+    // Return it
+    return geoviewLayerConfig;
   }
 }
 

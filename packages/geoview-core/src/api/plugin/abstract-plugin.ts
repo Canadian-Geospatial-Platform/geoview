@@ -8,7 +8,7 @@ import { TypeWindow } from '@/core/types/global-types';
 import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 
-/** ******************************************************************************************************************************
+/**
  * interface used by all plugins to define their options.
  */
 export type TypePluginOptions = {
@@ -16,7 +16,7 @@ export type TypePluginOptions = {
   viewer?: MapViewer;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Plugin abstract base class.
  */
 export abstract class AbstractPlugin {

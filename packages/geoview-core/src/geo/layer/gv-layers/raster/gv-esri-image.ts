@@ -2,11 +2,12 @@ import { ImageArcGISRest } from 'ol/source';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
 
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
+  CONST_LAYER_TYPES,
   TypeIconSymbolVectorConfig,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
@@ -17,6 +18,9 @@ import { validateExtent } from '@/geo/utils/utilities';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { Projection } from '@/geo/utils/projection';
+import { Fetch } from '@/core/utils/fetch-helper';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 
 /**
  * Manages an Esri Image layer.
@@ -82,15 +86,13 @@ export class GVEsriImage extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
     try {
       if (!layerConfig) return null;
-      const legendUrl = `${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`;
-      const response = await fetch(legendUrl);
-      const legendJson: TypeEsriImageLayerLegend = await response.json();
-      let legendInfo;
+      const legendJson = await Fetch.fetchJsonAsObject(`${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`);
+      let legendInfo: TypeJsonArray | undefined;
       if (legendJson.layers && legendJson.layers.length === 1) {
-        legendInfo = legendJson.layers[0].legend;
+        legendInfo = legendJson.layers[0].legend as TypeJsonArray;
       } else if (legendJson.layers.length) {
-        const layerInfo = legendJson.layers.find((layer) => layer.layerId === layerConfig.layerId);
-        if (layerInfo) legendInfo = layerInfo.legend;
+        const layerInfo = (legendJson.layers as TypeJsonArray).find((layer) => layer.layerId === layerConfig.layerId);
+        if (layerInfo) legendInfo = layerInfo.legend as TypeJsonArray;
       }
       if (!legendInfo) {
         const legend: TypeLegend = {
@@ -103,9 +105,9 @@ export class GVEsriImage extends AbstractGVRaster {
       const uniqueValueStyleInfo: TypeLayerStyleConfigInfo[] = [];
       legendInfo.forEach((info) => {
         const styleInfo: TypeLayerStyleConfigInfo = {
-          label: info.label,
+          label: info.label as string,
           visible: layerConfig.initialSettings.states?.visible || true,
-          values: info.label.split(','),
+          values: (info.label as string).split(','),
           settings: {
             type: 'iconSymbol',
             mimeType: info.contentType,
@@ -133,7 +135,7 @@ export class GVEsriImage extends AbstractGVRaster {
       };
 
       return legend;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`Get Legend for ${layerConfig.layerPath} error`, error);
       return null;
     }
@@ -151,7 +153,7 @@ export class GVEsriImage extends AbstractGVRaster {
   /**
    * Overrides when the layer gets in loaded status.
    */
-  override onLoaded(): void {
+  protected override onLoaded(): void {
     // Call parent
     super.onLoaded();
 
@@ -203,23 +205,26 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides the way to get the bounds for this layer type.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  override onGetBounds(): Extent | undefined {
-    // Get the metadata extent
-    const metadataExtent = this.getMetadataExtent();
+  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
+    // Get the metadata projection
+    const metadataProjection = this.getMetadataProjection();
 
-    // If found
-    let layerBounds;
-    if (metadataExtent) {
-      // Get the metadata projection
-      const metadataProjection = this.getMetadataProjection()?.getCode();
-      layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
-      layerBounds = validateExtent(layerBounds, this.getMapViewer().getProjection().getCode());
+    // Get the metadata extent
+    let metadataExtent = this.getMetadataExtent();
+
+    // If both found
+    if (metadataExtent && metadataProjection) {
+      // Transform extent to given projection
+      metadataExtent = Projection.transformExtentFromProj(metadataExtent, metadataProjection, projection, stops);
+      metadataExtent = validateExtent(metadataExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds
-    return layerBounds;
+    return metadataExtent;
   }
 }
 

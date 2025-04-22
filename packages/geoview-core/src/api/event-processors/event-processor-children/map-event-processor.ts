@@ -25,12 +25,12 @@ import {
   TypeLayerEntryConfig,
   TypeMapConfig,
   TypeMapFeaturesInstance,
+  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
 import { isPointInExtent } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -58,7 +58,7 @@ import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
@@ -105,13 +105,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     map.addControl(scaleBarMetric);
     map.addControl(scaleBarImperial);
 
+    // Get the projection
+    const mapProjection = Projection.getProjectionFromString(`EPSG:${store.getState().mapState.currentProjection}`);
+
     // add map overlays
     // create overlay for north pole icon
     const northPoleId = `${mapId}-northpole`;
-    const projectionPosition = Projection.transformFromLonLat(
-      [NORTH_POLE_POSITION[1], NORTH_POLE_POSITION[0]],
-      `EPSG:${store.getState().mapState.currentProjection}`
-    );
+    const projectionPosition = Projection.transformFromLonLat([NORTH_POLE_POSITION[1], NORTH_POLE_POSITION[0]], mapProjection);
 
     const northPoleMarker = new Overlay({
       id: northPoleId,
@@ -190,7 +190,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),
       // TO.DOCONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
       await whenThisThen(() => api && api.hasMapViewer(mapId) && api.getMapViewer(mapId).plugins);
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError(`Couldn't retrieve the plugins instance on Map Viewer`, error);
     }
@@ -211,7 +211,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           document.getElementById(`${mapId}-scaleControlBarMetric`)?.querySelector('.ol-scale-text') &&
           document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text')
       );
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError(`Couldn't retrieve the scale information from the dom tree`, error);
       // TODO: Check - Maybe we want to actually throw the exception here? Logging only for now until couple maps get tested.
@@ -851,12 +851,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Set basemap will use the current display language and projection and recreate the basemap
     const language = AppEventProcessor.getDisplayLanguage(mapId);
     const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
+
+    // Create the core basemap
     const basemap = await this.getMapViewer(mapId).basemap.createCoreBasemap(basemapOptions, projection, language);
 
-    if (basemap) {
-      this.getMapViewer(mapId).basemap.setBasemap(basemap);
-      this.setCurrentBasemapOptions(mapId, basemapOptions);
-    }
+    // Set the basemap and basemap options
+    this.getMapViewer(mapId).basemap.setBasemap(basemap);
+    this.setCurrentBasemapOptions(mapId, basemapOptions);
   }
 
   static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {
@@ -916,7 +917,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     // Invalid extent
-    throw new GeoViewError(mapId, `Couldn't zoom to extent, invalid extent: ${extent}`);
+    throw new InvalidExtentError(extent);
   }
 
   static async zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void> {
@@ -930,7 +931,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // GV There were issues with fromLonLat in rare cases in LCC projections, transformExtentFromProj seems to solve them.
       // GV fromLonLat and transformExtentFromProj give differing results in many cases, fromLonLat had issues with the first
       // GV three results from a geolocator search for "vancouver river"
-      const convertedExtent = Projection.transformExtentFromProj(bbox, Projection.PROJECTION_NAMES.LNGLAT, projectionConfig);
+      const convertedExtent = Projection.transformExtentFromProj(bbox, Projection.getProjectionLngLat(), projectionConfig);
 
       // Highlight
       this.getMapViewerLayerAPI(mapId).featureHighlight.highlightGeolocatorBBox(convertedExtent);
@@ -993,7 +994,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // If extent is in config, use it
     if (homeView!.extent) {
       const lnglatExtent = homeView!.extent as Extent;
-      extent = Projection.transformExtentFromProj(lnglatExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
+      extent = Projection.transformExtentFromProj(
+        lnglatExtent,
+        Projection.getProjectionLngLat(),
+        Projection.getProjectionFromString(`EPSG:${currProjection}`)
+      );
       options.padding = [0, 0, 0, 0];
     }
 
@@ -1002,7 +1007,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // If extent is not valid, take the default one for the current projection
     if (extent.length !== 4 || extent.includes(Infinity))
-      extent = Projection.transformExtentFromProj(CV_MAP_EXTENTS[currProjection], `EPSG:4326`, `EPSG:${currProjection}`);
+      extent = Projection.transformExtentFromProj(
+        CV_MAP_EXTENTS[currProjection],
+        Projection.getProjectionLngLat(),
+        Projection.getProjectionFromString(`EPSG:${currProjection}`)
+      );
     return this.zoomToExtent(mapId, extent, options);
   }
 
@@ -1048,7 +1057,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Change view to go to proper zoom centered in the middle of layer extent
     // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
     // Check if the map center is already in the layer extent and if so, do not center
-    const layerExtent = (geoviewLayer! as AbstractGVLayer).getBounds();
+    const layerExtent = (geoviewLayer! as AbstractGVLayer).getBounds(this.getMapViewer(mapId).getProjection(), MapViewer.DEFAULT_STOPS);
     const centerExtent =
       layerExtent && layerMinZoom > mapZoom! && !isPointInExtent(view.getCenter()!, layerExtent)
         ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]

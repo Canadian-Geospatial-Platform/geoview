@@ -44,10 +44,12 @@ export default function BasemapSelect(): JSX.Element {
    */
   const handleChoice = (basemapChoice: string): void => {
     setSelectedBasemap(basemapChoice);
-    createBasemapFromOptions(basemapChoice === 'default' ? configBasemapOptions : basemapChoiceOptions[basemapChoice]).catch((error) => {
-      // Log
-      logger.logPromiseFailed('setBaseMap in basemaps.ts', error);
-    });
+    createBasemapFromOptions(basemapChoice === 'default' ? configBasemapOptions : basemapChoiceOptions[basemapChoice]).catch(
+      (error: unknown) => {
+        // Log
+        logger.logPromiseFailed('setBaseMap in basemaps.ts', error);
+      }
+    );
   };
 
   /**

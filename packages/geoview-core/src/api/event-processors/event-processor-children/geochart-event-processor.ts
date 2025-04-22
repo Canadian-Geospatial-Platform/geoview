@@ -42,7 +42,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
         logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - geochartState.layerDataArray', cur);
 
         // Also propagate in the batched array
-        GeochartEventProcessor.#propagateFeatureInfoToStoreBatch(store.getState().mapId, cur).catch((error) => {
+        GeochartEventProcessor.#propagateFeatureInfoToStoreBatch(store.getState().mapId, cur).catch((error: unknown) => {
           // Log
           logger.logPromiseFailed(
             'propagateFeatureInfoToStoreBatch in layerDataArrayUpdateBatch subscribe in geochart-event-processor',

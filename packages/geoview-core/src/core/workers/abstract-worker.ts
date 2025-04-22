@@ -126,7 +126,7 @@ export abstract class AbstractWorker<T> {
       this.#messageHandlers = [];
       this.worker.terminate();
       logger.logTraceWorker('Done terminating worker:', this.name);
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('Error terminating worker:', this.name, error);
     }
   }

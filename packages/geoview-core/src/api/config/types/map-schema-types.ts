@@ -18,9 +18,9 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the map feature instance according to what is specified in the schema.
  */
 export type TypeMapFeaturesInstance = {
@@ -335,6 +335,21 @@ export { EsriFeatureLayerConfig } from '@/api/config/types/classes/geoview-confi
 export { WmsLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/wms-config';
 export { WfsLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/wfs-config';
 
+/** Definition of the keys used to create the constants of the GeoView layer */
+type LayerTypesKey =
+  | 'CSV'
+  | 'ESRI_DYNAMIC'
+  | 'ESRI_FEATURE'
+  | 'ESRI_IMAGE'
+  | 'IMAGE_STATIC'
+  | 'GEOJSON'
+  | 'GEOPACKAGE'
+  | 'XYZ_TILES'
+  | 'VECTOR_TILES'
+  | 'OGC_FEATURE'
+  | 'WFS'
+  | 'WMS';
+
 /** Definition of the geoview layer types accepted by the viewer. */
 export type TypeGeoviewLayerType =
   | 'CSV'
@@ -349,6 +364,59 @@ export type TypeGeoviewLayerType =
   | 'ogcWms'
   | 'vectorTiles'
   | 'xyzTiles';
+
+/**
+ * This type is created to only be used when validating the configuration schema types.
+ * Indeed, GeoCore is not an official Abstract Geoview Layer, but it can be used in schema types.
+ */
+export type TypeGeoviewLayerTypeWithGeoCore = TypeGeoviewLayerType | typeof CONST_LAYER_ENTRY_TYPES.GEOCORE;
+
+/**
+ * Definition of the GeoView layer constants
+ */
+export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
+  CSV: 'CSV',
+  ESRI_DYNAMIC: 'esriDynamic',
+  ESRI_FEATURE: 'esriFeature',
+  ESRI_IMAGE: 'esriImage',
+  IMAGE_STATIC: 'imageStatic',
+  GEOJSON: 'GeoJSON',
+  GEOPACKAGE: 'GeoPackage',
+  XYZ_TILES: 'xyzTiles',
+  VECTOR_TILES: 'vectorTiles',
+  OGC_FEATURE: 'ogcFeature',
+  WFS: 'ogcWfs',
+  WMS: 'ogcWms',
+};
+
+/**
+ * Definition of the sub schema to use for each type of Geoview layer
+ */
+export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> = {
+  CSV: 'TypeVectorLayerEntryConfig',
+  imageStatic: 'TypeImageStaticLayerEntryConfig',
+  esriDynamic: 'TypeEsriDynamicLayerEntryConfig',
+  esriFeature: 'TypeVectorLayerEntryConfig',
+  esriImage: 'TypeEsriImageLayerEntryConfig',
+  GeoJSON: 'TypeVectorLayerEntryConfig',
+  GeoPackage: 'TypeVectorLayerEntryConfig',
+  xyzTiles: 'TypeTileLayerEntryConfig',
+  vectorTiles: 'TypeTileLayerEntryConfig',
+  ogcFeature: 'TypeVectorLayerEntryConfig',
+  ogcWfs: 'TypeVectorLayerEntryConfig',
+  ogcWms: 'TypeOgcWmsLayerEntryConfig',
+};
+
+export const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
+  CONST_LAYER_TYPES.CSV,
+  CONST_LAYER_TYPES.GEOJSON,
+  CONST_LAYER_TYPES.ESRI_DYNAMIC,
+  CONST_LAYER_TYPES.ESRI_FEATURE,
+  CONST_LAYER_TYPES.ESRI_IMAGE,
+  CONST_LAYER_TYPES.OGC_FEATURE,
+  CONST_LAYER_TYPES.WFS,
+  CONST_LAYER_TYPES.GEOPACKAGE,
+];
 
 /** Initial settings to apply to the GeoView layer at creation time. */
 export type TypeLayerInitialSettings = {
@@ -964,7 +1032,7 @@ export const convertLayerTypeToEntry = (layerType: TypeGeoviewLayerType): TypeLa
       return CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
     default:
       // Throw unsupported error
-      throw new Error(`Unsupported layer type ${layerType} to convert to layer entry`);
+      throw new NotSupportedError(`Unsupported layer type ${layerType} to convert to layer entry`);
   }
 };
 

@@ -15,7 +15,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import { PointMarkers } from './point-markers';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-/** *****************************************************************************************************************************
+/**
  * A class to handle highlighting of features
  *
  * @exports

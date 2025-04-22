@@ -1,7 +1,7 @@
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeGeoviewLayerConfig,
+  TypeGeoviewLayerType,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeLayerStatus,
@@ -149,6 +149,23 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Returns the sibling layer configurations of the current layer.
+   * If the current layer has a parent, this method retrieves all layer entry
+   * configs under the same parent. It can optionally exclude layers of type 'group'.
+   * @param {boolean} includeGroups - Whether to include entries of type 'group' in the result. False by default.
+   * @returns {ConfigBaseClass[]} An array of sibling layer configurations. Returns an empty array if there is no parent.
+   */
+  getSiblings(includeGroups: boolean = false): ConfigBaseClass[] {
+    // If there's a parent
+    if (this.parentLayerConfig) {
+      return this.parentLayerConfig.listOfLayerEntryConfig.filter((config) => includeGroups || config.entryType !== 'group');
+    }
+
+    // No siblings
+    return [];
+  }
+
+  /**
    * Sets the layer status to registered.
    */
   setLayerStatusRegistered(): void {
@@ -236,6 +253,56 @@ export abstract class ConfigBaseClass {
     //     this.parentLayerConfig.setLayerStatusLoaded();
     //   }
     // }
+  }
+
+  /**
+   * Updates the status of all parents layers based on the status of their sibling layers.
+   * This method checks the statuses of sibling layers (layers sharing the same parent).
+   * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
+   * - If at least one sibling is in a 'loaded' state, it sets the parent layer status to 'loaded'.
+   * - If neither condition is met, the parent status remains unchanged.
+   */
+  updateLayerStatusParent(): void {
+    // Redirect
+    ConfigBaseClass.#updateLayerStatusParentRec(this);
+  }
+
+  /**
+   * Recursively updates the status of the parent layer based on the status of its sibling layers.
+   * This method checks the statuses of sibling layers (layers sharing the same parent).
+   * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
+   * - If at least one sibling is in a 'loaded' state, it sets the parent layer status to 'loaded'.
+   * - If neither condition is met, the parent status remains unchanged.
+   */
+  static #updateLayerStatusParentRec(currentConfig: ConfigBaseClass): void {
+    // If there's no parent
+    if (!currentConfig.parentLayerConfig) return;
+
+    // Get all siblings of the layer
+    const siblings = currentConfig.getSiblings(true);
+
+    // Get all siblings which are in error
+    const siblingsInError = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'error');
+
+    // If all siblings are in fact in error
+    if (siblings.length === siblingsInError.length) {
+      // Set the parent layer status as error
+      currentConfig.parentLayerConfig.setLayerStatusError();
+      // Continue with the parent
+      ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
+      return;
+    }
+
+    // Get all siblings which are in loaded
+    const siblingsInLoaded = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'loaded');
+
+    // If at least one layer is loaded
+    if (siblingsInLoaded.length > 0) {
+      // Set the parent layer status as loaded
+      currentConfig.parentLayerConfig.setLayerStatusLoaded();
+      // Continue with the parent
+      ConfigBaseClass.#updateLayerStatusParentRec(currentConfig.parentLayerConfig);
+    }
   }
 
   /**

@@ -175,7 +175,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
             this.onLayerSetUpdatedProcess(layerPath);
           }
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('legendPromise in #checkQueryLegend in LegendsLayerSet', error);
         });
