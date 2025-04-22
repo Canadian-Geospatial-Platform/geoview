@@ -4,9 +4,6 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 import { bbox } from 'ol/loadingstrategy';
-
-// import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
-
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
@@ -19,13 +16,13 @@ import {
   TypeSourceWfsInitialConfig,
 } from '@/api/config/types/map-schema-types';
 
-import { xmlToJson, findPropertyNameByRegex, fetchXMLToJson } from '@/core/utils/utilities';
+import { findPropertyNameByRegex } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { GeoViewLayerError } from '@/core/exceptions/layer-exceptions';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
+import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -65,7 +62,7 @@ export class WFS extends AbstractGeoViewVector {
     const queryUrl = url!.indexOf('?') > -1 ? url.substring(0, url!.indexOf('?')) : url;
 
     // Query XML to Json
-    return fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
+    return Fetch.fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
   }
 
   /**
@@ -85,8 +82,8 @@ export class WFS extends AbstractGeoViewVector {
       this.metadata = capabilitiesObject;
       this.#version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
     } else {
-      // Throw WFS_Capabilities was empty
-      throw new GeoViewLayerError(this.mapId, this.geoviewLayerId, 'WFS_Capabilities was empty');
+      // Throw error
+      throw new LayerNoCapabilitiesError(this.mapId, this.geoviewLayerId);
     }
   }
 
@@ -110,7 +107,7 @@ export class WFS extends AbstractGeoViewVector {
 
       if (!foundMetadata) {
         // Add a layer load error
-        this.addLayerLoadError(layerConfig, `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
         return;
       }
 
@@ -135,13 +132,10 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override async onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
-
+  protected override async onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
     let queryUrl = layerConfig.source!.dataAccessPath;
 
     // check if url contains metadata parameters for the getCapabilities request and reformat the urls
@@ -166,16 +160,14 @@ export class WFS extends AbstractGeoViewVector {
     }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerConfig.layerId}`;
 
     if (describeFeatureUrl && outputFormat === 'application/json') {
-      const layerMetadata = (await (await fetch(describeFeatureUrl)).json()) as TypeJsonObject;
+      const layerMetadata = await Fetch.fetchJson(describeFeatureUrl);
       if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
         this.setLayerMetadata(layerConfig.layerPath, layerMetadata.featureTypes[0].properties);
         WFS.#processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
       }
     } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
-      const layerMetadata = (await (await fetch(describeFeatureUrl)).text()) as string;
-      // need to pass a xmldom to xmlToJson to convert xsd schema to json
-      const xmlDOMDescribe = new DOMParser().parseFromString(layerMetadata, 'text/xml');
-      const xmlJsonDescribe = xmlToJson(xmlDOMDescribe);
+      // Fetch the XML and read the content as Json
+      const xmlJsonDescribe = await Fetch.fetchXMLToJson(describeFeatureUrl);
       const prefix = Object.keys(xmlJsonDescribe)[0].includes('xsd:') ? 'xsd:' : '';
       const xmlJsonSchema = xmlJsonDescribe[`${prefix}schema`];
       const xmlJsonDescribeElement =
@@ -266,7 +258,7 @@ export class WFS extends AbstractGeoViewVector {
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override createVectorSource(
-    layerConfig: AbstractBaseLayerEntryConfig,
+    layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
@@ -293,9 +285,8 @@ export class WFS extends AbstractGeoViewVector {
       version: this.#version,
     });
 
-    const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
-
-    return vectorSource;
+    // Call parent
+    return super.createVectorSource(layerConfig, sourceOptions, readOptions);
   }
 }
 

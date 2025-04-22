@@ -95,7 +95,8 @@
       }
     ],
     "require-await": 1, // Warning
-    "@typescript-eslint/await-thenable": "warn"
+    "@typescript-eslint/await-thenable": "warn",
+    "@typescript-eslint/prefer-promise-reject-errors": "error"
   },
   "overrides": [
     {

@@ -12,9 +12,8 @@ import {
   commonProcessLayerMetadata,
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview config section
@@ -87,26 +86,19 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
   /**
    * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof EsriDynamicLayerEntryConfig))
-      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+  protected override onProcessLayerMetadata(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriDynamicLayerEntryConfig> {
     return commonProcessLayerMetadata(this, layerConfig);
   }
 
   /**
    * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<ImageLayer<ImageArcGISRest>>} The created Open Layer object.
    */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
-    // Instance check
-    if (!(layerConfig instanceof EsriDynamicLayerEntryConfig))
-      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
-
+  protected override onProcessOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata?.copyrightText ? this.metadata?.copyrightText : '') as string];
     sourceOptions.url = layerConfig.source.dataAccessPath!;
@@ -137,7 +129,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
-    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
+    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });

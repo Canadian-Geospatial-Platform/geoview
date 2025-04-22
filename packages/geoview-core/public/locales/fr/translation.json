@@ -180,11 +180,11 @@
   "validation": {
     "layer": {
       "loadfailed": "Le chargement de la couche __param__ a échoué sur la carte",
-      "uuidNotFound": "L'identifiant de couche GeoCore __param__ n'existe pas sur le serveur",
       "notfound": "La sous couche __param__ de la couche __param__ n'existe pas sur le serveur",
       "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la couche __param__ sur la carte",
       "usedtwice": "Utilisation en double de l'identifiant de couche __param__ sur la carte",
-      "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul identifiant par couche"
+      "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul identifiant par couche",
+      "vectorFeaturesFailed": "Échec lors du chargement des enregistrements vectorielles pour la couche __param__"
     },
     "schema": {
       "notFound": "Une erreur de schéma a été trouvée, vérifiez la console pour voir ce qui ne va pas.",
@@ -264,7 +264,9 @@
       "noCSVGeometry": "Impossible de trouver des données géographiques dans la couche CSV __param__"
     },
     "geocore": {
-      "noLayer": "Aucune couche renvoyée par le service GeoCore"
+      "uuidNotFound": "L'identifiant de couche GeoCore __param__ n'existe pas sur le serveur",
+      "invalidResponse": "Réponse invalide retournée le service GeoCore pour UUID __param__",
+      "noLayer": "Aucune couche retournée par le service GeoCore pour UUID __param__"
     },
     "geolocator": {
       "noService": "Service de géolocalisation non disponible"

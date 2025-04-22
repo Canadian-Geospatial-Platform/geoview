@@ -1,5 +1,4 @@
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { logger } from '@/core/utils/logger';
 import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import {
   TypeStyleGeometry,
@@ -16,6 +15,7 @@ import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 /**
  * Returns the type of the specified field.
@@ -119,21 +119,12 @@ export async function esriQueryRecordsByUrl(
   // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this
   // TO.DO.CONT: one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
   // Query the data
-  try {
-    const response = await fetch(url);
-    const respJson = await response.json();
-    if (respJson.error) {
-      // Throw
-      throw new Error(`Error code = ${respJson.error.code} ${respJson.error.message}` || '');
-    }
+  const respJson = await Fetch.fetchJson(url);
 
-    // Return the array of TypeFeatureInfoEntryPartial or the raw response features array
-    return parseFeatureInfoEntries ? esriParseFeatureInfoEntries(respJson.features, geometryType) : respJson.features;
-  } catch (error) {
-    // Log
-    logger.logError('There is a problem with this query: ', url, error);
-    throw error;
-  }
+  // Return the array of TypeFeatureInfoEntryPartial or the raw response features array
+  return parseFeatureInfoEntries
+    ? esriParseFeatureInfoEntries(respJson.features as TypeJsonObject[], geometryType)
+    : (respJson.features as unknown as TypeFeatureInfoEntryPartial[]);
 }
 
 /**
@@ -177,24 +168,13 @@ export function esriQueryRecordsByUrlObjectIds(
  */
 export async function esriQueryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
   // Query the data
-  try {
-    const response = await fetch(url);
-    const respJson = await response.json();
-    if (respJson.error) {
-      // Throw
-      throw new Error(`Error code = ${respJson.error.code} ${respJson.error.message}` || '');
-    }
+  const respJson = await Fetch.fetchJson(url);
 
-    // If any related record groups found
-    if (respJson.relatedRecordGroups.length > 0)
-      // Return the array of TypeFeatureInfoEntryPartial
-      return esriParseFeatureInfoEntries(respJson.relatedRecordGroups[recordGroupIndex].relatedRecords);
-    return Promise.resolve([]);
-  } catch (error) {
-    // Log
-    logger.logError('There is a problem with this query: ', url, error);
-    throw error;
-  }
+  // If any related record groups found
+  if ((respJson.relatedRecordGroups.length as number) > 0)
+    // Return the array of TypeFeatureInfoEntryPartial
+    return esriParseFeatureInfoEntries(respJson.relatedRecordGroups[recordGroupIndex].relatedRecords as TypeJsonObject[]);
+  return Promise.resolve([]);
 }
 
 /**

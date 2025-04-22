@@ -6,7 +6,6 @@ import Feature from 'ol/Feature';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
@@ -15,7 +14,7 @@ import {
   commonProcessLayerMetadata,
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { LayerEntryConfigLayerIdNotFeatureLayerError } from '@/core/exceptions/layer-entry-config-exceptions';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -71,7 +70,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
     if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
       // Add a layer load error
-      this.addLayerLoadError(layerConfig, `LayerId ${layerConfig.layerPath} of map ${this.mapId} is not a feature layer`);
+      this.addLayerLoadError(new LayerEntryConfigLayerIdNotFeatureLayerError(this.mapId, layerConfig), layerConfig);
       return true;
     }
     return false;
@@ -79,33 +78,25 @@ export class EsriFeature extends AbstractGeoViewVector {
 
   /**
    * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<EsriFeatureLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof EsriFeatureLayerEntryConfig))
-      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+  protected override onProcessLayerMetadata(layerConfig: EsriFeatureLayerEntryConfig): Promise<EsriFeatureLayerEntryConfig> {
     return commonProcessLayerMetadata(this, layerConfig);
   }
 
   /**
-   * Create a source configuration for the vector layer.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
-   * @param {SourceOptions} sourceOptions The source options (default: {}).
-   * @param {ReadOptions} readOptions The read options (default: {}).
-   *
+   * Creates a source configuration for the vector layer.
+   * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @param {SourceOptions} sourceOptions - The source options (default: {}).
+   * @param {ReadOptions} readOptions - The read options (default: {}).
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override createVectorSource(
-    layerConfig: AbstractBaseLayerEntryConfig,
+    layerConfig: EsriFeatureLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
-    // ? The line below uses var because a var declaration has a wider scope than a let declaration.
-    // eslint-disable-next-line no-var
-    var vectorSource: VectorSource<Feature>;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.url = layerConfig.source!.dataAccessPath!;
     // eslint-disable-next-line no-param-reassign
@@ -113,8 +104,8 @@ export class EsriFeature extends AbstractGeoViewVector {
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new EsriJSON();
 
-    vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
-    return vectorSource;
+    // Call parent
+    return super.createVectorSource(layerConfig, sourceOptions, readOptions);
   }
 }
 
@@ -122,9 +113,7 @@ export class EsriFeature extends AbstractGeoViewVector {
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriFeatureLayerConfig if the geoviewLayerType attribute
  * of the verifyIfLayer parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use
  * this function.
- *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriFeatureLayerConfig => {
@@ -135,10 +124,8 @@ export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig):
  * type guard function that redefines a TypeLayerEntryConfig as a EsriFeatureLayerEntryConfig if the geoviewLayerType
  * attribute of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_FEATURE. The type ascention applies only to the true
  * block of the if clause that use this function.
- *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention
  * is valid
- *
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsEsriFeature = (

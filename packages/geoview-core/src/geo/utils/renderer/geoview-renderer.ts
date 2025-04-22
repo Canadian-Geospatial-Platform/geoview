@@ -565,7 +565,7 @@ function featureIsNotVisible(feature: Feature, filterEquation: FilterNodeArrayTy
       operatorOnTop3 = operatorAt(-2, operatorStack);
     operatorStack.pop();
   } catch (error) {
-    throw new Error(`Invalid vector layer filter (${(error as { message: string }).message}).`);
+    throw new Error(`Invalid vector layer filter (${error}.`);
   }
   if (dataStack.length !== 1 || dataStack[0].nodeType !== NodeType.variable)
     throw new Error(`Invalid vector layer filter (invalid structure).`);

@@ -266,9 +266,11 @@ export class GeometryApi {
 
     const featureId = optionalFeatureId || generateId();
 
+    const projectionConv = Projection.getProjectionFromString(`EPSG:${options?.projection || 4326}`);
+
     const projectedCoordinates = Projection.transform(
       coordinate,
-      `EPSG:${options?.projection || 4326}`,
+      projectionConv,
       Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
     );
 

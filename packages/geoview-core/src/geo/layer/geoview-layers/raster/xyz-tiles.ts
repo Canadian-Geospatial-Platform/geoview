@@ -10,8 +10,11 @@ import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConf
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import {
+  LayerEntryConfigInvalidLayerEntryConfigError,
+  LayerEntryConfigLayerIdNotFoundError,
+} from '@/core/exceptions/layer-entry-config-exceptions';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -59,7 +62,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
-        this.addLayerLoadError(layerConfig, `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
       }
       return;
     }
@@ -70,26 +73,21 @@ export class XYZTiles extends AbstractGeoViewRaster {
       const foundEntry = metadataLayerList.find((layerMetadata: TypeJsonObject) => layerMetadata.id.toString() === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
-        this.addLayerLoadError(layerConfig, `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
       }
       return;
     }
 
-    throw new GeoViewError(
-      this.mapId,
-      `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
-    );
+    // Throw an invalid layer entry config error
+    throw new LayerEntryConfigInvalidLayerEntryConfigError(this.mapId, layerConfig);
   }
 
   /**
    * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+   * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<TileLayer<XYZ>>} The GeoView raster layer that has been created.
    */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TileLayer<XYZ>> {
-    // Instance check
-    if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
-
+  protected override onProcessOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TileLayer<XYZ>> {
     const sourceOptions: SourceOptions = {
       url: layerConfig.source.dataAccessPath,
     };
@@ -122,7 +120,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as TileLayer<XYZ>;
-    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
+    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });
@@ -133,13 +131,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<XYZTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
-
+  protected override onProcessLayerMetadata(layerConfig: XYZTilesLayerEntryConfig): Promise<XYZTilesLayerEntryConfig> {
     // TODO Need to see why the metadata isn't handled properly for ESRI XYZ tiles.
     // GV Possibly caused by a difference between OGC and ESRI XYZ Tiles, but only have ESRI XYZ Tiles as example currently
     // GV Also, might be worth checking out OGCMapTile for this? https://openlayers.org/en/latest/examples/ogc-map-tiles-geographic.html

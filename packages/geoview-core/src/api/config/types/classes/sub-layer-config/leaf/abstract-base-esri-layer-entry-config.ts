@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { codedValueType, Extent, rangeDomainType, TypeFeatureInfoLayerConfig, TypeOutfields } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
@@ -12,6 +10,7 @@ import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { isvalidComparedToInternalSchema } from '@/api/config/utils';
 import { logger } from '@/core/utils/logger';
 import { DateMgt, TimeDimensionESRI } from '@/core/utils/date-mgt';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 // ========================
 // #region CLASS HEADER
@@ -41,25 +40,24 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
 
     try {
       // fetch layer metadata.
-      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
-      // if the data returned contains the error property, an error was detected.
-      if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
-      else {
-        // Save the raw metadata in the private property
-        this.setLayerMetadata(data);
-        // Parse the raw layer metadata and build the geoview configuration.
-        this.parseLayerMetadata();
+      const data = await Fetch.fetchJson(`${queryUrl}?f=json`);
 
-        if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
-          throw new GeoviewLayerConfigError(
-            `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`
-          );
-        }
-        return;
+      // Save the raw metadata in the private property
+      this.setLayerMetadata(data);
+      // Parse the raw layer metadata and build the geoview configuration.
+      this.parseLayerMetadata();
+
+      if (!isvalidComparedToInternalSchema(this.getSchemaPath(), this, true)) {
+        throw new GeoviewLayerConfigError(
+          `GeoView internal configuration ${this.getLayerPath()} is invalid compared to the internal schema specification.`
+        );
       }
+      return;
     } catch (error) {
       logger.logError('Error detected while reading Layer metadata.', error);
     }
+
+    // Set the error detectec flag
     this.setErrorDetectedFlag();
   }
 
@@ -94,7 +92,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
       metadataExtent = Projection.transformExtentFromObj(
         metadataExtent,
         layerMetadata.extent.spatialReference,
-        Projection.PROJECTION_NAMES.LNGLAT
+        Projection.getProjectionLngLat()
       );
       this.initialSettings.extent = validateExtentWhenDefined(metadataExtent);
     }

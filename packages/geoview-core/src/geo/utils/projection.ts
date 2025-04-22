@@ -2,10 +2,9 @@ import proj4 from 'proj4';
 import { Coordinate } from 'ol/coordinate';
 import { register } from 'ol/proj/proj4';
 import {
-  get as olGetProjection,
-  Projection as olProjection,
+  get as OLGetProjection,
+  Projection as OLProjection,
   getPointResolution,
-  ProjectionLike,
   transform as olTransform,
   transformExtent as olTransformExtent,
   fromLonLat,
@@ -16,6 +15,7 @@ import { Extent } from 'ol/extent';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { logger } from '@/core/utils/logger';
 import { TypeJsonObject } from '@/api/config/types/config-types';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 /**
  * Class used to handle functions for transforming projections
@@ -57,20 +57,19 @@ export abstract class Projection {
   /**
    * List of supported projections and their OpenLayers projection
    */
-  static PROJECTIONS: Record<string, olProjection> = {};
+  static PROJECTIONS: Record<string, OLProjection> = {};
 
   /**
    * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
    * original).
-   *
-   * @param {Extent} extent The extent to transform.
-   * @param {ProjectionLike} source Source projection-like.
-   * @param {ProjectionLike} destination Destination projection-like.
-   * @param {number} stops Optional number of stops per side used for the transform. The default value is 20.
+   * @param {Extent} extent - The extent to transform.
+   * @param {OLProjection} source - Source projection-like.
+   * @param {OLProjection} destination - Destination projection-like.
+   * @param {number} stops - Optional number of stops per side used for the transform. The default value is 25.
    *
    * @returns The densified extent transformed in the destination projection.
    */
-  static transformAndDensifyExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops = 25): Coordinate[] {
+  static transformAndDensifyExtent(extent: Extent, source: OLProjection, destination: OLProjection, stops: number = 25): Coordinate[] {
     const coordinates: number[][] = [];
     const width: number = extent[2] - extent[0];
     const height: number = extent[3] - extent[1];
@@ -86,17 +85,17 @@ export abstract class Projection {
    * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
    * original).
    *
-   * @param {Extent} extent The extent to transform.
-   * @param {TypeJsonObject | undefined} projection An object containing a wkid or wkt property.
-   * @param {ProjectionLike} destination Destination projection-like.
-   * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
+   * @param {Extent} extent - The extent to transform.
+   * @param {TypeJsonObject | undefined} projection - An object containing a wkid or wkt property.
+   * @param {OLProjection} destination - Destination projection-like.
+   * @param {number?} stops - Optional number of stops per side used for the transform. By default only the corners are used.
    *
    * @returns The new extent transformed in the destination projection.
    */
   static transformExtentFromObj(
     extent: Extent,
     projection: TypeJsonObject | undefined,
-    destination: ProjectionLike,
+    destination: OLProjection,
     stops?: number | undefined
   ): Extent {
     // Get the projection object
@@ -108,68 +107,80 @@ export abstract class Projection {
       return Projection.transformExtentFromProj(extent, projectionObj, destination, stops);
     }
 
-    // Invalid projection
-    throw new Error(`Invalid or unsupported projection: ${JSON.stringify(projection)}`);
+    // Failed
+    throw new Error(`Invalid projection object '${projection}`);
   }
 
   /**
    * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
    * original).
    *
-   * @param {Extent} extent The extent to transform.
-   * @param {number} wkid An EPSG id number.
-   * @param {ProjectionLike} destination Destination projection-like.
-   * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
+   * @param {Extent} extent - The extent to transform.
+   * @param {number} wkid - An EPSG id number.
+   * @param {OLProjection} destination - Destination projection-like.
+   * @param {number?} stops - Optional number of stops per side used for the transform. By default only the corners are used.
    *
    * @returns The new extent transformed in the destination projection.
    */
-  static transformExtentFromWKID(extent: Extent, wkid: number, destination: ProjectionLike, stops?: number | undefined): Extent {
+  static transformExtentFromWKID(extent: Extent, wkid: number, destination: OLProjection, stops?: number | undefined): Extent {
+    // The projection
+    const proj = Projection.getProjectionFromString(`EPSG:${wkid}`);
+
     // Redirect
-    return Projection.transformExtentFromProj(extent, `EPSG:${wkid}`, destination, stops);
+    return Projection.transformExtentFromProj(extent, proj, destination, stops);
   }
 
   /**
    * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
    * original).
    *
-   * @param {Extent} extent The extent to transform.
-   * @param {string} customWKT A custom WKT projection.
-   * @param {ProjectionLike} destination Destination projection-like.
-   * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
+   * @param {Extent} extent - The extent to transform.
+   * @param {string} customWKT - A custom WKT projection.
+   * @param {OLProjection} destination - Destination projection-like.
+   * @param {number?} stops - Optional number of stops per side used for the transform. By default only the corners are used.
    *
    * @returns The new extent transformed in the destination projection.
    */
-  static transformExtentFromWKT(extent: Extent, customWKT: string, destination: ProjectionLike, stops?: number | undefined): Extent {
+  static transformExtentFromWKT(extent: Extent, customWKT: string, destination: OLProjection, stops?: number | undefined): Extent {
+    // Get the projection from WKT
+    const sourceProjection = Projection.getProjectionFromWKT(customWKT);
+
     // Redirect
-    return Projection.transformExtentFromProj(extent, Projection.getProjectionFromWKT(customWKT), destination, stops);
+    return Projection.transformExtentFromProj(extent, sourceProjection, destination, stops);
   }
 
   /**
    * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
    * original).
    *
-   * @param {Extent} extent The extent to transform.
-   * @param {ProjectionLike} source Source projection-like.
-   * @param {ProjectionLike} destination Destination projection-like.
-   * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
+   * @param {Extent} extent - The extent to transform.
+   * @param {OLProjection} source - Source projection-like.
+   * @param {OLProjection} destination - Destination projection-like.
+   * @param {number?} stops - Optional number of stops per side used for the transform. By default only the corners are used.
    *
    * @returns The new extent transformed in the destination projection.
    */
-  static transformExtentFromProj(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent {
+  static transformExtentFromProj(extent: Extent, source: OLProjection, destination: OLProjection, stops?: number | undefined): Extent {
     // This is included for certain outliers.
     // TODO Refactor: invalid extents should be handled before this point, test and remove - 5a65ad7c-561a-466a-8375-8d876624df9d
     if (typeof extent[0] !== 'number')
       return olTransformExtent([-180, 90, 180, 90], Projection.PROJECTION_NAMES.LNGLAT, destination, stops);
-    // Project
-    return olTransformExtent(extent, source, destination, stops);
+
+    // If different projections
+    if (source.getCode() !== destination.getCode()) {
+      // Project
+      return olTransformExtent(extent, source, destination, stops);
+    }
+
+    // As-is
+    return extent;
   }
 
   /**
-   * Convert points from one projection to another using proj4
-   *
-   * @param {Coordinate[]} points array of passed in points to convert
-   * @param {string} fromProj projection to be converted from
-   * @param {string} toProj projection to be converted to
+   * Converts points from one projection to another using proj4
+   * @param {Coordinate[]} points - Array of passed in points to convert
+   * @param {string} fromProj - Projection to be converted from
+   * @param {string} toProj - Projection to be converted to
    */
   static transformPoints(points: Coordinate[], fromProj: string, toProj: string): Array<Array<number>> {
     // initialize empty array for the converted points
@@ -195,35 +206,32 @@ export abstract class Projection {
 
   /**
    * Wrapper around OpenLayers function to transforms a coordinate from one projection to another.
-   *
-   * @param {Coordinate} coordinate Longitude/latitude coordinate
-   * @param {ProjectionLike} inProjection Actual projection of the coordinate
-   * @param {ProjectionLike} outProjection Desired projection of the coordinate
-   * @return {Coordinate}  Coordinate as projected
+   * @param {Coordinate} coordinate - Longitude/latitude coordinate
+   * @param {OLProjection} inProjection - Actual projection of the coordinate
+   * @param {OLProjection} outProjection - Desired projection of the coordinate
+   * @return {Coordinate} Coordinate as projected
    */
-  static transform(coordinate: Coordinate, inProjection: ProjectionLike, outProjection: ProjectionLike): Coordinate {
+  static transform(coordinate: Coordinate, inProjection: OLProjection, outProjection: OLProjection): Coordinate {
     return olTransform(coordinate, inProjection, outProjection);
   }
 
   /**
    * Wrapper around OpenLayers function to transforms a coordinate from longitude/latitude.
-   *
-   * @param {Coordinate} coordinate Longitude/latitude coordinate
-   * @param {ProjectionLike} projection Projection to project the coordinate
-   * @return {Coordinate}  Coordinate as projected
+   * @param {Coordinate} coordinate - Longitude/latitude coordinate
+   * @param {OLProjection} projection - Projection to project the coordinate
+   * @return {Coordinate} Coordinate as projected
    */
-  static transformFromLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate {
+  static transformFromLonLat(coordinate: Coordinate, projection: OLProjection): Coordinate {
     return fromLonLat(coordinate, projection);
   }
 
   /**
    * Wrapper around OpenLayers function to transforms a coordinate to longitude/latitude.
-   *
-   * @param {Coordinate} coordinate Projected coordinate
-   * @param {ProjectionLike} projection Projection of the coordinate
-   * @return {Coordinate}  Coordinate as longitude and latitude, i.e. an array with longitude as 1st and latitude as 2nd element.
+   * @param {Coordinate} coordinate - Projected coordinate
+   * @param {OLProjection} projection - Projection of the coordinate
+   * @return {Coordinate} Coordinate as longitude and latitude, i.e. an array with longitude as 1st and latitude as 2nd element.
    */
-  static transformToLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate {
+  static transformToLonLat(coordinate: Coordinate, projection: OLProjection): Coordinate {
     return toLonLat(coordinate, projection);
   }
 
@@ -240,8 +248,7 @@ export abstract class Projection {
 
     try {
       // Fetch proj4 definition from epsg.io
-      const response = await fetch(`https://epsg.io/${code}.proj4`);
-      const definition = await response.text();
+      const definition = await Fetch.fetchText(`https://epsg.io/${code}.proj4`);
 
       if (definition) {
         // Register in proj4 if fetched
@@ -250,8 +257,7 @@ export abstract class Projection {
 
         // Register in supported projections
         this.PROJECTION_NAMES = { ...this.PROJECTION_NAMES, [code]: projectionName };
-        const foundOlProjection = olGetProjection(projectionName);
-        if (foundOlProjection) this.PROJECTIONS[code] = foundOlProjection;
+        this.PROJECTIONS[code] = Projection.getProjectionFromString(projectionName);
       } else logger.logError(`Unable to add projection ${projectionName}, definiton not found`);
     } catch {
       logger.logError(`Unable to add projection ${projectionName}, definiton not found`);
@@ -260,39 +266,37 @@ export abstract class Projection {
 
   /**
    * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
-   *
-   * @param {ProjectionLike} projectionLike Either a code string which is a combination of authority and identifier such as "EPSG:4326", or an existing projection object, or undefined.
-   * @return {olProjection | undefined} — Projection object, or undefined if not in list.
+   * @param {TypeJsonObject | undefined} projectionObj - A projection object with properties such as latestWkid, wkid, or wkt.
+   * @return {OLProjection | undefined} — Projection object, or undefined if not in list.
    */
-  static getProjectionFromObj(projection: TypeJsonObject | undefined): olProjection | undefined {
+  static getProjectionFromObj(projectionObj: TypeJsonObject | undefined): OLProjection | undefined {
     // If wkid
-    if (projection) {
-      if (projection.latestWkid) {
-        return Projection.getProjectionFromProj(`EPSG:${projection.latestWkid}`);
+    if (projectionObj) {
+      if (projectionObj.latestWkid) {
+        return Projection.getProjectionFromString(`EPSG:${projectionObj.latestWkid}`);
       }
-      if (projection.wkid) {
+      if (projectionObj.wkid) {
         // Redirect
-        return Projection.getProjectionFromProj(`EPSG:${projection.wkid}`);
+        return Projection.getProjectionFromString(`EPSG:${projectionObj.wkid}`);
       }
     }
 
     // If wkt
-    if (projection && projection.wkt) {
+    if (projectionObj && projectionObj.wkt) {
       // Redirect
-      return Projection.getProjectionFromWKT(projection.wkt as string);
+      return Projection.getProjectionFromWKT(projectionObj.wkt as string);
     }
 
-    // Nope
+    // Not found
     return undefined;
   }
 
   /**
    * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
-   *
-   * @param {ProjectionLike} projectionLike Either a code string which is a combination of authority and identifier such as "EPSG:4326", or an existing projection object, or undefined.
-   * @return {olProjection | undefined} — Projection object, or undefined if not in list.
+   * @param {string} customWKT - A code string which is a combination of authority and identifier such as "EPSG:4326".
+   * @return {OLProjection | undefined} Projection object, or undefined if not in list.
    */
-  static getProjectionFromWKT(customWKT: string): olProjection | undefined {
+  static getProjectionFromWKT(customWKT: string): OLProjection {
     // If the custom WKT doesn't exist
     if (!this.CUSTOM_WKT_AND_NUM[customWKT]) {
       // Register a new custom projection using the WKT
@@ -312,25 +316,38 @@ export abstract class Projection {
     const wktKey = this.CUSTOM_WKT_AND_NUM[customWKT];
 
     // Get the projection
-    return Projection.getProjectionFromProj(wktKey);
+    return Projection.getProjectionFromString(wktKey);
   }
 
   /**
    * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
-   *
-   * @param {ProjectionLike} projectionLike Either a code string which is a combination of authority and identifier such as "EPSG:4326", or an existing projection object, or undefined.
-   * @return {olProjection | undefined} — Projection object, or undefined if not in list.
+   * @param {string} projection - A code string which is a combination of authority and identifier such as "EPSG:4326".
+   * @return {OLProjection | undefined} Projection object, or undefined if not found.
    */
-  static getProjectionFromProj(projectionLike: ProjectionLike): olProjection | undefined {
-    return olGetProjection(projectionLike) || undefined;
+  static getProjectionFromString(projection: string): OLProjection {
+    // Get the projection from string
+    const proj = OLGetProjection(projection);
+
+    // If found
+    if (proj) return proj;
+
+    // Failed
+    throw new Error(`Invalid projection code '${projection}`);
+  }
+
+  /**
+   * Gets the projection representing a LngLat projection.
+   * @return {OLProjection} Projection object representing LngLat.
+   */
+  static getProjectionLngLat(): OLProjection {
+    return Projection.getProjectionFromString(Projection.PROJECTION_NAMES.LNGLAT);
   }
 
   /**
    * Get map point resolution
-   *
-   * @param {string} projection the projection code
-   * @param {Coordinate} center map center
-   * @returns the point resolution for map center
+   * @param {string} projection - The projection code
+   * @param {Coordinate} center - Map center
+   * @returns The point resolution for map center
    */
   static getResolution(projection: string, center: Coordinate): number {
     return getPointResolution(projection, 1, center, 'm');
@@ -339,8 +356,8 @@ export abstract class Projection {
   /**
    * Reads an extent and verifies if it might be reversed (ymin,xmin,ymax,ymin) and when
    * so puts it back in order (xmin,ymin,xmax,ymax).
-   * @param {string} projection The projection the extent is in
-   * @param {Extent} extent The extent to check
+   * @param {string} projection - The projection the extent is in
+   * @param {Extent} extent - The extent to check
    * @returns {Extent} The extent in order (xmin,ymin,xmax,ymax).
    */
   static readExtentCarefully(projection: string, extent: Extent): Extent {
@@ -359,12 +376,12 @@ export abstract class Projection {
 
   /**
    * Transform coordinates between two projections
-   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} coordinates the coordinates to transform
-   * @param {string} startProjection the current projection of the coordinates.
+   * @param {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} coordinates - The coordinates to transform
+   * @param {string} startProjection - The current projection of the coordinates.
    *   Note: the value should include 'EPSG:' then the projection  number.
-   * @param {string} endProjection the transformed projection of the coordinates.
+   * @param {string} endProjection - The transformed projection of the coordinates.
    *   Note: the value should include 'EPSG:' then the projection  number.
-   * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} the transformed coordinates
+   * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} The transformed coordinates
    */
   static transformCoordinates(
     coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined,
@@ -373,17 +390,21 @@ export abstract class Projection {
   ): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined {
     let projectedCoordinates;
 
+    // Read the projections
+    const startProjectionConv = Projection.getProjectionFromString(startProjection);
+    const endProjectionConv = Projection.getProjectionFromString(endProjection);
+
     if (coordinates && GeometryApi.isCoordinates(coordinates)) {
-      projectedCoordinates = Projection.transform(coordinates, startProjection, endProjection);
+      projectedCoordinates = Projection.transform(coordinates, startProjectionConv, endProjectionConv);
     } else if (coordinates && GeometryApi.isArrayOfCoordinates(coordinates)) {
-      projectedCoordinates = coordinates.map((coord) => Projection.transform(coord, startProjection, endProjection));
+      projectedCoordinates = coordinates.map((coord) => Projection.transform(coord, startProjectionConv, endProjectionConv));
     } else if (coordinates && GeometryApi.isArrayOfArrayOfCoordinates(coordinates)) {
       projectedCoordinates = coordinates.map((coordArray) =>
-        coordArray.map((coord) => Projection.transform(coord, startProjection, endProjection))
+        coordArray.map((coord) => Projection.transform(coord, startProjectionConv, endProjectionConv))
       );
     } else if (coordinates && GeometryApi.isArrayOfArrayOfArrayOfCoordinates(coordinates)) {
       projectedCoordinates = coordinates.map((coordArrayArray) =>
-        coordArrayArray.map((coordArray) => coordArray.map((coord) => Projection.transform(coord, startProjection, endProjection)))
+        coordArrayArray.map((coordArray) => coordArray.map((coord) => Projection.transform(coord, startProjectionConv, endProjectionConv)))
       );
     }
 
@@ -399,8 +420,8 @@ function initCRS84Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES.CRS84, '+proj=longlat +datum=WGS84 +no_defs +type=crs');
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES.CRS84);
-  if (projection) Projection.PROJECTIONS['CRS:84'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.CRS84);
+  Projection.PROJECTIONS['CRS:84'] = projection;
 }
 
 /**
@@ -410,16 +431,16 @@ function init4326Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES.LNGLAT, '+proj=longlat +datum=WGS84 +no_defs +type=crs');
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES.LNGLAT);
-  if (projection) Projection.PROJECTIONS['4326'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.LNGLAT);
+  Projection.PROJECTIONS['4326'] = projection;
 }
 
 /**
  * Initializes the WM Projection
  */
 function initWMProjection(): void {
-  const projection = olGetProjection(Projection.PROJECTION_NAMES.WM);
-  if (projection) Projection.PROJECTIONS['3857'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.WM);
+  Projection.PROJECTIONS['3857'] = projection;
 }
 
 /**
@@ -433,8 +454,8 @@ function initLCCProjection(): void {
   );
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES.LCC);
-  if (projection) Projection.PROJECTIONS['3978'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.LCC);
+  Projection.PROJECTIONS['3978'] = projection;
 }
 
 /**
@@ -445,8 +466,8 @@ function initCSRSProjection(): void {
   proj4.defs(Projection.PROJECTION_NAMES.CSRS, '+proj=longlat +ellps=GRS80 +no_defs +type=crs');
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES.CSRS);
-  if (projection) Projection.PROJECTIONS['4617'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.CSRS);
+  Projection.PROJECTIONS['4617'] = projection;
 }
 
 /**
@@ -457,9 +478,8 @@ function initCSRS98Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES.CSRS98, '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs +type=crs');
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES.CSRS98);
-
-  if (projection) Projection.PROJECTIONS['4140'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.CSRS98);
+  Projection.PROJECTIONS['4140'] = projection;
 }
 
 /**
@@ -472,9 +492,8 @@ function init3578Projection(): void {
   );
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES[3578]);
-
-  if (projection) Projection.PROJECTIONS['3578'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[3578]);
+  Projection.PROJECTIONS['3578'] = projection;
 }
 
 /**
@@ -484,9 +503,8 @@ function init4269Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES[4269], '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs +type=crs');
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES[4269]);
-
-  if (projection) Projection.PROJECTIONS['4269'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[4269]);
+  Projection.PROJECTIONS['4269'] = projection;
 }
 
 /**
@@ -499,9 +517,8 @@ function init42101Projection(): void {
   );
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES[42101]);
-
-  if (projection) Projection.PROJECTIONS['42101'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[42101]);
+  Projection.PROJECTIONS['42101'] = projection;
 }
 
 /**
@@ -514,9 +531,8 @@ function init3979Projection(): void {
   );
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES[3979]);
-
-  if (projection) Projection.PROJECTIONS['3979'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[3979]);
+  Projection.PROJECTIONS['3979'] = projection;
 }
 
 /**
@@ -529,9 +545,8 @@ function init102100Projection(): void {
   );
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES[102100]);
-
-  if (projection) Projection.PROJECTIONS['102100'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[102100]);
+  Projection.PROJECTIONS['102100'] = projection;
 }
 
 /**
@@ -544,9 +559,8 @@ function init102184Projection(): void {
   );
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES[102184]);
-
-  if (projection) Projection.PROJECTIONS['102184'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[102184]);
+  Projection.PROJECTIONS['102184'] = projection;
 }
 
 /**
@@ -559,9 +573,8 @@ function init102190Projection(): void {
   );
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES[102190]);
-
-  if (projection) Projection.PROJECTIONS['102190'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[102190]);
+  Projection.PROJECTIONS['102190'] = projection;
 }
 
 /**
@@ -574,9 +587,8 @@ function init3400Projection(): void {
   );
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES[3400]);
-
-  if (projection) Projection.PROJECTIONS['3400'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[3400]);
+  Projection.PROJECTIONS['3400'] = projection;
 }
 
 /**
@@ -586,9 +598,8 @@ function init2151Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES[2151], '+proj=utm +zone=13 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs');
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES[2151]);
-
-  if (projection) Projection.PROJECTIONS['2151'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[2151]);
+  Projection.PROJECTIONS['2151'] = projection;
 }
 
 /**
@@ -601,9 +612,8 @@ function init2957Projection(): void {
   );
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES[2957]);
-
-  if (projection) Projection.PROJECTIONS['2957'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[2957]);
+  Projection.PROJECTIONS['2957'] = projection;
 }
 
 /**
@@ -613,9 +623,8 @@ function init26914Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES[26914], '+proj=utm +zone=14 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs');
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES[26914]);
-
-  if (projection) Projection.PROJECTIONS['26914'] = projection;
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[26914]);
+  Projection.PROJECTIONS['26914'] = projection;
 }
 
 // Initialize the supported projections

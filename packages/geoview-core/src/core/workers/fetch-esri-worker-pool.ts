@@ -48,7 +48,7 @@ export class FetchEsriWorkerPool extends AbstractWorkerPool<FetchEsriWorkerType>
    * @throws {Error} When no workers are available or query processing fails
    */
   public async process(params: QueryParams): Promise<TypeJsonObject> {
-    const availableWorker = this.workers.find((w) => !this.busyWorkers.has(w));
+    const availableWorker = this.getAvailableWorker();
     if (!availableWorker) {
       throw new Error('No available workers');
     }

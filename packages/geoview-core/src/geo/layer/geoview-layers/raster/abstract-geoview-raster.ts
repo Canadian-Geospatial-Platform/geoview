@@ -1,5 +1,5 @@
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { fetchJson } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /**
@@ -15,7 +15,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
     const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
 
     // Query and read
-    return fetchJson(parsedUrl);
+    return Fetch.fetchJson(parsedUrl);
   }
 
   /**

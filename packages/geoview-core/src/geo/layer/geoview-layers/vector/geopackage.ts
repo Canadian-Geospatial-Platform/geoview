@@ -25,10 +25,10 @@ import {
   TypeOutfields,
 } from '@/api/config/types/map-schema-types';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
+import { LayerNotCreatedError } from '@/core/exceptions/layer-exceptions';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
@@ -75,12 +75,12 @@ export class GeoPackage extends AbstractGeoViewVector {
   /**
    * Create a source configuration for the vector layer.
    *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
+   * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
    */
   protected extractGeopackageData(
-    layerConfig: AbstractBaseLayerEntryConfig,
+    layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): Promise<[LayerData[], SldsInterface]> {
@@ -92,6 +92,7 @@ export class GeoPackage extends AbstractGeoViewVector {
       const layersInfo: LayerData[] = [];
       const styleSlds: SldsInterface = {};
 
+      // TODO: Refactor - Rewrite the xhr here to use utilities.fetch instead. XMLHttpRequest shouldn't be used anymore.
       const xhr = new XMLHttpRequest();
       xhr.responseType = 'arraybuffer';
 
@@ -198,10 +199,10 @@ export class GeoPackage extends AbstractGeoViewVector {
   /**
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {VectorLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {string | number | Uint8Array} sld The SLD style associated with the layer
    */
-  protected static processGeopackageStyle(layerConfig: AbstractBaseLayerEntryConfig, sld: string | number | Uint8Array): void {
+  protected static processGeopackageStyle(layerConfig: VectorLayerEntryConfig, sld: string | number | Uint8Array): void {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
     // eslint-disable-next-line no-param-reassign
@@ -355,13 +356,13 @@ export class GeoPackage extends AbstractGeoViewVector {
   /**
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
-   * @param {AbstractLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {VectorLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
    *
    * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
    */
   protected processOneGeopackageLayer(
-    layerConfig: AbstractBaseLayerEntryConfig,
+    layerConfig: VectorLayerEntryConfig,
     layerInfo: LayerData,
     sld?: SldsInterface
   ): Promise<BaseLayer | undefined> {
@@ -390,11 +391,11 @@ export class GeoPackage extends AbstractGeoViewVector {
 
   /**
    * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
    * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
    */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer> {
+  protected override onProcessOneLayerEntry(layerConfig: VectorLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer> {
     // TODO: Refactor - This function implementation needs revision, because it doesn't return a single 'BaseLayer', it can
     // TO.DOCONT: create more than one layer which seems to differ from the other layer classes.
 
@@ -412,15 +413,14 @@ export class GeoPackage extends AbstractGeoViewVector {
                   if (layerGroup) layerGroup.getLayers().push(baseLayer);
                   resolve(layerGroup || baseLayer);
                 } else {
-                  // Add a layer load error
-                  this.addLayerLoadError(layerConfig, `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`);
-                  reject();
+                  // Throw error
+                  throw new LayerNotCreatedError(this.mapId, layerConfig.layerPath);
                 }
               })
               .catch((error) => {
                 // Log
                 logger.logPromiseFailed('processOneGeopackageLayer (1) in processOneLayerEntry in GeoPackage', error);
-                reject();
+                reject(error instanceof Error ? error : new Error(String(error)));
               });
           } else {
             // eslint-disable-next-line no-param-reassign
@@ -435,7 +435,7 @@ export class GeoPackage extends AbstractGeoViewVector {
               promises.push(
                 new Promise<BaseLayer>((resolve2, reject2) => {
                   // "Clone" the config, patch until that layer type logic is rebuilt
-                  const newLayerEntryConfig = layerConfig.clone() as AbstractBaseLayerEntryConfig;
+                  const newLayerEntryConfig = layerConfig.clone() as VectorLayerEntryConfig;
                   newLayerEntryConfig.layerId = layers[i].name;
                   newLayerEntryConfig.layerName = layers[i].name;
                   newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
@@ -452,9 +452,8 @@ export class GeoPackage extends AbstractGeoViewVector {
 
                         resolve2(baseLayer);
                       } else {
-                        // Add a layer load error
-                        this.addLayerLoadError(layerConfig, `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`);
-                        reject2();
+                        // Throw error
+                        throw new LayerNotCreatedError(this.mapId, layerConfig.layerPath);
                       }
                     })
                     .catch((error) => {
@@ -462,8 +461,9 @@ export class GeoPackage extends AbstractGeoViewVector {
                       logger.logPromiseFailed('processOneGeopackageLayer (2) in processOneLayerEntry in GeoPackage', error);
 
                       // Set the layer status to error
+                      // TODO: Check - Do we need to set the status to error here if we're doing it later in the other catch? (caught below)
                       layerConfig.setLayerStatusError();
-                      reject2();
+                      reject2(error instanceof Error ? error : new Error(String(error)));
                     });
                 })
               );
@@ -482,7 +482,7 @@ export class GeoPackage extends AbstractGeoViewVector {
 
           // Set the layer status to error
           layerConfig.setLayerStatusError();
-          reject();
+          reject(error instanceof Error ? error : new Error(String(error)));
         });
     });
 

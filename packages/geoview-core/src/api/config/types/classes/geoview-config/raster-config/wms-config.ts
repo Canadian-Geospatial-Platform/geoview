@@ -11,6 +11,7 @@ import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { xmlToJson } from '@/core/utils/utilities';
 
 export type TypeWmsLayerNode = WmsGroupLayerConfig | WmsLayerEntryConfig;
@@ -274,8 +275,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
   async #fetchXmlServiceMetadata(metadataUrl: string): Promise<void> {
     try {
       const parser = new WMSCapabilities();
-      const response = await fetch(metadataUrl);
-      const capabilitiesString = await response.text();
+      const capabilitiesString = await Fetch.fetchText(metadataUrl);
       this.setServiceMetadata(parser.read(capabilitiesString));
       // GV: If this.getServiceMetadata() returns {}, we need to verify if the object is empty to conclude there is no metadata.
       if (Object.keys(this.getServiceMetadata()).length) {
@@ -365,8 +365,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       newUrl = `${newUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
     }
 
-    const response = await fetch(newUrl);
-    const capabilitiesString = await response.text();
+    const capabilitiesString = await Fetch.fetchText(newUrl);
 
     const xmlDomResponse = new DOMParser().parseFromString(capabilitiesString, 'text/xml');
     const jsonResponse = xmlToJson(xmlDomResponse);

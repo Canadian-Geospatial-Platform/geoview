@@ -24,8 +24,10 @@ import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import i18n from '@/core/translation/i18n';
 import { logger } from '@/core/utils/logger';
-import { removeCommentsFromJSON, whenThisThen } from '@/core/utils/utilities';
+import { removeCommentsFromJSON } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/external-types';
@@ -72,19 +74,6 @@ export function unmountMap(mapId: string, mapContainer: HTMLElement): void {
 }
 
 /**
- * Function to read the configuration specified
- *
- * @param {string} configUrl - url to fetch the config from
- * @returns configuration string
- */
-async function fetchConfigFile(configUrl: string): Promise<string> {
-  const response = await fetch(configUrl);
-  const result = await response.json();
-
-  return result;
-}
-
-/**
  * Function to get a configuration from a div element who contains attributes to read from.
  * If the div has one of the following atttributes data-config, data-config-url or data-shared,
  * it will try to get a valid configuration from the attribute content. If there is no such attributes,
@@ -120,7 +109,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
   } else if (mapElement.hasAttribute('data-config-url')) {
     // configurations file url is provided, fetch then process
     const configUrl = mapElement.getAttribute('data-config-url');
-    const configObject = await fetchConfigFile(configUrl!);
+    const configObject = await Fetch.fetchJsonAs<string | TypeJsonObject>(configUrl!);
     mapConfig = await api.config.createMapConfig(configObject, lang);
 
     // TODO: refactor - remove this injection once config is done, remove the casting to unknown
@@ -181,7 +170,8 @@ async function renderMap(mapElement: Element): Promise<void> {
     configuration!.map!.listOfGeoviewLayerConfig! as MapConfigLayerEntry[], // TODO: refactor - remove cast after
     (errorKey: string, params: string[]) => {
       // Wait for the map viewer to get loaded in the api
-      whenThisThen(() => api.getMapViewer(configuration.mapId))
+      api
+        .getMapViewerAsync(configuration.mapId)
         .then(() => {
           // Create the error
           const error = new GeoViewError(configuration.mapId, errorKey, params);
@@ -194,7 +184,7 @@ async function renderMap(mapElement: Element): Promise<void> {
         })
         .catch((error) => {
           // Log promise failed
-          logger.logPromiseFailed('Promise failed in whenThisThen in initializeMapConfig in app.renderMap', error);
+          logger.logPromiseFailed('Promise failed in getMapViewerAsync in config.initializeMapConfig in app.renderMap', error);
         });
     }
   );
@@ -217,7 +207,7 @@ async function renderMap(mapElement: Element): Promise<void> {
   }
 
   // Failed
-  return Promise.reject(new Error('Failed to render the map'));
+  throw new Error('Failed to render the map');
 }
 
 /**

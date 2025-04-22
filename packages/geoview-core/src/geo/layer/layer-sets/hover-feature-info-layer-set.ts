@@ -7,7 +7,7 @@ import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstra
 import { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { AbortError } from '@/core/exceptions/core-exceptions';
+import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -183,7 +183,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
           })
           .catch((error) => {
             // If aborted
-            if (AbortError.isAbortError(error)) {
+            if (error instanceof RequestAbortedError) {
               // Log
               logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
             } else {

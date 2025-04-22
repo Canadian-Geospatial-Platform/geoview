@@ -19,11 +19,15 @@ import { CV_CONFIG_PROXY_URL } from '@/api/config/types/config-constants';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { AbortError } from '@/core/exceptions/core-exceptions';
+import { CancelledError, NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerEntryConfigLayerIdNotFoundError,
+  LayerEntryConfigWMSSubLayerNotFoundError,
+} from '@/core/exceptions/layer-entry-config-exceptions';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -57,22 +61,21 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} url - The url to query the metadata from.
    */
   static override async fetchMetadata(url: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeJsonObject> {
-    let response;
+    let capabilitiesString;
     try {
       // Fetch the metadata
-      response = await fetch(url);
+      capabilitiesString = await Fetch.fetchText(url);
     } catch {
       // If network issue such as CORS
       // We're going to change the metadata url to use a proxy
       const newProxiedMetadataUrl = `${CV_CONFIG_PROXY_URL}${url}`;
       // Try again with the proxy this time
-      response = await fetch(newProxiedMetadataUrl);
+      capabilitiesString = await Fetch.fetchText(newProxiedMetadataUrl);
       // Callback about it
       callbackNewMetadataUrl?.(CV_CONFIG_PROXY_URL);
     }
 
     // Continue reading the metadata to return it
-    const capabilitiesString = await response.text();
     const parser = new WMSCapabilities();
     return parser.read(capabilitiesString);
   }
@@ -133,7 +136,7 @@ export class WMS extends AbstractGeoViewRaster {
         // For each array of result, filter on those that have no Capability
         for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++) {
           // Track the error
-          this.addLayerLoadError(layerConfigsToQuery[i], 'No Capabilities for the WMS');
+          this.addLayerLoadError(new LayerNoCapabilitiesError(this.mapId, this.geoviewLayerId), undefined);
         }
 
         // Set it
@@ -348,7 +351,7 @@ export class WMS extends AbstractGeoViewRaster {
     const layerFound = this.#getLayerMetadataEntry(layerConfig.layerId!);
     if (!layerFound) {
       // Add a layer load error
-      this.addLayerLoadError(layerConfig, `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+      this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
       return;
     }
 
@@ -401,7 +404,7 @@ export class WMS extends AbstractGeoViewRaster {
       // If we don't want all sub layers (simulating the 'Private element not on object' error we had for long time)
       if (!this.fullSubLayers) {
         // Skip the rest on purpose (ref TODO: Bug above)
-        throw new AbortError();
+        throw new CancelledError();
       }
     });
 
@@ -445,13 +448,10 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<ImageLayer<ImageWMS>>} The GeoView raster layer that has been created.
    */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageWMS>> {
-    // Instance check
-    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
-
+  protected override onProcessOneLayerEntry(layerConfig: OgcWmsLayerEntryConfig): Promise<ImageLayer<ImageWMS>> {
     // Get the layer capabilities
     const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
 
@@ -502,7 +502,7 @@ export class WMS extends AbstractGeoViewRaster {
       if (requestResult.length > 0) {
         // Get the OpenLayer that was created
         olLayer = requestResult[0] as ImageLayer<ImageWMS>;
-      } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
+      } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
 
       // GV Time to emit about the layer creation!
       this.emitLayerCreation({ config: layerConfig, layer: olLayer });
@@ -512,18 +512,15 @@ export class WMS extends AbstractGeoViewRaster {
     }
 
     // Error
-    throw new GeoViewError(this.mapId, 'validation.layer.notfound', [layerConfig.layerId, this.geoviewLayerId]);
+    throw new LayerEntryConfigWMSSubLayerNotFoundError(this.mapId, layerConfig, this.geoviewLayerId);
   }
 
   /**
    * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<OgcWmsLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
-
+  protected override onProcessLayerMetadata(layerConfig: OgcWmsLayerEntryConfig): Promise<OgcWmsLayerEntryConfig> {
     const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId)!;
     this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);
     if (layerCapabilities) {

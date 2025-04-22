@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import Ajv from 'ajv';
 
 import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { api } from '@/app';
 import { TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
@@ -61,7 +62,7 @@ export abstract class Plugin {
             resolve(window.geoviewPlugins[pluginId]);
           })
           .catch((error) => {
-            reject(error);
+            reject(error instanceof Error ? error : new Error(String(error)));
           });
       }
     });
@@ -144,7 +145,7 @@ export abstract class Plugin {
 
             try {
               // Try to find the custom config from the config path
-              const result = await (await fetch(configPath)).json();
+              const result = await Fetch.fetchJson(configPath);
 
               if (result) {
                 logger.logTraceCore('Plugin - addPlugin file config', result);

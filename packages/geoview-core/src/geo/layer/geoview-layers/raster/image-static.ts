@@ -7,8 +7,13 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
 
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import {
+  LayerEntryConfigInvalidLayerEntryConfigError,
+  LayerEntryConfigLayerIdNotFoundError,
+  LayerEntryConfigParameterExtentNotDefinedInSourceError,
+  LayerEntryConfigParameterProjectionNotDefinedInSourceError,
+} from '@/core/exceptions/layer-entry-config-exceptions';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
@@ -53,30 +58,24 @@ export class ImageStatic extends AbstractGeoViewRaster {
       const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
-        this.addLayerLoadError(layerConfig, `ImageStatic layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
-        return;
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
       }
       return;
     }
 
-    throw new GeoViewError(
-      this.mapId,
-      `Invalid ImageStatic metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
-    );
+    // Throw an invalid layer entry config error
+    throw new LayerEntryConfigInvalidLayerEntryConfigError(this.mapId, layerConfig);
   }
 
   /**
    * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<ImageLayer<Static>>} The GeoView raster layer that has been created.
    */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<Static>> {
-    // Instance check
-    if (!(layerConfig instanceof ImageStaticLayerEntryConfig))
-      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+  protected override onProcessOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageLayer<Static>> {
+    // Validate the source extent
+    if (!layerConfig?.source?.extent) throw new LayerEntryConfigParameterExtentNotDefinedInSourceError(this.mapId, layerConfig);
 
-    if (!layerConfig?.source?.extent)
-      throw new GeoViewError(this.mapId, 'Parameter extent is not defined in source element of layerConfig.');
     const sourceOptions: SourceOptions = {
       url: layerConfig.source.dataAccessPath || '',
       imageExtent: layerConfig.source.extent,
@@ -88,9 +87,10 @@ export class ImageStatic extends AbstractGeoViewRaster {
       sourceOptions.crossOrigin = 'Anonymous';
     }
 
+    // Validate the source projection
     if (layerConfig?.source?.projection) {
       sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-    } else throw new GeoViewError(this.mapId, 'Parameter projection is not define in source element of layerConfig.');
+    } else throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(this.mapId, layerConfig);
 
     // Create the source
     const source = new Static(sourceOptions);
@@ -103,7 +103,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<Static>;
-    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
+    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });

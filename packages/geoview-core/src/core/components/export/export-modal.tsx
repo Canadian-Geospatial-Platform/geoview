@@ -86,7 +86,7 @@ export default function ExportModal(): JSX.Element {
           setActiveAppBarTab(legendId, 'legend', false, false);
           disableFocusTrap();
         })
-        .catch((error: Error) => {
+        .catch((error) => {
           logger.logError('Error while exporting the image', error);
         });
     }
@@ -141,7 +141,7 @@ export default function ExportModal(): JSX.Element {
             img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
             mapImage.appendChild(img);
           })
-          .catch((error: Error) => {
+          .catch((error) => {
             logger.logError('Error occured while converting map to image', error);
           });
         setIsLegendLoading(false);
