@@ -541,13 +541,13 @@ export type TypeSourceGeoJsonInitialConfig = TypeBaseVectorSourceInitialConfig;
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
   /** Maximum number of records to fetch (default: 0). */
-  maxRecordCount: number;
+  maxRecordCount?: number; // TODO: refactor - remove ?
   /** Filter to apply on features of this layer. */
   layerFilter?: string;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
   /** The format used by the image layer. */
-  format: TypeEsriFormatParameter;
+  format?: TypeEsriFormatParameter; // TODO: refactor - remove ?
   /**
    * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png
    * and .gif formats support transparency.

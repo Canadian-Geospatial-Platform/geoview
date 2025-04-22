@@ -208,9 +208,9 @@ export class WFS extends AbstractGeoViewVector {
    */
   static #processFeatureInfoConfig(fields: TypeJsonArray, layerConfig: VectorLayerEntryConfig): void {
     // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.source) layerConfig.source = { projection: 3978 }; // TODO: refactor - remove projection introduced by move to config schema type
+    if (!layerConfig.source) layerConfig.source = {};
     // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true, nameField: '', outfields: [] }; // TODO: refactor - remove nameField/outFields introduced by move to config schema type
+    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
 
     // Process undefined outfields or aliasFields
     if (!layerConfig.source.featureInfo.outfields?.length) {

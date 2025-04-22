@@ -28,9 +28,6 @@ export type TypeJsonArray = TypeJsonValue & TypeJsonObject[];
  */
 export type TypeJsonObject = TypeJsonValue & { [key: string]: TypeJsonObject };
 
-export type TypeJsonObject1 = { [key: string]: TypeJsonValue };
-export type TypeJsonValue1 = null | string | number | boolean | TypeJsonValue[] | TypeJsonObject;
-
 /**
  * Convert a type of a variable to json object
  *
