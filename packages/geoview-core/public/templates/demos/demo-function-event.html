@@ -264,7 +264,7 @@
         // listen to layer error events
         cgpv.api.getMapViewer('map1').layer.onLayerError((sender, payload) => {
           // NOTE: The event added layer will be trigger first as the layer, even in error, has been added to ui
-          cgpv.api.getMapViewer('map1').notifications.addNotificationError(payload.geoviewLayerId + ' | ' + payload.error);
+          cgpv.api.getMapViewer('map1').notifications.addNotificationError('Repeat: ' + payload.error);
         });
 
         // listen to layer removed event

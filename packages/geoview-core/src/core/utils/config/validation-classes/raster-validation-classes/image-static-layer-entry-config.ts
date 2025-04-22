@@ -1,8 +1,7 @@
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageStaticInitialConfig } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES, TypeSourceImageStaticInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
-/** ******************************************************************************************************************************
+/**
  * Type used to define a GeoView image layer to display on the map.
  */
 export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
@@ -25,12 +24,6 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: ImageStaticLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
-
-    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
-      throw new Error(
-        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} when the metadataAccessPath is undefined.`
-      );
-    }
 
     if (!this.source.dataAccessPath) this.source.dataAccessPath = this.geoviewLayerConfig.metadataAccessPath;
     if (

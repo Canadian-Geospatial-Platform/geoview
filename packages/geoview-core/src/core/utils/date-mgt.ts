@@ -30,7 +30,7 @@ const ISO_UTC_DATE_FRAGMENTS_ORDER: TypeDateFragments = [
   ['-', '-', 'T', '+', '00:00'],
 ];
 
-/** ******************************************************************************************************************************
+/**
  * constant/interface used to define the precision for date object (yyyy, mm, dd).
  */
 const DEFAULT_DATE_PRECISION = {
@@ -39,12 +39,12 @@ const DEFAULT_DATE_PRECISION = {
   day: 'YYYY-MM-DD',
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type used to define the date precision pattern to use.
  */
 export type DatePrecision = 'year' | 'month' | 'day' | undefined;
 
-/** ******************************************************************************************************************************
+/**
  * constant/interface used to define the precision for time object (hh, mm, ss).
  */
 const DEFAULT_TIME_PRECISION = {
@@ -53,7 +53,7 @@ const DEFAULT_TIME_PRECISION = {
   second: 'THH:mm:ssZ',
 };
 
-/** ******************************************************************************************************************************
+/**
  * constant used to define the ESRI unit to OGC period conversion.
  */
 const timeUnitsESRI = {
@@ -64,12 +64,12 @@ const timeUnitsESRI = {
   esriTimeUnitsYears: 'Y',
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type used to define the time precision pattern to use.
  */
 export type TimePrecision = 'hour' | 'minute' | 'second' | undefined;
 
-/** ******************************************************************************************************************************
+/**
  * Type used to define the range values for an OGC time dimension.
  */
 type RangeItems = {
@@ -77,7 +77,7 @@ type RangeItems = {
   range: string[];
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type used to define the GeoView OGC time dimension.
  */
 export type TimeDimension = {
@@ -90,7 +90,7 @@ export type TimeDimension = {
   displayPattern: [DatePrecision | undefined, TimePrecision | undefined];
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type used to validate the ESRI time dimension.
  */
 export type TimeDimensionESRI = {

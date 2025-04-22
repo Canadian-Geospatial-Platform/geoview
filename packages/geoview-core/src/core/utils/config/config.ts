@@ -8,13 +8,15 @@ import {
   MapConfigLayerEntry,
   layerEntryIsGroupLayer,
   TypeDisplayLanguage,
+  CONST_LAYER_TYPES,
+  TypeGeoviewLayerType,
 } from '@/api/config/types/map-schema-types';
-import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { generateId } from '@/core/utils/utilities';
+import { LayerInvalidGeoviewLayerTypeError } from '@/core/exceptions/layer-exceptions';
 
 /**
  * Class to read and validate the GeoView map features configuration. Will validate every item for structure and valid values.
@@ -39,7 +41,7 @@ export class Config {
     this.configValidation = new ConfigValidation(language);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Get a valid map configuration.
    * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig Config object to validate.
    * @returns {MapConfigLayerEntry} A valid map config layer entry.
@@ -63,7 +65,7 @@ export class Config {
         } else if (Object.values(CONST_LAYER_TYPES).includes((geoviewLayerEntry as TypeGeoviewLayerConfig).geoviewLayerType)) {
           const geoViewLayerEntryCasted = geoviewLayerEntry as TypeGeoviewLayerConfig;
           this.#setLayerEntryType(geoViewLayerEntryCasted.listOfLayerEntryConfig!, geoViewLayerEntryCasted.geoviewLayerType);
-        } else throw new Error(`Invalid GeoView Layer Type ${geoviewLayerEntry.geoviewLayerType}`);
+        } else throw new LayerInvalidGeoviewLayerTypeError(geoviewLayerEntry.geoviewLayerId, geoviewLayerEntry.geoviewLayerType);
       });
     }
 
@@ -74,7 +76,7 @@ export class Config {
     return validLayers;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Initialize all layer entry type fields accordingly to the GeoView layer type.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entry configuration to adjust.
    * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type.
@@ -93,7 +95,7 @@ export class Config {
     });
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Initialize a map config from either inline div, url params, json file.
    *
    * @returns {Promise<TypeMapFeaturesConfig | undefined>} The initialized valid map config.

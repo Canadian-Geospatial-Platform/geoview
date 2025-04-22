@@ -15,7 +15,8 @@ import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-excep
 
 import { logger } from '@/core/utils/logger';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { findPropertyNameByRegex, xmlToJson } from '@/core/utils/utilities';
+import { findPropertyNameByRegex } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 // ====================
 // #region CLASS HEADER
@@ -214,7 +215,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // Execute the request using a JSON output format.
     if (supportedOutputFormat === 'application/json') {
-      const layerMetadata = (await (await fetch(describeFeatureUrl)).json()) as TypeJsonObject;
+      const layerMetadata = await Fetch.fetchJsonAsObject(describeFeatureUrl);
       if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties))
         return layerMetadata.featureTypes[0].properties;
       return [];
@@ -222,10 +223,9 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // Execute the request using a XML output format.
     if (supportedOutputFormat.toUpperCase().includes('XML')) {
-      const layerMetadata = (await (await fetch(describeFeatureUrl)).text()) as string;
-      // need to pass a xmldom to xmlToJson to convert xsd schema to json
-      const xmlDOMDescribe = new DOMParser().parseFromString(layerMetadata, 'text/xml');
-      const xmlJsonDescribe = xmlToJson(xmlDOMDescribe);
+      // Fetch the XML and read the content as Json
+      const xmlJsonDescribe = await Fetch.fetchXMLToJson(describeFeatureUrl);
+
       const prefix = Object.keys(xmlJsonDescribe)[0].includes('xsd:') ? 'xsd:' : '';
       const xmlJsonSchema = xmlJsonDescribe[`${prefix}schema`];
       const xmlJsonDescribeElement =

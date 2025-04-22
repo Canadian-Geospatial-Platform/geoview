@@ -4,19 +4,18 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeBaseVectorSourceInitialConfig,
   TypeLayerEntryConfig,
+  CONST_LAYER_TYPES,
+  CONST_LAYER_ENTRY_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'CSV';
@@ -46,32 +45,36 @@ export class CSV extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+  protected override onFetchAndSetServiceMetadata(): Promise<void> {
+    // None
+    return Promise.resolve();
+  }
 
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   */
+  protected override onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
     // process the feature info configuration and attach the config to the instance for access by parent class
-    this.setLayerMetadata(layerConfig.layerPath, Cast<TypeJsonObject>(layerConfig));
+    this.setLayerMetadata(layerConfig.layerPath, layerConfig as unknown as TypeJsonObject);
 
     // Return the layer config
     return Promise.resolve(layerConfig);
   }
 
   /**
-   * Create a source configuration for the vector layer.
-   *
+   * Overrides the creation of the source configuration for the vector layer
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
-   *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected override createVectorSource(
-    layerConfig: AbstractBaseLayerEntryConfig,
+  protected override onCreateVectorSource(
+    layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
@@ -81,8 +84,52 @@ export class CSV extends AbstractGeoViewVector {
     sourceOptions.url = layerConfig.source!.dataAccessPath;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatGeoJSON();
-    const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
-    return vectorSource;
+
+    // Call parent
+    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+  }
+
+  /**
+   * Creates a configuration object for a CSV Feature layer.
+   * This function constructs a `TypeCSVLayerConfig` object that describes a CSV Feature layer
+   * and its associated entry configurations based on the provided parameters.
+   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the GeoView layer.
+   * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
+   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @returns {TypeCSVLayerConfig} The constructed configuration object for the CSV Feature layer.
+   */
+  static createCSVLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware: boolean,
+    layerEntries: TypeJsonArray
+  ): TypeCSVLayerConfig {
+    const geoviewLayerConfig: TypeCSVLayerConfig = {
+      geoviewLayerId,
+      geoviewLayerName,
+      metadataAccessPath,
+      geoviewLayerType: CONST_LAYER_TYPES.CSV,
+      isTimeAware,
+      listOfLayerEntryConfig: [],
+    };
+    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      const layerEntryConfig = new CsvLayerEntryConfig({
+        geoviewLayerConfig,
+        schemaTag: CONST_LAYER_TYPES.CSV,
+        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
+        layerId: layerEntry.id as string,
+        source: {
+          dataAccessPath: metadataAccessPath,
+        },
+      } as CsvLayerEntryConfig);
+      return layerEntryConfig;
+    });
+
+    // Return it
+    return geoviewLayerConfig;
   }
 }
 

@@ -1,27 +1,27 @@
-import axios, { CanceledError } from 'axios';
-
 import ImageLayer from 'ol/layer/Image';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { ImageWMS } from 'ol/source';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
 
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { xmlToJson } from '@/core/utils/utilities';
-import { AbortError } from '@/core/exceptions/core-exceptions';
 import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
 import { CV_CONFIG_PROXY_URL } from '@/api/config/types/config-constants';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { LayerInvalidFeatureInfoFormatWMSError } from '@/core/exceptions/layer-exceptions';
+import { MapViewer } from '@/geo/map/map-viewer';
+import { NetworkError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Manages a WMS layer.
@@ -127,119 +127,114 @@ export class GVWMS extends AbstractGVRaster {
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    try {
-      // If the layer is invisible
-      if (!this.getVisible()) return [];
+    // If the layer is invisible
+    if (!this.getVisible()) return [];
 
-      // Get the layer config and source
-      const layerConfig = this.getLayerConfig();
+    // Get the layer config and source
+    const layerConfig = this.getLayerConfig();
 
-      // Check if bounds are properly set
-      if (!layerConfig.initialSettings!.bounds) {
-        const newBounds = this.getBounds();
-        if (newBounds)
-          layerConfig.initialSettings!.bounds = Projection.transformExtentFromProj(
-            newBounds,
-            this.getMapViewer().getView().getProjection(),
-            Projection.PROJECTION_NAMES.LNGLAT
-          );
-        else return [];
+    // TODO: Check - Why are we checking if bounds are properly set in this getFeatureInfoAtLongLat override? Seems late or out of order?
+    // Check if bounds are properly set
+    if (!layerConfig.initialSettings!.bounds) {
+      const newBounds = this.getBounds(this.getMapViewer().getView().getProjection(), MapViewer.DEFAULT_STOPS);
+      if (newBounds)
+        layerConfig.initialSettings!.bounds = Projection.transformExtentFromProj(
+          newBounds,
+          this.getMapViewer().getView().getProjection(),
+          Projection.getProjectionLngLat()
+        );
+      else return [];
+    }
+
+    const clickCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
+    if (
+      lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
+      layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
+      lnglat[1] < layerConfig.initialSettings!.bounds![1] ||
+      layerConfig.initialSettings!.bounds![3] < lnglat[1]
+    )
+      return [];
+
+    let infoFormat = '';
+    const featureInfoFormat = this.getLayerConfig().getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format as TypeJsonArray;
+    if (featureInfoFormat)
+      if (featureInfoFormat.includes('text/xml' as TypeJsonObject)) infoFormat = 'text/xml';
+      else if (featureInfoFormat.includes('text/html' as TypeJsonObject)) infoFormat = 'text/html';
+      else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
+      else {
+        // Failed
+        throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath);
       }
 
-      const clickCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
-      if (
-        lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
-        layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
-        lnglat[1] < layerConfig.initialSettings!.bounds![1] ||
-        layerConfig.initialSettings!.bounds![3] < lnglat[1]
-      )
-        return [];
+    const wmsSource = this.getOLSource();
+    const viewResolution = this.getMapViewer().getView().getResolution()!;
+    const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, this.getMapViewer().getProjection().getCode(), {
+      INFO_FORMAT: infoFormat,
+    });
 
-      let infoFormat = '';
-      const featureInfoFormat = this.getLayerConfig().getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format as TypeJsonArray;
-      if (featureInfoFormat)
-        if (featureInfoFormat.includes('text/xml' as TypeJsonObject)) infoFormat = 'text/xml';
-        else if (featureInfoFormat.includes('text/html' as TypeJsonObject)) infoFormat = 'text/html';
-        else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
+    if (featureInfoUrl) {
+      let featureMember: TypeJsonObject | undefined;
+
+      // Perform query
+      const responseData = await Fetch.fetchText(featureInfoUrl, { signal: abortController?.signal });
+      if (infoFormat === 'text/xml') {
+        // Read string as Json
+        const xmlDomResponse = new DOMParser().parseFromString(responseData, 'text/xml');
+        const jsonResponse = xmlToJson(xmlDomResponse);
+
+        // GV TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
+        // GV For the moment, we try to guess the response format based on properties returned from the query
+        const featureCollection = GVWMS.#getAttribute(jsonResponse, 'FeatureCollection');
+        if (featureCollection) featureMember = GVWMS.#getAttribute(featureCollection, 'featureMember');
         else {
-          throw new GeoViewError(
-            this.getMapId(),
-            'Parameter info_format of GetFeatureInfo only support text/xml, text/html and text/plain for WMS services.'
-          );
-        }
-
-      const wmsSource = this.getOLSource();
-      const viewResolution = this.getMapViewer().getView().getResolution()!;
-      const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, this.getMapViewer().getProjection().getCode(), {
-        INFO_FORMAT: infoFormat,
-      });
-      if (featureInfoUrl) {
-        let featureMember: TypeJsonObject | undefined;
-
-        // Perform query
-        const response = await axios(featureInfoUrl, { signal: abortController?.signal });
-        if (infoFormat === 'text/xml') {
-          const xmlDomResponse = new DOMParser().parseFromString(response.data, 'text/xml');
-          const jsonResponse = xmlToJson(xmlDomResponse);
-          // GV TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
-          // GV For the moment, we try to guess the response format based on properties returned from the query
-          const featureCollection = GVWMS.#getAttribute(jsonResponse, 'FeatureCollection');
-          if (featureCollection) featureMember = GVWMS.#getAttribute(featureCollection, 'featureMember');
-          else {
-            const featureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'FeatureInfoResponse');
-            if (featureInfoResponse) {
-              featureMember = GVWMS.#getAttribute(featureInfoResponse, 'FIELDS');
-              if (featureMember) featureMember = GVWMS.#getAttribute(featureMember, '@attributes');
-            } else {
-              const getFeatureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'GetFeatureInfoResponse');
-              if (getFeatureInfoResponse?.Layer) {
-                featureMember = {};
-                featureMember['Layer name'] = getFeatureInfoResponse?.Layer?.['@attributes']?.name;
-                if (getFeatureInfoResponse?.Layer?.Attribute?.['@attributes']) {
-                  const fieldName = getFeatureInfoResponse.Layer.Attribute['@attributes'].name as string;
-                  const fieldValue = getFeatureInfoResponse.Layer.Attribute['@attributes'].value;
-                  featureMember[fieldName] = fieldValue;
-                }
+          const featureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'FeatureInfoResponse');
+          if (featureInfoResponse) {
+            featureMember = GVWMS.#getAttribute(featureInfoResponse, 'FIELDS');
+            if (featureMember) featureMember = GVWMS.#getAttribute(featureMember, '@attributes');
+          } else {
+            const getFeatureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'GetFeatureInfoResponse');
+            if (getFeatureInfoResponse?.Layer) {
+              featureMember = {};
+              featureMember['Layer name'] = getFeatureInfoResponse?.Layer?.['@attributes']?.name;
+              if (getFeatureInfoResponse?.Layer?.Attribute?.['@attributes']) {
+                const fieldName = getFeatureInfoResponse.Layer.Attribute['@attributes'].name as string;
+                const fieldValue = getFeatureInfoResponse.Layer.Attribute['@attributes'].value;
+                featureMember[fieldName] = fieldValue;
               }
             }
           }
-        } else if (response.data && response.data.length > 0) {
-          // The response has any data to show
-          if (infoFormat === 'text/html') {
-            featureMember = { html: response.data };
-          } else featureMember = { plain_text: { '#text': response.data } };
         }
-
-        if (featureMember) {
-          const featureInfoResult = this.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
-          return featureInfoResult;
-        }
+      } else if (infoFormat === 'text/html') {
+        // The response is in html format
+        featureMember = { html: responseData } as unknown as TypeJsonObject;
+      } else {
+        // The response is in text format
+        featureMember = { plain_text: { '#text': responseData } } as unknown as TypeJsonObject;
       }
 
-      return [];
-    } catch (error) {
-      // If cancelled
-      if (error instanceof CanceledError) {
-        // Raise an Abort Error to standardize the error with an error coming from
-        // a fetch() instead of axios (to standardize support accross layer classes)
-        throw new AbortError('Cancelled', abortController?.signal);
+      // If managed to read data
+      if (featureMember) {
+        const featureInfoResult = this.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
+        return featureInfoResult;
       }
 
-      // Raise higher
-      throw error;
+      // Log
+      logger.logWarning(`Invalid information returned in the getFeatureInfo for layer ${layerConfig.layerPath}`);
     }
+
+    // Log
+    logger.logWarning(`No feature url to get the feature info from for the WMS layer ${layerConfig.layerPath}`);
+    return [];
   }
 
   /**
    * Overrides the fetching of the legend for a WMS layer.
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
-  override async onFetchLegend(): Promise<TypeLegend | null> {
+  override async onFetchLegend(): Promise<TypeWmsLegend | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
-
-      let legend: TypeWmsLegend;
       const legendImage = await this.#getLegendImage(layerConfig!);
       const styleLegends: TypeWmsLegendStyle[] = [];
 
@@ -251,23 +246,23 @@ export class GVWMS extends AbstractGVRaster {
           drawingCanvas.height = image.height;
           const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
           drawingContext.drawImage(image, 0, 0);
-          legend = {
+
+          // Return the legend
+          return {
             type: CONST_LAYER_TYPES.WMS,
             legend: drawingCanvas,
             styles: styleLegends.length ? styleLegends : undefined,
           };
-          return legend;
         }
       }
 
-      legend = {
+      // No good
+      return {
         type: CONST_LAYER_TYPES.WMS,
         legend: null,
         styles: styleLegends.length > 1 ? styleLegends : undefined,
       };
-
-      return legend;
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('gv-wms.onFetchLegend()\n', error);
       return null;
@@ -369,39 +364,33 @@ export class GVWMS extends AbstractGVRaster {
       if (queryUrl) {
         queryUrl = queryUrl.toLowerCase().startsWith('http:') ? `https${queryUrl.slice(4)}` : queryUrl;
 
-        axios
-          .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })
-          .then((response) => {
-            // Text response means something went wrong
-            if (response.data.type === 'text/xml') {
+        /** For some layers the layer loads fine through the proxy, but fetching the legend fails
+         * We try the fetch first without the proxy and if we get a network error, try again with the proxy.
+         */
+        Fetch.fetchBlob(queryUrl)
+          .then((responseBlob) => {
+            // Expected response, return it as image
+            resolve(readImage(responseBlob));
+          })
+          .catch((error: unknown) => {
+            // If a network error such as CORS
+            if (error instanceof NetworkError) {
+              // Try appending link with proxy url to avoid CORS issues
+              queryUrl = `${CV_CONFIG_PROXY_URL}?${queryUrl}`;
+
+              Fetch.fetchBlob(queryUrl)
+                .then((responseBlob) => {
+                  // Expected response, return it as image
+                  resolve(readImage(responseBlob));
+                })
+                .catch(() => {
+                  // Just absolute fail
+                  resolve(null);
+                });
+            } else {
+              // Not a CORS issue, return null
               resolve(null);
             }
-
-            // Expected response, return it as image
-            resolve(readImage(Cast<Blob>(response.data)));
-          })
-          .catch((error) => {
-            /** For some layers the layer loads fine through the proxy, but fetching the legend fails
-             * We try the fetch first without the proxy and if we get a network error, try again with the proxy.
-             */
-            if (error.code === 'ERR_NETWORK') {
-              // Try appending link with proxy url to avoid CORS issues
-              queryUrl = `${CV_CONFIG_PROXY_URL}${queryUrl}`;
-
-              axios
-                .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })
-                .then((response) => {
-                  // Text response means something went wrong
-                  if (response.data.type === 'text/xml') {
-                    resolve(null);
-                  }
-
-                  // Expected response, return it as image
-                  resolve(readImage(Cast<Blob>(response.data)));
-                })
-                .catch(() => resolve(null));
-              // Not a CORS issue, return null
-            } else resolve(null);
           });
         // No URL to query
       } else resolve(null);
@@ -491,7 +480,7 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Overrides when the layer gets in loaded status.
    */
-  override onLoaded(): void {
+  protected override onLoaded(): void {
     // Call parent
     super.onLoaded();
 
@@ -531,7 +520,11 @@ export class GVWMS extends AbstractGVRaster {
         // Parse the filter value to use
         filterValueToUse = parseDateTimeValuesEsriImageOrWMS(filterValueToUse, this.getExternalFragmentsOrder());
 
-        source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
+        // Create the source parameter to update
+        const sourceParam = { [dimension]: filterValueToUse.replace(/\s*/g, '') };
+
+        // Update the source param
+        source.updateParams(sourceParam);
         olLayer.changed();
 
         // Emit event
@@ -544,9 +537,11 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the way to get the bounds for this layer type.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  override onGetBounds(): Extent | undefined {
+  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
     const layerConfig = this.getLayerConfig();
 
     // Get the layer config bounds
@@ -554,18 +549,23 @@ export class GVWMS extends AbstractGVRaster {
 
     // If layer bounds were found, project
     if (layerConfigBounds) {
-      // Make sure we're in the map projection. Always EPSG:4326 when coming from our configuration.
-      layerConfigBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerConfigBounds, 'EPSG:4326');
+      // Transform extent to given projection
+      layerConfigBounds = Projection.transformExtentFromProj(layerConfigBounds, Projection.getProjectionLngLat(), projection, stops);
     }
 
-    // Get the layer bounds from metadata, favoring a bounds in the same project as the map
-    const metadataExtent = this.#getBoundsExtentFromMetadata(this.getMapViewer().getProjection().getCode());
+    // Get the layer bounds from metadata, favoring a bounds in the same projection as the map
+    const metadataExtent = this.#getBoundsExtentFromMetadata(projection.getCode());
 
     // If any
     let layerBounds;
     if (metadataExtent) {
       const [metadataProj, metadataBounds] = metadataExtent;
-      layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataBounds, metadataProj);
+
+      // If read something
+      if (metadataProj) {
+        const metadataProjConv = Projection.getProjectionFromString(metadataProj);
+        layerBounds = Projection.transformExtentFromProj(metadataBounds, metadataProjConv, projection, stops);
+      }
     }
 
     // If both layer config had bounds and layer has real bounds, take the intersection between them
@@ -576,7 +576,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // Validate
-    layerBounds = validateExtentWhenDefined(layerBounds, this.getMapViewer().getProjection().getCode());
+    layerBounds = validateExtentWhenDefined(layerBounds, projection.getCode());
 
     // Return the calculated bounds
     return layerBounds;

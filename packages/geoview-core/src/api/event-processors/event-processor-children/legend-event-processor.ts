@@ -5,16 +5,11 @@ import {
   TypeFeatureInfoEntry,
   TypeStyleGeometry,
   layerEntryIsGroupLayer,
-} from '@/api/config/types/map-schema-types';
-import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
-import {
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
-  TypeWmsLegend,
-  isImageStaticLegend,
-  isVectorLegend,
-  isWmsLegend,
-} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+} from '@/api/config/types/map-schema-types';
+import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
+import { TypeWmsLegend, isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -226,7 +221,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method propagates the information stored in the legend layer set to the store.
    *
    * @param {string} mapId The map identifier.

@@ -42,18 +42,21 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { isValidUUID } from '@/core/utils/utilities';
 import { GeoCore } from '@/geo/layer/other/geocore';
 import { GeoViewLayerAddedResult, LayerApi } from '@/geo/layer/layer';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
+  CONST_LAYER_ENTRY_TYPES,
+  TypeLayerEntryConfig,
+  TypeGeoviewLayerConfig,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerTypeWithGeoCore,
-  AbstractGeoViewLayer,
-} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import { EsriDynamic, TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeXYZTilesConfig, XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { EsriFeature, TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { GeoJSON, TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { ConfigApi } from '@/api/config/config-api';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 type EsriOptions = {
   err: string;
@@ -184,7 +187,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError(`${serviceName} ${t('layers.errorServer')}`, [], false);
+    api.getMapViewer(mapId).notifications.showError('layers.errorServer', [serviceName], false);
   };
 
   /**
@@ -278,7 +281,7 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // Log error
       logger.logError(error);
       if ((error as Error).message === 'proj') {
@@ -328,7 +331,7 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('WFS');
       // Log error
       logger.logError(error);
@@ -419,7 +422,7 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('OGC API Feature');
       // Log error
       logger.logError(error);
@@ -448,10 +451,11 @@ export function AddNewLayer(): JSX.Element {
           setLayerList(layers);
         }
       }
-    } catch (error) {
-      emitErrorServer('GeoCore UUID');
+    } catch (error: unknown) {
       // Log error
       logger.logError(error);
+
+      emitErrorServer('GeoCore (UUID)');
       return false;
     }
     return true;
@@ -530,7 +534,7 @@ export function AddNewLayer(): JSX.Element {
       } else {
         throw new Error('err'); // TODO: Check - What is this error?
       }
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer(esriOptions(type).err);
       // Log error
       logger.logError(error);
@@ -569,7 +573,7 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('ESRI Image');
       // Log error
       logger.logError(error);
@@ -615,7 +619,7 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('XYZ Tile');
       // Log error
       logger.logError(error);
@@ -655,7 +659,7 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('CSV');
       // Log error
       logger.logError(error);
@@ -671,9 +675,8 @@ export function AddNewLayer(): JSX.Element {
    */
   const geoJSONValidation = async (): Promise<boolean> => {
     try {
-      const response = await fetch(layerURL);
-      const json = await response.json();
-      if (!['FeatureCollection', 'Feature'].includes(json.type)) {
+      const json = await Fetch.fetchJsonAsObject(layerURL);
+      if (!['FeatureCollection', 'Feature'].includes(json.type as string)) {
         // We assume that a metadata file is present
         const geojsonGeoviewLayerConfig = {
           geoviewLayerType: GEOJSON,
@@ -724,7 +727,7 @@ export function AddNewLayer(): JSX.Element {
         setLayerName(layers[0].layerName!);
         setLayerEntries([layers[0]]);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('GeoJSON');
       // Log error
       logger.logError(error);
@@ -763,7 +766,7 @@ export function AddNewLayer(): JSX.Element {
   //   ];
   //   setLayerName(layers[0].layerName!);
   //   setLayerEntries([layers[0]]);
-  // } catch (error) {
+  // } catch (error: unknown) {
   //   emitErrorServer('GeoPackage');
   //   // Log error
   //   logger.logError(error);
@@ -879,7 +882,7 @@ export function AddNewLayer(): JSX.Element {
             setStepButtonEnabled(false);
           }
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('promise of layer validation in handleStep2 in AddNewLayer', error);
         });
@@ -951,7 +954,7 @@ export function AddNewLayer(): JSX.Element {
           doneAdding();
           addedLayers.forEach((addedLayer) => doneAddedShowMessage(addedLayer.layer));
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('Promise.allSettled in handleStepLast in AddNewLayer', error);
         });
@@ -982,7 +985,7 @@ export function AddNewLayer(): JSX.Element {
             doneAdding();
             doneAddedShowMessage(addedLayer.layer);
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('addedLayer.promiseLayer in handleStepLast in AddNewLayer', error);
           });

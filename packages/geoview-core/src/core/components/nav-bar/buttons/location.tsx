@@ -25,7 +25,7 @@ export default function Location(): JSX.Element {
 
   const successCallback = (position: GeolocationPosition): void => {
     // Zoom to my location
-    zoomToMyLocation(position).catch((error) => {
+    zoomToMyLocation(position).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('Failed to zoomToMyLocation in location.successCallback', error);
     });

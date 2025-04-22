@@ -8,6 +8,7 @@ import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-confi
 import { getXMLHttpRequest } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { Projection } from '@/geo/utils/projection';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 // ========================
 // #region CLASS HEADER
@@ -68,7 +69,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         try {
           // On rare occasions, the value returned is not a JSON string, but rather an HTML string, which is an error.
           jsonMetadata = JSON.parse(metadataString);
-        } catch (error) {
+        } catch (error: unknown) {
           logger.logError('The service metadata request returned an invalid JSON string.\n', error);
           throw new GeoviewLayerConfigError('Invalid JSON string');
         }
@@ -90,7 +91,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
       } else {
         throw new GeoviewLayerConfigError('An empty metadata object was returned');
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
@@ -267,7 +268,8 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         return 'Polygon';
 
       default:
-        throw new Error(`Unsupported geometry type: ${esriGeometryType}`);
+        // Unsupported geometry type
+        throw new NotSupportedError(`Unsupported geometry type: ${esriGeometryType}`);
     }
   }
   // #endregion STATIC

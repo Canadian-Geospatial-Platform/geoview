@@ -5,13 +5,14 @@ import WMSCapabilities from 'ol/format/WMSCapabilities';
 import { Extent } from 'ol/extent';
 
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   CONST_LAYER_ENTRY_TYPES,
   layerEntryIsGroupLayer,
+  TypeOfServer,
+  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
@@ -19,16 +20,24 @@ import { CV_CONFIG_PROXY_URL } from '@/api/config/types/config-constants';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { AbortError } from '@/core/exceptions/core-exceptions';
+import { CancelledError, NetworkError, NotImplementedError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
+import { LayerDataAccessPathMandatoryError, LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerEntryConfigLayerIdNotFoundError,
+  LayerEntryConfigWMSSubLayerNotFoundError,
+} from '@/core/exceptions/layer-entry-config-exceptions';
+import { Fetch } from '@/core/utils/fetch-helper';
+import { deepMergeObjects } from '@/core/utils/utilities';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
   listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
 }
+
+/** Local type to work with a metadata fetch result */
+type MetatadaFetchResult = { layerConfig: TypeLayerEntryConfig; metadata: TypeJsonObject };
 
 /**
  * A class to add wms layer.
@@ -50,31 +59,6 @@ export class WMS extends AbstractGeoViewRaster {
     super(CONST_LAYER_TYPES.WMS, layerConfig, mapId);
     this.WMSStyles = [];
     this.fullSubLayers = fullSubLayers;
-  }
-
-  /**
-   * Fetches the metadata for a typical WFS class.
-   * @param {string} url - The url to query the metadata from.
-   */
-  static override async fetchMetadata(url: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeJsonObject> {
-    let response;
-    try {
-      // Fetch the metadata
-      response = await fetch(url);
-    } catch {
-      // If network issue such as CORS
-      // We're going to change the metadata url to use a proxy
-      const newProxiedMetadataUrl = `${CV_CONFIG_PROXY_URL}${url}`;
-      // Try again with the proxy this time
-      response = await fetch(newProxiedMetadataUrl);
-      // Callback about it
-      callbackNewMetadataUrl?.(CV_CONFIG_PROXY_URL);
-    }
-
-    // Continue reading the metadata to return it
-    const capabilitiesString = await response.text();
-    const parser = new WMSCapabilities();
-    return parser.read(capabilitiesString);
   }
 
   /**
@@ -103,7 +87,11 @@ export class WMS extends AbstractGeoViewRaster {
           // A Proxy had to be used to fetch the service metadata, update the layer config with it
           this.metadataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
         });
+
+        // Set the metadata
+        // TODO: Check - without validating if they have Capability property?
         this.metadata = metadata;
+
         this.#processMetadataInheritance();
       } else {
         // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
@@ -111,55 +99,91 @@ export class WMS extends AbstractGeoViewRaster {
         // the end. Even though the "Layers" parameter is ignored by other WMS servers, the drawback of this method is
         // sending unnecessary requests while only one GetCapabilities could be used when the server publishes a small set of
         // metadata. Which is not the case for the Geomet service.
-        const promisedArrayOfMetadata: Promise<TypeJsonObject | null>[] = [];
-        let i: number;
-        layerConfigsToQuery.forEach((layerConfig: TypeLayerEntryConfig, layerIndex: number) => {
-          for (i = 0; layerConfigsToQuery[i].layerId !== layerConfig.layerId; i++);
-          if (i === layerIndex)
-            // This is the first time we execute this query
-            promisedArrayOfMetadata.push(
-              WMS.fetchMetadata(`${metadataUrlGetCap}&Layers=${layerConfig.layerId}`, (proxyUsed: string) => {
-                // A Proxy had to be used to fetch the service metadata, update the layer config with it
-                layerConfigsToQuery[i].source!.dataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
-              })
-            );
-          // query already done. Use previous returned value
-          else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
+        const promisedArrayOfMetadata: Promise<MetatadaFetchResult>[] = [];
+        layerConfigsToQuery.forEach((layerConfig: TypeLayerEntryConfig, currentIndex: number) => {
+          // Find the first index where a layer with the same ID appears
+          const firstOccurrenceIndex = layerConfigsToQuery.findIndex((entry) => entry.layerId === layerConfig.layerId);
+
+          // If first time we see this layerId
+          if (firstOccurrenceIndex === currentIndex) {
+            // Create a promise of a metadata fetch
+            const promise = new Promise<MetatadaFetchResult>((resolve, reject) => {
+              const promiseMetadata = WMS.fetchMetadata(`${metadataUrlGetCap}&Layers=${layerConfig.layerId}`, (proxyUsed: string) => {
+                // A proxy was used; update the data access path accordingly
+                // eslint-disable-next-line no-param-reassign
+                layerConfig.source!.dataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
+              });
+
+              // When done, resolve with information or reject with information
+              promiseMetadata
+                .then((metadata) => {
+                  // If there is indeed a Capability property
+                  if (metadata.Capability) {
+                    // Resolve the metadata GetCap
+                    resolve({ metadata, layerConfig });
+                  } else {
+                    // No Capability property
+                    reject(
+                      new PromiseRejectErrorWrapper(
+                        new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId),
+                        layerConfig
+                      )
+                    );
+                  }
+                })
+                .catch((error: unknown) => {
+                  reject(new PromiseRejectErrorWrapper(error, layerConfig));
+                });
+            });
+
+            // Add the promise in the list
+            promisedArrayOfMetadata.push(promise);
+          } else {
+            // This layerId has already been queried; reuse the previous promise
+            promisedArrayOfMetadata.push(promisedArrayOfMetadata[firstOccurrenceIndex]);
+          }
         });
 
         // Wait for all promises to resolve
-        const arrayOfMetadata = await Promise.all(promisedArrayOfMetadata);
+        const arrayOfMetadata = await Promise.allSettled(promisedArrayOfMetadata);
 
-        // For each array of result, filter on those that have no Capability
-        for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++) {
-          // Track the error
-          this.addLayerLoadError(layerConfigsToQuery[i], 'No Capabilities for the WMS');
+        // If no layers metadata fetch fulfilled (all failed)
+        if (arrayOfMetadata.filter((promise) => promise.status === 'fulfilled').length === 0) {
+          // Set the parent in error status
+          layerConfigsToQuery[0].parentLayerConfig?.setLayerStatusError();
         }
 
-        // Set it
-        this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
+        // For each settled promise
+        arrayOfMetadata.forEach((promise) => {
+          // If the promise fulfilled
+          if (promise.status === 'fulfilled') {
+            // GV This section has been rewritten, in this commit, trying to keep the logic intact best I could and
+            // GV keeping the private functions call too (still seems confusing to me though)
 
-        // TODO: Check - The following code really could use more code documentation
-        // If set
-        if (this.metadata) {
-          // Loop
-          for (i = 0; i < arrayOfMetadata.length; i++) {
-            // If any capability
-            if (arrayOfMetadata[i]?.Capability) {
-              if (!this.#getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
-                const metadataLayerPathToAdd = this.#getMetadataLayerPath(
-                  layerConfigsToQuery[i].layerId!,
-                  arrayOfMetadata[i]!.Capability.Layer
-                );
-                this.#addLayerToMetadataInstance(
-                  metadataLayerPathToAdd,
-                  this.metadata?.Capability?.Layer,
-                  arrayOfMetadata[i]!.Capability.Layer
-                );
-              }
+            // If the metadata hasn't been set yet
+            if (!this.metadata) this.metadata = promise.value.metadata;
+
+            const layerId = promise.value.layerConfig.layerId!;
+            const alreadyExists = this.#getLayerMetadataEntry(layerId);
+
+            // If not already loaded
+            if (!alreadyExists) {
+              const metadataLayerPathToAdd = this.#getMetadataLayerPath(layerId, promise.value.metadata.Capability.Layer);
+
+              this.#addLayerToMetadataInstance(
+                metadataLayerPathToAdd,
+                this.metadata.Capability.Layer,
+                promise.value.metadata.Capability?.Layer
+              );
             }
+          } else {
+            // Get the reason
+            const reason = promise.reason as PromiseRejectErrorWrapper<TypeLayerEntryConfig>;
+
+            // Track the error
+            this.addLayerLoadError(reason.error, reason.object);
           }
-        }
+        });
 
         this.#processMetadataInheritance();
       }
@@ -167,10 +191,170 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
+   * Overrides the validation of a layer entry config.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
+   */
+  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+    const layerFound = this.#getLayerMetadataEntry(layerConfig.layerId!);
+    if (!layerFound) {
+      // Add a layer load error
+      this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
+      return;
+    }
+
+    if ('Layer' in layerFound) {
+      this.#createGroupLayer(layerFound, layerConfig as unknown as GroupLayerEntryConfig);
+      return;
+    }
+
+    // eslint-disable-next-line no-param-reassign
+    if (!layerConfig.layerName) layerConfig.layerName = layerFound.Title as string;
+  }
+
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<OgcWmsLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   */
+  protected override onProcessLayerMetadata(layerConfig: OgcWmsLayerEntryConfig): Promise<OgcWmsLayerEntryConfig> {
+    const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId)!;
+    this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);
+    if (layerCapabilities) {
+      const attributions = this.getAttributions();
+      if (layerCapabilities.Attribution && !attributions.includes(layerCapabilities.Attribution?.Title as string)) {
+        // Add it
+        attributions.push(layerCapabilities.Attribution.Title as string);
+        this.setAttributions(attributions);
+      }
+
+      // eslint-disable-next-line no-param-reassign
+      if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
+
+      // TODO: Check - Likely not the best place to set the layer as queryable?
+      MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
+
+      // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
+      // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because
+      // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
+      // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
+      if (layerCapabilities.MinScaleDenominator) {
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerCapabilities.MinScaleDenominator as number);
+      }
+      if (layerCapabilities.MaxScaleDenominator) {
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerCapabilities.MaxScaleDenominator as number);
+      }
+
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+
+      if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
+      }
+
+      // If there's a dimension
+      if (layerCapabilities.Dimension) {
+        // TODO: Validate the layerCapabilities.Dimension for example if an interval is even possible
+
+        // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
+
+        const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
+          (dimension) => dimension.name === 'time'
+        );
+
+        // If a temporal dimension was found
+        if (temporalDimension) {
+          this.setTemporalDimension(layerConfig.layerPath, DateMgt.createDimensionFromOGC(temporalDimension));
+        }
+      }
+    }
+
+    // Return the layer config
+    return Promise.resolve(layerConfig);
+  }
+
+  /**
+   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+   * @returns {Promise<ImageLayer<ImageWMS>>} The GeoView raster layer that has been created.
+   */
+  protected override onProcessOneLayerEntry(layerConfig: OgcWmsLayerEntryConfig): Promise<ImageLayer<ImageWMS>> {
+    // Get the layer capabilities
+    const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
+
+    // If layer capabilities found
+    if (layerCapabilities) {
+      // Validate the dataAccessPath exists
+      if (!layerConfig.source?.dataAccessPath) {
+        // Throw error missing dataAccessPath
+        throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+      }
+
+      const dataAccessPath = layerConfig.source.dataAccessPath!;
+
+      let styleToUse = '';
+      if (Array.isArray(layerConfig.source?.wmsStyle) && layerConfig.source?.wmsStyle) {
+        styleToUse = layerConfig.source?.wmsStyle[0];
+      } else if (layerConfig.source.wmsStyle) {
+        styleToUse = layerConfig.source?.wmsStyle as string;
+      } else if (layerCapabilities.Style) {
+        styleToUse = layerCapabilities.Style[0].Name as string;
+      }
+
+      if (Array.isArray(layerConfig.source?.wmsStyle)) {
+        this.WMSStyles = layerConfig.source.wmsStyle;
+      } else if (layerCapabilities.Style && (layerCapabilities.Style.length as number) > 1) {
+        this.WMSStyles = [];
+        for (let i = 0; i < (layerCapabilities.Style.length as number); i++) {
+          this.WMSStyles.push(layerCapabilities.Style[i].Name as string);
+        }
+      } else this.WMSStyles = [styleToUse];
+
+      const sourceOptions: SourceOptions = {
+        url: dataAccessPath,
+        params: { LAYERS: layerConfig.layerId, STYLES: styleToUse },
+      };
+
+      sourceOptions.attributions = this.getAttributions();
+      sourceOptions.serverType = layerConfig.source.serverType;
+      if (layerConfig.source.crossOrigin) {
+        sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+      } else {
+        sourceOptions.crossOrigin = 'Anonymous';
+      }
+      if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+
+      // Create the source
+      const source = new ImageWMS(sourceOptions);
+
+      // GV Time to request an OpenLayers layer!
+      const requestResult = this.emitLayerRequesting({ config: layerConfig, source, extraConfig: { layerCapabilities } });
+
+      // If any response
+      let olLayer: ImageLayer<ImageWMS>;
+      if (requestResult.length > 0) {
+        // Get the OpenLayer that was created
+        olLayer = requestResult[0] as ImageLayer<ImageWMS>;
+      } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
+
+      // GV Time to emit about the layer creation!
+      this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+
+      // Return the OpenLayer layer
+      return Promise.resolve(olLayer);
+    }
+
+    // Error
+    throw new LayerEntryConfigWMSSubLayerNotFoundError(layerConfig, this.geoviewLayerId);
+  }
+
+  /**
    * This method reads the service metadata from a XML metadataAccessPath.
-   *
    * @param {string} metadataUrl The metadataAccessPath
-   *
+   * @param {Function} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
+   *                                            The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
@@ -178,7 +362,8 @@ export class WMS extends AbstractGeoViewRaster {
     // Fetch it
     const capabilities = await WMS.fetchMetadata(metadataUrl, callbackNewMetadataUrl);
 
-    // Set it
+    // Set the metadata
+    // TODO: Check - without validating if they have Capability property?
     this.metadata = capabilities;
 
     this.#processMetadataInheritance();
@@ -341,27 +526,6 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
-   * Overrides the validation of a layer entry config.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
-   */
-  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
-    const layerFound = this.#getLayerMetadataEntry(layerConfig.layerId!);
-    if (!layerFound) {
-      // Add a layer load error
-      this.addLayerLoadError(layerConfig, `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
-      return;
-    }
-
-    if ('Layer' in layerFound) {
-      this.#createGroupLayer(layerFound, layerConfig as unknown as GroupLayerEntryConfig);
-      return;
-    }
-
-    // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.layerName) layerConfig.layerName = layerFound.Title as string;
-  }
-
-  /**
    * This method create recursively dynamic group layers from the service metadata.
    *
    * @param {TypeJsonObject} layer The dynamic group layer metadata.
@@ -401,7 +565,7 @@ export class WMS extends AbstractGeoViewRaster {
       // If we don't want all sub layers (simulating the 'Private element not on object' error we had for long time)
       if (!this.fullSubLayers) {
         // Skip the rest on purpose (ref TODO: Bug above)
-        throw new AbortError();
+        throw new CancelledError();
       }
     });
 
@@ -444,138 +608,88 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @returns {Promise<ImageLayer<ImageWMS>>} The GeoView raster layer that has been created.
+   * Fetches the metadata for a typical WFS class.
+   * @param {string} url - The url to query the metadata from.
+   * @param {Function} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
+   *                                            The parameter sent in the callback is the proxy prefix with the '?' at the end.
    */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageWMS>> {
-    // Instance check
-    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+  static override async fetchMetadata(url: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeJsonObject> {
+    let capabilitiesString;
+    try {
+      // Fetch the metadata
+      capabilitiesString = await Fetch.fetchText(url);
+    } catch (error: unknown) {
+      // If a network error such as CORS
+      if (error instanceof NetworkError) {
+        // We're going to change the metadata url to use a proxy
+        const newProxiedMetadataUrl = `${CV_CONFIG_PROXY_URL}?${url}`;
 
-    // Get the layer capabilities
-    const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
+        // Try again with the proxy this time
+        capabilitiesString = await Fetch.fetchText(newProxiedMetadataUrl);
 
-    // If layer capabilities found
-    if (layerCapabilities) {
-      const dataAccessPath = layerConfig.source.dataAccessPath!;
-
-      let styleToUse = '';
-      if (Array.isArray(layerConfig.source?.wmsStyle) && layerConfig.source?.wmsStyle) {
-        styleToUse = layerConfig.source?.wmsStyle[0];
-      } else if (layerConfig.source.wmsStyle) {
-        styleToUse = layerConfig.source?.wmsStyle as string;
-      } else if (layerCapabilities.Style) {
-        styleToUse = layerCapabilities.Style[0].Name as string;
-      }
-
-      if (Array.isArray(layerConfig.source?.wmsStyle)) {
-        this.WMSStyles = layerConfig.source.wmsStyle;
-      } else if (layerCapabilities.Style && (layerCapabilities.Style.length as number) > 1) {
-        this.WMSStyles = [];
-        for (let i = 0; i < (layerCapabilities.Style.length as number); i++) {
-          this.WMSStyles.push(layerCapabilities.Style[i].Name as string);
-        }
-      } else this.WMSStyles = [styleToUse];
-
-      const sourceOptions: SourceOptions = {
-        url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
-        params: { LAYERS: layerConfig.layerId, STYLES: styleToUse },
-      };
-
-      sourceOptions.attributions = this.getAttributions();
-      sourceOptions.serverType = layerConfig.source.serverType;
-      if (layerConfig.source.crossOrigin) {
-        sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+        // Callback about it
+        callbackNewMetadataUrl?.(`${CV_CONFIG_PROXY_URL}?`);
       } else {
-        sourceOptions.crossOrigin = 'Anonymous';
+        // Unknown error, throw it
+        throw error;
       }
-      if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-
-      // Create the source
-      const source = new ImageWMS(sourceOptions);
-
-      // GV Time to request an OpenLayers layer!
-      const requestResult = this.emitLayerRequesting({ config: layerConfig, source, extraConfig: { layerCapabilities } });
-
-      // If any response
-      let olLayer: ImageLayer<ImageWMS>;
-      if (requestResult.length > 0) {
-        // Get the OpenLayer that was created
-        olLayer = requestResult[0] as ImageLayer<ImageWMS>;
-      } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
-
-      // GV Time to emit about the layer creation!
-      this.emitLayerCreation({ config: layerConfig, layer: olLayer });
-
-      // Return the OpenLayer layer
-      return Promise.resolve(olLayer);
     }
 
-    // Error
-    throw new GeoViewError(this.mapId, 'validation.layer.notfound', [layerConfig.layerId, this.geoviewLayerId]);
+    // Continue reading the metadata to return it
+    const parser = new WMSCapabilities();
+    return parser.read(capabilitiesString);
   }
 
   /**
-   * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * Creates a configuration object for a WMS layer.
+   * This function constructs a `TypeWMSLayerConfig` object that describes an WMS layer
+   * and its associated entry configurations based on the provided parameters.
+   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the GeoView layer.
+   * @param {string} metadataAccessPath - The URL or path to access metadata.
+   * @param {TypeOfServer} serverType - The server type.
+   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @returns {TypeWMSLayerConfig} The constructed configuration object for the WMS layer.
    */
-  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+  static createWMSLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    serverType: TypeOfServer,
+    isTimeAware: boolean,
+    layerEntries: TypeJsonArray,
+    customGeocoreLayerConfig: TypeJsonObject
+  ): TypeWMSLayerConfig {
+    const geoviewLayerConfig: TypeWMSLayerConfig = {
+      geoviewLayerId,
+      geoviewLayerName,
+      metadataAccessPath,
+      geoviewLayerType: CONST_LAYER_TYPES.WMS,
+      isTimeAware,
+      listOfLayerEntryConfig: [],
+    };
+    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      const layerEntryConfig = {
+        geoviewLayerConfig,
+        schemaTag: CONST_LAYER_TYPES.WMS,
+        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
+        layerId: layerEntry.id as string,
+        source: {
+          serverType: serverType ?? 'mapserver',
+          dataAccessPath: metadataAccessPath,
+        },
+      };
 
-    const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId)!;
-    this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);
-    if (layerCapabilities) {
-      const attributions = this.getAttributions();
-      if (layerCapabilities.Attribution && !attributions.includes(layerCapabilities.Attribution?.Title as string)) {
-        // Add it
-        attributions.push(layerCapabilities.Attribution.Title as string);
-        this.setAttributions(attributions);
-      }
+      // Overwrite default from geocore custom config
+      const mergedConfig = deepMergeObjects(layerEntryConfig as unknown as TypeJsonObject, customGeocoreLayerConfig);
 
-      // eslint-disable-next-line no-param-reassign
-      if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
+      // Reconstruct
+      return new OgcWmsLayerEntryConfig(mergedConfig as unknown as OgcWmsLayerEntryConfig);
+    });
 
-      // TODO: Check - Likely not the best place to set the layer as queryable?
-      MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
-
-      // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
-      // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because
-      // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
-      // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
-      if (layerCapabilities.MinScaleDenominator) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, layerCapabilities.MinScaleDenominator as number);
-      }
-      if (layerCapabilities.MaxScaleDenominator) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, layerCapabilities.MaxScaleDenominator as number);
-      }
-
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
-
-      if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
-      }
-
-      // Set time dimension
-      if (layerCapabilities.Dimension) {
-        const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
-          (dimension) => dimension.name === 'time'
-        );
-
-        // If a temporal dimension was found
-        if (temporalDimension) {
-          this.setTemporalDimension(layerConfig.layerPath, DateMgt.createDimensionFromOGC(temporalDimension));
-        }
-      }
-    }
-
-    // Return the layer config
-    return Promise.resolve(layerConfig);
+    // Return it
+    return geoviewLayerConfig;
   }
 }
 

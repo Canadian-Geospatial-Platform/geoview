@@ -116,7 +116,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
        */
       addNotification: (notif: NotificationDetailsType): void => {
         // Redirect to processor
-        AppEventProcessor.addNotification(get().mapId, notif).catch((error) => {
+        AppEventProcessor.addNotification(get().mapId, notif).catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('AppEventProcessor.addNotification in actions.addNotification in appState', error);
         });

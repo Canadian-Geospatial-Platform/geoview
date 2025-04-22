@@ -111,7 +111,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }, [layersData, layerDetails, selectedLayer]);
 
   const handleZoomTo = (): void => {
-    zoomToLayerExtent(layerDetails.layerPath).catch((error) => {
+    zoomToLayerExtent(layerDetails.layerPath).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('in zoomToLayerExtent in layer-details.handleZoomTo', error);
     });
@@ -123,7 +123,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       !layersData.filter((layers) => layers.layerPath === layerDetails.layerPath && !!layers?.features?.length).length ||
       layerDetails.layerStatus === LAYER_STATUS.ERROR
     ) {
-      triggerGetAllFeatureInfo(layerDetails.layerPath).catch((error) => {
+      triggerGetAllFeatureInfo(layerDetails.layerPath).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in single-layer.handleLayerClick', error);
       });

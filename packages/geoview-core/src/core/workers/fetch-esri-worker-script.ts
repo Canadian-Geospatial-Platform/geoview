@@ -1,8 +1,13 @@
+// GV This file is executed in another thread. Do not try to use our core framework too much as
+// GV it tends to break the build for some reason to be investigated... e.g. we can't call delay(), see other GV note below.
+// GV Similarly, we can't import fetch-helper with the Fetch class as it also ends up breaking the build. So we import a light
+// GV version 'fetchWithTimeout' of a copycat in Fetch class.
+
 import { expose } from 'comlink';
 
 import { createWorkerLogger } from '@/core/workers/helper/logger-worker';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { fetchWithTimeout } from '@/core/utils/fetch-helper';
+import { fetchWithTimeout } from '@/core/utils/fetch-worker-helper';
 import { AsyncSemaphore } from '@/core/utils/async-semaphore';
 
 /**
@@ -99,7 +104,7 @@ const processBatch = async (
       // eslint-disable-next-line no-loop-func
       .then(async (json) => {
         // The current count
-        const currentCount = json.features.length;
+        const currentCount = json.features.length as number;
 
         // Use the semaphore to update the shared 'localProcessedFeatures' variable
         // eslint-disable-next-line no-await-in-loop
@@ -190,7 +195,7 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
     };
 
     return response as unknown as TypeJsonObject;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError('Error in queryAllEsriFeatures', error);
     logger.sendMessage('error');
     throw error;
@@ -205,8 +210,11 @@ const worker = {
    * Initializes the worker.
    */
   init(): void {
-    // Log
-    logger.logTrace('FetchEsriWorker initialized');
+    try {
+      logger.logTrace('FetchEsriWorker initialized');
+    } catch (error: unknown) {
+      logger.logError('FetchEsriWorker failed to initialize', error);
+    }
   },
 
   /**
@@ -216,12 +224,14 @@ const worker = {
    * @throws {Error} When the query processing fails
    */
   process(params: QueryParams): Promise<TypeJsonObject> {
-    // Log
-    logger.logTrace('Starting query processing', JSON.stringify(params));
-
-    // Launch the query and return the promise about it
-    const promise = params.objectIds === 'all' ? queryAllEsriFeatures(params) : queryEsriFeatures(params);
-    return promise;
+    try {
+      logger.logTrace('Starting query processing', JSON.stringify(params));
+      const response = params.objectIds === 'all' ? queryAllEsriFeatures(params) : queryEsriFeatures(params);
+      return response;
+    } catch (error: unknown) {
+      logger.logError('Query processing failed', error);
+      throw error;
+    }
   },
 };
 
