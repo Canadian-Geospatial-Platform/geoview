@@ -3,7 +3,7 @@ import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageWmsInitialConfig } from '@/api/
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
-/** ******************************************************************************************************************************
+/**
  * Type used to define a GeoView image layer to display on the map.
  */
 export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {

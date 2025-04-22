@@ -64,4 +64,4 @@ export class GeoviewLayerInvalidParameterError extends ConfigError {
   }
 }
 
-export {};
+export {}; // TODO: Check - What is this export for?

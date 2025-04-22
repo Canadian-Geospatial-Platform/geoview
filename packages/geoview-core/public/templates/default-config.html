@@ -287,7 +287,9 @@
           corePackages: [],
           theme: 'geo.ca',
         })
-      );
+      ).catch((error) => {
+        console.error('Failed to create map from config', error);
+      });
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {

@@ -2,7 +2,7 @@ import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig } from '@/api/config/type
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 
-/** ******************************************************************************************************************************
+/**
  * Type used to define a layer group.
  */
 export class GroupLayerEntryConfig extends ConfigBaseClass {

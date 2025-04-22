@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { Extent } from 'ol/extent';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -33,10 +32,12 @@ import { EsriDynamic, geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-laye
 import { EsriFeature, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { fetchJson } from '@/core/utils/utilities';
-import { EmptyResponseError } from '@/core/exceptions/core-exceptions';
-import { GeoViewLayerError } from '@/core/exceptions/layer-exceptions';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { Fetch } from '@/core/utils/fetch-helper';
+import { LayerError, LayerEntryConfigLayerIdEsriMustBeNumberError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerEntryConfigEmptyLayerGroupError,
+  LayerEntryConfigLayerIdNotFoundError,
+} from '@/core/exceptions/layer-entry-config-exceptions';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -45,40 +46,25 @@ import { logger } from '@/core/utils/logger';
  * @returns {Promise<void>} A promise that the execution is completed.
  */
 export async function commonFetchAndSetServiceMetadata(layer: EsriDynamic | EsriFeature): Promise<void> {
-  try {
-    // Query
-    const responseJson = await fetchJson(`${layer.metadataAccessPath}?f=json`);
+  // Query
+  const responseJson = await Fetch.fetchJsonAsObject(`${layer.metadataAccessPath}?f=json`);
 
-    // Set it
-    // eslint-disable-next-line no-param-reassign
-    layer.metadata = responseJson;
+  // Set it
+  // eslint-disable-next-line no-param-reassign
+  layer.metadata = responseJson;
 
-    // If there's an error in the content of the response itself
-    if ('error' in layer.metadata) {
-      throw new GeoViewLayerError(
-        layer.mapId,
-        layer.geoviewLayerId,
-        `Error code = ${layer.metadata.error.code}, ${layer.metadata.error.message}`
-      );
-    }
+  // If there's an error in the content of the response itself
+  if ('error' in layer.metadata) {
+    throw new LayerError(layer.geoviewLayerId, `Error code = ${layer.metadata.error.code}, ${layer.metadata.error.message}`);
+  }
 
-    // Here, content is good
-    const copyrightText = layer.metadata.copyrightText as string;
-    const attributions = layer.getAttributions();
-    if (copyrightText && !attributions.includes(copyrightText)) {
-      // Add it
-      attributions.push(copyrightText);
-      layer.setAttributions(attributions);
-    }
-  } catch (error) {
-    // If empty response error
-    if (error instanceof EmptyResponseError) {
-      // Throw error
-      throw new GeoViewLayerError(layer.mapId, layer.geoviewLayerId, 'Metadata was empty');
-    }
-
-    // Throw higher
-    throw error;
+  // Here, content is good
+  const copyrightText = layer.metadata.copyrightText as string;
+  const attributions = layer.getAttributions();
+  if (copyrightText && !attributions.includes(copyrightText)) {
+    // Add it
+    attributions.push(copyrightText);
+    layer.setAttributions(attributions);
   }
 }
 
@@ -108,7 +94,7 @@ export function commonValidateListOfLayerEntryConfig(
 
       if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
         // Add a layer load error
-        layer.addLayerLoadError(layerConfig, `Empty layer group (mapId:  ${layer.mapId}, layerPath: ${layerConfig.layerPath})`);
+        layer.addLayerLoadError(new LayerEntryConfigEmptyLayerGroupError(layerConfig), layerConfig);
       }
       return;
     }
@@ -117,9 +103,14 @@ export function commonValidateListOfLayerEntryConfig(
     layerConfig.setLayerStatusProcessing();
 
     let esriIndex = Number(layerConfig.layerId);
-    if (Number.isNaN(esriIndex)) {
+
+    // Validate the layer id is a number (and a non-decimal one)
+    if (!Number.isInteger(esriIndex)) {
       // Add a layer load error
-      layer.addLayerLoadError(layerConfig, `ESRI layerId must be a number (mapId:  ${layer.mapId}, layerPath: ${layerConfig.layerPath})`);
+      layer.addLayerLoadError(
+        new LayerEntryConfigLayerIdEsriMustBeNumberError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.layerId),
+        layerConfig
+      );
       return;
     }
 
@@ -129,7 +120,7 @@ export function commonValidateListOfLayerEntryConfig(
 
     if (esriIndex === -1) {
       // Add a layer load error
-      layer.addLayerLoadError(layerConfig, `ESRI layerId not found (mapId:  ${layer.mapId}, layerPath: ${layerConfig.layerPath})`);
+      layer.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
       return;
     }
 
@@ -389,7 +380,7 @@ export function commonProcessInitialSettings(
       const latlonExtent = Projection.transformExtentFromObj(
         layerExtent,
         layerMetadata.extent.spatialReference,
-        Projection.PROJECTION_NAMES.LNGLAT
+        Projection.getProjectionLngLat()
       );
       // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings!.bounds = latlonExtent;
@@ -421,33 +412,30 @@ export async function commonProcessLayerMetadata<
     if (layerConfig.geoviewLayerConfig.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_IMAGE)
       queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
 
-    const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
-    if (data?.error) {
-      // Throw error
-      throw new GeoViewError(layer.mapId, `Error code = ${data.error.code}, ${data.error.message}`);
-    }
+    // Fetch the layer metadata
+    const resultData = await Fetch.fetchJsonAsObject(`${queryUrl}?f=json`);
 
     // Set the layer metadata
-    layer.setLayerMetadata(layerConfig.layerPath, data);
+    layer.setLayerMetadata(layerConfig.layerPath, resultData);
 
     // The following line allow the type ascention of the type guard functions on the second line below
     if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
       if (!layerConfig.layerStyle) {
-        const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
+        const renderer = Cast<EsriBaseRenderer>(resultData.drawingInfo?.renderer);
         // eslint-disable-next-line no-param-reassign
         if (renderer) layerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
       }
     }
 
-    if (data.spatialReference && !Projection.getProjectionFromObj(data.spatialReference)) {
-      await Projection.addProjection(data.spatialReference);
+    if (resultData.spatialReference && !Projection.getProjectionFromObj(resultData.spatialReference)) {
+      await Projection.addProjection(resultData.spatialReference);
     }
 
     commonProcessFeatureInfoConfig(layer, layerConfig);
 
     commonProcessInitialSettings(layer, layerConfig);
 
-    commonProcessTemporalDimension(layer, data.timeInfo, layerConfig, layer.type === CONST_LAYER_TYPES.ESRI_IMAGE);
+    commonProcessTemporalDimension(layer, resultData.timeInfo, layerConfig, layer.type === CONST_LAYER_TYPES.ESRI_IMAGE);
   }
 
   return layerConfig;

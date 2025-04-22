@@ -14,6 +14,7 @@ import {
 import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core//utils/logger';
 import { createStyleUsingEsriRenderer, EsriBaseRenderer } from '@/api/config/esri-renderer-parser';
 
@@ -303,7 +304,7 @@ export class ConfigApi {
     language: TypeDisplayLanguage,
     config: TypeJsonArray | TypeJsonObject,
     geocoreUrl?: string,
-    filterUndefinedValues = true
+    filterUndefinedValues: boolean = true
   ): Promise<TypeJsonArray | TypeJsonObject | undefined> {
     // convert the JSON object to a JSON array. We want to process a single type.
     const listOfGeoviewLayerConfig = Array.isArray(config) ? config : [config];
@@ -539,15 +540,10 @@ export class ConfigApi {
     // GV: THE CODE IN THIS SECTION IS NOT PERMANANT BECAUSE THE CORRESPONDING
     // GV: GEOVIEW LAYER CLASSES HAVE NOT YET BEEN IMPLEMENTED.
     // GV: BEGINNING OF TEMPORARY SECTION
-    async function fetchJsonMetadata(url: string): Promise<TypeJsonObject> {
-      const response = await fetch(`${url}?f=json`);
-      return response.json();
-    }
-
     let jsonData: TypeJsonObject;
     switch (layerType) {
       case 'ogcFeature':
-        jsonData = await fetchJsonMetadata(serviceAccessString);
+        jsonData = await Fetch.fetchJsonAsObject(`${serviceAccessString}?f=json`);
         if (jsonData.collections)
           return (jsonData.collections as TypeJsonArray).map((layer) => {
             return Cast<EntryConfigBaseClass>({

@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -20,9 +18,11 @@ import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { fetchJson } from '@/core/utils/utilities';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { Fetch } from '@/core/utils/fetch-helper';
+import {
+  LayerEntryConfigInvalidLayerEntryConfigError,
+  LayerEntryConfigLayerIdNotFoundError,
+} from '@/core/exceptions/layer-entry-config-exceptions';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -59,7 +59,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     const queryUrl = url.endsWith('/') ? `${url}collections?f=json` : `${url}/collections?f=json`;
 
     // Set it
-    return fetchJson(queryUrl);
+    return Fetch.fetchJsonAsObject(queryUrl);
   }
 
   /**
@@ -85,7 +85,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
       if (!foundCollection) {
         // Add a layer load error
-        this.addLayerLoadError(layerConfig, `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
         return;
       }
 
@@ -98,8 +98,8 @@ export class OgcFeature extends AbstractGeoViewVector {
       if (!layerConfig.initialSettings.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
         const latlonExtent = Projection.transformExtentFromProj(
           foundCollection.extent.spatial.bbox[0] as number[],
-          Projection.getProjectionFromProj(foundCollection.extent.spatial.crs as string)!,
-          Projection.PROJECTION_NAMES.LNGLAT
+          Projection.getProjectionFromString(foundCollection.extent.spatial.crs as string),
+          Projection.getProjectionLngLat()
         );
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.bounds = latlonExtent;
@@ -110,30 +110,25 @@ export class OgcFeature extends AbstractGeoViewVector {
       return;
     }
 
-    throw new GeoViewError(
-      this.mapId,
-      `Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
-    );
+    // Failed
+    throw new LayerEntryConfigInvalidLayerEntryConfigError(layerConfig);
   }
 
   /**
    * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override async onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
-
+  protected override async onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
     const metadataUrl = this.metadataAccessPath;
     if (metadataUrl) {
       const queryUrl = metadataUrl.endsWith('/')
         ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
         : `${metadataUrl}/collections/${layerConfig.layerId}/queryables?f=json`;
-      const queryResult = await axios.get<TypeJsonObject>(queryUrl);
-      if (queryResult.data.properties) {
-        this.setLayerMetadata(layerConfig.layerPath, queryResult.data.properties);
-        OgcFeature.#processFeatureInfoConfig(queryResult.data.properties, layerConfig);
+      const queryResultData = await Fetch.fetchJsonAsObject(queryUrl);
+      if (queryResultData.properties) {
+        this.setLayerMetadata(layerConfig.layerPath, queryResultData.properties);
+        OgcFeature.#processFeatureInfoConfig(queryResultData.properties, layerConfig);
       }
     }
 
@@ -193,16 +188,14 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Create a source configuration for the vector layer.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
-   * @param {SourceOptions} sourceOptions The source options (default: {}).
-   * @param {ReadOptions} readOptions The read options (default: {}).
-   *
+   * Creates a source configuration for the vector layer.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @param {SourceOptions} sourceOptions - The source options (default: {}).
+   * @param {ReadOptions} readOptions - The read options (default: {}).
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override createVectorSource(
-    layerConfig: AbstractBaseLayerEntryConfig,
+    layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
@@ -214,8 +207,9 @@ export class OgcFeature extends AbstractGeoViewVector {
     sourceOptions.url = `${sourceOptions.url}/collections/${layerConfig.layerId}/items?f=json`;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatGeoJSON();
-    const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
-    return vectorSource;
+
+    // Call parent
+    return super.createVectorSource(layerConfig, sourceOptions, readOptions);
   }
 }
 
@@ -223,9 +217,7 @@ export class OgcFeature extends AbstractGeoViewVector {
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayerConfig if the geoviewLayerType attribute of
  * the verifyIfLayer parameter is OGC_FEATURE. The type ascention applies only to the true block of the if clause that use this
  * function.
- *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeOgcFeatureLayerConfig => {
@@ -236,10 +228,8 @@ export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): 
  * type guard function that redefines a TypeLayerEntryConfig as a OgcFeatureLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is OGC_FEATURE. The type ascention applies only to the true block of
  * the if clause that use this function.
- *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
  * valid.
- *
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsOgcFeature = (

@@ -3,13 +3,13 @@ import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { Image as ImageLayer } from 'ol/layer';
 
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
 
 import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -36,25 +36,24 @@ export class EsriImage extends AbstractGeoViewRaster {
 
   /**
    * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<EsriImageLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof EsriImageLayerEntryConfig))
-      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+  protected override onProcessLayerMetadata(layerConfig: EsriImageLayerEntryConfig): Promise<EsriImageLayerEntryConfig> {
     return commonProcessLayerMetadata(this, layerConfig);
   }
 
   /**
    * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+   * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<ImageLayer<ImageArcGISRest>>} The GeoView raster layer that has been created.
    */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
-    // Instance check
-    if (!(layerConfig instanceof EsriImageLayerEntryConfig))
-      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+  protected override onProcessOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
+    // Validate the dataAccessPath exists
+    if (!layerConfig.source?.dataAccessPath) {
+      // Throw error missing dataAccessPath
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+    }
 
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
@@ -80,7 +79,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
-    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
+    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
 
     // GV Time to emit about the layer creation!
     this.emitLayerCreation({ config: layerConfig, layer: olLayer });

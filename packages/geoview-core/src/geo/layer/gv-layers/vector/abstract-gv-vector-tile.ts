@@ -1,9 +1,11 @@
 import VectorTile from 'ol/source/VectorTile';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
 
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { validateExtent } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector tile type layer.
@@ -29,18 +31,22 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
 
   /**
    * Overrides the way to get the bounds for this layer type.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  override onGetBounds(): Extent | undefined {
+  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
     // Get the source projection
-    const sourceProjection = this.getOLSource().getProjection() || undefined;
+    const sourceProjection = this.getOLSource().getProjection();
 
     // Get the layer bounds
     let sourceExtent = this.getOLSource().getTileGrid()?.getExtent();
-    if (sourceExtent) {
-      // Make sure we're in the map projection
-      sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
-      sourceExtent = validateExtent(sourceExtent, this.getMapViewer().getProjection().getCode());
+
+    // If both found
+    if (sourceExtent && sourceProjection) {
+      // Transform extent to given projection
+      sourceExtent = Projection.transformExtentFromProj(sourceExtent, sourceProjection, projection, stops);
+      sourceExtent = validateExtent(sourceExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds

@@ -238,7 +238,11 @@
           }
 
           // create map
-          cgpv.api.createMapFromConfig('map1', e.target.value, 800).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
+          cgpv.api.createMapFromConfig('map1', e.target.value, 800)
+            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'))
+            .catch((error) => {
+              console.error('Failed to create map from config', error);
+            });
         }, 1500);
 
         // fetch JSON config file to show in the text are section

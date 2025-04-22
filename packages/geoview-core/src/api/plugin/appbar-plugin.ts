@@ -3,7 +3,7 @@ import { AbstractPlugin } from './abstract-plugin';
 import { TypeWindow } from '@/core/types/global-types';
 import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
-/** ******************************************************************************************************************************
+/**
  * AppBar Plugin abstract class.
  */
 export abstract class AppBarPlugin extends AbstractPlugin {

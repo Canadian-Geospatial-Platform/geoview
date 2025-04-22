@@ -11,7 +11,7 @@ import {
   TypeFeatureInfoResultSet,
   TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { AbortError } from '@/core/exceptions/core-exceptions';
+import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -183,7 +183,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           })
           .catch((error) => {
             // If aborted
-            if (AbortError.isAbortError(error)) {
+            if (error instanceof RequestAbortedError) {
               // Log
               logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
             } else {

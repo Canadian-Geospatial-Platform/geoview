@@ -4,7 +4,7 @@ import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 import { TypeJsonValue } from '@/api/config/types/config-types';
 import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
-/** ******************************************************************************************************************************
+/**
  * Interface used to initialize a button panel.
  */
 export type TypeButtonPanelProps = {
@@ -14,7 +14,7 @@ export type TypeButtonPanelProps = {
   button: TypeButtonProps;
 };
 
-/** ******************************************************************************************************************************
+/**
  * type for the panel properties used when creating a new panel.
  */
 export type TypePanelProps = {
@@ -53,7 +53,7 @@ export interface PanelStyles {
   panelCardContent?: { [key: string]: string };
 }
 
-/** ******************************************************************************************************************************
+/**
  * Interface for the button properties used when creating a new button.
  */
 export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
@@ -77,7 +77,7 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
   visible?: boolean;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Interface for the text properties used when creating a new text field.
  */
 export interface TypeTextFieldProps extends Omit<TextFieldProps, 'type'> {
@@ -89,7 +89,7 @@ export interface TypeTextFieldProps extends Omit<TextFieldProps, 'type'> {
 
 // GV Check if it must be deleted.
 // TODO: used in layer-panel packages... check if we can merge
-/** ******************************************************************************************************************************
+/**
  * Interface for the button properties used when creating a new button.
  */
 export interface ButtonPropsLayerPanel {
@@ -98,7 +98,7 @@ export interface ButtonPropsLayerPanel {
   handleNext: () => void;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Interface used when creating a new button panel.
  */
 export type TypeButtonPanel = {
@@ -115,7 +115,7 @@ export type TypeButtonPanel = {
   // TODO: Check - Why handleOpen here and in TypePanelAppProps? Acts as a bridge, why?
 };
 
-/** ******************************************************************************************************************************
+/**
  * constant that defines the panel types.
  */
 export const CONST_PANEL_TYPES = {
