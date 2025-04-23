@@ -170,6 +170,41 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
     return () => orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer?.features?.length);
   }, [selectedLayerPath, orderedLayerData]);
 
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
+
+    const clearLoading = delay(() => {
+      setIsLoading(false);
+    }, 100);
+    return () => clearTimeout(clearLoading);
+  }, [isLoading, selectedLayerPath]);
+
+  /**
+   * This effect will unmount the FOOTER BAR if the tab is changed
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - unmount', selectedLayerPath);
+
+    // NOTE: Reason for not using component unmount, because we are not mounting and unmounting components
+    // when we switch tabs.
+    if (selectedTab !== TABS.DATA_TABLE && containerType !== CONTAINER_TYPE.APP_BAR) {
+      setSelectedLayerPath('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTab]);
+
+  /**
+   * This effect will only run when appbar will have data table as component
+   * It will unselect the layer path when component is unmounted.
+   */
+  useEffect(() => {
+    if ((tabGroup !== CV_DEFAULT_APPBAR_CORE.DATA_TABLE || !isOpen) && appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.DATA_TABLE)) {
+      setSelectedLayerPath('');
+    }
+  }, [tabGroup, isOpen, setSelectedLayerPath, appBarComponents]);
+
   // If has selected layer on load and the data for selectedLayerPath is empty, trigger a query
   useEffect(() => {
     if (isFirstLoad.current) {
@@ -187,38 +222,6 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       }
     }
   }, [orderedLayerData, selectedLayerPath, triggerGetAllFeatureInfo]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
-
-    const clearLoading = delay(() => {
-      setIsLoading(false);
-    }, 100);
-    return () => clearTimeout(clearLoading);
-  }, [isLoading, selectedLayerPath]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DATA-PANEL - unmount', selectedLayerPath);
-
-    // NOTE: Reason for not using component unmount, because we are not mounting and unmounting components
-    // when we switch tabs.
-    if (selectedTab !== TABS.DATA_TABLE) {
-      setSelectedLayerPath('');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTab]);
-
-  /**
-   * This effect will only run when appbar will have data table as component
-   * It will unselect the layer path when component is unmounted.
-   */
-  useEffect(() => {
-    if ((tabGroup !== CV_DEFAULT_APPBAR_CORE.DATA_TABLE || !isOpen) && appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.DATA_TABLE)) {
-      setSelectedLayerPath('');
-    }
-  }, [tabGroup, isOpen, setSelectedLayerPath, appBarComponents]);
 
   /**
    * Check if layer sttaus is processing while querying
