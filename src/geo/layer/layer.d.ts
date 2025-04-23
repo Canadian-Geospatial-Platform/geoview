@@ -1,5 +1,6 @@
 import BaseLayer from 'ol/layer/Base';
 import { Extent } from 'ol/extent';
+import { GeoJSONObject } from 'ol/format/GeoJSON';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -126,6 +127,14 @@ export declare class LayerApi {
      */
     loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): Promise<void>;
     /**
+     * Show the errors that happened during layers loading.
+     * If it's an aggregate error, log and show all of them.
+     * If it's a regular error, log and show only that error.
+     * @param error - The error to log and show.
+     * @param geoviewLayerId - The Geoview layer id for which the error happened.
+     */
+    logAndShowLayerError(error: unknown, geoviewLayerId: string): void;
+    /**
      * Refreshes GeoCore Layers
      */
     reloadGeocoreLayers(): void;
@@ -140,20 +149,15 @@ export declare class LayerApi {
      * Adds a layer to the map. This is the main method to add a GeoView Layer on the map.
      * It handles all the processing, including the validations, and makes sure to inform the layer sets about the layer.
      * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add
-     * @returns {GeoViewLayerAddedResult | undefined} The result of the addition of the geoview layer.
+     * @returns {GeoViewLayerAddedResult} The result of the addition of the geoview layer.
      * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
      */
-    addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult | undefined;
+    addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult;
     /**
      * Registers the layer identifier.
      * @param {ConfigBaseClass} layerConfig - The layer entry config to register
      */
     registerLayerConfigInit(layerConfig: ConfigBaseClass): void;
-    /**
-     * Registers the layer config in the LayerApi to start managing it.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config to register
-     */
-    registerLayerConfigInLayerSets(layerConfig: ConfigBaseClass): void;
     /**
      * Registers the layer in the LayerApi layer-sets to start managing it.
      * This function may be used to start managing a layer in the UI when said layer has been created outside of the regular config->layer flow.
@@ -169,7 +173,7 @@ export declare class LayerApi {
     /**
      * Checks if the layer results sets are all greater than or equal to the provided status
      */
-    checkLayerStatus(status: TypeLayerStatus, layerEntriesToCheck: MapConfigLayerEntry[] | undefined, callbackNotGood?: (geoviewLayer: AbstractBaseLayer) => void): [boolean, number];
+    checkLayerStatus(status: TypeLayerStatus, layerEntriesToCheck: MapConfigLayerEntry[] | undefined, callbackNotGood?: (layerConfig: ConfigBaseClass) => void): [boolean, number];
     /**
      * Checks if the layer results sets are all ready using the resultSet from the FeatureInfo LayerSet
      */
@@ -178,6 +182,10 @@ export declare class LayerApi {
      * Removes all geoview layers from the map
      */
     removeAllGeoviewLayers(): void;
+    /**
+     * Removes all layers in error from the map
+     */
+    removeAllLayersInError(): void;
     /**
      * Removes layer and feature highlights for a given layer.
      * @param {string} layerPath - The path of the layer to remove highlights from.
@@ -244,6 +252,13 @@ export declare class LayerApi {
      * @param {string} name - The new name to use.
      */
     setLayerName(layerPath: string, name: string): void;
+    /**
+     * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
+     *
+     * @param {string} layerPath - The path of the layer.
+     * @param {GeoJSONObject | string} geojson - The new geoJSON.
+     */
+    setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void;
     /**
      * Redefine feature info fields.
      *
@@ -353,7 +368,7 @@ type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, void>;
  */
 export type LayerErrorEvent = {
     layerPath: string;
-    errorMessage: string;
+    error: string;
 };
 /**
  * Define a delegate for the event handler function signature

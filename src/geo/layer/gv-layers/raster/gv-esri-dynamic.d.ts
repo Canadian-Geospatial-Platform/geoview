@@ -55,9 +55,10 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     protected getFieldDomain(fieldName: string): null | codedValueType | rangeDomainType;
     /**
      * Overrides the get all feature information for all the features stored in the layer.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getAllFeatureInfo(): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getAllFeatureInfo(abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Query all features with a web worker
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
@@ -66,18 +67,20 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeJsonObject>;
     /**
      * Overrides the return of feature information at a given pixel location.
-     * @param {Coordinate} location - The pixel coordinate that will be used by the query.
-     * @param {boolean} queryGeometry - The query geometry boolean.
+     * @param {Pixel} location - The pixel coordinate that will be used by the query.
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtPixel(location: Pixel, queryGeometry?: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtPixel(location: Pixel, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at a given coordinate.
      * @param {Coordinate} location - The coordinate that will be used by the query.
-     * @param {boolean} queryGeometry - The query geometry boolean.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry?: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Query the features geometry with a web worker
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
@@ -91,10 +94,11 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
      * @param {Coordinate} lnglat - The coordinate that will be used by the query.
-     * @param {boolean} queryGeometry - The query geometry boolean.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate, queryGeometry?: boolean): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtLongLat(lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Gets the layer view filter. The filter is derived from the uniqueValue or the classBreak visibility flags and a layerFilter
      * associated to the layer.
@@ -106,6 +110,11 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
      */
     onFetchLegend(): Promise<TypeLegend | null>;
+    /**
+     * Overrides when the style should be set by the fetched legend.
+     * @param legend
+     */
+    onSetStyleAccordingToLegend(legend: TypeLegend): void;
     /**
      * Overrides when the layer gets in loaded status.
      */
@@ -120,10 +129,10 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      */
     applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
     /**
-     * Gets the bounds of the layer and returns updated bounds.
+     * Overrides the way to get the bounds for this layer type.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    getBounds(): Extent | undefined;
+    onGetBounds(): Extent | undefined;
     /**
      * Sends a query to get ESRI Dynamic feature geometries and calculates an extent from them.
      * @param {string[]} objectIds - The IDs of the features to calculate the extent from.

@@ -10,11 +10,11 @@ import { TypeCGPV } from '@/core/types/global-types';
 export * from './core/types/external-types';
 export declare const api: API;
 /**
- * Function to unmount a map element
+ * Safely unmounts a map and cleans up its resources
  *
  * @param {string} mapId - The map id to unmount
  */
-export declare function unmountMap(mapId: string): void;
+export declare function unmountMap(mapId: string, mapContainer: HTMLElement): void;
 /**
  * Initialize a basic div from a function call.
  * GV The div MUST NOT have a geoview-map class or a warning will be shown.

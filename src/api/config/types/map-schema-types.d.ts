@@ -35,6 +35,9 @@ export type TypeFooterBarProps = {
     collapsed: boolean;
     selectedTab: TypeValidFooterBarTabsCoreProps;
     selectedLayersLayerPath: string;
+    selectedDataTableLayerPath: string;
+    selectedGeoChartLayerPath: string;
+    selectedTimeSliderLayerPath: string;
 };
 /** Supported app bar values. */
 export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'aoi-panel' | 'custom-legend' | 'geochart' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers';
@@ -46,6 +49,9 @@ export type TypeAppBarProps = {
     collapsed: boolean;
     selectedTab: TypeValidAppBarCoreProps;
     selectedLayersLayerPath: string;
+    selectedDataTableLayerPath: string;
+    selectedGeoChartLayerPath: string;
+    selectedTimeSliderLayerPath: string;
 };
 /** Overview map options. Default none. */
 export type TypeOverviewMapProps = {

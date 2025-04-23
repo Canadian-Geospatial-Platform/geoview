@@ -1,3 +1,4 @@
+import { MapBrowserEvent } from 'ol';
 import { ReadOptions } from 'ol/format/Feature';
 import Geometry from 'ol/geom/Geometry';
 import { Style } from 'ol/style';
@@ -13,6 +14,7 @@ import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
 import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
+import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 export declare const layerTypes: Record<"CSV" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/geo/layer/geoview-layers/abstract-geoview-layers").TypeGeoviewLayerType>;
 /**
  * Fetch the json response from the ESRI map server to get REST endpoint metadata
@@ -176,7 +178,7 @@ export declare function getArea(geometry: Geometry): number;
  */
 export declare function getLength(geometry: Geometry): number;
 /**
- * Calculate distance along a path define by array of Coordinates
+ * Calculates distance along a path define by array of Coordinates
  * @param  {Coordinate[]} coordinates - Array of corrdinates
  * @param {string} inProj - Input projection (EPSG:4326, EPSG:3978, ESPG:3857)
  * @param {string} outProj - Output projection (EPSG:3978, ESPG:3857)
@@ -187,7 +189,7 @@ export declare function calculateDistance(coordinates: Coordinate[], inProj: str
     sections: number[];
 };
 /**
- * Get meters per pixel for different projections
+ * Gets meters per pixel for different projections
  * @param {TypeValidMapProjectionCodes} projection - The projection of the map
  * @param {number} resolution - The resolution of the map
  * @param {number?} lat - The latitude, only needed for Web Mercator
@@ -195,22 +197,29 @@ export declare function calculateDistance(coordinates: Coordinate[], inProj: str
  */
 export declare function getMetersPerPixel(projection: TypeValidMapProjectionCodes, resolution: number, lat?: number): number;
 /**
- * Convert a map scale to zoom level
+ * Converts a map scale to zoom level
  * @param view The view for converting the scale
  * @param targetScale The desired scale (e.g. 50000 for 1:50,000)
  * @returns number representing the closest zoom level for the given scale
  */
 export declare const getZoomFromScale: (view: View, targetScale: number | undefined, dpiValue?: number) => number | undefined;
 /**
- * Convert a map scale to zoom level
+ * Converts a map scale to zoom level
  * @param view The view for converting the zoom
  * @param zoom The desired zoom (e.g. 50000 for 1:50,000)
  * @returns number representing the closest scale for the given zoom number
  */
 export declare const getScaleFromZoom: (view: View, zoom: number) => number | undefined;
 /**
- * Get map scale for Web Mercator or Lambert Conformal Conic projections
+ * Gets map scale for Web Mercator or Lambert Conformal Conic projections
  * @param view The view to get the current scale from
  * @returns number representing scale (e.g. 50000 for 1:50,000)
  */
 export declare const getMapScale: (view: View) => number | undefined;
+/**
+ * Gets the pointer position information from a Map Event and a specified projection.
+ * @param {MapEvent} mapEvent - The map event
+ * @param {string} projCode - The map projection code
+ * @returns {TypeMapMouseInfo} An object representing pointer position information
+ */
+export declare const getPointerPositionFromMapEvent: (mapEvent: MapBrowserEvent, projCode: string) => TypeMapMouseInfo;

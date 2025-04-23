@@ -6,4 +6,4 @@ import { SxStyles } from '@/ui/style/types';
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export declare const getSxClasses: (theme: Theme, isMapFullScreen: boolean, footerPanelResizeValue: number) => SxStyles;
+export declare const getSxClasses: (theme: Theme, isMapFullScreen: boolean, footerPanelResizeValue: number, mapHeight: number) => SxStyles;

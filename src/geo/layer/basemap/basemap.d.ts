@@ -3,9 +3,11 @@ import BaseLayer from 'ol/layer/Base';
 import OLMap from 'ol/Map';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { EventDelegateBase } from '@/app';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
+import { EventDelegateBase } from '@/api/events/event-helper';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { MapViewer } from '@/geo/map/map-viewer';
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
  * can be filtered by projection (currently only WM and LCC projections are listed,
@@ -14,9 +16,10 @@ import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
  * @exports
  * @class Basemap
  */
-export declare class Basemap {
+export declare class BasemapApi {
     #private;
     static REQUEST_DELAY_MAX: number;
+    mapViewer: MapViewer;
     activeBasemap?: TypeBasemapProps;
     defaultOrigin?: number[];
     defaultResolutions?: number[];
@@ -24,13 +27,12 @@ export declare class Basemap {
     overviewMap?: TypeBasemapProps;
     overviewMapCtrl?: OLOverviewMap;
     basemapOptions: TypeBasemapOptions;
-    mapId: string;
     /**
-     * Initialize basemap.
+     * Initialize basemap api
+     * @param {string} mapViewer - The map viewer.
      * @param {TypeBasemapOptions} basemapOptions - Optional basemap option properties, passed in from map config.
-     * @param {string} mapId - The map id.
      */
-    constructor(basemapOptions: TypeBasemapOptions, mapId: string);
+    constructor(mapViewer: MapViewer, basemapOptions: TypeBasemapOptions);
     /**
      * Basemap list
      */
@@ -62,6 +64,10 @@ export declare class Basemap {
      */
     loadDefaultBasemaps(projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<void>;
     /**
+     * Clears the basemap layers from the map.
+     */
+    clearBasemaps(): void;
+    /**
      * Set the current basemap and update the basemap layers on the map.
      * @param {TypeBasemapProps} basemap - The basemap.
      */
@@ -71,15 +77,25 @@ export declare class Basemap {
      */
     refreshBasemap(): void;
     /**
-     * Registers a component removed event callback.
-     * @param {MapComponentRemovedDelegate} callback - The callback to be executed whenever the event is emitted
+     * Registers a basemap changed event callback.
+     * @param {BasemapChangedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onBasemapChanged(callback: BasemapChangedDelegate): void;
     /**
-     * Unregisters a component removed event callback.
-     * @param {MapComponentRemovedDelegate} callback - The callback to stop being called whenever the event is emitted
+     * Unregisters a basemap changed event callback.
+     * @param {BasemapChangedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
-    offMapLanguageChanged(callback: BasemapChangedDelegate): void;
+    offBasemapChanged(callback: BasemapChangedDelegate): void;
+    /**
+     * Registers a basemap error event callback.
+     * @param {BasemapErrorDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onBasemapError(callback: BasemapErrorDelegate): void;
+    /**
+     * Unregisters a basemap error event callback.
+     * @param {BasemapErrorDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offBasemapError(callback: BasemapErrorDelegate): void;
 }
 /**
  * Define an event for the delegate.
@@ -90,5 +106,15 @@ export type BasemapChangedEvent = {
 /**
  * Define a delegate for the event handler function signature.
  */
-type BasemapChangedDelegate = EventDelegateBase<Basemap, BasemapChangedEvent, void>;
+type BasemapChangedDelegate = EventDelegateBase<BasemapApi, BasemapChangedEvent, void>;
+/**
+ * Define an event for the delegate.
+ */
+export type BasemapErrorEvent = {
+    error: GeoViewError;
+};
+/**
+ * Define a delegate for the event handler function signature.
+ */
+type BasemapErrorDelegate = EventDelegateBase<BasemapApi, BasemapErrorEvent, void>;
 export {};

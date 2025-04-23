@@ -16,7 +16,6 @@ import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/laye
  */
 export declare class GVWMS extends AbstractGVRaster {
     #private;
-    WMSStyles: never[];
     /**
      * Constructs a GVWMS layer to manage an OpenLayer layer.
      * @param {string} mapId - The map id
@@ -41,22 +40,28 @@ export declare class GVWMS extends AbstractGVRaster {
     getLayerConfig(): OgcWmsLayerEntryConfig;
     /**
      * Overrides the return of feature information at a given pixel location.
-     * @param {Coordinate} location - The pixel coordinate that will be used by the query.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {Pixel} location - The pixel coordinate that will be used by the query.
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtPixel(location: Pixel, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at a given coordinate.
      * @param {Coordinate} location - The coordinate that will be used by the query.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
      * @param {Coordinate} lnglat - The coordinate that will be used by the query.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
+     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+     * @param {AbortController?} abortController - The optional abort controller.
+     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null>;
+    protected getFeatureInfoAtLongLat(lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the fetching of the legend for a WMS layer.
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
@@ -82,8 +87,8 @@ export declare class GVWMS extends AbstractGVRaster {
      */
     applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
     /**
-     * Gets the bounds of the layer and returns updated bounds.
+     * Overrides the way to get the bounds for this layer type.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    getBounds(): Extent | undefined;
+    onGetBounds(): Extent | undefined;
 }
