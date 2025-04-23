@@ -87,7 +87,8 @@
     "cesium": "~1.128.0",
     "ol-cesium": "~2.17.0",
     "olcs": "~2.22.1",
-    "@cesium/engine": "~16.0.0"
+    "@cesium/engine": "~16.0.0",
+    "resium": "~1.19.0-beta.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.25.7",

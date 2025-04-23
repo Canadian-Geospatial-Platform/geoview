@@ -215,6 +215,9 @@ importers:
       react-test-renderer:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
+      resium:
+        specifier: ~1.19.0-beta.1
+        version: 1.19.0-beta.1(cesium@1.128.0)(react-dom@18.3.1)(react@18.3.1)
       sanitize-html:
         specifier: ^2.13.1
         version: 2.14.0
@@ -9200,6 +9203,19 @@ packages:
   /requires-port@1.0.0:
     resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==}
     dev: true
+
+  /resium@1.19.0-beta.1(cesium@1.128.0)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-0LRb4z2/tkjs0Pe8gD7X59S0E6OPC98yo6ayM13pY/XCz2T5OJyA+hR7q3hH2vmPPzgOtQBrkGd9IBAW9a8uNQ==}
+    engines: {node: '>=20.11.0'}
+    peerDependencies:
+      cesium: 1.x
+      react: '>=18.2.0 <20'
+      react-dom: '>=18.2.0 <20'
+    dependencies:
+      cesium: 1.128.0
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+    dev: false
 
   /resolve-cwd@3.0.0:
     resolution: {integrity: sha512-OrZaX2Mb+rJCpH/6CpSqt9xFVpN++x01XnN2ie9g6P5/3xelLAkXWVADpdz1IHD/KFfEXyE6V0U01OQ3UO2rEg==}

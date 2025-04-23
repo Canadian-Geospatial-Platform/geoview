@@ -9,6 +9,7 @@ import { AppBar } from '@/core/components/app-bar/app-bar';
 import { NavBar } from '@/core/components/nav-bar/nav-bar';
 import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { MapInfo } from '@/core/components/map-info/map-info';
+import { CesiumMap } from '@/core/components/cesium/cesium-map';
 
 import { Box, CircularProgress, Link, Modal, Snackbar, Button, TypeModalProps, ModalApi, ModalEvent } from '@/ui';
 import { getShellSxClasses } from './containers-style';
@@ -17,6 +18,7 @@ import {
   useAppCircularProgressActive,
   useAppFullscreenActive,
   useAppGeoviewHTMLElement,
+  useAppShow3dMap,
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   useUIActiveFocusItem,
@@ -223,9 +225,7 @@ export function Shell(props: ShellProps): JSX.Element {
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             {mapLoaded && <AppBar api={mapViewer.appBarApi} />}
             <MapInfo />
-            <Box sx={sxClasses.mapContainer}>
-              <Map viewer={mapViewer} />
-            </Box>
+            <Box sx={sxClasses.mapContainer}> {useAppShow3dMap() ? <CesiumMap /> : <Map viewer={mapViewer} />} </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
             <Snackbar
               snackBarId={mapViewer.mapId}

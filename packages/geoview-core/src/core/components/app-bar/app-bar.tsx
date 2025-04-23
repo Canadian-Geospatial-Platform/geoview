@@ -17,7 +17,6 @@ import {
   SendIcon,
   LayersOutlinedIcon,
 } from '@/ui';
-
 import { Plugin } from '@/api/plugin/plugin';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
@@ -29,7 +28,12 @@ import {
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import {
+  useAppFullscreenActive,
+  useAppGeoviewHTMLElement,
+  useAppShow3dMap,
+  useAppStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { Guide, Legend, DetailsPanel, AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent, Datapanel, LayersPanel } from '@/core/components';
@@ -45,9 +49,6 @@ import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { OpenIn3dButton } from '../open-in-3d-button/open-in-3d-button';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import OSM from 'ol/source/OSM';
-import TileLayer from 'ol/layer/Tile';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -65,9 +66,6 @@ export interface ButtonPanelGroupType {
   [panelId: string]: ButtonPanelType;
 }
 
-let basemapLayerOlCs = new TileLayer({
-  source: new OSM(),
-});
 /**
  * Create an app-bar with buttons that can open a panel
  */
@@ -96,10 +94,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const { hideClickMarker } = useMapStoreActions();
 
   const isMapFullScreen = useAppFullscreenActive();
+  const show3dMap = useAppShow3dMap();
 
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
   const { setActiveAppBarTab } = useUIStoreActions();
+  const { setShow3dMap } = useAppStoreActions();
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
@@ -165,17 +165,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Get the button panel
       const buttonPanel = buttonPanelGroups[groupName][buttonId];
       if (groupName === 'openIn3dButton') {
-        let mapViewer = MapEventProcessor.getMapViewer(mapId);
-        if (!buttonPanel.panel?.status) {
-          mapViewer.map.addLayer(basemapLayerOlCs);
-        } else {
-          mapViewer.map.removeLayer(basemapLayerOlCs);
-        }
-        mapViewer.cmap.setEnabled(!buttonPanel.panel?.status);
+        setShow3dMap(!show3dMap);
       }
       setActiveAppBarTab(buttonId, groupName, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
-    [buttonPanelGroups, setActiveAppBarTab]
+    [buttonPanelGroups, setActiveAppBarTab, show3dMap, setShow3dMap]
   );
 
   const handleGeneralCloseClicked = useCallback(

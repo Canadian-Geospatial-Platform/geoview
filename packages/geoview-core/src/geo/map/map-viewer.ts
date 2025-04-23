@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Root } from 'react-dom/client';
-import { get as getProjection } from 'ol/proj.js';
 import { i18n } from 'i18next';
 
 import { debounce } from 'lodash';
@@ -260,18 +259,6 @@ export class MapViewer {
         Projection.PROJECTION_NAMES.LNGLAT,
         projection.getCode()
       );
-    // const initialMap = new OLMap({
-    //   target: mapElement,
-    //   layers: [
-    //     new TileLayer({
-    //       source: new OSM(),
-    //     }),
-    //   ],
-    //   view: new View({
-    //     center: [0, 0],
-    //     zoom: 2,
-    //   }),
-    // });
     const initialMap = new OLMap({
       target: mapElement,
       layers: [createEmptyBasemap()],
@@ -296,7 +283,6 @@ export class MapViewer {
 
     this.map = initialMap;
     this.initMap();
-    this.cmap = new OLCesium({ map: initialMap, target: `mapTargetElement-${this.mapId}` });
     return initialMap;
   }
 
