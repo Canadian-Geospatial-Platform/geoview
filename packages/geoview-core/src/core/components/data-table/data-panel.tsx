@@ -206,6 +206,8 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   }, [tabGroup, isOpen, setSelectedLayerPath, appBarComponents]);
 
   // If has selected layer on load and the data for selectedLayerPath is empty, trigger a query
+  // TODO Occasionally, setting the default selected layer can have unexpected behaviours.
+  // TO.DOCONT e.g. Refresh the page, switch tabs in the browser, come back to tab when done. The layer isn't selected
   useEffect(() => {
     if (isFirstLoad.current) {
       isFirstLoad.current = false;
