@@ -9,7 +9,7 @@ import { Feature } from 'ol';
 import initSqlJs, { SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
-import { Cast, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
@@ -22,13 +22,13 @@ import {
   TypePolygonVectorConfig,
   TypeFillStyle,
   CONST_LAYER_ENTRY_TYPES,
-} from '@/geo/map/map-schema-types';
+  TypeOutfields,
+} from '@/api/config/types/map-schema-types';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { TypeOutfields } from '@/api/config/types/map-schema-types';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';

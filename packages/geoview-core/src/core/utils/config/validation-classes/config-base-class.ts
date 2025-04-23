@@ -6,9 +6,9 @@ import {
   TypeLayerInitialSettings,
   TypeLayerStatus,
   layerEntryIsGroupLayer,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';

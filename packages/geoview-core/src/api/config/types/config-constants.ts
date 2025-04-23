@@ -1,8 +1,8 @@
 // TODO: When we are done with the config extraction, do a review of all the constants, types and utilities to
 // TO.DOCONT: remove code duplication.
 
-import { Cast, LayerEntryTypesKey, LayerTypesKey } from '@config/types/config-types';
-import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
+import { Cast, LayerEntryTypesKey, LayerTypesKey } from '@/api/config/types/config-types';
+import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import {
   TypeBasemapId,
   TypeDisplayLanguage,
@@ -12,7 +12,7 @@ import {
   TypeValidMapProjectionCodes,
   TypeValidVersions,
   TypeGeoviewLayerType,
-} from '@config/types/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 
 /** The default geocore url */
 export const CV_CONFIG_GEOCORE_URL = 'https://geocore.api.geo.ca';
@@ -28,6 +28,7 @@ export const CV_CONFIG_METADATA_RECORDS_URL = '';
 
 export const CV_CONFIG_GEOCORE_TYPE = 'geoCore';
 
+// TODO: Remove GEOCORE after refactor
 // Constants for the layer config types
 export const CV_CONST_SUB_LAYER_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType> = {
   VECTOR: 'vector',
@@ -35,6 +36,7 @@ export const CV_CONST_SUB_LAYER_TYPES: Record<LayerEntryTypesKey, TypeLayerEntry
   RASTER_TILE: 'raster-tile',
   RASTER_IMAGE: 'raster-image',
   GROUP: 'group',
+  GEOCORE: 'geoCore',
 };
 
 /**

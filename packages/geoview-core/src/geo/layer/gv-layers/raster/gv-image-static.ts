@@ -4,7 +4,7 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Extent } from 'ol/extent';
 import axios from 'axios';
 
-import { Cast, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';

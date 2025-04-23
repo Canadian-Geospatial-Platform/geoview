@@ -1,5 +1,5 @@
 import { useStore } from 'zustand';
-import { TypeDisplayLanguage, TypeDisplayTheme } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/config/types/map-schema-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';

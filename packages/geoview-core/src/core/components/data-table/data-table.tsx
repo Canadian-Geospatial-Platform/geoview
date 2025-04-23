@@ -41,7 +41,7 @@ import { useUIFooterPanelResizeValue, useUIStoreActions } from '@/core/stores/st
 import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import { useLightBox } from '@/core/components/common';

@@ -1,8 +1,8 @@
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
-import { Extent } from '@config/types/map-schema-types';
-import { WmsLayerConfig } from '@config/types/classes/geoview-config/raster-config/wms-config';
-import { isvalidComparedToInternalSchema } from '@config/utils';
-import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
+import { GroupLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
+import { Extent } from '@/api/config/types/map-schema-types';
+import { WmsLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/wms-config';
+import { isvalidComparedToInternalSchema } from '@/api/config/utils';
+import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 

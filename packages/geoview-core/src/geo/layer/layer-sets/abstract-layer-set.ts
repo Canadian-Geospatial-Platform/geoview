@@ -8,7 +8,7 @@ import {
   TypeLocation,
   TypeResultSet,
   TypeResultSetEntry,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';

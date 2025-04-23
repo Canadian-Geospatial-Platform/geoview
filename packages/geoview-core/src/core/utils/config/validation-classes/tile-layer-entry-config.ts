@@ -1,4 +1,4 @@
-import { CONST_LAYER_ENTRY_TYPES, TypeSourceTileInitialConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeSourceTileInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************

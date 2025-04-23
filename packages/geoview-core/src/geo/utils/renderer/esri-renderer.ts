@@ -1,8 +1,7 @@
 import { asString } from 'ol/color';
 
-import { TypeKindOfVectorSettings } from '@config/types/map-schema-types';
-
 import {
+  TypeKindOfVectorSettings,
   isFilledPolygonVectorConfig,
   isIconSymbolVectorConfig,
   isLineStringVectorConfig,
@@ -18,7 +17,8 @@ import {
   TypeLayerStyleSettings,
   TypeStyleGeometry,
   TypeSymbol,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
+
 import { logger } from '@/core/utils/logger';
 
 /*

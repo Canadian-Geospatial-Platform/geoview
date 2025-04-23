@@ -1,4 +1,11 @@
-import { Extent, TypeLayerControls } from '@config/types/map-schema-types';
+import {
+  Extent,
+  TypeLayerControls,
+  TypeLayerStyleSettings,
+  TypeFeatureInfoEntry,
+  TypeStyleGeometry,
+  layerEntryIsGroupLayer,
+} from '@/api/config/types/map-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
   CONST_LAYER_TYPES,
@@ -12,7 +19,6 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeLayerStyleSettings, TypeFeatureInfoEntry, TypeStyleGeometry, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from './map-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState

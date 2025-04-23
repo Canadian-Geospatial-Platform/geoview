@@ -37,7 +37,7 @@ import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
-import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/api/config/types/config-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
 import { CONTAINER_TYPE } from '@/core/utils/constant';

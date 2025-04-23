@@ -14,7 +14,7 @@ import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
 import { ColumnsType } from './data-table-types';
-import { TypeFeatureInfoEntry } from '@/geo';
+import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { SxStyles } from '@/ui/style/types';
 
 // GV: Disabled prop-types for this to work. From the react 19 ugprade guide it seems that prop-types are deprecated.

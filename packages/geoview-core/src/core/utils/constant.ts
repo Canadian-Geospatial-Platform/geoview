@@ -39,8 +39,6 @@ export const FEATURE_INFO_STATUS = {
   ERROR: 'error',
 } as const;
 
-export const VECTOR_LAYER = { csv: '', esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
-
 export const ARROW_KEY_CODES: string[] = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLefts'];
 export const ARROW_KEYS_WITH_SPACE: string[] = [...ARROW_KEY_CODES, 'Space'];
 
@@ -94,5 +92,3 @@ export const CONTAINER_TYPE = {
   APP_BAR: 'appBar',
   FOOTER_BAR: 'footerBar',
 } as const;
-
-export const WMS_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy?';

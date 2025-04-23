@@ -1,5 +1,5 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { QueryType, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { QueryType, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';

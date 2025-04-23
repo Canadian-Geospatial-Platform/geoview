@@ -1,8 +1,8 @@
-import { toJsonObject, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { TypeDisplayLanguage, TypeStyleGeometry } from '@config/types/map-schema-types';
-import { EsriGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/esri-group-layer-config';
-import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
+import { toJsonObject, TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { TypeDisplayLanguage, TypeStyleGeometry } from '@/api/config/types/map-schema-types';
+import { EsriGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/esri-group-layer-config';
+import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 import { getXMLHttpRequest } from '@/core/utils/utilities';

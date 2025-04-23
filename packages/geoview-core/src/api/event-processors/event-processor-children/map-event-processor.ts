@@ -6,7 +6,7 @@ import { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 
-import { CV_MAP_EXTENTS } from '@config/types/config-constants';
+import { CV_MAP_EXTENTS } from '@/api/config/types/config-constants';
 import {
   TypeBasemapOptions,
   TypeInteraction,
@@ -18,11 +18,6 @@ import {
   TypePointMarker,
   TypeHighlightColors,
   TypeMapViewSettings,
-} from '@config/types/map-schema-types';
-import { api } from '@/app';
-import { LayerApi } from '@/geo/layer/layer';
-import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import {
   MapConfigLayerEntry,
   TypeFeatureInfoEntry,
   TypeGeometry,
@@ -30,7 +25,10 @@ import {
   TypeLayerEntryConfig,
   TypeMapConfig,
   TypeMapFeaturesInstance,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
+import { api } from '@/app';
+import { LayerApi } from '@/geo/layer/layer';
+import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
@@ -470,6 +468,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Note: It seems that since OpenLayers 10.5 OpenLayers throws an exception about this. So this line was added.
       this.getMapViewer(mapId).basemap.clearBasemaps();
 
+      // Set overview map visibility to false when reproject to remove it from the map as it is vector tile
+      MapEventProcessor.setOverviewMapVisibility(mapId, false);
+
       // Remove all vector tiles from the map, because they don't allow on-the-fly reprojection (OpenLayers 10.5 exception issue)
       // GV Experimental code, to test further... not problematic to keep it for now
       this.getMapViewerLayerAPI(mapId)
@@ -498,6 +499,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // When the map projection is changed, all layer bounds must be recalculated
       this.getMapViewer(mapId).layer.recalculateBoundsAll();
+
+      // Reset the map object of overview map control
+      MapEventProcessor.setOverviewMapVisibility(mapId, true);
     } finally {
       // Remove circular progress as refresh is done
       AppEventProcessor.setCircularProgress(mapId, false);
@@ -1431,7 +1435,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // eslint-disable-next-line no-param-reassign
       else if (removeUnlisted) geoviewLayerConfig.geoviewLayerName = '';
       if (geoviewLayerConfig.listOfLayerEntryConfig?.length)
-        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig, removeUnlisted);
+        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig as TypeLayerEntryConfig[], removeUnlisted);
     });
 
     return mapConfig;

@@ -8,7 +8,7 @@ import {
   TypeGeometry,
   TypeQueryStatus,
   TypeFieldEntry,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 

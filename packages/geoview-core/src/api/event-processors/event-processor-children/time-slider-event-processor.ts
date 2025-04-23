@@ -5,7 +5,7 @@ import {
   TypeTimeSliderValues,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/api/config/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';

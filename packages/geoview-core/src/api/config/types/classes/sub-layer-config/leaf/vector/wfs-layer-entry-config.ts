@@ -1,5 +1,5 @@
-import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
-import { Cast, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
+import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@/api/config/types/config-constants';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import {
   TypeLayerStyleConfig,
   TypeLayerEntryType,
@@ -7,11 +7,11 @@ import {
   Extent,
   TypeFeatureInfoLayerConfig,
   TypeOutfields,
-} from '@config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
-import { WfsLayerConfig } from '@config/types/classes/geoview-config/vector-config/wfs-config';
-import { isvalidComparedToInternalSchema } from '@config/utils';
-import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
+} from '@/api/config/types/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
+import { WfsLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/wfs-config';
+import { isvalidComparedToInternalSchema } from '@/api/config/utils';
+import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';

@@ -3,7 +3,7 @@ import { useAppDisplayLanguageById, useAppStoreActions } from 'geoview-core/src/
 import { TypeGeochartResultSetEntry } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
 import { MapEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/map-event-processor';
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
-import { TypeFeatureInfoEntry, TypeLayerEntryConfig } from 'geoview-core/src/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeLayerEntryConfig } from 'geoview-core/src/api/config/types/map-schema-types';
 import { logger } from 'geoview-core/src/core/utils/logger';
 import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';

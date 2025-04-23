@@ -20,10 +20,13 @@ import {
   codedValueType,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
-} from '@/geo/map/map-schema-types';
+  TypeOutfieldsType,
+  TypeStyleGeometry,
+  TypeValidMapProjectionCodes,
+  TypeIconSymbolVectorConfig,
+} from '@/api/config/types/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain, parseDateTimeValuesEsriDynamic } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { TypeOutfieldsType, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -894,7 +897,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
             src: info.imageData,
             width: info.width,
             height: info.height,
-          },
+          } as TypeIconSymbolVectorConfig,
         };
         uniqueValueStyleInfo.push(styleInfo);
       });

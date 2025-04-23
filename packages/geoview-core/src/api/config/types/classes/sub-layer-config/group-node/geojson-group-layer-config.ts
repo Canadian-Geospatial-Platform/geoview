@@ -1,10 +1,10 @@
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
-import { isvalidComparedToInternalSchema } from '@config/utils';
-import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
-import { GeoJsonLayerConfig } from '@config/types/classes/geoview-config/vector-config/geojson-config';
-import { Cast } from '@config/types/config-types';
-import { Extent, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { merge } from 'lodash';
+import { GroupLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
+import { isvalidComparedToInternalSchema } from '@/api/config/utils';
+import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
+import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/geojson-config';
+import { Cast } from '@/api/config/types/config-types';
+import { Extent, TypeLayerInitialSettings } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 

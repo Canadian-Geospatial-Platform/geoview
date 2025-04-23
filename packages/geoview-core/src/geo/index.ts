@@ -30,7 +30,6 @@ export * from './layer/layer-sets/hover-feature-info-layer-set';
 export * from './layer/layer-sets/abstract-layer-set';
 export * from './layer/layer-sets/legends-layer-set';
 export * from './layer/layer';
-export * from './map/map-schema-types';
 export * from './map/map-viewer';
 export * from './map/feature-highlight';
 export * from './utils/projection';

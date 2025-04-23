@@ -1,5 +1,6 @@
-import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
-import { Cast } from '@config/types/config-types';
+import { merge } from 'lodash';
+import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@/api/config/types/config-constants';
+import { Cast } from '@/api/config/types/config-types';
 import {
   TypeLayerStyleConfig,
   TypeLayerEntryType,
@@ -8,13 +9,12 @@ import {
   TypeStyleGeometry,
   TypeLayerInitialSettings,
   Extent,
-} from '@config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
-import { GeoJsonLayerConfig } from '@config/types/classes/geoview-config/vector-config/geojson-config';
-import { isvalidComparedToInternalSchema } from '@config/utils';
-import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
+} from '@/api/config/types/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
+import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/geojson-config';
+import { isvalidComparedToInternalSchema } from '@/api/config/utils';
+import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 
-import { merge } from 'lodash';
 import { logger } from '@/core/utils/logger';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { TimeDimension } from '@/core/utils/date-mgt';

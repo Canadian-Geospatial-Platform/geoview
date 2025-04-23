@@ -20,15 +20,17 @@ import {
   VALID_DISPLAY_LANGUAGE,
   VALID_DISPLAY_THEME,
   VALID_PROJECTION_CODES,
-} from '@config/types/config-constants';
+} from '@/api/config/types/config-constants';
 import {
+  TypeMapFeaturesInstance,
   TypeViewSettings,
   TypeInteraction,
   TypeValidMapProjectionCodes,
   TypeDisplayLanguage,
   TypeDisplayTheme,
   TypeMapViewSettings,
-} from '@config/types/map-schema-types';
+  MapConfigLayerEntry,
+} from '@/api/config/types/map-schema-types';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
 
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
@@ -36,7 +38,7 @@ import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
-import { TypeMapFeaturesInstance, TypeOrderedLayerInfo, api, unmountMap } from '@/app';
+import { api, unmountMap } from '@/app';
 import { Plugin } from '@/api/plugin/plugin';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 
@@ -57,12 +59,14 @@ import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { createEmptyBasemap, getPointerPositionFromMapEvent } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
-import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
-import { GVGroupLayer } from '../layer/gv-layers/gv-group-layer';
+import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -315,7 +319,8 @@ export class MapViewer {
     this.layer = new LayerApi(this);
 
     // Load the list of geoview layers in the config to add all layers on the map
-    this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig).catch((error) => {
+    // TODO: refactor - remove the cast as MapConfigLayerEntry[] everywhere
+    this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[]).catch((error) => {
       // Log
       logger.logPromiseFailed('loadListOfGeoviewLayer in initMap in MapViewer', error);
     });
@@ -579,7 +584,7 @@ export class MapViewer {
         // Check if all registered layers are registered
         const [allGood, layersCount] = this.layer.checkLayerStatus(
           'registered',
-          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[],
           (layerConfig) => {
             logger.logTraceDetailed('checkMapReady - 1 - waiting on layer registration...', layerConfig.geoviewLayerConfig.geoviewLayerId);
           }
@@ -712,7 +717,7 @@ export class MapViewer {
         // Check if all registered layers are processed
         const [allGood, layersCount] = this.layer.checkLayerStatus(
           'processed',
-          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[],
           (layerConfig) => {
             logger.logTraceDetailed('checkMapReady - 2 - waiting on layer processed...', layerConfig.geoviewLayerConfig.geoviewLayerId);
           }
@@ -749,7 +754,7 @@ export class MapViewer {
         // Check if all registered layers are loaded
         const [allGood, layersCount] = this.layer.checkLayerStatus(
           'loaded',
-          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[],
           (layerConfig) => {
             logger.logTraceDetailed(
               'checkMapReady - 3 - waiting on layer loaded/error status...',

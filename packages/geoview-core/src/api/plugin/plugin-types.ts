@@ -1,6 +1,5 @@
-import { AnySchemaObject } from 'ajv';
 import React from 'react';
-import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonObject, TypeJsonValue, AnySchemaObject } from '@/api/config/types/config-types';
 import { API } from '@/api';
 
 /** ******************************************************************************************************************************

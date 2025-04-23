@@ -1,5 +1,5 @@
-import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
-import { TypeLayerEntryType, TypeSourceEsriImageInitialConfig, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
+import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@/api/config/types/config-constants';
+import { TypeLayerEntryType, TypeSourceEsriImageInitialConfig, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { AbstractBaseEsriLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
 
 // ========================

@@ -10,13 +10,14 @@ import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegend
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import {
-  layerEntryIsEsriDynamic,
   TypeFeatureInfoEntryPartial,
   TypeLayerStatus,
   TypeLayerStyleConfig,
   TypeResultSet,
   TypeResultSetEntry,
-} from '@/geo/map/map-schema-types';
+  TypeLayerControls,
+  layerEntryIsEsriDynamic,
+} from '@/api/config/types/map-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -24,7 +25,6 @@ import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
-import { TypeLayerControls } from '@/api/config/types/map-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 // #region INTERFACES & TYPES

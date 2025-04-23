@@ -1,4 +1,4 @@
-import { Cast, AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-core';
+import { Cast, AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-core/src/api/config/types/config-types';
 import { IconButtonPropsExtend } from 'geoview-core/src/ui/icon-button/icon-button';
 import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
