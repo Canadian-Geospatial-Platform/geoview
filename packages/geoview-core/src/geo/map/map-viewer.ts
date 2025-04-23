@@ -96,8 +96,6 @@ export class MapViewer {
   // Note: The '!' is used here, because it's being created just a bit late, but not late enough that we want to keep checking for undefined throughout the code base
   map!: OLMap;
 
-  cmap!: OLCesium;
-
   // plugins attach to the map
   plugins: TypeRecordOfPlugin = {};
 

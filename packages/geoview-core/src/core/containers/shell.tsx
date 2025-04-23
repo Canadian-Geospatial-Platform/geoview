@@ -225,7 +225,7 @@ export function Shell(props: ShellProps): JSX.Element {
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             {mapLoaded && <AppBar api={mapViewer.appBarApi} />}
             <MapInfo />
-            <Box sx={sxClasses.mapContainer}> {useAppShow3dMap() ? <CesiumMap /> : <Map viewer={mapViewer} />} </Box>
+            <Box sx={sxClasses.mapContainer}> {useAppShow3dMap() ? <CesiumMap viewer={mapViewer} /> : <Map viewer={mapViewer} />} </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
             <Snackbar
               snackBarId={mapViewer.mapId}

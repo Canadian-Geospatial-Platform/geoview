@@ -26,7 +26,6 @@ type MapProps = {
 };
 Cesium.Ion.defaultAccessToken =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2OWJhMWNjZS03NmNjLTQ0OGItOGE5MC02MzVmNjVjZjBlM2UiLCJpZCI6MTEwMDMwLCJpYXQiOjE2NjQ4NzQwNDB9.3spD2Vvdc267VZFFQozH0nxmeJRlE7dQC5QsKeiJMiY';
-(window as any).Cesium = Cesium;
 /**
  * Create a map component
  * @param {MapProps} props - Map props containing the viewer
