@@ -130,14 +130,12 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
     setterActions: {
       addTimeSliderLayer(newLayer: TimeSliderLayerSet): void {
         // Set a default displayPattern if it's undefined
-        const layerPath = Object.keys(newLayer)[0];
-        const layer = newLayer[layerPath];
-
-        // eslint-disable-next-line no-param-reassign
-        newLayer[layerPath] = {
-          ...layer,
-          displayPattern: layer.displayPattern ?? ['day', undefined],
-        };
+        Object.keys(newLayer).forEach((layerPath) => {
+          if (newLayer[layerPath].displayPattern === undefined) {
+            // eslint-disable-next-line no-param-reassign
+            newLayer[layerPath].displayPattern = ['day', undefined];
+          }
+        });
 
         set({
           timeSliderState: {
