@@ -1994,10 +1994,6 @@
           "type": "string",
           "description": "Layerpath of data table tab layer to be selected at map load"
         },
-        "selectedGeoChartLayerPath": {
-          "type": "string",
-          "description": "Layerpath of geochart tab layer to be selected at map load"
-        },
         "selectedLayersLayerPath": {
           "type": "string",
           "description": "Layerpath of layer tab layer to be selected at map load"
@@ -2062,17 +2058,9 @@
           "type": "string",
           "description": "Layerpath of data table tab layer to be selected at map load"
         },
-        "selectedGeoChartLayerPath": {
-          "type": "string",
-          "description": "Layerpath of geochart tab layer to be selected at map load"
-        },
         "selectedLayersLayerPath": {
           "type": "string",
           "description": "Layerpath of layer tab layer to be selected at map load"
-        },
-        "selectedTimeSliderLayerPath": {
-          "type": "string",
-          "description": "Layerpath of time slider tab layer to be selected at map load"
         }
       },
       "required": [
