@@ -16,7 +16,7 @@ import {
   useMapVisibleRangeLayers,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/api/config/types/map-schema-types';
 
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';

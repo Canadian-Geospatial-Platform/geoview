@@ -13,14 +13,14 @@ import {
   TypeLayerStyleConfigInfo,
   TypeLayerStyleSettings,
   TypeLayerStyleConfig,
-} from '@config/types/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 
 import {
   isFilledPolygonVectorConfig,
   isIconSymbolVectorConfig,
   isLineStringVectorConfig,
   isSimpleSymbolVectorConfig,
-} from '@config/types/type-guards';
+} from '@/api/config/types/type-guards';
 
 import { logger } from '@/core/utils/logger';
 

@@ -1,4 +1,4 @@
-import { ConfigApi } from '@config/config-api';
+import { ConfigApi } from '@/api/config/config-api';
 
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { Plugin } from '@/api/plugin/plugin';

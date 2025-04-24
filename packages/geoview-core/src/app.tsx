@@ -12,8 +12,8 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
+import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
+import { MapConfigLayerEntry, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
@@ -178,7 +178,7 @@ async function renderMap(mapElement: Element): Promise<void> {
   const config = new Config(lang);
   const configObj = config.initializeMapConfig(
     configuration.mapId,
-    configuration!.map!.listOfGeoviewLayerConfig!,
+    configuration!.map!.listOfGeoviewLayerConfig! as MapConfigLayerEntry[], // TODO: refactor - remove cast after
     (errorKey: string, params: string[]) => {
       // Wait for the map viewer to get loaded in the api
       whenThisThen(() => api.getMapViewer(configuration.mapId))

@@ -15,7 +15,7 @@ import { Extent } from 'ol/extent';
 
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { logger } from '@/core/utils/logger';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 
 /**
  * Class used to handle functions for transforming projections

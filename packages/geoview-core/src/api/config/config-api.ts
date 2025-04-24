@@ -1,17 +1,17 @@
 import cloneDeep from 'lodash/cloneDeep';
 
-import { CV_DEFAULT_MAP_FEATURE_CONFIG, CV_CONFIG_GEOCORE_TYPE, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
-import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray, Cast } from '@config/types/config-types';
-import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
-import { UUIDmapConfigReader } from '@config/uuid-config-reader';
+import { CV_DEFAULT_MAP_FEATURE_CONFIG, CV_CONFIG_GEOCORE_TYPE, CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray, Cast } from '@/api/config/types/config-types';
+import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
+import { UUIDmapConfigReader } from '@/api/config/uuid-config-reader';
 import {
   AbstractGeoviewLayerConfig,
   EntryConfigBaseClass,
   TypeDisplayLanguage,
   TypeGeoviewLayerType,
   TypeLayerStyleConfig,
-} from '@config/types/map-schema-types';
-import { MapConfigError } from '@config/types/classes/config-exceptions';
+} from '@/api/config/types/map-schema-types';
+import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';

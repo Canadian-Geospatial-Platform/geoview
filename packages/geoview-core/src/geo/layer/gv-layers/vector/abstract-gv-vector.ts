@@ -15,12 +15,11 @@ import { ProjectionLike } from 'ol/proj';
 import { FilterNodeArrayType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { featureInfoGetFieldType, parseDateTimeValuesVector } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { getExtentUnion } from '@/geo/utils/utilities';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**

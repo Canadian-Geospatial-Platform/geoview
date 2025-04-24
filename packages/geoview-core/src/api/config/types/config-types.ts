@@ -12,6 +12,7 @@ export function Cast<TargetType = never>(p: unknown): TargetType {
 /**
  * General Json type
  */
+export type { AnySchemaObject } from 'ajv';
 /**
  * Type used for a value within a json object
  */
@@ -42,8 +43,9 @@ export function toJsonObject(p: unknown): TypeJsonObject {
   return p as TypeJsonObject;
 }
 
+// TODO: Remove GEOCORE after refactor
 // Definition of the keys used to create the constants of the GeoView layer
-export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP';
+export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE';
 
 // Definition of the keys used to create the constants of the GeoView layer
 export type LayerTypesKey =

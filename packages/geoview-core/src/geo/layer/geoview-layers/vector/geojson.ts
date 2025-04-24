@@ -12,10 +12,10 @@ import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  TypeBaseSourceVectorInitialConfig,
-} from '@/geo/map/map-schema-types';
+  TypeBaseVectorSourceInitialConfig,
+} from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { Cast, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -204,7 +204,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
+    readOptions.dataProjection = (layerConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.url = layerConfig.source!.dataAccessPath!;
     // eslint-disable-next-line no-param-reassign

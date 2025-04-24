@@ -2,7 +2,7 @@ import { Coordinate } from 'ol/coordinate';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry, TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, TypeResultSet } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, TypeResultSet } from '@/api/config/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { EventType, AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';

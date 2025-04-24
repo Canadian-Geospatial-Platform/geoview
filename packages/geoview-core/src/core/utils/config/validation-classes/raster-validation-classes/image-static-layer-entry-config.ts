@@ -1,5 +1,5 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageStaticInitialConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageStaticInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************

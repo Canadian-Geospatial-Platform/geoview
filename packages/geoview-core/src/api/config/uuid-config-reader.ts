@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { TypeJsonObject, TypeJsonArray, toJsonObject } from '@config/types/config-types';
-import { CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
+import { TypeJsonObject, TypeJsonArray, toJsonObject } from '@/api/config/types/config-types';
+import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 

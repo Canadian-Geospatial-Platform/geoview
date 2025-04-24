@@ -8,7 +8,7 @@ import { useTheme } from '@mui/material/styles';
 import { Box, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } from '@mui/material';
 
 import { animated } from '@react-spring/web';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
 import { IconButton } from '@/ui/icon-button/icon-button';

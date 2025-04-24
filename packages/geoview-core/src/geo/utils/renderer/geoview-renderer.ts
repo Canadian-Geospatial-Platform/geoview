@@ -17,7 +17,7 @@ import {
   isIconSymbolVectorConfig,
   isLineStringVectorConfig,
   isSimpleSymbolVectorConfig,
-  TypeBaseStyleType,
+  TypeLayerStyleConfigType,
   TypeFillStyle,
   TypePolygonVectorConfig,
   TypeIconSymbolVectorConfig,
@@ -30,7 +30,7 @@ import {
   TypeLayerStyleSettings,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import {
   binaryKeywors,
   defaultColor,
@@ -997,11 +997,11 @@ function processSimplePolygon(
     geometry = feature.getGeometry() as Geometry;
   }
   if (isFilledPolygonVectorConfig(settings)) {
-    const { fillStyle } = settings;
+    const { fillStyle } = settings as TypePolygonVectorConfig; // TODO: refactor - introduce by moving to config map schema type
     if (geometry !== undefined) {
-      return processFillStyle[fillStyle].call('', settings, geometry);
+      return processFillStyle[fillStyle].call('', settings as TypePolygonVectorConfig, geometry);
     }
-    return processFillStyle[fillStyle].call('', settings);
+    return processFillStyle[fillStyle].call('', settings as TypePolygonVectorConfig);
   }
   return undefined;
 }
@@ -1454,7 +1454,7 @@ function processClassBreaksPolygon(
 }
 
 /** Table of function to process the style settings based on the feature geometry and the kind of style settings. */
-export const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyleProcessor>> = {
+export const processStyle: Record<TypeLayerStyleConfigType, Record<TypeStyleGeometry, TypeStyleProcessor>> = {
   simple: {
     Point: processSimplePoint,
     MultiPoint: processSimplePoint,

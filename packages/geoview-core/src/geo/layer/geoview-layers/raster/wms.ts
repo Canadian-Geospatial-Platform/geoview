@@ -4,13 +4,18 @@ import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 import { Extent } from 'ol/extent';
 
-import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
+import {
+  TypeLayerEntryConfig,
+  TypeGeoviewLayerConfig,
+  CONST_LAYER_ENTRY_TYPES,
+  layerEntryIsGroupLayer,
+} from '@/api/config/types/map-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { WMS_PROXY_URL } from '@/app';
+import { CV_CONFIG_PROXY_URL } from '@/api/config/types/config-constants';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -59,11 +64,11 @@ export class WMS extends AbstractGeoViewRaster {
     } catch {
       // If network issue such as CORS
       // We're going to change the metadata url to use a proxy
-      const newProxiedMetadataUrl = `${WMS_PROXY_URL}${url}`;
+      const newProxiedMetadataUrl = `${CV_CONFIG_PROXY_URL}${url}`;
       // Try again with the proxy this time
       response = await fetch(newProxiedMetadataUrl);
       // Callback about it
-      callbackNewMetadataUrl?.(WMS_PROXY_URL);
+      callbackNewMetadataUrl?.(CV_CONFIG_PROXY_URL);
     }
 
     // Continue reading the metadata to return it

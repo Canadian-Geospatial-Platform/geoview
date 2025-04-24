@@ -1,6 +1,6 @@
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
-import { isvalidComparedToInternalSchema } from '@config/utils';
-import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
+import { GroupLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
+import { isvalidComparedToInternalSchema } from '@/api/config/utils';
+import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 
 // ========================
 // #region CLASS HEADER

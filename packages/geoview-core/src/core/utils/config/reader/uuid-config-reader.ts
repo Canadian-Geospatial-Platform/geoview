@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { TypeJsonObject, TypeJsonArray } from '@/core/types/global-types';
-import { CONST_LAYER_ENTRY_TYPES, TypeGeoviewLayerConfig, TypeOfServer, TypeTileGrid } from '@/geo/map/map-schema-types';
+import { TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeGeoviewLayerConfig, TypeOfServer, TypeTileGrid } from '@/api/config/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';

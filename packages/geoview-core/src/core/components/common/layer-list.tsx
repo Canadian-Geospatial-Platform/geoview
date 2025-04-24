@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { animated } from '@react-spring/web';
 import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography } from '@/ui';
-import { TypeFeatureInfoEntry, TypeQueryStatus, TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeQueryStatus, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
 import { logger } from '@/core/utils/logger';

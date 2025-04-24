@@ -6,21 +6,21 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  TypeBaseSourceVectorInitialConfig,
-} from '@/geo/map/map-schema-types';
+  TypeBaseVectorSourceInitialConfig,
+  TypeOutfields,
+} from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeOutfields } from '@/api/config/types/map-schema-types';
 import { fetchJson } from '@/core/utils/utilities';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
@@ -207,7 +207,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
+    readOptions.dataProjection = (layerConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.url = layerConfig.source!.dataAccessPath!;
     // eslint-disable-next-line no-param-reassign

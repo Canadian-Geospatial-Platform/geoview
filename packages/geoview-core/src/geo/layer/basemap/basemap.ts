@@ -12,8 +12,8 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 
 import { applyStyle } from 'ol-mapbox-style';
 
-import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global-types';
+import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
 import { TypeBasemapProps, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';

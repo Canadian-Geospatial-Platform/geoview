@@ -1,4 +1,4 @@
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { fetchJson } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 

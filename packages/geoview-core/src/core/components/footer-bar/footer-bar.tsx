@@ -17,7 +17,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 
-import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 
@@ -33,7 +33,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { isElementInViewport } from '@/core/utils/utilities';
-import { UseHtmlToReact } from '../common/hooks/use-html-to-react';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
 interface Tab {
   icon: ReactNode;

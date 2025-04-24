@@ -1,12 +1,12 @@
 import mergeWith from 'lodash/mergeWith';
 import cloneDeep from 'lodash/cloneDeep';
 
-import { Cast, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
-import { TypeGeoviewLayerType, TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@config/utils';
-import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
-import { ConfigError, GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
+import { Cast, TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
+import { TypeGeoviewLayerType, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@/api/config/utils';
+import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
+import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
+import { ConfigError, GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { generateId } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';

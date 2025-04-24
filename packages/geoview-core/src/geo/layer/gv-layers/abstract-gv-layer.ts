@@ -24,13 +24,14 @@ import {
   TypeLocation,
   QueryType,
   TypeStyleGeometry,
-} from '@/geo/map/map-schema-types';
+  TypeGeoviewLayerType,
+  TypeOutfieldsType,
+} from '@/api/config/types/map-schema-types';
 import { getLegendStyles, getFeatureImageSource, processStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { TypeGeoviewLayerType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';

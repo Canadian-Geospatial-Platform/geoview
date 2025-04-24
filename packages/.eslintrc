@@ -23,8 +23,7 @@
         "alias": {
           "map": [
             ["@", "./src"],
-            ["@public", "./public"],
-            ["@config", "./src/api/config"]
+            ["@public", "./public"]
           ]
         },
         "extensions": [".js", ".jsx", ".ts", ".tsx"]

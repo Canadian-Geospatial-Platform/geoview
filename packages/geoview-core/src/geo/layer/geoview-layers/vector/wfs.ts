@@ -5,24 +5,25 @@ import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 import { bbox } from 'ol/loadingstrategy';
 
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+// import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
 
-import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  TypeBaseSourceVectorInitialConfig,
-} from '@/geo/map/map-schema-types';
+  TypeOutfields,
+  TypeOutfieldsType,
+  TypeSourceWfsInitialConfig,
+} from '@/api/config/types/map-schema-types';
 
 import { xmlToJson, findPropertyNameByRegex, fetchXMLToJson } from '@/core/utils/utilities';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { GeoViewLayerError } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
@@ -270,7 +271,7 @@ export class WFS extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
+    readOptions.dataProjection = (layerConfig.source as TypeSourceWfsInitialConfig).dataProjection;
 
     // eslint-disable-next-line no-param-reassign
     sourceOptions.url = (extent): string => {

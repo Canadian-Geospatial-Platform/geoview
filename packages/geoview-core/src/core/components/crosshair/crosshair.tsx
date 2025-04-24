@@ -9,7 +9,7 @@ import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial
 import { getMapPointerPosition, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
-import { useGeoViewMapId } from '@/app';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 type CrosshairProps = {
   mapTargetElement: HTMLElement;

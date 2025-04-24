@@ -6,7 +6,7 @@ import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classe
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
 
 import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';

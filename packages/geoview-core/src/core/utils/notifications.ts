@@ -1,5 +1,5 @@
 import { NotificationType } from '@/core/components/notifications/notifications';
-import { TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonArray, TypeJsonValue } from '@/api/config/types/config-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { generateId, getLocalizedMessage } from './utilities';

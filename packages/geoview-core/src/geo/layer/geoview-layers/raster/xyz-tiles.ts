@@ -6,8 +6,8 @@ import defaultsDeep from 'lodash/defaultsDeep';
 
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
-import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -67,7 +67,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // ESRI MapServer Implementation
     if (Array.isArray(this.metadata?.layers)) {
       const metadataLayerList = this.metadata.layers;
-      const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.id.toString() === layerConfig.layerId);
+      const foundEntry = metadataLayerList.find((layerMetadata: TypeJsonObject) => layerMetadata.id.toString() === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
         this.addLayerLoadError(layerConfig, `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);

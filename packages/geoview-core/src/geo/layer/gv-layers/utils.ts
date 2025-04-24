@@ -1,4 +1,4 @@
-import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 import {
@@ -9,8 +9,8 @@ import {
   TypeFieldEntry,
   TypeFeatureInfoLayerConfig,
   TypeGeometry,
-} from '@/geo/map/map-schema-types';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+  TypeOutfieldsType,
+} from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';

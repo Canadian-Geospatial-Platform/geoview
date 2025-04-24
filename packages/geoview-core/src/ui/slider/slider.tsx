@@ -208,7 +208,6 @@ function SliderUI(props: SliderProps): JSX.Element {
     }
 
     // Handle middle element if odd number of markers
-    // TODO: there is still issue when previous to middle interfere with last in Ontario ring of fire (time slider config- small screen)
     if (left === right) {
       const middleElement = markerArray[left];
       const overlapWithLeft = checkOverlap(markerArray[lastVisibleLeft], middleElement, orientationIn);
@@ -218,6 +217,23 @@ function SliderUI(props: SliderProps): JSX.Element {
         lastVisibleLeft = left;
       } else {
         middleElement.classList.add('MuiSlider-markLabel-overlap');
+      }
+    }
+
+    // Check if we have an even number of visible markers and handle middle pair overlap
+    const visibleMarkers = markerArray.filter((marker) => !marker.classList.contains('MuiSlider-markLabel-overlap'));
+    if (visibleMarkers.length % 2 === 0) {
+      const middleIndex = visibleMarkers.length / 2;
+      const leftMiddle = visibleMarkers[middleIndex - 1];
+      const rightMiddle = visibleMarkers[middleIndex];
+
+      // Check overlap between the middle pair
+      const hasOverlap = checkOverlap(leftMiddle, rightMiddle, orientationIn);
+
+      if (hasOverlap) {
+        // Hide both middle labels if they overlap
+        leftMiddle.classList.add('MuiSlider-markLabel-overlap');
+        rightMiddle.classList.add('MuiSlider-markLabel-overlap');
       }
     }
   }, [checkOverlap, containerId]);

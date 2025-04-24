@@ -7,8 +7,13 @@ import { applyStyle } from 'ol-mapbox-style';
 import { MVT } from 'ol/format';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig, TypeTileGrid } from '@/geo/map/map-schema-types';
-import { TypeJsonObject } from '@/core/types/global-types';
+import {
+  TypeLayerEntryConfig,
+  TypeSourceTileInitialConfig,
+  TypeGeoviewLayerConfig,
+  TypeTileGrid,
+} from '@/api/config/types/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
