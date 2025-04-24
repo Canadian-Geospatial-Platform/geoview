@@ -1,7 +1,6 @@
 import { useStore } from 'zustand';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
@@ -18,7 +17,6 @@ export interface IGeochartState {
   layerDataArrayBatch: TypeGeochartResultSetEntry[];
   layerDataArrayBatchLayerPathBypass: string;
   selectedLayerPath: string;
-  setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
     setGeochartCharts: (charts: GeoChartStoreByLayerPath) => void;
@@ -52,14 +50,6 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
     layerDataArrayBatch: [],
     layerDataArrayBatchLayerPathBypass: '',
     selectedLayerPath: '',
-    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
-      set({
-        geochartState: {
-          ...get().geochartState,
-          selectedLayerPath: geoviewConfig.footerBar?.selectedGeoChartLayerPath || geoviewConfig.appBar?.selectedGeoChartLayerPath || '',
-        },
-      });
-    },
 
     // #region ACTIONS
 

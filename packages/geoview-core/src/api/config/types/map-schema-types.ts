@@ -100,7 +100,6 @@ export type TypeFooterBarProps = {
   selectedTab: TypeValidFooterBarTabsCoreProps;
   selectedLayersLayerPath: string;
   selectedDataTableLayerPath: string;
-  selectedGeoChartLayerPath: string;
   selectedTimeSliderLayerPath: string;
 };
 
@@ -126,7 +125,6 @@ export type TypeAppBarProps = {
   selectedTab: TypeValidAppBarCoreProps;
   selectedLayersLayerPath: string;
   selectedDataTableLayerPath: string;
-  selectedGeoChartLayerPath: string;
   selectedTimeSliderLayerPath: string;
 };
 

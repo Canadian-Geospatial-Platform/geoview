@@ -278,7 +278,7 @@ export interface ColumnFilter {
   value: unknown;
 }
 
-interface IDataTableSettings {
+export interface IDataTableSettings {
   columnFiltersRecord: TypeColumnFiltersState;
   columnsFiltersVisibility: boolean;
   mapFilteredRecord: boolean;
