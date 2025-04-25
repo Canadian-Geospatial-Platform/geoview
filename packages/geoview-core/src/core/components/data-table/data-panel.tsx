@@ -36,6 +36,9 @@ interface DataPanelType {
  */
 
 export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPanelType): JSX.Element {
+  // Log
+  logger.logTraceRender('components/data-table/data-panel');
+
   const { t } = useTranslation();
   const theme = useTheme();
 

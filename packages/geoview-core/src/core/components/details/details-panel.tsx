@@ -22,11 +22,13 @@ import { LayerListEntry, Layout } from '@/core/components/common';
 import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info';
-import { FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
+import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
 import { DetailsSkeleton } from './details-skeleton';
+import { TypeContainerBox } from '@/core/types/global-types';
 
 interface DetailsPanelType {
   fullWidth?: boolean;
+  containerType?: TypeContainerBox;
 }
 
 /**
@@ -35,7 +37,7 @@ interface DetailsPanelType {
  * @param {DetailsPanelProps} props The properties passed to LayersListFooter
  * @returns {JSX.Element} the layers list
  */
-export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Element {
+export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE.FOOTER_BAR }: DetailsPanelType): JSX.Element {
   logger.logTraceRender('components/details/details-panel');
 
   // Hooks
@@ -480,6 +482,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
 
   return (
     <Layout
+      containerType={containerType}
       selectedLayerPath={selectedLayerPath || ''}
       layerList={memoLayersList}
       onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}

@@ -136,7 +136,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     return {
       legend: { icon: <LegendIcon />, content: <Legend /> },
-      layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel /> },
+      layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel /> },
       guide: { icon: <QuestionMarkIcon />, content: <Guide /> },

@@ -40,7 +40,7 @@
   },
   "mapctrl": {
     "rotation": {
-      "resetRotation": "Réinitialiser la rotation",
+      "resetRotation": "Réinitialiser la rotation de la carte",
       "fixedNorth": "Nord fixe"
     },
     "mouseposition": {
