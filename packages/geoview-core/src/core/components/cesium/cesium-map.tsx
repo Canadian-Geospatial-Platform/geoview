@@ -10,9 +10,10 @@ import {
   Viewer,
   createWorldTerrainAsync,
   GeoJsonDataSource,
-  WebMapServiceImageryProvider,
   Ellipsoid,
   BoundingSphere,
+  WebMapServiceImageryProvider,
+  Color,
 } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -23,15 +24,38 @@ import { transformExtent } from 'ol/proj';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { ColorMaterialProperty, ConstantProperty, ImageryProvider, MaterialProperty } from '@cesium/engine';
+import Icon from 'ol/style/Icon';
+import Feature from 'ol/Feature';
+import Style, { StyleLike } from 'ol/style/Style';
+//import { FlatStyleLike } from 'ol/style/flat';
+import { Geometry } from 'ol/geom';
+import VectorSource from 'ol/source/Vector';
 
 type MapProps = {
   viewer: MapViewer;
 };
 
+enum ScaleMode {
+  M,
+  I,
+}
+
+// Possible Scale Values;
+const ScaleKm = [500, 200, 100, 50, 20, 10, 5, 2, 1];
+const ScaleM = [500, 200, 100, 50, 20, 10, 5, 2, 1, 0.5];
+const ScaleMi = [500, 200, 100, 50, 20, 10, 5, 2, 1];
+const ScaleFt = [2000, 1000, 500, 200, 100, 50, 20, 10, 5, 2, 1, 0.5, 0.25];
+// Approximate Screen Pixel Size;
+const ScreenPixelSize = 0.000264583;
+const DesiredScaleLineLength = 120; // px
+// Coefficients here to allieviate the use of magic numbers;
+const KmToMi = 0.621371;
+const KmToFt = 3280.84;
+const KmToM = 1000;
+
 async function VectorLayerDataSource(viewer: MapViewer, layer: VectorLayer) {
   const source = layer.getSource();
-  const style = layer.getStyle();
-  console.log(style);
   const features = source!.getFeatures();
   if (features.length > 0) {
     const geoJsonFormatter = new GeoJSON();
@@ -40,24 +64,53 @@ async function VectorLayerDataSource(viewer: MapViewer, layer: VectorLayer) {
       featureProjection: projCode,
       dataProjection: 'EPSG:4326',
     });
-    // filter geometries that are "Circles" and add elipsoid geometries for each.
-    return GeoJsonDataSource.load(geoJson);
+    return await GeoJsonDataSource.load(geoJson);
   }
   return undefined;
 }
 
+function drillDownScale(pixScale: number, mode: ScaleMode): [string, string] {
+  let scale = mode === ScaleMode.M ? ScaleKm : ScaleMi;
+  let unit = mode === ScaleMode.M ? 'km' : 'mi';
+  let lg;
+  let lw;
+  for (let i = 0; i < scale.length; i++) {
+    lg = scale[i];
+    console.log('lg', lg);
+    lw = parseInt((lg / pixScale).toFixed(0));
+    console.log('lw', lw);
+    if (lw <= DesiredScaleLineLength) {
+      return [`${lw}px`, `${lg} ${unit}`];
+    }
+  }
+  unit = mode === ScaleMode.M ? 'm' : 'ft';
+  scale = mode === ScaleMode.M ? ScaleM : ScaleFt;
+  let pixScaleSmall = mode === ScaleMode.M ? pixScale * KmToM : pixScale * KmToFt;
+  for (let i = 0; i < scale.length; i++) {
+    lg = scale[i];
+    console.log('lg', lg);
+    lw = parseInt((lg / pixScaleSmall).toFixed(0));
+    console.log('lw', lw);
+    if (lw <= DesiredScaleLineLength) {
+      return [`${lw}px`, `${lg} ${unit}`];
+    }
+  }
+  return [`${lw}px`, `${lg} ${unit}`];
+}
+
 function getMapScale(pixSize: number): TypeScaleInfo {
-  const lwm = 100;
-  const lgm = ((pixSize * lwm) / 1000).toFixed(0);
-  const lwi = 100;
-  const lgi = ((pixSize * 0.621371 * lwi) / 1000).toFixed(0);
+  const pixSizeKm = pixSize / KmToM;
+  const pixSizeMi = pixSizeKm * KmToMi;
+  const [lwm, lgm] = drillDownScale(pixSizeKm, ScaleMode.M);
+  const [lwi, lgi] = drillDownScale(pixSizeMi, ScaleMode.I);
+  const denom = (pixSize / ScreenPixelSize).toFixed(0);
   return {
-    labelGraphicMetric: `${lgm}km`,
-    lineWidthMetric: `${lwm}px`,
-    labelGraphicImperial: `${lgi}mi`,
-    lineWidthImperial: `${lwi}px`,
+    labelGraphicMetric: lgm,
+    lineWidthMetric: lwm,
+    labelGraphicImperial: lgi,
+    lineWidthImperial: lwi,
     // The scale of the earth on the map compared to real world earth.
-    labelNumeric: `1:${pixSize}km | 1:${pixSize * 0.621371}mi`,
+    labelNumeric: `1 : ${denom}`,
   };
 }
 
@@ -72,7 +125,67 @@ function setOLMapExtent(oViewer: MapViewer, cViewer: Viewer): void {
   MapEventProcessor.zoomToExtent(oViewer.mapId, projdExtent, { padding: [1, 1, 1, 1], maxZoom: 30, duration: 1 });
 }
 
-export function CesiumMap(props: MapProps): JSX.Element {
+function styleVectorDataSource(datasource: GeoJsonDataSource | undefined, layer: VectorLayer) {
+  if (!datasource || !layer) return;
+  datasource.entities.values.forEach((entity) => {
+    const featureId = entity.properties?.featureId?.getValue();
+    const layerSource = layer.getSource();
+    if (!layerSource) return;
+    const olFeature = layerSource.getFeatures().find((feature) => feature.values_.featureId === featureId);
+    console.log('olFeature', olFeature);
+    if (olFeature) {
+      let style = extractStyleForFeature(layer, olFeature);
+      if (style instanceof Array) {
+        style = style[0];
+      }
+      if (style == null) return;
+      const stroke = style.getStroke();
+      const fill = style.getFill();
+
+      if (entity.polygon) {
+        entity.polygon.material = fill ? olColorToCesiumProperty(fill.getColor()) : blank;
+        entity.polygon.outlineColor = stroke ? olColorToCesiumProperty(stroke.getColor()) : blank;
+        entity.polygon.outlineWidth = stroke ? new ConstantProperty(stroke.getWidth()) : 0;
+      }
+      if (entity.polyline) {
+        entity.polyline.material = stroke ? olColorToCesiumProperty(stroke.getColor()) : blank;
+        entity.polyline.width = stroke ? stroke.getWidth() : 0;
+      }
+      if (entity.billboard) {
+        const img = style.getImage();
+        if (img instanceof Icon) {
+          let src = img.getSrc();
+          if (!src) return;
+          entity.billboard.image = new ConstantProperty(src);
+          entity.billboard.scale = new ConstantProperty(img.getScale()) || 1;
+          entity.billboard.rotation = new ConstantProperty(img.getRotation()) || 0;
+        }
+      }
+    }
+  });
+}
+
+function ImageLayerDataSource(_viewer: MapViewer, layer: ImageLayer<ImageWMS>): ImageryProvider {
+  const source = layer.getSource();
+  //if (source instanceof ImageWMS) {
+  const url = source!.getUrl();
+  const params = source!.getParams();
+  const options: WebMapServiceImageryProvider.ConstructorOptions = {
+    url: url!,
+    layers: params.LAYERS,
+    enablePickFeatures: false,
+    parameters: {
+      FORMAT: 'image/png',
+      TRANSPARENT: 'TRUE',
+    },
+  };
+  return new WebMapServiceImageryProvider(options);
+  //}
+}
+
+const blank = new ColorMaterialProperty(Color.fromBytes(0, 0, 0, 0));
+
+export function CesiumMap(props: MapProps) {
   const viewerRef = useRef<HTMLDivElement>(null);
   const { viewer } = props;
 
@@ -88,16 +201,6 @@ export function CesiumMap(props: MapProps): JSX.Element {
 
     const initCesium = async () => {
       const terrainProvider = await createWorldTerrainAsync();
-      // const imageryProvider = ArcGisMapServerImageryProvider.fromUrl(
-      //   'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
-      //   {
-      //     enablePickFeatures: false,
-      //   }
-      // );
-
-      // const baseLayer = ImageryLayer.fromProviderAsync(imageryProvider, {});
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       cViewer = new Viewer(viewerRef.current!, {
         terrainProvider,
         baseLayerPicker: false,
@@ -130,50 +233,10 @@ export function CesiumMap(props: MapProps): JSX.Element {
         if (layer instanceof VectorLayer) {
           const datasource = await VectorLayerDataSource(viewer, layer);
           datasource ? cViewer.dataSources.add(datasource) : null;
-          // datasource.entities.values.forEach((entity) => {
-          //   const featureId = entity.properties?.id?.getValue();
-          //   const olFeature = layer.getSource().getFeatureById(featureId);
-
-          //   if (olFeature) {
-          //     const style = extractStyleForFeature(layer, olFeature);
-          //     const stroke = style.getStroke();
-          //     const fill = style.getFill();
-
-          //     if (entity.polygon && fill) {
-          //       entity.polygon.material = olColorToCesium(fill.getColor());
-          //     }
-          //     if (entity.polyline && stroke) {
-          //       entity.polyline.material = olColorToCesium(stroke.getColor());
-          //       entity.polyline.width = stroke.getWidth();
-          //     }
-          //     if (entity.point && style.getImage()) {
-          //       const img = style.getImage();
-          //       if (img.getFill()) {
-          //         entity.point.color = olColorToCesium(img.getFill().getColor());
-          //       }
-          //       if (img.getRadius) {
-          //         entity.point.pixelSize = img.getRadius();
-          //       }
-          //     }
-          //   }
-          // });
+          styleVectorDataSource(datasource, layer);
         } else if (layer instanceof ImageLayer) {
-          const source = layer.getSource();
-          if (source instanceof ImageWMS) {
-            const url = source.getUrl();
-            const params = source.getParams();
-            const options: WebMapServiceImageryProvider.ConstructorOptions = {
-              url: url!,
-              layers: params.LAYERS,
-              enablePickFeatures: false,
-              parameters: {
-                FORMAT: 'image/png',
-                TRANSPARENT: 'TRUE',
-              },
-            };
-            const imageryProvider = new WebMapServiceImageryProvider(options);
-            cViewer.imageryLayers.addImageryProvider(imageryProvider);
-          }
+          const imageryProvider = ImageLayerDataSource(viewer, layer);
+          cViewer.imageryLayers.addImageryProvider(imageryProvider);
         }
       });
     };
@@ -190,17 +253,39 @@ export function CesiumMap(props: MapProps): JSX.Element {
   return <div ref={viewerRef} style={{ width: '100%', height: '100vh', display: 'block' }} />;
 }
 
-/*
-function olColorToCesium(olColor) {
+function olColorToCesiumProperty(olColor: [number, number, number, number] | string): MaterialProperty {
   // OL can be like [r, g, b, a] or a CSS string
   if (Array.isArray(olColor)) {
-    return Color.fromBytes(olColor[0], olColor[1], olColor[2], olColor[3] * 255);
+    return new ColorMaterialProperty(Color.fromBytes(olColor[0], olColor[1], olColor[2], olColor[3] * 255));
   }
-  return Color.fromCssColorString(olColor);
+  return new ColorMaterialProperty(Color.fromCssColorString(olColor));
 }
 
-function extractStyleForFeature(layer: VectorLayer, feature) {
-  const style = layer.getStyle();
-  return typeof style === 'function' ? (style as (any) => { any })(feature) : style;
+// function extractStyleForFeature(layer: VectorLayer, feature: Feature) {
+//   let style: StyleLike | FlatStyleLike | undefined | null = feature.getStyle();
+//   if (style == null) {
+//     style = layer.getStyle();
+//   }
+//   return typeof style === 'function' ? style(feature, 1) : style;
+// }
+
+// function extractStyleForFeature(layer: VectorLayer<VectorSource>, feature: Feature<Geometry>): Style | Style[] | null {
+//   let style = feature.getStyle() ?? layer.getStyle();
+//   return typeof style === 'function' ? style(feature, 0) : style;
+// }
+function extractStyleForFeature(layer: VectorLayer<VectorSource>, feature: Feature<Geometry>): Style | Style[] | null {
+  const styleCandidate = feature.getStyle() ?? layer.getStyle();
+
+  // Short-circuit if undefined, null, or void
+  if (!styleCandidate) return null;
+
+  // If it's a function, call it — assume it returns Style or Style[]
+  if (typeof styleCandidate === 'function') {
+    const result = styleCandidate(feature, 0);
+    // You may want to do runtime checks here too
+    return Array.isArray(result) || result instanceof Style ? result : null;
+  }
+
+  // Otherwise, assert it's Style or Style[]
+  return Array.isArray(styleCandidate) || styleCandidate instanceof Style ? styleCandidate : null;
 }
-*/

@@ -57,6 +57,7 @@ const CoordinateDisplay = memo(function CoordinateDisplay({
  * Format the coordinates output in lat long
  */
 const formatCoordinates = (lnglat: Coordinate, DMS: boolean, t: (key: string) => string): FormattedCoordinates => {
+  console.log(lnglat);
   const labelX = lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east');
   const labelY = lnglat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north');
 
@@ -94,6 +95,7 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
     // logger.logTraceUseMemo('MOUSE-POSITION - pointerPosition', pointerPosition);
 
     const { lnglat, projected } = pointerPosition;
+    if (!lnglat || !projected) return ['', '', ''];
     const DMS = formatCoordinates(lnglat, true, t);
     const DD = formatCoordinates(lnglat, false, t);
 
