@@ -345,6 +345,16 @@
       ]
     }
   },
+  "appBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
+    }
+  },
   "corePackages": [],
   "theme": "geo.ca",
   "appBar": {
