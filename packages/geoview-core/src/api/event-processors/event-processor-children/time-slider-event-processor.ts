@@ -46,6 +46,15 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets time slider selected layer path.
+   * @param {string} mapId - The map id of the state to act on
+   * @returns {string} The selected time slider layer path or undefined
+   */
+  static getTimeSliderSelectedLayer(mapId: string): string | undefined {
+    return this.getTimesliderState(mapId)?.selectedLayerPath;
+  }
+
+  /**
    * Gets filter(s) for a layer.
    * @param {string} mapId - The map id of the state to act on
    * @param {string} layerPath - The path of the layer

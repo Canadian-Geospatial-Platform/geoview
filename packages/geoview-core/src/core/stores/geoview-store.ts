@@ -81,10 +81,8 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
         set({ timeSliderState: initializeTimeSliderState(set, get) });
         get().timeSliderState.setDefaultConfigValues(config);
       }
-      if (config.footerBar?.tabs.core.includes('geochart')) {
-        set({ geochartState: initializeGeochartState(set, get) });
-        get().geochartState.setDefaultConfigValues(config);
-      }
+      if (config.footerBar?.tabs.core.includes('geochart')) set({ geochartState: initializeGeochartState(set, get) });
+
       if (config.corePackages?.includes('swiper')) set({ swiperState: initializeSwiperState(set, get) });
     },
 

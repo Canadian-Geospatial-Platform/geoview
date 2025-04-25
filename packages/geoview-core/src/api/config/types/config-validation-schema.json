@@ -214,9 +214,17 @@
           ],
           "description": "Footer tab to be selected at map load"
         },
+        "selectedDataTableLayerPath": {
+          "type": "string",
+          "description": "Layerpath of data table tab layer to be selected at map load"
+        },
         "selectedLayersLayerPath": {
           "type": "string",
-          "description": "Layerpath of layer to be selected in the layers tab at map load"
+          "description": "Layerpath of layer tab layer to be selected at map load"
+        },
+        "selectedTimeSliderLayerPath": {
+          "type": "string",
+          "description": "Layerpath of time slider tab layer to be selected at map load"
         }
       },
       "required": [
@@ -281,9 +289,13 @@
           ],
           "description": "App bar tab to be selected at map load"
         },
+        "selectedDataTableLayerPath": {
+          "type": "string",
+          "description": "Layerpath of data table tab layer to be selected at map load"
+        },
         "selectedLayersLayerPath": {
           "type": "string",
-          "description": "Layerpath of layer to be selected at map load"
+          "description": "Layerpath of layer tab layer to be selected at map load"
         }
       },
       "required": [

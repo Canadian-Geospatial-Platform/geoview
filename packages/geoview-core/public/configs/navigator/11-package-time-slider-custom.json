@@ -60,7 +60,9 @@
         "details",
         "time-slider"
       ]
-    }
+    },
+    "selectedTab": "time-slider",
+    "selectedTimeSliderLayerPath": "wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"
   },
   "corePackages": [],
   "corePackagesConfig": [
