@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Root } from 'react-dom/client';
+
 import { i18n } from 'i18next';
 
 import debounce from 'lodash/debounce';
@@ -267,6 +267,7 @@ export class MapViewer {
         Projection.PROJECTION_NAMES.LNGLAT,
         projection.getCode()
       );
+
     const initialMap = new OLMap({
       target: mapElement,
       layers: [createEmptyBasemap()],
@@ -287,10 +288,11 @@ export class MapViewer {
       controls: [],
       keyboardEventTarget: document.getElementById(`map-${this.mapId}`) as HTMLElement,
     });
-    // Set the map
 
+    // Set the map
     this.map = initialMap;
     this.initMap();
+
     return initialMap;
   }
 

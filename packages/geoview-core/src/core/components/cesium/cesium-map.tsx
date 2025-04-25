@@ -59,7 +59,6 @@ const blank = new ColorMaterialProperty(Color.fromBytes(0, 0, 0, 0));
 const ZeroProp = new ConstantProperty(0);
 
 function olColorToCesiumProperty(olColor: [number, number, number, number] | string): MaterialProperty {
-  // OL can be like [r, g, b, a] or a CSS string
   if (Array.isArray(olColor)) {
     return new ColorMaterialProperty(Color.fromBytes(olColor[0], olColor[1], olColor[2], olColor[3] * 255));
   }
@@ -68,18 +67,11 @@ function olColorToCesiumProperty(olColor: [number, number, number, number] | str
 
 function extractStyleForFeature(_layer: VectorLayer<VectorSource>, feature: Feature<Geometry>): Style | Style[] | null {
   const styleCandidate = feature.getStyle();
-
-  // Short-circuit if undefined, null, or void
   if (!styleCandidate) return null;
-
-  // If it's a function, call it — assume it returns Style or Style[]
   if (typeof styleCandidate === 'function') {
     const result = styleCandidate(feature, 0);
-    // You may want to do runtime checks here too
     return Array.isArray(result) || result instanceof Style ? result : null;
   }
-
-  // Otherwise, assert it's Style or Style[]
   return Array.isArray(styleCandidate) || styleCandidate instanceof Style ? styleCandidate : null;
 }
 
@@ -135,7 +127,6 @@ function getMapScale(pixSize: number): TypeScaleInfo {
     lineWidthMetric: lwm,
     labelGraphicImperial: lgi,
     lineWidthImperial: lwi,
-    // The scale of the earth on the map compared to real world earth.
     labelNumeric: `1 : ${denom}`,
   };
 }
@@ -284,18 +275,6 @@ export function CesiumMap(props: MapProps): JSX.Element {
           }
         })
       );
-      // for (const layer of layers) {
-      //   if (layer instanceof VectorLayer) {
-      //     const datasource = await VectorLayerDataSource(viewer, layer);
-      //     if (datasource) {
-      //       cViewer.dataSources.add(datasource);
-      //       styleVectorDataSource(datasource, layer);
-      //     }
-      //   } else if (layer instanceof ImageLayer) {
-      //     const imageryProvider = ImageLayerDataSource(viewer, layer);
-      //     cViewer.imageryLayers.addImageryProvider(imageryProvider);
-      //   }
-      // }
     };
 
     initCesium().catch((e) => {
