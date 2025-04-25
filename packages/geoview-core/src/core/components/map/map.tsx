@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useCallback, MutableRefObject, useMemo } from 'react';
 
 import { Box, useMediaQuery } from '@mui/material';
@@ -22,6 +21,7 @@ import { toJsonObject } from '@/api/config/types/config-types';
 type MapProps = {
   viewer: MapViewer;
 };
+
 /**
  * Create a map component
  * @param {MapProps} props - Map props containing the viewer
@@ -53,6 +53,7 @@ export function Map(props: MapProps): JSX.Element {
   const initCGPVMap = useCallback((): void => {
     // Log
     logger.logTraceUseCallback('map.initCGPVMap');
+
     // Load the core packages which are the ones who load on map (not footer plugin, not app-bar plugin)
     mapStoreConfig?.corePackages?.forEach((corePackage: string): void => {
       Plugin.loadScript(corePackage)
@@ -86,11 +87,9 @@ export function Map(props: MapProps): JSX.Element {
     if (!isMapInitialized.current) {
       // Init the map on first render
       viewer.createMap(mapElement.current!);
+
       initCGPVMap();
       isMapInitialized.current = true;
-    } else {
-      // alert('Map already initialized');
-      // viewer.cmap.setEnabled(true);
     }
   }, [initCGPVMap, viewer]);
 
