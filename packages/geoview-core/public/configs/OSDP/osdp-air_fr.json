@@ -12,213 +12,25 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "5a65ad7c-561a-466a-8375-8d876624df9d",
-        "geoviewLayerName": "Émissions de polluants atmosphériques - Émissions de particules fines par installation",
+        "geoviewLayerName": "Émissions de polluants atmosphériques- Émissions de particules fines par installation",
         "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "layerName": "Quantité d’eau",
-            "entryType": "group",
-            "initialSettings": {
-              "states": {
-                "opacity": 0.5
-              }
-            },
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "1",
-                "layerName": "Quantité d’eau aux stations de suivi"
-              },
-              {
-                "layerId": "2",
-                "layerName": "Bords du bassin"
-              },
-              {
-                "layerId": "3",
-                "layerName": "Étiquettes de bassin (1M)"
-              }
-            ]
-          },
+            "layerId": "17",
+            "layerName": "Émissions de polluants atmosphériques- Émissions de particules fines par installation"
+          }
+        ]
+      },
+      {
+       "geoviewLayerId": "305a4924-afb8-4c7d-8459-8ef309960942",
+        "geoviewLayerName": "Qualité de l’air – Concentrations de pointe de particules fines aux stations de surveillance",
+        "metadataAccessPath": "",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
           {
-            "layerId": "4",
-            "layerName": "Qualité d’eau",
-            "entryType": "group",
-            "initialSettings": {
-              "states": {
-                "opacity": 0.5
-              }
-            },
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "5",
-                "layerName": "Qualité d’eau aux stations de suivi"
-              },
-              {
-                "layerId": "6",
-                "layerName": "Bords du bassin"
-              },
-              {
-                "layerId": "7",
-                "layerName": "Étiquettes de bassin (1M)"
-              }
-            ]
-          },
-          {
-            "layerId": "8",
-            "layerName": "Émissions atmospheriques",
-            "entryType": "group",
-            "initialSettings": {
-              "states": {
-                "opacity": 0.5
-              }
-            },
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "9",
-                "layerName": "Émissions de monoxyde de carbone"
-              },
-              {
-                "layerId": "10",
-                "layerName": "Émissions de gaz à effet de serre"
-              },
-              {
-                "layerId": "11",
-                "layerName": "Émissions de mercure "
-              },
-              {
-                "layerId": "12",
-                "layerName": "Émissions de plomb "
-              },
-              {
-                "layerId": "13",
-                "layerName": "Émissions de cadmium"
-              },
-              {
-                "layerId": "14",
-                "layerName": "Émissions d’ammoniac"
-              },
-              {
-                "layerId": "15",
-                "layerName": "Émissions d’oxydes d’azote"
-              },
-              {
-                "layerId": "16",
-                "layerName": "Émissions de particules inhalables "
-              },
-              {
-                "layerId": "17",
-                "layerName": "Émissions de particules fines "
-              },
-              {
-                "layerId": "18",
-                "layerName": "Émissions d’oxydes de soufre"
-              },
-              {
-                "layerId": "19",
-                "layerName": "Émissions de particules totales"
-              },
-              {
-                "layerId": "20",
-                "layerName": "Émissions de composés organiques volatils"
-              }
-            ]
-          },
-          {
-            "layerId": "21",
-            "layerName": "Qualité de l’air",
-            "entryType": "group",
-            "initialSettings": {
-              "states": {
-                "opacity": 0.5
-              }
-            },
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "22",
-                "layerName": "Concentration ambiante moyenne de dioxyde d’azote"
-              },
-              {
-                "layerId": "23",
-                "layerName": "Concentration ambiante de pointe de dioxyde d’azote"
-              },
-              {
-                "layerId": "24",
-                "layerName": "Concentration ambiante moyenne d’ozone"
-              },
-              {
-                "layerId": "25",
-                "layerName": "Concentration ambiante de pointe d’ozone"
-              },
-              {
-                "layerId": "26",
-                "layerName": "Concentration ambiante moyenne de particules fines"
-              },
-              {
-                "layerId": "27",
-                "layerName": "Concentration ambiante de pointe de particules fines"
-              },
-              {
-                "layerId": "28",
-                "layerName": "Concentration ambiante moyenne de dioxyde de soufre"
-              },
-              {
-                "layerId": "29",
-                "layerName": "Concentration ambiante de pointe de dioxyde de soufre"
-              },
-              {
-                "layerId": "30",
-                "layerName": "Concentration ambiante moyenne de composés organiques volatils"
-              }
-            ]
-          },
-          {
-            "layerId": "31",
-            "layerName": "Aires conservées",
-            "entryType": "group",
-            "initialSettings": {
-              "states": {
-                "opacity": 0.5
-              }
-            },
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "32",
-                "layerName": "Vide - Aires conservées a déménagé"
-              },
-              {
-                "layerId": "33",
-                "layerName": "Écozone"
-              },
-              {
-                "layerId": "34",
-                "layerName": "Limite de l’écozone"
-              }
-            ]
-          },
-          {
-            "layerId": "35",
-            "layerName": "Toxiques de l’eau",
-            "entryType": "group",
-            "initialSettings": {
-              "states": {
-                "opacity": 0.5
-              }
-            },
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "36",
-                "layerName": "Rejets de cadmium dans l’eau "
-              },
-              {
-                "layerId": "37",
-                "layerName": "Rejets de mercure dans l’eau"
-              },
-              {
-                "layerId": "38",
-                "layerName": "Rejets de plomb dans l’eau"
-              }
-            ]
+            "layerId": "27",
+            "layerName": "Qualité de l’air – Concentrations de pointe de particules fines aux stations de surveillance"
           }
         ]
       }

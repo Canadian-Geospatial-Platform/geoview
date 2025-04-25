@@ -39,27 +39,27 @@
             "listOfLayerEntryConfig": [
               {
                 "layerId": "1",
-                "layerName": "Biomass Power Station (MW)"
+                "layerName": "Biomass generating Station (MW)"
               },
               {
                 "layerId": "2",
-                "layerName": "Hydroelectric Power Station (MW)"
+                "layerName": "Hydro generating Station (MW)"
               },
               {
                 "layerId": "3",
-                "layerName": "Nuclear Power Station (MW)"
+                "layerName": "Nuclear generating Station (MW)"
               },
               {
                 "layerId": "4",
-                "layerName": "Solar Power Station (MW)"
+                "layerName": "Solar generating Station (MW)"
               },
               {
                 "layerId": "5",
-                "layerName": "Tidal Power Station (MW)"
+                "layerName": "Tidal generating Station (MW)"
               },
               {
                 "layerId": "6",
-                "layerName": "Wind Farm (MW)"
+                "layerName": "Wind generating Station (MW)"
               }
             ]
           }
