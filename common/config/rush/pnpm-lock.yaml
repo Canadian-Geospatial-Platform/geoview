@@ -182,15 +182,9 @@ importers:
       ol:
         specifier: ^10.2.1
         version: 10.4.0
-      ol-cesium:
-        specifier: ~2.17.0
-        version: 2.17.0(cesium@1.128.0)(ol@10.4.0)
       ol-mapbox-style:
         specifier: ^12.3.5
         version: 12.4.1(ol@10.4.0)
-      olcs:
-        specifier: ~2.22.1
-        version: 2.22.1(cesium@1.128.0)(ol@10.4.0)
       proj4:
         specifier: ^2.12.1
         version: 2.15.0
@@ -215,9 +209,6 @@ importers:
       react-test-renderer:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
-      resium:
-        specifier: ~1.19.0-beta.1
-        version: 1.19.0-beta.1(cesium@1.128.0)(react-dom@18.3.1)(react@18.3.1)
       sanitize-html:
         specifier: ^2.13.1
         version: 2.14.0
@@ -8369,16 +8360,6 @@ packages:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
     dev: true
 
-  /ol-cesium@2.17.0(cesium@1.128.0)(ol@10.4.0):
-    resolution: {integrity: sha512-XaMXjQYuq2eMPAgAx2e1wjN4I4QwfmPC+9YgU4xoMCj/MBj8oDQusyloQ4TaovypqbZg+0jJDDSZc7BhXckBwA==}
-    peerDependencies:
-      cesium: '>= 1.62.0'
-      ol: '>= 6.0.1 || 7 || 8'
-    dependencies:
-      cesium: 1.128.0
-      ol: 10.4.0
-    dev: false
-
   /ol-mapbox-style@12.4.1(ol@10.4.0):
     resolution: {integrity: sha512-KNcu7FJD04LFd+9iuNwFiislQ8GfzNdiGaWKRWRh21rm8N4CKIR436VycWbx2AyqQXiLxQaTidYYgSMPPXnt2A==}
     peerDependencies:
@@ -8399,16 +8380,6 @@ packages:
       geotiff: 2.1.3
       pbf: 4.0.1
       rbush: 4.0.1
-    dev: false
-
-  /olcs@2.22.1(cesium@1.128.0)(ol@10.4.0):
-    resolution: {integrity: sha512-QWpFA84km7bOZFh0PDrKa35HkvI+mud9fcRZ4NHbRMFtBIQnY8l9oba+WocimIhXer4hIybc4nx0q60sEngLKg==}
-    peerDependencies:
-      cesium: '>= 1.90.0'
-      ol: '>= 9.2, >= 10'
-    dependencies:
-      cesium: 1.128.0
-      ol: 10.4.0
     dev: false
 
   /on-finished@2.4.1:
@@ -9203,19 +9174,6 @@ packages:
   /requires-port@1.0.0:
     resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==}
     dev: true
-
-  /resium@1.19.0-beta.1(cesium@1.128.0)(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-0LRb4z2/tkjs0Pe8gD7X59S0E6OPC98yo6ayM13pY/XCz2T5OJyA+hR7q3hH2vmPPzgOtQBrkGd9IBAW9a8uNQ==}
-    engines: {node: '>=20.11.0'}
-    peerDependencies:
-      cesium: 1.x
-      react: '>=18.2.0 <20'
-      react-dom: '>=18.2.0 <20'
-    dependencies:
-      cesium: 1.128.0
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-    dev: false
 
   /resolve-cwd@3.0.0:
     resolution: {integrity: sha512-OrZaX2Mb+rJCpH/6CpSqt9xFVpN++x01XnN2ie9g6P5/3xelLAkXWVADpdz1IHD/KFfEXyE6V0U01OQ3UO2rEg==}
