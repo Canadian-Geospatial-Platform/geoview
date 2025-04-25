@@ -2,10 +2,13 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box, CircularProgressBase, ErrorIcon, GroupWorkOutlinedIcon, IconButton, BrowserNotSupportedIcon } from '@/ui';
 
-import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from '@/core/components/common/layer-icon-style';
-import { LayerListEntry } from '@/core/components/common/layer-list';
-import { useIconLayerSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useIconLayerSet,
+  useSelectorLayerChildren,
+  useSelectorLayerLegendQueryStatus,
+  useSelectorLayerStatus,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 
 export interface TypeIconStackProps {
@@ -15,7 +18,7 @@ export interface TypeIconStackProps {
 }
 
 interface LayerIconProps {
-  layer: TypeLegendLayer | LayerListEntry;
+  layerPath: string;
 }
 
 // Constants outside component to prevent recreating every render
@@ -126,13 +129,20 @@ const IconStack = memo(function IconStack({ layerPath, onIconClick, onStackIconC
 });
 
 // TODO: Unmemoize this component, probably, because it's in 'common' folder
-export const LayerIcon = memo(function LayerIcon({ layer }: LayerIconProps): JSX.Element {
-  const isError = layer.layerStatus === 'error' || ('queryStatus' in layer && layer.queryStatus === 'error');
+export const LayerIcon = memo(function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
+  // Log
+  logger.logTraceRenderDetailed('components/common/layer-icon', layerPath);
 
-  const isLoading =
-    (layer.layerStatus !== 'loaded' && layer.layerStatus !== 'error') || ('queryStatus' in layer && layer.queryStatus === 'processing');
+  // Hooks
+  const layerStatus = useSelectorLayerStatus(layerPath);
+  const layerQueryStatus = useSelectorLayerLegendQueryStatus(layerPath);
+  const layerChildren = useSelectorLayerChildren(layerPath);
 
-  const hasChildren = 'children' in layer && layer?.children.length;
+  const isError = layerStatus === 'error' || (layerQueryStatus && layerQueryStatus === 'error');
+
+  const isLoading = (layerStatus !== 'loaded' && layerStatus !== 'error') || (layerQueryStatus && layerQueryStatus === 'processing');
+
+  const hasChildren = layerChildren && layerChildren.length;
 
   if (isError) return <ErrorIcon color="error" />;
 
@@ -146,5 +156,5 @@ export const LayerIcon = memo(function LayerIcon({ layer }: LayerIconProps): JSX
 
   if (hasChildren) return <GroupWorkOutlinedIcon color="primary" />;
 
-  return <IconStack layerPath={layer.layerPath} />;
+  return <IconStack layerPath={layerPath} />;
 });

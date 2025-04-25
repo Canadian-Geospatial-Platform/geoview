@@ -41,7 +41,7 @@
           </tr>
           <tr>
             <td>
-              <a href="#HMap1">1. Highly detailed layers - slow</a><br />
+              <a href="#Hmap1">1. Highly detailed layers - slow</a><br />
             </td>
           </tr>
         </tbody>
@@ -49,14 +49,14 @@
     </div>
 
     <div class="map-title-holder">
-      <h4 id="HMap1">1. Highly detailed layers - slow</h4>
+      <h4 id="Hmap1">1. Highly detailed layers - slow</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Layers Status</button>
-    <pre id="HMap1-state" class="panel map-title-holder"></pre>
+    <pre id="Hmap1-state" class="panel map-title-holder"></pre>
     <hr />
     <div
-      id="Map1"
+      id="map1"
       class="geoview-map"
       data-lang="en"
       data-config="{
@@ -66,6 +66,9 @@
             'projection': 3978,
             'initialView': {
               'zoomAndCenter': [12, [-71.26, 46.8]]
+            },
+            'homeView': {
+              'zoomAndCenter': [8, [-71.26, 46.8]]
             }
           },
           'basemapOptions': {

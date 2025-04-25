@@ -35,7 +35,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/api/menu-item/}
  */
 function MenuItemUI(props: MenuItemProps): JSX.Element {
-  logger.logTraceRender('ui/menu/menu-item');
+  logger.logTraceRenderDetailed('ui/menu/menu-item');
 
   // Get constant from props
   const { children } = props;

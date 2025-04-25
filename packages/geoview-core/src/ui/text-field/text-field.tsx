@@ -41,7 +41,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/react-text-field/}
  */
 function TextFieldUI(props: TypeTextFieldProps, ref: Ref<HTMLDivElement>): JSX.Element {
-  logger.logTraceRender('ui/text-field/text-field', props);
+  logger.logTraceRenderDetailed('ui/text-field/text-field', props);
 
   return <MaterialTextField {...props} ref={ref} />;
 }

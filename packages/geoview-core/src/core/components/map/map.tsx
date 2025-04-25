@@ -19,7 +19,7 @@ import { useMapLoaded, useMapNorthArrow, useMapOverviewMap } from '@/core/stores
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Plugin } from '@/api/plugin/plugin';
 import { logger } from '@/core/utils/logger';
-import { toJsonObject } from '@/core/types/global-types';
+import { toJsonObject } from '@/api/config/types/config-types';
 
 type MapProps = {
   viewer: MapViewer;

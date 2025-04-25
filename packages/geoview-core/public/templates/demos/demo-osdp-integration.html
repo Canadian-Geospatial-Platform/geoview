@@ -112,7 +112,7 @@ if (document.getElementById('Map1')) {
 
 function addLayers(layers) {
   layers.forEach((layer) => {
-    cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layer);
+    cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(layer);
   });
 }
             </pre>
@@ -139,7 +139,7 @@ function addLayers(layers) {
             <button id="addLayersCustom" style="margin: 10px" title="Add entered Geocore UUID's to the map with a custom configuration (List of layer entries)">Add Layers With Custom Config</button>
             <details style="margin-left: 30px;">
               <summary>Code</summary>
-              <pre>cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(uuid, customListOfLayerEntries);</pre>
+              <pre>cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(uuid, customListOfLayerEntries);</pre>
             </details>
           </div>
         </div>
@@ -166,8 +166,8 @@ return new Promise (resolve => {
 
   function removeMap(map) {
     return new Promise(resolve => {
-      if (cgpv.api.maps[map]) {
-        cgpv.api.maps[map].remove(false)
+      if (cgpv.api.hasMapViewer(map)) {
+        cgpv.api.deleteMapViewer(map, false);
           .then(() => {
             resolve();
           });
@@ -198,7 +198,7 @@ hybrid - Geocore layer names are kept, style to be reapplied by the service
         </details>
         <details style="margin-left: 30px;">
           <summary>Code</summary>
-          <pre>mapConfig = cgpv.api.maps.Map1.createMapConfigFromMapState(overrideGeocoreServiceNames);</pre>
+          <pre>mapConfig = cgpv.api.getMapViewer('Map1').createMapConfigFromMapState(overrideGeocoreServiceNames);</pre>
         </details>
       </div>
     </div>
@@ -226,7 +226,7 @@ hybrid - Geocore layer names are kept, style to be reapplied by the service
         <summary>Code</summary>
         <pre>
 const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de localisation des stations', 'Perimeter'], ['Carte commémorative du Canada', 'Commemorative Map']];
-cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
+cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig);
         </pre>
       </details>
       <button id="changeNamesAndRemove" style="margin: 10px" title="Replaces listed layer names with thei provided pair in the config, and removes any names that aren't listed">Change Names and Remove Unlisted</button>
@@ -234,7 +234,7 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
         <summary>Code</summary>
         <pre>
 const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de localisation des stations', 'Perimeter'], ['Carte commémorative du Canada', 'Commemorative Map']];
-cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
+cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true);
         </pre>
       </details>
     </div>
@@ -248,6 +248,9 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
           interaction: 'dynamic',
           viewSettings: {
             projection: 3857,
+            homeView: {
+              zoomAndCenter: [8, [-71.26, 46.8]]
+            }
           },
           basemapOptions: {
             basemapId: 'transport',
@@ -269,6 +272,9 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
           },
         },
         corePackages: [],
+        serviceUrls: {
+          metadataUrl: 'https://osdp-psdo.canada.ca/dp/en/search/metadata/NRCAN-FGP-1-'
+        },
         theme: 'geo.ca',
       };
 
@@ -305,10 +311,10 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
        * @param map The map id.
        * @returns Promise<void>
        */
-      function removeMap(map) {
+      function removeMap(mapId) {
         return new Promise((resolve) => {
-          if (cgpv.api.maps[map]) {
-            cgpv.api.maps[map].remove(false).then(() => {
+          if (cgpv.api.hasMapViewer(mapId)) {
+            cgpv.api.deleteMapViewer(mapId, false).then(() => {
               resolve();
             });
           } else {
@@ -323,8 +329,11 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
        * @param layers Array of layers.
        */
       function addLayers(layers) {
-        layers.forEach((layer) => {
-          cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layer);
+        layers.forEach((layer, i) => {
+          if (layers.indexOf(layer) < i) {
+            layer = `${layer}:${crypto.randomUUID()}`;
+          }
+          cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(layer);
         });
       }
 
@@ -374,7 +383,7 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
       updateConfigButton.addEventListener('click', function () {
         const keepNames = document.getElementById('keepNames').value;
         const overrideGeocoreServiceNames = keepNames === "hybrid" ? "hybrid" : keepNames === "true";
-        mapConfig = cgpv.api.maps.Map1.createMapConfigFromMapState(overrideGeocoreServiceNames);
+        mapConfig = cgpv.api.getMapViewer('Map1').createMapConfigFromMapState(overrideGeocoreServiceNames);
         console.log(mapConfig);
         updateConfigTextArea();
       });
@@ -412,7 +421,7 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
             result.push(array.slice(index, index + 2));
             return result;
           }, []);
-        cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig);
+        cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig);
         updateConfigTextArea();
       });
 
@@ -426,7 +435,7 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
             result.push(array.slice(index, index + 2));
             return result;
           }, []);
-        cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
+        cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true);
         updateConfigTextArea();
       });
 
@@ -557,8 +566,8 @@ cgpv.api.maps.Map1.replaceMapConfigLayerNames(pairs, mapConfig, true);
           const layerUuid = document.getElementById('layerUuidCustom').value;
           const layerUuidEntries = document.getElementById('layerUuidCustomEntries').value;
 
-          if (layerUuidEntries === '') cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layerUuid);
-          else cgpv.api.maps.Map1.layer.addGeoviewLayerByGeoCoreUUID(layerUuid, layerUuidEntries);
+          if (layerUuidEntries === '') cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(layerUuid);
+          else cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(layerUuid, layerUuidEntries);
         }
       });
 

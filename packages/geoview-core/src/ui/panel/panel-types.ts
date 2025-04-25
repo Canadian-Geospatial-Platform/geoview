@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 
-import { TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonValue } from '@/api/config/types/config-types';
 import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
 /** ******************************************************************************************************************************

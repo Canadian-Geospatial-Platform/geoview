@@ -41,6 +41,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   const dataTableRef = useRef<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(false);
+  const isFirstLoad = useRef(true);
 
   const mapId = useGeoViewMapId();
   const layerData = useDataTableAllFeaturesDataArray();
@@ -77,11 +78,9 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       setSelectedLayerPath(_layer.layerPath);
       setIsLoading(true);
 
+      // TODO: Check - Why would we trigger when the layer status is in error!? Removed the OR condition for now
       // trigger the fetching of the features when not available OR when layer status is in error
-      if (
-        !orderedLayerData.filter((layers) => layers.layerPath === _layer.layerPath && !!layers?.features?.length).length ||
-        _layer.layerStatus === LAYER_STATUS.ERROR
-      ) {
+      if (!orderedLayerData.filter((layers) => layers.layerPath === _layer.layerPath && !!layers?.features?.length).length) {
         triggerGetAllFeatureInfo(_layer.layerPath).catch((error) => {
           // Log
           logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in data-panel.handleLayerChange', error);
@@ -181,13 +180,16 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
     return () => clearTimeout(clearLoading);
   }, [isLoading, selectedLayerPath]);
 
+  /**
+   * This effect will unmount the FOOTER BAR if the tab is changed
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-PANEL - unmount', selectedLayerPath);
 
     // NOTE: Reason for not using component unmount, because we are not mounting and unmounting components
     // when we switch tabs.
-    if (selectedTab !== TABS.DATA_TABLE) {
+    if (selectedTab !== TABS.DATA_TABLE && containerType !== CONTAINER_TYPE.APP_BAR) {
       setSelectedLayerPath('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -202,6 +204,26 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       setSelectedLayerPath('');
     }
   }, [tabGroup, isOpen, setSelectedLayerPath, appBarComponents]);
+
+  // If has selected layer on load and the data for selectedLayerPath is empty, trigger a query
+  // TODO Occasionally, setting the default selected layer can have unexpected behaviours.
+  // TO.DOCONT e.g. Refresh the page, switch tabs in the browser, come back to tab when done. The layer isn't selected
+  useEffect(() => {
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+
+      if (selectedLayerPath && orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath)) {
+        setIsLoading(true);
+        triggerGetAllFeatureInfo(selectedLayerPath)
+          .catch((err) => {
+            logger.logError(`Data panel has failed to get all feature info, error: ${err}`);
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      }
+    }
+  }, [orderedLayerData, selectedLayerPath, triggerGetAllFeatureInfo]);
 
   /**
    * Check if layer sttaus is processing while querying

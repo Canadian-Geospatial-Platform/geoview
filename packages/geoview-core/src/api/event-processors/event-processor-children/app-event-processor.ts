@@ -1,4 +1,4 @@
-import { TypeDisplayLanguage, TypeDisplayTheme } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/config/types/map-schema-types';
 import { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { NotificationDetailsType } from '@/core/components';
@@ -65,19 +65,19 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * @param {string} param - Optional param to replace in the string if it is a key
    * @param {boolean} notification - True if we add the message to notification panel (default false)
    */
-  static addMessage(mapId: string, type: SnackbarType, message: string, param?: string[], notification = false): void {
+  static addMessage(mapId: string, type: SnackbarType, message: string, param?: string[], notification: boolean = false): void {
     switch (type) {
       case 'info':
-        api.maps[mapId].notifications.showMessage(message, param, notification);
+        api.getMapViewer(mapId).notifications.showMessage(message, param, notification);
         break;
       case 'success':
-        api.maps[mapId].notifications.showSuccess(message, param, notification);
+        api.getMapViewer(mapId).notifications.showSuccess(message, param, notification);
         break;
       case 'warning':
-        api.maps[mapId].notifications.showWarning(message, param, notification);
+        api.getMapViewer(mapId).notifications.showWarning(message, param, notification);
         break;
       case 'error':
-        api.maps[mapId].notifications.showError(message, param, notification);
+        api.getMapViewer(mapId).notifications.showError(message, param, notification);
         break;
       default:
         break;

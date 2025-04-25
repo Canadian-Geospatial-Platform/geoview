@@ -64,7 +64,10 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const getFilterInfo = (timeSliderLayerInfo: TypeTimeSliderValues): string | null => {
     if (timeSliderLayerInfo.filtering) {
       const { values } = timeSliderLayerInfo;
-      const [datePattern, timePattern] = [...timeSliderLayerInfo.displayPattern];
+
+      // Fill in date pattern and time pattern with default values if the display pattern is empty for some reason
+      const [datePattern, timePattern] = timeSliderLayerInfo.displayPattern;
+
       return timeSliderLayerInfo.values.length === 1
         ? DateMgt.formatDatePattern(values[0], 'day', timePattern)
         : `${DateMgt.formatDatePattern(values[0], datePattern, timePattern)} / ${DateMgt.formatDatePattern(
@@ -146,7 +149,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    */
   const renderContent = (): JSX.Element | null => {
     if (selectedLayerPath) {
-      return <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />;
+      return <TimeSlider config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />;
     }
 
     return null;

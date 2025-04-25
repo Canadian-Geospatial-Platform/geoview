@@ -1,5 +1,5 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageEsriInitialConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageEsriInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -17,6 +17,9 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceImageEsriInitialConfig;
+
+  /** Max number of records for query - NOT USE FOR IMAGE SERVER */
+  maxRecordCount?: number;
 
   /**
    * The class constructor.

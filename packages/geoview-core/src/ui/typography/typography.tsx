@@ -29,7 +29,7 @@ import { logger } from '@/core/utils/logger';
  * @see {@link https://mui.com/material-ui/react-typography/}
  */
 function TypographyUI(props: TypographyProps, ref: Ref<HTMLElement>): JSX.Element {
-  logger.logTraceRender('ui/typography/typography', props);
+  logger.logTraceRenderDetailed('ui/typography/typography', props);
 
   return <MaterialTypography ref={ref} {...props} />;
 }

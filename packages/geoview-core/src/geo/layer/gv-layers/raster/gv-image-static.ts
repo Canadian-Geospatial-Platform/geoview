@@ -4,7 +4,7 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Extent } from 'ol/extent';
 import axios from 'axios';
 
-import { Cast, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
@@ -118,7 +118,7 @@ export class GVImageStatic extends AbstractGVRaster {
         const drawingCanvas = document.createElement('canvas');
         drawingCanvas.width = image.width;
         drawingCanvas.height = image.height;
-        const drawingContext = drawingCanvas.getContext('2d')!;
+        const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
         drawingContext.drawImage(image, 0, 0);
         const legend: TypeLegend = {
           type: CONST_LAYER_TYPES.IMAGE_STATIC,
@@ -138,11 +138,10 @@ export class GVImageStatic extends AbstractGVRaster {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds.
+   * Overrides the way to get the bounds for this layer type.
    * @returns {Extent | undefined} The layer bounding box.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getBounds(): Extent | undefined {
+  override onGetBounds(): Extent | undefined {
     // Get the source projection
     const sourceProjection = this.getOLSource().getProjection() || undefined;
 

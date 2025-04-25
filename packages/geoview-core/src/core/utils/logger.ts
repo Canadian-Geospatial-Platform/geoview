@@ -1,3 +1,4 @@
+/* eslint-disable no-console */ // Point of this class is to console.log
 import { isArray } from 'lodash';
 import { getItemAsNumber, getItemAsNumberOrNumberArraySetValue } from './localStorage';
 
@@ -9,11 +10,13 @@ export const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
 // For tracing useCallback. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_CALLBACK = 3;
 // For tracing rendering. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
-export const LOG_TRACE_RENDER = 4;
+export const LOG_TRACE_RENDER_DETAILED = 4;
+// For tracing rendering. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
+export const LOG_TRACE_RENDER = 5;
 // For tracing useMemo. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
-export const LOG_TRACE_USE_MEMO = 5;
+export const LOG_TRACE_USE_MEMO = 6;
 // For tracing useEffect mounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
-export const LOG_TRACE_USE_EFFECT = 6;
+export const LOG_TRACE_USE_EFFECT = 7;
 // For tracing store subscription events. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_CORE_STORE_SUBSCRIPTION = 8;
 // For tracing api events. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
@@ -97,6 +100,20 @@ export class ConsoleLogger {
     if (!LOG_ACTIVE) return;
     // Redirect
     this.#logLevel(LOG_TRACE_USE_EFFECT_UNMOUNT, 'U_UMT', 'grey', useEffectFunction, ...messages);
+  }
+
+  /**
+   * Logging function commonly used in the rendering to log when a component is being rendered.
+   * This function is for the small components that get rendered a lot and that we don't typically want in the render trace.
+   * Only shows if LOG_ACTIVE is true.
+   * @param {string} component - The component being rendered
+   * @param {unknown[]} messages - The messages to log
+   */
+  logTraceRenderDetailed(component: string, ...messages: unknown[]): void {
+    // Validate log active
+    if (!LOG_ACTIVE) return;
+    // Redirect
+    this.#logLevel(LOG_TRACE_RENDER_DETAILED, `RENDR - ${this.logCount.renderer++}`, 'plum', component, ...messages); // Not a typo, 5 characters for alignment
   }
 
   /**
@@ -377,9 +394,7 @@ export class ConsoleLogger {
    */
   #logLevel(level: number, header: string, color: keyof ColorCode, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
-    if (this.#checkLevel(level))
-      // eslint-disable-next-line no-console
-      console.log(`%c${ConsoleLogger.#formatTime(new Date())} ${header}`, `color: ${color}`, ...messages);
+    if (this.#checkLevel(level)) console.log(`%c${ConsoleLogger.#formatTime(new Date())} ${header}`, `color: ${color}`, ...messages);
   }
 
   /**
@@ -391,7 +406,6 @@ export class ConsoleLogger {
    */
   #warnLevel(level: number, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
-    // eslint-disable-next-line no-console
     if (this.#checkLevel(level)) console.warn(`${ConsoleLogger.#formatTime(new Date())}`, ...messages);
   }
 
@@ -404,7 +418,6 @@ export class ConsoleLogger {
    */
   #errorLevel(level: number, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
-    // eslint-disable-next-line no-console
     if (this.#checkLevel(level)) console.error(`${ConsoleLogger.#formatTime(new Date())}`, ...messages);
   }
 

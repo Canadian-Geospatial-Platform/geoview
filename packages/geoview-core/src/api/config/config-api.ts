@@ -1,17 +1,17 @@
 import cloneDeep from 'lodash/cloneDeep';
 
-import { CV_DEFAULT_MAP_FEATURE_CONFIG, CV_CONFIG_GEOCORE_TYPE, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
-import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray, Cast } from '@config/types/config-types';
-import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
-import { UUIDmapConfigReader } from '@config/uuid-config-reader';
+import { CV_DEFAULT_MAP_FEATURE_CONFIG, CV_CONFIG_GEOCORE_TYPE, CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray, Cast } from '@/api/config/types/config-types';
+import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
+import { UUIDmapConfigReader } from '@/api/config/uuid-config-reader';
 import {
   AbstractGeoviewLayerConfig,
   EntryConfigBaseClass,
   TypeDisplayLanguage,
   TypeGeoviewLayerType,
   TypeLayerStyleConfig,
-} from '@config/types/map-schema-types';
-import { MapConfigError } from '@config/types/classes/config-exceptions';
+} from '@/api/config/types/map-schema-types';
+import { MapConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';
@@ -311,12 +311,14 @@ export class ConfigApi {
     // Get the geocore URL from the config, otherwise use the default URL.
     const geocoreServerUrl = geocoreUrl || CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl;
 
-    // Filter all geocore layers and convert the result into an array of geoviewLayerId.
-    const geocoreArrayOfKeys = listOfGeoviewLayerConfig
-      .filter((layerConfig) => layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE)
-      .map<string>((geocoreLayer) => {
-        return geocoreLayer.geoviewLayerId as string;
-      });
+    // Filter all geocore layers and convert the result into an array of unique geoviewLayerId.
+    const geocoreArrayOfKeys = Array.from(
+      new Set(
+        listOfGeoviewLayerConfig
+          .filter((layerConfig) => layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE)
+          .map<string>((geocoreLayer) => geocoreLayer.geoviewLayerId as string)
+      )
+    );
 
     // If the listOfGeoviewLayerConfig contains GeoCore layers, process them.
     if (geocoreArrayOfKeys.length) {
@@ -329,13 +331,17 @@ export class ConfigApi {
         // the listOfGeoviewLayerConfig.
         let newListOfGeoviewLayerConfig = listOfGeoviewLayerConfig.map((layerConfig) => {
           if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
-            const jsonConfigFound = arrayOfJsonConfig.find(
-              (jsonConfig) => jsonConfig.geoviewLayerId === `rcs.${layerConfig.geoviewLayerId}.${language}`
-            );
+            const jsonConfigFound = arrayOfJsonConfig.find((jsonConfig) => {
+              // Remove the duplicate tag from the ID so it will match
+              const geocoreId = (layerConfig.geoviewLayerId as string).split(':')[0];
+              return jsonConfig.geoviewLayerId === `rcs.${geocoreId}.${language}`;
+            });
             if (jsonConfigFound) {
-              jsonConfigFound.geoviewLayerId = layerConfig.geoviewLayerId;
-              jsonConfigFound.isGeocore = true as TypeJsonObject; // We want to remember that the origin is GeoCore.
-              return jsonConfigFound;
+              // take a clone in case the ID is a duplicate so the config can be re-used
+              const newConfig = cloneDeep(jsonConfigFound);
+              newConfig.geoviewLayerId = layerConfig.geoviewLayerId;
+              newConfig.isGeocore = true as TypeJsonObject; // We want to remember that the origin is GeoCore.
+              return newConfig;
             }
           }
           return layerConfig;

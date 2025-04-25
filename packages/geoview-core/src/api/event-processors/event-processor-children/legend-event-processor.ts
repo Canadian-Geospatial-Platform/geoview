@@ -1,4 +1,11 @@
-import { Extent, TypeLayerControls } from '@config/types/map-schema-types';
+import {
+  Extent,
+  TypeLayerControls,
+  TypeLayerStyleSettings,
+  TypeFeatureInfoEntry,
+  TypeStyleGeometry,
+  layerEntryIsGroupLayer,
+} from '@/api/config/types/map-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
   CONST_LAYER_TYPES,
@@ -12,7 +19,6 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeLayerStyleSettings, TypeFeatureInfoEntry, TypeStyleGeometry, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from './map-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -235,9 +241,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
       const controls: TypeLayerControls = {
         highlight: layerConfig.initialSettings?.controls?.highlight !== undefined ? layerConfig.initialSettings?.controls?.highlight : true,
-        hover: layerConfig.initialSettings?.controls?.hover !== undefined ? layerConfig.initialSettings?.controls?.hover : true,
+        hover: layerConfig.initialSettings?.controls?.hover !== undefined ? layerConfig.initialSettings?.controls?.hover : false,
         opacity: layerConfig.initialSettings?.controls?.opacity !== undefined ? layerConfig.initialSettings?.controls?.opacity : true,
-        query: layerConfig.initialSettings?.controls?.query !== undefined ? layerConfig.initialSettings?.controls?.query : true,
+        query: layerConfig.initialSettings?.controls?.query !== undefined ? layerConfig.initialSettings?.controls?.query : false,
         remove: layerConfig.initialSettings?.controls?.remove !== undefined ? layerConfig.initialSettings?.controls?.remove : removeDefault,
         table: layerConfig.initialSettings?.controls?.table !== undefined ? layerConfig.initialSettings?.controls?.table : true,
         visibility:
@@ -247,6 +253,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       return controls;
     };
 
+    // TODO: refactor - avoid nested function relying on outside parameter like layerPathNodes
+    // TODO.CONT: The layerId set by this array has the map identifier in front... remove
     const createNewLegendEntries = (currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
       // If outside of range of layer paths, stop
       if (layerPathNodes.length < currentLevel) return;
@@ -332,9 +340,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           type: legendResultSetEntry.data?.type || (layerConfig.entryType as TypeGeoviewLayerType),
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
           opacity: layerConfig.initialSettings?.states?.opacity || 1,
+          hoverable: layerConfig.initialSettings?.states?.hoverable,
+          queryable: layerConfig.initialSettings?.states?.queryable,
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
           icons: LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data!) || [],
+          url: layerConfig.geoviewLayerConfig.metadataAccessPath,
         };
 
         // Add the icons as items on the layer entry
@@ -502,13 +513,24 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {TypeLegendItem} item - The item to change.
    * @param {boolean} visibility - The new visibility.
    */
-  static setItemVisibility(mapId: string, item: TypeLegendItem, visibility: boolean = true): void {
-    // Get current layer legends and set item visibility
+  static setItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem, visibility: boolean = true): void {
+    // Get current layer legends
     const curLayers = this.getLayerState(mapId).legendLayers;
 
-    // TODO: Check - Is this line really at the right place in this function? It doesn't seem to be doing anything with regards to 'curLayers'!?
-    // eslint-disable-next-line no-param-reassign
-    item.isVisible = visibility;
+    // Get the particular object holding the items array itself from the store
+    const layer = this.getLegendLayerInfo(mapId, layerPath);
+
+    // If found
+    if (layer) {
+      // ! Change the visibility of the given item.
+      // ! which happens to be the same object reference as the one in the items array here
+      // TODO: Refactor - Rethink this pattern to find a better cohesive solution for ALL 'set' that go in the store and change them all
+      // eslint-disable-next-line no-param-reassign
+      item.isVisible = visibility;
+
+      // Shadow-copy this specific array so that the hooks are triggered for this items array and this one only
+      layer.items = [...layer.items];
+    }
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
@@ -535,7 +557,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath, true);
     // Get legend layers and legend layer to update
     const curLayers = this.getLayerState(mapId).legendLayers;
-    const layer = this.findLayerByPath(curLayers, layerPath);
+
+    // Get the particular object holding the items array itself from the store
+    const layer = this.getLegendLayerInfo(mapId, layerPath);
 
     // Set item visibility on map and in legend layer item for each item in layer
     if (layer) {
@@ -544,6 +568,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         // eslint-disable-next-line no-param-reassign
         item.isVisible = visibility;
       });
+
+      // Shadow-copy this specific array so that the hooks are triggered for this items array and this one only
+      layer.items = [...layer.items];
     }
 
     // Set updated legend layers
@@ -590,6 +617,46 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static setLayerOpacity(mapId: string, layerPath: string, opacity: number): void {
     const curLayers = this.getLayerState(mapId).legendLayers;
     this.#setOpacityInLayerAndChildren(mapId, curLayers, layerPath, opacity);
+
+    // Set updated legend layers
+    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
+  }
+
+  /**
+   * Sets the layer hoverable capacity.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {boolean} hoverable - The hoverable state to set.
+   */
+  static setLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
+    if (hoverable) MapEventProcessor.getMapViewerLayerAPI(mapId).hoverFeatureInfoLayerSet.enableHoverListener(layerPath);
+    else MapEventProcessor.getMapViewerLayerAPI(mapId).hoverFeatureInfoLayerSet.disableHoverListener(layerPath);
+
+    // ! Wrong pattern, need to be look at...
+    // TODO: These setters take curLayers, modify an object indirectly (which happens to affect an object inside curLayers!),
+    // TODO.CONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
+    const curLayers = this.getLayerState(mapId).legendLayers;
+    this.getLegendLayerInfo(mapId, layerPath)!.hoverable = hoverable;
+
+    // Set updated legend layers
+    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
+  }
+
+  /**
+   * Sets the layer queryable capacity.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {boolean} queryable - The queryable state to set.
+   */
+  static setLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void {
+    if (queryable) MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.enableClickListener(layerPath);
+    else MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.disableClickListener(layerPath);
+
+    // ! Wrong pattern, need to be look at...
+    // TODO: These setters take curLayers, modify an object indirectly (which happens to affect an object inside curLayers!),
+    // TODO.CONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
+    const curLayers = this.getLayerState(mapId).legendLayers;
+    this.getLegendLayerInfo(mapId, layerPath)!.queryable = queryable;
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);

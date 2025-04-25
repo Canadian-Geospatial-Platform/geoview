@@ -1,6 +1,7 @@
-import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/core/types/global-types';
+import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
 import { TimeDimension, DateMgt } from 'geoview-core/src/core/utils/date-mgt';
 import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
+import { AbstractGVLayer } from 'geoview-core/src/geo/layer/gv-layers/abstract-gv-layer';
 import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 import { TimeSliderEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/time-slider-event-processor';
@@ -62,8 +63,8 @@ class TimeSliderPlugin extends FooterPlugin {
           unlockLeft: 'Unlock left handle',
           lockRight: 'Lock right handle',
           lockLeft: 'Lock left handle',
-          disableFilter: 'Disable Filtering',
-          enableFilter: 'Enable Filtering',
+          disableFilter: 'Disable Time Filtering',
+          enableFilter: 'Enable Time Filtering',
           pauseAnimation: 'Pause animation',
           playAnimation: 'Play animation',
           back: 'Back',
@@ -91,8 +92,8 @@ class TimeSliderPlugin extends FooterPlugin {
           unlockLeft: 'Déverrouiller la poignée gauche',
           lockRight: 'Verrouiller la poignée droite',
           lockLeft: 'Verrouiller la poignée gauche',
-          disableFilter: 'Désactiver le filtrage',
-          enableFilter: 'Activer le filtrage',
+          disableFilter: 'Désactiver le filtrage temporel',
+          enableFilter: 'Activer le filtrage temporel',
           pauseAnimation: `Pause de l'animation`,
           playAnimation: `Jouer l'animation`,
           back: 'Retour',
@@ -215,8 +216,17 @@ class TimeSliderPlugin extends FooterPlugin {
    */
   #filterTimeSliderLayers(layerPaths: string[]): string[] {
     const filteredLayerPaths = layerPaths.filter((layerPath) => {
-      // Return the temporal dimension for the layer if any
-      return this.mapViewer().layer.getGeoviewLayer(layerPath)?.getTemporalDimension();
+      // Get the layer
+      const layer = this.mapViewer().layer.getGeoviewLayer(layerPath);
+
+      // If of the right type
+      if (layer instanceof AbstractGVLayer) {
+        // Return the temporal dimension for the layer if any
+        return layer.getTemporalDimension();
+      }
+
+      // Skip
+      return undefined;
     });
     return filteredLayerPaths;
   }

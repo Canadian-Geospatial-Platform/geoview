@@ -39,9 +39,8 @@
       "core": [
         "geolocator",
         "export",
-        "basemap-panel",
-        "legend",
         "layers",
+        "legend",
         "details",
         "guide"
       ]
@@ -56,7 +55,12 @@
     "tabs": {
       "core": [
         "data-table"
-      ]
+      ],
+      "custom": [{
+        "id": "download-map-data",
+        "label": "How to download map data", 
+        "contentHTML": "<div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>"
+      }]
     },
     "collapsed": true
   },

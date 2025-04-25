@@ -4,7 +4,8 @@ import i18next from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeWindow, TypeJsonObject, AnySchemaObject } from '@/core/types/global-types';
+import { TypeWindow } from '@/core/types/global-types';
+import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 
 /** ******************************************************************************************************************************
@@ -64,7 +65,7 @@ export abstract class AbstractPlugin {
    * @returns MapViewer The MapViewer used by this Plugin
    */
   mapViewer(): MapViewer {
-    return this.api.maps[this.pluginProps.mapId];
+    return this.api.getMapViewer(this.pluginProps.mapId);
   }
 
   /**

@@ -5,7 +5,7 @@ import {
   TypeTimeSliderValues,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/api/config/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
@@ -43,6 +43,15 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    */
   static getTimeSliderLayers(mapId: string): TimeSliderLayerSet | undefined {
     return this.getTimesliderState(mapId)?.timeSliderLayers;
+  }
+
+  /**
+   * Gets time slider selected layer path.
+   * @param {string} mapId - The map id of the state to act on
+   * @returns {string} The selected time slider layer path or undefined
+   */
+  static getTimeSliderSelectedLayer(mapId: string): string | undefined {
+    return this.getTimesliderState(mapId)?.selectedLayerPath;
   }
 
   /**

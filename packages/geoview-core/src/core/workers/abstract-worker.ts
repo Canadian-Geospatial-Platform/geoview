@@ -28,6 +28,9 @@ export abstract class AbstractWorker<T> {
   /** A proxy object to interact with the worker using Comlink. */
   protected proxy: Remote<T>;
 
+  /** A list of message handlers for the worker. */
+  #messageHandlers: ((event: MessageEvent) => void)[] = [];
+
   /**
    * Creates an instance of AbstractWorker.
    * @param {string} name - The Web Worker name for logging.
@@ -74,6 +77,9 @@ export abstract class AbstractWorker<T> {
           default:
             break;
         }
+      } else if (event.data && event.data.type === 'message') {
+        // Call all registered message handlers
+        this.#messageHandlers.forEach((handler) => handler(event));
       }
     };
   }
@@ -93,10 +99,31 @@ export abstract class AbstractWorker<T> {
   public abstract process(...args: unknown[]): Promise<unknown>;
 
   /**
+   * Add method to register message handlers
+   * @param {MessageEvent} handler - The message handler to add.
+   */
+  public addMessageHandler(handler: (event: MessageEvent) => void): void {
+    this.#messageHandlers.push(handler);
+  }
+
+  /**
+   * Add method to remove message handlers
+   * @param  {MessageEvent} handler - The message handler to remove.
+   */
+  public removeMessageHandler(handler: (event: MessageEvent) => void): void {
+    const index = this.#messageHandlers.indexOf(handler);
+    if (index > -1) {
+      this.#messageHandlers.splice(index, 1);
+    }
+  }
+
+  /**
    * Terminates the worker.
    */
   terminate(): void {
     try {
+      // Clear message handlers before terminating
+      this.#messageHandlers = [];
       this.worker.terminate();
       logger.logTraceWorker('Done terminating worker:', this.name);
     } catch (error) {

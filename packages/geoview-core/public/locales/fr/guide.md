@@ -207,6 +207,13 @@ L’onglet **Couches** comprend les sous-menus suivants&nbsp;:
 
 _**N.B.&nbsp;: Cliquez sur une couche pour afficher ses information dans la section de droite.**_
 
+**Information importante**  
+Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png) et que l'icône Zoom sur l'échelle visible  <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
+
+- En cliquant sur le bouton Zoom sur l'échelle visible, la carte sera ajustée au niveau de zoom approprié, ce qui rendra la couche visible.
+- Cependant, après avoir effectué un zoom, il se peut que vous ne voyiez pas immédiatement les éléments s'il n'y a pas de données dans la zone de visualisation actuelle.
+- Dans ce cas, vous devrez peut-être effectuer un déplacement de la carte pour localiser les éléments.
+
 Le sous-menu **Vue** de l’onglet **Couches** se divise en deux sections. La section de gauche présente les couches affichées sur la carte. Si vous cliquez sur une couche, ses paramètres (options accessibles pour la couche) s’afficheront dans la section de droite.
 
 **Icônes de couche**
@@ -316,6 +323,12 @@ Cochez la case ![]({{assetsURL}}/img/guide/layers/check.png) pour garder l’él
 
 _**N.B.&nbsp;: Cliquez sur une couche pour afficher ses données dans la section de droite.**_
 
+**Informations importantes sur la navigation**
+- Vous pouvez demander des données à partir d'une seule table à la fois. Pendant l'extraction des données, tous les boutons _couches_ sont désactivés.
+- La couche sélectionnée sera en vert et un message de progression apparaîtra au bas de la section carte.
+- Une fois la recherche de données terminée, tous les boutons _couches_ sont réactivés.
+- Si vous passez à un autre onglet pendant le processus, vous devrez resélectionner la couche lorsque vous reviendrez à l'onglet _Données_ pour afficher les résultats.
+
 L’onglet **Données** se divise en deux sections. La liste des couches se trouve à gauche, et les données des couches, à droite. Cliquez sur une couche pour en voir les données dans le tableau de droite.
 
 **Commandes de l’onglet Données**
@@ -402,11 +415,13 @@ _**N.B.&nbsp;: Cliquez sur une couche pour afficher son curseur temporel dans la
 
 L’onglet **Curseur temporel** dans le pied de page se divise en deux sections. La liste des couches ayant un facteur temporel se trouve dans la section de gauche.
 
+Cette case à cocher ![]({{assetsURL}}/img/guide/layers/check.png) contrôle si le curseur temporel filtre les données.
+- Lorsque la case est cochée, seules les données correspondant à la date sélectionnée sont affichées.
+- Lorsque la case est décochée, toutes les données, peu importe la date, sont affichées.
+
 Une barre de curseur s’affiche avec un ou deux points déplaçables. Pour les couches à facteur temporel ponctuel, il n’y a qu’un point déplaçable. Pour les couches à plage temporelle, il y a deux points déplaçables permettant de régler le début et la fin de la plage.
 
 Cliquez sur le point et déplacez-le sur la barre pour sélectionner les valeurs de filtre souhaitées ou un moment donné dans le temps. Pour une couche à plage temporelle, cliquez sur l’icône de cadenas ![]({{assetsURL}}/img/guide/footer/lock_30.svg) afin de verrouiller le point de début.
-
-Cochez ou décochez la case de filtre ![]({{assetsURL}}/img/guide/layers/check.png) pour activer ou désactiver le filtrage.
 
 Appuyez sur l’icône de lecture ![]({{assetsURL}}/img/guide/footer/play_arrow_30.svg) pour voir les résultats dans le temps. Cliquez sur l’icône de changement de direction ![]({{assetsURL}}/img/guide/footer/direction_arrow_30.svg) pour avancer ou reculer dans le temps.
 

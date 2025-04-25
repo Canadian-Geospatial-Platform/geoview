@@ -1,8 +1,8 @@
-import { CV_CONST_SUB_LAYER_TYPES, CV_LAYER_GROUP_SCHEMA_PATH } from '@config/types/config-constants';
-import { TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { TypeDisplayLanguage, TypeLayerEntryType } from '@config/types/map-schema-types';
+import { CV_CONST_SUB_LAYER_TYPES, CV_LAYER_GROUP_SCHEMA_PATH } from '@/api/config/types/config-constants';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
+import { TypeDisplayLanguage, TypeLayerEntryType } from '@/api/config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 import { logger } from '@/core/utils/logger';
 

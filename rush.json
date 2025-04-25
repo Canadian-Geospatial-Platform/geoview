@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
   "rushVersion": "5.113.4",
   "pnpmVersion": "8.15.2",
-  "nodeSupportedVersionRange": ">=20.11.0 <21.8.0",
+  "nodeSupportedVersionRange": ">=20.11.0",
   "pnpmOptions": {
     "strictPeerDependencies": false,
     "useWorkspaces": true
@@ -19,6 +19,10 @@
     "url": "https://github.com/Canadian-Geospatial-Platform/geoview"
   },
   "projects": [
+    {
+      "packageName": "geoview-custom-legend",
+      "projectFolder": "packages/geoview-custom-legend"
+    },
     {
       "packageName": "geoview-aoi-panel",
       "projectFolder": "packages/geoview-aoi-panel"

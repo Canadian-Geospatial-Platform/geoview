@@ -56,7 +56,7 @@ export interface CircularProgressPropsExtend extends CircularProgressProps {
  * @see {@link https://mui.com/material-ui/react-progress/}
  */
 function CircularProgressUI(props: CircularProgressPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/circular-progress/circular-progress');
+  logger.logTraceRenderDetailed('ui/circular-progress/circular-progress');
 
   // Get constant from props
   const { style = {}, isLoaded, sx = {}, ...rest } = props;

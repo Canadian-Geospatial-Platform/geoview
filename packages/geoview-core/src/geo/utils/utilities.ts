@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import { MapBrowserEvent } from 'ol';
 import { WMSCapabilities, WKT, GeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import Geometry from 'ol/geom/Geometry';
@@ -13,17 +14,17 @@ import { LineString, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
 import View from 'ol/View';
 
-import { Cast, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 
 import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { TypeLayerStyleConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 
 import { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
-import { TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
+import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 
 /**
  * Interface used for css style declarations
@@ -473,7 +474,7 @@ export function getLength(geometry: Geometry): number {
 }
 
 /**
- * Calculate distance along a path define by array of Coordinates
+ * Calculates distance along a path define by array of Coordinates
  * @param  {Coordinate[]} coordinates - Array of corrdinates
  * @param {string} inProj - Input projection (EPSG:4326, EPSG:3978, ESPG:3857)
  * @param {string} outProj - Output projection (EPSG:3978, ESPG:3857)
@@ -492,7 +493,7 @@ export function calculateDistance(coordinates: Coordinate[], inProj: string, out
 }
 
 /**
- * Get meters per pixel for different projections
+ * Gets meters per pixel for different projections
  * @param {TypeValidMapProjectionCodes} projection - The projection of the map
  * @param {number} resolution - The resolution of the map
  * @param {number?} lat - The latitude, only needed for Web Mercator
@@ -513,32 +514,27 @@ export function getMetersPerPixel(projection: TypeValidMapProjectionCodes, resol
 }
 
 /**
- * Convert a map scale to zoom level
+ * Converts a map scale to zoom level
  * @param view The view for converting the scale
  * @param targetScale The desired scale (e.g. 50000 for 1:50,000)
  * @returns number representing the closest zoom level for the given scale
  */
-export const getZoomFromScale = (view: View, targetScale: number | undefined): number | undefined => {
+export const getZoomFromScale = (view: View, targetScale: number | undefined, dpiValue?: number): number | undefined => {
   if (!targetScale) return undefined;
   const projection = view.getProjection();
   const mpu = projection.getMetersPerUnit();
-  const dpi = 25.4 / 0.28; // OpenLayers default DPI
+  const dpi = dpiValue ?? 25.4 / 0.28; // OpenLayers default DPI
 
   // Calculate resolution from scale
   if (!mpu) return undefined;
   // Resolution = Scale / ( metersPerUnit * inchesPerMeter * DPI )
   const targetResolution = targetScale / (mpu * 39.37 * dpi);
 
-  // Get the constrained resolution that matches our tile matrix
-  const constrainedResolution = view.getConstrainedResolution(targetResolution);
-
-  // Convert resolution to zoom
-  if (!constrainedResolution) return undefined;
-  return view.getZoomForResolution(constrainedResolution) || undefined;
+  return view.getZoomForResolution(targetResolution) || undefined;
 };
 
 /**
- * Convert a map scale to zoom level
+ * Converts a map scale to zoom level
  * @param view The view for converting the zoom
  * @param zoom The desired zoom (e.g. 50000 for 1:50,000)
  * @returns number representing the closest scale for the given zoom number
@@ -559,10 +555,26 @@ export const getScaleFromZoom = (view: View, zoom: number): number | undefined =
 };
 
 /**
- * Get map scale for Web Mercator or Lambert Conformal Conic projections
+ * Gets map scale for Web Mercator or Lambert Conformal Conic projections
  * @param view The view to get the current scale from
  * @returns number representing scale (e.g. 50000 for 1:50,000)
  */
 export const getMapScale = (view: View): number | undefined => {
   return getScaleFromZoom(view, view.getZoom() || 0);
+};
+
+/**
+ * Gets the pointer position information from a Map Event and a specified projection.
+ * @param {MapEvent} mapEvent - The map event
+ * @param {string} projCode - The map projection code
+ * @returns {TypeMapMouseInfo} An object representing pointer position information
+ */
+export const getPointerPositionFromMapEvent = (mapEvent: MapBrowserEvent, projCode: string): TypeMapMouseInfo => {
+  // Return an object representing pointer position information
+  return {
+    projected: mapEvent.coordinate,
+    pixel: mapEvent.pixel,
+    lnglat: Projection.transformPoints([mapEvent.coordinate], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
+    dragging: mapEvent.dragging,
+  };
 };

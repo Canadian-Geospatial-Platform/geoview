@@ -1,6 +1,7 @@
-import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/core/types/global-types';
+import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/api/config/types/config-types';
 import { MapPlugin } from 'geoview-core/src/api/plugin/map-plugin';
 import { SwiperEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/swiper-event-processor';
+import { GeoViewError } from 'geoview-core/src/core/exceptions/geoview-exceptions';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import schema from '../schema.json';
@@ -74,7 +75,7 @@ class SwiperPlugin extends MapPlugin {
     try {
       // Check if the layer exists on the map
       const olLayer = this.mapViewer().layer.getOLLayer(layerPath);
-      if (!olLayer) throw new Error(`Layer at path ${layerPath} not found.`);
+      if (!olLayer) throw new GeoViewError(this.pluginProps.mapId, `Layer at path ${layerPath} not found.`);
 
       // Add the layer path
       SwiperEventProcessor.addLayerPath(this.pluginProps.mapId, layerPath);

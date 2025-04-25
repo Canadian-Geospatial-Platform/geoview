@@ -12,16 +12,17 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 
 import { applyStyle } from 'ol-mapbox-style';
 
-import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { EventDelegateBase, api } from '@/app';
-import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global-types';
+import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
 import { TypeBasemapProps, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
-import EventHelper from '@/api/events/event-helper';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -31,9 +32,12 @@ import EventHelper from '@/api/events/event-helper';
  * @exports
  * @class Basemap
  */
-export class Basemap {
+export class BasemapApi {
   // The maximum delay to wait before we abandon(?) a basemap
   static REQUEST_DELAY_MAX = 3000;
+
+  // The map viewer
+  mapViewer: MapViewer;
 
   // Active basemap
   activeBasemap?: TypeBasemapProps;
@@ -56,17 +60,14 @@ export class Basemap {
   // The basemap options passed from the map config
   basemapOptions: TypeBasemapOptions;
 
-  // The map id to be used in events
-  mapId: string;
-
   /**
-   * Initialize basemap.
+   * Initialize basemap api
+   * @param {string} mapViewer - The map viewer.
    * @param {TypeBasemapOptions} basemapOptions - Optional basemap option properties, passed in from map config.
-   * @param {string} mapId - The map id.
    */
-  constructor(basemapOptions: TypeBasemapOptions, mapId: string) {
-    this.mapId = mapId;
-
+  constructor(mapViewer: MapViewer, basemapOptions: TypeBasemapOptions) {
+    // Keep the properties
+    this.mapViewer = mapViewer;
     this.basemapOptions = basemapOptions;
 
     // Create the overview default basemap (no label, no shaded)
@@ -145,6 +146,9 @@ export class Basemap {
   // Keep all callback delegates references
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
 
+  // Keep all callback delegates references
+  #onBasemapErrorHandlers: BasemapErrorDelegate[] = [];
+
   // #region OVERVIEW MAP
   getOverviewMapControl(olMap: OLMap, toggleButton: HTMLDivElement): OLOverviewMap {
     if (this.overviewMapCtrl) {
@@ -194,7 +198,7 @@ export class Basemap {
 
       if (tileLayer) {
         // add this layer to the basemap group
-        tileLayer.set(this.mapId, 'basemap');
+        tileLayer.set(this.mapViewer.mapId, 'basemap');
         newLayers.push(tileLayer as BaseLayer);
       }
     });
@@ -207,8 +211,8 @@ export class Basemap {
     // Overview Map Config
     if (overviewMap) this.overviewMap = overviewMap;
     else {
-      // TODO: find a more centralized way to trap error and display message
-      api.maps[this.mapId].notifications.showError('mapctrl.overviewmap.error');
+      // Emit about the error
+      this.#emitBasemapError({ error: new GeoViewError(this.mapViewer.mapId, 'mapctrl.overviewmap.error') });
     }
 
     // Overview Map Control
@@ -251,6 +255,7 @@ export class Basemap {
     let extent: Extent = [0, 0, 0, 0];
     let origin: number[] = [];
     let urlProj = 0;
+    let copyright = '';
 
     // ? The actual response expected by AxiosResponse is `any`
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -266,7 +271,7 @@ export class Basemap {
       try {
         // Get info from server
         // TODO: Check/Refactor - Document the necessity to explicitely reject after Basemap.REQUEST_DELAY_MAX
-        const request = await requestBasemap(basemapLayer.jsonUrl as string, Basemap.REQUEST_DELAY_MAX);
+        const request = await requestBasemap(basemapLayer.jsonUrl as string, BasemapApi.REQUEST_DELAY_MAX);
 
         if (request) {
           const result = toJsonObject(request.data);
@@ -307,6 +312,9 @@ export class Basemap {
           // Set extent for this layer
           extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
 
+          // Set copyright text for this layer
+          copyright = result.copyrightText as string;
+
           // Set the spatial Reference for this layer
           urlProj = tileInfo.spatialReference.latestWkid as number;
 
@@ -314,7 +322,10 @@ export class Basemap {
           if (basemapLayer.styleUrl) {
             const tileSize = [tileInfo.rows as number, tileInfo.cols as number];
             source = new VectorTile({
-              attributions: getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId)),
+              attributions: getLocalizedMessage(
+                'mapctrl.attribution.defaultnrcan',
+                AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)
+              ),
               projection: Projection.PROJECTIONS[urlProj],
               url: basemapLayer.url as string,
               format: new MVT(),
@@ -327,7 +338,10 @@ export class Basemap {
             });
           } else {
             source = new XYZ({
-              attributions: getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId)),
+              attributions: getLocalizedMessage(
+                'mapctrl.attribution.defaultnrcan',
+                AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)
+              ),
               projection: Projection.PROJECTIONS[urlProj],
               url: basemapLayer.url as string,
               crossOrigin: 'Anonymous',
@@ -353,6 +367,7 @@ export class Basemap {
             resolutions, // ? is this use somewhere, modifying values has no effect. Issue 643
             minScale: minZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
             maxScale: maxZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
+            copyright,
           };
         }
       } catch (error) {
@@ -387,10 +402,10 @@ export class Basemap {
     let maxZoom = 23;
 
     // Check if projection is provided for the basemap creation
-    const projectionCode = projection === undefined ? MapEventProcessor.getMapState(this.mapId).currentProjection : projection;
+    const projectionCode = projection === undefined ? MapEventProcessor.getMapState(this.mapViewer.mapId).currentProjection : projection;
 
     // Check if language is provided for the basemap creation
-    const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapId) : language;
+    const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId) : language;
 
     // Check if basemap options are provided for the basemap creation
     const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
@@ -519,9 +534,12 @@ export class Basemap {
           coreBasemapOptions.basemapId === 'osm'
             ? [
                 '© OpenStreetMap',
-                getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId)),
+                getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)),
               ]
-            : [getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId))],
+            : [
+                basemapLayers.find((layer) => coreBasemapOptions.basemapId === layer.basemapId)?.copyright || '',
+                getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)),
+              ],
         zoomLevels: {
           min: minZoom,
           max: maxZoom,
@@ -567,7 +585,7 @@ export class Basemap {
     const attribution: bilingual = basemapProps.attribution as unknown as bilingual;
 
     // Check if language is provided for the basemap creation
-    const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapId) : language;
+    const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId) : language;
 
     // Create the basemap properties
     const formatProps: TypeBasemapProps = { ...basemapProps };
@@ -606,7 +624,7 @@ export class Basemap {
    * @param {TypeDisplayLanguage} language - Optional language.
    */
   async loadDefaultBasemaps(projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<void> {
-    const basemap = await this.createCoreBasemap(MapEventProcessor.getBasemapOptions(this.mapId), projection, language);
+    const basemap = await this.createCoreBasemap(MapEventProcessor.getBasemapOptions(this.mapViewer.mapId), projection, language);
 
     if (basemap) {
       // Info used by create custom basemap
@@ -621,6 +639,28 @@ export class Basemap {
   }
 
   /**
+   * Clears the basemap layers from the map.
+   */
+  clearBasemaps(): void {
+    // Remove previous basemaps
+    const layers = this.mapViewer.map.getAllLayers();
+
+    // Loop through all layers on the map
+    for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+      const layer = layers[layerIndex];
+
+      // Get group id that this layer belongs to
+      const layerId = layer.get('mapId');
+
+      // Check if the group id matches basemap
+      if (layerId && layerId === 'basemap') {
+        // Remove the basemap layer
+        this.mapViewer.map.removeLayer(layer);
+      }
+    }
+  }
+
+  /**
    * Set the current basemap and update the basemap layers on the map.
    * @param {TypeBasemapProps} basemap - The basemap.
    */
@@ -629,26 +669,12 @@ export class Basemap {
     this.activeBasemap = basemap;
 
     // Set store attribution for the selected basemap or empty string if not provided
-    MapEventProcessor.setMapAttribution(this.mapId, basemap ? basemap.attribution : ['']);
+    MapEventProcessor.setMapAttribution(this.mapViewer.mapId, basemap ? basemap.attribution : ['']);
 
     // Update the basemap layers on the map
     if (basemap?.layers) {
-      // Remove previous basemaps
-      const layers = MapEventProcessor.getMapViewer(this.mapId).map.getAllLayers();
-
-      // Loop through all layers on the map
-      for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
-        const layer = layers[layerIndex];
-
-        // Get group id that this layer belongs to
-        const layerId = layer.get('mapId');
-
-        // Check if the group id matches basemap
-        if (layerId && layerId === 'basemap') {
-          // Remove the basemap layer
-          MapEventProcessor.getMapViewer(this.mapId).map.removeLayer(layer);
-        }
-      }
+      // Clear basemaps
+      this.clearBasemaps();
 
       // Add basemap layers
       basemap.layers.forEach((layer, index) => {
@@ -657,7 +683,12 @@ export class Basemap {
           basemapLayer = new VectorTileLayer({
             opacity: layer.opacity,
             source: layer.source,
-            declutter: true,
+            renderMode: 'vector',
+            renderBuffer: 100,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
+            // Only declutter labels and add className otherwise (https://github.com/openlayers/openlayers/issues/10096)
+            ...(layer.basemapId === 'label' ? { declutter: true } : { className: 'geom' }),
           });
 
           // Apply Style to Vector Tile Basemap
@@ -678,7 +709,7 @@ export class Basemap {
         basemapLayer.set('mapId', 'basemap');
 
         // Add the basemap layer
-        MapEventProcessor.getMapViewer(this.mapId).map.getLayers().insertAt(index, basemapLayer);
+        this.mapViewer.map.getLayers().insertAt(index, basemapLayer);
 
         // Render the layer
         basemapLayer.changed();
@@ -690,30 +721,68 @@ export class Basemap {
   }
 
   /**
-   * Emits a component removed event to all handlers.
+   * Refreshes the basemap layers
+   */
+  refreshBasemap(): void {
+    this.activeBasemap?.layers.forEach((layer) => {
+      layer.source.refresh();
+    });
+  }
+
+  /**
+   * Emits a basemap changed event to all handlers.
+   * @param {BasemapChangedEvent} event - The event to be emitted
    * @private
    */
   #emitBasemapChanged(event: BasemapChangedEvent): void {
-    // Emit the component removed event for all handlers
+    // Emit the basemap changed event for all handlers
     EventHelper.emitEvent(this, this.#onBasemapChangedHandlers, event);
   }
 
   /**
-   * Registers a component removed event callback.
-   * @param {MapComponentRemovedDelegate} callback - The callback to be executed whenever the event is emitted
+   * Registers a basemap changed event callback.
+   * @param {BasemapChangedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onBasemapChanged(callback: BasemapChangedDelegate): void {
-    // Register the component removed event handler
+    // Register the basemap changed event handler
     EventHelper.onEvent(this.#onBasemapChangedHandlers, callback);
   }
 
   /**
-   * Unregisters a component removed event callback.
-   * @param {MapComponentRemovedDelegate} callback - The callback to stop being called whenever the event is emitted
+   * Unregisters a basemap changed event callback.
+   * @param {BasemapChangedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offMapLanguageChanged(callback: BasemapChangedDelegate): void {
-    // Unregister the component removed event handler
+  offBasemapChanged(callback: BasemapChangedDelegate): void {
+    // Unregister the basemap changed event handler
     EventHelper.offEvent(this.#onBasemapChangedHandlers, callback);
+  }
+
+  /**
+   * Emits a basemap error event to all handlers.
+   * @param {BasemapErrorEvent} event - The event to be emitted
+   * @private
+   */
+  #emitBasemapError(event: BasemapErrorEvent): void {
+    // Emit the basemap error event for all handlers
+    EventHelper.emitEvent(this, this.#onBasemapErrorHandlers, event);
+  }
+
+  /**
+   * Registers a basemap error event callback.
+   * @param {BasemapErrorDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onBasemapError(callback: BasemapErrorDelegate): void {
+    // Register the basemap error event handler
+    EventHelper.onEvent(this.#onBasemapErrorHandlers, callback);
+  }
+
+  /**
+   * Unregisters a basemap error event callback.
+   * @param {BasemapErrorDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offBasemapError(callback: BasemapErrorDelegate): void {
+    // Unregister the basemap error event handler
+    EventHelper.offEvent(this.#onBasemapErrorHandlers, callback);
   }
 }
 
@@ -727,4 +796,16 @@ export type BasemapChangedEvent = {
 /**
  * Define a delegate for the event handler function signature.
  */
-type BasemapChangedDelegate = EventDelegateBase<Basemap, BasemapChangedEvent, void>;
+type BasemapChangedDelegate = EventDelegateBase<BasemapApi, BasemapChangedEvent, void>;
+
+/**
+ * Define an event for the delegate.
+ */
+export type BasemapErrorEvent = {
+  error: GeoViewError;
+};
+
+/**
+ * Define a delegate for the event handler function signature.
+ */
+type BasemapErrorDelegate = EventDelegateBase<BasemapApi, BasemapErrorEvent, void>;

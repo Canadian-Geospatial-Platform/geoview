@@ -17,7 +17,6 @@ import { ConfigProps } from './time-slider-types';
 
 interface TimeSliderProps {
   config: ConfigProps;
-  mapId: string;
   layerPath: string;
 }
 
@@ -32,7 +31,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   logger.logTraceRender('geoview-time-slider/time-slider', props);
 
   const { cgpv } = window;
-  const { config, layerPath, mapId } = props;
+  const { config, layerPath } = props;
   const { react, ui } = cgpv;
   const { useState, useRef, useEffect, useCallback } = react;
   const {
@@ -401,8 +400,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           <Box sx={{ textAlign: 'center', paddingTop: '20px' }}>
             <Slider
               key={values[1] ? values[1] + values[0] : values[0]}
-              sliderId={layerPath}
-              mapId={mapId}
               style={{ width: '80%', color: 'primary' }}
               min={minAndMax[0]}
               max={minAndMax[1]}

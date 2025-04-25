@@ -1,13 +1,13 @@
-import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
-import { Cast } from '@config/types/config-types';
-import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
+import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@/api/config/types/config-constants';
+import { Cast } from '@/api/config/types/config-types';
+import { AbstractBaseEsriLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
 import {
   TypeLayerStyleConfig,
   TypeLayerEntryType,
   TypeSourceEsriFeatureInitialConfig,
   TypeVectorSourceFormats,
   TypeValidMapProjectionCodes,
-} from '@config/types/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import { EsriBaseRenderer, createStyleUsingEsriRenderer } from '@/api/config/esri-renderer-parser';
 
 // ========================

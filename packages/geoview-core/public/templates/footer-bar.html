@@ -40,7 +40,7 @@
     </table>
   </div>
 
-  <div id="mapWM" class="geoview-map" data-lang="en" data-config-url="./configs/footer-tabs-config.json"></div>
+  <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/footer-tabs-config.json"></div>
   <p>
     The map will show how you can add footer tabs using GeoView core component and <strong>Vanilla JavaScript</strong>
     using the
@@ -57,7 +57,7 @@
   <script>
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
     cgpv.init((mapIdTemp) => {
-      if (mapIdTemp === 'mapWM') {
+      if (mapIdTemp === 'map1') {
         // import react and api from the core
         const { react, api, ui } = cgpv;
 
@@ -71,13 +71,13 @@
         //   const [layers, setLayers] = useState([]);
 
         //   async function getWMSLegend(geoviewLayerId) {
-        //     const res = await api.maps[mapId].layer.getGeoviewLayer(layerId).getLegendGraphic();
+        //     const res = await api.getMapViewer(mapId).layer.getGeoviewLayer(layerId).getLegendGraphic();
 
         //     return res;
         //   }
 
         //   async function getEsriDynamicLegend(layerId) {
-        //     const res = await api.maps[mapId].layer.getGeoviewLayer(layerId).getLegendJson();
+        //     const res = await api.getMapViewer(mapId).layer.getGeoviewLayer(layerId).getLegendJson();
 
         //     return res;
         //   }
@@ -85,7 +85,7 @@
         //   useEffect(() => {
         //     async function getLayers() {
         //       // get layers added to the map
-        //       const { layers: mapLayers } = api.maps[mapId].layer;
+        //       const { layers: mapLayers } = api.getMapViewer(mapId).layer;
 
         //       // loop through added layers
         //       for (let layerIndex = 0; layerIndex < Object.keys(mapLayers).length; layerIndex++) {
@@ -264,7 +264,7 @@
         }
 
         // import footerBar tabs from the core for the current map
-        const { footerBarApi } = api.maps[mapId];
+        const { footerBarApi } = api.getMapViewer(mapId);
 
         // create new tab and add the component
         footerBarApi.createTab({

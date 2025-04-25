@@ -1,15 +1,30 @@
+/* eslint-disable max-classes-per-file */
+
+import { TypeJsonArray, TypeJsonValue } from '@/api/config/types/config-types';
+import { getLocalizedMessage } from '@/core/utils/utilities';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+
+// Custom error class for GeoView-related errors
 export class GeoViewError extends Error {
-  // The map id
+  // The map id related to the error
   mapId: string;
 
-  constructor(mapId: string) {
+  /**
+   * Constructor to initialize the GeoViewError with a map ID.
+   * @param mapId - The map ID associated with the error
+   */
+  constructor(mapId: string, localizedKeyOrMessage: string, params: TypeJsonValue[] | TypeJsonArray | string[] = []) {
+    // Call the parent class (Error) constructor with a custom message
     super(`An error happened on map ${mapId}`);
 
-    // Keep the informations
+    // Store the map ID
     this.mapId = mapId;
 
-    // Set the prototype explicitly (as recommended by TypeScript doc)
-    // https://github.com/microsoft/TypeScript-wiki/blob/81fe7b91664de43c02ea209492ec1cea7f3661d0/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work)
+    // Set the message
+    this.message = getLocalizedMessage(localizedKeyOrMessage, AppEventProcessor.getDisplayLanguage(mapId), params);
+
+    // Set the prototype explicitly to ensure correct inheritance (recommended by TypeScript documentation)
+    // This is to handle the prototype chain correctly when extending built-in classes like Error
     Object.setPrototypeOf(this, GeoViewError.prototype);
   }
 }

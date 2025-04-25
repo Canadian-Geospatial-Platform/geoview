@@ -1,12 +1,13 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import {
   IDataTableState,
+  IDataTableSettings,
   TypeAllFeatureInfoResultSet,
   TypeAllFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -29,6 +30,29 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   protected static getDataTableState(mapId: string): IDataTableState {
     // Return the DataTable state
     return super.getState(mapId).dataTableState;
+  }
+
+  /**
+   * Get a specific state.
+   * @param {string} mapId - The mapId
+   * @param {'allFeaturesDataArray' | 'activeLayerData' | 'layersDataTableSetting' | 'selectedFeature' | 'selectedLayerPath' | 'tableFilters'} state - The state to get
+   * @returns {string | TypeAllFeatureInfoResultSetEntry[] | TypeLayerData[] | Record<string, IDataTableSettings> | TypeFeatureInfoEntry | Record<string, string> | undefined | null} The requested state
+   */
+  static getSingleDataTableState(
+    mapId: string,
+    state: 'allFeaturesDataArray' | 'activeLayerData' | 'layersDataTableSetting' | 'selectedFeature' | 'selectedLayerPath' | 'tableFilters'
+  ):
+    | string
+    | TypeAllFeatureInfoResultSetEntry[]
+    | TypeLayerData[]
+    | IDataTableSettings
+    | Record<string, IDataTableSettings>
+    | TypeFeatureInfoEntry
+    | Record<string, string>
+    | undefined
+    | null {
+    if (this.getDataTableState(mapId)) return this.getDataTableState(mapId)![state];
+    return undefined;
   }
 
   /**

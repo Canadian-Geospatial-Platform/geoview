@@ -1787,6 +1787,10 @@
           "$ref": "#/definitions/TypeInitialViewSettings",
           "description": "Settings for the initial viewing area of the map."
         },
+        "homeView": {
+          "$ref": "#/definitions/TypeInitialViewSettings",
+          "description": "Settings for the home nav bar button."
+        },
         "enableRotation": {
           "type": "boolean",
           "default": true,
@@ -1952,7 +1956,7 @@
                   "id": {
                     "type": "string"
                   },
-                  "defaultTabs": {
+                  "label": {
                     "type": "string"
                   },
                   "contentHTML": {
@@ -1986,9 +1990,17 @@
           ],
           "description": "Footer tab to be selected at map load"
         },
+        "selectedDataTableLayerPath": {
+          "type": "string",
+          "description": "Layerpath of data table tab layer to be selected at map load"
+        },
         "selectedLayersLayerPath": {
           "type": "string",
-          "description": "Layerpath of layer to be selected at map load"
+          "description": "Layerpath of layer tab layer to be selected at map load"
+        },
+        "selectedTimeSliderLayerPath": {
+          "type": "string",
+          "description": "Layerpath of time slider tab layer to be selected at map load"
         }
       },
       "required": [
@@ -2042,9 +2054,13 @@
           ],
           "description": "App bar tab to be selected at map load"
         },
+        "selectedDataTableLayerPath": {
+          "type": "string",
+          "description": "Layerpath of data table tab layer to be selected at map load"
+        },
         "selectedLayersLayerPath": {
           "type": "string",
-          "description": "Layerpath of layer to be selected at map load"
+          "description": "Layerpath of layer tab layer to be selected at map load"
         }
       },
       "required": [
@@ -2136,9 +2152,14 @@
           "type": "string",
           "description": "An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server or an absolute path on a server which sets CORS headers."
         },
-        "geolocator": {
+        "geolocatorUrl": {
           "type": "string",
           "description": "Service end point to access geo location of searched value."
+        },
+        "metadataUrl": {
+          "type": "string",
+          "description": "Service end point to access metadata of layers.",
+          "default": "https://open.canada.ca/data/en/dataset/"
         }
       },
       "required": [

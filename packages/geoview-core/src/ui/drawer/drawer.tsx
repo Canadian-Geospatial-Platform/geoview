@@ -57,7 +57,7 @@ export interface DrawerPropsExtend extends DrawerProps {
  * @see {@link https://mui.com/material-ui/react-drawer/}
  */
 function DrawerUI(props: DrawerPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/drawer/drawer');
+  logger.logTraceRenderDetailed('ui/drawer/drawer');
 
   // Get constant from props
   const { variant, status, className, style, children, ...rest } = props;

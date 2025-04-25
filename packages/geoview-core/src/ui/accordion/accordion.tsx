@@ -122,7 +122,7 @@ const AccordionExpandIcon = memo(function AccordionExpandIcon({
  * @see {@link https://mui.com/material-ui/react-accordion/}
  */
 function AccordionUI(props: AccordionProps): ReactNode {
-  logger.logTraceRender('ui/accordions/accordion)');
+  logger.logTraceRenderDetailed('ui/accordions/accordion)');
 
   // Get const from props
   const { id, sx, items, className, defaultExpanded = false, showLoadingIcon = false } = props;
@@ -182,7 +182,7 @@ function AccordionUI(props: AccordionProps): ReactNode {
   );
 
   return (
-    <Box id={generateId(id)} sx={sx} className="accordion-group">
+    <Box id={id || generateId(18)} sx={sx} className="accordion-group">
       {items.map((item: AccordionItem, index: number) => (
         <MaterialAccordion
           // eslint-disable-next-line react/no-array-index-key

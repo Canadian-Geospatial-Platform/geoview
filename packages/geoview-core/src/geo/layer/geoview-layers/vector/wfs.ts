@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for sourceOptions-layerConfig. We keep it global...
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WFS as FormatWFS } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -7,26 +5,27 @@ import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 import { bbox } from 'ol/loadingstrategy';
 
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+// import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
 
-import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  TypeBaseSourceVectorInitialConfig,
-  layerEntryIsGroupLayer,
-} from '@/geo/map/map-schema-types';
+  TypeOutfields,
+  TypeOutfieldsType,
+  TypeSourceWfsInitialConfig,
+} from '@/api/config/types/map-schema-types';
 
-import { getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
-import { logger } from '@/core/utils/logger';
+import { xmlToJson, findPropertyNameByRegex, fetchXMLToJson } from '@/core/utils/utilities';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { TypeOutfields, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { GeoViewLayerError } from '@/core/exceptions/layer-exceptions';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -37,61 +36,18 @@ export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geovie
   listOfLayerEntryConfig: WfsLayerEntryConfig[];
 }
 
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the geoviewLayerType attribute of the
- * verifyIfLayer parameter is WFS. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerConfigIsWFS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWFSLayerConfig => {
-  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as a WFS if the type attribute of the verifyIfGeoViewLayer parameter
- * is WFS. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is WFS => {
-  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.WFS;
-};
-
-/** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a WfsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WFS. The type ascention applies only to the true block of
- * the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
- * valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is WfsLayerEntryConfig => {
-  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
-};
-
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
-/** *****************************************************************************************************************************
+/**
  * A class to add WFS layer.
  *
  * @exports
  * @class WFS
  */
-// ******************************************************************************************************************************
-// GV Layers Refactoring - Obsolete (in layers)
 export class WFS extends AbstractGeoViewVector {
   /** private variable holding wfs version. */
   #version = '2.0.0';
 
-  /** ***************************************************************************************************************************
-   * Initialize layer
+  /**
+   * Constructs a WFS Layer configuration processor.
    * @param {string} mapId the id of the map
    * @param {TypeWFSLayerConfig} layerConfig the layer configuration
    */
@@ -99,201 +55,166 @@ export class WFS extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.WFS, layerConfig, mapId);
   }
 
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
+  /**
+   * Fetches the metadata for a typical WFS class.
+   * @param {string} url - The url to query the metadata from.
+   */
+  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+    // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
+    const getCapabilitiesUrl = url.indexOf('?') > -1 ? url.substring(url!.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
+    const queryUrl = url!.indexOf('?') > -1 ? url.substring(0, url!.indexOf('?')) : url;
+
+    // Query XML to Json
+    return fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
+  }
+
+  /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected override fetchServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      let metadataUrl = this.metadataAccessPath;
+  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
+    // Fetch it
+    const metadataString = await WFS.fetchMetadata(this.metadataAccessPath);
 
-      // check if url contains metadata parameters for the getCapabilities request and reformat the urls
-      const getCapabilitiesUrl =
-        metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(metadataUrl!.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
-      metadataUrl = metadataUrl!.indexOf('?') > -1 ? metadataUrl.substring(0, metadataUrl!.indexOf('?')) : metadataUrl;
+    // Parse the WFS_Capabilities
+    const capabilitiesObject = findPropertyNameByRegex(metadataString, /(?:WFS_Capabilities)/);
 
-      if (metadataUrl) {
-        getXMLHttpRequest(`${metadataUrl}${getCapabilitiesUrl}`)
-          .then((metadataString) => {
-            if (metadataString === '{}') {
-              this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-            } else {
-              // need to pass a xmldom to xmlToJson
-              const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
-              const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
-
-              const capabilitiesObject = findPropertyNameByRegex(xmlJsonCapabilities, /(?:WFS_Capabilities)/);
-
-              this.metadata = capabilitiesObject as TypeJsonObject;
-              this.#version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
-              resolve();
-            }
-          })
-          .catch((reason) => {
-            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-            logger.logError('Unable to fetch metadata', this.metadataAccessPath, reason);
-            resolve();
-          });
-      } else {
-        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
-      }
-    });
-    return promisedExecution;
+    // If found
+    if (capabilitiesObject) {
+      // Set it
+      this.metadata = capabilitiesObject;
+      this.#version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
+    } else {
+      // Throw WFS_Capabilities was empty
+      throw new GeoViewLayerError(this.mapId, this.geoviewLayerId, 'WFS_Capabilities was empty');
+    }
   }
 
-  /** ***************************************************************************************************************************
-   * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
-   * necessary, additional code can be executed in the child method to complete the layer configuration.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+  /**
+   * Overrides the validation of a layer entry config.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
    */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-          layerConfig.layerStatus = 'error';
-          return;
-        }
+  protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
+    // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
+    // you can define them in the configuration section.
+    // when there is only one layer, it is not an array but an object
+    if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType))
+      this.metadata!.FeatureTypeList!.FeatureType = [this.metadata?.FeatureTypeList?.FeatureType] as TypeJsonObject;
+
+    if (Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
+      const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
+      const foundMetadata = metadataLayerList.find((layerMetadata) => {
+        const metadataLayerId = (layerMetadata.Name && layerMetadata.Name['#text']) as string;
+        return metadataLayerId.includes(layerConfig.layerId!);
+      });
+
+      if (!foundMetadata) {
+        // Add a layer load error
+        this.addLayerLoadError(layerConfig, `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+        return;
       }
 
-      layerConfig.layerStatus = 'processing';
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
-      // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
-      // you can define them in the configuration section.
-      // when there is only one layer, it is not an array but an object
-      if (!Array.isArray(this.metadata?.FeatureTypeList?.FeatureType))
-        this.metadata!.FeatureTypeList!.FeatureType = [this.metadata?.FeatureTypeList?.FeatureType] as TypeJsonObject;
+      if (!layerConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
+        // TODO: Check - This additional processing seem valid, but is it at the right place? A bit confusing with the rest of the codebase.
+        // TODO: Refactor - Layers refactoring. Validate if this code is still being executed after the layers migration. This code may easily have been forgotten.
+        const lowerCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
+        const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
+        const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
 
-      if (Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
-        const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
-        const foundMetadata = metadataLayerList.find((layerMetadata) => {
-          const metadataLayerId = (layerMetadata.Name && layerMetadata.Name['#text']) as string;
-          return metadataLayerId.includes(layerConfig.layerId!);
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.initialSettings!.bounds = bounds;
+      }
+
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings!.bounds = validateExtentWhenDefined(layerConfig.initialSettings!.bounds);
+    }
+  }
+
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   */
+  protected override async onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Instance check
+    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+
+    let queryUrl = layerConfig.source!.dataAccessPath;
+
+    // check if url contains metadata parameters for the getCapabilities request and reformat the urls
+    queryUrl = queryUrl!.indexOf('?') > -1 ? queryUrl!.substring(0, queryUrl!.indexOf('?')) : queryUrl;
+
+    // extract DescribeFeatureType operation parameters
+    const describeFeatureParams = this.metadata!['ows:OperationsMetadata']['ows:Operation'][1]['ows:Parameter'];
+    const describeFeatureParamsValues = findPropertyNameByRegex(describeFeatureParams, /(?:Value)/);
+    let outputFormat = '';
+    if (describeFeatureParamsValues !== undefined) {
+      if (Array.isArray(describeFeatureParamsValues['ows:Value'])) {
+        outputFormat = describeFeatureParamsValues['ows:Value'][0]['#text'] as string;
+      } else if (describeFeatureParamsValues['ows:Value'] === undefined) {
+        outputFormat = describeFeatureParamsValues[0]['#text'] as string;
+      } else {
+        outputFormat = (describeFeatureParamsValues as TypeJsonObject)['ows:Value']['#text'] as string;
+      }
+    }
+
+    const describeFeatureUrl = `${queryUrl}?service=WFS&request=DescribeFeatureType&version=${
+      this.#version
+    }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerConfig.layerId}`;
+
+    if (describeFeatureUrl && outputFormat === 'application/json') {
+      const layerMetadata = (await (await fetch(describeFeatureUrl)).json()) as TypeJsonObject;
+      if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
+        this.setLayerMetadata(layerConfig.layerPath, layerMetadata.featureTypes[0].properties);
+        WFS.#processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
+      }
+    } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
+      const layerMetadata = (await (await fetch(describeFeatureUrl)).text()) as string;
+      // need to pass a xmldom to xmlToJson to convert xsd schema to json
+      const xmlDOMDescribe = new DOMParser().parseFromString(layerMetadata, 'text/xml');
+      const xmlJsonDescribe = xmlToJson(xmlDOMDescribe);
+      const prefix = Object.keys(xmlJsonDescribe)[0].includes('xsd:') ? 'xsd:' : '';
+      const xmlJsonSchema = xmlJsonDescribe[`${prefix}schema`];
+      const xmlJsonDescribeElement =
+        xmlJsonSchema[`${prefix}complexType`] !== undefined
+          ? xmlJsonSchema[`${prefix}complexType`][`${prefix}complexContent`][`${prefix}extension`][`${prefix}sequence`][`${prefix}element`]
+          : [];
+
+      if (Array.isArray(xmlJsonDescribeElement)) {
+        // recreate the array of properties as if it was json
+        const featureTypeProperties: TypeJsonArray = [];
+        xmlJsonDescribeElement.forEach((element) => {
+          featureTypeProperties.push(element['@attributes']);
         });
 
-        if (!foundMetadata) {
-          this.layerLoadError.push({
-            layer: layerPath,
-            loggerMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
-          });
-          layerConfig.layerStatus = 'error';
-          return;
-        }
-
-        layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
-
-        if (!layerConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
-          // TODO: Check - This additional processing seem valid, but is it at the right place? A bit confusing with the rest of the codebase.
-          // TODO: Refactor - Layers refactoring. Validate if this code is still being executed after the layers migration. This code may easily have been forgotten.
-          const lowerCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
-          const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
-          const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
-
-          layerConfig.initialSettings!.bounds = bounds;
-        }
-        layerConfig.initialSettings!.bounds = validateExtentWhenDefined(layerConfig.initialSettings!.bounds);
+        this.setLayerMetadata(layerConfig.layerPath, featureTypeProperties as TypeJsonObject);
+        WFS.#processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
       }
-    });
-  }
-
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
-   * layer's configuration.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
-   */
-  // GV Layers Refactoring - Obsolete (in config?)
-  protected override async processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
-
-    try {
-      let queryUrl = layerConfig.source!.dataAccessPath;
-
-      // check if url contains metadata parameters for the getCapabilities request and reformat the urls
-      queryUrl = queryUrl!.indexOf('?') > -1 ? queryUrl!.substring(0, queryUrl!.indexOf('?')) : queryUrl;
-
-      // extract DescribeFeatureType operation parameters
-      const describeFeatureParams = this.metadata!['ows:OperationsMetadata']['ows:Operation'][1]['ows:Parameter'];
-      const describeFeatureParamsValues = findPropertyNameByRegex(describeFeatureParams, /(?:Value)/);
-      let outputFormat = '';
-      if (describeFeatureParamsValues !== undefined) {
-        if (Array.isArray(describeFeatureParamsValues['ows:Value'])) {
-          outputFormat = describeFeatureParamsValues['ows:Value'][0]['#text'] as string;
-        } else if (describeFeatureParamsValues['ows:Value'] === undefined) {
-          outputFormat = describeFeatureParamsValues[0]['#text'] as string;
-        } else {
-          outputFormat = (describeFeatureParamsValues as TypeJsonObject)['ows:Value']['#text'] as string;
-        }
-      }
-
-      const describeFeatureUrl = `${queryUrl}?service=WFS&request=DescribeFeatureType&version=${
-        this.#version
-      }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerConfig.layerId}`;
-
-      if (describeFeatureUrl && outputFormat === 'application/json') {
-        const layerMetadata = (await (await fetch(describeFeatureUrl)).json()) as TypeJsonObject;
-        if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
-          this.setLayerMetadata(layerConfig.layerPath, layerMetadata.featureTypes[0].properties);
-          WFS.#processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
-        }
-      } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
-        const layerMetadata = (await (await fetch(describeFeatureUrl)).text()) as string;
-        // need to pass a xmldom to xmlToJson to convert xsd schema to json
-        const xmlDOMDescribe = new DOMParser().parseFromString(layerMetadata, 'text/xml');
-        const xmlJsonDescribe = xmlToJson(xmlDOMDescribe);
-        const prefix = Object.keys(xmlJsonDescribe)[0].includes('xsd:') ? 'xsd:' : '';
-        const xmlJsonSchema = xmlJsonDescribe[`${prefix}schema`];
-        const xmlJsonDescribeElement =
-          xmlJsonSchema[`${prefix}complexType`] !== undefined
-            ? xmlJsonSchema[`${prefix}complexType`][`${prefix}complexContent`][`${prefix}extension`][`${prefix}sequence`][
-                `${prefix}element`
-              ]
-            : [];
-
-        if (Array.isArray(xmlJsonDescribeElement)) {
-          // recreate the array of properties as if it was json
-          const featureTypeProperties: TypeJsonArray = [];
-          xmlJsonDescribeElement.forEach((element) => {
-            featureTypeProperties.push(element['@attributes']);
-          });
-
-          this.setLayerMetadata(layerConfig.layerPath, featureTypeProperties as TypeJsonObject);
-          WFS.#processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
-        }
-      }
-    } catch (error) {
-      logger.logError(`Error processing layer metadata for layer path "${layerConfig.layerPath}`, error);
-      layerConfig.layerStatus = 'error';
     }
+
+    // Return the layer config
     return layerConfig;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    * @private
    */
-  // GV Layers Refactoring - Obsolete (in config)
   static #processFeatureInfoConfig(fields: TypeJsonArray, layerConfig: VectorLayerEntryConfig): void {
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source) layerConfig.source = {};
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
 
     // Process undefined outfields or aliasFields
     if (!layerConfig.source.featureInfo.outfields?.length) {
+      // eslint-disable-next-line no-param-reassign
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
 
       fields.forEach((fieldEntry) => {
@@ -312,12 +233,15 @@ export class WFS extends AbstractGeoViewVector {
     }
 
     layerConfig.source.featureInfo!.outfields.forEach((outfield) => {
+      // eslint-disable-next-line no-param-reassign
       if (!outfield.alias) outfield.alias = outfield.name;
     });
 
     // INFO: WFS as geometry for first field, set name field to second value
-    if (!layerConfig.source.featureInfo.nameField)
+    if (!layerConfig.source.featureInfo.nameField) {
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[1].name;
+    }
   }
 
   // Patch for field type only use for WFS
@@ -332,7 +256,7 @@ export class WFS extends AbstractGeoViewVector {
     return 'string';
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
@@ -341,14 +265,15 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  // GV Layers Refactoring - Obsolete (in config?, in layers?)
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
-    readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
+    // eslint-disable-next-line no-param-reassign
+    readOptions.dataProjection = (layerConfig.source as TypeSourceWfsInitialConfig).dataProjection;
 
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.url = (extent): string => {
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       let sourceUrl = layerConfig.source!.dataAccessPath!;
@@ -363,6 +288,7 @@ export class WFS extends AbstractGeoViewVector {
       return sourceUrl;
     };
 
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatWFS({
       version: this.#version,
     });
@@ -372,3 +298,29 @@ export class WFS extends AbstractGeoViewVector {
     return vectorSource;
   }
 }
+
+/**
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the geoviewLayerType attribute of the
+ * verifyIfLayer parameter is WFS. The type ascention applies only to the true block of the if clause that use this function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const layerConfigIsWFS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWFSLayerConfig => {
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
+};
+
+/**
+ * type guard function that redefines a TypeLayerEntryConfig as a WfsLayerEntryConfig if the geoviewLayerType attribute of the
+ * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WFS. The type ascention applies only to the true block of
+ * the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
+ * valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is WfsLayerEntryConfig => {
+  return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
+};

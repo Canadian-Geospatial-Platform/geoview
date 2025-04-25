@@ -1,11 +1,11 @@
-import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@config/types/config-constants';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { WfsGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/wfs-group-layer-config';
-import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { WfsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
-import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
-import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
+import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@/api/config/types/config-constants';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { WfsGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/wfs-group-layer-config';
+import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { WfsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
+import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
+import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
 import { findPropertyNameByRegex, getXMLHttpRequest, xmlToJson } from '@/core/utils/utilities';
@@ -136,7 +136,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     // If the feature list contains more than one layer, create a group node.
     if (featureType.length > 1) {
       const groupConfig = toJsonObject({
-        layerId: this.geoviewLayerId,
+        layerId: 'base-group',
         layerName: this.getLanguage() === 'en' ? 'Layer Group' : 'Groupe de couches',
         isLayerGroup: true,
         listOfLayerEntryConfig: featureType.map((layerMetadata) => {

@@ -51,7 +51,7 @@ function AutocompleteUI<
   DisableClearable extends boolean | undefined = undefined,
   FreeSolo extends boolean | undefined = undefined,
 >(props: AutocompletePropsExtend<T, Multiple, DisableClearable, FreeSolo>, ref: Ref<HTMLElement>): JSX.Element {
-  logger.logTraceRender('ui/autocomplete/autocomplete');
+  logger.logTraceRenderDetailed('ui/autocomplete/autocomplete');
 
   // Get constant from props
   const { fullWidth, ...autoCompleteProps } = props;

@@ -60,7 +60,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       color: '#000',
     },
     '& .MuiSlider-markLabel-overlap': {
-      display: 'none',
+      display: 'none !important',
     },
   },
 });

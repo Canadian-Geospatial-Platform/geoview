@@ -15,7 +15,8 @@
     "openGuide": "Open guide",
     "guide": "Guide",
     "fullScreen": "Full screen",
-    "processing": "Processing __param__ element(s) of __param__"
+    "processing": "Processing __param__ element(s) of __param__",
+    "clickEnlarge": "Click to enlarge"
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -115,6 +116,10 @@
     "errorNotLoaded": "An error occured when loading the layer",
     "errorProj": "does not support current map projection",
     "errorImageLoad": "Error loading source image for layer: __param__ at zoom level __param__",
+    "fetchProgress": "Fetching data... Retrieved __param__ of __param__ records",
+    "fetchDone": "Data fetched - __param__ records",
+    "fetchStart": "Start fetching data...",
+    "slowFetch": "Downloading __param__ is taking longer then expected",
     "only": "only",
     "opacity": "Opacity",
     "opacityMax": "Maximum from parent",
@@ -129,7 +134,13 @@
     "layerAddedAndLoading": "Layer __param__ added and loading",
     "layerAddedWithError": "Layer __param__ in error",
     "instructionsNoLayersTitle": "No layers visible",
-    "instructionsNoLayersBody": "Add visible layers on the map."
+    "instructionsNoLayersBody": "Add visible layers on the map.",
+    "moreInfo": "More Information",
+    "layerType": "Type: ",
+    "layerResource": "Resource: ",
+    "layerMetadata": "Metadata: ",
+    "layerHoverable": "Info on mouse over",
+    "layerQueryable": "Info on mouse click"
   },
   "details": {
     "title": "Details",
@@ -165,8 +176,9 @@
   },
   "validation": {
     "layer": {
-      "loadfailed": "Layer __param__ failed to load on map.",
+      "loadfailed": "Layer __param__ failed to load on map",
       "notfound": "The sublayer __param__ of the layer __param__ does not exist on the server",
+      "uuidNotFount": "GeoCore layer identifier __param__ does not exist on the server",
       "createtwice": "Can not execute the createGeoViewRasterLayers method twice for the layer __param__ on map",
       "usedtwice": "Duplicate use of layer identifier __param__ on map",
       "multipleUUID": "GeoCore layers may only have one GeoCore id per layer"
@@ -234,6 +246,7 @@
     "noTab": "No tab"
   },
   "error": {
+    "generic": "An error happened, contact us or view console for details",
     "metadata": {
       "unableRead": "Unable to read metadata",
       "empty": "Value returned is empty",
@@ -243,7 +256,10 @@
       "createGroup": "Unable to create group layer",
       "emptyGroup": "Empty layer group",
       "esriId": "ESRI layerId must be a number",
-      "esriIdNotFound": "ESRI layerId not found"
+      "esriIdNotFound": "ESRI layerId not found",
+      "notAbleToQuery": "Not able to download records for __param__",
+      "unsuportedProjection": "Layer __param__ projection does not match map projection",
+      "noCSVGeometry": "Could not find geographic data in the CSV layer __param__"
     },
     "geocore": {
       "noLayer": "No layers returned by GeoCore service"

@@ -9,8 +9,8 @@ import { asArray, asString } from 'ol/color';
 
 import { MapViewer } from '@/geo/map/map-viewer';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { generateId, setAlphaColor, getScriptAndAssetURL } from '@/core/utils/utilities';
-import { TypeStyleGeometry } from '@/geo/map/map-schema-types';
+import { setAlphaColor, getScriptAndAssetURL, generateId } from '@/core/utils/utilities';
+import { TypeStyleGeometry } from '@/api/config/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -116,7 +116,7 @@ export class GeometryApi {
   ): Feature {
     const polylineOptions = options || {};
 
-    const featureId = generateId(id);
+    const featureId = id || generateId();
 
     // create a line geometry
     const polyline = new Feature({
@@ -190,7 +190,7 @@ export class GeometryApi {
   ): Feature {
     const polygonOptions = options || {};
 
-    const featureId = generateId(optionalFeatureId);
+    const featureId = optionalFeatureId || generateId();
 
     // create a polygon geometry
     const polygon = new Feature({
@@ -264,7 +264,7 @@ export class GeometryApi {
   ): Feature {
     const circleOptions = options || {};
 
-    const featureId = generateId(optionalFeatureId);
+    const featureId = optionalFeatureId || generateId();
 
     const projectedCoordinates = Projection.transform(
       coordinate,
@@ -354,7 +354,7 @@ export class GeometryApi {
       },
     };
 
-    const featureId = generateId(optionalFeatureId);
+    const featureId = optionalFeatureId || generateId();
 
     // create a point feature
     const marker = new Feature({

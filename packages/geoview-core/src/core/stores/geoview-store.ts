@@ -15,7 +15,7 @@ import { IUIState, initializeUIState } from '@/core/stores/store-interface-and-i
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
-import { serializeTypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { serializeTypeGeoviewLayerConfig, MapConfigLayerEntry } from '@/api/config/types/map-schema-types';
 
 export type TypeSetStore = (
   partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>),
@@ -50,9 +50,6 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
   return {
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
-      // Log (leaving the logDebug for now until more tests are done with the config 2024-02-28)
-      logger.logDebug('Sending the map config to the store...', config.mapId);
-
       // GV this is a copy of the original map configuration, no modifications is allowed
       // ? this configuration is use to reload the map
       const clonedConfig = cloneDeep(config);
@@ -63,7 +60,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
       // TO.DOCONT: Configurations should be as losely coupled as possible.
       for (let i = 0; i < (clonedConfig.map?.listOfGeoviewLayerConfig?.length || 0); i++) {
         // Serialize the GeoviewLayerConfig
-        const serialized = serializeTypeGeoviewLayerConfig(clonedConfig.map!.listOfGeoviewLayerConfig![i]);
+        const serialized = serializeTypeGeoviewLayerConfig(clonedConfig.map!.listOfGeoviewLayerConfig![i] as MapConfigLayerEntry); // TODO: refactor - remove cast
 
         // Reassign
         clonedConfig.map.listOfGeoviewLayerConfig![i] = serialized as never;
@@ -75,11 +72,17 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
       get().appState.setDefaultConfigValues(config);
       get().mapState.setDefaultConfigValues(config);
       get().uiState.setDefaultConfigValues(config);
+      get().layerState.setDefaultConfigValues(config);
+      get().dataTableState.setDefaultConfigValues(config);
 
       // packages states, only create if needed
       // TODO: Change this check for something more generic that checks in appBar too
-      if (config.footerBar?.tabs.core.includes('time-slider')) set({ timeSliderState: initializeTimeSliderState(set, get) });
+      if (config.footerBar?.tabs.core.includes('time-slider')) {
+        set({ timeSliderState: initializeTimeSliderState(set, get) });
+        get().timeSliderState.setDefaultConfigValues(config);
+      }
       if (config.footerBar?.tabs.core.includes('geochart')) set({ geochartState: initializeGeochartState(set, get) });
+
       if (config.corePackages?.includes('swiper')) set({ swiperState: initializeSwiperState(set, get) });
     },
 

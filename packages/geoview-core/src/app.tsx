@@ -12,8 +12,8 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
+import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
+import { MapConfigLayerEntry, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
@@ -24,7 +24,8 @@ import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import i18n from '@/core/translation/i18n';
 import { logger } from '@/core/utils/logger';
-import { removeCommentsFromJSON } from '@/core/utils/utilities';
+import { removeCommentsFromJSON, whenThisThen } from '@/core/utils/utilities';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/external-types';
@@ -39,13 +40,35 @@ let cgpvCallbackLayersProcessed: (mapId: string) => void | undefined;
 let cgpvCallbackLayersLoaded: (mapId: string) => void | undefined;
 
 /**
- * Function to unmount a map element
+ * Checks if a root is mounted for a given map ID
+ *
+ * @param {string} mapId - The map identifier
+ * @returns {boolean} True if the root exists and is mounted
+ */
+const isRootMounted = (mapId: string): boolean => {
+  return !!reactRoot[mapId];
+};
+
+/**
+ * Safely unmounts a map and cleans up its resources
  *
  * @param {string} mapId - The map id to unmount
  */
-export function unmountMap(mapId: string): void {
-  // Unmount the react root
-  reactRoot[mapId]?.unmount();
+export function unmountMap(mapId: string, mapContainer: HTMLElement): void {
+  if (isRootMounted(mapId)) {
+    try {
+      reactRoot[mapId].unmount();
+      logger.logInfo(`Map ${mapId} is unmounted...`);
+    } catch (error) {
+      logger.logError(`Error unmounting map ${mapId}:`, error);
+    } finally {
+      // Remove React-specific attributes
+      mapContainer.removeAttribute('data-react-root');
+      mapContainer.removeAttribute('data-zustand-devtools');
+
+      delete reactRoot[mapId];
+    }
+  }
 }
 
 /**
@@ -148,26 +171,47 @@ async function renderMap(mapElement: Element): Promise<void> {
   // TODO: refactor - remove this config once we get layers from the new one
   // create a new config for this map element
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
-  const config = new Config(lang);
-  const configObj = config.initializeMapConfig(configuration.mapId, configuration!.map!.listOfGeoviewLayerConfig!);
-  configuration.map.listOfGeoviewLayerConfig = configObj!;
 
   // Set the i18n language to the language specified in the config
   await i18n.changeLanguage(lang);
+
+  const config = new Config(lang);
+  const configObj = config.initializeMapConfig(
+    configuration.mapId,
+    configuration!.map!.listOfGeoviewLayerConfig! as MapConfigLayerEntry[], // TODO: refactor - remove cast after
+    (errorKey: string, params: string[]) => {
+      // Wait for the map viewer to get loaded in the api
+      whenThisThen(() => api.getMapViewer(configuration.mapId))
+        .then(() => {
+          // Create the error
+          const error = new GeoViewError(configuration.mapId, errorKey, params);
+
+          // Log it
+          logger.logWarning(`- Map ${configuration.mapId}: ${error.message}`);
+
+          // Show the error
+          api.getMapViewer(configuration.mapId).notifications.showError(error.message);
+        })
+        .catch((error) => {
+          // Log promise failed
+          logger.logPromiseFailed('Promise failed in whenThisThen in initializeMapConfig in app.renderMap', error);
+        });
+    }
+  );
+  configuration.map.listOfGeoviewLayerConfig = configObj!;
 
   // if valid config was provided - mapId is now part of config
   if (configuration) {
     const { mapId } = configuration;
 
-    // add config to store
-    addGeoViewStore(configuration);
-
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
 
+    // add config to store
+    addGeoViewStore(configuration);
+
     // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
     return new Promise<void>((resolve) => {
-      // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
       reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} onMapViewerInit={(): void => resolve()} />);
     });
   }
@@ -253,7 +297,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           callbackMapInit?.(mapId); // TODO: Obsolete call, remove it eventually
 
           // Register when the map viewer will have a map ready
-          api.maps[mapId].onMapReady((mapViewer) => {
+          api.getMapViewer(mapId).onMapReady((mapViewer) => {
             logger.logInfo('Map ready / layers registered', mapViewer.mapId);
 
             // Callback for that particular map
@@ -261,7 +305,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           });
 
           // Register when the map viewer will have loaded layers
-          api.maps[mapId].onMapLayersProcessed((mapViewer) => {
+          api.getMapViewer(mapId).onMapLayersProcessed((mapViewer) => {
             logger.logInfo('Map layers processed', mapViewer.mapId);
 
             // Callback for that particular map
@@ -269,7 +313,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           });
 
           // Register when the map viewer will have loaded layers
-          api.maps[mapId].onMapLayersLoaded((mapViewer) => {
+          api.getMapViewer(mapId).onMapLayersLoaded((mapViewer) => {
             logger.logInfo('Map layers loaded', mapViewer.mapId);
 
             // Callback for that particular map

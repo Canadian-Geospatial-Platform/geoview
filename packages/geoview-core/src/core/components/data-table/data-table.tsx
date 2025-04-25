@@ -41,7 +41,7 @@ import { useUIFooterPanelResizeValue, useUIStoreActions } from '@/core/stores/st
 import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
@@ -398,8 +398,8 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
   }, [data.features, handleZoomIn]);
 
   // TODO: The table is triggering many useless callback. With max-height of 5000px, it is slower to create but faster scroll.
-  // TODO.CONT: The x scroll is at the bottom, this is not good. We can set at the top with CSS below.
-  // TODO.CONT: It looks like we have circular dependencies, lack of useMemo to avoid rendering, callback not need like lightbox (only for images but render alll the time), ...
+  // TO.DOCONT: The x scroll is at the bottom, this is not good. We can set at the top with CSS below.
+  // TO.DOCONT: It looks like we have circular dependencies, lack of useMemo to avoid rendering, callback not need like lightbox (only for images but render alll the time), ...
   // transform: 'rotateX(180deg)',
   //   '& .MuiTable-root': {  // Target the MUI table root specifically
   //     transform: 'rotateX(180deg)',

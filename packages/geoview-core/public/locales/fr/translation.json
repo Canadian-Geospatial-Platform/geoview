@@ -15,7 +15,8 @@
     "openGuide": "Ouvrir le guide",
     "guide": "Guide",
     "fullScreen": "Plein écran",
-    "processing": "Traitement de __param__ element(s) sur __param__"
+    "processing": "Traitement de __param__ element(s) sur __param__",
+    "clickEnlarge": "Cliquer pour agrandir"
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
@@ -115,6 +116,10 @@
     "errorNotLoaded": "Une erreur s'est produite lors du chargement de la couche",
     "errorProj": "ne prend pas en charge la projection cartographique actuelle",
     "errorImageLoad": "Erreur de chargement de l'image source pour la couche: __param__ au niveau de zoom __param__",
+    "fetchProgress": "Téléchargement des données... Téléchargé __param__ de __param__ enregistrements",
+    "fetchDone": "Données téléchargées - __param__ enregistrements",
+    "fetchStart": "Début du téléchargement des données...",
+    "slowFetch": "Le téléchargement de __param__ prend plus de temps que prévu",
     "only": "seulement",
     "opacity": "Opacité",
     "opacityMax": "Maximum du parent",
@@ -129,7 +134,13 @@
     "layerAddedAndLoading": "Couche __param__ ajoutée et en chargement",
     "layerAddedWithError": "Couche __param__ en erreur",
     "instructionsNoLayersTitle": "Aucune couche visible",
-    "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte."
+    "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte.",
+    "moreInfo": "Plus d'informations",
+    "layerType": "Type : ",
+    "layerResource": "Ressource : ",
+    "layerMetadata": "Métadonnées : ",
+    "layerHoverable": "Info au passage de la souris",
+    "layerQueryable": "Info au click de la souris"
   },
   "details": {
     "title": "Détails",
@@ -165,11 +176,12 @@
   },
   "validation": {
     "layer": {
-      "loadfailed": "Le chargement de la couche __param__ a échoué sur la carte.",
-      "notfound": "La sous couche __param__ de la couche __param__ n'existe pas sur le sereur",
+      "loadfailed": "Le chargement de la couche __param__ a échoué sur la carte",
+      "uuidNotFound": "L'identifiant de couche GeoCore __param__ n'existe pas sur le serveur",
+      "notfound": "La sous couche __param__ de la couche __param__ n'existe pas sur le serveur",
       "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la couche __param__ sur la carte",
       "usedtwice": "Utilisation en double de l'identifiant de couche __param__ sur la carte",
-      "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul identifiant par couche."
+      "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul identifiant par couche"
     },
     "schema": {
       "notFound": "Une erreur de schéma a été trouvée, vérifiez la console pour voir ce qui ne va pas.",
@@ -233,6 +245,7 @@
     "noTab": "Pas d'onglet"
   },
   "error": {
+    "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour détails",
     "metadata": {
       "unableRead": "Impossible de lire les métadonnées",
       "empty": "La valeur renvoyée est vide",
@@ -242,7 +255,10 @@
       "createGroup": "Impossible de créer une couche de groupe",
       "emptyGroup": "Groupe de couches vide",
       "esriId": "Le layerId ESRI doit être un nombre",
-      "esriIdNotFound": "Le layerId ESRI introuvable"
+      "esriIdNotFound": "Le layerId ESRI introuvable",
+      "notAbleToQuery": "Impossible de téléchager les données pour __param__",
+      "unsuportedProjection": "La projection de la couche __param__ ne correspond pas à la projection de la carte",
+      "noCSVGeometry": "Impossible de trouver des données géographiques dans la couche CSV __param__"
     },
     "geocore": {
       "noLayer": "Aucune couche renvoyée par le service GeoCore"

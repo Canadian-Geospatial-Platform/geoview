@@ -1,8 +1,8 @@
 // TODO: When we are done with the config extraction, do a review of all the constants, types and utilities to
 // TO.DOCONT: remove code duplication.
 
-import { Cast, LayerEntryTypesKey, LayerTypesKey } from '@config/types/config-types';
-import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
+import { Cast, LayerEntryTypesKey, LayerTypesKey } from '@/api/config/types/config-types';
+import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import {
   TypeBasemapId,
   TypeDisplayLanguage,
@@ -12,7 +12,7 @@ import {
   TypeValidMapProjectionCodes,
   TypeValidVersions,
   TypeGeoviewLayerType,
-} from '@config/types/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 
 /** The default geocore url */
 export const CV_CONFIG_GEOCORE_URL = 'https://geocore.api.geo.ca';
@@ -20,11 +20,15 @@ export const CV_CONFIG_GEOCORE_URL = 'https://geocore.api.geo.ca';
 /** The default geolocator url */
 export const CV_CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
 
-/** The default geolocator url */
+/** The default proxy url */
 export const CV_CONFIG_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
+
+/** The default metadata recors url for uuid layer (empty because it needs to be set by config en and fr) */
+export const CV_CONFIG_METADATA_RECORDS_URL = '';
 
 export const CV_CONFIG_GEOCORE_TYPE = 'geoCore';
 
+// TODO: Remove GEOCORE after refactor
 // Constants for the layer config types
 export const CV_CONST_SUB_LAYER_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType> = {
   VECTOR: 'vector',
@@ -32,6 +36,7 @@ export const CV_CONST_SUB_LAYER_TYPES: Record<LayerEntryTypesKey, TypeLayerEntry
   RASTER_TILE: 'raster-tile',
   RASTER_IMAGE: 'raster-image',
   GROUP: 'group',
+  GEOCORE: 'geoCore',
 };
 
 /**
@@ -197,8 +202,9 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
   externalPackages: [],
   serviceUrls: {
     geocoreUrl: CV_CONFIG_GEOCORE_URL,
-    geolocator: CV_CONFIG_GEOLOCATOR_URL,
+    geolocatorUrl: CV_CONFIG_GEOLOCATOR_URL,
     proxyUrl: CV_CONFIG_PROXY_URL,
+    metadataUrl: CV_CONFIG_METADATA_RECORDS_URL,
   },
   globalSettings: { canRemoveSublayers: true },
   schemaVersionUsed: '1.0',
@@ -234,6 +240,7 @@ export const CV_DEFAULT_APPBAR_TABS_ORDER = [
   'openIn3dButton',
   'aoi-panel',
   'legend',
+  'custom-legend',
   'layers',
   'details',
   'data-table',

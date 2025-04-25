@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -71,7 +71,7 @@
       <h4 id="HLCONF1">1. Load from no config object</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="CONF1" class="geoview-map"></div>
+    <div id="map1" class="geoview-map"></div>
     <p>This map will will load with default configuration because none is provided.</p>
     <hr />
 
@@ -80,7 +80,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
-      id="CONF2"
+      id="map2"
       class="geoview-map"
       data-lang="en"
       data-config="{
@@ -88,12 +88,12 @@
             'interaction': 'dynamic',
             'viewSettings': {
               'zoom': 4,
-              'center': [-100, x],
+              'center': [-100, 'x'],
               'projection': 1111
-            }
+            }}
           }"
     ></div>
-    <p>This map will load with bad configuration (<strong>'center': [-100, x]</strong>) replaced with default.</p>
+    <p>This map will load with bad configuration (<strong>'center': [-100, 'x']</strong>) replaced with default.</p>
     <hr />
 
     <div class="map-title-holder">
@@ -101,7 +101,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
-      id="CONF3"
+      id="map3"
       class="geoview-map"
       data-lang="test_sp-CA"
       data-config="{
@@ -134,7 +134,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
-      id="CONF4"
+      id="map4"
       class="geoview-map"
       data-lang="test_sp-CA"
       data-config="{
@@ -179,7 +179,7 @@
       <h4 id="HLCONF5A">5.A. Load config from URL params</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="CONF5A" class="geoview-map" data-lang="en" data-shared="true"></div>
+    <div id="map5A" class="geoview-map" data-lang="en" data-shared="true"></div>
     <p>
       This map loads it's configurations from the URL parameters by providing a <strong>data-shared</strong> attribute. If a
       <strong>data-config</strong> attribute was also provided then the later will have its configuration overriden with config from url
@@ -192,7 +192,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div
-      id="CONF5B"
+      id="map5B"
       class="geoview-map"
       data-config="{
       'map': {
@@ -226,7 +226,7 @@
       <h4 id="HLCONF6">6. Load config from file</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="CONF6" class="geoview-map" data-lang="en" data-config-url="./configs/my-config.json"></div>
+    <div id="map6" class="geoview-map" data-lang="en" data-config-url="./configs/my-config.json"></div>
     <p>This map loads it's configurations from a file by providing <strong>data-config-url</strong>, the map is static!</p>
     <hr />
 
@@ -234,7 +234,7 @@
       <h4 id="HLCONF7">7. Load config from function call</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="CONF7" class="" data-lang="fr"></div>
+    <div id="map7" class="" data-lang="fr"></div>
     <p>This map loads it's configurations from a function call (after 10 seconds). Configuration error with double layer id.</p>
     <hr />
 
@@ -244,35 +244,48 @@
     <script src="codedoc.js"></script>
     <script>
       cgpv.api.createMapFromConfig(
-        'CONF7',
+        'map7',
         JSON.stringify({
-              'map': {
-                'interaction': 'dynamic',
-                'viewSettings': {
-                  'zoom': 10,
-                  'center': [-110, 70],
-                  'projection': 3978
-                },
-                'basemapOptions': {
-                  'basemapId': 'transport',
-                  'shaded': false,
-                  'labeled': true
-                },
-                'listOfGeoviewLayerConfig': [{
-                  'geoviewLayerId': 'wmsLYR1',
-                  'geoviewLayerName': 'earthquakes',
-                  'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
-                  'geoviewLayerType': 'esriDynamic',
-                  'listOfLayerEntryConfig': [
-                    {
-                      'layerId': '0'
-                    }
-                  ]
-                }]
+          map: {
+            interaction: 'dynamic',
+            viewSettings: {
+              zoom: 10,
+              center: [-110, 70],
+              projection: 3978,
+            },
+            basemapOptions: {
+              basemapId: 'transport',
+              shaded: false,
+              labeled: true,
+            },
+            listOfGeoviewLayerConfig: [
+              {
+                geoviewLayerId: 'wmsLYR1',
+                geoviewLayerName: 'earthquakes',
+                metadataAccessPath: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                geoviewLayerType: 'esriDynamic',
+                listOfLayerEntryConfig: [
+                  {
+                    layerId: '0',
+                  },
+                ],
               },
-              'components': ['overview-map'],
-              'corePackages': [],
-              'theme': 'geo.ca'
+              {
+                geoviewLayerId: 'wmsLYR1',
+                geoviewLayerName: 'earthquakes',
+                metadataAccessPath: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
+                geoviewLayerType: 'esriDynamic',
+                listOfLayerEntryConfig: [
+                  {
+                    layerId: '0',
+                  },
+                ],
+              },
+            ],
+          },
+          components: ['overview-map'],
+          corePackages: [],
+          theme: 'geo.ca',
         })
       );
 

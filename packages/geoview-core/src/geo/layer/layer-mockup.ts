@@ -1,11 +1,12 @@
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import {
+  TypeBaseVectorGeometryConfig,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerEntryType,
   TypeLayerStyleConfig,
   TypeVectorSourceFormats,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import { TimeDimension } from '@/core/utils/date-mgt';
 
 export abstract class LayerMockup {
@@ -353,7 +354,7 @@ export abstract class LayerMockup {
               rotation: 0,
               opacity: 1,
               offset: [0, 0],
-            },
+            } as TypeBaseVectorGeometryConfig,
             values: [],
           },
         ],

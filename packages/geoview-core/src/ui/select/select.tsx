@@ -47,7 +47,7 @@ export interface TypeMenuItemProps {
  * @returns {JSX.Element} the auto complete ui component
  */
 function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element {
-  logger.logTraceRender('ui/select/select');
+  logger.logTraceRenderDetailed('ui/select/select');
 
   // Get constant from props
   const {

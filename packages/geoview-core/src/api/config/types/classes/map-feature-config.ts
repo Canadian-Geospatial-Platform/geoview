@@ -1,14 +1,14 @@
 import cloneDeep from 'lodash/cloneDeep';
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
-import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
-import { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vector-config/esri-feature-config';
-import { EsriImageLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-image-config';
-import { WmsLayerConfig } from '@config/types/classes/geoview-config/raster-config/wms-config';
-import { WfsLayerConfig } from '@config/types/classes/geoview-config/vector-config/wfs-config';
-import { GeoJsonLayerConfig } from '@config/types/classes/geoview-config/vector-config/geojson-config';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { EsriDynamicLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/esri-dynamic-config';
+import { EsriFeatureLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/esri-feature-config';
+import { EsriImageLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/esri-image-config';
+import { WmsLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/wms-config';
+import { WfsLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/wfs-config';
+import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/geojson-config';
 import {
   CV_BASEMAP_ID,
   CV_BASEMAP_LABEL,
@@ -22,8 +22,8 @@ import {
   VALID_PROJECTION_CODES,
   CV_MAP_CENTER,
   CV_VALID_ZOOM_LEVELS,
-} from '@config/types/config-constants';
-import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@config/utils';
+} from '@/api/config/types/config-constants';
+import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@/api/config/utils';
 import {
   Extent,
   TypeAppBarProps,
@@ -41,9 +41,10 @@ import {
   TypeServiceUrls,
   TypeValidMapProjectionCodes,
   TypeValidVersions,
-} from '@config/types/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 
 import { logger } from '@/core/utils/logger';
+import { generateId } from '@/core/utils/utilities';
 import { ConfigApi } from '@/api/config/config-api';
 
 // ========================
@@ -148,10 +149,11 @@ export class MapFeatureConfig {
       .filter((layerConfig) => {
         if (layerConfig) {
           if (layerConfig.geoviewLayerId in this.#registeredLayerPaths) {
-            layerConfig.setErrorDetectedFlag();
-            layerConfig.setErrorDetectedFlagForAllLayers(layerConfig.listOfLayerEntryConfig);
-            logger.logError(`ERROR: The GeoView layer ${layerConfig.geoviewLayerId} is duplicated.`);
-          } else this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
+            // Add duplicate marker ('geoviewId:uuid') so the ID is unique
+            // eslint-disable-next-line no-param-reassign
+            layerConfig.geoviewLayerId = `${layerConfig.geoviewLayerId}:${generateId(8)}`;
+          }
+          this.#registeredLayerPaths[layerConfig.geoviewLayerId] = layerConfig;
         }
         return layerConfig;
       }) as AbstractGeoviewLayerConfig[];
@@ -408,12 +410,12 @@ export class MapFeatureConfig {
     const promiseLayersProcessed: Promise<void>[] = [];
 
     this.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-      promiseLayersProcessed.push(geoviewLayerConfig.fetchServiceMetadata());
+      promiseLayersProcessed.push((geoviewLayerConfig as AbstractGeoviewLayerConfig).fetchServiceMetadata()); // TODO: refactor - remove the cast AbstractGeoviewLayerConfig because of MapConfigLayerEntry everywhere
     });
 
     const promiseSettledResult = await Promise.allSettled(promiseLayersProcessed);
     promiseSettledResult.forEach((promise, i) => {
-      if (promise.status === 'rejected') this.map.listOfGeoviewLayerConfig[i].setErrorDetectedFlag();
+      if (promise.status === 'rejected') (this.map.listOfGeoviewLayerConfig[i] as AbstractGeoviewLayerConfig).setErrorDetectedFlag();
     });
     // TODO: Have a chat with Alex about his comment "We could still set the flag here, for processing reasons, and return the whole Promise.allSettled for convenience."
   }
@@ -440,10 +442,10 @@ export class MapFeatureConfig {
           (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId === geoviewConfig.geoviewLayerId
         );
         // If a GeoView layer config has been found, use it. Otherwise, do nothing
-        if (geoviewConfigToUse) geoviewConfig.applyUserConfig(geoviewConfigToUse);
+        if (geoviewConfigToUse) (geoviewConfig as AbstractGeoviewLayerConfig).applyUserConfig(geoviewConfigToUse);
       } else {
         // Use config provided at instanciation time.
-        geoviewConfig.applyUserConfig();
+        (geoviewConfig as AbstractGeoviewLayerConfig).applyUserConfig();
       }
     });
   }

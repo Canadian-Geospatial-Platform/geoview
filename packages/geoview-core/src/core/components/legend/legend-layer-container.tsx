@@ -1,24 +1,29 @@
 import { useTheme } from '@mui/material';
 import { memo, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Collapse, List } from '@/ui';
-import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { ItemsList } from './legend-layer-items';
+import { LegendLayer } from './legend-layer';
+import {
+  useSelectorLayerChildren,
+  useSelectorLayerIcons,
+  useSelectorLayerItems,
+  useSelectorLayerType,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
-
-// Define component types and interfaces
-type LegendLayerType = React.FC<{ layer: TypeLegendLayer }>;
+import { useSelectorLayerLegendCollapsed } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface CollapsibleContentProps {
-  layer: TypeLegendLayer;
-  legendExpanded: boolean; // Expanded come from store ordered layer info array
+  layerPath: string;
   initLightBox: (imgSrc: string, title: string, index: number, total: number) => void;
-  LegendLayerComponent: LegendLayerType;
+  LegendLayerComponent: typeof LegendLayer;
 }
 
 interface WMSLegendImageProps {
   imgSrc: string;
+  title: string;
   initLightBox: (imgSrc: string, title: string, index: number, total: number) => void;
   legendExpanded: boolean;
   sxClasses: Record<string, object>;
@@ -34,13 +39,14 @@ const styles = {
 
 // Extracted WMS Legend Component
 const WMSLegendImage = memo(
-  ({ imgSrc, initLightBox, legendExpanded, sxClasses }: WMSLegendImageProps): JSX.Element => (
+  ({ imgSrc, initLightBox, legendExpanded, sxClasses, title }: WMSLegendImageProps): JSX.Element => (
     <Collapse in={legendExpanded} sx={sxClasses!.collapsibleContainer} timeout="auto">
       <Box
         component="img"
         tabIndex={0}
         src={imgSrc}
         sx={styles.wmsImage}
+        title={title}
         onClick={() => initLightBox(imgSrc, '', 0, 2)}
         onKeyDown={(e) => (e.code === 'Space' || e.code === 'Enter' ? initLightBox(imgSrc, '', 0, 2) : null)}
       />
@@ -50,47 +56,45 @@ const WMSLegendImage = memo(
 WMSLegendImage.displayName = 'WMSLegendImage';
 
 export const CollapsibleContent = memo(function CollapsibleContent({
-  layer,
-  legendExpanded,
+  layerPath,
   initLightBox,
   LegendLayerComponent,
 }: CollapsibleContentProps): JSX.Element | null {
-  logger.logTraceRender('components/legend/legend-layer-container');
-
   // Hooks
+  const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const layerType = useSelectorLayerType(layerPath);
+  const isCollapsed = useSelectorLayerLegendCollapsed(layerPath);
+  const layerItems = useSelectorLayerItems(layerPath);
+  const layerChildren = useSelectorLayerChildren(layerPath);
+  const layerIcons = useSelectorLayerIcons(layerPath);
 
-  // Props extraction
-  const { children, items } = layer;
+  // Log
+  logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent', layerPath, layerChildren?.length);
 
   // Early returns
-  if (children?.length === 0 && items?.length === 1) return null;
+  if (layerChildren?.length === 0 && layerItems?.length === 1) return null;
 
-  const isWMSWithLegend = layer.type === CV_CONST_LAYER_TYPES.WMS && layer.icons?.[0]?.iconImage && layer.icons[0].iconImage !== 'no data';
+  const isWMSWithLegend = layerType === CV_CONST_LAYER_TYPES.WMS && layerIcons?.[0]?.iconImage && layerIcons[0].iconImage !== 'no data';
 
   // If it is a WMS legend, create a specific component
   if (isWMSWithLegend) {
     return (
       <WMSLegendImage
-        imgSrc={layer.icons[0].iconImage || ''}
+        imgSrc={layerIcons[0].iconImage || ''}
         initLightBox={initLightBox}
-        legendExpanded={legendExpanded}
+        legendExpanded={!isCollapsed}
         sxClasses={sxClasses}
+        title={t('general.clickEnlarge')!}
       />
     );
   }
 
   return (
-    <Collapse in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
-      <List>
-        {layer.children
-          .filter((d) => !['error', 'processing'].includes(d.layerStatus ?? ''))
-          .map((item) => (
-            <LegendLayerComponent layer={item} key={item.layerPath} />
-          ))}
-      </List>
-      <ItemsList items={items} />
+    <Collapse in={!isCollapsed} sx={sxClasses.collapsibleContainer} timeout="auto" unmountOnExit>
+      <List>{layerChildren && layerChildren.map((item) => <LegendLayerComponent layerPath={item.layerPath} key={item.layerPath} />)}</List>
+      <ItemsList items={layerItems || []} />
     </Collapse>
   );
 });

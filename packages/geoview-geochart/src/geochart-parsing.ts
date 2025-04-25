@@ -1,5 +1,9 @@
-import { TypeJsonObject } from 'geoview-core/src/core/types/global-types';
-import { TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial, TypeLayerEntryConfig } from 'geoview-core/src/geo/map/map-schema-types';
+import { TypeJsonObject } from 'geoview-core/src/api/config/types/config-types';
+import {
+  TypeFeatureInfoEntry,
+  TypeFeatureInfoEntryPartial,
+  TypeLayerEntryConfig,
+} from 'geoview-core/src/api/config/types/map-schema-types';
 import { ChartType, GeoChartDatasource } from 'geochart';
 import { LayerApi } from 'geoview-core/src/geo/layer/layer';
 import { TypeGeochartResultSetEntry } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';

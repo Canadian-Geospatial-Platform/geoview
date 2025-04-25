@@ -3,7 +3,10 @@
     "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
-        "layerIds": ["geojsonLYR1/geojsonLYR1/polygons.json", "geojsonLYR1/geojsonLYR1/lines.json"]
+        "layerIds": [
+          "geojsonLYR1/base-group/polygons.json",
+          "geojsonLYR1/base-group/lines.json"
+        ]
       },
       "projection": 3978
     },
@@ -67,16 +70,31 @@
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export"]
+      "core": [
+        "geolocator",
+        "export"
+      ]
     }
   },
-  "navBar": ["zoom", "fullscreen", "home", "location"],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location"
+  ],
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
     }
   },
-  "components": ["north-arrow"],
+  "components": [
+    "north-arrow"
+  ],
   "corePackages": [],
   "externalPackages": []
 }

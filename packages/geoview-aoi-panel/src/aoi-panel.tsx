@@ -1,3 +1,4 @@
+import { TypeWindow } from 'geoview-core/src/core/types/global-types';
 import { Extent } from 'geoview-core/src/api/config/types/map-schema-types';
 import { useMapStoreActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './area-of-interest-style';
@@ -25,10 +26,10 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
   const { mapId, config } = props;
   const aoiList = config.aoiList as AoiListItems;
 
-  const { cgpv } = window;
+  const { cgpv } = window as TypeWindow;
   const { api, ui } = cgpv;
 
-  const myMap = api.maps[mapId];
+  const myMap = api.getMapViewer(mapId);
   const { Card, Box } = ui.elements;
 
   const theme = ui.useTheme();

@@ -1,5 +1,5 @@
 import { Vector as VectorSource } from 'ol/source';
-import { TypeJsonArray } from '@/core/types/global-types';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
@@ -17,8 +17,6 @@ export class GVWFS extends AbstractGVVector {
    * @param {VectorSource} olSource - The OpenLayer source.
    * @param {WfsLayerEntryConfig} layerConfig - The layer configuration.
    */
-  // Disabling 'any', because that's how it is in OpenLayers
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public constructor(mapId: string, olSource: VectorSource, layerConfig: WfsLayerEntryConfig) {
     super(mapId, olSource, layerConfig);
   }

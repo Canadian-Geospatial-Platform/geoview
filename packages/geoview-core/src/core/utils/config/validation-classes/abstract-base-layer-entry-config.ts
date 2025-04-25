@@ -1,20 +1,20 @@
 /* eslint-disable no-underscore-dangle */
 // ? we escape all private attribute in this file
 import {
-  TypeBaseSourceVectorInitialConfig,
+  TypeBaseVectorSourceInitialConfig,
   TypeSourceImageEsriInitialConfig,
   TypeSourceImageInitialConfig,
   TypeSourceImageStaticInitialConfig,
-  TypeSourceImageWmsInitialConfig,
+  TypeSourceWmsInitialConfig,
   TypeSourceTileInitialConfig,
   TypeLayerStyleConfig,
   TypeStyleGeometry,
   TypeLayerStyleSettings,
   TypeVectorSourceInitialConfig,
   TypeVectorTileSourceInitialConfig,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
 
 /** ******************************************************************************************************************************
@@ -38,31 +38,20 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** Source settings to apply to the GeoView layer source at creation time. */
   source?:
-    | TypeBaseSourceVectorInitialConfig
+    | TypeBaseVectorSourceInitialConfig
     | TypeSourceTileInitialConfig
     | TypeVectorSourceInitialConfig
     | TypeVectorTileSourceInitialConfig
     | TypeSourceImageInitialConfig
-    | TypeSourceImageWmsInitialConfig
+    | TypeSourceWmsInitialConfig
     | TypeSourceImageEsriInitialConfig
     | TypeSourceImageStaticInitialConfig;
 
   /** Style to apply to the vector layer. */
-  layerStyle?: TypeLayerStyleConfig;
+  layerStyle?: TypeLayerStyleConfig = undefined;
 
   /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
   declare listOfLayerEntryConfig: never;
-
-  /**
-   * The class constructor.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
-   */
-  protected constructor(layerConfig: AbstractBaseLayerEntryConfig) {
-    super(layerConfig);
-    // Attribute 'layerStyle' must exist in layerConfig even if it is undefined
-    if (!('layerStyle' in this)) this.layerStyle = undefined;
-    Object.assign(this, layerConfig);
-  }
 
   /**
    * Gets the service metadata that is associated to the service.

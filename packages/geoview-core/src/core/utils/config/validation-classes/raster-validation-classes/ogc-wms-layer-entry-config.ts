@@ -1,5 +1,5 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageWmsInitialConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageWmsInitialConfig } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
@@ -31,7 +31,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     if (!this.source) this.source = {};
 
     // When the dataAccessPath is undefined and the metadataAccessPath ends with ".xml", the dataAccessPath is temporarilly
-    // set to '' and will be filled in the fetchServiceMetadata method of the class WMS.
+    // set to '' and will be filled in the fetchAndSetServiceMetadata method of the class WMS.
     if (!this.source.dataAccessPath) this.source.dataAccessPath = '';
 
     // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set

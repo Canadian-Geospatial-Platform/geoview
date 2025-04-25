@@ -1,14 +1,14 @@
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 
-import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@config/types/config-constants';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { WmsGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/wms-group-layer-config';
-import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { WmsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
-import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
-import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
+import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@/api/config/types/config-constants';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { WmsGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/wms-group-layer-config';
+import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { WmsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
+import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
+import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
+import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
 import { xmlToJson } from '@/core/utils/utilities';

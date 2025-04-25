@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-import { Cast, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
-import { codedValueType, Extent, rangeDomainType, TypeFeatureInfoLayerConfig, TypeOutfields } from '@config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { codedValueType, Extent, rangeDomainType, TypeFeatureInfoLayerConfig, TypeOutfields } from '@/api/config/types/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 
-import { GeoviewLayerConfigError } from '@config/types/classes/config-exceptions';
-import { AbstractGeoviewEsriLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-esri-layer-config';
+import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
+import { AbstractGeoviewEsriLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-esri-layer-config';
 
 import { Projection } from '@/geo/utils/projection';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';

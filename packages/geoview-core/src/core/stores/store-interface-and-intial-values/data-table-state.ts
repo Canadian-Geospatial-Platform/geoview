@@ -2,7 +2,8 @@ import { useStore } from 'zustand';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with DataTableEventProcessor vs DataTaleState
@@ -18,6 +19,7 @@ export interface IDataTableState {
   selectedFeature: TypeFeatureInfoEntry | null;
   selectedLayerPath: string;
   tableFilters: Record<string, string>;
+  setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
     addOrUpdateTableFilter(layerPath: string, filter: string): void;
@@ -67,6 +69,15 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
     selectedFeature: null,
     selectedLayerPath: '',
     tableFilters: {},
+    // Initialize default
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      set({
+        dataTableState: {
+          ...get().dataTableState,
+          selectedLayerPath: geoviewConfig.footerBar?.selectedDataTableLayerPath || geoviewConfig.appBar?.selectedDataTableLayerPath || '',
+        },
+      });
+    },
 
     // #region ACTIONS
 
@@ -267,7 +278,7 @@ export interface ColumnFilter {
   value: unknown;
 }
 
-interface IDataTableSettings {
+export interface IDataTableSettings {
   columnFiltersRecord: TypeColumnFiltersState;
   columnsFiltersVisibility: boolean;
   mapFilteredRecord: boolean;

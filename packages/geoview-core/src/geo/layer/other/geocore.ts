@@ -1,14 +1,13 @@
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 import { Config } from '@/core/utils/config/config';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { logger } from '@/core/utils/logger';
+import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
-import { api } from '@/app';
+import { TypeDisplayLanguage, GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to add geoCore layer to the map
@@ -32,12 +31,17 @@ export class GeoCore {
 
   /**
    * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
-   * @param {string} uuid the UUID of the layer
-   * @param {GeoCoreLayerConfig} layerConfig the layer configuration
+   * @param {string} uuid - The UUID of the layer
+   * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration
    * @returns {Promise<TypeGeoviewLayerConfig[]>} list of layer configurations to add to the map
    */
   async createLayersFromUUID(uuid: string, layerConfig?: GeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig[]> {
     // Get the map config
+    const map = MapEventProcessor.getMapViewer(this.#mapId);
+    if (map.layer.getGeoviewLayerIds().includes(uuid)) {
+      // eslint-disable-next-line no-param-reassign
+      uuid = `${uuid}:${generateId(8)}`;
+    }
     const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.#mapId);
 
     // Generate the url using metadataAccessPath when specified or using the geocore url
@@ -45,10 +49,19 @@ export class GeoCore {
 
     try {
       // Get the GV config from UUID and await
-      const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid]);
+      const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid.split(':')[0]]);
 
       // Validate the generated Geoview Layer Config
       ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);
+
+      // For each found geochart associated with the Geocore UUIDs
+      response.geocharts?.forEach((geochartConfig) => {
+        // Get the layerPath from geocore response
+        const layerPath = geochartConfig.layers[0].layerId;
+
+        // Add a GeoChart
+        GeochartEventProcessor.addGeochartChart(this.#mapId, layerPath, geochartConfig);
+      });
 
       // Use user supplied listOfLayerEntryConfig if provided
       if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
@@ -61,7 +74,10 @@ export class GeoCore {
         if (!tempLayerConfig.geoviewLayerName) tempLayerConfig.geoviewLayerName = response.layers[0].geoviewLayerName;
 
         const config = new Config(this.#displayLanguage);
-        const newLayerConfig = config.getValidMapConfig([tempLayerConfig]);
+        const newLayerConfig = config.getValidMapConfig([tempLayerConfig], (error) => {
+          // When an error happens, raise the exception, we handle it higher in this case
+          throw error;
+        });
         return newLayerConfig as TypeGeoviewLayerConfig[];
       }
 
@@ -73,11 +89,10 @@ export class GeoCore {
           response.layers[0].listOfLayerEntryConfig[0].layerName = layerConfig.geoviewLayerName;
       }
 
-      // For each found geochart associated with the Geocore UUIDs
-      response.geocharts?.forEach((geochartConfig) => {
-        // Add a GeoChart
-        GeochartEventProcessor.addGeochartChart(this.#mapId, geochartConfig.layers[0].layerId as string, geochartConfig);
-      });
+      // Make sure if it's a duplicate, the response has the duplicates safe ID
+      if (uuid.includes(':') && uuid.split(':')[0] === response.layers[0].geoviewLayerId) {
+        response.layers[0].geoviewLayerId = uuid;
+      }
 
       return response.layers;
     } catch (error) {
@@ -88,9 +103,8 @@ export class GeoCore {
       if (MapEventProcessor.findMapLayerFromOrderedInfo(this.#mapId, uuid))
         MapEventProcessor.removeOrderedLayerInfo(this.#mapId, uuid, false);
 
-      // TODO: find a more centralized way to trap error and display message
-      api.maps[this.#mapId].notifications.showError('validation.layer.loadfailed', [`GeoCore - ${uuid}`]);
-      throw error;
+      // Throw error
+      throw new GeoViewError(this.#mapId, 'validation.layer.uuidNotFound', [uuid]);
     }
   }
 }

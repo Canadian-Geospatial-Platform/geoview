@@ -2,7 +2,7 @@ import { Coordinate } from 'ol/coordinate';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry, TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, TypeResultSet } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, TypeResultSet } from '@/api/config/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { EventType, AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -11,6 +11,7 @@ import {
   TypeFeatureInfoResultSet,
   TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { AbortError } from '@/core/exceptions/core-exceptions';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -24,6 +25,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   // Keep all callback delegate references
   #onQueryEndedHandlers: QueryEndedDelegate[] = [];
+
+  // Keep all abort controllers per layer path
+  #abortControllers: { [layerPath: string]: AbortController } = {};
 
   /**
    * The class constructor that instanciate a set of layer.
@@ -62,7 +66,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].eventListenerEnabled = true;
+    this.resultSet[layerPath].eventListenerEnabled = layer.getLayerConfig().initialSettings.states?.queryable ?? true;
     this.resultSet[layerPath].queryStatus = 'processed';
     this.resultSet[layerPath].features = [];
   }
@@ -71,7 +75,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * Overrides the behavior to apply when propagating to the store
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
     // Redirect - Add layer to the list after registration
     this.#propagateToStore(resultSetEntry, type === 'layer-registration' ? 'name' : 'click');
@@ -110,13 +113,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
     // GV As it is (and was like this before events refactor), the this.resultSet is mutating between async calls.
 
-    // TODO: Use the AbortController and kill the active query if there is one in progress. The query layer here call the getFeatureInfoAtLongLat
-    // TODO.CONT: in gv-esri-dynamic. It is for this particular format we need check because identify are slow and many can be sent at the same time
-    // Create an AbortController instance
-    // const controller = new AbortController();
-    // const signal = controller.signal;
-    // controller.abort(); // Cancels the fetch request
-
     // Prepare to hold all promises of features in the loop below
     const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];
 
@@ -134,9 +130,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
       // If layer was found
       if (layer && layer instanceof AbstractGVLayer) {
-        // If state is not queryable
-        if (!AbstractLayerSet.isStateQueryable(layer)) return;
-
         // If state is not in visible range
         if (!AbstractLayerSet.isInVisibleRange(layer)) return;
 
@@ -147,8 +140,23 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         // Propagate to store
         this.#propagateToStore(this.resultSet[layerPath]);
 
+        // If the layer path has an abort controller
+        if (Object.keys(this.#abortControllers).includes(layerPath)) {
+          // Abort it
+          this.#abortControllers[layerPath].abort();
+        }
+
+        // Create an AbortController for the query
+        this.#abortControllers[layerPath] = new AbortController();
+
         // Process query on results data
-        const promiseResult = AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layer, queryType, longLatCoordinate);
+        const promiseResult = AbstractLayerSet.queryLayerFeatures(
+          layer,
+          queryType,
+          longLatCoordinate,
+          true,
+          this.#abortControllers[layerPath]
+        );
 
         // Add the promise
         allPromises.push(promiseResult);
@@ -157,33 +165,46 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         promiseResult
           .then((arrayOfRecords) => {
             // Use the response to align arrayOfRecords fields with layerConfig fields
-            if (arrayOfRecords?.length)
+            if (arrayOfRecords.length) {
               AbstractLayerSet.alignRecordsWithOutFields(
                 this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig,
                 arrayOfRecords
               );
+            }
 
             // Use the response to possibly patch the layer config metadata
-            if (arrayOfRecords?.length) this.#patchMissingMetadataIfNecessary(layerPath, arrayOfRecords[0]);
+            if (arrayOfRecords.length) this.#patchMissingMetadataIfNecessary(layerPath, arrayOfRecords[0]);
 
             // Keep the features retrieved
             this.resultSet[layerPath].features = arrayOfRecords;
 
-            // When property features is undefined, we are waiting for the query result.
-            // when Array.isArray(features) is true, the features property contains the query result.
-            // when property features is null, the query ended with an error.
-            this.resultSet[layerPath].queryStatus = arrayOfRecords ? 'processed' : 'error';
-
-            // Propagate to store
-            this.#propagateToStore(this.resultSet[layerPath]);
+            // Query was processed
+            this.resultSet[layerPath].queryStatus = 'processed';
           })
           .catch((error) => {
-            // Log
-            logger.logPromiseFailed('queryLayerFeatures in queryLayers in FeatureInfoLayerSet', error);
+            // If aborted
+            if (AbortError.isAbortError(error)) {
+              // Log
+              logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
+            } else {
+              // Error in the query
+              this.resultSet[layerPath].queryStatus = 'error';
+
+              // Log
+              logger.logPromiseFailed('queryLayerFeatures in queryLayers in FeatureInfoLayerSet', error);
+            }
+          })
+          .finally(() => {
+            // Propagate to store
+            this.#propagateToStore(this.resultSet[layerPath]);
           });
       } else {
+        // Error
         this.resultSet[layerPath].features = null;
         this.resultSet[layerPath].queryStatus = 'error';
+
+        // Propagate to store
+        this.#propagateToStore(this.resultSet[layerPath]);
       }
     });
 
@@ -209,7 +230,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     this.resultSet[layerPath].features = [];
 
     // Propagate to store
-    this.#propagateToStore(this.resultSet[layerPath]);
+    this.#propagateToStore(this.resultSet[layerPath], 'name');
   }
 
   /**

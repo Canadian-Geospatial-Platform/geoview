@@ -83,7 +83,7 @@ interface TypeStep {
  * @see {@link https://mui.com/material-ui/react-stepper/}
  */
 function StepperUI(props: StepperPropsExtend): JSX.Element {
-  logger.logTraceRender('ui/stepper/stepper', props);
+  logger.logTraceRenderDetailed('ui/stepper/stepper', props);
 
   // Get constant from props
   const { steps, ...stepperProps } = props;

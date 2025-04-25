@@ -1,7 +1,59 @@
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { Coordinate } from 'ol/coordinate';
+import Feature from 'ol/Feature';
+import RenderFeature from 'ol/render/Feature';
+import { Pixel } from 'ol/pixel';
+
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { LayerEntryTypesKey, TypeJsonValue } from '@/api/config/types/config-types';
 
 import { TimeDimension } from '@/core/utils/date-mgt';
+
+// TODO: Deprecated import after refactor
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+
+/** ******************************************************************************************************************************
+ *  Definition of the map feature instance according to what is specified in the schema.
+ */
+export type TypeMapFeaturesInstance = {
+  /** map configuration. */
+  map: TypeMapConfig;
+  /** Service URLs. */
+  serviceUrls: TypeServiceUrls;
+  /** Display theme, default = geo.ca. */
+  theme?: TypeDisplayTheme;
+  /** Nav bar properies. */
+  navBar?: TypeNavBarProps;
+  /** App bar properies. */
+  appBar?: TypeAppBarProps;
+  /** Footer bar properies. */
+  footerBar?: TypeFooterBarProps;
+  /** Overview map properies. */
+  overviewMap?: TypeOverviewMapProps;
+  /** Map components. */
+  components?: TypeMapComponents;
+  /** List of core packages. */
+  corePackages?: TypeMapCorePackages;
+  /** List of core packages. */
+  corePackagesConfig?: TypeCorePackagesConfig;
+  /** List of external packages. */
+  externalPackages?: TypeExternalPackages;
+  /**
+   * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
+   * this version of the viewer.
+   */
+  schemaVersionUsed?: '1.0';
+  /** Global settings. */
+  globalSettings?: TypeGlobalSettings;
+};
 
 // #region UTILITY TYPES
 
@@ -17,7 +69,7 @@ export type TypePostSettings = { header?: Record<string, string>; data: unknown 
 // #region MAP FEATURES
 
 /** Definition of the map configuration settings. */
-export { MapFeatureConfig } from '@config/types/classes/map-feature-config';
+export { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 
 /** Supported geoview themes. */
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
@@ -34,7 +86,7 @@ export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 
 /** Footer bar tabs custom definition. */
 export type TypeFooterBarTabsCustomProps = {
   id: string;
-  defaultTabs: string;
+  label: string;
   contentHTML: string;
 };
 
@@ -47,6 +99,8 @@ export type TypeFooterBarProps = {
   collapsed: boolean;
   selectedTab: TypeValidFooterBarTabsCoreProps;
   selectedLayersLayerPath: string;
+  selectedDataTableLayerPath: string;
+  selectedTimeSliderLayerPath: string;
 };
 
 /** Supported app bar values. */
@@ -55,13 +109,13 @@ export type TypeValidAppBarCoreProps =
   | 'export'
   | 'aoi-panel'
   | 'openIn3dButton'
+  | 'custom-legend'
   | 'geochart'
   | 'guide'
   | 'legend'
   | 'details'
   | 'data-table'
-  | 'layers'
-  | '';
+  | 'layers';
 
 /** Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there. */
 export type TypeAppBarProps = {
@@ -71,6 +125,8 @@ export type TypeAppBarProps = {
   collapsed: boolean;
   selectedTab: TypeValidAppBarCoreProps;
   selectedLayersLayerPath: string;
+  selectedDataTableLayerPath: string;
+  selectedTimeSliderLayerPath: string;
 };
 
 /** Overview map options. Default none. */
@@ -123,13 +179,20 @@ export type TypeServiceUrls = {
   /**
    * An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server
    * or an absolute path on a server which sets CORS headers.
+   * Default = CV_CONFIG_PROXY_URL ('https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy'. Used in config-constants).
    */
   proxyUrl?: string;
   /**
    * An optional geolocator service end point url, which will be used to call to get geo location of address.
    * Default = CV_CONFIG_GEOLOCATOR_URL ('https://geolocator.api.geo.ca?keys=geonames,nominatim,locate'. Used in config-constants).
    */
-  geolocator?: string;
+  geolocatorUrl?: string;
+  /**
+   * An optional metadata service end point url, which will be used to call to metadata page for uuid layer.
+   * Mostly use for currated amp were en and fr config are use.
+   * Default = CV_CONFIG_METADATA_RECORDS_URL (''. Used in config-constants).
+   */
+  metadataUrl?: string;
 };
 
 /** Valid schema version number. */
@@ -150,7 +213,7 @@ export type TypeMapConfig = {
   /** Type of interaction. */
   interaction: TypeInteraction;
   /** List of GeoView Layers in the order which they should be added to the map. */
-  listOfGeoviewLayerConfig: AbstractGeoviewLayerConfig[];
+  listOfGeoviewLayerConfig: AbstractGeoviewLayerConfig[] | MapConfigLayerEntry[]; // TODO: refactor - remove mapConfig
   /** View settings. */
   viewSettings: TypeViewSettings;
   /** Highlight color. */
@@ -181,6 +244,8 @@ export type TypeInteraction = 'static' | 'dynamic';
 export type TypeViewSettings = {
   /** Settings for the initial view for map, default is zoomAndCenter of [3.5, [-90, 60]] */
   initialView?: TypeMapViewSettings;
+  /** Settings for the home nav bar button. */
+  homeView?: TypeMapViewSettings;
   /** Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used. Default = true. */
   enableRotation?: boolean;
   /**
@@ -263,13 +328,13 @@ export type TypePointMarker = {
 // #region GEOVIEW LAYERS
 
 /** Parent class of the GeoView layers. */
-export { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
+export { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 
 /** Child classes derived from the AbstractGeoviewLayerConfig. */
-export { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
-export { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vector-config/esri-feature-config';
-export { WmsLayerConfig } from '@config/types/classes/geoview-config/raster-config/wms-config';
-export { WfsLayerConfig } from '@config/types/classes/geoview-config/vector-config/wfs-config';
+export { EsriDynamicLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/esri-dynamic-config';
+export { EsriFeatureLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/esri-feature-config';
+export { WmsLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/wms-config';
+export { WfsLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/wfs-config';
 
 /** Definition of the geoview layer types accepted by the viewer. */
 export type TypeGeoviewLayerType =
@@ -338,23 +403,26 @@ export type TypeLayerStates = {
   queryable?: boolean;
 };
 
+// #endregion GEOVIEW LAYERS
+
 // #region SUB LAYERS
 export { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 export { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
-export { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
+export { GroupLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
 /** Child classes derived from the AbstractBaseLayerEntryConfig. */
-export { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/raster/esri-dynamic-layer-entry-config';
-export { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/esri-feature-layer-entry-config';
-export { WmsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
-export { WfsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
-export { GeoJsonLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
+export { EsriDynamicLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/esri-dynamic-layer-entry-config';
+export { EsriFeatureLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/esri-feature-layer-entry-config';
+export { WmsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
+export { WfsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
+export { GeoJsonLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
 
 /** Valid keys for the geometryType property. */
 export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
 
+// TODO: refactor remove geoCore
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
-export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group';
+export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore';
 
 /** Temporal dimension associated to the layer. */
 export type TypeTemporalDimension = TimeDimension;
@@ -370,13 +438,17 @@ export type TypeNearestValues = 'discrete' | 'absolute';
 
 /** Base type from which we derive the source properties for all the leaf nodes in the layer tree. */
 export type TypeBaseSourceInitialConfig = {
+  /** Path used to access the data. */
+  dataAccessPath?: string;
   /**
    * Spatial Reference EPSG code supported (https://epsg.io/). We support lat/long, Web Mercator and Lambert Conical Conform Canada.
    * Default = 3978.
    */
-  projection: TypeValidSourceProjectionCodes;
+  projection?: TypeValidSourceProjectionCodes; // TODO: refactor - remove ?
   /** The crossOrigin attribute if needed to load the data. */
   crossOrigin?: string;
+  /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
+  featureInfo?: TypeFeatureInfoLayerConfig; // TODO: refactor - from geo map schema type
 };
 
 /** Initial settings for tile image sources. */
@@ -400,8 +472,10 @@ export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 
 /** Base type from which we derive the source properties for all the vector leaf nodes in the layer tree. */
 export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitialConfig {
+  /** Path used to access the data. */
+  dataAccessPath?: string;
   /** Maximum number of records to fetch (default: 0). */
-  maxRecordCount: number;
+  maxRecordCount?: number; // TODO: refactor - remove ?
   /** Filter to apply on features of this layer. */
   layerFilter?: string;
   /** The feature format used by the XHR feature loader when url is set. */
@@ -410,6 +484,10 @@ export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitial
   featureInfo?: TypeFeatureInfoLayerConfig;
   /** Loading strategy to use (all or bbox). */
   strategy?: 'all' | 'bbox';
+  /** The projection code of the source. Default value is EPSG:4326. */
+  dataProjection?: string; // TODO: refactor - from geo map schema types
+  /** Settings to use when loading a GeoJSON layer using a POST instead of a GET */
+  postSettings?: TypePostSettings; // TODO: refactor - from geo map schema types
 }
 
 /** Type from which we derive the source properties for all the Wfs leaf nodes in the layer tree. */
@@ -419,6 +497,8 @@ export type TypeSourceWfsInitialConfig = TypeBaseVectorSourceInitialConfig;
 export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
   /** The character used to separate columns of csv file. */
   separator?: string;
+  /** The feature format used by the XHR feature loader when url is set. */
+  format?: TypeVectorSourceFormats; // TODO: refactor - from geo map schema type
 }
 
 /** Initial settings to apply to the GeoView vector tile layer source at creation time. */
@@ -460,13 +540,13 @@ export type TypeSourceGeoJsonInitialConfig = TypeBaseVectorSourceInitialConfig;
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
   /** Maximum number of records to fetch (default: 0). */
-  maxRecordCount: number;
+  maxRecordCount?: number; // TODO: refactor - remove ?
   /** Filter to apply on features of this layer. */
   layerFilter?: string;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
   /** The format used by the image layer. */
-  format: TypeEsriFormatParameter;
+  format?: TypeEsriFormatParameter; // TODO: refactor - remove ?
   /**
    * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png
    * and .gif formats support transparency.
@@ -485,6 +565,8 @@ export interface TypeSourceEsriImageInitialConfig extends TypeBaseSourceInitialC
   transparent?: boolean;
 }
 
+// #endregion SUB LAYERS
+
 /** The format used by the image layer. */
 export type TypeEsriFormatParameter = 'png' | 'jpg' | 'gif' | 'svg';
 
@@ -496,9 +578,9 @@ export type TypeFeatureInfoLayerConfig = {
    * The display field of the layer. If it is not present the viewer will make an attempt to find the first valid
    * field.
    */
-  nameField: string;
+  nameField?: string; // TODO: refactor - remove ?
   /** The list of fields to be displayed by the UI. */
-  outfields: TypeOutfields[];
+  outfields?: TypeOutfields[]; // TODO: refactor - remove ?
 };
 
 /** The definition of the fields to be displayed by the UI. */
@@ -529,6 +611,16 @@ export type codeValueEntryType = {
   name: string;
   code: unknown;
 };
+
+export type TypeFieldEntry = {
+  fieldKey: number;
+  value: unknown;
+  dataType: TypeOutfieldsType;
+  alias: string;
+  domain: null | codedValueType | rangeDomainType;
+};
+
+// #region STYLE
 
 /** Styles to apply to the GeoView vector layer by geometry types. */
 export type TypeLayerStyleConfig = Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>>;
@@ -681,3 +773,302 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorGeometryConfig
    */
   crossOrigin?: string;
 }
+// #endregion STYLE
+
+// #region RESULT SET
+export type TypeLayerStatus = 'newInstance' | 'registered' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
+
+export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
+
+export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
+
+export type TypeLocation = null | Pixel | Coordinate | Coordinate[] | string;
+
+export type TypeResultSetEntry = {
+  layerPath: string;
+  layerName: string;
+  layerStatus: TypeLayerStatus;
+};
+
+export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
+  [layerPath: string]: T;
+};
+
+export type TypeFeatureInfoEntry = {
+  featureKey: number;
+  geoviewLayerType: TypeGeoviewLayerType;
+  extent: Extent | undefined;
+  geometry: TypeGeometry | Feature | null;
+  featureIcon: string;
+  fieldInfo: Partial<Record<string, TypeFieldEntry>>;
+  nameField: string | null;
+  layerPath: string;
+};
+
+/**
+ * Partial definition of a TypeFeatureInfoEntry for simpler use case queries.
+ * Purposely linking this simpler type to the main TypeFeatureInfoEntry type here, in case, for future we want
+ * to add more information on one or the other and keep things loosely linked together.
+ */
+export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo' | 'geometry'>;
+
+// TODO: Refactor - Check if this type is still used and replace it with something like TypeAllFeatureInfoResultSetEntry?
+// TO.DOCONT:  Still use in data-table-state and detail.tsx
+export type TypeLayerData = {
+  eventListenerEnabled: boolean;
+  // When property features is undefined, we are waiting for the query result.
+  // when Array.isArray(features) is true, the features property contains the query result.
+  // when property features is null, the query ended with an error.
+  queryStatus: TypeQueryStatus;
+  features: TypeFeatureInfoEntry[] | undefined | null;
+  isDisabled?: boolean;
+};
+// #endregion RESULT SET
+
+export interface TypeGeometry extends RenderFeature {
+  ol_uid: string;
+}
+
+// #region OLD CONFIG
+// TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead
+export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntryConfig;
+
+// TODO: After refactor, use the function in type-guard...
+export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType> = {
+  VECTOR: 'vector',
+  VECTOR_TILE: 'vector-tile',
+  RASTER_TILE: 'raster-tile',
+  RASTER_IMAGE: 'raster-image',
+  GROUP: 'group',
+  GEOCORE: 'geoCore',
+};
+
+// It seems sometimes this type guard is called with a TypeLayerEntryConfig and sometimes with a ConfigBaseClass, so I'm putting it explicit
+export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig | ConfigBaseClass): verifyIfLayer is GroupLayerEntryConfig => {
+  return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.GROUP;
+};
+
+export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is VectorLayerEntryConfig => {
+  return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.VECTOR;
+};
+
+export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TileLayerEntryConfig => {
+  return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.VECTOR_TILE;
+};
+
+export const layerEntryIsRasterTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TileLayerEntryConfig => {
+  return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
+};
+
+export const layerEntryIsOgcWms = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is OgcWmsLayerEntryConfig => {
+  return verifyIfLayer?.schemaTag === CONST_LAYER_TYPES.WMS;
+};
+
+export const layerEntryIsEsriDynamic = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is EsriDynamicLayerEntryConfig => {
+  return verifyIfLayer?.schemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+};
+
+export const layerEntryIsEsriimage = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is EsriImageLayerEntryConfig => {
+  return verifyIfLayer?.schemaTag === CONST_LAYER_TYPES.ESRI_IMAGE;
+};
+
+export const layerEntryIsImageStatic = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is ImageStaticLayerEntryConfig => {
+  return verifyIfLayer?.schemaTag === CONST_LAYER_TYPES.IMAGE_STATIC;
+};
+
+/**
+ * Returns true if the layer entry from the map configuration represents a GeoCore layer type.
+ * @param {MapConfigLayerEntry} layerConfigEntryOption The layer entry config to check
+ * @returns {boolean} True if the layer type if GeoCore
+ */
+export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLayerEntry): boolean => {
+  return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.GEOCORE;
+};
+
+export type MapConfigLayerEntry = TypeGeoviewLayerConfig | GeoCoreLayerConfig;
+
+export type TypeGeoviewLayerConfig = {
+  /** The GeoView layer identifier. */
+  geoviewLayerId: string;
+  /**
+   * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
+   * information.
+   */
+  geoviewLayerName?: string;
+  /** The GeoView layer access path (English/French). */
+  metadataAccessPath?: string;
+  /** Type of GeoView layer. */
+  geoviewLayerType: TypeGeoviewLayerType;
+  /** Date format used by the service endpoint. */
+  serviceDateFormat?: string;
+  /** Date format used by the getFeatureInfo to output date variable. */
+  externalDateFormat?: string;
+  /** Flag to exclude layer from time anble function like time slider */
+  isTimeAware?: boolean;
+  /**
+   * Initial settings to apply to the GeoView layer at creation time.
+   * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
+   */
+  initialSettings?: TypeLayerInitialSettings;
+
+  /** Min and max scales */
+  minScale?: number;
+  maxScale?: number;
+
+  /** The layer entries to use from the GeoView layer. */
+  listOfLayerEntryConfig: TypeLayerEntryConfig[];
+};
+
+export type GeoCoreLayerConfig = {
+  /** Type of GeoView layer. */
+  geoviewLayerType: typeof CONST_LAYER_ENTRY_TYPES.GEOCORE;
+
+  /** The GeoCore UUID. */
+  geoviewLayerId: string;
+
+  /**
+   * The display name of the layer (English/French). This overrides the default name coming from the GeoCore API.
+   */
+  // TODO: Bug - The geoviewLayerName doesn't override the name from GeoCore. Fix this.
+  // TO.DOCONT: On type we should have the initial setting as well. This is to override the information from service.
+  // TO.DOCONT: I think it is working with other type of layer. Now having geocore not a layer type anymore, we should be able to overrides.
+  // TO.DOCONT: For this we will need a little trick because when we create the config the setting are set at the root level and in our config it will take it from the layerID.
+  // TO.DOCONT: There is refactor to do to make this work for all layer type. Global setting should be cascade to child of the root layer.
+  geoviewLayerName: string | undefined;
+
+  /** Initial settings to apply to the GeoCore layer at creation time. */
+  initialSettings?: TypeLayerInitialSettings;
+
+  /** The layer entries to use from the GeoCore layer. */
+  listOfLayerEntryConfig?: TypeLayerEntryConfig[];
+};
+
+export const convertLayerTypeToEntry = (layerType: TypeGeoviewLayerType): TypeLayerEntryType => {
+  switch (layerType) {
+    case CONST_LAYER_TYPES.CSV:
+    case CONST_LAYER_TYPES.GEOJSON:
+    case CONST_LAYER_TYPES.GEOPACKAGE:
+    case CONST_LAYER_TYPES.OGC_FEATURE:
+    case CONST_LAYER_TYPES.WFS:
+    case CONST_LAYER_TYPES.ESRI_FEATURE:
+      return CONST_LAYER_ENTRY_TYPES.VECTOR;
+
+    case CONST_LAYER_TYPES.IMAGE_STATIC:
+    case CONST_LAYER_TYPES.ESRI_DYNAMIC:
+    case CONST_LAYER_TYPES.ESRI_IMAGE:
+    case CONST_LAYER_TYPES.WMS:
+      return CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
+    case CONST_LAYER_TYPES.XYZ_TILES:
+    case CONST_LAYER_TYPES.VECTOR_TILES:
+      return CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
+    default:
+      // Throw unsupported error
+      throw new Error(`Unsupported layer type ${layerType} to convert to layer entry`);
+  }
+};
+
+/**
+ * Temporary? function to serialize a geoview layer configuration to be able to send it to the store
+ * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoviewlayer config to serialize
+ * @returns TypeJsonValue The serialized config as pure JSON
+ */
+export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLayerEntry): TypeJsonValue => {
+  // TODO: Create a 'serialize()' function inside `TypeGeoviewLayerConfig` when/if it's transformed to a class.
+  // TO.DOCONT: and copy this code in deleting this function here. For now, this explicit workaround function is necessary.
+
+  // If GeoCore layer entry
+  if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
+    // Serialize
+    return {
+      geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+      geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
+      geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+    } as GeoCoreLayerConfig as never;
+  }
+
+  // Cast
+  const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
+
+  // Serialize
+  const serializedGeoviewLayerConfig = {
+    geoviewLayerId: geoviewLayerConfigCasted.geoviewLayerId,
+    geoviewLayerName: geoviewLayerConfigCasted.geoviewLayerName,
+    geoviewLayerType: geoviewLayerConfigCasted.geoviewLayerType,
+    metadataAccessPath: geoviewLayerConfigCasted.metadataAccessPath,
+    serviceDateFormat: geoviewLayerConfigCasted.serviceDateFormat,
+    externalDateFormat: geoviewLayerConfigCasted.externalDateFormat,
+    initialSettings: geoviewLayerConfigCasted.initialSettings,
+    isTimeAware: geoviewLayerConfigCasted.isTimeAware,
+    listOfLayerEntryConfig: [],
+  } as TypeGeoviewLayerConfig;
+
+  // Loop on the LayerEntryConfig to serialize further
+  for (let j = 0; j < (geoviewLayerConfigCasted.listOfLayerEntryConfig?.length || 0); j++) {
+    // TODO: Check - #1883 why some don't have the serialize funcion in here!? Maybe a Type vs Class thing!?
+    // Got to check if serialize exists, because some aren't classes!? Making it as any for now, as we can't trust it
+    if ('serialize' in geoviewLayerConfigCasted.listOfLayerEntryConfig[j]) {
+      // Serialize the TypeLayerEntryConfig
+      const serializedLayerEntryConfig = geoviewLayerConfigCasted.listOfLayerEntryConfig[j].serialize();
+
+      // Store as serialized
+      serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig as never);
+    } else {
+      // Store as is for now
+      serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(geoviewLayerConfigCasted.listOfLayerEntryConfig[j]);
+    }
+  }
+
+  // Return it
+  return serializedGeoviewLayerConfig as never;
+};
+
+export type TypeSourceImageInitialConfig =
+  | TypeSourceImageWmsInitialConfig
+  | TypeSourceImageEsriInitialConfig
+  | TypeSourceImageStaticInitialConfig;
+
+export interface TypeSourceImageStaticInitialConfig extends Omit<TypeBaseSourceInitialConfig, 'featureInfo'> {
+  /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
+   * it must be set to false if specified.
+   */
+  featureInfo?: { queryable: false };
+  /** Image extent */
+  extent: Extent;
+}
+
+export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialConfig {
+  /** The type of the remote WMS server. The default value is mapserver. */
+  serverType?: TypeOfServer;
+  /** Style to apply. Default = '' */
+  wmsStyle?: string | string[];
+}
+
+export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialConfig {
+  /** The format used by the image layer. */
+  format?: TypeEsriFormatParameter;
+  /**
+   * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and
+   * .gif formats support transparency. Default = true.
+   */
+  transparent?: boolean;
+}
+
+// TODO: refactor - check to use the typegard in config instead
+export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypeLineStringVectorConfig => {
+  return verifyIfConfig?.type === 'lineString';
+};
+
+export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypePolygonVectorConfig => {
+  return verifyIfConfig?.type === 'filledPolygon';
+};
+
+export const isSimpleSymbolVectorConfig = (
+  verifyIfConfig: TypeBaseVectorGeometryConfig
+): verifyIfConfig is TypeSimpleSymbolVectorConfig => {
+  return verifyIfConfig?.type === 'simpleSymbol';
+};
+
+export const isIconSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypeIconSymbolVectorConfig => {
+  return verifyIfConfig?.type === 'iconSymbol';
+};
+// #endregion OLD CONFIG

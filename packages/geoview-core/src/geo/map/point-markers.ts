@@ -6,7 +6,9 @@ import { Extent } from 'ol/extent';
 import { Projection } from '@/geo/utils/projection';
 import { getExtentUnion } from '@/geo/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { FeatureHighlight, getScriptAndAssetURL, MapViewer } from '@/app';
+import { FeatureHighlight } from '@/geo/map/feature-highlight';
+import { getScriptAndAssetURL } from '@/core/utils/utilities';
+import { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
 import { TypePointMarker } from '@/api/config/types/map-schema-types';
 
@@ -75,7 +77,7 @@ export class PointMarkers {
         pointFeature.setStyle(pointStyle);
 
         // Add feature to source
-        this.#featureHighlight.highlighSource.addFeature(pointFeature);
+        this.#featureHighlight.highlightSource.addFeature(pointFeature);
         // Add ID to array
         this.#featureIds.push(featureId);
       });
@@ -88,8 +90,8 @@ export class PointMarkers {
    */
   #removePointMarkersFromMap(): void {
     this.#featureIds.forEach((id) => {
-      const feature = this.#featureHighlight.highlighSource.getFeatureById(id);
-      if (feature) this.#featureHighlight.highlighSource.removeFeature(feature);
+      const feature = this.#featureHighlight.highlightSource.getFeatureById(id);
+      if (feature) this.#featureHighlight.highlightSource.removeFeature(feature);
     });
     this.#featureIds = [];
   }
@@ -160,7 +162,7 @@ export class PointMarkers {
       // Get the point coordinates and extrapolate to extent
       const coordinates = ids
         .map((id) => {
-          const feature = this.#featureHighlight.highlighSource.getFeatureById(id);
+          const feature = this.#featureHighlight.highlightSource.getFeatureById(id);
           if (feature) {
             const pointCoordinates = (feature?.getGeometry() as Point).getCoordinates();
             return [pointCoordinates[0], pointCoordinates[1], pointCoordinates[0], pointCoordinates[1]] as Extent;

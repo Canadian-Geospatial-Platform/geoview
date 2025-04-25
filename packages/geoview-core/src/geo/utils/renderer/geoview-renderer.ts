@@ -17,7 +17,7 @@ import {
   isIconSymbolVectorConfig,
   isLineStringVectorConfig,
   isSimpleSymbolVectorConfig,
-  TypeBaseStyleType,
+  TypeLayerStyleConfigType,
   TypeFillStyle,
   TypePolygonVectorConfig,
   TypeIconSymbolVectorConfig,
@@ -30,7 +30,7 @@ import {
   TypeLayerStyleSettings,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import {
   binaryKeywors,
   defaultColor,
@@ -45,6 +45,7 @@ import {
 } from './geoview-renderer-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -176,7 +177,7 @@ async function createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement |
       const drawingCanvas = document.createElement('canvas');
       drawingCanvas.width = width;
       drawingCanvas.height = height;
-      const drawingContext = drawingCanvas.getContext('2d')!;
+      const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
       drawingContext.globalAlpha = iconStyle.getOpacity();
       drawingContext.drawImage(image, 0, 0);
       return drawingCanvas;
@@ -202,7 +203,7 @@ function createPointCanvas(pointStyle?: Style): HTMLCanvasElement {
   const drawingCanvas = document.createElement('canvas');
   drawingCanvas.width = width + 4;
   drawingCanvas.height = height + 4;
-  const drawingContext = toContext(drawingCanvas.getContext('2d')!);
+  const drawingContext = toContext(drawingCanvas.getContext('2d', { willReadFrequently: true })!);
   drawingContext.setStyle(pointStyle!);
   drawingContext.setTransform([1, 0, 0, 1, 0, 0]);
   drawingContext.drawGeometry(new Point([drawingCanvas.width / 2, drawingCanvas.width / 2]));
@@ -220,7 +221,7 @@ function createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
   const drawingCanvas = document.createElement('canvas');
   drawingCanvas.width = LEGEND_CANVAS_WIDTH;
   drawingCanvas.height = LEGEND_CANVAS_HEIGHT;
-  const context = drawingCanvas.getContext('2d')!;
+  const context = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
   const gradient = context.createLinearGradient(0, drawingCanvas.height, drawingCanvas.width, 0);
   gradient.addColorStop(0, '#7f7f7f');
   gradient.addColorStop(0.667, '#ffffff');
@@ -250,7 +251,7 @@ function createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
   const drawingCanvas = document.createElement('canvas');
   drawingCanvas.width = LEGEND_CANVAS_WIDTH;
   drawingCanvas.height = LEGEND_CANVAS_HEIGHT;
-  const context = drawingCanvas.getContext('2d')!;
+  const context = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
   const gradient = context.createLinearGradient(0, drawingCanvas.height, drawingCanvas.width, 0);
   gradient.addColorStop(0, '#7f7f7f');
   gradient.addColorStop(0.667, '#ffffff');
@@ -487,7 +488,7 @@ function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayTyp
           else dataStack.push({ nodeType: NodeType.variable, nodeValue: operand.nodeValue.toLowerCase() });
           break;
         default:
-          throw new Error(`unknown operator error`);
+          throw new NotImplementedError(`unknown operator error`);
       }
     }
   }
@@ -868,7 +869,7 @@ function processPaternFill(settings: TypePolygonVectorConfig, fillPaternLines: F
   const drawingCanvas = document.createElement('canvas');
   drawingCanvas.width = paternSize * 2;
   drawingCanvas.height = paternSize * 2;
-  const context = drawingCanvas.getContext('2d');
+  const context = drawingCanvas.getContext('2d', { willReadFrequently: true });
   context!.strokeStyle = settings.color;
   context!.lineCap = 'butt';
   context!.lineWidth = settings.paternWidth !== undefined ? settings.paternWidth : 1;
@@ -884,7 +885,7 @@ function processPaternFill(settings: TypePolygonVectorConfig, fillPaternLines: F
   const outputCanvas = document.createElement('canvas');
   outputCanvas.width = paternSize;
   outputCanvas.height = paternSize;
-  const outputContext = outputCanvas.getContext('2d');
+  const outputContext = outputCanvas.getContext('2d', { willReadFrequently: true });
   outputContext!.putImageData(context!.getImageData(paternSize / 2, paternSize / 2, paternSize, paternSize), 0, 0);
 
   fillOptions.color = outputContext!.createPattern(outputCanvas, 'repeat');
@@ -996,11 +997,11 @@ function processSimplePolygon(
     geometry = feature.getGeometry() as Geometry;
   }
   if (isFilledPolygonVectorConfig(settings)) {
-    const { fillStyle } = settings;
+    const { fillStyle } = settings as TypePolygonVectorConfig; // TODO: refactor - introduce by moving to config map schema type
     if (geometry !== undefined) {
-      return processFillStyle[fillStyle].call('', settings, geometry);
+      return processFillStyle[fillStyle].call('', settings as TypePolygonVectorConfig, geometry);
     }
-    return processFillStyle[fillStyle].call('', settings);
+    return processFillStyle[fillStyle].call('', settings as TypePolygonVectorConfig);
   }
   return undefined;
 }
@@ -1234,14 +1235,20 @@ function searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeLaye
       const fieldName = feature.getKeys().find((key) => {
         return key.toLowerCase() === fields[j]?.toLowerCase();
       });
+
       if (fieldName) {
-        // TODO: info - explain why we need to use == instead of ===
+        const styleInfoValue =
+          typeof uniqueValueStyleInfo[i].values[j] === 'string'
+            ? (uniqueValueStyleInfo[i].values[j] as string).replace("''", "'")
+            : uniqueValueStyleInfo[i].values[j];
+        // We want type conversion for the values, so '1234' equals 1234
         // eslint-disable-next-line eqeqeq
-        isEqual = feature.get(fieldName) == uniqueValueStyleInfo[i].values[j];
+        isEqual = feature.get(fieldName) == styleInfoValue;
         if (isEqual && j + 1 === fields.length) return i;
       } else logger.logWarning(`Renderer searchUniqueValueEntry. Can not find field ${fields[j]}`);
     }
   }
+
   return undefined;
 }
 
@@ -1447,7 +1454,7 @@ function processClassBreaksPolygon(
 }
 
 /** Table of function to process the style settings based on the feature geometry and the kind of style settings. */
-export const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyleProcessor>> = {
+export const processStyle: Record<TypeLayerStyleConfigType, Record<TypeStyleGeometry, TypeStyleProcessor>> = {
   simple: {
     Point: processSimplePoint,
     MultiPoint: processSimplePoint,
@@ -1518,8 +1525,7 @@ export function getAndCreateFeatureStyle(
     const { type } = styleSettings;
     // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
     const featureStyle = processStyle[type][geometryType].call('', styleSettings, feature as Feature, filterEquation, legendFilterIsOff);
-    // Set the feature style to avoid recreating later
-    (feature as Feature).setStyle(featureStyle);
+
     return featureStyle;
   }
 
@@ -1570,10 +1576,7 @@ export function getFeatureImageSource(
       //   });
       // });
 
-      const featureStyle =
-        feature.getStyle() instanceof Style
-          ? (feature.getStyle() as Style)
-          : processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
+      const featureStyle = processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
 
       if (featureStyle) {
         if (geometryType === 'Point') {

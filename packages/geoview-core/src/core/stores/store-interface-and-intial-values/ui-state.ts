@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
 import { capitalize } from 'lodash';
-import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@config/types/map-schema-types';
+import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -80,6 +80,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     footerPanelResizeValue: 35,
     footerBarIsCollapsed: false,
     selectedFooterLayerListItemId: '',
+    selectedAppBarLayerListItemId: '',
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -99,6 +100,10 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           corePackagesComponents: geoviewConfig.corePackages || [],
           navBarComponents: geoviewConfig.navBar || [],
           footerBarIsCollapsed: geoviewConfig.footerBar?.collapsed !== undefined ? geoviewConfig.footerBar.collapsed : false,
+          selectedFooterLayerListItemId:
+            geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath
+              ? `${get().mapId}-${geoviewConfig.footerBar?.selectedTab || geoviewConfig.appBar?.selectedTab}-${geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath}`
+              : '',
         },
       });
     },

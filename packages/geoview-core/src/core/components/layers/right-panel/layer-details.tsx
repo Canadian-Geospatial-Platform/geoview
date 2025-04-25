@@ -30,11 +30,17 @@ import {
   useDataTableLayerSettings,
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { generateId } from '@/core/utils/utilities';
+import { generateId, isValidUUID } from '@/core/utils/utilities';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS } from '@/core/utils/constant';
+import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { Collapse } from '@/ui/collapse/collapse';
+import { Button } from '@/ui/button/button';
+import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
+import { useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { Switch } from '@/ui/switch/switch';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -52,16 +58,36 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   const [isDataTableVisible, setIsDataTableVisible] = useState(false);
+  const [isInfoCollapse, setIsInfoCollapse] = useState(false);
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
-  const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, refreshLayer, zoomToLayerExtent, getLayerBounds } =
-    useLayerStoreActions();
+  const {
+    setAllItemsVisibility,
+    toggleItemVisibility,
+    setHighlightLayer,
+    refreshLayer,
+    zoomToLayerExtent,
+    getLayerBounds,
+    setLayerHoverable,
+    setLayerQueryable,
+  } = useLayerStoreActions();
   const { enableFocusTrap } = useUIStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const datatableSettings = useDataTableLayerSettings();
   const layersData = useDataTableAllFeaturesDataArray();
+  const metadataUrl = useAppMetadataServiceURL();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
+
+  // Is highlight button disabled?
+  const isLayerHighlightCapable = layerDetails.controls?.highlight;
+
+  // Is zoom to extent button disabled?
+  const isLayerZoomToExtentCapable = layerDetails.controls?.zoom;
+
+  // Is layer hoverable or queryable
+  const isLayerHoverable = layerDetails.controls?.hover;
+  const isLayerQueryable = layerDetails.controls?.query;
 
   useEffect(() => {
     // Log
@@ -204,7 +230,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <Fragment key={layer.layerId}>
             <ListItem sx={{ padding: '6px 0px', borderTop: `1px solid ${theme.palette.geoViewColor.bgColor.dark[50]}` }}>
               <ListItemIcon>
-                <LayerIcon layer={layer} />
+                <LayerIcon layerPath={layer.layerPath} />
               </ListItemIcon>
               <ListItemText primary={layer.layerName} />
             </ListItem>
@@ -230,7 +256,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   function renderHighlightButton(): JSX.Element {
-    if (layerDetails.controls?.highlight !== false)
+    if (isLayerHighlightCapable)
       return (
         <IconButton
           tooltip={t('legend.highlightLayer') as string}
@@ -240,15 +266,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <HighlightOutlinedIcon />
         </IconButton>
       );
-    return (
-      <IconButton className="buttonOutline" disabled>
-        <HighlightOutlinedIcon color="disabled" />
-      </IconButton>
-    );
+    return <Box />;
   }
 
   function renderZoomButton(): JSX.Element {
-    if (layerDetails.controls?.zoom !== false)
+    if (isLayerZoomToExtentCapable)
       return (
         <IconButton
           tooltip={t('legend.zoomTo') as string}
@@ -259,11 +281,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <ZoomInSearchIcon />
         </IconButton>
       );
-    return (
-      <IconButton className="buttonOutline" disabled>
-        <ZoomInSearchIcon color="disabled" />
-      </IconButton>
-    );
+    return <Box />;
   }
 
   function renderLayerButtons(): JSX.Element {
@@ -309,6 +327,100 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     }
 
     return null;
+  };
+
+  const renderInfo = (): JSX.Element | null => {
+    const { type, url, layerPath } = layerDetails;
+
+    // Set Ressource
+    const wfsParams = '?service=WFS&version=2.0.0&request=GetCapabilities';
+    const wmsParams = '?service=WMS&version=1.3.0&request=GetCapabilities';
+    let resources: string = '';
+
+    // Check if we can set the resource url
+    if (url) {
+      switch (type) {
+        case CV_CONST_LAYER_TYPES.WMS:
+          // Check if URL already includes WMS GetCapabilities parameters
+          // eslint-disable-next-line no-nested-ternary
+          resources = url.toLowerCase().endsWith('.xml')
+            ? `${url}`
+            : url.includes('?')
+              ? url
+              : `${url}${wmsParams}&layers=${layerPath.split('/').slice(-1)[0]}`;
+          break;
+        case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
+        case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
+          resources = `${url}${url.endsWith('/') ? '' : '/'}${layerPath.split('/').slice(-1)[0]}`;
+          break;
+        case CV_CONST_LAYER_TYPES.XYZ_TILES:
+        case CV_CONST_LAYER_TYPES.ESRI_IMAGE:
+          resources = `${url}`;
+          break;
+        case CV_CONST_LAYER_TYPES.WFS:
+          // Check if URL already includes WFS GetCapabilities parameters
+          resources = url.includes('?') ? url : `${url}${wfsParams}`;
+          break;
+        case CV_CONST_LAYER_TYPES.OGC_FEATURE:
+          resources = `${url}/collections/${layerPath.split('/').slice(-1)[0]}`;
+          break;
+        case CV_CONST_LAYER_TYPES.VECTOR_TILES:
+          resources = `${url}?f=html`;
+          break;
+        default:
+          break;
+      }
+    }
+
+    // Check if we can set the metadata from layerPath
+    const id = layerDetails.layerPath.split('/')[0].split(':')[0];
+    const validId = isValidUUID(id) && metadataUrl !== '';
+
+    return (
+      <Box>
+        <Button type="text" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
+          {`${t('layers.moreInfo')!}`}
+          <IconButton className="buttonOutline" edge="end" size="small" tooltip={t('layers.toggleCollapse')!}>
+            {isInfoCollapse ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </Button>
+        <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
+          <Box>{`${t('layers.layerType')!}${layerDetails.type}`}</Box>
+          {resources !== '' && (
+            <Box className="info-container">
+              {`${t('layers.layerResource')!}`}
+              <a href={resources} target="_blank" rel="noopener noreferrer">
+                {resources}
+              </a>
+            </Box>
+          )}
+          {validId && (
+            <Box className="info-container">
+              {`${t('layers.layerMetadata')!}`}
+              <a href={`${metadataUrl}${id}`} target="_blank" rel="noopener noreferrer">
+                {`${id}`}
+              </a>
+            </Box>
+          )}
+          {isLayerHoverable && (
+            <Switch
+              size="small"
+              onChange={() => setLayerHoverable(layerDetails.layerPath, !layerDetails.hoverable!)}
+              title={t('layers.layerHoverable')!}
+              checked={layerDetails.hoverable}
+            />
+          )}
+          {isLayerQueryable && (
+            <Switch
+              size="small"
+              onChange={() => setLayerQueryable(layerDetails.layerPath, !layerDetails.queryable!)}
+              title={t('layers.layerQueryable')!}
+              checked={layerDetails.queryable}
+            />
+          )}
+        </Collapse>
+      </Box>
+    );
   };
 
   // Render
@@ -359,6 +471,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             )}
           </Box>
           <Divider sx={{ marginTop: '20px', marginBottom: '10px' }} variant="middle" />
+          {renderInfo()}
           {layerDetails.layerAttribution &&
             layerDetails.layerAttribution.map((attribution) => {
               if (attribution) {
@@ -370,7 +483,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                       fontSize: theme.palette.geoViewFontSize.sm,
                       textAlign: 'center',
                     }}
-                    key={generateId()}
+                    key={generateId(18)}
                   >
                     {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
                   </Typography>

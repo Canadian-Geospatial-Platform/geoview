@@ -17,7 +17,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 
-import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 
@@ -33,6 +33,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { isElementInViewport } from '@/core/utils/utilities';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
 interface Tab {
   icon: ReactNode;
@@ -85,17 +86,48 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // Log
     logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabKeys', footerBarTabsConfig?.tabs?.core);
 
-    return (footerBarTabsConfig?.tabs?.core ?? []).reduce(
+    const coreTabs = (footerBarTabsConfig?.tabs?.core ?? []).reduce(
       (acc, curr) => {
         acc[curr] = {} as Tab;
         return acc;
       },
       {} as Record<string, Tab>
     );
-  }, [footerBarTabsConfig?.tabs?.core]);
+
+    // Add custom tabs
+    const customTabs = (footerBarTabsConfig?.tabs?.custom ?? []).reduce(
+      (acc, curr) => {
+        acc[curr.id] = {} as Tab;
+        return acc;
+      },
+      {} as Record<string, Tab>
+    );
+
+    return { ...coreTabs, ...customTabs };
+  }, [footerBarTabsConfig?.tabs]);
 
   // List of Footer Tabs created from config file.
   const [tabsList, setTabsList] = useState<Record<string, Tab>>(memoFooterBarTabKeys);
+
+  // Create custom tabs from configuration
+  useEffect(() => {
+    if (footerBarTabsConfig?.tabs?.custom) {
+      footerBarTabsConfig.tabs.custom.forEach((customTab) => {
+        const newTab = {
+          [customTab.id]: {
+            icon: <InfoOutlinedIcon />, // TODO: Make it configurable if needed
+            label: customTab.label,
+            content: <UseHtmlToReact htmlContent={customTab.contentHTML ?? ''} />,
+          },
+        } as Record<string, Tab>;
+
+        // Add the custom tab to the tabs list
+        setTabsList((prevState: Record<string, Tab>) => {
+          return { ...prevState, ...newTab };
+        });
+      });
+    }
+  }, [footerBarTabsConfig]);
 
   // Panels for each tab in footer config file.
   const memoTabs = useMemo(() => {
@@ -137,7 +169,14 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const handleAddTab = useCallback((sender: FooterBarApi, event: FooterTabCreatedEvent) => {
     // Log
     logger.logTraceUseCallback('FOOTER-BAR - handleAddTab', event);
-    const newTab = { [event.tab.id]: { icon: event.tab.icon, label: event.tab.label, content: event.tab.content } } as Record<string, Tab>;
+    const newTab = {
+      [event.tab.id]: {
+        icon: event.tab.icon || <InfoOutlinedIcon />,
+        label: event.tab.label,
+        content:
+          typeof event.tab.content === 'string' ? <UseHtmlToReact htmlContent={(event.tab.content as string) ?? ''} /> : event.tab.content,
+      },
+    } as Record<string, Tab>;
 
     // NOTE: we need prevState because of an async nature of adding plugins.
     setTabsList((prevState: Record<string, Tab>) => {

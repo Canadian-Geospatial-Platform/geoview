@@ -6,7 +6,7 @@ import { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 
-import { CV_MAP_EXTENTS } from '@config/types/config-constants';
+import { CV_MAP_EXTENTS } from '@/api/config/types/config-constants';
 import {
   TypeBasemapOptions,
   TypeInteraction,
@@ -17,11 +17,7 @@ import {
   TypeViewSettings,
   TypePointMarker,
   TypeHighlightColors,
-} from '@config/types/map-schema-types';
-import { api } from '@/app';
-import { LayerApi } from '@/geo/layer/layer';
-import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import {
+  TypeMapViewSettings,
   MapConfigLayerEntry,
   TypeFeatureInfoEntry,
   TypeGeometry,
@@ -29,12 +25,14 @@ import {
   TypeLayerEntryConfig,
   TypeMapConfig,
   TypeMapFeaturesInstance,
-} from '@/geo/map/map-schema-types';
+} from '@/api/config/types/map-schema-types';
+import { api } from '@/app';
+import { LayerApi } from '@/geo/layer/layer';
+import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
 import { isPointInExtent } from '@/geo/utils/utilities';
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
@@ -60,6 +58,8 @@ import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -75,78 +75,6 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 // GV The reason for this pattern is so that UI components and processes performing back-end code
 // GV both end up running code in MapEventProcessor (UI: via 'actions' and back-end code via 'MapEventProcessor')
 export class MapEventProcessor extends AbstractEventProcessor {
-  /**
-   * Override the initialization process to register store subscriptions handlers and return them so they can be destroyed later.
-   */
-  protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
-    const { mapId } = store.getState();
-
-    // #region FEATURE SELECTION
-    // Checks for changes to highlighted features and updates highlights
-    const unsubMapHighlightedFeatures = store.subscribe(
-      (state) => state.mapState.highlightedFeatures,
-      (curFeatures, prevFeatures) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - highlightedFeatures', mapId, curFeatures);
-
-        if (curFeatures.length === 0) MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight('all');
-        else {
-          const curFeatureUids = curFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
-          const prevFeatureUids = prevFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
-          const newFeatures = curFeatures.filter(
-            (feature: TypeFeatureInfoEntry) => !prevFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
-          );
-          const removedFeatures = prevFeatures.filter(
-            (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
-          );
-          for (let i = 0; i < newFeatures.length; i++)
-            MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.highlightFeature(newFeatures[i]);
-          for (let i = 0; i < removedFeatures.length; i++)
-            MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(
-              (removedFeatures[i].geometry as TypeGeometry).ol_uid
-            );
-        }
-      },
-      {
-        equalityFn: (prev, curr) => {
-          // Quick length checks first (prevents re-render) and calls to removeHighlight
-          if (prev === curr) return true;
-          if (prev.length !== curr.length) return false;
-          if (prev.length === 0) return true;
-
-          // Use Set for O(1) lookup instead of array operations
-          const prevUids = new Set(prev.map((feature) => (feature.geometry as TypeGeometry).ol_uid));
-
-          // Single pass through current features
-          return curr.every((feature) => prevUids.has((feature.geometry as TypeGeometry).ol_uid));
-        },
-      }
-    );
-
-    // #endregion FEATURE SELECTION
-
-    const unsubOrderedLayerInfo = store.subscribe(
-      (state) => state.mapState.orderedLayerInfo,
-      (cur) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - orderedLayerInfo', mapId, cur);
-
-        const curVisibleLayers = cur
-          .map((layerInfo) => {
-            if (layerInfo.visible) return layerInfo.layerPath;
-            return undefined;
-          })
-          .filter((layerPath) => layerPath);
-        const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
-        if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(curVisibleLayers))
-          store.getState().mapState.setterActions.setVisibleLayers(curVisibleLayers as string[]);
-      }
-    );
-
-    // Return the array of subscriptions so they can be destroyed later
-    return [unsubMapHighlightedFeatures, unsubOrderedLayerInfo];
-  }
-
   /**
    * Initializes the map controls
    * @param {string} mapId - The map id being initialized
@@ -232,27 +160,27 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the Map Viewer instance for a given map id
-   * This is use to reduce the use of api.maps[mapId] and be more explicit
+   * This is use to reduce the use of api.getMapViewer(mapId) and be more explicit
    * @param {string} mapId - map Id
    * @returns {MapViewer} The Map viewer instance
    */
   static getMapViewer(mapId: string): MapViewer {
-    return api.maps[mapId];
+    return api.getMapViewer(mapId);
   }
 
   /**
    * Shortcut to get the Map Viewer layer api instance for a given map id
-   * This is use to reduce the use of api.maps[mapId].layer and be more explicit
+   * This is use to reduce the use of api.getMapViewer(mapId).layer and be more explicit
    * @param {string} mapId - map Id
    * @returns {LayerApi} The Map viewer layer API instance
    */
   static getMapViewerLayerAPI(mapId: string): LayerApi {
-    return api.maps[mapId].layer;
+    return api.getMapViewer(mapId).layer;
   }
 
   /**
    * Shortcut to get the Map Viewer plugins instance for a given map id
-   * This is use to reduce the use of api.maps[mapId].plugins and be more explicit
+   * This is use to reduce the use of api.getMapViewer(mapId).plugins and be more explicit
    * @param {string} mapId - map Id
    * @returns {TypeRecordOfPlugin} The map plugins record
    */
@@ -261,13 +189,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Check if the plugins exist
       // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),
       // TO.DOCONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
-      await whenThisThen(() => api && api.maps && api.maps[mapId] && api.maps[mapId].plugins);
+      await whenThisThen(() => api && api.hasMapViewer(mapId) && api.getMapViewer(mapId).plugins);
     } catch (error) {
       // Log
       logger.logError(`Couldn't retrieve the plugins instance on Map Viewer`, error);
     }
 
-    return api.maps[mapId].plugins;
+    return api.getMapViewer(mapId).plugins;
   }
 
   /**
@@ -293,12 +221,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Get metric values
     const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
     const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
-    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')!.lastChild as HTMLElement)?.innerHTML;
+    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
 
     // Get metric values
     const scaleControlBarImperial = document.getElementById(`${mapId}-scaleControlBarImperial`);
     const lineWidthImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
-    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')!.lastChild as HTMLElement)?.innerHTML;
+    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
 
     // get resolution value (same for metric and imperial)
     const labelNumeric = (scaleControlBarMetric?.querySelector('.ol-scale-text') as HTMLElement)?.innerHTML;
@@ -418,6 +346,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setMapLoaded(mapLoaded);
   }
 
+  static setMapDisplayed(mapId: string): void {
+    // Save in store
+    this.getMapStateProtected(mapId).setterActions.setMapDisplayed();
+  }
+
   static setMapPointerPosition(mapId: string, pointerPosition: TypeMapMouseInfo): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setPointerPosition(pointerPosition);
@@ -438,30 +371,19 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return layersInVisibleRange;
   };
 
-  static setVisibleRangeLayerMapState(mapId: string, visibleRangeLayers: string[]): void {
-    this.getMapStateProtected(mapId).setterActions.setVisibleRangeLayers(visibleRangeLayers);
-  }
-
   static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {
-    const { orderedLayerInfo, visibleRangeLayers } = this.getMapStateProtected(mapId);
+    const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const orderedLayer = orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
 
     if (orderedLayer && orderedLayer.inVisibleRange !== inVisibleRange) {
       orderedLayer.inVisibleRange = inVisibleRange;
-      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
+      this.setMapOrderedLayerInfo(mapId, orderedLayerInfo);
     }
-
-    if (inVisibleRange && !visibleRangeLayers.includes(layerPath))
-      this.setVisibleRangeLayerMapState(mapId, [...visibleRangeLayers, layerPath]);
   }
 
-  static setZoom(mapId: string, zoom: number, orderedLayerInfo?: TypeOrderedLayerInfo[]): void {
+  static setZoom(mapId: string, zoom: number): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setZoom(zoom);
-
-    if (orderedLayerInfo) {
-      this.setOrderedLayerInfoWithNoOrderChangeState(mapId, orderedLayerInfo);
-    }
   }
 
   static setIsMouseInsideMap(mapId: string, inside: boolean): void {
@@ -541,6 +463,31 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // use store action to set projection value in store and apply new view to the map
       this.getMapStateProtected(mapId).setterActions.setProjection(projectionCode);
 
+      // Before changing the view, clear the basemaps right away to prevent a moment where a
+      // vector tile basemap might, momentarily, be in different projection than the view.
+      // Note: It seems that since OpenLayers 10.5 OpenLayers throws an exception about this. So this line was added.
+      this.getMapViewer(mapId).basemap.clearBasemaps();
+
+      // Set overview map visibility to false when reproject to remove it from the map as it is vector tile
+      MapEventProcessor.setOverviewMapVisibility(mapId, false);
+
+      // Remove all vector tiles from the map, because they don't allow on-the-fly reprojection (OpenLayers 10.5 exception issue)
+      // GV Experimental code, to test further... not problematic to keep it for now
+      this.getMapViewerLayerAPI(mapId)
+        .getGeoviewLayers()
+        .filter((layer) => layer instanceof AbstractGVVectorTile)
+        .forEach((layer) => {
+          // Remove the layer
+          this.getMapViewerLayerAPI(mapId).removeLayerUsingPath(layer.getLayerPath());
+
+          // Log
+          this.getMapViewer(mapId).notifications.showWarning(
+            `The vector tile ${layer.getLayerName()} had to be removed due to a projection conflict.`,
+            [],
+            true
+          );
+        });
+
       // set new view
       this.getMapViewer(mapId).setView(newView);
 
@@ -552,10 +499,18 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // When the map projection is changed, all layer bounds must be recalculated
       this.getMapViewer(mapId).layer.recalculateBoundsAll();
+
+      // Reset the map object of overview map control
+      MapEventProcessor.setOverviewMapVisibility(mapId, true);
     } finally {
       // Remove circular progress as refresh is done
       AppEventProcessor.setCircularProgress(mapId, false);
     }
+  }
+
+  static setHomeButtonView(mapId: string, view: TypeMapViewSettings): void {
+    // Save in store
+    this.getMapStateProtected(mapId).setterActions.setHomeView(view);
   }
 
   static rotate(mapId: string, rotation: number): void {
@@ -632,6 +587,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void {
     if (feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
+      MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.highlightFeature(feature);
       // Save in store
       this.getMapStateProtected(mapId).setterActions.setHighlightedFeatures([
         ...this.getMapStateProtected(mapId).highlightedFeatures,
@@ -643,17 +599,24 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static removeHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry | 'all'): void {
     if (feature === 'all' || feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
       // Filter what we want to keep as highlighted features
-      const highlightedFeatures =
-        feature === 'all'
-          ? []
-          : this.getMapStateProtected(mapId).highlightedFeatures.filter(
-              (featureInfoEntry: TypeFeatureInfoEntry) =>
-                (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
-            );
+      let highlightedFeatures: TypeFeatureInfoEntry[] = [];
+      if (feature === 'all') {
+        MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(feature);
+      } else {
+        MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight((feature.geometry as TypeGeometry).ol_uid);
+        highlightedFeatures = this.getMapStateProtected(mapId).highlightedFeatures.filter(
+          (featureInfoEntry: TypeFeatureInfoEntry) =>
+            (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
+        );
+      }
 
       // Save in store
       this.getMapStateProtected(mapId).setterActions.setHighlightedFeatures(highlightedFeatures);
     }
+  }
+
+  static removeLayerHighlights(mapId: string, layerPath: string): void {
+    MapEventProcessor.getMapViewerLayerAPI(mapId).removeLayerHighlights(layerPath);
   }
 
   /**
@@ -764,7 +727,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setQueryable(layerPath, queryable);
   }
 
-  static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed?: boolean): void {
+  static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed: boolean): void {
     this.getMapStateProtected(mapId).setterActions.setLegendCollapsed(layerPath, collapsed);
   }
 
@@ -773,14 +736,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
   }
 
-  static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {
-    // Redirect
-    this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo(curOrderedLayerInfo);
-  }
-
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
     // Redirect to state API
-    api.maps[mapId].stateApi.reorderLayers(mapId, layerPath, move);
+    api.getMapViewer(mapId).stateApi.reorderLayers(mapId, layerPath, move);
   }
 
   /**
@@ -798,7 +756,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   ): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const layerPath = (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
-      ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}`
+      ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/base-group`
       : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
     const pathToSearch = layerPathToReplace || layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, pathToSearch);
@@ -934,10 +892,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     extent: Extent,
     options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: OL_ZOOM_MAXZOOM, duration: OL_ZOOM_DURATION }
   ): Promise<void> {
-    // Validate the extent coordinates
+    // Validate the extent coordinates - need to make sure we aren't excluding zero with !number
     if (
       !extent.some((number) => {
-        return !number || Number.isNaN(number);
+        return (!number && number !== 0) || Number.isNaN(number);
       })
     ) {
       // store state will be updated by map event
@@ -957,7 +915,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     // Invalid extent
-    throw new Error(`Couldn't zoom to extent, invalid extent: ${extent}`);
+    throw new GeoViewError(mapId, `Couldn't zoom to extent, invalid extent: ${extent}`);
   }
 
   static async zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void> {
@@ -1019,26 +977,31 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const currProjection = this.getMapStateProtected(mapId).currentProjection;
     let extent: Extent = CV_MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
+    const homeView = this.getMapStateProtected(mapId).homeView || this.getMapStateProtected(mapId).initialView;
 
-    // TODO: Use the values store in state. Use the new store function to set initial view values
-    // TODO.CONT: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2662
     // Transform center coordinates and update options if zoomAndCenter are in config
-    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter) {
-      [options.maxZoom] = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter!;
+    if (homeView!.zoomAndCenter) {
+      [options.maxZoom] = homeView!.zoomAndCenter!;
 
-      const center = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![1];
+      const center = homeView!.zoomAndCenter![1];
       const projectedCoords = Projection.transformPoints([center], Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
 
       extent = [...projectedCoords[0], ...projectedCoords[0]];
     }
 
     // If extent is in config, use it
-    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.extent) {
-      const lnglatExtent = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.extent as Extent;
+    if (homeView!.extent) {
+      const lnglatExtent = homeView!.extent as Extent;
       extent = Projection.transformExtentFromProj(lnglatExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
       options.padding = [0, 0, 0, 0];
     }
 
+    // If layer IDs are in the config, use them
+    if (homeView!.layerIds) extent = this.getMapViewerLayerAPI(mapId).getExtentOfMultipleLayers(homeView!.layerIds);
+
+    // If extent is not valid, take the default one for the current projection
+    if (extent.length !== 4 || extent.includes(Infinity))
+      extent = Projection.transformExtentFromProj(CV_MAP_EXTENTS[currProjection], `EPSG:4326`, `EPSG:${currProjection}`);
     return this.zoomToExtent(mapId, extent, options);
   }
 
@@ -1078,12 +1041,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Set the right zoom (Infinity will act as a no change in zoom level)
     let layerZoom = Infinity;
-    if (layerMinZoom !== -Infinity && layerMinZoom > mapZoom!) layerZoom = layerMinZoom + 0.1;
-    else if (layerMaxZoom !== Infinity && layerMaxZoom < mapZoom!) layerZoom = layerMaxZoom - 0.1;
+    if (layerMinZoom !== -Infinity && layerMinZoom >= mapZoom!) layerZoom = layerMinZoom + 0.25;
+    else if (layerMaxZoom !== Infinity && layerMaxZoom <= mapZoom!) layerZoom = layerMaxZoom - 0.25;
 
     // Change view to go to proper zoom centered in the middle of layer extent
     // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
-    // Check if the map center is already ib the layer extent and if so, do not center
+    // Check if the map center is already in the layer extent and if so, do not center
     const layerExtent = (geoviewLayer! as AbstractGVLayer).getBounds();
     const centerExtent =
       layerExtent && layerMinZoom > mapZoom! && !isPointInExtent(view.getCenter()!, layerExtent)
@@ -1142,16 +1105,31 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath The path of the layer to apply filters to.
    */
   static applyLayerFilters(mapId: string, layerPath: string): void {
+    // Get the Geoview layer
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
-    if (geoviewLayer) {
+
+    // If found it and of right type
+    if (
+      geoviewLayer &&
+      (geoviewLayer instanceof AbstractGVVector ||
+        geoviewLayer instanceof GVWMS ||
+        geoviewLayer instanceof GVEsriImage ||
+        geoviewLayer instanceof GVEsriDynamic)
+    ) {
+      // Depending on the instance
       if (geoviewLayer instanceof GVWMS || geoviewLayer instanceof GVEsriImage) {
+        // Read filter information
         const filter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+
+        // If filter was defined
         if (filter) geoviewLayer.applyViewFilter(filter);
       } else {
+        // Read filter information
         const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
+        const filter = filters.join(' and ');
 
         // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
-        (geoviewLayer as AbstractGVVector | GVEsriDynamic).applyViewFilter(filters.join(' and '));
+        geoviewLayer.applyViewFilter(filter);
       }
     }
   }
@@ -1363,7 +1341,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       );
 
       // Get info for view
-      const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
+      const projection = this.getMapStateProtected(mapId).currentProjection as TypeValidMapProjectionCodes;
       const currentView = this.getMapViewer(mapId).map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
@@ -1375,6 +1353,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Set view settings
       const viewSettings: TypeViewSettings = {
         initialView: { zoomAndCenter: [currentView.getZoom() as number, centerLatLng] },
+        homeView: this.getMapStateProtected(mapId).homeView,
         enableRotation: config.map.viewSettings.enableRotation !== undefined ? config.map.viewSettings.enableRotation : undefined,
         rotation: this.getMapStateProtected(mapId).rotation,
         minZoom: currentView.getMinZoom(),
@@ -1409,20 +1388,28 @@ export class MapEventProcessor extends AbstractEventProcessor {
         schemaVersionUsed: config.schemaVersionUsed,
       };
 
-      // Set open app bar tab
+      // Set app bar tab settings
       if (newMapConfig.appBar) {
         newMapConfig.appBar.selectedTab = UIEventProcessor.getActiveAppBarTab(mapId).tabGroup as TypeValidAppBarCoreProps;
         newMapConfig.appBar.collapsed = !UIEventProcessor.getActiveAppBarTab(mapId).isOpen;
+
+        const selectedDataTableLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
+        if (selectedDataTableLayerPath) newMapConfig.appBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;
         const selectedLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
         if (selectedLayerPath) newMapConfig.appBar.selectedLayersLayerPath = selectedLayerPath as string;
       }
 
-      // Set open footer bar tab
+      // Set footer bar tab settings
       if (newMapConfig.footerBar) {
         newMapConfig.footerBar.selectedTab = UIEventProcessor.getActiveFooterBarTab(mapId) as TypeValidFooterBarTabsCoreProps;
         newMapConfig.footerBar.collapsed = UIEventProcessor.getFooterBarIsCollapsed(mapId);
-        const selectedLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
-        if (selectedLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerPath as string;
+
+        const selectedDataTableLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
+        if (selectedDataTableLayerPath) newMapConfig.footerBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;
+        const selectedLayerLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
+        if (selectedLayerLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerLayerPath as string;
+        const selectedTimeSliderLayerPath = TimeSliderEventProcessor.getTimeSliderSelectedLayer(mapId);
+        if (selectedTimeSliderLayerPath) newMapConfig.footerBar.selectedTimeSliderLayerPath = selectedTimeSliderLayerPath as string;
       }
 
       return newMapConfig;
@@ -1456,7 +1443,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // eslint-disable-next-line no-param-reassign
       else if (removeUnlisted) geoviewLayerConfig.geoviewLayerName = '';
       if (geoviewLayerConfig.listOfLayerEntryConfig?.length)
-        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig, removeUnlisted);
+        this.#replaceLayerEntryConfigNames(pairsDict, geoviewLayerConfig.listOfLayerEntryConfig as TypeLayerEntryConfig[], removeUnlisted);
     });
 
     return mapConfig;
