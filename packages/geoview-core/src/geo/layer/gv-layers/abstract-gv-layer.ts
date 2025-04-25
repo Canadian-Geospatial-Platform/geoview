@@ -621,6 +621,38 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Some GeoJSON features may have fields with objects as values, this is a way to flatten those objects so the field can be handled
+   * Recursive so it can handle recursive objects
+   * Example: details = {name: "Test", date: "Today"} => details_name: "Test", details_date: "Today"
+   * @param obj The field object to be flattened
+   * @param prefix The prefix is the name of the field that is an object.
+   * @param result The result object that holds the field names and their values
+   * @returns The final result record
+   */
+  protected flattenFieldObject(obj: unknown, prefix: string = '', result: Record<string, unknown> = {}): Record<string, unknown> {
+    // If not an object or is null/array, return early
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+      return result;
+    }
+
+    // Process each property of the object
+    Object.entries(obj as Record<string, unknown>).forEach(([key, value]) => {
+      const newKey = prefix ? `${prefix}_${key}` : key;
+
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        // Recursively flatten nested objects
+        this.flattenFieldObject(value, newKey, result);
+      } else {
+        // Store leaf values
+        // eslint-disable-next-line no-param-reassign
+        result[newKey] = value;
+      }
+    });
+
+    return result;
+  }
+
+  /**
    * Converts the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
    * @param {Feature[]} features - The array of features to convert.
    * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The layer configuration.
@@ -697,38 +729,64 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         const featureFields = feature.getKeys();
         featureFields.forEach((fieldName) => {
           if (fieldName !== 'geometry') {
-            // Calculate the field domain if not already calculated
-            if (!(fieldName in dictFieldDomains)) {
-              // Calculate it
-              dictFieldDomains[fieldName] = this.getFieldDomain(fieldName);
-            }
-            const fieldDomain = dictFieldDomains[fieldName];
+            const fieldValue = feature.get(fieldName);
 
-            // Calculate the field type if not already calculated
-            if (!(fieldName in dictFieldTypes)) {
-              dictFieldTypes[fieldName] = this.getFieldType(fieldName);
-            }
-            const fieldType = dictFieldTypes[fieldName];
-            const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
-            if (fieldEntry) {
-              featureInfoEntry.fieldInfo[fieldEntry.name] = {
-                fieldKey: fieldKeyCounter++,
-                value:
-                  // If fieldName is the alias for the entry, we will not get a value, so we try the fieldEntry name.
-                  this.getFieldValue(feature, fieldName, fieldEntry!.type as 'string' | 'number' | 'date') ||
-                  this.getFieldValue(feature, fieldEntry.name, fieldEntry!.type as 'string' | 'number' | 'date'),
-                dataType: fieldEntry!.type,
-                alias: fieldEntry!.alias,
-                domain: fieldDomain,
-              };
-            } else if (!outfields) {
-              featureInfoEntry.fieldInfo[fieldName] = {
-                fieldKey: fieldKeyCounter++,
-                value: this.getFieldValue(feature, fieldName, fieldType),
-                dataType: fieldType,
-                alias: fieldName,
-                domain: fieldDomain,
-              };
+            if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) {
+              const flattenedField = this.flattenFieldObject(fieldValue, fieldName);
+              for (const [key, value] of Object.entries(flattenedField)) {
+                const fieldEntry = outfields?.find((outfield) => outfield.name === key || outfield.alias === key);
+                if (fieldEntry) {
+                  featureInfoEntry.fieldInfo[fieldEntry.name] = {
+                    fieldKey: fieldKeyCounter++,
+                    value,
+                    dataType: fieldEntry!.type,
+                    alias: fieldEntry!.alias,
+                    domain: null,
+                  };
+                } else if (!outfields) {
+                  featureInfoEntry.fieldInfo[key] = {
+                    fieldKey: fieldKeyCounter++,
+                    value,
+                    dataType: 'string',
+                    alias: key,
+                    domain: null,
+                  };
+                }
+              }
+            } else {
+              // Calculate the field domain if not already calculated
+              if (!(fieldName in dictFieldDomains)) {
+                // Calculate it
+                dictFieldDomains[fieldName] = this.getFieldDomain(fieldName);
+              }
+              const fieldDomain = dictFieldDomains[fieldName];
+
+              // Calculate the field type if not already calculated
+              if (!(fieldName in dictFieldTypes)) {
+                dictFieldTypes[fieldName] = this.getFieldType(fieldName);
+              }
+              const fieldType = dictFieldTypes[fieldName];
+              const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
+              if (fieldEntry) {
+                featureInfoEntry.fieldInfo[fieldEntry.name] = {
+                  fieldKey: fieldKeyCounter++,
+                  value:
+                    // If fieldName is the alias for the entry, we will not get a value, so we try the fieldEntry name.
+                    this.getFieldValue(feature, fieldName, fieldEntry!.type as 'string' | 'number' | 'date') ||
+                    this.getFieldValue(feature, fieldEntry.name, fieldEntry!.type as 'string' | 'number' | 'date'),
+                  dataType: fieldEntry!.type,
+                  alias: fieldEntry!.alias,
+                  domain: fieldDomain,
+                };
+              } else if (!outfields) {
+                featureInfoEntry.fieldInfo[fieldName] = {
+                  fieldKey: fieldKeyCounter++,
+                  value: this.getFieldValue(feature, fieldName, fieldType),
+                  dataType: fieldType,
+                  alias: fieldName,
+                  domain: fieldDomain,
+                };
+              }
             }
           }
         });

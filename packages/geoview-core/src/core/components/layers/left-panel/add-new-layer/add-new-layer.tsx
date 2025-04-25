@@ -774,7 +774,12 @@ export function AddNewLayer(): JSX.Element {
       setLayerType(ESRI_IMAGE);
     } else if (layerTokens.indexOf('WFS') !== -1) {
       setLayerType(WFS);
-    } else if (displayURL.toUpperCase().endsWith('.JSON') || displayURL.toUpperCase().endsWith('.GEOJSON')) {
+    } else if (
+      displayURL.toUpperCase().endsWith('.JSON') ||
+      displayURL.toUpperCase().includes('.JSON?') ||
+      displayURL.toUpperCase().endsWith('.GEOJSON') ||
+      displayURL.toUpperCase().includes('.GEOJSON?')
+    ) {
       setLayerType(GEOJSON);
     } else if (displayURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || displayURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
       setLayerType(XYZ_TILES);
