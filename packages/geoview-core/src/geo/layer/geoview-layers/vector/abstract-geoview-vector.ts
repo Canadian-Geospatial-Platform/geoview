@@ -422,19 +422,54 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       // eslint-disable-next-line no-param-reassign
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
 
+      // For processing possible objects in JSON fields
+      const processNestedObject = (value: unknown, baseName: string, outfields: TypeOutfields[]): void => {
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          // Process nested object
+          Object.entries(value as Record<string, unknown>).forEach(([key, propValue]) => {
+            const fieldName = `${baseName}_${key}`;
+
+            if (propValue && typeof propValue === 'object' && !Array.isArray(propValue)) {
+              // Recursively process nested objects
+              processNestedObject(propValue, fieldName, outfields);
+            } else {
+              // Create field for leaf value
+              let propType = 'string';
+              if (propValue !== '' && Number(propValue)) propType = 'number';
+
+              const newOutfield: TypeOutfields = {
+                name: fieldName,
+                alias: fieldName.replace(/_/g, '.'), // Make alias more readable
+                type: propType as 'string' | 'number',
+                domain: null,
+              };
+              outfields.push(newOutfield);
+            }
+          });
+        }
+      };
+
       headers.forEach((header, index) => {
         // If not excluded
         if (!excludedHeaders.includes(header)) {
-          let type = 'string';
-          if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
+          const value = firstRow[index];
 
-          const newOutfield: TypeOutfields = {
-            name: header,
-            alias: header,
-            type: type as 'string' | 'number',
-            domain: null,
-          };
-          layerConfig.source!.featureInfo!.outfields!.push(newOutfield);
+          if (value && typeof value === 'object' && !Array.isArray(value)) {
+            // Process object and all nested properties
+            processNestedObject(value, header, layerConfig.source!.featureInfo!.outfields!);
+          } else {
+            // Process normally as before
+            let type = 'string';
+            if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
+
+            const newOutfield: TypeOutfields = {
+              name: header,
+              alias: header,
+              type: type as 'string' | 'number',
+              domain: null,
+            };
+            layerConfig.source!.featureInfo!.outfields!.push(newOutfield);
+          }
         }
       });
     }
