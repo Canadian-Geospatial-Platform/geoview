@@ -26,6 +26,8 @@ const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitu
 const EXCLUDED_HEADERS_LNG = ['longitude', 'lon', 'x', 'xcoord', 'longitude|longitude', 'longitude | longitude'];
 const EXCLUDED_HEADERS_GEN = ['geometry', 'geom'];
 const EXCLUDED_HEADERS = EXCLUDED_HEADERS_LAT.concat(EXCLUDED_HEADERS_LNG).concat(EXCLUDED_HEADERS_GEN);
+// GV Order of these keywords matter, preference will be given in this order
+const NAME_FIELD_KEYWORDS = ['^name$', '^title$', '^label$'];
 
 /**
  * The AbstractGeoViewVector class.
@@ -422,54 +424,28 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       // eslint-disable-next-line no-param-reassign
       if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
 
-      // For processing possible objects in JSON fields
-      const processNestedObject = (value: unknown, baseName: string, outfields: TypeOutfields[]): void => {
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
-          // Process nested object
-          Object.entries(value as Record<string, unknown>).forEach(([key, propValue]) => {
-            const fieldName = `${baseName}_${key}`;
-
-            if (propValue && typeof propValue === 'object' && !Array.isArray(propValue)) {
-              // Recursively process nested objects
-              processNestedObject(propValue, fieldName, outfields);
-            } else {
-              // Create field for leaf value
-              let propType = 'string';
-              if (propValue !== '' && Number(propValue)) propType = 'number';
-
-              const newOutfield: TypeOutfields = {
-                name: fieldName,
-                alias: fieldName.replace(/_/g, '.'), // Make alias more readable
-                type: propType as 'string' | 'number',
-                domain: null,
-              };
-              outfields.push(newOutfield);
-            }
-          });
-        }
-      };
-
       headers.forEach((header, index) => {
         // If not excluded
         if (!excludedHeaders.includes(header)) {
           const value = firstRow[index];
 
+          // Skip complex fields
           if (value && typeof value === 'object' && !Array.isArray(value)) {
-            // Process object and all nested properties
-            processNestedObject(value, header, layerConfig.source!.featureInfo!.outfields!);
-          } else {
-            // Process normally as before
-            let type = 'string';
-            if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
-
-            const newOutfield: TypeOutfields = {
-              name: header,
-              alias: header,
-              type: type as 'string' | 'number',
-              domain: null,
-            };
-            layerConfig.source!.featureInfo!.outfields!.push(newOutfield);
+            logger.logWarning(`Skipping field '${header}' as it is a complex field`);
+            return;
           }
+
+          // Process normally as before
+          let type = 'string';
+          if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
+
+          const newOutfield: TypeOutfields = {
+            name: header,
+            alias: header,
+            type: type as 'string' | 'number',
+            domain: null,
+          };
+          layerConfig.source!.featureInfo!.outfields!.push(newOutfield);
         }
       });
     }
@@ -481,8 +457,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Set name field to first value
     if (!layerConfig.source.featureInfo.nameField) {
+      // Try to set nameField to a name field
+      const nameField = NAME_FIELD_KEYWORDS.reduce<TypeOutfields | undefined>((found, keyword) => {
+        if (found) return found;
+        return layerConfig.source!.featureInfo!.outfields!.find((field) => {
+          return new RegExp(keyword, 'i').test(field.name);
+        });
+      }, undefined);
+
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
+      layerConfig.source.featureInfo.nameField = nameField ? nameField.name : layerConfig.source.featureInfo!.outfields[0].name;
     }
   }
 
