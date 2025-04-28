@@ -1,4 +1,4 @@
-import { ConfigApi } from '@config/config-api';
+import { ConfigApi } from '@/api/config/config-api';
 import { Plugin } from '@/api/plugin/plugin';
 import { DateMgt } from '@/core/utils/date-mgt';
 import * as Utilities from '@/core/utils/utilities';

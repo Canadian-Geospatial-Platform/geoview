@@ -1,4 +1,4 @@
-import { TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonArray, TypeJsonValue } from '@/api/config/types/config-types';
 import { EventDelegateBase } from '@/api/events/event-helper';
 /**
  * Class used to send message to user for a map. Can be a notification and/or a snackbar message

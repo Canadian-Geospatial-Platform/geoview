@@ -1,8 +1,8 @@
 import { Dayjs } from 'dayjs';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 export type TypeDateFragments = [number[], number[], string[]];
 /** ******************************************************************************************************************************
  * Type used to define the date precision pattern to use.

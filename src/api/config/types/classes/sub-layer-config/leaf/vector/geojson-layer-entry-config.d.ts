@@ -1,6 +1,6 @@
-import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceGeoJsonInitialConfig } from '@config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
-import { GeoJsonLayerConfig } from '@config/types/classes/geoview-config/vector-config/geojson-config';
+import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceGeoJsonInitialConfig } from '@/api/config/types/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
+import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/geojson-config';
 /**
  * The GeoJson geoview sublayer class.
  */

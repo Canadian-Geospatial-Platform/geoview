@@ -1,6 +1,6 @@
-import { TypeJsonObject } from '@config/types/config-types';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { TypeGeoviewLayerType, TypeLayerEntryType, TypeLayerInitialSettings, TypeDisplayLanguage, Extent } from '@config/types/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { TypeGeoviewLayerType, TypeLayerEntryType, TypeLayerInitialSettings, TypeDisplayLanguage, Extent } from '@/api/config/types/map-schema-types';
 /**
  * Base type used to define a GeoView sublayer to display on the map. The sublayer can be a group or an abstract sublayer.
  */

@@ -1,5 +1,5 @@
-import { TypeJsonObject } from '@/core/types/global-types';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerEntryType, TypeLayerStyleConfig, TypeVectorSourceFormats } from '@/geo/map/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerEntryType, TypeLayerStyleConfig, TypeVectorSourceFormats } from '@/api/config/types/map-schema-types';
 import { TimeDimension } from '@/core/utils/date-mgt';
 export declare abstract class LayerMockup {
     #private;

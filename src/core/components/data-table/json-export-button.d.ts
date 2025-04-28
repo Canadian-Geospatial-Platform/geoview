@@ -1,4 +1,4 @@
-import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 interface JSONExportButtonProps {
     rows: unknown[];
     features: TypeFeatureInfoEntry[];

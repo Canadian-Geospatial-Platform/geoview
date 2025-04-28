@@ -1,5 +1,5 @@
 import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { TypeFieldEntry } from '@/geo/map/map-schema-types';
+import { TypeFieldEntry } from '@/api/config/types/map-schema-types';
 export interface MappedLayerDataType extends TypeAllFeatureInfoResultSetEntry {
     fieldInfos: Partial<Record<string, TypeFieldEntry>>;
 }

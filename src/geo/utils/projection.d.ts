@@ -1,7 +1,7 @@
 import { Coordinate } from 'ol/coordinate';
 import { Projection as olProjection, ProjectionLike } from 'ol/proj';
 import { Extent } from 'ol/extent';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 /**
  * Class used to handle functions for transforming projections
  *

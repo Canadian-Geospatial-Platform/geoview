@@ -1,4 +1,4 @@
-import { TypeFillStyle } from '@/geo/map/map-schema-types';
+import { TypeFillStyle } from '@/api/config/types/map-schema-types';
 export declare const defaultColor: string[];
 export type FillPaternLine = {
     moveTo: [number, number];

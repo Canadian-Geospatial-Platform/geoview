@@ -1,5 +1,4 @@
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { TypeDisplayLanguage, GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
 /**
  * Class used to add geoCore layer to the map
  *

@@ -1,5 +1,5 @@
-import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
-import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceEsriFeatureInitialConfig } from '@config/types/map-schema-types';
+import { AbstractBaseEsriLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
+import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceEsriFeatureInitialConfig } from '@/api/config/types/map-schema-types';
 /**
  * The ESRI feature geoview sublayer class.
  */

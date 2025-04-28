@@ -1,4 +1,4 @@
-import { TypeGeoviewLayerType, TypeLayerEntryType } from '@config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/config/types/map-schema-types';
 type NewType = TypeGeoviewLayerType;
 /**
  * Definition of the GeoView layer entry types for each type of Geoview layer

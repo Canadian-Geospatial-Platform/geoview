@@ -3,7 +3,7 @@ import i18next from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeJsonObject, AnySchemaObject } from '@/core/types/global-types';
+import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types';
 /** ******************************************************************************************************************************
  * interface used by all plugins to define their options.
  */

@@ -1,6 +1,6 @@
-import { TypeJsonObject } from '@config/types/config-types';
-import { TypeGeoviewLayerType, TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeGeoviewLayerType, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 /**
  *  Base class for the definition of a Geoview layer configuration.
  */

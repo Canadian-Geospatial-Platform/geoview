@@ -1,6 +1,6 @@
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { TypeJsonArray, TypeJsonValue } from '@/api/config/types/config-types';
-import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 export declare class GeoViewLayerError extends GeoViewError {
     geoviewLayerId: string;
     constructor(mapId: string, geoviewLayerId: string, localizedKeyOrMessage?: string | undefined, params?: TypeJsonValue[] | TypeJsonArray | string[] | undefined);

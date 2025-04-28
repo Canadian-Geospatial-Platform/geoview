@@ -1,5 +1,5 @@
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
-import { GeoJsonLayerConfig } from '@config/types/classes/geoview-config/vector-config/geojson-config';
+import { GroupLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
+import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/geojson-config';
 /**
  * Base type used to define the common implementation of a GeoJson GeoView sublayer to display on the map.
  */

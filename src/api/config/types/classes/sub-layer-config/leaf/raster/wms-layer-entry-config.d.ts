@@ -1,5 +1,5 @@
-import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceWmsInitialConfig, WmsLayerConfig } from '@config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
+import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceWmsInitialConfig, WmsLayerConfig } from '@/api/config/types/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 /**
  * The OGC WMS geoview sublayer class.
  */

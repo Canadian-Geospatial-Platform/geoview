@@ -1,8 +1,8 @@
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
-import { TypeJsonObject } from '@config/types/config-types';
-import { AbstractBaseLayerEntryConfig, TypeBaseVectorGeometryConfig, TypeIconSymbolVectorConfig, TypeLineStringVectorConfig, TypePolygonVectorConfig, TypeSimpleSymbolVectorConfig } from '@config/types/map-schema-types';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { EsriDynamicLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/esri-dynamic-config';
+import { GroupLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { AbstractBaseLayerEntryConfig, TypeBaseVectorGeometryConfig, TypeIconSymbolVectorConfig, TypeLineStringVectorConfig, TypePolygonVectorConfig, TypeSimpleSymbolVectorConfig } from '@/api/config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/esri-dynamic-layer-entry-config';
 /**

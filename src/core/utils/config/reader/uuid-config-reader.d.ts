@@ -1,5 +1,5 @@
-import { TypeJsonObject } from '@/core/types/global-types';
-import { TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
 export type GeoChartGeoCoreConfig = TypeJsonObject & {
     layers: {
         layerId: string;

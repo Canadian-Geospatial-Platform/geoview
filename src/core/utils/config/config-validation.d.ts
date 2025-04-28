@@ -1,5 +1,4 @@
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { TypeGeoviewLayerConfig, MapConfigLayerEntry } from '@/geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeGeoviewLayerConfig, MapConfigLayerEntry } from '@/api/config/types/map-schema-types';
 /**
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.
  * @exports

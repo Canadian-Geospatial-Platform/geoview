@@ -1,4 +1,4 @@
-import { TypeFieldEntry } from '@/geo/map/map-schema-types';
+import { TypeFieldEntry } from '@/api/config/types/map-schema-types';
 interface FeatureInfoTableProps {
     featureInfoList: TypeFieldEntry[];
 }

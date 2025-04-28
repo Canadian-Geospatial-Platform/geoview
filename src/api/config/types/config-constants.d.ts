@@ -1,6 +1,6 @@
-import { LayerEntryTypesKey, LayerTypesKey } from '@config/types/config-types';
-import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
-import { TypeBasemapId, TypeDisplayLanguage, TypeDisplayTheme, TypeInteraction, TypeLayerEntryType, TypeValidMapProjectionCodes, TypeValidVersions, TypeGeoviewLayerType } from '@config/types/map-schema-types';
+import { LayerEntryTypesKey, LayerTypesKey } from '@/api/config/types/config-types';
+import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
+import { TypeBasemapId, TypeDisplayLanguage, TypeDisplayTheme, TypeInteraction, TypeLayerEntryType, TypeValidMapProjectionCodes, TypeValidVersions, TypeGeoviewLayerType } from '@/api/config/types/map-schema-types';
 /** The default geocore url */
 export declare const CV_CONFIG_GEOCORE_URL = "https://geocore.api.geo.ca";
 /** The default geolocator url */

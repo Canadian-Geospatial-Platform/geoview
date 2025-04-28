@@ -9,6 +9,7 @@ export declare function Cast<TargetType = never>(p: unknown): TargetType;
 /**
  * General Json type
  */
+export type { AnySchemaObject } from 'ajv';
 /**
  * Type used for a value within a json object
  */
@@ -33,5 +34,5 @@ export type TypeJsonObject = TypeJsonValue & {
  * @returns the variable with the type converted to a json object
  */
 export declare function toJsonObject(p: unknown): TypeJsonObject;
-export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP';
+export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE';
 export type LayerTypesKey = 'CSV' | 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOPACKAGE' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';

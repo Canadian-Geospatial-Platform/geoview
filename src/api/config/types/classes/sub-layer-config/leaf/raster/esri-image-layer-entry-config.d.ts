@@ -1,4 +1,4 @@
-import { TypeLayerEntryType, TypeSourceEsriImageInitialConfig } from '@config/types/map-schema-types';
+import { TypeLayerEntryType, TypeSourceEsriImageInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseEsriLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
 /**
  * The ESRI Image geoview sublayer class.

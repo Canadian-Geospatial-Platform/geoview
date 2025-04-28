@@ -1,13 +1,12 @@
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { TypeFeatureInfoEntryPartial, TypeLayerEntryConfig, TypeStyleGeometry, codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntryPartial, TypeLayerEntryConfig, TypeStyleGeometry, codedValueType, rangeDomainType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /**
  * Fetches the Esri metadata and sets it for the given layer.
  * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.

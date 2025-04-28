@@ -1,7 +1,7 @@
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus } from '@/api/config/types/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.

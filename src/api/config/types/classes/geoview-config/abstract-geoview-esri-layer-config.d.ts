@@ -1,6 +1,6 @@
-import { TypeJsonObject } from '@config/types/config-types';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { TypeDisplayLanguage, TypeStyleGeometry } from '@config/types/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { TypeDisplayLanguage, TypeStyleGeometry } from '@/api/config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 /**
  * The ESRI dynamic geoview layer class.

@@ -1,4 +1,4 @@
-import { TypeLayerStyleConfig } from '@config/types/map-schema-types';
+import { TypeLayerStyleConfig } from '@/api/config/types/map-schema-types';
 export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 export type EsriBaseRenderer = {
     type: EsriRendererTypes;
