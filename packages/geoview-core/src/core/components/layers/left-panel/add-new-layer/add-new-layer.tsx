@@ -496,7 +496,9 @@ export function AddNewLayer(): JSX.Element {
               new EsriFeatureLayerEntryConfig({
                 geoviewLayerConfig: esriGeoviewLayerConfig,
                 layerId:
-                  layerURL.split('/').pop()?.toLowerCase() !== 'mapserver' && layerURL.split('/').pop()?.toLowerCase() !== 'featureserver'
+                  // Remove trailing slash (/) so pop doesn't return empty string
+                  layerURL.replace(/\/$/, '').split('/').pop()?.toLowerCase() !== 'mapserver' &&
+                  layerURL.replace(/\/$/, '').split('/').pop()?.toLowerCase() !== 'featureserver'
                     ? layerURL.split('/').pop()
                     : (esriMetadata.layers[0].id as string),
                 schemaTag: CONST_LAYER_TYPES.ESRI_FEATURE,
