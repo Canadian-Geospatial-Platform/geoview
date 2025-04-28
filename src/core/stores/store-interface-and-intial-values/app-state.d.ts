@@ -1,4 +1,4 @@
-import { TypeDisplayLanguage, TypeDisplayTheme } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/config/types/map-schema-types';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';

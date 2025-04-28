@@ -1,8 +1,7 @@
-import { Extent } from '@config/types/map-schema-types';
+import { Extent, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 export declare class LegendEventProcessor extends AbstractEventProcessor {
     #private;
     /**

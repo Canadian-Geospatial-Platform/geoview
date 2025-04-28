@@ -1,6 +1,6 @@
 import { Style } from 'ol/style';
 import Feature, { FeatureLike } from 'ol/Feature';
-import { TypeBaseStyleType, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo } from '@/geo/map/map-schema-types';
+import { TypeLayerStyleConfigType, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo } from '@/api/config/types/map-schema-types';
 import { FilterNodeArrayType } from './geoview-renderer-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 type TypeStyleProcessor = (styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeArrayType, legendFilterIsOff?: boolean) => Style | undefined;
@@ -30,7 +30,7 @@ export declare function loadImage(src: string): Promise<HTMLImageElement | null>
  */
 export declare function getLegendStyles(styleConfig: TypeLayerStyleConfig | undefined): Promise<TypeVectorLayerStyles>;
 /** Table of function to process the style settings based on the feature geometry and the kind of style settings. */
-export declare const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyleProcessor>>;
+export declare const processStyle: Record<TypeLayerStyleConfigType, Record<TypeStyleGeometry, TypeStyleProcessor>>;
 /** ***************************************************************************************************************************
  * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
  * create it using the default style strategy.

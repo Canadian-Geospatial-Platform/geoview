@@ -1,4 +1,4 @@
-import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceEsriDynamicInitialConfig } from '@config/types/map-schema-types';
+import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceEsriDynamicInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseEsriLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
 /**
  * The ESRI dynamic geoview sublayer class.

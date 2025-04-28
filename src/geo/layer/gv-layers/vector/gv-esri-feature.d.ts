@@ -1,8 +1,7 @@
 import VectorSource from 'ol/source/Vector';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
+import { codedValueType, rangeDomainType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /**
  * Manages an Esri Feature layer.
  *

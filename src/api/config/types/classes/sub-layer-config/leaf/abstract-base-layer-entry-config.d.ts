@@ -1,4 +1,4 @@
-import { TypeTemporalDimension, TypeStyleGeometry, TypeLayerEntryType } from '@config/types/map-schema-types';
+import { TypeTemporalDimension, TypeStyleGeometry, TypeLayerEntryType } from '@/api/config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 /**
  * Base type used to define a GeoView sublayer to display on the map.

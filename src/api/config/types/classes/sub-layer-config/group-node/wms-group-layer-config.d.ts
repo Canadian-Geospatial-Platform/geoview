@@ -1,5 +1,5 @@
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
-import { WmsLayerConfig } from '@config/types/classes/geoview-config/raster-config/wms-config';
+import { GroupLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/group-node/group-layer-entry-config';
+import { WmsLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/wms-config';
 /**
  * Base type used to define the common implementation of an ESRI GeoView sublayer to display on the map.
  */

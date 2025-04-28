@@ -1,4 +1,4 @@
-import { TypeJsonObject } from '@config/types/config-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 export type GeoChartGeoCoreConfig = TypeJsonObject & {
     layers: {
         layerId: string;

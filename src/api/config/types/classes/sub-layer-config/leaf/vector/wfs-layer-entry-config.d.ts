@@ -1,6 +1,6 @@
-import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceWfsInitialConfig } from '@config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
-import { WfsLayerConfig } from '@config/types/classes/geoview-config/vector-config/wfs-config';
+import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceWfsInitialConfig } from '@/api/config/types/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
+import { WfsLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/wfs-config';
 /**
  * The OGC WFS geoview sublayer class.
  */

@@ -1,6 +1,6 @@
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
-import { TypeAppBarProps, TypeDisplayLanguage, TypeDisplayTheme, TypeExternalPackages, TypeFooterBarProps, TypeGlobalSettings, TypeMapComponents, TypeMapConfig, TypeMapCorePackages, TypeCorePackagesConfig, TypeNavBarProps, TypeOverviewMapProps, TypeServiceUrls } from '@config/types/map-schema-types';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeAppBarProps, TypeDisplayLanguage, TypeDisplayTheme, TypeExternalPackages, TypeFooterBarProps, TypeGlobalSettings, TypeMapComponents, TypeMapConfig, TypeMapCorePackages, TypeCorePackagesConfig, TypeNavBarProps, TypeOverviewMapProps, TypeServiceUrls } from '@/api/config/types/map-schema-types';
 /**
  * The map feature configuration class.
  */

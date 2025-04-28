@@ -1,6 +1,6 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { ITimeSliderState, TimeSliderLayerSet, TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
     #private;
     /**
@@ -17,6 +17,12 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      * @returns {TimeSliderLayerSet | undefined} The time slider layer set or undefined
      */
     static getTimeSliderLayers(mapId: string): TimeSliderLayerSet | undefined;
+    /**
+     * Gets time slider selected layer path.
+     * @param {string} mapId - The map id of the state to act on
+     * @returns {string} The selected time slider layer path or undefined
+     */
+    static getTimeSliderSelectedLayer(mapId: string): string | undefined;
     /**
      * Gets filter(s) for a layer.
      * @param {string} mapId - The map id of the state to act on

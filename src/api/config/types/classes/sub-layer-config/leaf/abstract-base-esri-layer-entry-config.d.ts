@@ -1,6 +1,6 @@
-import { TypeJsonObject } from '@config/types/config-types';
-import { TypeFeatureInfoLayerConfig } from '@config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeFeatureInfoLayerConfig } from '@/api/config/types/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 /**
  * Base type used to define the common implementation of an ESRI GeoView sublayer to display on the map.
  */

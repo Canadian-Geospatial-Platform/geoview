@@ -1,9 +1,9 @@
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { WfsGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/wfs-group-layer-config';
-import { TypeJsonObject } from '@config/types/config-types';
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { WfsLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
-import { EntryConfigBaseClass } from '@config/types/classes/sub-layer-config/entry-config-base-class';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { WfsGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/wfs-group-layer-config';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { WfsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
+import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 export type TypeWfsLayerNode = WfsGroupLayerConfig | WfsLayerEntryConfig;
 /**
  * The WFS geoview layer class.
@@ -12,7 +12,7 @@ export declare class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     /**
      * Type of GeoView layer.
      */
-    geoviewLayerType: import("@config/types/map-schema-types").TypeGeoviewLayerType;
+    geoviewLayerType: import("@/api/config/types/map-schema-types").TypeGeoviewLayerType;
     /** The layer entries to use from the GeoView layer. */
     listOfLayerEntryConfig: EntryConfigBaseClass[] | TypeWfsLayerNode[];
     /**

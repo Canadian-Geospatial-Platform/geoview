@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { TypeFeatureInfoEntry, TypeQueryStatus, TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeQueryStatus, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 export interface LayerListEntry {
     content?: string | ReactNode;
     layerName: string;

@@ -1,6 +1,6 @@
-import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
  */
@@ -8,7 +8,7 @@ export declare class GroupLayerEntryConfig extends ConfigBaseClass {
     /** Tag used to link the entry to a specific schema is not used by groups. */
     schemaTag: never;
     /** Layer entry data type. */
-    entryType: import("@/geo/map/map-schema-types").TypeLayerEntryType;
+    entryType: import("@/api/config/types/map-schema-types").TypeLayerEntryType;
     /** The ending element of the layer configuration path is not used on groups. */
     layerIdExtension: never;
     /** Source settings to apply to the GeoView layer source at creation time is not used by groups. */

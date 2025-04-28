@@ -1,4 +1,4 @@
-import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
 import { AbstractPlugin } from './abstract-plugin';
 /**
  * Class to manage plugins

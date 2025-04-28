@@ -1,6 +1,5 @@
-import { MapConfigLayerEntry } from '@/geo/map/map-schema-types';
+import { MapConfigLayerEntry, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 /**
  * Class to read and validate the GeoView map features configuration. Will validate every item for structure and valid values.
  * If error found, will replace by default values and sent a message in the console for developers to know something went wrong.

@@ -1,9 +1,9 @@
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { EsriGroupLayerConfig } from '@config/types/classes/sub-layer-config/group-node/esri-group-layer-config';
-import { TypeJsonObject } from '@config/types/config-types';
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { AbstractGeoviewEsriLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-esri-layer-config';
-import { EsriImageLayerEntryConfig } from '@config/types/classes/sub-layer-config/leaf/raster/esri-image-layer-entry-config';
+import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { EsriGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/esri-group-layer-config';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { AbstractGeoviewEsriLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-esri-layer-config';
+import { EsriImageLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/esri-image-layer-entry-config';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 export type TypeEsriImageLayerNode = EsriGroupLayerConfig | EsriImageLayerEntryConfig;
 /**
@@ -11,7 +11,7 @@ export type TypeEsriImageLayerNode = EsriGroupLayerConfig | EsriImageLayerEntryC
  */
 export declare class EsriImageLayerConfig extends AbstractGeoviewEsriLayerConfig {
     /** Type of GeoView layer. */
-    geoviewLayerType: import("@config/types/map-schema-types").TypeGeoviewLayerType;
+    geoviewLayerType: import("@/api/config/types/map-schema-types").TypeGeoviewLayerType;
     /** The layer entries to use from the GeoView layer. */
     listOfLayerEntryConfig: TypeEsriImageLayerNode[];
     /**

@@ -1,6 +1,6 @@
-import { TypeBaseSourceVectorInitialConfig, TypeSourceImageEsriInitialConfig, TypeSourceImageInitialConfig, TypeSourceImageStaticInitialConfig, TypeSourceImageWmsInitialConfig, TypeSourceTileInitialConfig, TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeVectorSourceInitialConfig, TypeVectorTileSourceInitialConfig } from '@/geo/map/map-schema-types';
+import { TypeBaseVectorSourceInitialConfig, TypeSourceImageEsriInitialConfig, TypeSourceImageInitialConfig, TypeSourceImageStaticInitialConfig, TypeSourceWmsInitialConfig, TypeSourceTileInitialConfig, TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeVectorSourceInitialConfig, TypeVectorTileSourceInitialConfig } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.
@@ -14,7 +14,7 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     /** Indicates if filter is on/off */
     legendFilterIsOff: boolean;
     /** Source settings to apply to the GeoView layer source at creation time. */
-    source?: TypeBaseSourceVectorInitialConfig | TypeSourceTileInitialConfig | TypeVectorSourceInitialConfig | TypeVectorTileSourceInitialConfig | TypeSourceImageInitialConfig | TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig;
+    source?: TypeBaseVectorSourceInitialConfig | TypeSourceTileInitialConfig | TypeVectorSourceInitialConfig | TypeVectorTileSourceInitialConfig | TypeSourceImageInitialConfig | TypeSourceWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig;
     /** Style to apply to the vector layer. */
     layerStyle?: TypeLayerStyleConfig;
     /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */

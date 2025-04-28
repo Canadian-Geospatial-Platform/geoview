@@ -1,5 +1,6 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { IDataTableState, TypeAllFeatureInfoResultSet, TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { IDataTableState, IDataTableSettings, TypeAllFeatureInfoResultSet, TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { TypeFeatureInfoEntry, TypeLayerData } from '@/api/config/types/map-schema-types';
 export declare class DataTableEventProcessor extends AbstractEventProcessor {
     #private;
     /**
@@ -8,6 +9,13 @@ export declare class DataTableEventProcessor extends AbstractEventProcessor {
      * @returns {IDataTableState} The DataTable state
      */
     protected static getDataTableState(mapId: string): IDataTableState;
+    /**
+     * Get a specific state.
+     * @param {string} mapId - The mapId
+     * @param {'allFeaturesDataArray' | 'activeLayerData' | 'layersDataTableSetting' | 'selectedFeature' | 'selectedLayerPath' | 'tableFilters'} state - The state to get
+     * @returns {string | TypeAllFeatureInfoResultSetEntry[] | TypeLayerData[] | Record<string, IDataTableSettings> | TypeFeatureInfoEntry | Record<string, string> | undefined | null} The requested state
+     */
+    static getSingleDataTableState(mapId: string, state: 'allFeaturesDataArray' | 'activeLayerData' | 'layersDataTableSetting' | 'selectedFeature' | 'selectedLayerPath' | 'tableFilters'): string | TypeAllFeatureInfoResultSetEntry[] | TypeLayerData[] | IDataTableSettings | Record<string, IDataTableSettings> | TypeFeatureInfoEntry | Record<string, string> | undefined | null;
     /**
      * Gets filter(s) for a layer.
      * @param {string} mapId - The map id of the state to act on

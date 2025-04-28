@@ -1,4 +1,4 @@
-import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@config/types/map-schema-types';
+import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 type UIActions = IUIState['actions'];

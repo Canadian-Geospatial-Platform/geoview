@@ -9,9 +9,8 @@ import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
  */

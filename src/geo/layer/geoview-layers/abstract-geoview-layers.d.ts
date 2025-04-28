@@ -1,11 +1,11 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import Source from 'ol/source/Source';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStyleConfig, TypeLayerInitialSettings, TypeLayerStatus, TypeStyleGeometry, CONST_LAYER_ENTRY_TYPES } from '@/geo/map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStyleConfig, TypeLayerInitialSettings, TypeLayerStatus, TypeStyleGeometry, CONST_LAYER_ENTRY_TYPES } from '@/api/config/types/map-schema-types';
 import { GeoViewLayerLoadedFailedError } from '@/core/exceptions/layer-exceptions';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';

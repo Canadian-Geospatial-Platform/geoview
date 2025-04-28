@@ -1,9 +1,8 @@
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Extent } from 'ol/extent';
-import { TypeHighlightColors } from '@config/types/map-schema-types';
+import { TypeHighlightColors, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeFeatureInfoEntry } from './map-schema-types';
 import { PointMarkers } from './point-markers';
 /** *****************************************************************************************************************************
  * A class to handle highlighting of features

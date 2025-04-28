@@ -2,13 +2,11 @@ import { Coordinate } from 'ol/coordinate';
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent';
 import { FitOptions } from 'ol/View';
-import { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeMapViewSettings, TypeValidMapProjectionCodes, TypeZoomAndCenter } from '@config/types/map-schema-types';
+import { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeMapViewSettings, TypeValidMapProjectionCodes, TypeZoomAndCenter, TypeFeatureInfoEntry, TypePointMarker } from '@/api/config/types/map-schema-types';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
-import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
-import { TypePointMarker } from '@/api/config/types/map-schema-types';
 import { TypeHoverFeatureInfo } from './feature-info-state';
 type MapActions = IMapState['actions'];
 export interface IMapState {

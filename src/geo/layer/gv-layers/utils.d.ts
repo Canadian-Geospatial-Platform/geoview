@@ -1,7 +1,6 @@
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
-import { TypeStyleGeometry, TypeFeatureInfoEntryPartial, codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
-import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
+import { TypeStyleGeometry, TypeFeatureInfoEntryPartial, codedValueType, rangeDomainType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';

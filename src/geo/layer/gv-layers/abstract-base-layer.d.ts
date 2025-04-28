@@ -1,8 +1,7 @@
 import BaseLayer from 'ol/layer/Base';
-import { Extent } from '@/api/config/types/map-schema-types';
+import { Extent, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 /**
  * Abstract Base Layer managing an OpenLayer layer, including a layer group.
  */

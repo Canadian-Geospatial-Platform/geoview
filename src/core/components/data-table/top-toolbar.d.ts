@@ -1,7 +1,7 @@
 import React from 'react';
 import { MRT_TableInstance as MRTTableInstance, MRT_ColumnDef } from 'material-react-table';
 import { ColumnsType } from './data-table-types';
-import { TypeFeatureInfoEntry } from '@/geo';
+import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { SxStyles } from '@/ui/style/types';
 interface TopToolbarProps<TData extends ColumnsType> {
     /**
