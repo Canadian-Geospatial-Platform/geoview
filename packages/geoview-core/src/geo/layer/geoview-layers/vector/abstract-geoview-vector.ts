@@ -427,15 +427,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       headers.forEach((header, index) => {
         // If not excluded
         if (!excludedHeaders.includes(header)) {
-          const value = firstRow[index];
-
           // Skip complex fields
-          if (value && typeof value === 'object' && !Array.isArray(value)) {
+          if (firstRow[index] && typeof firstRow[index] === 'object' && !Array.isArray(firstRow[index])) {
             logger.logWarning(`Skipping field '${header}' as it is a complex field`);
             return;
           }
 
-          // Process normally as before
           let type = 'string';
           if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
 
