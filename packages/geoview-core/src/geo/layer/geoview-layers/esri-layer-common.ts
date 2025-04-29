@@ -37,6 +37,7 @@ import { fetchJson } from '@/core/utils/utilities';
 import { EmptyResponseError } from '@/core/exceptions/core-exceptions';
 import { GeoViewLayerError } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Fetches the Esri metadata and sets it for the given layer.
@@ -292,6 +293,7 @@ export function commonProcessFeatureInfoConfig(
     else if (layerConfig.source.featureInfo.queryable && layerMetadata.type !== 'Group Layer' && !layerMetadata.fields.length) {
       // eslint-disable-next-line no-param-reassign
       layerConfig.source.featureInfo.queryable = false;
+      logger.logWarning(`Layer ${layerPath} has no fields defined in the service metadata. Queryable set to false.`);
     }
     // The queryable flag comes from the user config
   } else {
