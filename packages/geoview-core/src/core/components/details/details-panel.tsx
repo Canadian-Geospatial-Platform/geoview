@@ -56,7 +56,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
 
   // States
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
-  const [selectedLayerPathLocal, setselectedLayerPathLocal] = useState<string>(selectedLayerPath);
+  const [selectedLayerPathLocal, setSelectedLayerPathLocal] = useState<string>(selectedLayerPath);
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
   const prevLayerSelected = useRef<TypeLayerData>();
   const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>();
@@ -270,11 +270,14 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DETAILS-PANEL - check selection', memoLayerSelectedItem);
+    logger.logTraceUseEffect('DETAILS-PANEL - check selection', memoLayerSelectedItem, selectedLayerPath);
 
-    // Redirect to the keep selected layer path logic
-    checkSelectedLayerPathList(setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath, memoLayerSelectedItem, memoLayersList);
-  }, [memoLayerSelectedItem, memoLayersList, setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath]);
+    // If selected layer path is not empty, launch the checker to try to maintain the selection on the correct selected layer
+    if (selectedLayerPath) {
+      // Redirect to the keep selected layer path logic
+      checkSelectedLayerPathList(setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath, memoLayerSelectedItem, memoLayersList);
+    }
+  }, [memoLayerSelectedItem, memoLayersList, selectedLayerPath, setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath]);
 
   // #endregion
 
@@ -355,7 +358,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   // If the layer path has changed since last render
   if (selectedLayerPathLocal !== selectedLayerPath) {
     // Selected layer path changed
-    setselectedLayerPathLocal(selectedLayerPath);
+    setSelectedLayerPathLocal(selectedLayerPath);
     // Reset the feature index, because it's a whole different selected layer with different features
     resetCurrentIndex();
   }
@@ -375,18 +378,20 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   );
 
   /**
-   * Select the layer after layer is selected from map.
+   * Select a layer after a map click happened on the map.
    */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL- mapClickCoordinates', mapClickCoordinates);
 
+    // If nothing was previously selected at all
     if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
       const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
+      // Select the first layer that has features
       setSelectedLayerPath(selectedLayer?.layerPath ?? '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapClickCoordinates, memoLayersList]);
+  }, [mapClickCoordinates, memoLayersList, setSelectedLayerPath]);
 
   /**
    * Check all layers status is processed while querying
