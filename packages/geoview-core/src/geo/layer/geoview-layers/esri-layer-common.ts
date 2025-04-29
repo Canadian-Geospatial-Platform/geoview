@@ -288,13 +288,12 @@ export function commonProcessFeatureInfoConfig(
       // eslint-disable-next-line no-param-reassign
       layerConfig.source.featureInfo.queryable = queryable;
     }
-    // else The queryable flag comes from the user config and throw an error if it's a group layer with no fields.
-    else if (layerConfig.source.featureInfo.queryable && layerMetadata.type === 'Group Layer') {
-      throw new GeoViewError(
-        layer.mapId,
-        `The config whose layer path is ${layerPath} cannot set a layer as queryable because a group layer does not have field definitions`
-      );
+    // Set queryable to false if there are no fields defined in the service
+    else if (layerConfig.source.featureInfo.queryable && layerMetadata.type !== 'Group Layer' && !layerMetadata.fields.length) {
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.source.featureInfo.queryable = false;
     }
+    // The queryable flag comes from the user config
   } else {
     // eslint-disable-next-line no-param-reassign
     layerConfig.source.featureInfo =
