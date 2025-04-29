@@ -67,7 +67,6 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   );
 
   // State
-  const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
   const [formattedLegendLayerList, setFormattedLegendLayersList] = useState<TypeLegendLayer[][]>([]);
 
   // Store
@@ -128,8 +127,8 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
     logger.logTraceUseCallback('LEGEND - window resize event');
 
     // Update the layer list based on window size
-    updateLegendLayerListByWindowSize(legendLayers);
-  }, [legendLayers, updateLegendLayerListByWindowSize]);
+    updateLegendLayerListByWindowSize(layersList);
+  }, [layersList, updateLegendLayerListByWindowSize]);
 
   // Wire a handler using a custom hook on the window resize event
   useEventListener<Window>('resize', handleWindowResize, window);
@@ -138,10 +137,6 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LEGEND - layer setup', layersList);
-
-    // Set the legend layers based on the layers list
-    // TODO: Check - Check necessity of having 2 arrays (layersList vs legendLayers)
-    setLegendLayers(layersList);
 
     // Update the layer list based on window size
     updateLegendLayerListByWindowSize(layersList);
