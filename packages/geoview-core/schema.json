@@ -2207,6 +2207,17 @@
         "canRemoveSublayers": {
           "type": "boolean",
           "description": "Whether or not sublayers can be removed from layer groups. Default = true."
+        },
+        "disableLayerType": {
+          "description": "Whether or not the provided layer type is disabled",
+          "type":"array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/TypeGeoviewLayerType"
+              }
+            ]
+          }
         }
       }
     },
