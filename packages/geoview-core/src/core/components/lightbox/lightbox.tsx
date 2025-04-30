@@ -98,11 +98,7 @@ export const LightboxImg = memo(function LightboxImg({
           document.getElementsByClassName('yarl__root')[0].getElementsByTagName('button')[1].focus();
         },
         exited,
-        view: (props: ViewCallbackProps) => {
-          if (onSlideChange) {
-            onSlideChange(props.index);
-          }
-        },
+        view: (props: ViewCallbackProps) => onSlideChange?.(props.index),
       }}
       render={{
         iconClose: () => (
