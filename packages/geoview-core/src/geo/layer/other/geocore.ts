@@ -48,8 +48,21 @@ export class GeoCore {
     const url = `${mapConfig!.serviceUrls.geocoreUrl}`;
 
     try {
+      // For single ids, remove any tags following the uuid.
+      // For arrays of ids, do the same for each id in the array.
+      const splitUuidArr = [];
+      if (Array.isArray(uuid)) {
+        let splitUuid;
+        for (const id of uuid) {
+          [splitUuid] = id.split(':');
+          splitUuidArr.push(splitUuid);
+        }
+      } else {
+        splitUuidArr.push(uuid.split(':')[0]);
+      }
+
       // Get the GV config from UUID and await
-      const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid.split(':')[0]]);
+      const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, splitUuidArr);
 
       // Validate the generated Geoview Layer Config
       ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);

@@ -332,8 +332,22 @@ export class ConfigApi {
         let newListOfGeoviewLayerConfig = listOfGeoviewLayerConfig.map((layerConfig) => {
           if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
             const jsonConfigFound = arrayOfJsonConfig.find((jsonConfig) => {
-              // Remove the duplicate tag from the ID so it will match
-              const geocoreId = (layerConfig.geoviewLayerId as string).split(':')[0];
+              // For single ids, remove the duplicate tag from the ID so it will match.
+              // For arrays of ids, do the same for each id in the array.
+              let geocoreId;
+
+              if (Array.isArray(layerConfig.geoviewLayerId)) {
+                let geoviewLayerId;
+                geocoreId = [];
+
+                for (const id of layerConfig.geoviewLayerId) {
+                  [geoviewLayerId] = (id as string).split(':');
+                  geocoreId.push(geoviewLayerId);
+                }
+              } else {
+                [geocoreId] = (layerConfig.geoviewLayerId as string).split(':');
+              }
+
               return jsonConfig.geoviewLayerId === `rcs.${geocoreId}.${language}`;
             });
             if (jsonConfigFound) {
