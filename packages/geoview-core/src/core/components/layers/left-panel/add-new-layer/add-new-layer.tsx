@@ -25,6 +25,7 @@ import { TypeCSVLayerConfig, CSV as CsvGeoviewClass } from '@/geo/layer/geoview-
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useAppDisabledLayerTypes } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
@@ -90,6 +91,7 @@ export function AddNewLayer(): JSX.Element {
 
   // get values from store
   const mapId = useGeoViewMapId();
+  const disabledLayerTypes = useAppDisabledLayerTypes();
   const { setDisplayState } = useLayerStoreActions();
 
   const isMultiple = (): boolean =>
@@ -153,6 +155,16 @@ export function AddNewLayer(): JSX.Element {
   const emitErrorNone = (): void => {
     setIsLoading(false);
     api.getMapViewer(mapId).notifications.showError('layers.errorNone', [], false);
+  };
+
+  /**
+   * Emits an error dialogue when a layer type is disabled
+   *
+   * @param disabledType label for the TextField input that cannot be empty
+   */
+  const emitErrorDisabled = (disabledType: string): void => {
+    setIsLoading(false);
+    api.getMapViewer(mapId).notifications.showError('layers.errorDisabled', [disabledType], false);
   };
 
   /**
@@ -760,20 +772,34 @@ export function AddNewLayer(): JSX.Element {
   // };
 
   /**
+   * Helper function for setting the layer type if it's allowed
+   * @param {TypeGeoviewLayerTypeWithGeoCore} layerTypeValue
+   */
+  const setLayerTypeIfAllowed = (layerTypeValue: TypeGeoviewLayerTypeWithGeoCore): void => {
+    if ((disabledLayerTypes as TypeGeoviewLayerTypeWithGeoCore[]).includes(layerTypeValue)) {
+      emitErrorDisabled(layerTypeValue);
+      setLayerType('');
+      setStepButtonEnabled(false);
+    } else {
+      setLayerType(layerTypeValue);
+    }
+  };
+
+  /**
    * Attempt to determine the layer type based on the URL format
    */
   const bestGuessLayerType = (): void => {
     const layerTokens = displayURL.toUpperCase().split('/');
     const layerId = parseInt(layerTokens[layerTokens.length - 1], 10);
     if (displayURL.toUpperCase().endsWith('MAPSERVER') || displayURL.toUpperCase().endsWith('MAPSERVER/')) {
-      setLayerType(ESRI_DYNAMIC);
+      setLayerTypeIfAllowed(ESRI_DYNAMIC);
     } else if (
       displayURL.toUpperCase().indexOf('FEATURESERVER') !== -1 ||
       (displayURL.toUpperCase().indexOf('MAPSERVER') !== -1 && !Number.isNaN(layerId))
     ) {
-      setLayerType(ESRI_FEATURE);
+      setLayerTypeIfAllowed(ESRI_FEATURE);
     } else if (displayURL.toUpperCase().indexOf('IMAGESERVER') !== -1) {
-      setLayerType(ESRI_IMAGE);
+      setLayerTypeIfAllowed(ESRI_IMAGE);
     } else if (layerTokens.indexOf('WFS') !== -1) {
       setLayerType(WFS);
     } else if (
@@ -784,13 +810,13 @@ export function AddNewLayer(): JSX.Element {
     ) {
       setLayerType(GEOJSON);
     } else if (displayURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || displayURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
-      setLayerType(XYZ_TILES);
+      setLayerTypeIfAllowed(XYZ_TILES);
     } else if (displayURL.indexOf('/') === -1 && displayURL.replaceAll('-', '').length === 32) {
-      setLayerType(GEOCORE);
+      setLayerTypeIfAllowed(GEOCORE);
     } else if (displayURL.toUpperCase().indexOf('WMS') !== -1) {
-      setLayerType(WMS);
+      setLayerTypeIfAllowed(WMS);
     } else if (displayURL.toUpperCase().endsWith('.CSV') || displayURL.toUpperCase().includes('.CSV?')) {
-      setLayerType(CSV);
+      setLayerTypeIfAllowed(CSV);
     } else {
       setLayerType('');
       setStepButtonEnabled(false);
@@ -1290,13 +1316,17 @@ export function AddNewLayer(): JSX.Element {
                       id: 'service-type-label',
                     }}
                     ref={serviceTypeRef}
-                    menuItems={layerOptions.map(([value, label]) => ({
-                      key: value,
-                      item: {
-                        value,
-                        children: label,
-                      },
-                    }))}
+                    menuItems={layerOptions
+                      .filter(([value]) => {
+                        return !disabledLayerTypes.includes(value as TypeGeoviewLayerTypeWithGeoCore);
+                      })
+                      .map(([value, label]) => ({
+                        key: value,
+                        item: {
+                          value,
+                          children: label,
+                        },
+                      }))}
                   />
                   <NavButtons handleNext={handleStep2} />
                 </>

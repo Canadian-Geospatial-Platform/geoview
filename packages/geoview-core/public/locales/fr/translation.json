@@ -109,6 +109,7 @@
     "service": "Type de service",
     "name": "Nom",
     "layerSelect": "Sélectionner couche(s)",
+    "errorDisabled": "Le type de couche « __param__ » est désactivé dans cette carte.",
     "errorEmpty": "ne peut être vide",
     "errorNone": "Pas de fichier ou de source ajouté",
     "errorFile": "Seuls les fichiers geoJSON et CSV peuvent être utilisés",

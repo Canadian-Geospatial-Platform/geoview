@@ -109,6 +109,7 @@
     "service": "Service type",
     "name": "Name",
     "layerSelect": "Select layer(s)",
+    "errorDisabled": "The layer type '__param__' is disabled in this map",
     "errorEmpty": "cannot be empty",
     "errorNone": "No file or source added",
     "errorFile": "Only geoJSON and CSV files can be used",

@@ -1121,14 +1121,14 @@ export class LayerApi {
     const mapView = this.mapViewer.getView();
     if ((layerConfig.initialSettings.maxZoom || layerConfig.maxScale) && !(gvLayer instanceof GVGroupLayer)) {
       let maxScaleZoomLevel = getZoomFromScale(mapView, layerConfig.maxScale);
-      maxScaleZoomLevel = maxScaleZoomLevel ? Math.round(maxScaleZoomLevel) : undefined;
+      maxScaleZoomLevel = maxScaleZoomLevel ? Math.ceil(maxScaleZoomLevel * 100) / 100 : undefined;
       const maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
       gvLayer.setMaxZoom(maxZoom);
     }
 
     if ((layerConfig.initialSettings.minZoom || layerConfig.minScale) && !(gvLayer instanceof GVGroupLayer)) {
       let minScaleZoomLevel = getZoomFromScale(mapView, layerConfig.minScale);
-      minScaleZoomLevel = minScaleZoomLevel ? Math.round(minScaleZoomLevel) : undefined;
+      minScaleZoomLevel = minScaleZoomLevel ? Math.ceil(minScaleZoomLevel * 100) / 100 : undefined;
       const minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
       gvLayer.setMinZoom(minZoom);
     }

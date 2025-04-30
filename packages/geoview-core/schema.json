@@ -2208,13 +2208,16 @@
           "type": "boolean",
           "description": "Whether or not sublayers can be removed from layer groups. Default = true."
         },
-        "disableLayerType": {
-          "description": "Whether or not the provided layer type is disabled",
+        "disabledLayerTypes": {
+          "description": "Disabled layer types are not allowed in the add layers component",
           "type":"array",
           "items": {
             "anyOf": [
               {
                 "$ref": "#/definitions/TypeGeoviewLayerType"
+              },
+              {
+                "$ref": "#/definitions/TypeGeoCoreLayerType"
               }
             ]
           }
