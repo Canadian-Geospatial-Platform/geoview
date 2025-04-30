@@ -326,6 +326,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerConfig.layerPath);
         }
 
+        // Read the icons
+        const icons = LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data!);
+
         const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
         const legendLayerEntry: TypeLegendLayer = {
           bounds,
@@ -344,7 +347,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           queryable: layerConfig.initialSettings?.states?.queryable,
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
-          icons: LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data!) || [],
+          icons: icons || [],
           url: layerConfig.geoviewLayerConfig.metadataAccessPath,
         };
 
@@ -355,6 +358,16 @@ export class LegendEventProcessor extends AbstractEventProcessor {
               legendLayerEntry.items.push(legendLayerListItem);
             });
         });
+
+        // Also take care of image static by storing the iconImage into the icon property on-the-fly
+        if (isImageStaticLegend(legendResultSetEntry.data!) && icons && icons.length > 0) {
+          legendLayerEntry.items.push({
+            geometryType: 'Point',
+            name: 'image',
+            icon: icons[0].iconImage || null,
+            isVisible: true,
+          });
+        }
 
         // If non existing in the store yet
         if (entryIndex === -1) {
