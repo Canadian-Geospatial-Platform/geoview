@@ -3,6 +3,15 @@ import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 type SxClasses = Record<string, object>;
 
+/**
+ * Calculates and returns the container height based on various parameters
+ *
+ * @param {string} containerType - The type of container to calculate height for
+ * @param {boolean} isFullScreen - Indicates if the container is in fullscreen mode
+ * @param {boolean} footerBarIsCollapsed - Indicates if the footer bar is in collapsed state
+ * @param {number} footerPanelResizeValue - The resize value for the footer panel
+ * @returns {string} The calculated height value as a CSS-compatible string
+ */
 const getContainerHeight = (
   containerType: string,
   isFullScreen: boolean,
