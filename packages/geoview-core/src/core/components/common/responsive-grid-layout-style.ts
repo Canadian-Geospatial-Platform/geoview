@@ -5,6 +5,15 @@ import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 type SxClasses = Record<string, object>;
 
+/**
+ * Calculates and returns the container height based on various parameters
+ *
+ * @param {string} containerType - The type of container to calculate height for
+ * @param {boolean} isFullScreen - Indicates if the container is in fullscreen mode
+ * @param {boolean} footerBarIsCollapsed - Indicates if the footer bar is in collapsed state
+ * @param {number} footerPanelResizeValue - The resize value for the footer panel
+ * @returns {string} The calculated height value as a CSS-compatible string
+ */
 const getContainerHeight = (
   containerType: string,
   isFullScreen: boolean,
@@ -31,6 +40,14 @@ const getContainerHeight = (
   return defaultHeight;
 };
 
+/**
+ * Calculates and returns the maximum height based on various parameters
+ *
+ * @param {boolean} isFullScreen - Indicates if the component is in fullscreen mode
+ * @param {string} containerType - The type of container to calculate height for
+ * @param {number} mapHeight - The height of the map
+ * @returns {string} The calculated maximum height value as a CSS-compatible string
+ */
 const getMaxHeight = (isFullScreen: boolean, containerType: string, mapHeight: number): string => {
   // If not fullscreen
   if (!isFullScreen) {
@@ -72,6 +89,17 @@ export const getSxClassesMain = (
   },
 });
 
+/**
+ * Calculates and returns the maximum height based on various parameters
+ *
+ * @param {string} containerType - The type of container to calculate height for
+ * @param {boolean} isMapFullScreen - Indicates if the map is in fullscreen mode
+ * @param {number} footerPanelResizeValue - The resize value for the footer panel
+ * @param {number} mapHeight - The height of the map
+ * @param {number} rightTopHeight - The height of the right top panel
+ * @param {boolean} footerBarIsCollapsed - Indicates if the footer bar is collapsed
+ * @returns {string} The calculated maximum height value as a CSS-compatible string
+ */
 const calculateMaxHeight = (
   containerType: string,
   isMapFullScreen: boolean,
@@ -110,10 +138,16 @@ const calculateMaxHeight = (
 };
 
 /**
- * Get custom sx classes for the common grid layout
+ *  Get custom sx classes for the common grid layout
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param {Theme} theme - The MUI theme object containing styling configurations
+ * @param {boolean} isMapFullScreen - Indicates if the map is in fullscreen mode
+ * @param {number} footerPanelResizeValue - The resize value for the footer panel in pixels
+ * @param {number} mapHeight - The height of the map component in pixels
+ * @param {boolean} footerBarIsCollapsed - Indicates if the footer bar is collapsed
+ * @param {string} containerType - The type of container being styled
+ * @param {number} topHeight - The height of the top section in pixels
+ * @returns {SxStyles} An object containing MUI SX styling properties
  */
 export const getSxClasses = (
   theme: Theme,

@@ -82,11 +82,11 @@
         "geoviewLayerName": "Le Réseau canadien de surveillance radiologique - Radioactivité de l’air",
         "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
-		"initialSettings": {
-			"states": {
-			  "legendCollapsed": true
-			}
-		  },
+        "initialSettings": {
+        "states": {
+          "legendCollapsed": true
+        }
+          },
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
