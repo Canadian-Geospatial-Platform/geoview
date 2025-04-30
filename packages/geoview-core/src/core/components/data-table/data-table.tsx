@@ -463,7 +463,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     enableRowVirtualization: true,
     muiTableContainerProps: {
       sx: {
-        maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 240px)` : '475px', // TODO: set 475px when not in full screen. Even FS should use the footerPanelResizeValue
+        maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 240px)` : '425px', // TODO: set 425px when not in full screen. Even FS should use the footerPanelResizeValue
       },
     },
     rowVirtualizerInstanceRef,
