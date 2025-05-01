@@ -2211,9 +2211,9 @@
         },
         "disabledLayerTypes": {
           "description": "Disabled layer types are not allowed in the add layers component",
-          "type":"array",
+          "type": "array",
           "items": {
-            "anyOf": [
+            "enum": [
               {
                 "$ref": "#/definitions/TypeGeoviewLayerType"
               },
