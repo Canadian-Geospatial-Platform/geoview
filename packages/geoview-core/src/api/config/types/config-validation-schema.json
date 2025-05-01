@@ -114,7 +114,8 @@
         "fullscreen",
         "home",
         "location",
-        "basemap-select"
+        "basemap-select",
+        "projection"
       ]
     },
     "TypeNavBarProps": {

@@ -1906,7 +1906,8 @@
           "zoom",
           "fullscreen",
           "home",
-          "location"
+          "location",
+          "projection"
         ]
       },
       "default": [

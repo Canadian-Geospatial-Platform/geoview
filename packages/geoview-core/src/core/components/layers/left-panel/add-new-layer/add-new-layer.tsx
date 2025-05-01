@@ -813,6 +813,8 @@ export function AddNewLayer(): JSX.Element {
       setLayerTypeIfAllowed(XYZ_TILES);
     } else if (displayURL.indexOf('/') === -1 && displayURL.replaceAll('-', '').length === 32) {
       setLayerTypeIfAllowed(GEOCORE);
+    } else if (displayURL.toUpperCase().indexOf('WFS') !== -1) {
+      setLayerTypeIfAllowed(WFS);
     } else if (displayURL.toUpperCase().indexOf('WMS') !== -1) {
       setLayerTypeIfAllowed(WMS);
     } else if (displayURL.toUpperCase().endsWith('.CSV') || displayURL.toUpperCase().includes('.CSV?')) {
