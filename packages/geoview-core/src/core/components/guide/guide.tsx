@@ -8,7 +8,8 @@ import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './guide-style';
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { TABS } from '@/core/utils/constant';
+import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
+import { TypeContainerBox } from '@/core/types/global-types';
 
 interface GuideListItem extends LayerListEntry {
   content: string | ReactNode;
@@ -16,6 +17,7 @@ interface GuideListItem extends LayerListEntry {
 
 interface GuideType {
   fullWidth?: boolean;
+  containerType?: TypeContainerBox;
 }
 
 /**
@@ -24,7 +26,7 @@ interface GuideType {
  * @returns {JSX.Element} the guide (help) component
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
-export const Guide = memo(function GuidePanel({ fullWidth }: GuideType): JSX.Element {
+export const Guide = memo(function GuidePanel({ fullWidth = false, containerType = CONTAINER_TYPE.FOOTER_BAR }: GuideType): JSX.Element {
   logger.logTraceRender('components/guide/guide');
 
   // Hooks
@@ -106,6 +108,7 @@ export const Guide = memo(function GuidePanel({ fullWidth }: GuideType): JSX.Ele
   return (
     <Box sx={sxClasses.guideContainer}>
       <Layout
+        containerType={containerType}
         selectedLayerPath={selectedLayerPath || ''}
         layerList={layersList}
         onLayerListClicked={handleGuideItemClick}

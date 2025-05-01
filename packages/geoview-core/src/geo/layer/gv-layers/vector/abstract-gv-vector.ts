@@ -308,7 +308,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       // Update the layer style
       layer.setStyle({
         ...style,
-        ...{ [geometryType]: { type: 'simple', hasDefault: false, fields: [], info: [theStyle] } },
+        [geometryType]: { type: 'simple', hasDefault: false, fields: [], info: [theStyle] },
       });
     });
   }

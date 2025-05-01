@@ -2,7 +2,7 @@ import { useState, useEffect, memo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import Lightbox from 'yet-another-react-lightbox';
+import Lightbox, { ViewCallbackProps } from 'yet-another-react-lightbox';
 import Download from 'yet-another-react-lightbox/plugins/download';
 import 'yet-another-react-lightbox/styles.css';
 
@@ -24,6 +24,7 @@ export interface LightboxProps {
   index: number;
   exited: () => void;
   scale?: number;
+  onSlideChange?: (index: number) => void;
 }
 
 // Constants outside component to prevent recreating every render
@@ -46,6 +47,7 @@ export const LightboxImg = memo(function LightboxImg({
   index,
   exited,
   scale = LIGHTBOX_CONSTANTS.DEFAULT_SCALE,
+  onSlideChange,
 }: LightboxProps): JSX.Element {
   logger.logTraceRender('components/lightbox/lightbox');
 
@@ -86,7 +88,7 @@ export const LightboxImg = memo(function LightboxImg({
       close={() => setIsOpen(false)}
       slides={slides}
       index={index}
-      carousel={{ finite: true }}
+      carousel={{ finite: true, imageFit: 'contain' }}
       controller={{ closeOnPullDown, closeOnBackdropClick }}
       animation={{ fade: LIGHTBOX_CONSTANTS.FADE_DURATION, swipe: LIGHTBOX_CONSTANTS.SWIPE_DURATION }}
       labels={labels}
@@ -96,6 +98,7 @@ export const LightboxImg = memo(function LightboxImg({
           document.getElementsByClassName('yarl__root')[0].getElementsByTagName('button')[1].focus();
         },
         exited,
+        view: (props: ViewCallbackProps) => onSlideChange?.(props.index),
       }}
       render={{
         iconClose: () => (

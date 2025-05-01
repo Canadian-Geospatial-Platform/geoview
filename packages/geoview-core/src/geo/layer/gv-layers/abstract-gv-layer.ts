@@ -697,6 +697,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         const featureFields = feature.getKeys();
         featureFields.forEach((fieldName) => {
           if (fieldName !== 'geometry') {
+            const fieldValue = feature.get(fieldName);
+            // Skip complex fields
+            if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) {
+              return;
+            }
+
             // Calculate the field domain if not already calculated
             if (!(fieldName in dictFieldDomains)) {
               // Calculate it

@@ -40,7 +40,7 @@
   },
   "mapctrl": {
     "rotation": {
-      "resetRotation": "Reset Rotation",
+      "resetRotation": "Reset Map Rotation",
       "fixedNorth": "Fix North"
     },
     "mouseposition": {
