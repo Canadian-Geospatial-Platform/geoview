@@ -3,7 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
             "projection": 3978,
-        "initialView": {
+			"initialView": {
             "zoomAndCenter": [3.5, [-90, 60]]
             },
             "homeView": {

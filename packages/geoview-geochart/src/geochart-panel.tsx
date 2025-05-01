@@ -4,7 +4,7 @@ import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common'
 import { checkSelectedLayerPathList } from 'geoview-core/src/core/components/common/comp-common';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
 import { Box } from 'geoview-core/src/ui';
-import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
+import { useMapClickCoordinates, useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import {
   useGeochartConfigs,
   useGeochartStoreActions,
@@ -48,6 +48,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const selectedLayerPath = useGeochartSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
+  const mapClickCoordinates = useMapClickCoordinates();
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
@@ -73,6 +74,20 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   });
 
   /**
+   * Handles a click on the guide opening button click.
+   */
+  const handleGuideIsOpen = useCallback(
+    (guideIsOpenVal: boolean): void => {
+      // Log
+      logger.logTraceUseCallback('GEOCHART PANEL - handleGuideIsOpen', guideIsOpenVal);
+      if (guideIsOpenVal) {
+        setSelectedLayerPath('');
+      }
+    },
+    [setSelectedLayerPath]
+  );
+
+  /**
    * Handles click on enlarge button in the layout component.
    *
    * @param {boolean} isEnlarge Indicates if is enlarged
@@ -94,6 +109,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     // Keep the callback
     redrawGeochart.current[key] = theCallbackRedraw;
   };
+
+  // #region HOOKS
 
   /**
    * Gets the label for the number of features of a layer.
@@ -178,13 +195,34 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('GEOCHART-PANEL - check selection', memoLayerSelectedItem);
+    logger.logTraceUseEffect('GEOCHART-PANEL - check selection', memoLayerSelectedItem, selectedLayerPath);
 
-    // Redirect to the keep selected layer path logic
-    checkSelectedLayerPathList(setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath, memoLayerSelectedItem, memoLayersList);
-  }, [memoLayerSelectedItem, memoLayersList, setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath]);
+    // If selected layer path is not empty launch the checker to try to maintain the selection on the correct selected layer
+    if (selectedLayerPath) {
+      // Redirect to the keep selected layer path logic
+      checkSelectedLayerPathList(setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath, memoLayerSelectedItem, memoLayersList);
+    }
+  }, [memoLayerSelectedItem, memoLayersList, selectedLayerPath, setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath]);
 
-  // #region RENDERING ************************************************************************************************
+  /**
+   * Select a layer after a map click happened on the map.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DETAILS-PANEL- mapClickCoordinates', mapClickCoordinates);
+
+    // If nothing was previously selected at all
+    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
+      const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
+      // Select the first layer that has features
+      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapClickCoordinates, memoLayersList, setSelectedLayerPath]);
+
+  // #endregion HOOKS
+
+  // #region RENDERING
 
   /**
    * Renders a single GeoChart component
@@ -205,17 +243,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       />
     );
   };
-
-  const handleGuideIsOpen = useCallback(
-    (guideIsOpenVal: boolean): void => {
-      // Log
-      logger.logTraceUseCallback('GEOCHART PANEL - handleGuideIsOpen');
-      if (guideIsOpenVal) {
-        setSelectedLayerPath('');
-      }
-    },
-    [setSelectedLayerPath]
-  );
 
   /**
    * Renders the complete GeoChart Panel component

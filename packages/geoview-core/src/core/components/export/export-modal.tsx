@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import * as htmlToImage from 'html-to-image';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField } from '@/ui';
-import { exportPNG } from '@/core/utils/utilities';
+import { exportPNG, delay } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { useUIActiveAppBarTab, useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -18,6 +18,10 @@ import { LegendContainer } from '@/core/components/export/export-legend-utils';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 
 /**
+ * @typedef {{IAsyncContentCreation: import("Code\resources\app\extensions\node_modules\typescript\lib\lib.dom.d.ts").IAsyncContentCreation}} CoreLib
+ */
+
+/**
  * Export modal window component to export the viewer information in a PNG file
  *
  * @returns {JSX.Element} the export modal component
@@ -26,7 +30,7 @@ export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
   const mapId = useGeoViewMapId();
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
-
+  const imageDefaultWidth = 1738;
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
   const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
@@ -69,26 +73,92 @@ export default function ExportModal(): JSX.Element {
   // Set the legend layers
   const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
 
+  // resising image from dataurl
+  async function resizeImageData(imageUri: string, inFileName: string): Promise<void> {
+    const img = new Image();
+    const imgCanvas = document.createElement('canvas');
+    const ctx = imgCanvas.getContext('2d');
+
+    img.addEventListener('load', () => {
+      if (img.naturalWidth > imageDefaultWidth) {
+        exportPNG(img.src, inFileName);
+        return;
+      }
+
+      const dx = (imageDefaultWidth - img.naturalWidth) / 2;
+      const dy = 0;
+      const dHeight = img.naturalHeight;
+
+      // IMAGE TO CANVAS
+      imgCanvas.width = imageDefaultWidth;
+      imgCanvas.height = dHeight;
+
+      if (ctx) {
+        // Optional: fill background if you want a color behind
+        ctx.fillStyle = theme.palette.common.white; // or any background color
+        ctx.fillRect(0, 0, imgCanvas.width, imgCanvas.height);
+        ctx.drawImage(img, dx, dy); // Draw image to canvas
+        const imgurl = imgCanvas.toDataURL('image/png');
+        // Download png file from dataurl
+        exportPNG(imgurl, inFileName);
+      }
+    });
+    img.src = imageUri; // load image
+    await delay(1500);
+  }
+
   const exportMap = ((): void => {
-    if (exportContainerRef.current && textFieldRef.current && exportTitleRef.current) {
+    if (exportContainerRef?.current && textFieldRef.current && exportTitleRef.current) {
+      // Hide the text field
       textFieldRef.current.style.display = 'none';
+
+      // Update the title
       exportTitleRef.current.style.padding = '1rem';
       exportTitleRef.current.innerHTML = exportTitle;
+
       setIsMapExporting(true);
 
-      htmlToImage
-        .toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white, fontEmbedCSS: '' })
-        .then((dataUrl) => {
-          setIsMapExporting(false);
+      // Create a temporary container
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.width = `${imageDefaultWidth}px`;
 
-          exportPNG(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`);
+      // Clone the content
+      const clonedContent = exportContainerRef.current.cloneNode(true) as HTMLDivElement;
+      tempContainer.appendChild(clonedContent);
+      document.body.appendChild(tempContainer);
 
-          setActiveAppBarTab(legendId, 'legend', false, false);
-          disableFocusTrap();
-        })
-        .catch((error: Error) => {
-          logger.logError('Error while exporting the image', error);
-        });
+      // Small delay to ensure content is rendered
+      setTimeout(() => {
+        htmlToImage
+          .toPng(clonedContent, {
+            backgroundColor: theme.palette.common.white,
+            fontEmbedCSS: '',
+            width: imageDefaultWidth,
+            height: clonedContent.offsetHeight,
+          })
+          .then((dataUrl) => {
+            setIsMapExporting(false);
+            // Clean up
+            document.body.removeChild(tempContainer);
+
+            resizeImageData(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`)
+              .then(() => {
+                setActiveAppBarTab(legendId, 'legend', false, false);
+                disableFocusTrap();
+              })
+              .catch((error: Error) => {
+                logger.logError('Error while resizing the image', error);
+              });
+          })
+          .catch((error: Error) => {
+            // Clean up on error too
+            document.body.removeChild(tempContainer);
+            setIsMapExporting(false);
+            logger.logError('Error while exporting the image', error);
+          });
+      }, 100);
     }
   }) as MouseEventHandler<HTMLButtonElement>;
 
@@ -96,7 +166,6 @@ export default function ExportModal(): JSX.Element {
     setActiveAppBarTab(legendId, 'legend', false, false);
     disableFocusTrap();
   };
-
   /**
    * Calculate the width of the canvas based on dialog box container width.
    * @param {HTMLDivElement} dialogBox - Container where canvas will be rendered.
@@ -110,18 +179,19 @@ export default function ExportModal(): JSX.Element {
 
     return dialogBox.clientWidth - paddingLeft - paddingRight;
   };
+  console.log(getCanvasWidth); // eslint-disable-line no-console
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('Export Modal - mount');
     setLegendLayers(layersList);
+
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
     let timer: NodeJS.Timeout;
     if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
       const mapImage = mapImageRef.current;
       const dialogBox = dialogRef.current;
-
       if (overviewMap) overviewMap.style.visibility = 'hidden';
 
       // open legend in appbar when only appbar exists
@@ -144,8 +214,34 @@ export default function ExportModal(): JSX.Element {
           .catch((error: Error) => {
             logger.logError('Error occured while converting map to image', error);
           });
-        setIsLegendLoading(false);
-      }, 100);
+
+        // add legend
+        // check if footer tab exist then we don't need appBar Legend.
+        const legendContainer = (footerbarLegendContainer ?? appBarLegendContainer) as HTMLElement;
+        if (legendContainer && legendContainerRef.current) {
+          setIsLegendLoading(true);
+          // remove hidden attribute from document legend, so that html-to-image can copy the legend container.
+          const legendTab = document.getElementById(`shell-${mapId}-legend`) as HTMLElement;
+          const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
+          if (hasHiddenAttr) legendTab.removeAttribute('hidden');
+
+          htmlToImage
+            .toPng(legendContainer, { fontEmbedCSS: '', style: { overflow: 'hidden' } })
+            .then((dataUrl) => {
+              setIsLegendLoading(false);
+              const img = new Image();
+              img.src = dataUrl;
+              img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
+              legendContainerRef.current?.appendChild(img);
+              if (hasHiddenAttr) legendTab.hidden = true;
+            })
+            .catch((error: Error) => {
+              logger.logError('Error occured while converting legend to image', error);
+            });
+        } else {
+          setIsLegendLoading(false);
+        }
+      }, 500);
     }
     return () => {
       if (overviewMap) overviewMap.style.visibility = 'visible';
@@ -184,12 +280,7 @@ export default function ExportModal(): JSX.Element {
               )}
             </Box>
             {northArrow && (
-              <Box
-                textAlign="right"
-                style={{
-                  transform: `rotate(${rotationAngle.angle}deg)`,
-                }}
-              >
+              <Box textAlign="right" style={{ marginRight: 20, transform: `rotate(${rotationAngle.angle}deg)` }}>
                 <NorthArrowIcon width={44} height={44} />
               </Box>
             )}
@@ -203,7 +294,7 @@ export default function ExportModal(): JSX.Element {
           <Box ref={legendContainerRef}>
             {isLegendLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
           </Box>
-          <Box textAlign="center" key={t('mapctrl.disclaimer.message')} component="p" sx={{ margin: 0, marginBottom: '20px' }}>
+          <Box textAlign="center" key={t('mapctrl.disclaimer.message')} component="p" sx={{ margin: 5, marginBottom: '20px' }}>
             {t('mapctrl.disclaimer.message')}
           </Box>
           <Box textAlign="center">

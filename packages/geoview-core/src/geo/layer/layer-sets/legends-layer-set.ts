@@ -6,6 +6,9 @@ import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstra
 import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractGVLayer, LayerStyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { LayerApi } from '@/geo/layer/layer';
 
 /**
@@ -139,13 +142,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // If the layer legend should be queried (and not already querying).
     // GV Gotta make sure that we're not already querying, because EsriImage layers, for example, adjust the
     // GV style on the fly when querying legend. So, be careful not to loop!
-    if (
-      layer &&
-      layerConfig &&
-      layer instanceof AbstractGVLayer &&
-      this.resultSet[layerPath].legendQueryStatus !== 'querying' &&
-      (this.#legendShouldBeQueried(layerConfig) || forced)
-    ) {
+    const styleLoopingLayerTypes = [GVEsriDynamic, GVEsriFeature, GVEsriImage];
+    if (styleLoopingLayerTypes.some((type) => layer instanceof type) && this.resultSet[layerPath].legendQueryStatus === 'querying') {
+      return;
+    }
+
+    if (layer && layerConfig && layer instanceof AbstractGVLayer && (this.#legendShouldBeQueried(layerConfig) || forced)) {
       // Flag
       this.resultSet[layerPath].legendQueryStatus = 'querying';
 

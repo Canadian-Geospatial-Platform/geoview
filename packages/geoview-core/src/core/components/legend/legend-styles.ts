@@ -1,6 +1,67 @@
 import { Theme } from '@mui/material/styles';
+import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 type SxClasses = Record<string, object>;
+
+/**
+ * Calculates and returns the container height based on various parameters
+ *
+ * @param {string} containerType - The type of container to calculate height for
+ * @param {boolean} isFullScreen - Indicates if the container is in fullscreen mode
+ * @param {boolean} footerBarIsCollapsed - Indicates if the footer bar is in collapsed state
+ * @param {number} footerPanelResizeValue - The resize value for the footer panel
+ * @returns {string} The calculated height value as a CSS-compatible string
+ */
+const getContainerHeight = (
+  containerType: string,
+  isFullScreen: boolean,
+  footerBarIsCollapsed: boolean,
+  footerPanelResizeValue: number
+): string => {
+  // Default height
+  const defaultHeight = 'calc(100vh - 40px)';
+
+  // Handle APP_BAR case
+  if (containerType === CONTAINER_TYPE.APP_BAR) {
+    if (isFullScreen && !footerBarIsCollapsed) {
+      return `calc(${100 - footerPanelResizeValue}vh - 40px)`;
+    }
+    return defaultHeight;
+  }
+
+  // Handle FOOTER_BAR case
+  if (containerType === CONTAINER_TYPE.FOOTER_BAR && isFullScreen) {
+    return `calc(${footerPanelResizeValue}vh - 40px)`;
+  }
+
+  // Default case
+  return defaultHeight;
+};
+
+/**
+ * Generates the main SX classes for styling components
+ * @param {boolean} isFullScreen - Indicates if the component is in fullscreen mode
+ * @param {number} footerPanelResizeValue - The resize value for the footer panel in viewport height units
+ * @param {boolean} footerBarIsCollapsed - Indicates if the footer bar is collapsed
+ * @param {string} containerType - The type of container ('app-bar' or 'footer-bar')
+ * @returns {SxClasses} An object containing the style classes
+ */
+export const getSxClassesMain = (
+  isFullScreen: boolean,
+  footerPanelResizeValue: number,
+  footerBarIsCollapsed: boolean,
+  containerType: string
+): SxClasses => ({
+  container: {
+    padding: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    maxHeight: isFullScreen || containerType === CONTAINER_TYPE.APP_BAR ? '100%' : '660px', // maxHeight only when not fullscreen or app-bar
+    height: getContainerHeight(containerType, isFullScreen, footerBarIsCollapsed, footerPanelResizeValue),
+    overflowY: 'auto',
+    overflowX: 'hidden',
+  },
+});
 
 /**
  * Get custom sx classes for the legend
@@ -8,15 +69,7 @@ type SxClasses = Record<string, object>;
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme, isFullScreen?: boolean, footerPanelResizeValue?: number): SxClasses => ({
-  container: {
-    padding: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    maxHeight: isFullScreen ? undefined : '660px', // maxHeight only when not fullscreen
-    height: isFullScreen ? `calc(${footerPanelResizeValue}vh - 40px)` : undefined, // height only when fullscreen (- padding)
-    overflowY: 'auto',
-  },
+export const getSxClasses = (theme: Theme): SxClasses => ({
   title: {
     textAlign: 'left',
     fontWeight: '600',

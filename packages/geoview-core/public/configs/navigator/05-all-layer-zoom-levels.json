@@ -13,7 +13,7 @@
       {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "GeoJSON Sample",
-        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
@@ -62,7 +62,7 @@
             "layerName": "CSV - NPRI Water Media Group 2022",
             "initialSettings": { "maxZoom": 8 },
             "source": {
-              "dataAccessPath": "./datasets/csv-files/NPRI-INRP_WaterEau_MediaGroupMilieu_2022.csv",
+              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/NPRI-INRP_WaterEau_MediaGroupMilieu_2022.csv",
               "separator": ","
             },
             "minScale": 10000000
