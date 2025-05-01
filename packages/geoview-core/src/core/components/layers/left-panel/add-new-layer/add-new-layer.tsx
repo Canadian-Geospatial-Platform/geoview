@@ -791,30 +791,23 @@ export function AddNewLayer(): JSX.Element {
    * Attempt to determine the layer type based on the URL format
    */
   const bestGuessLayerType = (): boolean => {
-    const layerTokens = displayURL.toUpperCase().split('/');
-    const layerId = parseInt(layerTokens[layerTokens.length - 1], 10);
-
-    if (displayURL.match(/MAPSERVER\/?/i)) {
+    if (/MAPSERVER\/?/i.test(displayURL)) {
       return setLayerTypeIfAllowed(ESRI_DYNAMIC);
     }
 
-    if (displayURL.match(/FEATURESERVER/i) || (displayURL.match(/MAPSERVER/i) && !Number.isNaN(layerId))) {
+    if (/(?:FEATURESERVER|MAPSERVER(?:\/\d+)+)/i.test(displayURL)) {
       return setLayerTypeIfAllowed(ESRI_FEATURE);
     }
 
-    if (displayURL.match(/IMAGESERVER/i)) {
+    if (/IMAGESERVER/i.test(displayURL)) {
       return setLayerTypeIfAllowed(ESRI_IMAGE);
     }
 
-    if (displayURL.match(/WFS/i)) {
-      return setLayerTypeIfAllowed(WFS);
-    }
-
-    if (displayURL.match(/.(GEO)?JSON($|\?)/i)) {
+    if (/.(?:GEO)?JSON(?:$|\?)/i.test(displayURL)) {
       return setLayerTypeIfAllowed(GEOJSON);
     }
 
-    if (displayURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || displayURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
+    if (/\{z\}\/{[xy]}\/{[xy]}/i.test(displayURL)) {
       return setLayerTypeIfAllowed(XYZ_TILES);
     }
 
@@ -822,15 +815,15 @@ export function AddNewLayer(): JSX.Element {
       return setLayerTypeIfAllowed(GEOCORE);
     }
 
-    if (displayURL.match(/WFS/i)) {
+    if (/WFS/i.test(displayURL)) {
       return setLayerTypeIfAllowed(WFS);
     }
 
-    if (displayURL.match(/WMS/i)) {
+    if (/WMS/i.test(displayURL)) {
       return setLayerTypeIfAllowed(WMS);
     }
 
-    if (displayURL.match(/.CSV($|\?)/i)) {
+    if (/.CSV(?:$|\?)/i.test(displayURL)) {
       return setLayerTypeIfAllowed(CSV);
     }
 
