@@ -1386,6 +1386,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         externalPackages: config.externalPackages,
         serviceUrls: config.serviceUrls,
         schemaVersionUsed: config.schemaVersionUsed,
+        globalSettings: config.globalSettings,
       };
 
       // Set app bar tab settings
