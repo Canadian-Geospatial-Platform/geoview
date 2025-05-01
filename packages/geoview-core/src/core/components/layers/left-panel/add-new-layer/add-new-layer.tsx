@@ -39,6 +39,7 @@ import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { isValidUUID } from '@/core/utils/utilities';
 import { GeoCore } from '@/geo/layer/other/geocore';
 import { GeoViewLayerAddedResult, LayerApi } from '@/geo/layer/layer';
 import {
@@ -775,54 +776,67 @@ export function AddNewLayer(): JSX.Element {
    * Helper function for setting the layer type if it's allowed
    * @param {TypeGeoviewLayerTypeWithGeoCore} layerTypeValue
    */
-  const setLayerTypeIfAllowed = (layerTypeValue: TypeGeoviewLayerTypeWithGeoCore): void => {
-    if ((disabledLayerTypes as TypeGeoviewLayerTypeWithGeoCore[]).includes(layerTypeValue)) {
+  const setLayerTypeIfAllowed = (layerTypeValue: TypeGeoviewLayerTypeWithGeoCore): boolean => {
+    if (disabledLayerTypes.includes(layerTypeValue)) {
       emitErrorDisabled(layerTypeValue);
       setLayerType('');
       setStepButtonEnabled(false);
-    } else {
-      setLayerType(layerTypeValue);
+      return false;
     }
+    setLayerType(layerTypeValue);
+    return true;
   };
 
   /**
    * Attempt to determine the layer type based on the URL format
    */
-  const bestGuessLayerType = (): void => {
+  const bestGuessLayerType = (): boolean => {
     const layerTokens = displayURL.toUpperCase().split('/');
     const layerId = parseInt(layerTokens[layerTokens.length - 1], 10);
-    if (displayURL.toUpperCase().endsWith('MAPSERVER') || displayURL.toUpperCase().endsWith('MAPSERVER/')) {
-      setLayerTypeIfAllowed(ESRI_DYNAMIC);
-    } else if (
-      displayURL.toUpperCase().indexOf('FEATURESERVER') !== -1 ||
-      (displayURL.toUpperCase().indexOf('MAPSERVER') !== -1 && !Number.isNaN(layerId))
-    ) {
-      setLayerTypeIfAllowed(ESRI_FEATURE);
-    } else if (displayURL.toUpperCase().indexOf('IMAGESERVER') !== -1) {
-      setLayerTypeIfAllowed(ESRI_IMAGE);
-    } else if (layerTokens.indexOf('WFS') !== -1) {
-      setLayerType(WFS);
-    } else if (
-      displayURL.toUpperCase().endsWith('.JSON') ||
-      displayURL.toUpperCase().includes('.JSON?') ||
-      displayURL.toUpperCase().endsWith('.GEOJSON') ||
-      displayURL.toUpperCase().includes('.GEOJSON?')
-    ) {
-      setLayerType(GEOJSON);
-    } else if (displayURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || displayURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
-      setLayerTypeIfAllowed(XYZ_TILES);
-    } else if (displayURL.indexOf('/') === -1 && displayURL.replaceAll('-', '').length === 32) {
-      setLayerTypeIfAllowed(GEOCORE);
-    } else if (displayURL.toUpperCase().indexOf('WFS') !== -1) {
-      setLayerTypeIfAllowed(WFS);
-    } else if (displayURL.toUpperCase().indexOf('WMS') !== -1) {
-      setLayerTypeIfAllowed(WMS);
-    } else if (displayURL.toUpperCase().endsWith('.CSV') || displayURL.toUpperCase().includes('.CSV?')) {
-      setLayerTypeIfAllowed(CSV);
-    } else {
-      setLayerType('');
-      setStepButtonEnabled(false);
+
+    if (displayURL.match(/MAPSERVER\/?/i)) {
+      return setLayerTypeIfAllowed(ESRI_DYNAMIC);
     }
+
+    if (displayURL.match(/FEATURESERVER/i) || (displayURL.match(/MAPSERVER/i) && !Number.isNaN(layerId))) {
+      return setLayerTypeIfAllowed(ESRI_FEATURE);
+    }
+
+    if (displayURL.match(/IMAGESERVER/i)) {
+      return setLayerTypeIfAllowed(ESRI_IMAGE);
+    }
+
+    if (displayURL.match(/WFS/i)) {
+      return setLayerTypeIfAllowed(WFS);
+    }
+
+    if (displayURL.match(/.(GEO)?JSON($|\?)/i)) {
+      return setLayerTypeIfAllowed(GEOJSON);
+    }
+
+    if (displayURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || displayURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
+      return setLayerTypeIfAllowed(XYZ_TILES);
+    }
+
+    if (isValidUUID(displayURL)) {
+      return setLayerTypeIfAllowed(GEOCORE);
+    }
+
+    if (displayURL.match(/WFS/i)) {
+      return setLayerTypeIfAllowed(WFS);
+    }
+
+    if (displayURL.match(/WMS/i)) {
+      return setLayerTypeIfAllowed(WMS);
+    }
+
+    if (displayURL.match(/.CSV($|\?)/i)) {
+      return setLayerTypeIfAllowed(CSV);
+    }
+
+    setLayerType('');
+    setStepButtonEnabled(false);
+    return true;
   };
 
   /**
@@ -834,8 +848,7 @@ export function AddNewLayer(): JSX.Element {
       valid = false;
       emitErrorNone();
     }
-    if (valid) {
-      bestGuessLayerType();
+    if (valid && bestGuessLayerType()) {
       setActiveStep(1);
     }
   };
@@ -1223,7 +1236,7 @@ export function AddNewLayer(): JSX.Element {
         steps={[
           {
             stepLabel: {
-              children: t('layers.stepOne'),
+              children: disabledLayerTypes.includes(GEOCORE) ? t('layers.stepOneNoGeocore') : t('layers.stepOne'),
             },
             stepContent: {
               children: (
@@ -1288,7 +1301,7 @@ export function AddNewLayer(): JSX.Element {
                   <p style={{ textAlign: 'center' }}>{t('layers.or')}</p>
                   <TextField
                     sx={{ width: '100%' }}
-                    label={t('layers.url')}
+                    label={disabledLayerTypes.includes(GEOCORE) ? t('layers.urlNoGeocore') : t('layers.url')}
                     variant="standard"
                     value={displayURL}
                     onChange={handleInput}
