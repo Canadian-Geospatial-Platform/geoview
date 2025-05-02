@@ -161,10 +161,10 @@ export type TypeServiceUrls = {
 export type TypeValidVersions = '1.0';
 /** Service endpoint urls. */
 export type TypeGlobalSettings = {
-    /**
-     * Whether or not sublayers can be removed from layer groups. Default = true.
-     */
+    /** Whether or not sublayers can be removed from layer groups. Default = true */
     canRemoveSublayers?: boolean;
+    /** Whether a certain layer type should be disabled */
+    disabledLayerTypes?: TypeGeoviewLayerType[];
 };
 /** Definition of the map configuration settings. */
 export type TypeMapConfig = {

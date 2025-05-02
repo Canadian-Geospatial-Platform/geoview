@@ -2,9 +2,11 @@ import { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/config/types/map-sc
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeGeoviewLayerTypeWithGeoCore } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { SnackbarType } from '@/core/utils/notifications';
 type AppActions = IAppState['actions'];
 export interface IAppState {
+    disabledLayerTypes: TypeGeoviewLayerTypeWithGeoCore[];
     displayLanguage: TypeDisplayLanguage;
     displayTheme: TypeDisplayTheme;
     guide: TypeGuideObject | undefined;
@@ -53,6 +55,7 @@ export interface TypeGuideObject {
 }
 export declare const useAppCircularProgressActive: () => boolean;
 export declare const useAppCrosshairsActive: () => boolean;
+export declare const useAppDisabledLayerTypes: () => TypeGeoviewLayerTypeWithGeoCore[];
 export declare const useAppDisplayLanguage: () => TypeDisplayLanguage;
 export declare const useAppDisplayTheme: () => TypeDisplayTheme;
 export declare const useAppFullscreenActive: () => boolean;

@@ -13,6 +13,7 @@ export interface LightboxProps {
     index: number;
     exited: () => void;
     scale?: number;
+    onSlideChange?: (index: number) => void;
 }
 /**
  * Create an element that displays a lightbox
