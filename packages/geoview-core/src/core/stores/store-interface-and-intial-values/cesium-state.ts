@@ -1,9 +1,14 @@
 import { MutableRefObject } from 'react';
-import { ConstantProperty, Viewer } from 'cesium';
+import { ConstantProperty, ImageryLayer, Viewer } from 'cesium';
 import { useStore } from 'zustand';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
+
+function getImageryLayerByName(viewer: Viewer, name: string): ImageryLayer | undefined {
+  const layers = viewer.imageryLayers._layers;
+  return layers.find((layer: any) => layer.name === name);
+}
 
 export interface ICesiumState {
   cViewerRef: MutableRefObject<Viewer | null>;
@@ -39,32 +44,18 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
       getIsInitialized: (): boolean => {
         return get().cesiumState.isInitialized;
       },
-      /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
       toggleVisibility(layerPath: string): void {
-        /* eslint-disable-next-line no-console */
-        console.log('MADE IT IN');
-        /* eslint-disable-next-line no-console */
-        console.log(layerPath);
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
-          const ds = viewer.dataSources.get(0);
-          /* eslint-disable-next-line no-console */
-          console.log(ds);
-          ds.entities.suspendEvents();
-          ds.show = false;
-          for (const entity of ds.entities.values) {
-            /* eslint-disable-next-line no-console */
-            console.log(entity);
-            entity.show = false;
-            if (entity.billboard) {
-              entity.billboard.show = new ConstantProperty(false);
-            }
+          const [ds] = viewer.dataSources.getByName(layerPath);
+          if (ds) {
+            ds.show = !ds.show;
+            return;
           }
-          ds.entities.resumeEvents();
-          viewer.scene.requestRender();
-        } else {
-          /* eslint-disable-next-line no-console */
-          console.warn('Viewer is not initialized');
+          const is = getImageryLayerByName(viewer, layerPath);
+          if (is) {
+            is.show = !is.show;
+          }
         }
       },
     },

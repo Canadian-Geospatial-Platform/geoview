@@ -83,9 +83,12 @@ function extractStyleForFeature(_layer: VectorLayer<VectorSource>, feature: Feat
 }
 
 async function VectorLayerDataSource(viewer: MapViewer, layer: VectorLayer): Promise<GeoJsonDataSource | undefined> {
+  const layerPropsInt = layer.getPropertiesInternal();
+  let layerPath;
+  if (layerPropsInt?.layerConfig) {
+    layerPath = layerPropsInt.layerConfig.layerPath;
+  }
   const source = layer.getSource();
-  console.log(layer);
-  console.log(source);
   const features = source!.getFeatures();
   if (features.length > 0) {
     const geoJsonFormatter = new GeoJSON();
@@ -95,6 +98,9 @@ async function VectorLayerDataSource(viewer: MapViewer, layer: VectorLayer): Pro
       dataProjection: 'EPSG:4326',
     });
     const gJds = await GeoJsonDataSource.load(geoJson);
+    if (layerPath) {
+      gJds.name = layerPath;
+    }
     gJds.show = layer.isVisible();
     return gJds;
   }
@@ -287,6 +293,12 @@ export function CesiumMap(props: MapProps): JSX.Element {
           } else if (layer instanceof ImageLayer) {
             const imageryProvider = ImageLayerDataSource(viewer, layer);
             const ds = cViewer.imageryLayers.addImageryProvider(imageryProvider);
+            const layerPropsInt = layer.getPropertiesInternal();
+            let layerPath;
+            if (layerPropsInt?.layerConfig) {
+              layerPath = layerPropsInt.layerConfig.layerPath;
+            }
+            ds.name = layerPath;
             ds.show = layer.isVisible();
           }
         })
