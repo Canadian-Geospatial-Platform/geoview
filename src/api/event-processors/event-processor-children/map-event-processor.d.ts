@@ -148,10 +148,10 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * Update or remove the layer highlight.
      * @param {string} mapId - The ID of the map.
      * @param {string} layerPath - The layer path to set as the highlighted layer.
-     * @param {string} hilightedLayerPath - The layer path of the currently highlighted layer.
+     * @param {string} highlightedLayerPath - The layer path of the currently highlighted layer.
      * @returns {string} The layer path of the highlighted layer.
      */
-    static changeOrRemoveLayerHighlight(mapId: string, layerPath: string, hilightedLayerPath: string): string;
+    static changeOrRemoveLayerHighlight(mapId: string, layerPath: string, highlightedLayerPath: string): string;
     static addInitialFilter(mapId: string, layerPath: string, filter: string): void;
     static setCurrentBasemapOptions(mapId: string, basemapOptions: TypeBasemapOptions): void;
     static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void;

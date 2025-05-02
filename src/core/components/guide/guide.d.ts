@@ -1,5 +1,7 @@
+import { TypeContainerBox } from '@/core/types/global-types';
 interface GuideType {
     fullWidth?: boolean;
+    containerType?: TypeContainerBox;
 }
 /**
  * Guide component to display help content
