@@ -63,7 +63,6 @@ export const useManageArrow = (): ArrowReturn => {
 
     // Constants
     const ARROW_WIDTH = 24;
-    const RADIAN_CONVERSION = 0.01745329252;
     const mapWidth = mapSize[0] / 2;
     const offsetX = mapWidth - ARROW_WIDTH / 2;
 
@@ -113,7 +112,6 @@ export const useManageArrow = (): ArrowReturn => {
         const distanceFromNorthPole = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
         // Calculate distance factor (0 to 1)
-        // Adjust these values based on your projection and typical distances
         const MAX_DISTANCE = 10000; // Maximum meaningful distance from north pole
         const distanceFactor = Math.min(distanceFromNorthPole / MAX_DISTANCE, 1);
 
