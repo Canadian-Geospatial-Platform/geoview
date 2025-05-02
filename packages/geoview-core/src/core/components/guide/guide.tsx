@@ -1,4 +1,4 @@
-import { memo, useState, ReactNode, useMemo, useCallback } from 'react';
+import { memo, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
 import Markdown from 'markdown-to-jsx';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
@@ -103,6 +103,30 @@ export const Guide = memo(function GuidePanel({ fullWidth = false, containerType
     },
     [layersList]
   );
+
+  useEffect(() => {
+    const container = document.querySelector('.guideBox');
+
+    const handleClick = (e: Event): void => {
+      const target = e.target as HTMLAnchorElement;
+      if (target.tagName === 'A' && target.hash) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const element = container?.querySelector(target.hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    };
+
+    container?.addEventListener('click', handleClick);
+
+    // Cleanup function to remove the event listener
+    return () => {
+      container?.removeEventListener('click', handleClick);
+    };
+  }, [selectedLayerPath]);
 
   const ariaLabel = t('guide.title');
   return (

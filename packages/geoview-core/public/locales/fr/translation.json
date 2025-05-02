@@ -82,7 +82,7 @@
     "layerError": "La couche a une erreur...",
     "layerLoading": "La couche se charge...",
     "tableDetails": "Table détaillée",
-    "refreshLayer": "Rafraîchir la couche",
+    "refreshLayer": "Réinitialiser la couche",
     "highlightLayer": "Couche mise en évidence",
     "subLayersCount": "{count} sous-couches",
     "itemsCount": "{count} sur {totalCount} classes",

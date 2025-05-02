@@ -347,7 +347,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
 
     // GV: We cannot directly use the view extent and reproject. If we do so some layers (issue #2413) identify will return empty resultset
-    // GV.CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the repojection it works
+    // GV.CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the reprojection it works
     const mapViewer = this.getMapViewer();
     const mapExtent = mapViewer.getView().calculateExtent();
     const boundsLL = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[0], mapExtent[1]]);
@@ -996,7 +996,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     let layerBounds;
     if (metadataExtent) {
       // Get the metadata projection
-      const metadataProjection = this.getMetadataProjection();
+      const metadataProjection = this.getMetadataProjection()?.getCode();
       layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
       layerBounds = validateExtent(layerBounds, this.getMapViewer().getProjection().getCode());
     }

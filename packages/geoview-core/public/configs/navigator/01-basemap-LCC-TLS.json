@@ -11,7 +11,7 @@
       "labeled": true
     }
   },
-  "components": ["overview-map"],
+  "components": ["overview-map", "north-arrow"],
   "overviewMap": {
     "hideOnZoom": 6
   },

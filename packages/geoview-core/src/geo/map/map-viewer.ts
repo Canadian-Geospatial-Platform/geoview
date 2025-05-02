@@ -941,28 +941,22 @@ export class MapViewer {
       const currentExtent = this.getView().calculateExtent();
       const currentZoom = this.getView().getZoom();
 
-      // Add one-time size change listener only when we are zoomed out to keep the bottom
-      // extent so the viewer does not zoom center Canada
-      if (currentZoom! < 4.5)
-        this.map.once('change:size', () => {
-          // Update map size first
-          this.map.updateSize();
+      // Add one-time size change listener only when we are zoomed out to keep zoom center Canada)
+      this.map.once('change:size', () => {
+        // Apply padding when zoom out
+        const padding = currentZoom! < 4.5 ? [100, 100, 100, 100] : [0, 0, 0, 0];
+        this.zoomToExtent(currentExtent, { padding })
+          .then(() => {
+            // Handle success if needed
+          })
+          .catch((error) => {
+            // Handle any errors that occur during zoom
+            logger.logError('Error during zoom:', error);
+          });
 
-          // Calculate the new center to focus on bottom portion
-          const width = currentExtent[2] - currentExtent[0];
-          const height = currentExtent[3] - currentExtent[1];
-
-          // Calculate center point that will show bottom of previous extent
-          const centerX = currentExtent[0] + width / 2;
-          const centerY = currentExtent[1] - height / 2;
-
-          // Set the new center and zoom
-          this.getView().setCenter([centerX, centerY]);
-          this.getView().setZoom(currentZoom!);
-
-          // Force render
-          this.map.renderSync();
-        });
+        // Force render
+        this.map.renderSync();
+      });
 
       if (document.exitFullscreen) {
         document.exitFullscreen().catch((error) => {
