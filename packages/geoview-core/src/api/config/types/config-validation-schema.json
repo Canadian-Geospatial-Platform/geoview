@@ -437,11 +437,14 @@
           "description": "List of layer types that are disabled in the viewer.",
           "type": "array",
           "items": {
-            "enum": [
+            "anyOf": [
               {
                 "$ref": "#/definitions/TypeGeoviewLayerType"
               },
-              "geoCore"
+              {
+                "type": "string",
+                "enum": ["geoCore"]
+              }
             ]
           }
         }
