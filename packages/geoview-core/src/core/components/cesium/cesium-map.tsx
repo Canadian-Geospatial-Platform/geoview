@@ -33,6 +33,13 @@ import VectorSource from 'ol/source/Vector';
 import { TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { MapViewer } from '@/geo/map/map-viewer';
+import {
+  useCesiumStoreSetterActions,
+  useCesiumStoreActions,
+  useCesiumSetRef,
+  useCesiumIsInitialized,
+} from '@/core/stores/store-interface-and-intial-values/cesium-state';
+import { useAppShow3dMap } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 type MapProps = {
   viewer: MapViewer;
@@ -77,6 +84,8 @@ function extractStyleForFeature(_layer: VectorLayer<VectorSource>, feature: Feat
 
 async function VectorLayerDataSource(viewer: MapViewer, layer: VectorLayer): Promise<GeoJsonDataSource | undefined> {
   const source = layer.getSource();
+  console.log(layer);
+  console.log(source);
   const features = source!.getFeatures();
   if (features.length > 0) {
     const geoJsonFormatter = new GeoJSON();
@@ -86,6 +95,7 @@ async function VectorLayerDataSource(viewer: MapViewer, layer: VectorLayer): Pro
       dataProjection: 'EPSG:4326',
     });
     const gJds = await GeoJsonDataSource.load(geoJson);
+    gJds.show = layer.isVisible();
     return gJds;
   }
   return undefined;
@@ -204,22 +214,25 @@ function ImageLayerDataSource(_viewer: MapViewer, layer: ImageLayer<ImageWMS>): 
 }
 
 export function CesiumMap(props: MapProps): JSX.Element {
-  const viewerRef = useRef<HTMLDivElement>(null);
+  const oViewerRef = useRef<HTMLDivElement>(null);
+  const cViewerRef = useCesiumStoreActions().getCesiumViewerRef();
+  const isInitialized = useCesiumStoreActions().getIsInitialized;
+  const setCesiumViewer = useCesiumSetRef();
+  const setCesiumIsInitialized = useCesiumStoreSetterActions().setIsInitialized;
   const { viewer } = props;
 
   useEffect(() => {
-    if (!viewerRef.current) return undefined;
-
+    if (!oViewerRef.current) return undefined;
+    if (isInitialized()) return undefined;
+    setCesiumIsInitialized(true);
     Camera.DEFAULT_VIEW_RECTANGLE = Rectangle.fromDegrees(
       ...viewer.convertExtentFromMapProjToProj(viewer.map.getView().calculateExtent(), 'EPSG:4326')
     );
     Camera.DEFAULT_VIEW_FACTOR = 0;
 
-    let cViewer: Viewer;
-
     const initCesium = async (): Promise<void> => {
       const terrainProvider = await createWorldTerrainAsync();
-      cViewer = new Viewer(viewerRef.current!, {
+      const cViewer = new Viewer(oViewerRef.current!, {
         terrainProvider,
         baseLayerPicker: false,
         animation: false,
@@ -234,12 +247,14 @@ export function CesiumMap(props: MapProps): JSX.Element {
         useBrowserRecommendedResolution: false,
         orderIndependentTranslucency: false,
       });
+      cViewerRef.current = cViewer;
+      setCesiumViewer(cViewer);
       cViewer.camera.percentageChanged = 0.1;
       cViewer.camera.changed.addEventListener(() => {
         setOLMapExtent(viewer, cViewer);
-        const centerPixel = new Cartesian2(cViewer.canvas.clientWidth / 2, cViewer.canvas.clientHeight / 2);
+        const centerPixel = new Cartesian2(cViewer.canvas.clientWidth / 2, cViewer!.canvas.clientHeight / 2);
         const centerRay = cViewer.camera.getPickRay(centerPixel);
-        const centerPosition = cViewer.scene.globe.pick(centerRay!, cViewer.scene);
+        const centerPosition = cViewer.scene.globe.pick(centerRay!, cViewer!.scene);
         const bSphere = new BoundingSphere(centerPosition, 1.0);
         const pixSize = cViewer.camera.getPixelSize(bSphere, cViewer.scene.drawingBufferWidth, cViewer.scene.drawingBufferHeight);
         MapEventProcessor.setMapChangeSize(viewer.mapId, [10, 10], getMapScale(pixSize));
@@ -271,22 +286,17 @@ export function CesiumMap(props: MapProps): JSX.Element {
             }
           } else if (layer instanceof ImageLayer) {
             const imageryProvider = ImageLayerDataSource(viewer, layer);
-            cViewer.imageryLayers.addImageryProvider(imageryProvider);
+            const ds = cViewer.imageryLayers.addImageryProvider(imageryProvider);
+            ds.show = layer.isVisible();
           }
         })
       );
     };
-
     initCesium().catch((e) => {
       throw e;
     });
-
-    return () => {
-      if (cViewer && !cViewer.isDestroyed()) {
-        cViewer.destroy();
-      }
-    };
+    return () => {};
   });
 
-  return <div ref={viewerRef} style={{ width: '100%', height: '100vh', display: 'block' }} />;
+  return <div ref={oViewerRef} style={{ width: '100%', height: '100vh', display: 'block' }} />;
 }

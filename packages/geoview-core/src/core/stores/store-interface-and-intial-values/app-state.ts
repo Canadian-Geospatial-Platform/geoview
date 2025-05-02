@@ -269,6 +269,14 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
             show3dMap: active,
           },
         });
+        if (!active) {
+          set({
+            cesiumState: {
+              ...get().cesiumState,
+              isInitialized: false,
+            },
+          });
+        }
       },
 
       /**
