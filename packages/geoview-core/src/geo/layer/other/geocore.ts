@@ -46,7 +46,7 @@ export class GeoCore {
     const url = `${mapConfig!.serviceUrls.geocoreUrl}`;
 
     // Get the GV config from UUID and await
-    const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(this.#mapId, url, this.#displayLanguage, [uuid.split(':')[0]]);
+    const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid.split(':')[0]]);
 
     // Validate the generated Geoview Layer Config
     ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);

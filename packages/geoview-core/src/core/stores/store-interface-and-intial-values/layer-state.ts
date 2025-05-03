@@ -152,7 +152,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         }
 
         // Not an EsriDynamic layer
-        throw new LayerNotEsriDynamicError(get().mapId, layerPath);
+        throw new LayerNotEsriDynamicError(layerPath);
       },
 
       /**
@@ -292,7 +292,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         }
 
         // Failed
-        throw new NoBoundsError(get().mapId, layerPath);
+        throw new NoBoundsError(layerPath);
       },
 
       zoomToLayerVisibleScale: (layerPath: string): void => {

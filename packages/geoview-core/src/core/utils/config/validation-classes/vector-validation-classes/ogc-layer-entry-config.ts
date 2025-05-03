@@ -1,3 +1,4 @@
+import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceOgcFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { Projection } from '@/geo/utils/projection';
@@ -13,10 +14,10 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
+    // Validate the dataAccessPath exists when metadataAccessPath is empty
     if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
-      throw new Error(
-        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} when the metadataAccessPath is undefined.`
-      );
+      // Throw error missing dataAccessPath
+      throw new LayerDataAccessPathMandatoryError(this.geoviewLayerConfig.geoviewLayerId);
     }
 
     // Value for this.source.format can only be featureAPI.

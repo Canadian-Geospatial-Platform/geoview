@@ -74,7 +74,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       layerConfig.setLayerStatusError();
 
       // Raise error
-      throw new LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError(this.mapId, layerConfig);
+      throw new LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError(layerConfig);
     }
 
     if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;

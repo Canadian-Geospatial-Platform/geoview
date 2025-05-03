@@ -14,7 +14,7 @@ import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { ConfigValidation } from '@/core/utils/config/config-validation';
-import { generateId, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
+import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import {
@@ -50,7 +50,7 @@ import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-i
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerCreatedTwiceError, LayerNotGeoJsonError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -333,16 +333,20 @@ export class LayerApi {
    * @private
    */
   #handleLayerMessage(layer: AbstractGVLayer | AbstractGeoViewLayer, layerMessageEvent: LayerMessageEvent): void {
-    const localMessage = getLocalizedMessage(layerMessageEvent.messageKey, this.mapViewer.getDisplayLanguage());
+    // Read event params for clarity
+    const { messageType } = layerMessageEvent;
+    const { messageKey } = layerMessageEvent;
+    const { messageParams } = layerMessageEvent;
+    const { notification } = layerMessageEvent;
 
-    if (layerMessageEvent.messageType === 'info') {
-      this.mapViewer.notifications.showMessage(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
-    } else if (layerMessageEvent.messageType === 'warning') {
-      this.mapViewer.notifications.showWarning(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
-    } else if (layerMessageEvent.messageType === 'error') {
-      this.mapViewer.notifications.showError(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
-    } else if (layerMessageEvent.messageType === 'success') {
-      this.mapViewer.notifications.showSuccess(localMessage, layerMessageEvent.messageParams, layerMessageEvent.notification);
+    if (messageType === 'info') {
+      this.mapViewer.notifications.showMessage(messageKey, messageParams, notification);
+    } else if (messageType === 'warning') {
+      this.mapViewer.notifications.showWarning(messageKey, messageParams, notification);
+    } else if (messageType === 'error') {
+      this.mapViewer.notifications.showError(messageKey, messageParams, notification);
+    } else if (messageType === 'success') {
+      this.mapViewer.notifications.showSuccess(messageKey, messageParams, notification);
     }
   }
 
@@ -510,7 +514,7 @@ export class LayerApi {
             // Add it
             this.addGeoviewLayer(geoviewLayerConfig);
           } catch (error) {
-            // An error happening here likely means a particular trivial config error.
+            // An error happening here likely means a particular, trivial, config error.
             // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
 
             // Show the error(s)
@@ -552,7 +556,7 @@ export class LayerApi {
       }
 
       // Show error
-      this.mapViewer.notifications.showError(theError.message, [], true);
+      this.mapViewer.notifications.showErrorFromError(theError, true);
 
       // Emit about it
       this.#emitLayerError({ layerPath: layerPathOrId, error: theError.message });
@@ -777,7 +781,7 @@ export class LayerApi {
     // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
     if (this.getGeoviewLayerIds().includes(geoviewLayerConfig.geoviewLayerId)) {
       // Throw that the geoview layer id was already created
-      throw new LayerCreatedTwiceError(this.getMapId(), geoviewLayerConfig.geoviewLayerId);
+      throw new LayerCreatedTwiceError(geoviewLayerConfig.geoviewLayerId);
     } else {
       // Process the addition of the layer
       const result: GeoViewLayerAddedResult = this.#addGeoviewLayerStep2(geoviewLayerConfig);
@@ -836,7 +840,7 @@ export class LayerApi {
       layerBeingAdded = new VectorTiles(this.getMapId(), geoviewLayerConfig);
     } else {
       // Not implemented
-      throw new NotImplementedError('Unsupported layer class type');
+      throw new NotSupportedError('Unsupported layer class type');
     }
 
     // Add in the geoviewLayers set
@@ -892,7 +896,7 @@ export class LayerApi {
       }
 
       // Fail
-      throw new NotImplementedError('No corresponding GV layer');
+      throw new NotImplementedError('GV layer not implemented for the layer type');
     });
 
     // Register hook when an OpenLayer layer has been created
@@ -1801,7 +1805,7 @@ export class LayerApi {
       });
     } else {
       // Layer not GeoJson
-      throw new LayerNotGeoJsonError(mapId, layerPath);
+      throw new LayerNotGeoJsonError(layerPath);
     }
   }
 

@@ -29,6 +29,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { LayerNotCreatedError } from '@/core/exceptions/layer-exceptions';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
@@ -414,12 +415,11 @@ export class GeoPackage extends AbstractGeoViewVector {
                   resolve(layerGroup || baseLayer);
                 } else {
                   // Throw error
-                  throw new LayerNotCreatedError(this.mapId, layerConfig.layerPath);
+                  throw new LayerNotCreatedError(layerConfig.layerPath);
                 }
               })
               .catch((error) => {
-                // Log
-                logger.logPromiseFailed('processOneGeopackageLayer (1) in processOneLayerEntry in GeoPackage', error);
+                // Reject
                 reject(error instanceof Error ? error : new Error(String(error)));
               });
           } else {
@@ -453,7 +453,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                         resolve2(baseLayer);
                       } else {
                         // Throw error
-                        throw new LayerNotCreatedError(this.mapId, layerConfig.layerPath);
+                        throw new LayerNotCreatedError(layerConfig.layerPath);
                       }
                     })
                     .catch((error) => {
@@ -463,6 +463,8 @@ export class GeoPackage extends AbstractGeoViewVector {
                       // Set the layer status to error
                       // TODO: Check - Do we need to set the status to error here if we're doing it later in the other catch? (caught below)
                       layerConfig.setLayerStatusError();
+
+                      // Reject
                       reject2(error instanceof Error ? error : new Error(String(error)));
                     });
                 })
@@ -482,6 +484,8 @@ export class GeoPackage extends AbstractGeoViewVector {
 
           // Set the layer status to error
           layerConfig.setLayerStatusError();
+
+          // Reject
           reject(error instanceof Error ? error : new Error(String(error)));
         });
     });
@@ -565,7 +569,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         envelopeSize = 64;
         break;
       default:
-        throw new Error('Invalid geometry envelope size flag in GeoPackage');
+        throw new NotSupportedError('Invalid geometry envelope size flag in GeoPackage');
     }
     return gpkgBinGeom.subarray(envelopeSize + 8);
   }

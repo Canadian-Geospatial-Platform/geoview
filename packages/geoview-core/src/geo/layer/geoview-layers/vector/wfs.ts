@@ -83,7 +83,7 @@ export class WFS extends AbstractGeoViewVector {
       this.#version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
     } else {
       // Throw error
-      throw new LayerNoCapabilitiesError(this.mapId, this.geoviewLayerId);
+      throw new LayerNoCapabilitiesError(this.geoviewLayerId);
     }
   }
 
@@ -107,7 +107,7 @@ export class WFS extends AbstractGeoViewVector {
 
       if (!foundMetadata) {
         // Add a layer load error
-        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
         return;
       }
 

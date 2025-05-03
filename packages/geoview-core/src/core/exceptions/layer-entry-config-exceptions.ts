@@ -13,27 +13,24 @@ import { LayerError } from '@/core/exceptions/layer-exceptions';
  * @extends {LayerError}
  */
 export class LayerEntryConfigError extends LayerError {
-  // The configuration associated with the GeoView layer
+  /** The configuration associated with the GeoView layer */
   layerConfig: TypeLayerEntryConfig;
 
   /**
    * Protected constructor to initialize the LayerEntryConfigError.
    * This error is typically thrown when a GeoView layer's configuration fails to load or process correctly.
-   * @param {string} mapId - The ID of the map where the error occurred.
    * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
-   * @param {string | undefined} localizedKeyOrMessage - Optional message or key for localization (default: 'validation.layer.loadfailed').
+   * @param {string} messageKey - A localization key. Defaults to 'validation.layer.loadfailed'.
    * @param {TypeJsonValue[] | TypeJsonArray | string[] | undefined} params - Optional parameters to customize the error message.
    */
   protected constructor(
-    mapId: string,
     layerConfig: TypeLayerEntryConfig,
-    localizedKeyOrMessage: string | undefined = undefined,
+    messageKey: string | undefined = undefined,
     params: TypeJsonValue[] | TypeJsonArray | string[] | undefined = []
   ) {
     super(
-      mapId,
       layerConfig.layerPath,
-      localizedKeyOrMessage || 'validation.layer.loadfailed',
+      messageKey || 'validation.layer.loadfailed',
       params || [layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName || layerConfig.layerId || layerConfig.layerPath]
     );
 
@@ -54,11 +51,10 @@ export class LayerEntryConfigLayerIdNotFoundError extends LayerEntryConfigError 
   /**
    * Constructor to initialize the LayerEntryConfigLayerIdNotFoundError.
    * This error is thrown when the layer ID is not found within the layer configuration.
-   * @param {string} mapId - The ID of the map where the error occurred.
    * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
    */
-  constructor(mapId: string, layerConfig: TypeLayerEntryConfig) {
-    super(mapId, layerConfig, `Layer id not found (layerPath: ${layerConfig.layerPath})`);
+  constructor(layerConfig: TypeLayerEntryConfig) {
+    super(layerConfig, `Layer id not found (layerPath: ${layerConfig.layerPath})`);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerEntryConfigLayerIdNotFoundError.prototype);
@@ -73,11 +69,10 @@ export class LayerEntryConfigInvalidLayerEntryConfigError extends LayerEntryConf
   /**
    * Constructor to initialize the LayerEntryConfigInvalidLayerEntryConfigError.
    * This error is thrown when the metadata with regard to the listOfLayerEntryConfig is preventing to load the layer.
-   * @param {string} mapId - The ID of the map where the error occurred.
    * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
    */
-  constructor(mapId: string, layerConfig: TypeLayerEntryConfig) {
-    super(mapId, layerConfig, `Invalid metadata (listOfLayerEntryConfig) preventing load of layer (layerPath: ${layerConfig.layerPath})`);
+  constructor(layerConfig: TypeLayerEntryConfig) {
+    super(layerConfig, `Invalid metadata (listOfLayerEntryConfig) preventing load of layer (layerPath: ${layerConfig.layerPath})`);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerEntryConfigInvalidLayerEntryConfigError.prototype);
@@ -93,34 +88,13 @@ export class LayerEntryConfigLayerIdNotFeatureLayerError extends LayerEntryConfi
   /**
    * Constructor to initialize the LayerEntryConfigLayerIdNotFeatureLayerError.
    * This error is thrown when the layer ID provided does not correspond to a feature layer.
-   * @param {string} mapId - The ID of the map where the error occurred.
    * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
    */
-  constructor(mapId: string, layerConfig: TypeLayerEntryConfig) {
-    super(mapId, layerConfig, `LayerId not a feature layer (layerPath: ${layerConfig.layerPath})`);
+  constructor(layerConfig: TypeLayerEntryConfig) {
+    super(layerConfig, `LayerId not a feature layer (layerPath: ${layerConfig.layerPath})`);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerEntryConfigLayerIdNotFeatureLayerError.prototype);
-  }
-}
-
-/**
- * Custom error class thrown when the GeoView layer configuration is invalid due to the ESRI layer ID not being a number.
- * This error is used when the ESRI layer ID provided is expected to be a number, but it is not.
- * @extends {LayerEntryConfigError}
- */
-export class LayerEntryConfigLayerIdEsriMustBeNumberError extends LayerEntryConfigError {
-  /**
-   * Constructor to initialize the LayerEntryConfigLayerIdEsriMustBeNumberError.
-   * This error is thrown when the ESRI layer ID is not a number, which is required for proper layer configuration.
-   * @param {string} mapId - The ID of the map where the error occurred.
-   * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
-   */
-  constructor(mapId: string, layerConfig: TypeLayerEntryConfig) {
-    super(mapId, layerConfig, `ESRI layerId must be a number (layerPath: ${layerConfig.layerPath})`);
-
-    // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerEntryConfigLayerIdEsriMustBeNumberError.prototype);
   }
 }
 
@@ -133,11 +107,10 @@ export class LayerEntryConfigEmptyLayerGroupError extends LayerEntryConfigError 
   /**
    * Constructor to initialize the LayerEntryConfigEmptyLayerGroupError.
    * This error is thrown when a layer group in the configuration is found to be empty.
-   * @param {string} mapId - The ID of the map where the error occurred.
    * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
    */
-  constructor(mapId: string, layerConfig: TypeLayerEntryConfig) {
-    super(mapId, layerConfig, `Empty layer group (layerPath: ${layerConfig.layerPath})`);
+  constructor(layerConfig: TypeLayerEntryConfig) {
+    super(layerConfig, `Empty layer group (layerPath: ${layerConfig.layerPath})`);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerEntryConfigEmptyLayerGroupError.prototype);
@@ -153,14 +126,30 @@ export class LayerEntryConfigUnableToCreateGroupLayerError extends LayerEntryCon
   /**
    * Constructor to initialize the LayerEntryConfigUnableToCreateGroupLayerError.
    * This error is thrown when the creation of a group layer in the configuration fails.
-   * @param {string} mapId - The ID of the map where the error occurred.
    * @param {TypeLayerEntryConfig} layerConfig - The configuration object associated with the GeoView layer.
    */
-  constructor(mapId: string, layerConfig: TypeLayerEntryConfig) {
-    super(mapId, layerConfig, `Unable to create group layer ${layerConfig.layerPath}`);
+  constructor(layerConfig: TypeLayerEntryConfig) {
+    super(layerConfig, `Unable to create group layer ${layerConfig.layerPath}`);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerEntryConfigUnableToCreateGroupLayerError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a vector layer configuration is missing its required source URL.
+ * This typically indicates an improperly defined `LayerEntryConfig` for a vector source.
+ */
+export class LayerEntryConfigVectorSourceURLNotDefinedError extends LayerEntryConfigError {
+  /**
+   * Creates a new LayerEntryConfigVectorSourceURLNotDefinedError.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration that is missing the vector source URL.
+   */
+  constructor(layerConfig: TypeLayerEntryConfig) {
+    super(layerConfig, 'Vector source URL is not defined.');
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerEntryConfigVectorSourceURLNotDefinedError.prototype);
   }
 }
 
@@ -174,11 +163,10 @@ export class LayerEntryConfigUnableToCreateGroupLayerError extends LayerEntryCon
 export class LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError extends LayerEntryConfigError {
   /**
    * Creates an instance of LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError.
-   * @param {string} mapId - The unique identifier for the map where the error occurred.
    * @param {TypeLayerEntryConfig} layerConfig - The configuration object for the vector tile layer with the invalid projection.
    */
-  constructor(mapId: string, layerConfig: TypeLayerEntryConfig) {
-    super(mapId, layerConfig, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
+  constructor(layerConfig: TypeLayerEntryConfig) {
+    super(layerConfig, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError.prototype);
@@ -193,12 +181,11 @@ export class LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError e
 export class LayerEntryConfigWMSSubLayerNotFoundError extends LayerEntryConfigError {
   /**
    * Creates an instance of LayerEntryConfigWMSSubLayerNotFoundError.
-   * @param {string} mapId - The unique identifier for the map where the error occurred.
    * @param {TypeLayerEntryConfig} layerConfig - The layer configuration object referencing the missing WMS sub-layer.
    * @param {string} geoviewLayerId - The ID of the GeoView WMS layer that was expected to contain the sub-layer.
    */
-  constructor(mapId: string, layerConfig: TypeLayerEntryConfig, geoviewLayerId: string) {
-    super(mapId, layerConfig, 'validation.layer.notfound', [layerConfig.layerId, geoviewLayerId]);
+  constructor(layerConfig: TypeLayerEntryConfig, geoviewLayerId: string) {
+    super(layerConfig, 'validation.layer.notfound', [layerConfig.layerId, geoviewLayerId]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerEntryConfigWMSSubLayerNotFoundError.prototype);
@@ -215,11 +202,10 @@ export class LayerEntryConfigWMSSubLayerNotFoundError extends LayerEntryConfigEr
 export class LayerEntryConfigParameterExtentNotDefinedInSourceError extends LayerEntryConfigError {
   /**
    * Constructs a new LayerEntryConfigParameterExtentNotDefinedInSourceError instance.
-   * @param {string} mapId - The unique identifier of the map instance.
    * @param {TypeLayerEntryConfig} layerConfig - The layer configuration that caused the error.
    */
-  constructor(mapId: string, layerConfig: TypeLayerEntryConfig) {
-    super(mapId, layerConfig, 'Parameter extent is not defined in source element of layerConfig.');
+  constructor(layerConfig: TypeLayerEntryConfig) {
+    super(layerConfig, 'Parameter extent is not defined in source element of layerConfig.');
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerEntryConfigParameterExtentNotDefinedInSourceError.prototype);
@@ -236,11 +222,10 @@ export class LayerEntryConfigParameterExtentNotDefinedInSourceError extends Laye
 export class LayerEntryConfigParameterProjectionNotDefinedInSourceError extends LayerEntryConfigError {
   /**
    * Constructs a new LayerEntryConfigParameterProjectionNotDefinedInSourceError instance.
-   * @param {string} mapId - The unique identifier of the map instance.
    * @param {TypeLayerEntryConfig} layerConfig - The layer configuration object that caused the error.
    */
-  constructor(mapId: string, layerConfig: TypeLayerEntryConfig) {
-    super(mapId, layerConfig, 'Parameter projection is not defined in source element of layerConfig.');
+  constructor(layerConfig: TypeLayerEntryConfig) {
+    super(layerConfig, 'Parameter projection is not defined in source element of layerConfig.');
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerEntryConfigParameterProjectionNotDefinedInSourceError.prototype);

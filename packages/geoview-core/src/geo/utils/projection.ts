@@ -16,6 +16,8 @@ import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { logger } from '@/core/utils/logger';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { Fetch } from '@/core/utils/fetch-helper';
+import { InvalidProjectionError } from '@/core/exceptions/geoview-exceptions';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Class used to handle functions for transforming projections
@@ -108,7 +110,7 @@ export abstract class Projection {
     }
 
     // Failed
-    throw new Error(`Invalid projection object '${projection}`);
+    throw new NotSupportedError(`Invalid projection object '${projection}`);
   }
 
   /**
@@ -332,7 +334,7 @@ export abstract class Projection {
     if (proj) return proj;
 
     // Failed
-    throw new Error(`Invalid projection code '${projection}`);
+    throw new InvalidProjectionError(projection);
   }
 
   /**

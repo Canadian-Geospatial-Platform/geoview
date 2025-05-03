@@ -19,8 +19,9 @@ import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the map feature instance according to what is specified in the schema.
  */
 export type TypeMapFeaturesInstance = {
@@ -962,7 +963,7 @@ export const convertLayerTypeToEntry = (layerType: TypeGeoviewLayerType): TypeLa
       return CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
     default:
       // Throw unsupported error
-      throw new Error(`Unsupported layer type ${layerType} to convert to layer entry`);
+      throw new NotSupportedError(`Unsupported layer type ${layerType} to convert to layer entry`);
   }
 };
 

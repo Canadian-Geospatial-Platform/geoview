@@ -16,6 +16,7 @@ import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { Fetch } from '@/core/utils/fetch-helper';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Returns the type of the specified field.
@@ -196,9 +197,9 @@ export function esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: st
       return 'Polygon';
     case 'esriGeometryMultiPolygon':
       return 'MultiPolygon';
-
     default:
-      throw new Error(`Unsupported geometry type: ${esriGeometryType}`);
+      // Unsupported geometry type
+      throw new NotSupportedError(`Unsupported geometry type: ${esriGeometryType}`);
   }
 }
 

@@ -13,6 +13,7 @@ import * as GeoUtilities from '@/geo/utils/utilities';
 
 import { initMapDivFromFunctionCall } from '@/app';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -69,13 +70,16 @@ export class API {
    * Gets a map viewer instance by its ID.
    * @param {string} mapId - The unique identifier of the map to retrieve
    * @returns {MapViewer} The map viewer instance if found
-   * @throws {Error} If the map with the specified ID is not found
+   * @throws {MapViewerNotFoundError} If the map with the specified ID is not found
    */
   getMapViewer(mapId: string): MapViewer {
+    // Get the map instance
     const map = this.#maps[mapId];
-    // We use regular error because there is no valid mapId
-    if (!map) throw new Error(`Map with ID ${mapId} not found`);
 
+    // Validate the map viewer was found. If not throw MapViewerNotFoundError
+    if (!map) throw new MapViewerNotFoundError(mapId);
+
+    // Return it
     return map;
   }
 

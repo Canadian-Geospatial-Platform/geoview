@@ -101,13 +101,13 @@ export class GeoJSON extends AbstractGeoViewVector {
       );
       if (!foundEntry) {
         // Add a layer load error
-        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
       }
       return;
     }
 
     // Throw an invalid layer entry config error
-    throw new LayerEntryConfigInvalidLayerEntryConfigError(this.mapId, layerConfig);
+    throw new LayerEntryConfigInvalidLayerEntryConfigError(layerConfig);
   }
 
   /**

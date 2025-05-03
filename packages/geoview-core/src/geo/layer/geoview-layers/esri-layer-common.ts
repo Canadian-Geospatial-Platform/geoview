@@ -33,11 +33,10 @@ import { EsriFeature, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-laye
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { LayerError } from '@/core/exceptions/layer-exceptions';
+import { LayerError, LayerEntryConfigLayerIdEsriMustBeNumberError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigEmptyLayerGroupError,
   LayerEntryConfigLayerIdNotFoundError,
-  LayerEntryConfigLayerIdEsriMustBeNumberError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { logger } from '@/core/utils/logger';
 
@@ -56,7 +55,7 @@ export async function commonFetchAndSetServiceMetadata(layer: EsriDynamic | Esri
 
   // If there's an error in the content of the response itself
   if ('error' in layer.metadata) {
-    throw new LayerError(layer.mapId, layer.geoviewLayerId, `Error code = ${layer.metadata.error.code}, ${layer.metadata.error.message}`);
+    throw new LayerError(layer.geoviewLayerId, `Error code = ${layer.metadata.error.code}, ${layer.metadata.error.message}`);
   }
 
   // Here, content is good
@@ -95,7 +94,7 @@ export function commonValidateListOfLayerEntryConfig(
 
       if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
         // Add a layer load error
-        layer.addLayerLoadError(new LayerEntryConfigEmptyLayerGroupError(layer.mapId, layerConfig), layerConfig);
+        layer.addLayerLoadError(new LayerEntryConfigEmptyLayerGroupError(layerConfig), layerConfig);
       }
       return;
     }
@@ -104,9 +103,14 @@ export function commonValidateListOfLayerEntryConfig(
     layerConfig.setLayerStatusProcessing();
 
     let esriIndex = Number(layerConfig.layerId);
-    if (Number.isNaN(esriIndex)) {
+
+    // Validate the layer id is a number (and a non-decimal one)
+    if (!Number.isInteger(esriIndex)) {
       // Add a layer load error
-      layer.addLayerLoadError(new LayerEntryConfigLayerIdEsriMustBeNumberError(layer.mapId, layerConfig), layerConfig);
+      layer.addLayerLoadError(
+        new LayerEntryConfigLayerIdEsriMustBeNumberError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.layerId),
+        layerConfig
+      );
       return;
     }
 
@@ -116,7 +120,7 @@ export function commonValidateListOfLayerEntryConfig(
 
     if (esriIndex === -1) {
       // Add a layer load error
-      layer.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layer.mapId, layerConfig), layerConfig);
+      layer.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
       return;
     }
 

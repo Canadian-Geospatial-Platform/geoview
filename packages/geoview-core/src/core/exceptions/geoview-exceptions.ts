@@ -1,43 +1,109 @@
 /* eslint-disable max-classes-per-file */
 // We want more than 1 Error class here to save files
 
-// Classes in this file mostly inherit GeoViewError for billingual errors.
+// Classes in this file mostly inherit GeoViewError.
 
 import { Extent } from 'ol/extent';
-import { TypeJsonArray, TypeJsonValue } from '@/api/config/types/config-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Base error for GeoView that includes the map ID and supports localized messages.
  * @extends {Error}
  */
 export class GeoViewError extends Error {
-  /** The map ID associated with the error. */
-  mapId: string;
+  /** The localized key or message */
+  messageKey: string;
+
+  /** The parameters to be translated using the localizedKey */
+  messageParams: unknown[] | undefined;
 
   /**
-   * Constructs a new GeoViewError. GeoViewErrors are billingual.
-   * @param {string} mapId - The map ID where the error occurred.
-   * @param {string} localizedKeyOrMessage - A localization key or a raw error message.
-   * @param {TypeJsonValue[] | TypeJsonArray | string[] | undefined} params - Optional parameters for localization formatting.
+   * Constructs a new GeoViewError.
+   * @param {string} messageKey - A localization key or a raw error message.
+   * @param {unknown[] | undefined} messageParams - Optional parameters for localization formatting.
    * @param {ErrorOptions?} options - Optional error options, including `cause`.
    */
-  constructor(mapId: string, localizedKeyOrMessage: string, params?: TypeJsonValue[] | TypeJsonArray | string[], options?: ErrorOptions) {
-    // Compose a meaningful error message
-    const localizedMsg = getLocalizedMessage(localizedKeyOrMessage, AppEventProcessor.getDisplayLanguage(mapId), params);
-
+  constructor(messageKey: string, messageParams?: unknown[], options?: ErrorOptions) {
     // Call super with both message and native options (e.g., cause)
-    super(localizedMsg, options);
+    super('An error happened in GeoView', options);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'GeoViewError';
 
-    // Keep the map id
-    this.mapId = mapId;
+    // Keep the attributes
+    this.messageKey = messageKey;
+    this.messageParams = messageParams;
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, GeoViewError.prototype);
+  }
+
+  /**
+   * Returns a localized version of the error message using the given display language.
+   * @param {TypeDisplayLanguage} language - The target language for translation.
+   * @returns {string} The translated error message based on the error's message key and parameters.
+   */
+  translateMessage(language: TypeDisplayLanguage): string {
+    // Translate the message key of the exception
+    return getLocalizedMessage(language, this.messageKey, this.messageParams);
+  }
+
+  /**
+   * Logs an error using the application's logger.
+   * If the error is a GeoViewError, its message is translated to English (default) before logging.
+   * @param {unknown} error - The error to be logged. Can be any type.
+   */
+  static logError(error: unknown): void {
+    // If the error is a GeoViewError, we can try to translate it
+    if (error instanceof GeoViewError) {
+      logger.logError(error.translateMessage('en'));
+      return;
+    }
+
+    // We log as-is everything else
+    logger.logError(error);
+  }
+}
+
+/**
+ * Error thrown when a map viewer with a specified ID is not found.
+ * @extends {GeoViewError}
+ */
+export class MapViewerNotFoundError extends GeoViewError {
+  /**
+   * Creates an instance of MapViewerNotFoundError.
+   * @param {string} mapId - The unique identifier of the map that was not found.
+   */
+  constructor(mapId: string) {
+    super(`Map with ID ${mapId} not found`);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'MapViewerNotFoundError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, MapViewerNotFoundError.prototype);
+  }
+}
+
+/**
+ * Error thrown when an invalid or unsupported projection code is encountered.
+ * @extends {GeoViewError}
+ */
+export class InvalidProjectionError extends GeoViewError {
+  /**
+   * Creates a new InvalidProjectionError.
+   * @param {string} projectionCode - The invalid projection code that caused the error.
+   */
+  constructor(projectionCode: string) {
+    super('Invalid projection code', [projectionCode]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'InvalidProjectionError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, InvalidProjectionError.prototype);
   }
 }
 
@@ -49,11 +115,10 @@ export class GeoViewError extends Error {
 export class InvalidExtentError extends GeoViewError {
   /**
    * Constructs an InvalidExtentError error for the specified map ID and extent.
-   * @param {string} mapId - The ID of the map where the invalid extent was encountered.
    * @param {Extent} extent - The invalid extent that caused the error.
    */
-  constructor(mapId: string, extent: Extent) {
-    super(mapId, `Couldn't zoom to extent, invalid extent: ${extent}`);
+  constructor(extent: Extent) {
+    super('Invalid extent', [extent]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'InvalidExtentError';
@@ -72,10 +137,9 @@ export class InvalidExtentError extends GeoViewError {
 export class NoFeaturesPropertyError extends GeoViewError {
   /**
    * Creates an instance of NoFeaturesPropertyError.
-   * @param {string} mapId - The unique identifier for the map where the error occurred.
    */
-  constructor(mapId: string) {
-    super(mapId, "The response from the service didn't provide a 'features' property.");
+  constructor() {
+    super("The response from the service didn't provide a 'features' property.");
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'NoFeaturesPropertyError';
@@ -92,10 +156,9 @@ export class NoFeaturesPropertyError extends GeoViewError {
 export class CoreBasemapCreationError extends GeoViewError {
   /**
    * Constructs a CoreBasemapCreationError error for the specified map ID.
-   * @param {string} mapId - The ID of the map where the basemap creation failed.
    */
-  constructor(mapId: string) {
-    super(mapId, 'mapctrl.overviewmap.error');
+  constructor() {
+    super('mapctrl.overviewmap.error');
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'CoreBasemapCreationError';
@@ -114,11 +177,10 @@ export class NoBoundsError extends GeoViewError {
   /**
    * Creates an instance of NoBoundsError.
    *
-   * @param {string} mapId - The unique identifier for the map where the error occurred.
    * @param {string} layerPath - The path or identifier of the layer that caused the error.
    */
-  constructor(mapId: string, layerPath: string) {
-    super(mapId, `Couldn't find bounds for layer: ${layerPath}`);
+  constructor(layerPath: string) {
+    super(`Couldn't find bounds for layer: ${layerPath}`);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'NoBoundsError';

@@ -2,7 +2,7 @@ import { Root, createRoot } from 'react-dom/client';
 import sanitizeHtml from 'sanitize-html';
 
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
+import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -11,11 +11,11 @@ import { Fetch } from '@/core/utils/fetch-helper';
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
- * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - An array of parameters to replace, i.e. ['short']
+ * @param {unknown[]} params - An array of parameters to replace, i.e. ['short']
  * @param {string} message - The original message, i.e. "My string is __param__"
  * @returns {string} Message with values replaced "My string is short"
  */
-export function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string): string {
+export function replaceParams(params: unknown[], message: string): string {
   let tmpMess = message;
   (params as string[]).forEach((item: string) => {
     tmpMess = tmpMess.replace('__param__', item);
@@ -27,17 +27,14 @@ export function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[]
 /**
  * Return proper language Geoview localized values from map i18n instance
  *
- * @param {string} localizedKey - The localize key to read the message from
  * @param {TypeDisplayLanguage} language - The language to get the message in
+ * @param {string} messageKey - The localize key to read the message from
+ * @param {unknown[] | undefined} params - An array of parameters to replace, i.e. ['short']
  * @returns {string} The translated message with values replaced
  */
-export function getLocalizedMessage(
-  localizedKey: string,
-  language: TypeDisplayLanguage,
-  params: TypeJsonValue[] | TypeJsonArray | string[] | undefined = undefined
-): string {
+export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: string, params: unknown[] | undefined = undefined): string {
   const trans = i18n.getFixedT(language);
-  let message = trans(localizedKey);
+  let message = trans(messageKey);
 
   // if params provided, replace them
   if (params && params.length > 0) message = replaceParams(params, message);

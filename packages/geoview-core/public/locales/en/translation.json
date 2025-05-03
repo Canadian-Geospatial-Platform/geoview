@@ -115,7 +115,7 @@
     "errorEmpty": "cannot be empty",
     "errorNone": "No file or source added",
     "errorFile": "Only geoJSON and CSV files can be used",
-    "errorServer": "source is not valid",
+    "errorServer": "The __param__ source is not valid",
     "errorNotLoaded": "An error occured when loading the layer",
     "errorProj": "does not support current map projection",
     "errorImageLoad": "Error loading source image for layer: __param__ at zoom level __param__",
@@ -266,7 +266,7 @@
     },
     "geocore": {
       "uuidNotFound": "GeoCore layer identifier __param__ does not exist on the server",
-      "invalidResponse": "Invalid response from GeoCore service pour UUID __param__",
+      "invalidResponse": "Invalid response (__param__) from GeoCore service pour UUID __param__",
       "noLayer": "No layers returned by GeoCore service for UUID __param__"
     },
     "geolocator": {

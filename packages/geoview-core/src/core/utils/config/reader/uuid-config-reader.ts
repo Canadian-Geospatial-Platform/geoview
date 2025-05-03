@@ -66,13 +66,12 @@ export type UUIDmapConfigReaderResponse = {
 export class UUIDmapConfigReader {
   /**
    * Generates GeoView layers and package configurations (i.e. geochart), from GeoCore API, using a list of UUIDs.
-   * @param {string} mapId - The map ID
    * @param {string} baseUrl - The base url of GeoCore API
    * @param {string} lang - The language to get the config for
    * @param {string[]} uuids - A list of uuids to get the configurations for
    * @returns {Promise<UUIDmapConfigReaderResponse>} Layers and Geocharts read and parsed from uuids results from GeoCore
    */
-  static async getGVConfigFromUUIDs(mapId: string, baseUrl: string, lang: string, uuids: string[]): Promise<UUIDmapConfigReaderResponse> {
+  static async getGVConfigFromUUIDs(baseUrl: string, lang: string, uuids: string[]): Promise<UUIDmapConfigReaderResponse> {
     let result;
     try {
       // Build the url
@@ -83,12 +82,12 @@ export class UUIDmapConfigReader {
 
       // Return the parsed response
       return {
-        layers: this.#getLayerConfigFromResponse(mapId, uuids, result, lang),
+        layers: this.#getLayerConfigFromResponse(uuids, result, lang),
         geocharts: this.#getGeoChartConfigFromResponse(result, lang),
       };
     } catch (error) {
       // If the promise had failed
-      if (!result) throw new LayerGeoCoreUUIDNotFoundError(mapId, uuids, error as Error);
+      if (!result) throw new LayerGeoCoreUUIDNotFoundError(uuids, error as Error);
 
       // Re-throw the original error otherwise
       throw error;
@@ -104,11 +103,13 @@ export class UUIDmapConfigReader {
    * @returns {TypeGeoviewLayerConfig[]} layers parsed from uuid result
    * @private
    */
-  static #getLayerConfigFromResponse(mapId: string, uuids: string[], resultData: TypeJsonObject, lang: string): TypeGeoviewLayerConfig[] {
+  static #getLayerConfigFromResponse(uuids: string[], resultData: TypeJsonObject, lang: string): TypeGeoviewLayerConfig[] {
     // If invalid response
-    if (!resultData || !resultData.response || !resultData.response.rcs || !resultData.response.rcs[lang])
-      throw new LayerGeoCoreInvalidResponseError(mapId, uuids);
-    if (resultData.response.rcs[lang].length === 0) throw new LayerGeoCoreNoLayersError(mapId, uuids);
+    if (!resultData || !resultData.response || !resultData.response.rcs || !resultData.response.rcs[lang]) {
+      const errorMessage = resultData?.errorMessage || '<no error description>';
+      throw new LayerGeoCoreInvalidResponseError(uuids, errorMessage);
+    }
+    if (resultData.response.rcs[lang].length === 0) throw new LayerGeoCoreNoLayersError(uuids);
 
     const listOfGeoviewLayerConfig: TypeGeoviewLayerConfig[] = [];
     for (let i = 0; i < (resultData.response.rcs[lang] as TypeJsonArray).length; i++) {

@@ -122,7 +122,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       logger.logTraceUseCallback('GEOCHART-PANEL - getNumFeaturesLabel');
 
       const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${getLocalizedMessage('geochart.panel.chart', displayLanguage)}${numOfFeatures > 1 ? 's' : ''}`;
+      return `${numOfFeatures} ${getLocalizedMessage(displayLanguage, 'geochart.panel.chart')}${numOfFeatures > 1 ? 's' : ''}`;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mapId]
@@ -275,7 +275,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     }
 
     // Loading UI
-    return <Typography>{getLocalizedMessage('geochart.panel.loadingUI', displayLanguage)}</Typography>;
+    return <Typography>{getLocalizedMessage(displayLanguage, 'geochart.panel.loadingUI')}</Typography>;
   };
 
   // Render

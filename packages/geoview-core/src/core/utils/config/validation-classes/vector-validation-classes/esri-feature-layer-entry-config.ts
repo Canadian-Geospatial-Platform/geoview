@@ -1,3 +1,4 @@
+import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 
@@ -15,14 +16,10 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
+    // Validate the dataAccessPath exists when metadataAccessPath is empty
     if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
-      throw new Error(
-        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} when the metadataAccessPath is undefined.`
-      );
-    }
-
-    if (Number.isNaN(this.layerId)) {
-      throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
+      // Throw error missing dataAccessPath
+      throw new LayerDataAccessPathMandatoryError(this.geoviewLayerConfig.geoviewLayerId);
     }
 
     // Value for this.source.format can only be EsriJSON.

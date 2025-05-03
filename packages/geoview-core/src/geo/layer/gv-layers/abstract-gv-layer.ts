@@ -34,7 +34,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { SnackbarType } from '@/core/utils/notifications';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
 
 /**
@@ -334,7 +334,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // If the layer is not queryable
     if (layerConfig.source?.featureInfo?.queryable === false) {
       // Throw error
-      throw new LayerNotQueryableError(this.getMapId(), layerConfig.layerPath);
+      throw new LayerNotQueryableError(layerConfig.layerPath);
     }
 
     // Log
@@ -364,7 +364,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         break;
       default:
         // Not implemented
-        throw new NotImplementedError();
+        throw new NotSupportedError(`Unsupported query type '${queryType}'`);
     }
 
     // Wait for results

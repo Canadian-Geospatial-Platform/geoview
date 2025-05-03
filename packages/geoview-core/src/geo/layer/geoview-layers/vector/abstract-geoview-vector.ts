@@ -23,6 +23,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
+import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -89,7 +90,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     sourceOptions.loader = async (extent: Extent, resolution, projection, successCallback, failureCallback) => {
       try {
         // Resolve the url
-        const url = AbstractGeoViewVector.#resolveUrl(vectorSource, extent, resolution, projection);
+        const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
         // Fetch the data
         const responseText = await AbstractGeoViewVector.#fetchData(url, sourceConfig);
@@ -306,6 +307,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
   /**
    * Resolves the URL for the vector source, potentially calling a function if the URL is dynamic.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration used by the source.
    * @param {VectorSource<Feature>} source - The vector source from which to resolve the URL.
    * @param {Extent} extent - The geographic extent used in the URL resolution.
    * @param {number} resolution - The resolution of the map view, used for dynamic URL generation.
@@ -313,7 +315,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {string} The resolved URL for the vector source.
    * @throws {Error} If the URL cannot be determined.
    */
-  static #resolveUrl(source: VectorSource<Feature>, extent: Extent, resolution: number, projection: OLProjection): string {
+  static #resolveUrl(
+    layerConfig: VectorLayerEntryConfig,
+    source: VectorSource<Feature>,
+    extent: Extent,
+    resolution: number,
+    projection: OLProjection
+  ): string {
     // Get the raw URL from the vector source.
     const rawUrl = source.getUrl();
 
@@ -321,7 +329,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const url = typeof rawUrl === 'function' ? rawUrl(extent, resolution, projection) : rawUrl;
 
     // If no URL is found, throw an error.
-    if (!url) throw new Error('Vector source URL is not defined.');
+    if (!url) throw new LayerEntryConfigVectorSourceURLNotDefinedError(layerConfig);
 
     // Return the resolved URL.
     return url;
@@ -403,7 +411,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     if (latIndex === undefined || lonIndex === undefined) {
       // Failed
-      throw new LayerNoGeographicDataInCSVError(mapId, layerConfig.layerPath);
+      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath);
     }
 
     AbstractGeoViewVector.#processFeatureInfoConfig(headers, csvRows[1], EXCLUDED_HEADERS, layerConfig);

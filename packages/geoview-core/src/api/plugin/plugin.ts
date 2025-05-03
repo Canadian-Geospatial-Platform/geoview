@@ -62,6 +62,7 @@ export abstract class Plugin {
             resolve(window.geoviewPlugins[pluginId]);
           })
           .catch((error) => {
+            // Reject
             reject(error instanceof Error ? error : new Error(String(error)));
           });
       }

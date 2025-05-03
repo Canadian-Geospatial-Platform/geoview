@@ -204,7 +204,7 @@ export function createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile> {
   return emptyLayer;
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method gets the legend styles used by the the layer as specified by the style configuration.
  *
  * @param {TypeLayerStyleConfig} styleConfig - Layer style configuration.

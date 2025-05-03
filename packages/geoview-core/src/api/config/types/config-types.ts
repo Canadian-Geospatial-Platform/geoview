@@ -25,7 +25,7 @@ export type { AnySchemaObject } from 'ajv';
 // TO.DOCONT: They just mask the 'any' keword or confuse TypeScript into thinking a value is more constrained than it really is — when it's not.
 // TO.DOCONT: 3) An 'any' in disguise:
 // TO.DOCONT: This pattern was likely invented to avoid ESLint warnings like no-explicit-any without providing any meaningful type safety.
-// TO.DOCONT: We should use 'unknown' and 'any' honestly and explicitely in the codebase.
+// TO.DOCONT: We should use 'unknown' and 'any' honestly and explicitely in the codebase to save us headaches and guarantee safe code.
 
 // TO.DOCONT: Alternatively, if we do want to maintain the concept, we could replace those types with the following types.
 // TO.DOCONT: export type JsonPrimitive = string | number | boolean | null;

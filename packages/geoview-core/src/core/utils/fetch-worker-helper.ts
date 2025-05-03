@@ -19,7 +19,7 @@ import { RequestTimeoutError } from '@/core/exceptions/core-exceptions';
  * Performs a fetch request with timeout capability
  * @template T - The expected type of the JSON response
  * @param {string} url - The URL to fetch from
- * @param {RequestInit} [options={}] - Fetch options to be passed to the fetch call
+ * @param {RequestInit} [init={}] - The optional initialization parameters for the fetch.
  * @param {number} [timeoutMs=7000] - Timeout in milliseconds before the request is aborted
  * @returns {Promise<T>} A promise that resolves with the parsed JSON response
  * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -32,13 +32,13 @@ import { RequestTimeoutError } from '@/core/exceptions/core-exceptions';
  *     body: JSON.stringify({ id: 123 })
  *   }, 3000);
  */
-export const fetchWithTimeout = async <T>(url: string, options: RequestInit = {}, timeoutMs: number = 7000): Promise<T> => {
+export const fetchWithTimeout = async <T>(url: string, init: RequestInit = {}, timeoutMs: number = 7000): Promise<T> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(url, {
-      ...options,
+      ...init,
       signal: controller.signal,
     });
 

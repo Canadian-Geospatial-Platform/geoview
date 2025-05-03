@@ -245,7 +245,7 @@ export class MapViewer {
     // Register handler when basemap has error
     this.basemap.onBasemapError((sender, event) => {
       // Show the error
-      this.notifications.showError(event.error.message, [], true);
+      this.notifications.showErrorFromError(event.error);
     });
   }
 
@@ -336,8 +336,6 @@ export class MapViewer {
 
     // Start checking for when the map will be ready
     this.#checkMapReady();
-
-    Fetch.testJson('https://api.github.com/users/alex-nrcan');
   }
 
   /**
@@ -1014,7 +1012,7 @@ export class MapViewer {
     }
 
     // Unsupported
-    this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
+    this.notifications.addNotificationError(getLocalizedMessage(displayLanguage, 'validation.changeDisplayLanguage'));
   }
 
   /**
@@ -1058,7 +1056,7 @@ export class MapViewer {
   setTheme(displayTheme: TypeDisplayTheme): void {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
       AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
-    } else this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayTheme', this.getDisplayLanguage()));
+    } else this.notifications.addNotificationError(getLocalizedMessage(this.getDisplayLanguage(), 'validation.changeDisplayTheme'));
   }
 
   /**

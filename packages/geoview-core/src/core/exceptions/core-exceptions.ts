@@ -32,6 +32,32 @@ export class NotImplementedError extends Error {
 }
 
 /**
+ * Error thrown when an operation or feature is not supported in the current context.
+ * This is typically used when the code is reaching outside the scope for which it was defined.
+ * @extends {Error}
+ */
+export class NotSupportedError extends Error {
+  /**
+   * Creates a new NotSupportedError.
+   * @param {string} message - Optional error message.
+   */
+  constructor(message: string = 'This operation is not supported.') {
+    super(message);
+
+    this.name = 'NotSupportedError';
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, NotImplementedError);
+    }
+
+    // Ensure correct prototype chain
+    Object.setPrototypeOf(this, NotSupportedError.prototype);
+  }
+}
+
+/**
  * Error thrown to indicate that an operation was explicitly cancelled.
  * This is useful in scenarios where cancellation is part of expected control flow.
  * @extends {Error}

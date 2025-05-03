@@ -62,7 +62,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
-        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
       }
       return;
     }
@@ -73,13 +73,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
       const foundEntry = metadataLayerList.find((layerMetadata: TypeJsonObject) => layerMetadata.id.toString() === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
-        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
       }
       return;
     }
 
     // Throw an invalid layer entry config error
-    throw new LayerEntryConfigInvalidLayerEntryConfigError(this.mapId, layerConfig);
+    throw new LayerEntryConfigInvalidLayerEntryConfigError(layerConfig);
   }
 
   /**

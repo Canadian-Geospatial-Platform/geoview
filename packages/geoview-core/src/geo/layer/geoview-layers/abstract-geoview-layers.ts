@@ -413,17 +413,17 @@ export abstract class AbstractGeoViewLayer {
       // TODO: Check if this should be revised to just set the statuses to error on the layer configs and let the error be thrown right after
       this.#addLayerLoadErrorAll(
         this.listOfLayerEntryConfig,
-        new LayerServiceMetadataUnableToFetchError(this.mapId, this.geoviewLayerId, error as Error)
+        new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, error as Error)
       );
 
       // If empty response error
       if (error instanceof ResponseEmptyError) {
         // Throw higher
-        throw new LayerServiceMetadataEmptyError(this.mapId, this.geoviewLayerId);
+        throw new LayerServiceMetadataEmptyError(this.geoviewLayerId);
       }
 
       // Throw higher
-      throw new LayerServiceMetadataUnableToFetchError(this.mapId, this.geoviewLayerId, error as Error);
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, error as Error);
     }
   }
 
@@ -470,7 +470,7 @@ export abstract class AbstractGeoViewLayer {
         // If empty list, for a group layer, not good
         if (!layerConfig?.listOfLayerEntryConfig?.length) {
           // Add a layer load error
-          this.addLayerLoadError(new LayerEntryConfigEmptyLayerGroupError(this.mapId, layerConfig), layerConfig);
+          this.addLayerLoadError(new LayerEntryConfigEmptyLayerGroupError(layerConfig), layerConfig);
         }
       } else {
         try {
@@ -672,7 +672,7 @@ export abstract class AbstractGeoViewLayer {
           }
 
           // Add a layer load error
-          this.addLayerLoadError(new LayerEntryConfigUnableToCreateGroupLayerError(this.mapId, layerConfig), layerConfig);
+          this.addLayerLoadError(new LayerEntryConfigUnableToCreateGroupLayerError(layerConfig), layerConfig);
           return undefined;
         }
 

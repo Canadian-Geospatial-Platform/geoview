@@ -307,7 +307,7 @@ export class BasemapApi {
       if (basemapLayer.styleUrl) {
         const tileSize = [tileInfo.rows as number, tileInfo.cols as number];
         source = new VectorTile({
-          attributions: getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)),
+          attributions: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
           projection: Projection.PROJECTIONS[urlProj],
           url: basemapLayer.url as string,
           format: new MVT(),
@@ -320,7 +320,7 @@ export class BasemapApi {
         });
       } else {
         source = new XYZ({
-          attributions: getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)),
+          attributions: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
           projection: Projection.PROJECTIONS[urlProj],
           url: basemapLayer.url as string,
           crossOrigin: 'Anonymous',
@@ -507,11 +507,11 @@ export class BasemapApi {
           coreBasemapOptions.basemapId === 'osm'
             ? [
                 '© OpenStreetMap',
-                getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)),
+                getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
               ]
             : [
                 basemapLayers.find((layer) => coreBasemapOptions.basemapId === layer.basemapId)?.copyright || '',
-                getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)),
+                getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
               ],
         zoomLevels: {
           min: minZoom,
@@ -531,7 +531,7 @@ export class BasemapApi {
     }
 
     // Failed
-    throw new CoreBasemapCreationError(this.mapViewer.mapId);
+    throw new CoreBasemapCreationError();
   }
 
   /**

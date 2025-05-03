@@ -136,7 +136,7 @@ export class WMS extends AbstractGeoViewRaster {
         // For each array of result, filter on those that have no Capability
         for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++) {
           // Track the error
-          this.addLayerLoadError(new LayerNoCapabilitiesError(this.mapId, this.geoviewLayerId), undefined);
+          this.addLayerLoadError(new LayerNoCapabilitiesError(this.geoviewLayerId), undefined);
         }
 
         // Set it
@@ -351,7 +351,7 @@ export class WMS extends AbstractGeoViewRaster {
     const layerFound = this.#getLayerMetadataEntry(layerConfig.layerId!);
     if (!layerFound) {
       // Add a layer load error
-      this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
+      this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
       return;
     }
 
@@ -512,7 +512,7 @@ export class WMS extends AbstractGeoViewRaster {
     }
 
     // Error
-    throw new LayerEntryConfigWMSSubLayerNotFoundError(this.mapId, layerConfig, this.geoviewLayerId);
+    throw new LayerEntryConfigWMSSubLayerNotFoundError(layerConfig, this.geoviewLayerId);
   }
 
   /**

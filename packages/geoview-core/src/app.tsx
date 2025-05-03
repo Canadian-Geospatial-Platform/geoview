@@ -24,10 +24,10 @@ import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import i18n from '@/core/translation/i18n';
 import { logger } from '@/core/utils/logger';
-import { removeCommentsFromJSON } from '@/core/utils/utilities';
+import { getLocalizedMessage, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { TypeJsonObject } from '@/api/config/types/config-types';
+import { AppEventProcessor } from './api/event-processors/event-processor-children/app-event-processor';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/external-types';
@@ -157,6 +157,9 @@ async function renderMap(mapElement: Element): Promise<void> {
   // otherwise return the default config
   const configuration = await getMapConfig(mapElement);
 
+  // Read the map id
+  const { mapId } = configuration;
+
   // TODO: refactor - remove this config once we get layers from the new one
   // create a new config for this map element
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
@@ -166,21 +169,18 @@ async function renderMap(mapElement: Element): Promise<void> {
 
   const config = new Config(lang);
   const configObj = config.initializeMapConfig(
-    configuration.mapId,
+    mapId,
     configuration!.map!.listOfGeoviewLayerConfig! as MapConfigLayerEntry[], // TODO: refactor - remove cast after
     (errorKey: string, params: string[]) => {
       // Wait for the map viewer to get loaded in the api
       api
-        .getMapViewerAsync(configuration.mapId)
+        .getMapViewerAsync(mapId)
         .then(() => {
-          // Create the error
-          const error = new GeoViewError(configuration.mapId, errorKey, params);
-
           // Log it
-          logger.logWarning(`- Map ${configuration.mapId}: ${error.message}`);
+          logger.logError(`- Map ${mapId}: ${getLocalizedMessage(AppEventProcessor.getDisplayLanguage(mapId), errorKey, params)}`);
 
           // Show the error
-          api.getMapViewer(configuration.mapId).notifications.showError(error.message);
+          api.getMapViewer(mapId).notifications.showError(errorKey, params);
         })
         .catch((error) => {
           // Log promise failed
@@ -190,24 +190,16 @@ async function renderMap(mapElement: Element): Promise<void> {
   );
   configuration.map.listOfGeoviewLayerConfig = configObj!;
 
-  // if valid config was provided - mapId is now part of config
-  if (configuration) {
-    const { mapId } = configuration;
+  // render the map with the config
+  reactRoot[mapId] = createRoot(mapElement!);
 
-    // render the map with the config
-    reactRoot[mapId] = createRoot(mapElement!);
+  // add config to store
+  addGeoViewStore(configuration);
 
-    // add config to store
-    addGeoViewStore(configuration);
-
-    // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
-    return new Promise<void>((resolve) => {
-      reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} onMapViewerInit={(): void => resolve()} />);
-    });
-  }
-
-  // Failed
-  throw new Error('Failed to render the map');
+  // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
+  return new Promise<void>((resolve) => {
+    reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} onMapViewerInit={(): void => resolve()} />);
+  });
 }
 
 /**

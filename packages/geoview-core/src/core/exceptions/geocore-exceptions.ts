@@ -3,7 +3,7 @@
 
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
-// Classes in this file mostly inherit GeoViewError for billingual errors.
+// Classes in this file mostly inherit GeoViewError.
 
 /**
  * Error thrown when one or more layer UUIDs are not found when queried.
@@ -12,12 +12,11 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 export class LayerGeoCoreUUIDNotFoundError extends GeoViewError {
   /**
    * Constructs a new UUID-not-found error for a given map and list of UUIDs.
-   * @param {string} mapId - The map ID where the UUID(s) were expected.
    * @param {string[]} uuids - The list of UUIDs that could not be found.
    * @param {Error} cause - The original error that caused this one, if any.
    */
-  constructor(mapId: string, uuids: string[], cause: Error) {
-    super(mapId, 'error.geocore.uuidNotFound', uuids, { cause });
+  constructor(uuids: string[], cause: Error) {
+    super('error.geocore.uuidNotFound', uuids, { cause });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerGeoCoreUUIDNotFoundError';
@@ -34,11 +33,10 @@ export class LayerGeoCoreUUIDNotFoundError extends GeoViewError {
 export class LayerGeoCoreInvalidResponseError extends GeoViewError {
   /**
    * Constructs a new LayerGeoCoreInvalidResponseError for a given map and UUIDs.
-   * @param {string} mapId - The map ID where the UUID(s) were expected.
    * @param {string[]} uuids - The list of UUIDs that caused an invalid response by GeoCore.
    */
-  constructor(mapId: string, uuids: string[]) {
-    super(mapId, 'error.geocore.invalidResponse', [uuids.toString()]);
+  constructor(uuids: string[], errorMessage: unknown) {
+    super('error.geocore.invalidResponse', [errorMessage, uuids.toString()]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerGeoCoreInvalidResponseError';
@@ -55,11 +53,10 @@ export class LayerGeoCoreInvalidResponseError extends GeoViewError {
 export class LayerGeoCoreNoLayersError extends GeoViewError {
   /**
    * Constructs a new LayerGeoCoreNoLayersError for a given map and UUIDs.
-   * @param {string} mapId - The map ID where the UUID(s) were expected.
    * @param {string[]} uuids - The list of UUIDs that returned no layers.
    */
-  constructor(mapId: string, uuids: string[]) {
-    super(mapId, 'error.geocore.noLayer', [uuids.toString()]);
+  constructor(uuids: string[]) {
+    super('error.geocore.noLayer', [uuids.toString()]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerGeoCoreNoLayersError';

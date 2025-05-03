@@ -85,7 +85,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
       if (!foundCollection) {
         // Add a layer load error
-        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
         return;
       }
 
@@ -111,7 +111,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     }
 
     // Failed
-    throw new LayerEntryConfigInvalidLayerEntryConfigError(this.mapId, layerConfig);
+    throw new LayerEntryConfigInvalidLayerEntryConfigError(layerConfig);
   }
 
   /**

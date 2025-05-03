@@ -58,13 +58,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
       const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
-        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(this.mapId, layerConfig), layerConfig);
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
       }
       return;
     }
 
     // Throw an invalid layer entry config error
-    throw new LayerEntryConfigInvalidLayerEntryConfigError(this.mapId, layerConfig);
+    throw new LayerEntryConfigInvalidLayerEntryConfigError(layerConfig);
   }
 
   /**
@@ -74,7 +74,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   protected override onProcessOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageLayer<Static>> {
     // Validate the source extent
-    if (!layerConfig?.source?.extent) throw new LayerEntryConfigParameterExtentNotDefinedInSourceError(this.mapId, layerConfig);
+    if (!layerConfig?.source?.extent) throw new LayerEntryConfigParameterExtentNotDefinedInSourceError(layerConfig);
 
     const sourceOptions: SourceOptions = {
       url: layerConfig.source.dataAccessPath || '',
@@ -90,7 +90,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     // Validate the source projection
     if (layerConfig?.source?.projection) {
       sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-    } else throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(this.mapId, layerConfig);
+    } else throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(layerConfig);
 
     // Create the source
     const source = new Static(sourceOptions);

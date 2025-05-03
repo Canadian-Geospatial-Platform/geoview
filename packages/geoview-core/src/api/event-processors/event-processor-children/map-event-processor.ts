@@ -105,8 +105,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     map.addControl(scaleBarMetric);
     map.addControl(scaleBarImperial);
 
+    // Get the projection
     const mapProjection = Projection.getProjectionFromString(`EPSG:${store.getState().mapState.currentProjection}`);
-    if (!mapProjection) throw new Error(`Invalid map projection: EPSG:${store.getState().mapState.currentProjection}`);
 
     // add map overlays
     // create overlay for north pole icon
@@ -916,7 +916,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     // Invalid extent
-    throw new InvalidExtentError(mapId, extent);
+    throw new InvalidExtentError(extent);
   }
 
   static async zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void> {

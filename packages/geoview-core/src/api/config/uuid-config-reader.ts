@@ -3,6 +3,7 @@ import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
+import { LayerGeoCoreInvalidResponseError, LayerGeoCoreNoLayersError } from '@/core/exceptions/geocore-exceptions';
 
 // The GeoChart Json object coming out of the GeoCore response
 export type GeoChartGeoCoreConfig = TypeJsonObject & {
@@ -45,7 +46,7 @@ export class UUIDmapConfigReader {
     const result = await Fetch.fetchJsonAs<GeoChartGeoCoreConfig>(url);
 
     // Return the parsed response
-    return this.#getLayerConfigFromResponse(result, lang);
+    return this.#getLayerConfigFromResponse(uuids, result, lang);
   }
 
   /**
@@ -56,13 +57,13 @@ export class UUIDmapConfigReader {
    * @returns {TypeJsonObject[]} layers parsed from uuid result
    * @static @private
    */
-  static #getLayerConfigFromResponse(resultData: GeoChartGeoCoreConfig, lang: string): TypeJsonObject[] {
+  static #getLayerConfigFromResponse(uuids: string[], resultData: GeoChartGeoCoreConfig, lang: string): TypeJsonObject[] {
     // If invalid response
     if (!resultData || !resultData.response || !resultData.response.rcs || !resultData.response.rcs[lang]) {
-      const errorMessage = resultData?.errorMessage || '';
-      throw new Error(`Invalid response from GeoCore service\n${errorMessage}\n`);
+      const errorMessage = resultData?.errorMessage || '<no error description>';
+      throw new LayerGeoCoreInvalidResponseError(uuids, errorMessage);
     }
-    if (resultData.response.rcs[lang].length === 0) throw new Error('No layers returned by GeoCore service');
+    if (resultData.response.rcs[lang].length === 0) throw new LayerGeoCoreNoLayersError(uuids);
 
     const listOfGeoviewLayerConfig: TypeJsonObject[] = [];
     for (let i = 0; i < (resultData.response.rcs[lang] as TypeJsonArray).length; i++) {

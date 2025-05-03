@@ -16,6 +16,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { logger } from '@/core/utils/logger';
 
 import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from '@/geo/layer/geometry/geometry-types';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Store a group of features
@@ -788,7 +789,8 @@ export class GeometryApi {
 
       // Add support for other geometry types as needed
       default:
-        throw new Error(`Unsupported geometry type: ${geometryType}`);
+        // Unsupported geometry type
+        throw new NotSupportedError(`Unsupported geometry type: ${geometryType}`);
     }
   }
 

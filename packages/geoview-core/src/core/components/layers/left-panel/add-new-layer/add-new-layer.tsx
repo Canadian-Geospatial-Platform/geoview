@@ -185,7 +185,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError(`${serviceName} ${t('layers.errorServer')}`, [], false);
+    api.getMapViewer(mapId).notifications.showError('layers.errorServer', [serviceName], false);
   };
 
   /**
@@ -453,7 +453,7 @@ export function AddNewLayer(): JSX.Element {
       // Log error
       logger.logError(error);
 
-      emitErrorServer('GeoCore UUID');
+      emitErrorServer('GeoCore (UUID)');
       return false;
     }
     return true;

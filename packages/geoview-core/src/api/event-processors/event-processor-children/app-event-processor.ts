@@ -141,8 +141,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
           resolve();
         })
         .catch((error) => {
-          // Log and reject
-          logger.logPromiseFailed('inner promise in app-event-processor.setDisplayLanguage', error);
+          // Reject
           reject(error instanceof Error ? error : new Error(String(error)));
         });
     });

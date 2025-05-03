@@ -225,7 +225,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
 
     // Error
-    throw new NoFeaturesPropertyError(this.getMapId());
+    throw new NoFeaturesPropertyError();
   }
 
   /**
