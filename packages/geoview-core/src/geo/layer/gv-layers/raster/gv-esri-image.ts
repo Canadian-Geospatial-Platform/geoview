@@ -86,7 +86,7 @@ export class GVEsriImage extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
     try {
       if (!layerConfig) return null;
-      const legendJson = await Fetch.fetchJson(`${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`);
+      const legendJson = await Fetch.fetchJsonAsObject(`${layerConfig.geoviewLayerConfig.metadataAccessPath}/legend?f=json`);
       let legendInfo: TypeJsonArray | undefined;
       if (legendJson.layers && legendJson.layers.length === 1) {
         legendInfo = legendJson.layers[0].legend as TypeJsonArray;

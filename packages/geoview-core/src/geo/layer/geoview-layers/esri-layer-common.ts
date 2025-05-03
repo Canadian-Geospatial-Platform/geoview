@@ -48,7 +48,7 @@ import { logger } from '@/core/utils/logger';
  */
 export async function commonFetchAndSetServiceMetadata(layer: EsriDynamic | EsriFeature): Promise<void> {
   // Query
-  const responseJson = await Fetch.fetchJson(`${layer.metadataAccessPath}?f=json`);
+  const responseJson = await Fetch.fetchJsonAsObject(`${layer.metadataAccessPath}?f=json`);
 
   // Set it
   // eslint-disable-next-line no-param-reassign
@@ -409,7 +409,7 @@ export async function commonProcessLayerMetadata<
       queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
 
     // Fetch the layer metadata
-    const resultData = await Fetch.fetchJson(`${queryUrl}?f=json`);
+    const resultData = await Fetch.fetchJsonAsObject(`${queryUrl}?f=json`);
 
     // Set the layer metadata
     layer.setLayerMetadata(layerConfig.layerPath, resultData);

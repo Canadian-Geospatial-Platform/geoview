@@ -1017,7 +1017,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&objectIds=${idString}${outfieldQuery}&returnExtentOnly=true`;
 
       try {
-        const responseJson = await Fetch.fetchJson(queryUrl);
+        const responseJson = await Fetch.fetchJsonAsObject(queryUrl);
         const { extent } = responseJson;
 
         const projectionExtent: OLProjection | undefined = Projection.getProjectionFromObj(extent.spatialReference);

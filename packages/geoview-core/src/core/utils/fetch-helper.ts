@@ -1,20 +1,28 @@
-import { xmlToJson } from '@/core/utils/utilities';
-import { ResponseEmptyError, ResponseError, RequestAbortedError, RequestTimeoutError } from '@/core/exceptions/core-exceptions';
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { delay, xmlToJson } from '@/core/utils/utilities';
+import {
+  ResponseEmptyError,
+  ResponseError,
+  RequestAbortedError,
+  RequestTimeoutError,
+  ResponseTypeError,
+} from '@/core/exceptions/core-exceptions';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { logger } from '@/core/utils/logger';
 
 export class Fetch {
   /**
    * Fetches a url for a json response.
-   * If the response is empty, throws an EmptyResponseError.
    * @param {string} url - The url to fetch.
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+   * @param {number?} delayMs - The option delay before performing the actual fetch command (mostly for testing purposes).
    * @returns {Promise<TypeJsonObject>} The fetched json response.
    * @throws {ResponseError} If the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} If the JSON response is empty.
-   * @throws {RequestTimeoutError | RequestAbortedError} If the request was cancelled or timed out.
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
    * @throws {Error} For any other unexpected failures.
    */
-  static async fetchJson(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject> {
+  static async fetchJson(url: string, init?: RequestInit, timeoutMs?: number, delayMs?: number): Promise<TypeJsonObject | TypeJsonArray> {
     // The original signal if any
     const originalSignal = init?.signal || undefined;
 
@@ -31,6 +39,9 @@ export class Fetch {
     const combinedSignal = Fetch.#mergeAbortSignals([originalSignal, timeoutSignal]);
 
     try {
+      // If there's a delay before doing the actual fetch
+      if (delayMs) await delay(delayMs);
+
       // Query and read
       const response = await fetch(url, {
         ...init,
@@ -49,6 +60,12 @@ export class Fetch {
         return responseJson as TypeJsonObject;
       }
 
+      // Check if the response is not an empty array
+      if (Array.isArray(responseJson) && responseJson.length > 0) {
+        // Return the value
+        return responseJson as TypeJsonArray;
+      }
+
       // Throw empty response error
       throw new ResponseEmptyError();
     } catch (error) {
@@ -64,22 +81,81 @@ export class Fetch {
   }
 
   /**
-   * Fetches a url for a json response.
-   * If the response is empty, throws an EmptyResponseError.
+   * Fetches a url for a json response in the form of an object (not an array).
    * @param {string} url - The url to fetch.
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<T>} The fetched json response.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} If the JSON response is empty.
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+   * @throws {ResponseTypeError} If the response from the service is an array instead of an object.
+   * @throws {Error} For any other unexpected failures.
    */
-  static async fetchJsonAs<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
+  static async fetchJsonAsObject(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject> {
     // Redirect
-    return (await Fetch.fetchJson(url, init, timeoutMs)) as T;
+    const result = await this.fetchJson(url, init, timeoutMs);
+
+    // Validate the result of the fetch is indeed a Json object and not a Json array
+    if (Array.isArray(result)) {
+      throw new ResponseTypeError('object', result);
+    }
+
+    // Return the validated TypeJsonObject
+    return result as TypeJsonObject;
+  }
+
+  /**
+   * Fetches a url for a json response in the form of an array (not an object).
+   * @param {string} url - The url to fetch.
+   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+   * @returns {Promise<T>} The fetched json response.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} If the JSON response is empty.
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+   * @throws {ResponseTypeError} If the response from the service is an object instead of an array.
+   * @throws {Error} For any other unexpected failures.
+   */
+  static async fetchJsonAsArray(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonArray> {
+    // Redirect
+    const result = await this.fetchJson(url, init, timeoutMs);
+
+    // Validate the result of the fetch is indeed a Json array and not a Json object
+    if (!Array.isArray(result)) {
+      throw new ResponseTypeError('array', result);
+    }
+
+    // Return the validated TypeJsonArray
+    return result as TypeJsonArray;
+  }
+
+  /**
+   * Fetches a url for a json response and casts the json as 'T'. It doesn't validate the Json structure. It's up to the caller to do so.
+   * @param {string} url - The url to fetch.
+   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+   * @returns {Promise<T>} The fetched json response.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} If the JSON response is empty.
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+   * @throws {Error} For any other unexpected failures.
+   */
+  static fetchJsonAs<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
+    // Redirect
+    return Fetch.fetchJson(url, init, timeoutMs) as Promise<T>;
   }
 
   /**
    * Fetches a url for a text response.
-   * If the response is empty, throws an EmptyResponseError.
    * @param {string} url - The url to fetch.
+   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<TypeJsonObject>} The fetched text response.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} If the JSON response is empty.
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+   * @throws {Error} For any other unexpected failures.
    */
   static async fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string> {
     // The original signal if any
@@ -132,9 +208,13 @@ export class Fetch {
 
   /**
    * Fetches a url for a blob response.
-   * If the response is empty, throws an EmptyResponseError.
    * @param {string} url - The url to fetch.
+   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<Blob>} The fetched blob response.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+   * @throws {Error} For any other unexpected failures.
    */
   static async fetchBlob(url: string, init?: RequestInit, timeoutMs?: number): Promise<Blob> {
     // The original signal if any
@@ -178,9 +258,14 @@ export class Fetch {
 
   /**
    * Fetches a url for a xml response then converts the response to a json response.
-   * If the response is empty, throws an EmptyResponseError.
    * @param {string} url - The url to fetch.
+   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+   * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<TypeJsonObject>} The fetched json response.
+   * @throws {ResponseError} If the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} If the JSON response is empty.
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+   * @throws {Error} For any other unexpected failures.
    */
   static async fetchXMLToJson(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject> {
     // Fetch the text
@@ -207,11 +292,13 @@ export class Fetch {
    * Performs a fetch request with timeout capability
    * @template T - The expected type of the JSON response
    * @param {string} url - The URL to fetch from
-   * @param {RequestInit} [options={}] - Fetch options to be passed to the fetch call
-   * @param {number} [timeoutMs=7000] - Timeout in milliseconds before the request is aborted
+   * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+   * @param {number?} timeoutMs - Timeout in milliseconds before the request is aborted, defaults to 7 seconds
    * @returns {Promise<T>} A promise that resolves with the parsed JSON response
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-   * @throws {Error} When the response is not OK (status outside 200-299)
+   * @throws {ResponseError} If the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} If the JSON response is empty.
+   * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+   * @throws {Error} For any other unexpected failures.
    *
    * @example
    * try {
@@ -220,9 +307,9 @@ export class Fetch {
    *     body: JSON.stringify({ id: 123 })
    *   }, 3000);
    */
-  static fetchWithTimeout<T>(url: string, options: RequestInit = {}, timeoutMs: number = 7000): Promise<T> {
+  static fetchWithTimeout<T>(url: string, init?: RequestInit, timeoutMs: number = 7000): Promise<T> {
     // Redirect
-    return Fetch.fetchJsonAs<T>(url, options, timeoutMs);
+    return Fetch.fetchJsonAs<T>(url, init, timeoutMs);
   }
 
   /**
@@ -240,7 +327,7 @@ export class Fetch {
       if (signal) {
         // If the signal is already aborted
         if (signal.aborted) {
-          // Aboert right away
+          // Abort right away
           controller.abort();
           break;
         } else {
@@ -300,5 +387,86 @@ export class Fetch {
     if (originalSignal?.aborted) {
       throw new RequestAbortedError(originalSignal);
     }
+  }
+
+  /**
+   * Tests different fetch situations to explain how to use fetching functions with combination of AbortControllers and/or timeouts.
+   */
+  static testJson(url: string): void {
+    //
+    // Option A) Regular fetchJson call
+    //
+
+    // Regular fetch
+    Fetch.fetchJson(url)
+      .then((result) => {
+        logger.logDebug('FETCH TEST OPTION A GOOD', result);
+      })
+      .catch((error) => {
+        logger.logError("FETCH TEST OPTION A SHOULDN'T LOG", error);
+      });
+
+    //
+    // Option B) fetchJson call which is aborted
+    //
+
+    // Create a controller that will abort after 1 second
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 1000);
+
+    // Fetch a Json and delay it by 2 seconds so the abort has time to happen in (simulate)
+    Fetch.fetchJson(url, { signal: controller.signal }, undefined, 2000)
+      .then((result) => {
+        logger.logDebug("FETCH TEST OPTION B SHOULDN'T LOG", result);
+      })
+      .catch((error) => {
+        logger.logError('FETCH TEST OPTION B GOOD', error);
+      });
+
+    //
+    // Option C) fetchJson call which timeouts
+    //
+
+    // Fetch a Json and timeout immediately, not giving any chance with 1 millisecond
+    Fetch.fetchJson(url, undefined, 1)
+      .then((result) => {
+        logger.logDebug("FETCH TEST OPTION C SHOULDN'T LOG", result);
+      })
+      .catch((error) => {
+        logger.logError('FETCH TEST OPTION C GOOD', error);
+      });
+
+    //
+    // Option D) fetchJson call with both an exising abort signal (that's not aborting) and a timeout (which timeouts)
+    //
+
+    // Create a controller that won't abort
+    const controller2 = new AbortController();
+
+    // Fetch a Json and timeout immediately, not giving any chance with 1 millisecond
+    Fetch.fetchJson(url, { signal: controller2.signal }, 1)
+      .then((result) => {
+        logger.logDebug("FETCH TEST OPTION D SHOULDN'T LOG", result);
+      })
+      .catch((error) => {
+        logger.logError('FETCH TEST OPTION D GOOD', error);
+      });
+
+    //
+    // Option E) fetchJson call with both an exising abort signal (which aborts) and a timeout (which doesn't timeout)
+    //
+
+    // Create a controller that will abort after 1 second
+    const controller3 = new AbortController();
+    setTimeout(() => controller3.abort(), 1000);
+
+    // Fetch a Json and delay it by 2 seconds so the abort has time to kick in (simulate) and a long timeout (20 seconds is enough)
+    Fetch.fetchJson(url, { signal: controller3.signal }, 20000, 2000)
+      .then((result) => {
+        logger.logDebug("FETCH TEST OPTION E SHOULDN'T LOG", result);
+      })
+      .catch((error) => {
+        logger.logError('FETCH TEST OPTION E GOOD', error);
+      });
   }
 }

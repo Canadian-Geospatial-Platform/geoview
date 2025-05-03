@@ -110,6 +110,67 @@ export class PromiseRejectErrorWrapper<T> extends Error {
 }
 
 /**
+ * Custom error class for abort-related errors, typically used in fetch or async operations
+ * where an operation is aborted due to an `AbortSignal`.
+ * @extends {Error}
+ */
+export class RequestAbortedError extends Error {
+  /** The AbortSignal that triggered the error (optional) */
+  abortSignal: AbortSignal;
+
+  /**
+   * Constructor to initialize the AbortError with a message and an optional AbortSignal.
+   * @param {AbortSignal} abortSignal - The optional AbortSignal that caused the error
+   */
+  constructor(abortSignal: AbortSignal) {
+    super('Aborted');
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'RequestAbortedError';
+
+    // Store the AbortSignal if provided; it can be useful for debugging or handling specific abort scenarios
+    this.abortSignal = abortSignal;
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, RequestAbortedError);
+    }
+
+    // Ensure the prototype chain is correct (required in some transpilation targets)
+    Object.setPrototypeOf(this, RequestAbortedError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a request exceeds the configured timeout duration.
+ * This error is typically used to indicate that an asynchronous operation (such as a network request)
+ * did not complete within the allowed time limit and was aborted or failed due to timeout.
+ * @extends {Error}
+ */
+export class RequestTimeoutError extends Error {
+  /**
+   * Creates an instance of RequestTimeoutError.
+   * @param {number} timeoutMs - The timeout duration in milliseconds that was exceeded.
+   */
+  constructor(timeoutMs: number) {
+    super(`Request timed out after ${timeoutMs}ms`);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'RequestTimeoutError';
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, RequestTimeoutError);
+    }
+
+    // Ensure the prototype chain is correct (required in some transpilation targets)
+    Object.setPrototypeOf(this, RequestTimeoutError.prototype);
+  }
+}
+
+/**
  * Custom error class for handling fetch response errors when the fetch request fails
  * due to a non-success HTTP status.
  * @extends {Error}
@@ -168,62 +229,37 @@ export class ResponseEmptyError extends Error {
 }
 
 /**
- * Custom error class for abort-related errors, typically used in fetch or async operations
- * where an operation is aborted due to an `AbortSignal`.
- * @extends {Error}
+ * Error thrown when a response does not match the expected type.
  */
-export class RequestAbortedError extends Error {
-  /** The AbortSignal that triggered the error (optional) */
-  abortSignal: AbortSignal;
+export class ResponseTypeError extends Error {
+  /** The expected type description */
+  expectedType: string;
 
-  /**
-   * Constructor to initialize the AbortError with a message and an optional AbortSignal.
-   * @param {AbortSignal} abortSignal - The optional AbortSignal that caused the error
-   */
-  constructor(abortSignal: AbortSignal) {
-    super('Aborted');
+  /** The actual value that was received and caused the mismatch. */
+  receivedContent: unknown;
+
+  constructor(
+    expectedType: string,
+    receivedContent: unknown,
+    message: string = `Expected response type invalid, was expecting '${expectedType}'.`
+  ) {
+    // Pass the provided message (or default message) to the parent Error class
+    super(message);
 
     // Set a custom name for the error type to differentiate it from other error types
-    this.name = 'RequestAbortedError';
+    this.name = 'ResponseTypeError';
 
-    // Store the AbortSignal if provided; it can be useful for debugging or handling specific abort scenarios
-    this.abortSignal = abortSignal;
+    // Keep attributes
+    this.expectedType = expectedType;
+    this.receivedContent = receivedContent;
 
-    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Capture the stack trace (V8-specific engines like Chrome and Node.js)
     // Omits the constructor call from the trace for cleaner debugging
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, RequestAbortedError);
+      Error.captureStackTrace(this, ResponseTypeError);
     }
 
-    // Ensure the prototype chain is correct (required in some transpilation targets)
-    Object.setPrototypeOf(this, RequestAbortedError.prototype);
-  }
-}
-
-/**
- * Error thrown when a request exceeds the configured timeout duration.
- * This error is typically used to indicate that an asynchronous operation (such as a network request)
- * did not complete within the allowed time limit and was aborted or failed due to timeout.
- * @extends {Error}
- */
-export class RequestTimeoutError extends Error {
-  /**
-   * Creates an instance of RequestTimeoutError.
-   * @param {number} timeoutMs - The timeout duration in milliseconds that was exceeded.
-   */
-  constructor(timeoutMs: number) {
-    super(`Request timed out after ${timeoutMs}ms`);
-
-    // Set a custom name for the error type to differentiate it from other error types
-    this.name = 'RequestTimeoutError';
-
-    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
-    // Omits the constructor call from the trace for cleaner debugging
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, RequestTimeoutError);
-    }
-
-    // Ensure the prototype chain is correct (required in some transpilation targets)
-    Object.setPrototypeOf(this, RequestTimeoutError.prototype);
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, ResponseTypeError.prototype);
   }
 }

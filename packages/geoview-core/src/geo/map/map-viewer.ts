@@ -336,6 +336,8 @@ export class MapViewer {
 
     // Start checking for when the map will be ready
     this.#checkMapReady();
+
+    Fetch.testJson('https://api.github.com/users/alex-nrcan');
   }
 
   /**
@@ -1224,7 +1226,7 @@ export class MapViewer {
 
       // for the moment, only polygon are supported but if need be, other geometries can easely be use as well
       geoms.forEach((key: string) => {
-        Fetch.fetchJson(`${servEndpoint}${key}`)
+        Fetch.fetchJsonAsObject(`${servEndpoint}${key}`)
           .then((data) => {
             if (data.geometry !== undefined) {
               // add the geometry

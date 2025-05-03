@@ -15,7 +15,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
     const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
 
     // Query and read
-    return Fetch.fetchJson(parsedUrl);
+    return Fetch.fetchJsonAsObject(parsedUrl);
   }
 
   /**

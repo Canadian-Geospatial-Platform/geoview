@@ -59,7 +59,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     const queryUrl = url.endsWith('/') ? `${url}collections?f=json` : `${url}/collections?f=json`;
 
     // Set it
-    return Fetch.fetchJson(queryUrl);
+    return Fetch.fetchJsonAsObject(queryUrl);
   }
 
   /**
@@ -125,7 +125,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       const queryUrl = metadataUrl.endsWith('/')
         ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
         : `${metadataUrl}/collections/${layerConfig.layerId}/queryables?f=json`;
-      const queryResultData = await Fetch.fetchJson(queryUrl);
+      const queryResultData = await Fetch.fetchJsonAsObject(queryUrl);
       if (queryResultData.properties) {
         this.setLayerMetadata(layerConfig.layerPath, queryResultData.properties);
         OgcFeature.#processFeatureInfoConfig(queryResultData.properties, layerConfig);

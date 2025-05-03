@@ -119,7 +119,7 @@ export async function esriQueryRecordsByUrl(
   // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this
   // TO.DO.CONT: one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
   // Query the data
-  const respJson = await Fetch.fetchJson(url);
+  const respJson = await Fetch.fetchJsonAsObject(url);
 
   // Return the array of TypeFeatureInfoEntryPartial or the raw response features array
   return parseFeatureInfoEntries
@@ -168,7 +168,7 @@ export function esriQueryRecordsByUrlObjectIds(
  */
 export async function esriQueryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
   // Query the data
-  const respJson = await Fetch.fetchJson(url);
+  const respJson = await Fetch.fetchJsonAsObject(url);
 
   // If any related record groups found
   if ((respJson.relatedRecordGroups.length as number) > 0)

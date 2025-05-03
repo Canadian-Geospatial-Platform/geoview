@@ -259,7 +259,7 @@ export class BasemapApi {
     if (rest && (basemapLayer.jsonUrl as string)) {
       // Get info from server
       // TODO: Check/Refactor - Document the necessity to explicitely reject after Basemap.REQUEST_DELAY_MAX
-      const result = await Fetch.fetchJson(basemapLayer.jsonUrl as string, undefined, BasemapApi.REQUEST_DELAY_MAX);
+      const result = await Fetch.fetchJsonAsObject(basemapLayer.jsonUrl as string, undefined, BasemapApi.REQUEST_DELAY_MAX);
 
       // Get minimum scale
       const minScale = result.minScale as number;

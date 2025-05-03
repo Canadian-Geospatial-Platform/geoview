@@ -51,7 +51,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
       const queryUrl = serviceUrl.endsWith('/') ? `${serviceUrl}${this.layerId}` : `${serviceUrl}/${this.layerId}`;
 
       try {
-        const data = await Fetch.fetchJson(`${queryUrl}?f=json`);
+        const data = await Fetch.fetchJsonAsObject(`${queryUrl}?f=json`);
         if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
         else {
           // The metadata used are the layer metadata.

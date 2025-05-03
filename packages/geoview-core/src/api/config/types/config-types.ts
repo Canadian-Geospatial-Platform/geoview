@@ -13,6 +13,28 @@ export function Cast<TargetType = never>(p: unknown): TargetType {
  * General Json type
  */
 export type { AnySchemaObject } from 'ajv';
+
+// TODO: REFACTOR (BIG): We should get rid of these types: TypeJsonValue, TypeJsonObject and TypeJsonArray which
+// TO.DOCONT: have 3 problems and is a source of many issues througout our code base:
+
+// TO.DOCONT: 1) Self-referential:
+// TO.DOCONT: TypeJsonValue and TypeJsonObject are defined as objects which values are also TypeJsonObject — it’s infinitely recursive without
+// TO.DOCONT: a base case, and makes no sense for real JSON data (e.g., strings, numbers, arrays, etc.).
+// TO.DOCONT: 2) Unsafe intersection:
+// TO.DOCONT: TypeJsonValue & TypeJsonObject[] and TypeJsonValue & {...} create intersections that are not meaningful.
+// TO.DOCONT: They just mask the 'any' keword or confuse TypeScript into thinking a value is more constrained than it really is — when it's not.
+// TO.DOCONT: 3) An 'any' in disguise:
+// TO.DOCONT: This pattern was likely invented to avoid ESLint warnings like no-explicit-any without providing any meaningful type safety.
+// TO.DOCONT: We should use 'unknown' and 'any' honestly and explicitely in the codebase.
+
+// TO.DOCONT: Alternatively, if we do want to maintain the concept, we could replace those types with the following types.
+// TO.DOCONT: export type JsonPrimitive = string | number | boolean | null;
+// TO.DOCONT: export type JsonValue = JsonPrimitive | JsonArray | JsonObject;
+// TO.DOCONT: export interface JsonObject {
+// TO.DOCONT:   [key: string]: JsonValue;
+// TO.DOCONT: }
+// TO.DOCONT: export type JsonArray = JsonValue[];
+
 /**
  * Type used for a value within a json object
  */

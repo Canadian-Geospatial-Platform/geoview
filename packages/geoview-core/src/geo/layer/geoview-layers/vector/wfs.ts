@@ -160,7 +160,7 @@ export class WFS extends AbstractGeoViewVector {
     }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerConfig.layerId}`;
 
     if (describeFeatureUrl && outputFormat === 'application/json') {
-      const layerMetadata = await Fetch.fetchJson(describeFeatureUrl);
+      const layerMetadata = await Fetch.fetchJsonAsObject(describeFeatureUrl);
       if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
         this.setLayerMetadata(layerConfig.layerPath, layerMetadata.featureTypes[0].properties);
         WFS.#processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);

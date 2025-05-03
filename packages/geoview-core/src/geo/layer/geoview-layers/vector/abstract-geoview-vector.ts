@@ -262,7 +262,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }, 15000); // Log every 15 seconds
 
     try {
-      const promises = urlArray.map((featureUrl) => Fetch.fetchJson(featureUrl));
+      const promises = urlArray.map((featureUrl) => Fetch.fetchJsonAsObject(featureUrl));
 
       // Wait for all promises to complete
       return Promise.all(promises);

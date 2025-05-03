@@ -543,7 +543,7 @@ export class ConfigApi {
     let jsonData: TypeJsonObject;
     switch (layerType) {
       case 'ogcFeature':
-        jsonData = await Fetch.fetchJson(`${serviceAccessString}?f=json`);
+        jsonData = await Fetch.fetchJsonAsObject(`${serviceAccessString}?f=json`);
         if (jsonData.collections)
           return (jsonData.collections as TypeJsonArray).map((layer) => {
             return Cast<EntryConfigBaseClass>({

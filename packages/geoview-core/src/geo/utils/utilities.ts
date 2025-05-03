@@ -43,7 +43,7 @@ export const layerTypes = CONST_LAYER_TYPES;
  */
 export function getESRIServiceMetadata(url: string): Promise<TypeJsonObject> {
   // fetch the map server returning a json object
-  return Fetch.fetchJson(`${url}?f=json`);
+  return Fetch.fetchJsonAsObject(`${url}?f=json`);
 }
 
 /**

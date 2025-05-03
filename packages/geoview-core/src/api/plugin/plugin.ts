@@ -97,7 +97,7 @@ export abstract class Plugin {
 
       if (plugin) {
         // a config object used to store package config
-        let pluginConfigObj: unknown = {};
+        let pluginConfigObj: TypeJsonObject = {};
 
         // if a schema is defined then look for a config for this plugin
         if (plugin.schema && plugin.defaultConfig) {
@@ -145,7 +145,7 @@ export abstract class Plugin {
 
             try {
               // Try to find the custom config from the config path
-              const result = await Fetch.fetchJson(configPath);
+              const result = await Fetch.fetchJsonAsObject(configPath);
 
               if (result) {
                 logger.logTraceCore('Plugin - addPlugin file config', result);

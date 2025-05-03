@@ -60,7 +60,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     const queryUrl = url.toLowerCase().endsWith('json') || url.toLowerCase().endsWith('meta') ? url : `${url}?f=json`;
 
     // Set it
-    return Fetch.fetchJson(queryUrl);
+    return Fetch.fetchJsonAsObject(queryUrl);
   }
 
   /**

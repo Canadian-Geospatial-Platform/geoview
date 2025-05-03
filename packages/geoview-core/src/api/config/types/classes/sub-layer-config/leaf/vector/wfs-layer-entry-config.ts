@@ -215,7 +215,7 @@ export class WfsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // Execute the request using a JSON output format.
     if (supportedOutputFormat === 'application/json') {
-      const layerMetadata = await Fetch.fetchJson(describeFeatureUrl);
+      const layerMetadata = await Fetch.fetchJsonAsObject(describeFeatureUrl);
       if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties))
         return layerMetadata.featureTypes[0].properties;
       return [];

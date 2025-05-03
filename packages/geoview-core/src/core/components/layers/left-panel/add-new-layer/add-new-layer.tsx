@@ -673,7 +673,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const geoJSONValidation = async (): Promise<boolean> => {
     try {
-      const json = await Fetch.fetchJson(layerURL);
+      const json = await Fetch.fetchJsonAsObject(layerURL);
       if (!['FeatureCollection', 'Feature'].includes(json.type as string)) {
         // We assume that a metadata file is present
         const geojsonGeoviewLayerConfig = {

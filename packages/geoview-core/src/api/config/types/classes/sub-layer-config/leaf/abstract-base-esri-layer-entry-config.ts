@@ -40,7 +40,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
 
     try {
       // fetch layer metadata.
-      const data = await Fetch.fetchJson(`${queryUrl}?f=json`);
+      const data = await Fetch.fetchJsonAsObject(`${queryUrl}?f=json`);
 
       // Save the raw metadata in the private property
       this.setLayerMetadata(data);
