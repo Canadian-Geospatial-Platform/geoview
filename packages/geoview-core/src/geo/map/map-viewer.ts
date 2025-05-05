@@ -939,25 +939,31 @@ export class MapViewer {
     if (!status) {
       // Store the extent before any size changes occur
       const currentExtent = this.getView().calculateExtent();
-      const currentZoom = this.getView().getZoom();
+      const currentZoom = this.getMapState().currentZoom!;
+      let sizeChangeHandled = false; // Add flag to track if we've handled the size change
 
-      // Add one-time size change listener only when we are zoomed out to keep zoom center Canada)
-      this.map.once('change:size', () => {
-        // Apply padding when zoom out
-        const padding = currentZoom! < 4.5 ? [100, 100, 100, 100] : [0, 0, 0, 0];
-        this.zoomToExtent(currentExtent, { padding })
-          .then(() => {
-            // Handle success if needed
-          })
-          .catch((error) => {
-            // Handle any errors that occur during zoom
-            logger.logError('Error during zoom:', error);
-          });
+      // Store the extent and other relevant information
+      const handleSizeChange = (): void => {
+        if (sizeChangeHandled) return; // Skip if we've already handled it
+        sizeChangeHandled = true; // Set flag to prevent multiple executions
 
-        // Force render
-        this.map.renderSync();
-      });
+        if (currentZoom < 5.5) this.setZoomLevel(currentZoom - 0.5);
+        else
+          this.zoomToExtent(currentExtent, { padding: [0, 0, 0, 0] })
+            .then(() => {
+              // Force render
+              this.map.renderSync();
 
+              // Remove the listener after handling
+              this.map.un('change:size', handleSizeChange);
+            })
+            .catch((error) => {
+              logger.logError('Error during zoom after fullscreen exit:', error);
+            });
+      };
+
+      // Add the listener before exiting fullscreen
+      this.map.on('change:size', handleSizeChange);
       if (document.exitFullscreen) {
         document.exitFullscreen().catch((error) => {
           // Log

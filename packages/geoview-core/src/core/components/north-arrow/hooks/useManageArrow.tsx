@@ -43,6 +43,9 @@ export const useManageArrow = (): ArrowReturn => {
   const isLCCProjection = useMemo(() => `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC, [mapProjection]);
   const isWebMercator = useMemo(() => `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.WM, [mapProjection]);
 
+  const prevRotationRef = useRef(0);
+  const equalCountRef = useRef(0);
+
   /**
    * Calculate the north arrow offset and angle
    * Calculation taken from RAMP: https://github.com/fgpv-vpgf/fgpv-vpgf/blob/master/packages/ramp-core/src/app/geo/map-tools.service.js
@@ -89,11 +92,33 @@ export const useManageArrow = (): ArrowReturn => {
       if (fixNorth && (Math.round(angle.current) !== Math.round(arrowAngle) || mapZoom > 7)) {
         angle.current = arrowAngle;
 
-        // Calculate the rotation delta and apply only when higher then 0.1 to solve bugs when in middle of
-        // Canada and the map is trying to set rotation forever
-        const diff = Math.abs(mapRotation - ((180 - arrowAngle) * (2 * Math.PI)) / 360);
-        if (diff > 0.1) setRotation(((180 - arrowAngle) * (2 * Math.PI)) / 360);
-      } else {
+        // Calculate the rotation delta
+        const rotationValue = ((180 - arrowAngle) * (2 * Math.PI)) / 360;
+        const diff = Math.abs(mapRotation - rotationValue);
+
+        // Calculate longitude factor
+        const CENTRAL_MERIDIAN = -97; // CV_MAP_CENTER[3978][0];
+        const centerLongitude = Projection.transformCoordinates(mapCenterCoord, 'EPSG:3978', 'EPSG:4326')![0];
+        const deviationFromCenter = (centerLongitude as number) - CENTRAL_MERIDIAN;
+
+        if (Math.abs(deviationFromCenter) <= 3) {
+          setRotation(0);
+          equalCountRef.current = 0;
+        } else if (diff > 0.01) {
+          // Only set rotation if we haven't already set it for this value
+          if (rotationValue !== prevRotationRef.current) {
+            setRotation(rotationValue);
+            prevRotationRef.current = rotationValue;
+            equalCountRef.current = 1; // Set to 1 to indicate we've used this value
+          }
+          // If values are the same but we haven't set rotation yet
+          else if (equalCountRef.current === 0) {
+            setRotation(rotationValue);
+            equalCountRef.current = 1;
+          }
+          // Otherwise, do nothing (skip setting rotation)
+        }
+
         const mapRotationValue = mapRotation * (180 / Math.PI);
         newRotation = { angle: 90 - angleDegrees + mapRotationValue };
       }
