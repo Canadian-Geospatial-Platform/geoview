@@ -1,0 +1,69 @@
+#root {
+    --white: #ffffff;
+}
+
+.collectionPage {
+    border: 1px solid black;
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    /* background-color: var(--white); */
+    /* background: var(--white); */
+    color: black;
+}
+
+.collectionPage-hidden {
+    display: none;
+}
+
+.collectionPageItemsButton {
+    border: 1px solid black;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    width: -webkit-fill-available;
+    margin-bottom: 0;
+}
+
+.collectionPageInfo {
+    padding: 0.5rem;
+}
+
+.collectionPageInfoTopDiv {
+    display: flex; 
+    justify-content: space-between;
+    max-height: 2rem;
+}
+
+.collectionPageInfoIdLabel {
+    align-self: center;
+}
+
+.collectionPageDescription {
+    height: 5rem;
+    overflow-y: scroll;
+}
+
+.collectionPageInfoBottomDiv {
+    display: grid;
+    grid-template-columns: 75% 5% 20%;
+    height: 2rem;
+}
+
+.collectionPageInfoBottomKeywordsLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-wrap-mode: nowrap;
+}
+
+.collectionPageInfoBottomLicenseLabel {
+    text-overflow: ellipsis;
+    text-wrap-mode: nowrap;
+}
+
+.collectionPageScroll {
+    overflow-y: auto;
+    max-height: 19rem;
+    border: 1px solid black;
+    margin: 0.5rem;
+}

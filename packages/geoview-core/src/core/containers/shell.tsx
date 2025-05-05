@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, Fragment, useMemo } from 'react';
+import { useEffect, useState, useCallback, Fragment, useMemo, createElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -36,6 +36,8 @@ import { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/g
 import { FocusTrapDialog } from './focus-trap';
 import { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
+import { StacBrowserButton } from '../components/cesium/stac-browser-button';
+import { AppsIcon } from '@/ui/icons';
 
 type ShellProps = {
   mapViewer: MapViewer;
@@ -217,7 +219,27 @@ export function Shell(props: ShellProps): JSX.Element {
   useEffect(() => {
     if (show3dMap) {
       document.getElementById(`mapTargetElement-${mapId}`)!.style.display = 'hidden';
+      const button = {
+        id: 'stacBrowserButtonId',
+        tooltip: 'Open STAC Browser',
+        children: createElement(AppsIcon),
+      };
+
+      const panel = {
+        panelId: 'StacCatalogPanelId',
+        title: 'STAC Browser',
+        content: <StacBrowserButton key="stacBrowser" />,
+        convertHtmlContent: true,
+        width: geoviewElement?.clientWidth != null ? geoviewElement.clientWidth - 64 : 0,
+        icon: createElement(AppsIcon),
+      };
+
+      // call an api function to add a panel with a button in the default group
+      mapViewer.appBarApi.createAppbarPanel(button, panel, '3d_buttons');
     } else {
+      if (mapViewer.appBarApi.getAppBarButtonPanelById('StacCatalogPanelId')) {
+        mapViewer.appBarApi.removeAppbarPanel('StacCatalogPanelId', '3d_buttons');
+      }
       document.getElementById(`mapTargetElement-${mapId}`)!.style.display = 'flex';
     }
   });

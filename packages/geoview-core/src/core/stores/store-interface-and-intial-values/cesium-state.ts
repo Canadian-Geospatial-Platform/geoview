@@ -1,12 +1,14 @@
 import { MutableRefObject } from 'react';
-import { ConstantProperty, ImageryLayer, Viewer } from 'cesium';
+import { ImageryLayer, Viewer } from 'cesium';
 import { useStore } from 'zustand';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 
 function getImageryLayerByName(viewer: Viewer, name: string): ImageryLayer | undefined {
+  // eslint-disable-next-line no-underscore-dangle
   const layers = viewer.imageryLayers._layers;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return layers.find((layer: any) => layer.name === name);
 }
 
