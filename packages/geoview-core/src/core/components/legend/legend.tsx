@@ -140,7 +140,6 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
     logger.logTraceUseEffect('LEGEND - layer setup', layersList);
 
     // Set the legend layers based on the layers list
-    // TODO: Check - Check necessity of having 2 arrays (layersList vs legendLayers)
     setLegendLayers(layersList);
 
     // Update the layer list based on window size
