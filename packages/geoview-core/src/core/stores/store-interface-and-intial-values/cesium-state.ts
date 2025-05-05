@@ -20,6 +20,7 @@ export interface ICesiumState {
     getCesiumViewerRef: () => MutableRefObject<Viewer | null>;
     toggleVisibility: (layerPath: string) => void;
     getIsInitialized: () => boolean;
+    zoomToLayer: (layerPath: string) => void;
   };
   setterActions: {
     setCesiumViewer: (viewer: Viewer | null) => void;
@@ -57,6 +58,20 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
           const is = getImageryLayerByName(viewer, layerPath);
           if (is) {
             is.show = !is.show;
+          }
+        }
+      },
+      zoomToLayer(layerPath: string): void {
+        const viewer = get().cesiumState.cViewerRef.current;
+        if (viewer) {
+          const [ds] = viewer.dataSources.getByName(layerPath);
+          if (ds) {
+            viewer.flyTo(ds, { duration: 0 }).catch(() => {});
+            return;
+          }
+          const is = getImageryLayerByName(viewer, layerPath);
+          if (is) {
+            viewer.flyTo(is, { duration: 0 }).catch(() => {});
           }
         }
       },

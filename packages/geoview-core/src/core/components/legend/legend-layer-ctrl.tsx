@@ -51,7 +51,7 @@ const useControlActions = (layerPath: string): ControlActions => {
   const is3dMap = useAppShow3dMap();
   const { setOrToggleLayerVisibility } = useMapStoreActions();
   const { setHighlightLayer, zoomToLayerExtent, zoomToLayerVisibleScale } = useLayerStoreActions();
-  const { toggleVisibility } = useCesiumStoreActions();
+  const { toggleVisibility, zoomToLayer } = useCesiumStoreActions();
   return useMemo(
     () => ({
       handleZoomToLayerVisibleScale: (event: React.MouseEvent): void => {
@@ -72,14 +72,13 @@ const useControlActions = (layerPath: string): ControlActions => {
         event.stopPropagation();
         if (is3dMap) {
           console.log('HighlightLayerIn3D!');
-        } else {
-          setHighlightLayer(layerPath);
         }
+        setHighlightLayer(layerPath);
       },
       handleZoomTo: (event: React.MouseEvent): void => {
         event.stopPropagation();
         if (is3dMap) {
-          console.log('ZoomToIn3D!');
+          zoomToLayer(layerPath);
         } else {
           zoomToLayerExtent(layerPath).catch((error) => {
             logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
