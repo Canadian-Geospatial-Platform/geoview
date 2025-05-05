@@ -22,7 +22,7 @@ import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
-import { LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
+import { LayerDataAccessPathMandatoryError, LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
 
 // Some constants
@@ -43,6 +43,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: VectorLayerEntryConfig): Promise<BaseLayer> {
+    // Validate the dataAccessPath exists
+    if (!layerConfig.source?.dataAccessPath) {
+      // Throw error missing dataAccessPath
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+    }
+
     // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
     const vectorSource = this.createVectorSource(layerConfig);
     const vectorLayer: VectorLayer<VectorSource<Feature<Geometry>>> = this.createVectorLayer(

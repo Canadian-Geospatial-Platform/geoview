@@ -1,7 +1,6 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageEsriInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 
 /**
  * Type used to define a GeoView image layer to display on the map.
@@ -29,12 +28,6 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: EsriImageLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
-
-    // Validate the dataAccessPath exists when metadataAccessPath is empty
-    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
-      // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(this.geoviewLayerConfig.geoviewLayerId);
-    }
 
     if (!this.source) this.source = {};
 

@@ -22,7 +22,7 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { CancelledError, NotImplementedError } from '@/core/exceptions/core-exceptions';
-import { LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
+import { LayerDataAccessPathMandatoryError, LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigLayerIdNotFoundError,
   LayerEntryConfigWMSSubLayerNotFoundError,
@@ -457,6 +457,12 @@ export class WMS extends AbstractGeoViewRaster {
 
     // If layer capabilities found
     if (layerCapabilities) {
+      // Validate the dataAccessPath exists
+      if (!layerConfig.source?.dataAccessPath) {
+        // Throw error missing dataAccessPath
+        throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+      }
+
       const dataAccessPath = layerConfig.source.dataAccessPath!;
 
       let styleToUse = '';

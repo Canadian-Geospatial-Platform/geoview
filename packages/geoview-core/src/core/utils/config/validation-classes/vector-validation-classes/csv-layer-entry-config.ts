@@ -2,7 +2,6 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
 import { CONST_LAYER_ENTRY_TYPES } from '@/api/config/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 
 export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceCSVInitialConfig;
@@ -17,12 +16,6 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
   constructor(layerConfig: CsvLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
-
-    // Validate the dataAccessPath exists when metadataAccessPath is empty
-    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
-      // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(this.geoviewLayerConfig.geoviewLayerId);
-    }
 
     // Default value for this.entryType is vector
     if (this.entryType === undefined) this.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
