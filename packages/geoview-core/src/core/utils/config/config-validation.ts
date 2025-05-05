@@ -217,9 +217,11 @@ export class ConfigValidation {
       // Track only valid entries
       const validConfigs: typeof listOfMapConfigLayerEntry = [];
 
-      listOfMapConfigLayerEntry
-        .filter((geoviewLayerConfig) => !mapConfigLayerEntryIsGeoCore(geoviewLayerConfig))
-        .forEach((geoviewLayerConfig) => {
+      listOfMapConfigLayerEntry.forEach((geoviewLayerConfig) => {
+        if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
+          // As-is we keep it
+          validConfigs.push(geoviewLayerConfig);
+        } else {
           try {
             // The default value for geoviewLayerConfig.initialSettings.visible is true.
             const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
@@ -252,7 +254,8 @@ export class ConfigValidation {
             // An error happened with a geoview layer config, log and continue with the others
             GeoViewError.logError(error);
           }
-        });
+        }
+      });
 
       // We're done processing the listOfMapConfigLayerEntry and we only have valid ones in the validConfigs list
       // Repopulate the original array

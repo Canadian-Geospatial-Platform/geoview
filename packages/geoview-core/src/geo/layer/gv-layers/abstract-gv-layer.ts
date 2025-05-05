@@ -296,8 +296,16 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * Overridable method called when the layer is in error and couldn't be loaded correctly
    */
   protected onError(): void {
+    // Log
+    logger.logError(
+      `Error loading layer: ${this.getLayerPath()} at zoom level: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`
+    );
+
     // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
     this.getLayerConfig().setLayerStatusError();
+
+    // Emit about the error
+    this.emitMessage('layers.errorNotLoaded', [this.getLayerName()!], 'error', true);
   }
 
   /**
@@ -307,11 +315,19 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   protected onImageLoadError(): void {
     // Log
     logger.logError(
-      `Error loading source image for layer path: ${this.getLayerPath()} at zoom level: ${this.getMapViewer().getView().getZoom()}`
+      `Error loading source image for layer: ${this.getLayerPath()} at zoom level: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`
     );
 
+    // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
+    this.getLayerConfig().setLayerStatusError();
+
     // Emit about the error
-    this.emitMessage('layers.errorImageLoad', [this.getLayerName()!, this.getMapViewer().getView().getZoom()!.toString()], 'error', true);
+    this.emitMessage(
+      'layers.errorImageLoad',
+      [this.getLayerName()!, Math.round(this.getMapViewer().getView().getZoom() || 0).toString()],
+      'error',
+      true
+    );
   }
 
   /**
