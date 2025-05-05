@@ -51,7 +51,8 @@ type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: { [key: string]: string }
 ) => Style | undefined;
 
 let colorCount = 0;
@@ -1227,14 +1228,26 @@ function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): Typ
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
-function searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeLayerStyleConfigInfo[], feature: Feature): number | undefined {
+function searchUniqueValueEntry(
+  fields: string[],
+  uniqueValueStyleInfo: TypeLayerStyleConfigInfo[],
+  feature: Feature,
+  aliasLookup?: { [key: string]: string }
+): number | undefined {
   for (let i = 0; i < uniqueValueStyleInfo.length; i++) {
     for (let j = 0, isEqual = true; j < fields.length && isEqual; j++) {
       // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
       // unique value definition.
-      const fieldName = feature.getKeys().find((key) => {
+      let fieldName = feature.getKeys().find((key) => {
         return key.toLowerCase() === fields[j]?.toLowerCase();
       });
+
+      // Failed to find match: Attempt to find the alias from the names
+      if (!fieldName && aliasLookup && Object.keys(aliasLookup).length > 0) {
+        if (fields[j] in aliasLookup) {
+          fieldName = aliasLookup[fields[j]];
+        }
+      }
 
       if (fieldName) {
         const styleInfoValue =
@@ -1266,14 +1279,15 @@ function processUniqueValuePoint(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: { [key: string]: string }
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchUniqueValueEntry(fields, info, feature!);
+    const i = searchUniqueValueEntry(fields, info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePoint(info[i].settings);
     if (i === undefined && hasDefault && (legendFilterIsOff || styleSettings.info[styleSettings.info.length - 1].visible !== false))
       return processSimplePoint(styleSettings.info[styleSettings.info.length - 1].settings);
@@ -1295,14 +1309,15 @@ function processUniqueLineString(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: { [key: string]: string }
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchUniqueValueEntry(fields, info, feature!);
+    const i = searchUniqueValueEntry(fields, info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimpleLineString(info[i].settings, feature);
     if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimpleLineString(info[info.length - 1].settings, feature);
@@ -1324,14 +1339,15 @@ function processUniquePolygon(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: { [key: string]: string }
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchUniqueValueEntry(fields, info, feature!);
+    const i = searchUniqueValueEntry(fields, info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePolygon(info[i].settings, feature);
     if (i === undefined && hasDefault !== undefined && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimplePolygon(info[info.length - 1].settings, feature);
@@ -1348,12 +1364,25 @@ function processUniquePolygon(
  *
  * @returns {number | undefined} The index of the entry. Undefined if unable to find it.
  */
-function searchClassBreakEntry(field: string, classBreakStyleInfo: TypeLayerStyleConfigInfo[], feature: Feature): number | undefined {
+function searchClassBreakEntry(
+  field: string,
+  classBreakStyleInfo: TypeLayerStyleConfigInfo[],
+  feature: Feature,
+  aliasLookup?: { [key: string]: string }
+): number | undefined {
   // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
   // class break definition.
   const featureKey = (feature as Feature).getKeys().filter((key) => {
     return key.toLowerCase() === field.toLowerCase();
   });
+
+  // Failed to find match: Attempt to find the alias key from the names
+  if (featureKey.length !== 1 && aliasLookup && Object.keys(aliasLookup).length > 0) {
+    if (field in Object.keys(aliasLookup)) {
+      featureKey.push(aliasLookup[field]);
+    }
+  }
+
   if (featureKey.length !== 1) return undefined;
 
   const fieldValue = feature.get(featureKey[0]) as number | string;
@@ -1380,14 +1409,15 @@ function processClassBreaksPoint(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: { [key: string]: string }
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'classBreaks') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchClassBreakEntry(fields[0], info, feature!);
+    const i = searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePoint(info[i].settings);
     if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimplePoint(info[info.length - 1].settings);
@@ -1409,14 +1439,15 @@ function processClassBreaksLineString(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: { [key: string]: string }
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'classBreaks') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchClassBreakEntry(fields[0], info, feature!);
+    const i = searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimpleLineString(info[i].settings, feature);
     if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimpleLineString(info[info.length - 1].settings, feature);
@@ -1438,14 +1469,15 @@ function processClassBreaksPolygon(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: { [key: string]: string }
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'classBreaks') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchClassBreakEntry(fields[0], info, feature!);
+    const i = searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePolygon(info[i].settings, feature);
     if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimplePolygon(info[info.length - 1].settings, feature);
@@ -1498,6 +1530,7 @@ export function getAndCreateFeatureStyle(
   label: string,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
+  aliasLookup?: { [key: string]: string },
   callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
 ): Style | undefined {
   // Get the geometry type
@@ -1524,7 +1557,14 @@ export function getAndCreateFeatureStyle(
     const styleSettings = style![geometryType]!;
     const { type } = styleSettings;
     // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
-    const featureStyle = processStyle[type][geometryType].call('', styleSettings, feature as Feature, filterEquation, legendFilterIsOff);
+    const featureStyle = processStyle[type][geometryType].call(
+      '',
+      styleSettings,
+      feature as Feature,
+      filterEquation,
+      legendFilterIsOff,
+      aliasLookup
+    );
 
     return featureStyle;
   }
@@ -1544,7 +1584,8 @@ export function getFeatureImageSource(
   feature: Feature,
   style: TypeLayerStyleConfig,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: { [key: string]: string }
 ): string {
   // The image source that will be returned (if calculated successfully)
   let imageSource: string | undefined;
@@ -1576,7 +1617,7 @@ export function getFeatureImageSource(
       //   });
       // });
 
-      const featureStyle = processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
+      const featureStyle = processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff, aliasLookup);
 
       if (featureStyle) {
         if (geometryType === 'Point') {

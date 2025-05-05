@@ -301,8 +301,18 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Get the style
     const style = layer.getStyle() || {};
 
+    // Create lookup dictionary of names to alias
+    const aliasLookup =
+      (layer.getLayerConfig() as VectorLayerEntryConfig).source?.featureInfo?.outfields?.reduce(
+        (acc, field) => {
+          acc[field.name] = field.alias;
+          return acc;
+        },
+        {} as { [key: string]: string }
+      ) ?? {};
+
     // Get and create Feature style if necessary
-    return getAndCreateFeatureStyle(feature, style, label, filterEquation, legendFilterIsOff, (geometryType, theStyle) => {
+    return getAndCreateFeatureStyle(feature, style, label, filterEquation, legendFilterIsOff, aliasLookup, (geometryType, theStyle) => {
       // A new style has been created
       logger.logDebug('A new style has been created on-the-fly', geometryType, layer);
       // Update the layer style
