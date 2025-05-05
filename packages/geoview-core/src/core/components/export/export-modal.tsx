@@ -18,10 +18,6 @@ import { LegendContainer } from '@/core/components/export/export-legend-utils';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 
 /**
- * @typedef {{IAsyncContentCreation: import("Code\resources\app\extensions\node_modules\typescript\lib\lib.dom.d.ts").IAsyncContentCreation}} CoreLib
- */
-
-/**
  * Export modal window component to export the viewer information in a PNG file
  *
  * @returns {JSX.Element} the export modal component
@@ -80,7 +76,7 @@ export default function ExportModal(): JSX.Element {
     const ctx = imgCanvas.getContext('2d');
 
     img.addEventListener('load', () => {
-      if (img.naturalWidth > imageDefaultWidth) {
+      if (img.naturalWidth >= imageDefaultWidth) {
         exportPNG(img.src, inFileName);
         return;
       }
@@ -126,6 +122,10 @@ export default function ExportModal(): JSX.Element {
 
       // Clone the content
       const clonedContent = exportContainerRef.current.cloneNode(true) as HTMLDivElement;
+      const legendContainer = clonedContent.querySelector(`#${mapId}-legend-container`) as HTMLElement;
+      if (legendContainer) {
+        legendContainer.style.width = `${imageDefaultWidth}px`;
+      }
       tempContainer.appendChild(clonedContent);
       document.body.appendChild(tempContainer);
 
@@ -166,6 +166,7 @@ export default function ExportModal(): JSX.Element {
     setActiveAppBarTab(legendId, 'legend', false, false);
     disableFocusTrap();
   };
+
   /**
    * Calculate the width of the canvas based on dialog box container width.
    * @param {HTMLDivElement} dialogBox - Container where canvas will be rendered.
@@ -179,19 +180,18 @@ export default function ExportModal(): JSX.Element {
 
     return dialogBox.clientWidth - paddingLeft - paddingRight;
   };
-  console.log(getCanvasWidth); // eslint-disable-line no-console
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('Export Modal - mount');
     setLegendLayers(layersList);
-
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
     let timer: NodeJS.Timeout;
     if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
       const mapImage = mapImageRef.current;
       const dialogBox = dialogRef.current;
+
       if (overviewMap) overviewMap.style.visibility = 'hidden';
 
       // open legend in appbar when only appbar exists
@@ -214,34 +214,8 @@ export default function ExportModal(): JSX.Element {
           .catch((error: Error) => {
             logger.logError('Error occured while converting map to image', error);
           });
-
-        // add legend
-        // check if footer tab exist then we don't need appBar Legend.
-        const legendContainer = (footerbarLegendContainer ?? appBarLegendContainer) as HTMLElement;
-        if (legendContainer && legendContainerRef.current) {
-          setIsLegendLoading(true);
-          // remove hidden attribute from document legend, so that html-to-image can copy the legend container.
-          const legendTab = document.getElementById(`shell-${mapId}-legend`) as HTMLElement;
-          const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
-          if (hasHiddenAttr) legendTab.removeAttribute('hidden');
-
-          htmlToImage
-            .toPng(legendContainer, { fontEmbedCSS: '', style: { overflow: 'hidden' } })
-            .then((dataUrl) => {
-              setIsLegendLoading(false);
-              const img = new Image();
-              img.src = dataUrl;
-              img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
-              legendContainerRef.current?.appendChild(img);
-              if (hasHiddenAttr) legendTab.hidden = true;
-            })
-            .catch((error: Error) => {
-              logger.logError('Error occured while converting legend to image', error);
-            });
-        } else {
-          setIsLegendLoading(false);
-        }
-      }, 500);
+        setIsLegendLoading(false);
+      }, 100);
     }
     return () => {
       if (overviewMap) overviewMap.style.visibility = 'visible';
@@ -280,7 +254,12 @@ export default function ExportModal(): JSX.Element {
               )}
             </Box>
             {northArrow && (
-              <Box textAlign="right" style={{ marginRight: 20, transform: `rotate(${rotationAngle.angle}deg)` }}>
+              <Box
+                textAlign="right"
+                style={{
+                  transform: `rotate(${rotationAngle.angle}deg)`,
+                }}
+              >
                 <NorthArrowIcon width={44} height={44} />
               </Box>
             )}
@@ -294,7 +273,7 @@ export default function ExportModal(): JSX.Element {
           <Box ref={legendContainerRef}>
             {isLegendLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
           </Box>
-          <Box textAlign="center" key={t('mapctrl.disclaimer.message')} component="p" sx={{ margin: 5, marginBottom: '20px' }}>
+          <Box textAlign="center" key={t('mapctrl.disclaimer.message')} component="p" sx={{ margin: 0, marginBottom: '20px' }}>
             {t('mapctrl.disclaimer.message')}
           </Box>
           <Box textAlign="center">

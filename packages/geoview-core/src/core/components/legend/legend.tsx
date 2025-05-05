@@ -9,11 +9,10 @@ import {
   useAppFullscreenActive,
   useUIFooterPanelResizeValue,
   useLayerLegendLayers,
-  useUIFooterBarIsCollapsed,
 } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
-import { getSxClassesMain, getSxClasses } from './legend-styles';
+import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
@@ -31,7 +30,6 @@ const styles = {
     margin: '2rem',
     width: '100%',
     textAlign: 'center',
-    heigth: 'fit-content',
   },
   layerBox: {
     paddingRight: '0.65rem',
@@ -55,7 +53,7 @@ const responsiveWidths = {
   },
 } as const;
 
-export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }: LegendType): JSX.Element | null {
+export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): JSX.Element | null {
   logger.logTraceRender('components/legend/legend');
 
   // Hooks
@@ -63,14 +61,13 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
   const theme = useTheme();
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const footerBarIsCollapsed = useUIFooterBarIsCollapsed();
-  const sxClassesMain = useMemo(
-    () => getSxClassesMain(isMapFullScreen, footerPanelResizeValue, footerBarIsCollapsed, containerType),
-    [isMapFullScreen, footerPanelResizeValue, footerBarIsCollapsed, containerType]
+  const sxClasses = useMemo(
+    () => getSxClasses(theme, isMapFullScreen, footerPanelResizeValue),
+    [theme, isMapFullScreen, footerPanelResizeValue]
   );
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
+  const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
   const [formattedLegendLayerList, setFormattedLegendLayersList] = useState<TypeLegendLayer[][]>([]);
 
   // Store
@@ -120,8 +117,7 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
         list[index % arrSize].push(layer);
       });
 
-      // Format the list only if there is layers
-      setFormattedLegendLayersList(layers.length === 0 ? [] : list);
+      setFormattedLegendLayersList(list);
     },
     [getLegendLayerListSize]
   );
@@ -132,8 +128,8 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
     logger.logTraceUseCallback('LEGEND - window resize event');
 
     // Update the layer list based on window size
-    updateLegendLayerListByWindowSize(layersList);
-  }, [layersList, updateLegendLayerListByWindowSize]);
+    updateLegendLayerListByWindowSize(legendLayers);
+  }, [legendLayers, updateLegendLayerListByWindowSize]);
 
   // Wire a handler using a custom hook on the window resize event
   useEventListener<Window>('resize', handleWindowResize, window);
@@ -142,6 +138,10 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LEGEND - layer setup', layersList);
+
+    // Set the legend layers based on the layers list
+    // TODO: Check - Check necessity of having 2 arrays (layersList vs legendLayers)
+    setLegendLayers(layersList);
 
     // Update the layer list based on window size
     updateLegendLayerListByWindowSize(layersList);
@@ -187,7 +187,7 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
   if (footerId !== 'legend' && appBarId.tabGroup !== 'legend') return null;
 
   return (
-    <Box sx={sxClassesMain.container} id={`${mapId}-${containerType}-legendContainer`}>
+    <Box sx={sxClasses.container} id={`${mapId}-${containerType}-legendContainer`}>
       <Box sx={styles.flexContainer}>{content}</Box>
     </Box>
   );
