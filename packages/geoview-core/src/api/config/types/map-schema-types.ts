@@ -619,6 +619,9 @@ export type TypeFieldEntry = {
   domain: null | codedValueType | rangeDomainType;
 };
 
+// Definition of the alias lookup for matching field names to aliases
+export type TypeAliasLookup = { [key: string]: string };
+
 // #region STYLE
 
 /** Styles to apply to the GeoView vector layer by geometry types. */

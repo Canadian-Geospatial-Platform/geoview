@@ -30,6 +30,7 @@ import {
   TypeLayerStyleSettings,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
+  TypeAliasLookup,
 } from '@/api/config/types/map-schema-types';
 import {
   binaryKeywors,
@@ -52,7 +53,7 @@ type TypeStyleProcessor = (
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  aliasLookup?: { [key: string]: string }
+  aliasLookup?: TypeAliasLookup
 ) => Style | undefined;
 
 let colorCount = 0;
@@ -1232,7 +1233,7 @@ function searchUniqueValueEntry(
   fields: string[],
   uniqueValueStyleInfo: TypeLayerStyleConfigInfo[],
   feature: Feature,
-  aliasLookup?: { [key: string]: string }
+  aliasLookup?: TypeAliasLookup
 ): number | undefined {
   for (let i = 0; i < uniqueValueStyleInfo.length; i++) {
     for (let j = 0, isEqual = true; j < fields.length && isEqual; j++) {
@@ -1280,7 +1281,7 @@ function processUniqueValuePoint(
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  aliasLookup?: { [key: string]: string }
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1310,7 +1311,7 @@ function processUniqueLineString(
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  aliasLookup?: { [key: string]: string }
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1340,7 +1341,7 @@ function processUniquePolygon(
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  aliasLookup?: { [key: string]: string }
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1368,7 +1369,7 @@ function searchClassBreakEntry(
   field: string,
   classBreakStyleInfo: TypeLayerStyleConfigInfo[],
   feature: Feature,
-  aliasLookup?: { [key: string]: string }
+  aliasLookup?: TypeAliasLookup
 ): number | undefined {
   // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
   // class break definition.
@@ -1410,7 +1411,7 @@ function processClassBreaksPoint(
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  aliasLookup?: { [key: string]: string }
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1440,7 +1441,7 @@ function processClassBreaksLineString(
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  aliasLookup?: { [key: string]: string }
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1470,7 +1471,7 @@ function processClassBreaksPolygon(
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  aliasLookup?: { [key: string]: string }
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1530,7 +1531,7 @@ export function getAndCreateFeatureStyle(
   label: string,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  aliasLookup?: { [key: string]: string },
+  aliasLookup?: TypeAliasLookup,
   callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
 ): Style | undefined {
   // Get the geometry type
@@ -1585,7 +1586,7 @@ export function getFeatureImageSource(
   style: TypeLayerStyleConfig,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
-  aliasLookup?: { [key: string]: string }
+  aliasLookup?: TypeAliasLookup
 ): string {
   // The image source that will be returned (if calculated successfully)
   let imageSource: string | undefined;
