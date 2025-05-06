@@ -63,5 +63,3 @@ export class GeoviewLayerInvalidParameterError extends ConfigError {
     Object.setPrototypeOf(this, MapConfigError.prototype);
   }
 }
-
-export {}; // TODO: Check - What is this export for?

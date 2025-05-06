@@ -54,20 +54,20 @@ export class Fetch {
       // Get the json body of the response
       const responseJson = await response.json();
 
-      // Check if the response is not an empty object
-      if (responseJson.constructor === Object && Object.keys(responseJson).length > 0) {
-        // Return the value
-        return responseJson as TypeJsonObject;
+      // Check if the response is an object with no properties
+      if (responseJson.constructor === Object && Object.keys(responseJson).length === 0) {
+        // Throw empty response error
+        throw new ResponseEmptyError();
       }
 
-      // Check if the response is not an empty array
-      if (Array.isArray(responseJson) && responseJson.length > 0) {
-        // Return the value
+      // Check if the response is an array
+      if (Array.isArray(responseJson)) {
+        // Return the value as Array
         return responseJson as TypeJsonArray;
       }
 
-      // Throw empty response error
-      throw new ResponseEmptyError();
+      // Return the value as Object
+      return responseJson as TypeJsonObject;
     } catch (error) {
       // Throw the exceptions that we know
       Fetch.#throwWhatWeKnow(originalSignal, timeoutSignal, timeoutMs);
