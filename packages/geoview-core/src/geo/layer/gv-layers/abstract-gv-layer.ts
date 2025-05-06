@@ -35,6 +35,7 @@ import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { createAliasLookup } from './utils';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -639,16 +640,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       const dictFieldDomains: { [fieldName: string]: codedValueType | rangeDomainType | null } = {};
       // Hold a dictionary build on the fly for the field types
       const dictFieldTypes: { [fieldName: string]: TypeOutfieldsType } = {};
-
       // Create lookup dictionary of names to alias
-      const aliasLookup =
-        outfields?.reduce(
-          (acc, field) => {
-            acc[field.name] = field.alias;
-            return acc;
-          },
-          {} as { [key: string]: string }
-        ) ?? {};
+      const aliasLookup = createAliasLookup(outfields);
 
       // Loop on the promised feature infos
       let featureKeyCounter = 0;
