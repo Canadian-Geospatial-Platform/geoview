@@ -118,7 +118,7 @@ export const useManageArrow = (): ArrowReturn => {
           }
           // Otherwise, do nothing (skip setting rotation)
         }
-
+      } else {
         const mapRotationValue = mapRotation * (180 / Math.PI);
         newRotation = { angle: 90 - angleDegrees + mapRotationValue };
       }
