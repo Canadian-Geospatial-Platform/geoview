@@ -4,7 +4,7 @@ import { cleanPostalCode, getDecimalDegreeItem } from '@/core/components/geoloca
 import { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { RequestAbortedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
+import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 
 interface UseGeolocatorReturn {
   /** Array of geolocation results */
@@ -117,15 +117,6 @@ export const useGeolocator = (): UseGeolocatorReturn => {
         if (ddSupport) result.unshift(ddSupport);
 
         setData(result);
-      } catch (error2) {
-        // For geolocator, ignore when aborted request or an empty response is returned
-        if (error2 instanceof RequestAbortedError || error2 instanceof ResponseEmptyError) {
-          // Ignored
-          return;
-        }
-
-        // Throw higher
-        throw error2;
       } finally {
         setIsLoading(false);
         clearTimeout(fetchTimerRef.current);
@@ -138,12 +129,16 @@ export const useGeolocator = (): UseGeolocatorReturn => {
   const getGeolocations = useCallback(
     (searchTerm: string): void => {
       fetchGeolocations(searchTerm).catch((err) => {
-        // Handle or log any errors here if needed
-        if (err.name !== 'AbortError') {
-          setError(true);
-          setData(undefined);
-          logger.logError('GEOLOCATOR - search failed', err);
+        // If aborted response
+        if (err instanceof RequestAbortedError) {
+          // Cancel...
+          return;
         }
+
+        // Handle or log any errors here if needed
+        setError(true);
+        setData(undefined);
+        logger.logError('GEOLOCATOR - search failed', err);
       });
     },
     [fetchGeolocations]

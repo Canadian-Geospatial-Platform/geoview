@@ -140,7 +140,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
       metadataUrl = this.metadataAccessPath.endsWith('/') ? `${this.metadataAccessPath}?f=json` : `${this.metadataAccessPath}/?f=json`;
     try {
       if (metadataUrl.toLowerCase().endsWith('.meta') || metadataUrl.toLowerCase().endsWith('f=json')) {
-        // TODO: Check - This was a fetchText which was later converted to a Json, trying to fetchJson straight for simplicity
+        // This was a fetchText which was later converted to a Json, trying to fetchJson straight for simplicity
         const layerMetadata = await Fetch.fetchJsonAsObject(metadataUrl);
         this.setServiceMetadata(layerMetadata);
 

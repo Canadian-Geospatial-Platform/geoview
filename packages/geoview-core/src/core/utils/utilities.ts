@@ -203,7 +203,7 @@ export function xmlToJson(xml: Document | Node | Element): any {
  * Execute a XMLHttpRequest
  * @param {string} url - The url to request
  * @returns {Promise<string>} The return value, return is '{}' if request failed
- * @deprecated Use the utilities/fetch functions instead
+ * @deprecated Use the core/utils/fetch-helper.ts/Fetch functions instead
  */
 export function getXMLHttpRequest(url: string): Promise<string> {
   const request = new Promise<string>((resolve) => {
