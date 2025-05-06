@@ -35,7 +35,7 @@ import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { createAliasLookup } from './utils';
+import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -663,6 +663,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           const styleSettings = layerStyle[geometryType]!;
           const { type } = styleSettings;
           const featureStyle = processStyle[type][geometryType](styleSettings, feature, layerConfig.filterEquation, true, aliasLookup);
+          console.log(featureStyle);
 
           // Sometimes data is not well fomrated and some features has no style associated, just throw a warning
           if (featureStyle === undefined) {
