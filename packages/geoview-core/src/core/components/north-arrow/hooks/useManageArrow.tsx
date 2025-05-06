@@ -12,6 +12,7 @@ import {
   useMapZoom,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { CV_MAP_CENTER } from '@/api/config/types/config-constants';
 
 interface ArrowReturn {
   rotationAngle: { angle: number };
@@ -42,6 +43,9 @@ export const useManageArrow = (): ArrowReturn => {
   const isLCCProjection = useMemo(() => `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC, [mapProjection]);
   const isWebMercator = useMemo(() => `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.WM, [mapProjection]);
 
+  const prevRotationRef = useRef(0);
+  const equalCountRef = useRef(0);
+
   /**
    * Calculate the north arrow offset and angle
    * Calculation taken from RAMP: https://github.com/fgpv-vpgf/fgpv-vpgf/blob/master/packages/ramp-core/src/app/geo/map-tools.service.js
@@ -62,7 +66,6 @@ export const useManageArrow = (): ArrowReturn => {
 
     // Constants
     const ARROW_WIDTH = 24;
-    const RADIAN_CONVERSION = 0.01745329252;
     const mapWidth = mapSize[0] / 2;
     const offsetX = mapWidth - ARROW_WIDTH / 2;
 
@@ -89,10 +92,32 @@ export const useManageArrow = (): ArrowReturn => {
       if (fixNorth && (Math.round(angle.current) !== Math.round(arrowAngle) || mapZoom > 7)) {
         angle.current = arrowAngle;
 
-        // Calculate the rotation delta and apply only when higher then 0.1 to solve bugs when in middle of
-        // Canada and the map is trying to set rotation forever
-        const diff = Math.abs(mapRotation - ((180 - arrowAngle) * (2 * Math.PI)) / 360);
-        if (diff > 0.1) setRotation(((180 - arrowAngle) * (2 * Math.PI)) / 360);
+        // Calculate the rotation delta
+        const rotationValue = ((180 - arrowAngle) * (2 * Math.PI)) / 360;
+        const diff = Math.abs(mapRotation - rotationValue);
+
+        // Calculate longitude factor
+        const CENTRAL_MERIDIAN = -97; // CV_MAP_CENTER[3978][0];
+        const centerLongitude = Projection.transformCoordinates(mapCenterCoord, 'EPSG:3978', 'EPSG:4326')![0];
+        const deviationFromCenter = (centerLongitude as number) - CENTRAL_MERIDIAN;
+
+        if (Math.abs(deviationFromCenter) <= 3) {
+          setRotation(0);
+          equalCountRef.current = 0;
+        } else if (diff > 0.01) {
+          // Only set rotation if we haven't already set it for this value
+          if (rotationValue !== prevRotationRef.current) {
+            setRotation(rotationValue);
+            prevRotationRef.current = rotationValue;
+            equalCountRef.current = 1; // Set to 1 to indicate we've used this value
+          }
+          // If values are the same but we haven't set rotation yet
+          else if (equalCountRef.current === 0) {
+            setRotation(rotationValue);
+            equalCountRef.current = 1;
+          }
+          // Otherwise, do nothing (skip setting rotation)
+        }
       } else {
         const mapRotationValue = mapRotation * (180 / Math.PI);
         newRotation = { angle: 90 - angleDegrees + mapRotationValue };
@@ -104,34 +129,29 @@ export const useManageArrow = (): ArrowReturn => {
 
       if (!fixNorth && northPolePosition !== null) {
         const screenNorthPoint = northPolePosition;
-        const screenY = screenNorthPoint[1];
+        const mapCenter = getPixelFromCoordinate(mapCenterCoord);
 
-        // Initialize triangle with original numbers
-        const triangle = {
-          x: offsetX,
-          y: getPixelFromCoordinate(mapCenterCoord)[1],
-          m: 1,
-        };
+        // Calculate distance from north pole using triangle
+        const deltaX = screenNorthPoint[0] - mapCenter[0];
+        const deltaY = screenNorthPoint[1] - mapCenter[1];
+        const distanceFromNorthPole = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-        // If the extent is near the north pole be more precise otherwise use the original math
-        // Note: using the precise math would be ideal but when zooming in, the calculations make very
-        // large adjustments so reverting to the old less precise math provides a better experience.
-        if (screenNorthPoint[0] < 2400 && screenNorthPoint[1] > -1300 && -screenNorthPoint[1] < 3000) {
-          [triangle.x, triangle.y] = screenNorthPoint;
-          triangle.m = -1;
-        }
+        // Calculate distance factor (0 to 1)
+        const MAX_DISTANCE = 10000; // Maximum meaningful distance from north pole
+        const distanceFactor = Math.min(distanceFromNorthPole / MAX_DISTANCE, 1);
 
-        // z is the hypotenuse line from center point to the top of the viewer. The triangle is always a right triangle
-        const z = triangle.y / Math.sin(angleDegrees * RADIAN_CONVERSION);
+        // Calculate longitude factor (-90° is center, increases towards -150° and -30°)
+        const CENTRAL_MERIDIAN = CV_MAP_CENTER[3978][0];
+        const centerLongitude = mapCenterCoord[0];
+        const deviationFromCenter = centerLongitude - CENTRAL_MERIDIAN;
+        const longitudeFactor = Math.min(Math.abs(deviationFromCenter) / 60, 1); // 60° range to max
 
-        // this would be the bottom of our triangle, the length from center to where the arrow should be placed
-        const screenX =
-          screenY < 0
-            ? triangle.x + triangle.m * (Math.sin((90 - angleDegrees) * RADIAN_CONVERSION) * z) - ARROW_WIDTH / 2
-            : screenNorthPoint[0] - ARROW_WIDTH;
+        // Combine both factors and apply to max offset
+        const MAX_OFFSET = 100; // 100px maximum offset
+        const combinedFactor = distanceFactor * longitudeFactor;
 
-        // Limit the arrow to the bounds of the inner shell (+/- 25% from center)
-        newOffset = Math.max(offsetX - mapWidth * 0.25, Math.min(screenX, offsetX + mapWidth * 0.25));
+        // Apply offset - negative for western longitudes, positive for eastern
+        newOffset = offsetX - Math.sign(deviationFromCenter) * MAX_OFFSET * combinedFactor;
       }
 
       return { calculatedRotation: newRotation, calculatedOffset: newOffset };
