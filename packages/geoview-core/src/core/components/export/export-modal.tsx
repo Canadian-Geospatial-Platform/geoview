@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import * as htmlToImage from 'html-to-image';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField } from '@/ui';
-import { exportPNG } from '@/core/utils/utilities';
+import { exportPNG, delay } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { useUIActiveAppBarTab, useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -26,7 +26,7 @@ export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
   const mapId = useGeoViewMapId();
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
-
+  const imageDefaultWidth = 1738;
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
   const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
@@ -69,26 +69,96 @@ export default function ExportModal(): JSX.Element {
   // Set the legend layers
   const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
 
+  // resising image from dataurl
+  async function resizeImageData(imageUri: string, inFileName: string): Promise<void> {
+    const img = new Image();
+    const imgCanvas = document.createElement('canvas');
+    const ctx = imgCanvas.getContext('2d');
+
+    img.addEventListener('load', () => {
+      if (img.naturalWidth >= imageDefaultWidth) {
+        exportPNG(img.src, inFileName);
+        return;
+      }
+
+      const dx = (imageDefaultWidth - img.naturalWidth) / 2;
+      const dy = 0;
+      const dHeight = img.naturalHeight;
+
+      // IMAGE TO CANVAS
+      imgCanvas.width = imageDefaultWidth;
+      imgCanvas.height = dHeight;
+
+      if (ctx) {
+        // Optional: fill background if you want a color behind
+        ctx.fillStyle = theme.palette.common.white; // or any background color
+        ctx.fillRect(0, 0, imgCanvas.width, imgCanvas.height);
+        ctx.drawImage(img, dx, dy); // Draw image to canvas
+        const imgurl = imgCanvas.toDataURL('image/png');
+        // Download png file from dataurl
+        exportPNG(imgurl, inFileName);
+      }
+    });
+    img.src = imageUri; // load image
+    await delay(1500);
+  }
+
   const exportMap = ((): void => {
-    if (exportContainerRef.current && textFieldRef.current && exportTitleRef.current) {
+    if (exportContainerRef?.current && textFieldRef.current && exportTitleRef.current) {
+      // Hide the text field
       textFieldRef.current.style.display = 'none';
+
+      // Update the title
       exportTitleRef.current.style.padding = '1rem';
       exportTitleRef.current.innerHTML = exportTitle;
+
       setIsMapExporting(true);
 
-      htmlToImage
-        .toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white, fontEmbedCSS: '' })
-        .then((dataUrl) => {
-          setIsMapExporting(false);
+      // Create a temporary container
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.width = `${imageDefaultWidth}px`;
 
-          exportPNG(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`);
+      // Clone the content
+      const clonedContent = exportContainerRef.current.cloneNode(true) as HTMLDivElement;
+      const legendContainer = clonedContent.querySelector(`#${mapId}-legend-container`) as HTMLElement;
+      if (legendContainer) {
+        legendContainer.style.width = `${imageDefaultWidth}px`;
+      }
+      tempContainer.appendChild(clonedContent);
+      document.body.appendChild(tempContainer);
 
-          setActiveAppBarTab(legendId, 'legend', false, false);
-          disableFocusTrap();
-        })
-        .catch((error: Error) => {
-          logger.logError('Error while exporting the image', error);
-        });
+      // Small delay to ensure content is rendered
+      setTimeout(() => {
+        htmlToImage
+          .toPng(clonedContent, {
+            backgroundColor: theme.palette.common.white,
+            fontEmbedCSS: '',
+            width: imageDefaultWidth,
+            height: clonedContent.offsetHeight,
+          })
+          .then((dataUrl) => {
+            setIsMapExporting(false);
+            // Clean up
+            document.body.removeChild(tempContainer);
+
+            resizeImageData(dataUrl, `${fileExportDefaultPrefixName}-${exportTitle !== '' ? exportTitle.trim() : mapId}`)
+              .then(() => {
+                setActiveAppBarTab(legendId, 'legend', false, false);
+                disableFocusTrap();
+              })
+              .catch((error: Error) => {
+                logger.logError('Error while resizing the image', error);
+              });
+          })
+          .catch((error: Error) => {
+            // Clean up on error too
+            document.body.removeChild(tempContainer);
+            setIsMapExporting(false);
+            logger.logError('Error while exporting the image', error);
+          });
+      }, 100);
     }
   }) as MouseEventHandler<HTMLButtonElement>;
 
@@ -115,6 +185,7 @@ export default function ExportModal(): JSX.Element {
     // Log
     logger.logTraceUseEffect('Export Modal - mount');
     setLegendLayers(layersList);
+
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
     let timer: NodeJS.Timeout;
