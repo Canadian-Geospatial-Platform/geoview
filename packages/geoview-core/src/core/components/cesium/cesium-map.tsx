@@ -37,9 +37,8 @@ import {
   useCesiumStoreSetterActions,
   useCesiumStoreActions,
   useCesiumSetRef,
-  useCesiumIsInitialized,
 } from '@/core/stores/store-interface-and-intial-values/cesium-state';
-import { useAppShow3dMap } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 type MapProps = {
   viewer: MapViewer;
@@ -223,9 +222,19 @@ export function CesiumMap(props: MapProps): JSX.Element {
   const oViewerRef = useRef<HTMLDivElement>(null);
   const cViewerRef = useCesiumStoreActions().getCesiumViewerRef();
   const isInitialized = useCesiumStoreActions().getIsInitialized;
+  const { setShow3dMap } = useAppStoreActions();
   const setCesiumViewer = useCesiumSetRef();
+  const setCesiumSize = useCesiumStoreSetterActions().setMapSize;
   const setCesiumIsInitialized = useCesiumStoreSetterActions().setIsInitialized;
   const { viewer } = props;
+
+  viewer.layer.onLayerAdded(() => {
+    setShow3dMap(false);
+  });
+
+  viewer.layer.onLayerRemoved(() => {
+    setShow3dMap(false);
+  });
 
   useEffect(() => {
     if (!oViewerRef.current) return undefined;
@@ -255,6 +264,11 @@ export function CesiumMap(props: MapProps): JSX.Element {
       });
       cViewerRef.current = cViewer;
       setCesiumViewer(cViewer);
+      setCesiumSize([cViewer.canvas.width, cViewer.canvas.height]);
+      const observer = new ResizeObserver(() => {
+        setCesiumSize([cViewer.canvas.width, cViewer.canvas.height]);
+      });
+      observer.observe(cViewer.container);
       cViewer.camera.percentageChanged = 0.1;
       cViewer.camera.changed.addEventListener(() => {
         setOLMapExtent(viewer, cViewer);

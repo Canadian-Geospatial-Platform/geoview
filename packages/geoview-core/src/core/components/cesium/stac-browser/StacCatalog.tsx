@@ -518,7 +518,7 @@ function StacSearch(props: { url: string }): JSX.Element {
               ))}
             </select>
             <label htmlFor="searchLimitSelect">{i18nLimitResults()}</label>
-            <select name="searchLimitSelect" defaultValue={i18nSelectLimit()} onChange={(e) => setLimit(parseInt(e.target.value, 10))}>
+            <select name="searchLimitSelect" defaultValue={1000} onChange={(e) => setLimit(parseInt(e.target.value, 10))}>
               {[10, 50, 100, 250, 500, 1000, 2000].map((x: number) => (
                 <option key={x}> {x} </option>
               ))}
@@ -729,6 +729,12 @@ export function StacFeature(props: { feature: StacItem }): JSX.Element {
     callback!({ asset: selectedFeature, feature });
   }
 
+  useEffect(() => {
+    if (optionsObject.length > 0) {
+      setSelectedFeature(optionsObject[0].value!);
+    }
+  }, [optionsObject]);
+
   function addToMapClicked(): void {
     if ((selectedFeature as unknown) === null) {
       alert(i18nNoAssetSelected());
@@ -766,7 +772,6 @@ export function StacFeature(props: { feature: StacItem }): JSX.Element {
           }}
         >
           <select
-            defaultValue={i18nSelectAsset()}
             onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
               const selectedValue = optionsObject.find((option) => option.name === event.target.value);
               if (selectedValue) {

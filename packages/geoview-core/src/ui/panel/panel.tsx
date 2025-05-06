@@ -17,6 +17,8 @@ import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { FocusTrapContainer } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
+import { useCesiumMapSize } from '@/core/stores/store-interface-and-intial-values/cesium-state';
+import { useAppShow3dMap } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 /**
  * Interface for panel properties
@@ -56,6 +58,8 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   // TODO: should the mapSize pass as props to remove link with store
   // Store
   const mapSize = useMapSize();
+  const cesiumSize = useCesiumMapSize();
+  const show3dMap = useAppShow3dMap();
 
   // State
   const panelContainerRef = useRef<HTMLDivElement>(null);
@@ -112,8 +116,8 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
       panelContainerRef.current &&
       open
     ) {
-      panelContainerRef.current.style.width = `${mapSize[0]}px`;
-      panelContainerRef.current.style.maxWidth = `${mapSize[0]}px`;
+      panelContainerRef.current.style.width = `${show3dMap ? cesiumSize[0] : mapSize[0]}px`;
+      panelContainerRef.current.style.maxWidth = `${show3dMap ? cesiumSize[0] : mapSize[0]}px`;
     } else {
       panelContainerRef.current?.removeAttribute('style');
     }

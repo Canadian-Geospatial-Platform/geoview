@@ -1,5 +1,5 @@
 import { MutableRefObject } from 'react';
-import { ImageryLayer, Viewer } from 'cesium';
+import { Cartesian3, ImageryLayer, Rectangle, Viewer } from 'cesium';
 import { useStore } from 'zustand';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -15,16 +15,19 @@ function getImageryLayerByName(viewer: Viewer, name: string): ImageryLayer | und
 export interface ICesiumState {
   cViewerRef: MutableRefObject<Viewer | null>;
   isInitialized: boolean;
+  size: [number, number];
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
   actions: {
     getCesiumViewerRef: () => MutableRefObject<Viewer | null>;
     toggleVisibility: (layerPath: string) => void;
     getIsInitialized: () => boolean;
     zoomToLayer: (layerPath: string) => void;
+    zoomToExtent: (latLng: [number, number], bbox?: [number, number, number, number]) => void;
   };
   setterActions: {
     setCesiumViewer: (viewer: Viewer | null) => void;
     setIsInitialized: (value: boolean) => void;
+    setMapSize: (size: [number, number]) => void;
   };
 }
 
@@ -37,6 +40,7 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
   return {
     cViewerRef,
     isInitialized: false,
+    size: [0, 0],
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     setDefaultConfigValues: (_: TypeMapFeaturesConfig): void => {},
 
@@ -75,6 +79,22 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
           }
         }
       },
+      zoomToExtent(latLng: [number, number], bbox?: [number, number, number, number]): void {
+        const viewer = get().cesiumState.cViewerRef.current;
+        if (viewer) {
+          if (bbox) {
+            viewer.camera.flyTo({
+              destination: Rectangle.fromDegrees(bbox[0], bbox[1], bbox[2], bbox[3]),
+              duration: 0,
+            });
+          } else {
+            viewer.camera.flyTo({
+              destination: Cartesian3.fromDegrees(latLng[1], latLng[0], 50.0),
+              duration: 0,
+            });
+          }
+        }
+      },
     },
     setterActions: {
       setCesiumViewer: (viewer: Viewer | null): void => {
@@ -92,6 +112,9 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
           return state;
         });
       },
+      setMapSize: (size: [number, number]): void => {
+        set({ cesiumState: { ...get().cesiumState, size } });
+      },
     },
   };
 }
@@ -102,3 +125,4 @@ export const useCesiumStoreSetterActions = (): CesiumSetterActions =>
 export const useCesiumSetRef = (): CesiumSetRefType =>
   useStore(useGeoViewStore(), (state) => state.cesiumState.setterActions.setCesiumViewer);
 export const useCesiumIsInitialized = (): boolean => useStore(useGeoViewStore(), (state) => state.cesiumState.isInitialized);
+export const useCesiumMapSize = (): [number, number] => useStore(useGeoViewStore(), (state) => state.cesiumState.size);
