@@ -1090,6 +1090,7 @@ export abstract class AbstractGeoViewLayer {
    * @private
    */
   static #logErrorAndSetStatusErrorAll(error: Error, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+    // For each layer entry config in the list
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       // If the layer entry is a group
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -1116,20 +1117,8 @@ export abstract class AbstractGeoViewLayer {
    * @private
    */
   static #logErrorAndSetStatusError(error: Error, layerConfig: TypeLayerEntryConfig | undefined): void {
-    // Log it straight right away at the moment it happened
-    let { message } = error;
-
-    // If the error is GeoView, we have a messageKey that needs to be translated
-    if (error instanceof GeoViewError) {
-      // Translate the message
-      message = error.translateMessage('en'); // English by default in the log
-    }
-
-    // If there's a cause of the error inside
-    if (error.cause) message += ` | ${error.cause}`;
-
-    // Log it
-    logger.logError(message);
+    // Log the error
+    GeoViewError.logError(error);
 
     // Set the layer status to error
     layerConfig?.setLayerStatusError();
