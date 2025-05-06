@@ -1090,6 +1090,7 @@ export abstract class AbstractGeoViewLayer {
    * @private
    */
   static #logErrorAndSetStatusErrorAll(error: Error, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+    // For each layer entry config in the list
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       // If the layer entry is a group
       if (layerEntryIsGroupLayer(layerConfig)) {
