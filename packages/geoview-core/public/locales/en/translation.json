@@ -157,7 +157,9 @@
     "clearAllfeatures": "Clear all feature highlights",
     "keepFeatureSelected": "Keep feature highlighted",
     "featureDetailsTitle": "Feature {count} of {total}",
-    "featureDetailModalTitle": "Feature Detail"
+    "featureDetailModalTitle": "Feature Detail",
+    "notSymbolized": "Not symbolized",
+    "nullValue": "Null"
   },
   "lightbox": {
     "next": "Next",

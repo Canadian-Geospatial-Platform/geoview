@@ -11,6 +11,7 @@ import { delay } from '@/core/utils/utilities';
 import { TypeFeatureInfoEntry, TypeFieldEntry, TypeGeometry } from '@/api/config/types/map-schema-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
+import { FORMATTING_NO_LEGEND } from '@/geo/utils/renderer/geoview-renderer';
 
 interface FeatureInfoProps {
   feature: TypeFeatureInfoEntry;
@@ -57,7 +58,16 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
       <Box sx={sxClasses.flexBoxAlignCenter}>
         <Box component="img" src={iconSrc} alt={name} className="layer-icon" />
         <Typography sx={TYPOGRAPHY_STYLES} component="div">
-          {name}
+          {iconSrc !== FORMATTING_NO_LEGEND ? (
+            (name ?? t('details.nullValue'))
+          ) : (
+            <>
+              {`(${name}) `}
+              <Typography component="span" sx={{ fontStyle: 'italic' }}>
+                {t('details.notSymbolized')}
+              </Typography>
+            </>
+          )}
         </Typography>
       </Box>
       <Box
