@@ -21,6 +21,7 @@ import { Projection } from '@/geo/utils/projection';
 import { CV_CONFIG_PROXY_URL } from '@/api/config/types/config-constants';
 import { LayerInvalidFeatureInfoFormatWMSError } from '@/core/exceptions/layer-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { NetworkError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Manages a WMS layer.
@@ -260,7 +261,7 @@ export class GVWMS extends AbstractGVRaster {
         legend: null,
         styles: styleLegends.length > 1 ? styleLegends : undefined,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('gv-wms.onFetchLegend()\n', error);
       return null;
@@ -362,27 +363,33 @@ export class GVWMS extends AbstractGVRaster {
       if (queryUrl) {
         queryUrl = queryUrl.toLowerCase().startsWith('http:') ? `https${queryUrl.slice(4)}` : queryUrl;
 
+        /** For some layers the layer loads fine through the proxy, but fetching the legend fails
+         * We try the fetch first without the proxy and if we get a network error, try again with the proxy.
+         */
         Fetch.fetchBlob(queryUrl)
           .then((responseBlob) => {
             // Expected response, return it as image
             resolve(readImage(responseBlob));
           })
-          .catch((error) => {
-            /** For some layers the layer loads fine through the proxy, but fetching the legend fails
-             * We try the fetch first without the proxy and if we get a network error, try again with the proxy.
-             */
-            if (error.code === 'ERR_NETWORK') {
+          .catch((error: unknown) => {
+            // If a network error such as CORS
+            if (error instanceof NetworkError) {
               // Try appending link with proxy url to avoid CORS issues
-              queryUrl = `${CV_CONFIG_PROXY_URL}${queryUrl}`;
+              queryUrl = `${CV_CONFIG_PROXY_URL}?${queryUrl}`;
 
               Fetch.fetchBlob(queryUrl)
                 .then((responseBlob) => {
                   // Expected response, return it as image
                   resolve(readImage(responseBlob));
                 })
-                .catch(() => resolve(null));
+                .catch(() => {
+                  // Just absolute fail
+                  resolve(null);
+                });
+            } else {
               // Not a CORS issue, return null
-            } else resolve(null);
+              resolve(null);
+            }
           });
         // No URL to query
       } else resolve(null);

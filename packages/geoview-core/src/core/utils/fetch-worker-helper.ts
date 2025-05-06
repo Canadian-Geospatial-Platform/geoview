@@ -48,7 +48,7 @@ export const fetchWithTimeout = async <T>(url: string, init: RequestInit = {}, t
 
     const data = await response.json();
     return data as T;
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new RequestTimeoutError(timeoutMs);
     }

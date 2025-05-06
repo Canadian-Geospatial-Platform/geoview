@@ -214,7 +214,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       // Analyze the layer filter
       const filterEquation = analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
       layerConfig.filterEquation = filterEquation;
-    } catch (error) {
+    } catch (error: unknown) {
       // Failed
       throw new LayerInvalidLayerFilterError(layerConfig.layerPath, filterValueToUse, this.getLayerFilter(), error as Error);
     }

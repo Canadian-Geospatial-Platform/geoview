@@ -195,7 +195,7 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<TypeJsonObject
     };
 
     return response as unknown as TypeJsonObject;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError('Error in queryAllEsriFeatures', error);
     logger.sendMessage('error');
     throw error;
@@ -212,8 +212,8 @@ const worker = {
   init(): void {
     try {
       logger.logTrace('FetchEsriWorker initialized');
-    } catch {
-      logger.logError('FetchEsriWorker failed to initialize');
+    } catch (error: unknown) {
+      logger.logError('FetchEsriWorker failed to initialize', error);
     }
   },
 
@@ -228,7 +228,7 @@ const worker = {
       logger.logTrace('Starting query processing', JSON.stringify(params));
       const response = params.objectIds === 'all' ? queryAllEsriFeatures(params) : queryEsriFeatures(params);
       return response;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('Query processing failed', error);
       throw error;
     }

@@ -35,7 +35,7 @@ export class FetchEsriWorkerPool extends AbstractWorkerPool<FetchEsriWorkerType>
     try {
       await Promise.all(this.workers.map((worker) => worker.init()));
       this.#logger.logTrace('Worker pool initialized');
-    } catch (error) {
+    } catch (error: unknown) {
       this.#logger.logError('Worker pool initialization failed', error);
       throw error;
     }

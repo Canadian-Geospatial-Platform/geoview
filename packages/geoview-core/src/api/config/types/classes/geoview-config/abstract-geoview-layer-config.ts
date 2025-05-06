@@ -263,7 +263,7 @@ export abstract class AbstractGeoviewLayerConfig {
 
         await rootLayer.fetchLayerMetadata();
       }
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`An error occured while reading the metadata for the layerPath ${rootLayer.getLayerPath()}.`, error);
       rootLayer.setErrorDetectedFlag();
     }
@@ -336,7 +336,7 @@ export abstract class AbstractGeoviewLayerConfig {
 
       try {
         return this.createLayerEntryNode(subLayer.layerId, subLayer.getParentNode());
-      } catch (error) {
+      } catch (error: unknown) {
         subLayer.setErrorDetectedFlag();
         logger.logError(error);
         return subLayer;

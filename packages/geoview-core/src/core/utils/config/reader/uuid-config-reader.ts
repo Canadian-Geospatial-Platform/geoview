@@ -81,7 +81,7 @@ export class UUIDmapConfigReader {
         layers: this.#getLayerConfigFromResponse(uuids, result, lang),
         geocharts: this.#getGeoChartConfigFromResponse(result, lang),
       };
-    } catch (error) {
+    } catch (error: unknown) {
       // If the promise had failed
       if (!result) throw new LayerGeoCoreUUIDNotFoundError(uuids, error as Error);
 

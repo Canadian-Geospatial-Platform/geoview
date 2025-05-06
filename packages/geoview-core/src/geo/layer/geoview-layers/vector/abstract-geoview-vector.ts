@@ -122,7 +122,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
         // Refresh the OL layer (necessary?)
         this.getOLLayer(layerConfig.layerPath)?.changed();
-      } catch (error) {
+      } catch (error: unknown) {
         // Call the failed callback, this will trigger the onError callback on the layer object (which will put the layerStatus to error)
         // and this will remove the failed extent so that OpenLayers may retry loading it later.
         failureCallback?.();

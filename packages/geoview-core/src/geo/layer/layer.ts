@@ -476,7 +476,7 @@ export class LayerApi {
         const promise = geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig as GeoCoreLayerConfig);
 
         // Catch failed promises here. The filled promises will be taken care of with the others below.
-        promise.catch((error) => {
+        promise.catch((error: unknown) => {
           // Show the error(s)
           this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
         });
@@ -514,7 +514,7 @@ export class LayerApi {
 
             // Add it
             this.addGeoviewLayer(geoviewLayerConfig);
-          } catch (error) {
+          } catch (error: unknown) {
             // An error happening here likely means a particular, trivial, config error.
             // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
 
@@ -757,7 +757,7 @@ export class LayerApi {
         // Redirect
         this.addGeoviewLayer(geoviewLayerConfig);
       });
-    } catch (error) {
+    } catch (error: unknown) {
       // An error happening here likely means an issue with the UUID or a trivial config error.
       // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
 
@@ -802,7 +802,7 @@ export class LayerApi {
           // Time to throw to log/show any/all errors that happened during the layer processing
           result.layer.throwAggregatedLayerLoadErrors();
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // GV This is the major catcher of many possible layer processing issues
 
           // Show the error(s).
@@ -969,7 +969,7 @@ export class LayerApi {
     this.#registerForOrderedLayerInfo(layerConfig as TypeLayerEntryConfig);
 
     // Register for TimeSlider
-    this.#registerForTimeSlider(layerConfig as TypeLayerEntryConfig).catch((error) => {
+    this.#registerForTimeSlider(layerConfig as TypeLayerEntryConfig).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('in registration of layer for the time slider', error);
     });
@@ -993,7 +993,7 @@ export class LayerApi {
     // Tell the layer sets about it
     this.#allLayerSets.forEach((layerSet) => {
       // Register the layer to the layer set
-      layerSet.registerLayer(layer).catch((error) => {
+      layerSet.registerLayer(layer).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('in registerLayer in registerLayerUpdate', error);
       });
@@ -1252,7 +1252,7 @@ export class LayerApi {
         TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layerConfig);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch (error: unknown) {
       // Layer failed to load, abandon it for the TimeSlider registration, too bad.
       // The error itself, regarding the loaded failure, is already being taken care of elsewhere.
       // Here, we haven't even made it to a possible layer registration for a possible Time Slider, because we couldn't even get the layer to load anyways.
@@ -1809,7 +1809,7 @@ export class LayerApi {
       FeatureInfoEventProcessor.resetResultSet(mapId, layerPath, 'name');
 
       // Update feature info
-      DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerPath).catch((error) => {
+      DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerPath).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed(`Update all feature info in setGeojsonSource failed for layer ${layerPath}`, error);
       });

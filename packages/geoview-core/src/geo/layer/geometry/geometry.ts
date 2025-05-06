@@ -572,7 +572,7 @@ export class GeometryApi {
     try {
       geometryGroup.vectorLayer.getSource()?.addFeature(geometry as never);
       geometryGroup.vectorLayer.changed();
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`Error adding geometry to group ${geometryGroupId}`, error);
     }
   }

@@ -79,7 +79,7 @@ class SwiperPlugin extends MapPlugin {
 
       // Add the layer path
       SwiperEventProcessor.addLayerPath(this.pluginProps.mapId, layerPath);
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError(error);
     }

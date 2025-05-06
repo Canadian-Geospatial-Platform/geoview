@@ -279,7 +279,7 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // Log error
       logger.logError(error);
       if ((error as Error).message === 'proj') {
@@ -329,7 +329,7 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('WFS');
       // Log error
       logger.logError(error);
@@ -420,7 +420,7 @@ export function AddNewLayer(): JSX.Element {
       } else {
         setLayerList(layers);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('OGC API Feature');
       // Log error
       logger.logError(error);
@@ -449,7 +449,7 @@ export function AddNewLayer(): JSX.Element {
           setLayerList(layers);
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // Log error
       logger.logError(error);
 
@@ -532,7 +532,7 @@ export function AddNewLayer(): JSX.Element {
       } else {
         throw new Error('err'); // TODO: Check - What is this error?
       }
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer(esriOptions(type).err);
       // Log error
       logger.logError(error);
@@ -571,7 +571,7 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('ESRI Image');
       // Log error
       logger.logError(error);
@@ -617,7 +617,7 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('XYZ Tile');
       // Log error
       logger.logError(error);
@@ -657,7 +657,7 @@ export function AddNewLayer(): JSX.Element {
       ];
       setLayerName(layers[0].layerName!);
       setLayerEntries([layers[0]]);
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('CSV');
       // Log error
       logger.logError(error);
@@ -725,7 +725,7 @@ export function AddNewLayer(): JSX.Element {
         setLayerName(layers[0].layerName!);
         setLayerEntries([layers[0]]);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       emitErrorServer('GeoJSON');
       // Log error
       logger.logError(error);
@@ -764,7 +764,7 @@ export function AddNewLayer(): JSX.Element {
   //   ];
   //   setLayerName(layers[0].layerName!);
   //   setLayerEntries([layers[0]]);
-  // } catch (error) {
+  // } catch (error: unknown) {
   //   emitErrorServer('GeoPackage');
   //   // Log error
   //   logger.logError(error);
@@ -880,7 +880,7 @@ export function AddNewLayer(): JSX.Element {
             setStepButtonEnabled(false);
           }
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('promise of layer validation in handleStep2 in AddNewLayer', error);
         });
@@ -952,7 +952,7 @@ export function AddNewLayer(): JSX.Element {
           doneAdding();
           addedLayers.forEach((addedLayer) => doneAddedShowMessage(addedLayer.layer));
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('Promise.allSettled in handleStepLast in AddNewLayer', error);
         });
@@ -983,7 +983,7 @@ export function AddNewLayer(): JSX.Element {
             doneAdding();
             doneAddedShowMessage(addedLayer.layer);
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('addedLayer.promiseLayer in handleStepLast in AddNewLayer', error);
           });

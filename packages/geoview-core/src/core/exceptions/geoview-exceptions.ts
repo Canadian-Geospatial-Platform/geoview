@@ -14,10 +14,10 @@ import { logger } from '@/core/utils/logger';
  */
 export class GeoViewError extends Error {
   /** The localized key or message */
-  messageKey: string;
+  readonly messageKey: string;
 
   /** The parameters to be translated using the localizedKey */
-  messageParams: unknown[] | undefined;
+  readonly messageParams: unknown[] | undefined;
 
   /**
    * Constructs a new GeoViewError.

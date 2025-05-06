@@ -149,7 +149,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
             // Query was processed
             this.resultSet[layerPath].queryStatus = 'processed';
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             // If aborted
             if (error instanceof RequestAbortedError) {
               // Log

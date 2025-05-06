@@ -5,6 +5,7 @@ import {
   RequestAbortedError,
   RequestTimeoutError,
   ResponseTypeError,
+  NetworkError,
 } from '@/core/exceptions/core-exceptions';
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { logger } from '@/core/utils/logger';
@@ -68,9 +69,9 @@ export class Fetch {
 
       // Return the value as Object
       return responseJson as TypeJsonObject;
-    } catch (error) {
+    } catch (error: unknown) {
       // Throw the exceptions that we know
-      Fetch.#throwWhatWeKnow(originalSignal, timeoutSignal, timeoutMs);
+      Fetch.#throwWhatWeKnow(error, originalSignal, timeoutSignal, timeoutMs);
 
       // Throw anything else
       throw error;
@@ -194,9 +195,9 @@ export class Fetch {
 
       // Throw empty response error
       throw new ResponseEmptyError();
-    } catch (error) {
+    } catch (error: unknown) {
       // Throw the exceptions that we know
-      Fetch.#throwWhatWeKnow(originalSignal, timeoutSignal, timeoutMs);
+      Fetch.#throwWhatWeKnow(error, originalSignal, timeoutSignal, timeoutMs);
 
       // Throw anything else
       throw error;
@@ -244,9 +245,9 @@ export class Fetch {
 
       // Get the blob of the response
       return await response.blob();
-    } catch (error) {
+    } catch (error: unknown) {
       // Throw the exceptions that we know
-      Fetch.#throwWhatWeKnow(originalSignal, timeoutSignal, timeoutMs);
+      Fetch.#throwWhatWeKnow(error, originalSignal, timeoutSignal, timeoutMs);
 
       // Throw anything else
       throw error;
@@ -365,6 +366,7 @@ export class Fetch {
    * This method inspects which signal caused the abort and throws an appropriate typed error:
    * - `RequestTimeoutError` if the operation was cancelled due to a timeout.
    * - `RequestAbortedError` if it was aborted by an external (user-provided) signal.
+   * - `NetworkError` if it was a network related issue such as CORS
    * @param {AbortSignal | undefined} originalSignal - The external abort signal passed by the caller (e.g. user cancellation).
    * @param {AbortSignal | undefined} timeoutSignal - The internal abort signal used for enforcing a timeout.
    * @param {number | undefined} timeoutMs - The timeout duration used for the operation (required for timeout error reporting).
@@ -374,6 +376,7 @@ export class Fetch {
    * @private
    */
   static #throwWhatWeKnow(
+    error: unknown,
     originalSignal: AbortSignal | undefined,
     timeoutSignal: AbortSignal | undefined,
     timeoutMs: number | undefined
@@ -386,6 +389,12 @@ export class Fetch {
     // If the original signal caused the abort
     if (originalSignal?.aborted) {
       throw new RequestAbortedError(originalSignal);
+    }
+
+    // If the error is a TypeError, it's likely a network issue
+    if (error instanceof TypeError) {
+      // Likely a network or CORS error
+      throw new NetworkError('Network or CORS error occurred.', 'ERR_NETWORK', error);
     }
   }
 
@@ -402,7 +411,7 @@ export class Fetch {
       .then((result) => {
         logger.logDebug('FETCH TEST OPTION A GOOD', result);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         logger.logError("FETCH TEST OPTION A SHOULDN'T LOG", error);
       });
 
@@ -419,7 +428,7 @@ export class Fetch {
       .then((result) => {
         logger.logDebug("FETCH TEST OPTION B SHOULDN'T LOG", result);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         logger.logError('FETCH TEST OPTION B GOOD', error);
       });
 
@@ -432,7 +441,7 @@ export class Fetch {
       .then((result) => {
         logger.logDebug("FETCH TEST OPTION C SHOULDN'T LOG", result);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         logger.logError('FETCH TEST OPTION C GOOD', error);
       });
 
@@ -448,7 +457,7 @@ export class Fetch {
       .then((result) => {
         logger.logDebug("FETCH TEST OPTION D SHOULDN'T LOG", result);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         logger.logError('FETCH TEST OPTION D GOOD', error);
       });
 
@@ -465,7 +474,7 @@ export class Fetch {
       .then((result) => {
         logger.logDebug("FETCH TEST OPTION E SHOULDN'T LOG", result);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         logger.logError('FETCH TEST OPTION E GOOD', error);
       });
   }

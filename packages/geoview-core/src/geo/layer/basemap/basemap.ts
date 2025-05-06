@@ -70,7 +70,7 @@ export class BasemapApi {
     this.basemapOptions = basemapOptions;
 
     // Create the overview default basemap (no label, no shaded)
-    this.setOverviewMap().catch((error) => {
+    this.setOverviewMap().catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('setOverviewMap in constructor of layer/basemap', error);
     });
@@ -208,7 +208,7 @@ export class BasemapApi {
     try {
       // Create the Core Basemap
       this.overviewMap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
-    } catch (error) {
+    } catch (error: unknown) {
       // Emit about the error
       this.#emitBasemapError({ error: error as Error });
     }

@@ -476,7 +476,7 @@ export abstract class AbstractGeoViewLayer {
         try {
           // Single entry layer
           this.validateLayerEntryConfig(layerConfig);
-        } catch (error) {
+        } catch (error: unknown) {
           // If cancelled error
           if (error instanceof CancelledError) {
             // Cancelled.. skip (this is notably to support WMS special grouping)
@@ -619,9 +619,9 @@ export abstract class AbstractGeoViewLayer {
 
       // Return as-is
       return Promise.resolve(layerConfig);
-    } catch (error) {
+    } catch (error: unknown) {
       // Wrap so that we carry the layerConfig into the reject callback and throw it higher
-      throw new PromiseRejectErrorWrapper(error as Error, layerConfig);
+      throw new PromiseRejectErrorWrapper(error, layerConfig);
     }
   }
 
@@ -662,6 +662,8 @@ export abstract class AbstractGeoViewLayer {
         // Get the config to process
         const layerConfig = listOfLayerEntryConfig[0];
 
+        if (layerConfig.layerStatus === 'error') return undefined;
+
         // If working on a group layer
         if (layerEntryIsGroupLayer(layerConfig)) {
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
@@ -676,14 +678,12 @@ export abstract class AbstractGeoViewLayer {
           return undefined;
         }
 
-        if (layerConfig.layerStatus === 'error') return undefined;
-
         try {
           // Process entry and catch possible error
           const baseLayer = await this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig);
           if (layerGroup) layerGroup.getLayers().push(baseLayer);
           return layerGroup || baseLayer;
-        } catch (error) {
+        } catch (error: unknown) {
           // Add a layer load error
           this.addLayerLoadError(error as Error, layerConfig);
           return undefined;
@@ -711,9 +711,9 @@ export abstract class AbstractGeoViewLayer {
           // promiseOfLayerCreated.push(Promise.resolve(undefined)); commented unnecessary code
         } else {
           // Create promise and catch possible error
-          const promise = this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig).catch((error) => {
+          const promise = this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig).catch((error: unknown) => {
             // Add a layer load error
-            this.addLayerLoadError(error, layerConfig);
+            this.addLayerLoadError(formatError(error), layerConfig);
             return undefined;
           });
 
@@ -748,7 +748,7 @@ export abstract class AbstractGeoViewLayer {
         });
 
       return layerGroup;
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError(error);
 

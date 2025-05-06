@@ -907,7 +907,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       };
 
       return legend;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`Get Legend for ${layerConfig.layerPath} error`, error);
       return null;
     }
@@ -1030,7 +1030,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
           );
           return validateExtent(projExtent, this.getMapViewer().getProjection().getCode());
         }
-      } catch (error) {
+      } catch (error: unknown) {
         logger.logError(`Error fetching geometry from ${queryUrl}`, error);
       }
 
@@ -1071,7 +1071,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       //   });
 
       //   return calculatedExtent;
-      // } catch (error) {
+      // } catch (error: unknown) {
       //   logger.logError(`Error fetching geometry from ${queryUrl}`, error);
       // }
     }

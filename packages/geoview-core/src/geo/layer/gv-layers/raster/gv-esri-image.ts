@@ -135,7 +135,7 @@ export class GVEsriImage extends AbstractGVRaster {
       };
 
       return legend;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`Get Legend for ${layerConfig.layerPath} error`, error);
       return null;
     }

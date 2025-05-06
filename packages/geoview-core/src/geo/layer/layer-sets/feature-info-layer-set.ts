@@ -39,7 +39,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Register a handler on the map click
     this.layerApi.mapViewer.onMapSingleClick((mapViewer, payload) => {
       // Query all layers which can be queried
-      this.queryLayers(payload.lnglat).catch((error) => {
+      this.queryLayers(payload.lnglat).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('queryLayers in onMapSingleClick in FeatureInfoLayerSet', error);
       });
@@ -87,7 +87,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, eventType: EventType = 'click'): void {
     // Propagate
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), eventType, resultSetEntry).catch((error) => {
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), eventType, resultSetEntry).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('FeatureInfoEventProcessor.propagateToStore in FeatureInfoLayerSet', error);
     });
@@ -181,7 +181,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
             // Query was processed
             this.resultSet[layerPath].queryStatus = 'processed';
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             // If aborted
             if (error instanceof RequestAbortedError) {
               // Log

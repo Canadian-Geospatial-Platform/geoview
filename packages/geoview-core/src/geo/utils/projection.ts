@@ -259,9 +259,9 @@ export abstract class Projection {
       // Register in supported projections
       this.PROJECTION_NAMES = { ...this.PROJECTION_NAMES, [code]: projectionName };
       this.PROJECTIONS[code] = Projection.getProjectionFromString(projectionName);
-    } catch {
+    } catch (error: unknown) {
       // Log
-      logger.logError(`Unable to add projection ${projectionName}, definiton not found`);
+      logger.logError(`Unable to add projection ${projectionName}, definiton not found`, error);
       // TODO: Check - Throw?
     }
   }

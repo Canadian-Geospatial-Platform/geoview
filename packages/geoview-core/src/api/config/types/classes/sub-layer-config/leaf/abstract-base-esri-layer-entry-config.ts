@@ -53,7 +53,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
         );
       }
       return;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('Error detected while reading Layer metadata.', error);
     }
 

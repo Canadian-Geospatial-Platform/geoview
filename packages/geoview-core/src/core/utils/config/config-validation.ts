@@ -250,7 +250,7 @@ export class ConfigValidation {
 
             // Add it as a valid entry
             validConfigs.push(geoviewLayerConfigCasted);
-          } catch (error) {
+          } catch (error: unknown) {
             // An error happened with a geoview layer config, log and continue with the others
             GeoViewError.logError(error);
           }

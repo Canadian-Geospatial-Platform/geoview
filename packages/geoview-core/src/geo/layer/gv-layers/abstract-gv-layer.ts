@@ -550,7 +550,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
           this.#emitLegendQueried({ legend });
         }
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('promiseLegend in queryLegend in AbstractGVLayer', error);
       });
@@ -596,7 +596,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         legend: await getLegendStyles(this.getStyle()),
       };
       return legend;
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError(error);
       return null;
@@ -764,7 +764,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       });
 
       return queryResult;
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError(error);
       return [];

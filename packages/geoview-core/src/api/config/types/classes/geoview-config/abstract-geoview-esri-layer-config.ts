@@ -69,7 +69,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         try {
           // On rare occasions, the value returned is not a JSON string, but rather an HTML string, which is an error.
           jsonMetadata = JSON.parse(metadataString);
-        } catch (error) {
+        } catch (error: unknown) {
           logger.logError('The service metadata request returned an invalid JSON string.\n', error);
           throw new GeoviewLayerConfigError('Invalid JSON string');
         }
@@ -91,7 +91,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
       } else {
         throw new GeoviewLayerConfigError('An empty metadata object was returned');
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
