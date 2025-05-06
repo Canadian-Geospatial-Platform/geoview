@@ -49,6 +49,9 @@ enum ScaleMode {
   I,
 }
 
+// Canada's bounding box, our default map extent.
+const DEFAULT_EXTENTS = Rectangle.fromDegrees(-140.99778, 41.6751050889, -52.6480987209, 83.23324);
+
 // Possible Scale Values;
 const ScaleKm = [500, 200, 100, 50, 20, 10, 5, 2, 1];
 const ScaleM = [500, 200, 100, 50, 20, 10, 5, 2, 1, 0.5];
@@ -240,9 +243,7 @@ export function CesiumMap(props: MapProps): JSX.Element {
     if (!oViewerRef.current) return undefined;
     if (isInitialized()) return undefined;
     setCesiumIsInitialized(true);
-    Camera.DEFAULT_VIEW_RECTANGLE = Rectangle.fromDegrees(
-      ...viewer.convertExtentFromMapProjToProj(viewer.map.getView().calculateExtent(), 'EPSG:4326')
-    );
+    Camera.DEFAULT_VIEW_RECTANGLE = DEFAULT_EXTENTS;
     Camera.DEFAULT_VIEW_FACTOR = 0;
 
     const initCesium = async (): Promise<void> => {
@@ -265,6 +266,10 @@ export function CesiumMap(props: MapProps): JSX.Element {
       cViewerRef.current = cViewer;
       setCesiumViewer(cViewer);
       setCesiumSize([cViewer.canvas.width, cViewer.canvas.height]);
+      cViewer.camera.flyTo({
+        destination: Rectangle.fromDegrees(...viewer.convertExtentFromMapProjToProj(viewer.map.getView().calculateExtent(), 'EPSG:4326')),
+        duration: 0,
+      });
       const observer = new ResizeObserver(() => {
         setCesiumSize([cViewer.canvas.width, cViewer.canvas.height]);
       });

@@ -23,6 +23,7 @@ export interface ICesiumState {
     getIsInitialized: () => boolean;
     zoomToLayer: (layerPath: string) => void;
     zoomToExtent: (latLng: [number, number], bbox?: [number, number, number, number]) => void;
+    zoomToHome: () => void;
   };
   setterActions: {
     setCesiumViewer: (viewer: Viewer | null) => void;
@@ -93,6 +94,12 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
               duration: 0,
             });
           }
+        }
+      },
+      zoomToHome(): void {
+        const viewer = get().cesiumState.cViewerRef.current;
+        if (viewer) {
+          viewer.camera.flyHome(0);
         }
       },
     },
