@@ -1350,7 +1350,7 @@ function processUniquePolygon(
     const { hasDefault, fields, info } = styleSettings;
     const i = searchUniqueValueEntry(fields, info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePolygon(info[i].settings, feature);
-    if (i === undefined && hasDefault !== undefined && (legendFilterIsOff || info[info.length - 1].visible !== false))
+    if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimplePolygon(info[info.length - 1].settings, feature);
   }
   return undefined;
