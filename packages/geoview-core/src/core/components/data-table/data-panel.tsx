@@ -36,6 +36,9 @@ interface DataPanelType {
  */
 
 export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPanelType): JSX.Element {
+  // Log
+  logger.logTraceRender('components/data-table/data-panel');
+
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -251,7 +254,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
             .filter((data) => data.layerPath === selectedLayerPath)
             .map((data: MappedLayerDataType) => (
               <Box key={data.layerPath} ref={dataTableRef}>
-                <DataTable data={data} layerPath={data.layerPath} />
+                <DataTable data={data} layerPath={data.layerPath} containerType={containerType} />
               </Box>
             ))}
         </>

@@ -7,35 +7,13 @@
     "basemapOptions": {
       "basemapId": "transport",
       "shaded": false,
-      "labeled": false
+      "labeled": true
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "uniqueValueId",
-        "geoviewLayerName": "uniqueValue",
-        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
-        "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "1"
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "esriFeatureLYR5",
-        "geoviewLayerName": "Top Projects",
-        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/",
-        "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0"
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "GeoJSON Sample",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
@@ -49,7 +27,7 @@
           {
             "entryType": "group",
             "layerId": "point-feature-group",
-            "layerName": "point-feature-group",
+            "layerName": "Points & Icons",
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
@@ -61,7 +39,10 @@
               },
               {
                 "layerId": "points_1.json",
-                "layerName": "Points 1"
+                "layerName": "Points 1",
+                "initialSettings": {
+                  "controls": { "remove": true }
+                }
               },
               {
                 "layerId": "points_2.json",
@@ -78,15 +59,35 @@
     ]
   },
   "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
-    },
-    "selectedTab": "layers",
-    "selectedLayersLayerPath": "uniqueValueId/1"
-  },
-  "navBar": ["zoom", "fullscreen", "home", "location"],
   "components": ["north-arrow", "overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
+    },
+    "selectedTab": "layers"
+  },
   "corePackages": [],
-  "externalPackages": []
+  "globalSettings": {
+    "canRemoveSublayers": false,
+    "disabledLayerTypes": [
+      "geoCore",
+      "CSV",
+      "esriDynamic",
+      "esriFeature",
+      "esriImage",
+      "GeoJSON",
+      "GeoPackage",
+      "xyzTiles",
+      "ogcFeature",
+      "ogcWfs",
+      "ogcWms",
+      "imageStatic",
+      "vectorTiles"
+    ]
+  }
 }

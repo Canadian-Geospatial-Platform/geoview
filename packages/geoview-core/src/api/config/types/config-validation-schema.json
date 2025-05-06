@@ -114,7 +114,8 @@
         "fullscreen",
         "home",
         "location",
-        "basemap-select"
+        "basemap-select",
+        "projection"
       ]
     },
     "TypeNavBarProps": {
@@ -432,6 +433,21 @@
           "description": "Whether or not sublayers can be removed from layer groups.",
           "type": "boolean",
           "default": true
+        },
+        "disabledLayerTypes": {
+          "description": "List of layer types that are disabled in the viewer.",
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/TypeGeoviewLayerType"
+              },
+              {
+                "type": "string",
+                "enum": ["geoCore"]
+              }
+            ]
+          }
         }
       }
     },

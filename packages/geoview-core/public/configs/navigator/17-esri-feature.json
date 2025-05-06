@@ -11,6 +11,47 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "FeatureServerLyr1",
+        "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Toronto Neighbourhoods",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "AREA_NA7"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "FeatureServerLyr2",
+        "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "U2 Tour Locations",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "Venue",
+                "outfields": [
+                  { "name": "Venue", "alias": "Venue", "type": "string", "domain": null },
+                  { "name": "Event", "alias": "Event", "type": "string", "domain": null },
+                  { "name": "Tour", "alias": "Tour", "type": "string", "domain": null },
+                  { "name": "City", "alias": "City", "type": "string", "domain": null },
+                  { "name": "Date", "alias": "Date", "type": "date", "domain": null }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "uniqueValueId",
         "geoviewLayerName": "uniqueValue",
         "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
@@ -18,17 +59,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "1"
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "esriFeatureLYR1",
-        "geoviewLayerName": "Temporal_Test_Bed_en",
-        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/",
-        "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0"
           }
         ]
       },

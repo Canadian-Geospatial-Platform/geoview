@@ -38,9 +38,8 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
   const open = Boolean(anchorEl);
 
   /**
-   * Show export menu.
+   * Shows export menu.
    */
-
   const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     // Log
     logger.logTraceUseCallback('DATA-TABLE - EXPORT BUTTON - handleClick');
@@ -49,9 +48,8 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
   }, []);
 
   /**
-   * Close export menu.
+   * Closes export menu.
    */
-
   const handleClose = useCallback(() => {
     // Log
     logger.logTraceUseCallback('DATA-TABLE - EXPORT BUTTON - handleClose');
@@ -60,7 +58,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
   }, []);
 
   /**
-   * Build CSV Options for download.
+   * Builds CSV Options for download.
    */
   const getCsvOptions = useMemo(() => {
     // Log
@@ -82,9 +80,8 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
   }, [columns, getLayer, layerPath]);
 
   /**
-   * Export data table in csv format.
+   * Exports data table in csv format.
    */
-
   const handleExportData = useCallback((): void => {
     // Log
     logger.logTraceUseCallback('DATA-TABLE - EXPORT BUTTON - handleExportData');

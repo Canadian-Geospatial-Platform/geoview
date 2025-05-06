@@ -118,8 +118,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
       openIn3dButton: { icon: <SendIcon />, content: <OpenIn3dButton key="openIn3dButton" /> },
-      guide: { icon: <QuestionMarkIcon />, content: <Guide fullWidth /> },
-      details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
+      guide: { icon: <QuestionMarkIcon />, content: <Guide fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
+      details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       legend: { icon: <LegendIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.APP_BAR} /> },
@@ -328,7 +328,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         const panel: TypePanelProps = {
           panelId: `Appbar${capitalize(tab)}PanelId`,
           panelGroupName: tab,
-          type: 'app-bar',
+          type: CONTAINER_TYPE.APP_BAR,
           title: capitalize(tab),
           icon: memoPanels[tab].icon,
           content: memoPanels[tab].content,

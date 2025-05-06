@@ -26,6 +26,8 @@ const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitu
 const EXCLUDED_HEADERS_LNG = ['longitude', 'lon', 'x', 'xcoord', 'longitude|longitude', 'longitude | longitude'];
 const EXCLUDED_HEADERS_GEN = ['geometry', 'geom'];
 const EXCLUDED_HEADERS = EXCLUDED_HEADERS_LAT.concat(EXCLUDED_HEADERS_LNG).concat(EXCLUDED_HEADERS_GEN);
+// GV Order of these keywords matter, preference will be given in this order
+const NAME_FIELD_KEYWORDS = ['^name$', '^title$', '^label$'];
 
 /**
  * The AbstractGeoViewVector class.
@@ -425,6 +427,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       headers.forEach((header, index) => {
         // If not excluded
         if (!excludedHeaders.includes(header)) {
+          // Skip complex fields
+          if (firstRow[index] && typeof firstRow[index] === 'object' && !Array.isArray(firstRow[index])) {
+            logger.logWarning(`Skipping field '${header}' as it is a complex field`);
+            return;
+          }
+
           let type = 'string';
           if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
 
@@ -446,8 +454,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Set name field to first value
     if (!layerConfig.source.featureInfo.nameField) {
+      // Try to set nameField to a name field
+      const nameField = NAME_FIELD_KEYWORDS.reduce<TypeOutfields | undefined>((found, keyword) => {
+        if (found) return found;
+        return layerConfig.source!.featureInfo!.outfields!.find((field) => {
+          return new RegExp(keyword, 'i').test(field.name);
+        });
+      }, undefined);
+
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo!.outfields[0].name;
+      layerConfig.source.featureInfo.nameField = nameField ? nameField.name : layerConfig.source.featureInfo!.outfields[0].name;
     }
   }
 

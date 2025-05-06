@@ -53,7 +53,7 @@ export const MapInfo = memo(function MapInfo(): JSX.Element {
       height: expanded ? '6rem' : '3rem',
       background: theme.palette.geoViewColor.bgColor.dark[800],
       color: theme.palette.geoViewColor.bgColor.light[800],
-      width: interaction === 'dynamic' ? '100%' : 'fit-content',
+      width: interaction === 'dynamic' ? 'calc(100% - 60px)' : 'fit-content',
     }),
     [expanded, theme.palette.geoViewColor.bgColor, interaction]
   );

@@ -5,6 +5,7 @@ import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers'
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeGeoviewLayerTypeWithGeoCore } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/config/types/config-constants';
@@ -17,6 +18,7 @@ import { SnackbarType } from '@/core/utils/notifications';
 type AppActions = IAppState['actions'];
 
 export interface IAppState {
+  disabledLayerTypes: TypeGeoviewLayerTypeWithGeoCore[];
   displayLanguage: TypeDisplayLanguage;
   displayTheme: TypeDisplayTheme;
   guide: TypeGuideObject | undefined;
@@ -66,6 +68,7 @@ export interface IAppState {
  */
 export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppState {
   return {
+    disabledLayerTypes: [],
     displayLanguage: 'en' as TypeDisplayLanguage,
     displayTheme: 'geo.ca',
     guide: {},
@@ -87,6 +90,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       set({
         appState: {
           ...get().appState,
+          disabledLayerTypes: geoviewConfig.globalSettings?.disabledLayerTypes || [],
           displayLanguage: lang as TypeDisplayLanguage,
           displayTheme: geoviewConfig.theme || 'geo.ca',
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocatorUrl,
@@ -323,6 +327,8 @@ export interface TypeGuideObject {
 // **********************************************************
 export const useAppCircularProgressActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isCircularProgressActive);
 export const useAppCrosshairsActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isCrosshairsActive);
+export const useAppDisabledLayerTypes = (): TypeGeoviewLayerTypeWithGeoCore[] =>
+  useStore(useGeoViewStore(), (state) => state.appState.disabledLayerTypes);
 export const useAppDisplayLanguage = (): TypeDisplayLanguage => useStore(useGeoViewStore(), (state) => state.appState.displayLanguage);
 export const useAppDisplayTheme = (): TypeDisplayTheme => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);
 export const useAppFullscreenActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);

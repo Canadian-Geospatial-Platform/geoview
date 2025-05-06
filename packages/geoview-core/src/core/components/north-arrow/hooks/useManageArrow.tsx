@@ -47,6 +47,9 @@ export const useManageArrow = (): ArrowReturn => {
    * Calculation taken from RAMP: https://github.com/fgpv-vpgf/fgpv-vpgf/blob/master/packages/ramp-core/src/app/geo/map-tools.service.js
    */
   const { calculatedRotation, calculatedOffset } = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('USE-MANAGE-ARROW - calculatedRotation, calculatedOffset');
+
     // Early return if no arrow element
     if (!northArrowElement) {
       return { calculatedRotation: { angle: 0 }, calculatedOffset: 0 };
@@ -85,7 +88,11 @@ export const useManageArrow = (): ArrowReturn => {
       let newRotation = { angle: 0 };
       if (fixNorth && (Math.round(angle.current) !== Math.round(arrowAngle) || mapZoom > 7)) {
         angle.current = arrowAngle;
-        setRotation(((180 - arrowAngle) * (2 * Math.PI)) / 360);
+
+        // Calculate the rotation delta and apply only when higher then 0.1 to solve bugs when in middle of
+        // Canada and the map is trying to set rotation forever
+        const diff = Math.abs(mapRotation - ((180 - arrowAngle) * (2 * Math.PI)) / 360);
+        if (diff > 0.1) setRotation(((180 - arrowAngle) * (2 * Math.PI)) / 360);
       } else {
         const mapRotationValue = mapRotation * (180 / Math.PI);
         newRotation = { angle: 90 - angleDegrees + mapRotationValue };
@@ -148,13 +155,15 @@ export const useManageArrow = (): ArrowReturn => {
   // Update state with calculated values
   // State updates are side effects and belong in useEffect
   useEffect(() => {
+    // Log
     logger.logTraceUseEffect('USE-MANAGE-ARROW - calculatedRotation, calculatedOffset', {
       calculatedRotation,
       calculatedOffset,
     });
+
     setRotationAngle(calculatedRotation);
     setNorthOffset(calculatedOffset);
-  }, [calculatedRotation, calculatedOffset]);
+  }, [calculatedRotation, calculatedOffset, rotationAngle, northOffset]);
 
   return { rotationAngle, northOffset };
 };

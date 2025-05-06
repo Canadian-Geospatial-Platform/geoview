@@ -17,7 +17,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   layerDetails: {
     padding: '20px',
-    width: '100%',
   },
   buttonDescriptionContainer: {
     display: 'flex',

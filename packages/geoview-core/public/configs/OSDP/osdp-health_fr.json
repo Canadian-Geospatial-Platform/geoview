@@ -80,12 +80,16 @@
       {
         "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",
         "geoviewLayerName": "Le Réseau canadien de surveillance radiologique - Radioactivité de l’air",
-        "zIndex": 2,
         "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
+        "initialSettings": {
+        "states": {
+          "legendCollapsed": true
+        }
+          },
         "listOfLayerEntryConfig": [
           {
-            "layerId": "1",
+            "layerId": "0",
             "layerName": "Radioactivité de l’air",
             "initialSettings": {
               "states": {
@@ -95,7 +99,7 @@
             }
           },
           {
-            "layerId": "2",
+            "layerId": "1",
             "layerName": "Périmètre de localisation des stations",
             "initialSettings": {
               "states": {

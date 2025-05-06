@@ -25,6 +25,7 @@ import { TypeCSVLayerConfig, CSV as CsvGeoviewClass } from '@/geo/layer/geoview-
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useAppDisabledLayerTypes } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
@@ -38,6 +39,7 @@ import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { isValidUUID } from '@/core/utils/utilities';
 import { GeoCore } from '@/geo/layer/other/geocore';
 import { GeoViewLayerAddedResult, LayerApi } from '@/geo/layer/layer';
 import {
@@ -90,6 +92,7 @@ export function AddNewLayer(): JSX.Element {
 
   // get values from store
   const mapId = useGeoViewMapId();
+  const disabledLayerTypes = useAppDisabledLayerTypes();
   const { setDisplayState } = useLayerStoreActions();
 
   const isMultiple = (): boolean =>
@@ -153,6 +156,16 @@ export function AddNewLayer(): JSX.Element {
   const emitErrorNone = (): void => {
     setIsLoading(false);
     api.getMapViewer(mapId).notifications.showError('layers.errorNone', [], false);
+  };
+
+  /**
+   * Emits an error dialogue when a layer type is disabled
+   *
+   * @param disabledType label for the TextField input that cannot be empty
+   */
+  const emitErrorDisabled = (disabledType: string): void => {
+    setIsLoading(false);
+    api.getMapViewer(mapId).notifications.showError('layers.errorDisabled', [disabledType], false);
   };
 
   /**
@@ -496,7 +509,9 @@ export function AddNewLayer(): JSX.Element {
               new EsriFeatureLayerEntryConfig({
                 geoviewLayerConfig: esriGeoviewLayerConfig,
                 layerId:
-                  layerURL.split('/').pop()?.toLowerCase() !== 'mapserver' && layerURL.split('/').pop()?.toLowerCase() !== 'featureserver'
+                  // Remove trailing slash (/) so pop doesn't return empty string
+                  layerURL.replace(/\/$/, '').split('/').pop()?.toLowerCase() !== 'mapserver' &&
+                  layerURL.replace(/\/$/, '').split('/').pop()?.toLowerCase() !== 'featureserver'
                     ? layerURL.split('/').pop()
                     : (esriMetadata.layers[0].id as string),
                 schemaTag: CONST_LAYER_TYPES.ESRI_FEATURE,
@@ -758,36 +773,63 @@ export function AddNewLayer(): JSX.Element {
   // };
 
   /**
-   * Attempt to determine the layer type based on the URL format
+   * Helper function for setting the layer type if it's allowed
+   * @param {TypeGeoviewLayerTypeWithGeoCore} layerTypeValue
    */
-  const bestGuessLayerType = (): void => {
-    const layerTokens = displayURL.toUpperCase().split('/');
-    const layerId = parseInt(layerTokens[layerTokens.length - 1], 10);
-    if (displayURL.toUpperCase().endsWith('MAPSERVER') || displayURL.toUpperCase().endsWith('MAPSERVER/')) {
-      setLayerType(ESRI_DYNAMIC);
-    } else if (
-      displayURL.toUpperCase().indexOf('FEATURESERVER') !== -1 ||
-      (displayURL.toUpperCase().indexOf('MAPSERVER') !== -1 && !Number.isNaN(layerId))
-    ) {
-      setLayerType(ESRI_FEATURE);
-    } else if (displayURL.toUpperCase().indexOf('IMAGESERVER') !== -1) {
-      setLayerType(ESRI_IMAGE);
-    } else if (layerTokens.indexOf('WFS') !== -1) {
-      setLayerType(WFS);
-    } else if (displayURL.toUpperCase().endsWith('.JSON') || displayURL.toUpperCase().endsWith('.GEOJSON')) {
-      setLayerType(GEOJSON);
-    } else if (displayURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || displayURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
-      setLayerType(XYZ_TILES);
-    } else if (displayURL.indexOf('/') === -1 && displayURL.replaceAll('-', '').length === 32) {
-      setLayerType(GEOCORE);
-    } else if (displayURL.toUpperCase().indexOf('WMS') !== -1) {
-      setLayerType(WMS);
-    } else if (displayURL.toUpperCase().endsWith('.CSV') || displayURL.toUpperCase().includes('.CSV?')) {
-      setLayerType(CSV);
-    } else {
+  const setLayerTypeIfAllowed = (layerTypeValue: TypeGeoviewLayerTypeWithGeoCore): boolean => {
+    if (disabledLayerTypes.includes(layerTypeValue)) {
+      emitErrorDisabled(layerTypeValue);
       setLayerType('');
       setStepButtonEnabled(false);
+      return false;
     }
+    setLayerType(layerTypeValue);
+    return true;
+  };
+
+  /**
+   * Attempt to determine the layer type based on the URL format
+   */
+  const bestGuessLayerType = (): boolean => {
+    if (/MAPSERVER\/?/i.test(displayURL)) {
+      return setLayerTypeIfAllowed(ESRI_DYNAMIC);
+    }
+
+    if (/(?:FEATURESERVER|MAPSERVER(?:\/\d+)+)/i.test(displayURL)) {
+      return setLayerTypeIfAllowed(ESRI_FEATURE);
+    }
+
+    if (/IMAGESERVER/i.test(displayURL)) {
+      return setLayerTypeIfAllowed(ESRI_IMAGE);
+    }
+
+    if (/.(?:GEO)?JSON(?:$|\?)/i.test(displayURL)) {
+      return setLayerTypeIfAllowed(GEOJSON);
+    }
+
+    if (/\{z\}\/{[xy]}\/{[xy]}/i.test(displayURL)) {
+      return setLayerTypeIfAllowed(XYZ_TILES);
+    }
+
+    if (isValidUUID(displayURL)) {
+      return setLayerTypeIfAllowed(GEOCORE);
+    }
+
+    if (/WFS/i.test(displayURL)) {
+      return setLayerTypeIfAllowed(WFS);
+    }
+
+    if (/WMS/i.test(displayURL)) {
+      return setLayerTypeIfAllowed(WMS);
+    }
+
+    if (/.CSV(?:$|\?)/i.test(displayURL)) {
+      return setLayerTypeIfAllowed(CSV);
+    }
+
+    setLayerType('');
+    setStepButtonEnabled(false);
+    return true;
   };
 
   /**
@@ -799,8 +841,7 @@ export function AddNewLayer(): JSX.Element {
       valid = false;
       emitErrorNone();
     }
-    if (valid) {
-      bestGuessLayerType();
+    if (valid && bestGuessLayerType()) {
       setActiveStep(1);
     }
   };
@@ -1188,7 +1229,7 @@ export function AddNewLayer(): JSX.Element {
         steps={[
           {
             stepLabel: {
-              children: t('layers.stepOne'),
+              children: disabledLayerTypes.includes(GEOCORE) ? t('layers.stepOneNoGeocore') : t('layers.stepOne'),
             },
             stepContent: {
               children: (
@@ -1253,7 +1294,7 @@ export function AddNewLayer(): JSX.Element {
                   <p style={{ textAlign: 'center' }}>{t('layers.or')}</p>
                   <TextField
                     sx={{ width: '100%' }}
-                    label={t('layers.url')}
+                    label={disabledLayerTypes.includes(GEOCORE) ? t('layers.urlNoGeocore') : t('layers.url')}
                     variant="standard"
                     value={displayURL}
                     onChange={handleInput}
@@ -1283,13 +1324,17 @@ export function AddNewLayer(): JSX.Element {
                       id: 'service-type-label',
                     }}
                     ref={serviceTypeRef}
-                    menuItems={layerOptions.map(([value, label]) => ({
-                      key: value,
-                      item: {
-                        value,
-                        children: label,
-                      },
-                    }))}
+                    menuItems={layerOptions
+                      .filter(([value]) => {
+                        return !disabledLayerTypes.includes(value as TypeGeoviewLayerTypeWithGeoCore);
+                      })
+                      .map(([value, label]) => ({
+                        key: value,
+                        item: {
+                          value,
+                          children: label,
+                        },
+                      }))}
                   />
                   <NavButtons handleNext={handleStep2} />
                 </>

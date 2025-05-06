@@ -18,7 +18,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "Aire protégée et conservée"
+            "layerName": "Aire conservées au Canada"
           }
         ]
       },
@@ -30,7 +30,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "Lieux Prioritaires : Projets"
+            "layerName": "Lieux prioritaires pour les espèces en péril"
           }
         ]
       }

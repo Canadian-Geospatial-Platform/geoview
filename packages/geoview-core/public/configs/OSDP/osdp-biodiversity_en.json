@@ -18,7 +18,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "Protected and conserved area"
+            "layerName": "Canada’s conserved areas"
           }
         ]
       },
@@ -30,7 +30,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "Priority Places: Projects"
+            "layerName": "Priority Places For Species at Risk"
           }
         ]
       }
