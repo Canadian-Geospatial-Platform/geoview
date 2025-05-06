@@ -181,7 +181,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
               MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
             }
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             // If aborted
             if (error instanceof RequestAbortedError) {
               // Log

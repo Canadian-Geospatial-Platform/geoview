@@ -276,7 +276,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
           }
         }
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('getMapViewerPluginsInstance in useEffect in footer-bar', error);
       });
@@ -318,12 +318,12 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
             toJsonObject({
               mapId,
             })
-          ).catch((error) => {
+          ).catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('api.plugin.addPlugin(time-slider) in useEffect in FooterBar', error);
           });
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('api.plugin.loadScript(time-slider) in useEffect in FooterBar', error);
         });
@@ -340,12 +340,12 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
             toJsonObject({
               mapId,
             })
-          ).catch((error) => {
+          ).catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('api.plugin.addPlugin(geochart) in useEffect in FooterBar', error);
           });
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('api.plugin.loadScript(geochart) in useEffect in FooterBar', error);
         });

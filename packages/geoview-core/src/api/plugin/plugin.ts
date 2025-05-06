@@ -153,7 +153,7 @@ export abstract class Plugin {
                 logger.logTraceCore('Plugin - addPlugin file config', result);
                 pluginConfigObj = result;
               }
-            } catch (error) {
+            } catch (error: unknown) {
               // Log warning
               logger.logWarning(`Config not found.`, error);
             }
@@ -232,7 +232,7 @@ export abstract class Plugin {
       for (let i = 0; i < Object.keys(recordOfPlugins).length; i += 1) {
         const pluginId = Object.keys(recordOfPlugins)[i];
 
-        Plugin.removePlugin(pluginId, mapId).catch((error) => {
+        Plugin.removePlugin(pluginId, mapId).catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('removePlugins in plugins.ts', error);
         });

@@ -41,7 +41,7 @@ export class Notifications {
       count: 1,
     };
 
-    AppEventProcessor.addNotification(this.mapId, notification).catch((error) => {
+    AppEventProcessor.addNotification(this.mapId, notification).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('addNotification in Notifications', error);
     });

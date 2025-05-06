@@ -138,7 +138,7 @@ export class GVImageStatic extends AbstractGVRaster {
         type: CONST_LAYER_TYPES.IMAGE_STATIC,
         legend: null,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`Error getting legend for ${layerConfig.layerPath}`, error);
       return null;
     }

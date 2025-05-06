@@ -64,7 +64,7 @@ const useControlActions = (layerPath: string): ControlActions => {
       },
       handleZoomTo: (event: React.MouseEvent): void => {
         event.stopPropagation();
-        zoomToLayerExtent(layerPath).catch((error) => {
+        zoomToLayerExtent(layerPath).catch((error: unknown) => {
           logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
         });
       },

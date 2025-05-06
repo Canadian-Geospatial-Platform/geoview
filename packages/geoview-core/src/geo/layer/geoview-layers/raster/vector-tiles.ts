@@ -126,7 +126,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
       applyStyle(olLayer, appliedStyle, {
         resolutions: resolutions?.length ? resolutions : [],
-      }).catch((error) => {
+      }).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('applyStyle in processOneLayerEntry in VectorTiles', error);
       });

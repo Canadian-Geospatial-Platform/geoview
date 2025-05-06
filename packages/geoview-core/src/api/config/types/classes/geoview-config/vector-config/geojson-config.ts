@@ -149,7 +149,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
       }
 
       await this.createLayerTree();
-    } catch (error) {
+    } catch (error: unknown) {
       // GV Do we want to set layers in error if there is an error loading metadata?
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();

@@ -14,7 +14,7 @@ import { LayerError } from '@/core/exceptions/layer-exceptions';
  */
 export class LayerEntryConfigError extends LayerError {
   /** The configuration associated with the GeoView layer */
-  layerConfig: TypeLayerEntryConfig;
+  readonly layerConfig: TypeLayerEntryConfig;
 
   /**
    * Protected constructor to initialize the LayerEntryConfigError.

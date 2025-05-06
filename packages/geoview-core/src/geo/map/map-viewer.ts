@@ -317,10 +317,12 @@ export class MapViewer {
 
     // Load the list of geoview layers in the config to add all layers on the map
     // TODO: refactor - remove the cast as MapConfigLayerEntry[] everywhere
-    this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[]).catch((error) => {
-      // Log
-      logger.logPromiseFailed('loadListOfGeoviewLayer in initMap in MapViewer', error);
-    });
+    this.layer
+      .loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[])
+      .catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('loadListOfGeoviewLayer in initMap in MapViewer', error);
+      });
 
     // check if geometries are provided from url
     this.loadGeometries();
@@ -329,7 +331,7 @@ export class MapViewer {
     this.#mapInit = true;
     this.#emitMapInit();
 
-    MapEventProcessor.resetBasemap(this.mapId).catch((error) => {
+    MapEventProcessor.resetBasemap(this.mapId).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed(' MapEventProcessor.resetBasemap in map-viewer', error);
     });
@@ -388,7 +390,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapMoveEnd({ lnglat: centerCoordinates });
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapMoveEnd', error);
     }
@@ -412,7 +414,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapPointerMove(pointerPosition);
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapPointerMove', error);
     }
@@ -433,7 +435,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapPointerStop(pointerPosition);
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapPointerStopped', error);
     }
@@ -457,7 +459,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapSingleClick(pointerPosition);
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapSingleClick', error);
     }
@@ -512,7 +514,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapZoomEnd({ zoom });
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapZoomEnd', error);
     }
@@ -534,7 +536,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapRotation({ rotation });
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapRotation', error);
     }
@@ -560,7 +562,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapChangeSize({ size });
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapChangeSize', error);
     }
@@ -596,7 +598,7 @@ export class MapViewer {
           logger.logMarkerCheck(`mapReady-${this.mapId}`, `for map to be ready. Layers are still being processed...`);
 
           // Redirect
-          this.#checkMapReadyGo().catch((error) => {
+          this.#checkMapReadyGo().catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('checkMapReadyGo in checkMapReady in MapViewer', error);
           });
@@ -619,7 +621,7 @@ export class MapViewer {
     MapEventProcessor.initMapControls(this.mapId);
 
     // Load the guide
-    AppEventProcessor.setGuide(this.mapId).catch((error) => {
+    AppEventProcessor.setGuide(this.mapId).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('in setGuide in #checkMapReadyGo', error);
     });
@@ -640,7 +642,7 @@ export class MapViewer {
     });
 
     // Start checking for layers result sets to be ready
-    this.#checkLayerResultSetReady().catch((error) => {
+    this.#checkLayerResultSetReady().catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('Failed in #checkMapReadyGo in #checkLayerResultSetReady', error);
     });
@@ -666,7 +668,7 @@ export class MapViewer {
       // Zoom to extent
       this.zoomToExtent(this.convertExtentLngLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent), {
         padding: [0, 0, 0, 0],
-      }).catch((error) => {
+      }).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('Failed in #checkMapReadyGo in zoomToExtent', error);
       });
@@ -690,7 +692,7 @@ export class MapViewer {
         // Zoom to calculated extent
         if (layerExtents.length) {
           // Zoom on the layers extents
-          this.zoomToExtent(layerExtents).catch((error) => {
+          this.zoomToExtent(layerExtents).catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('Failed in #checkMapReadyGo in onMapLayersLoaded', error);
           });
@@ -916,7 +918,7 @@ export class MapViewer {
     // enter fullscreen
     if (status && element) {
       if (element.requestFullscreen) {
-        element.requestFullscreen().catch((error) => {
+        element.requestFullscreen().catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('element.requestFullscreen', error);
         });
@@ -954,7 +956,7 @@ export class MapViewer {
               // Remove the listener after handling
               this.map.un('change:size', handleSizeChange);
             })
-            .catch((error) => {
+            .catch((error: unknown) => {
               logger.logError('Error during zoom after fullscreen exit:', error);
             });
       };
@@ -962,7 +964,7 @@ export class MapViewer {
       // Add the listener before exiting fullscreen
       this.map.on('change:size', handleSizeChange);
       if (document.exitFullscreen) {
-        document.exitFullscreen().catch((error) => {
+        document.exitFullscreen().catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('document.exitFullscreen', error);
         });
@@ -1232,7 +1234,7 @@ export class MapViewer {
               this.layer.geometry.addPolygon(data.geometry.coordinates as number[] | Coordinate[][], undefined, generateId());
             }
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('fetchJson in loadGeometry in MapViewer', error);
           });
@@ -1263,7 +1265,7 @@ export class MapViewer {
     // Remove all layers
     try {
       this.layer.removeAllGeoviewLayers();
-    } catch (error) {
+    } catch (error: unknown) {
       // Failed to remove layers, eat the exception and continue to remove the map
       logger.logError('Failed to remove layers', error);
     }
@@ -1296,7 +1298,7 @@ export class MapViewer {
     const mapDiv = await this.remove(false);
 
     // TODO: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
-    api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height).catch((error) => {
+    api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height).catch((error: unknown) => {
       // Log
       logger.logError(`Couldn't reload the map in map-viewer`, error);
     });
@@ -1309,7 +1311,7 @@ export class MapViewer {
    */
   reloadWithCurrentState(maintainGeocoreLayerNames: boolean = true): void {
     const currentMapConfig = this.createMapConfigFromMapState(maintainGeocoreLayerNames);
-    this.reload(currentMapConfig).catch((error) => {
+    this.reload(currentMapConfig).catch((error: unknown) => {
       // Log
       logger.logError(`Couldn't reload the map in map-viewer`, error);
     });
@@ -1510,7 +1512,7 @@ export class MapViewer {
       // return angle (180 is pointing north)
       return ((bearing + 360) % 360).toFixed(1);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch (error: unknown) {
       return '180.0';
     }
   }

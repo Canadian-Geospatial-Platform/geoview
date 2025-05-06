@@ -186,7 +186,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
           // Log
           logger.logError('SWIPER - Failed to find layer to attach layer events', layerPath);
         }
-      } catch (error) {
+      } catch (error: unknown) {
         // Log
         logger.logError('SWIPER - Failed to attach layer events', viewer.layer?.geoviewLayers, layerPath, error);
       }
@@ -206,7 +206,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // For each layer path
     associatedLayerPaths.forEach((layerPath: string) => {
       // Wire events on the layer path
-      attachLayerEventsOnPath(layerPath).catch((error) => {
+      attachLayerEventsOnPath(layerPath).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('attachLayerEventsOnPath in useEffect in Swiper', error);
       });
@@ -232,7 +232,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
             // Log
             logger.logError('SWIPER - Failed to find layer to un-attach layer events', layerPath);
           }
-        } catch (error) {
+        } catch (error: unknown) {
           // Log
           logger.logError('SWIPER - Failed to un-attach layer events', layerPath, error);
         }

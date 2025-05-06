@@ -21,7 +21,7 @@ import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { CancelledError, NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { CancelledError, NetworkError, NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigLayerIdNotFoundError,
@@ -59,20 +59,29 @@ export class WMS extends AbstractGeoViewRaster {
   /**
    * Fetches the metadata for a typical WFS class.
    * @param {string} url - The url to query the metadata from.
+   * @param {Function} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
+   *                                            The parameter sent in the callback is the proxy prefix with the '?' at the end.
    */
   static override async fetchMetadata(url: string, callbackNewMetadataUrl?: (proxyUsed: string) => void): Promise<TypeJsonObject> {
     let capabilitiesString;
     try {
       // Fetch the metadata
       capabilitiesString = await Fetch.fetchText(url);
-    } catch {
-      // If network issue such as CORS
-      // We're going to change the metadata url to use a proxy
-      const newProxiedMetadataUrl = `${CV_CONFIG_PROXY_URL}${url}`;
-      // Try again with the proxy this time
-      capabilitiesString = await Fetch.fetchText(newProxiedMetadataUrl);
-      // Callback about it
-      callbackNewMetadataUrl?.(CV_CONFIG_PROXY_URL);
+    } catch (error: unknown) {
+      // If a network error such as CORS
+      if (error instanceof NetworkError) {
+        // We're going to change the metadata url to use a proxy
+        const newProxiedMetadataUrl = `${CV_CONFIG_PROXY_URL}?${url}`;
+
+        // Try again with the proxy this time
+        capabilitiesString = await Fetch.fetchText(newProxiedMetadataUrl);
+
+        // Callback about it
+        callbackNewMetadataUrl?.(`${CV_CONFIG_PROXY_URL}?`);
+      } else {
+        // Unknown error, throw it
+        throw error;
+      }
     }
 
     // Continue reading the metadata to return it
@@ -171,9 +180,9 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * This method reads the service metadata from a XML metadataAccessPath.
-   *
    * @param {string} metadataUrl The metadataAccessPath
-   *
+   * @param {Function} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
+   *                                            The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */

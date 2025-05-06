@@ -151,7 +151,7 @@ export function loadImage(src: string): Promise<HTMLImageElement | null> {
     image
       .decode()
       .then(() => resolve(image))
-      .catch((error) => {
+      .catch((error: unknown) => {
         logger.logError('GeoviewRenderer.loadImage(src) - Error while loading the src image =', src, error);
         resolve(null);
       });
@@ -183,7 +183,7 @@ async function createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement |
       return drawingCanvas;
     }
     return null;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError(`Error creating incon canvas for pointStyle`, error);
     return null;
   }
@@ -564,7 +564,7 @@ function featureIsNotVisible(feature: Feature, filterEquation: FilterNodeArrayTy
     )
       operatorOnTop3 = operatorAt(-2, operatorStack);
     operatorStack.pop();
-  } catch (error) {
+  } catch (error: unknown) {
     throw new Error(`Invalid vector layer filter (${error}.`);
   }
   if (dataStack.length !== 1 || dataStack[0].nodeType !== NodeType.variable)
@@ -1043,7 +1043,7 @@ async function processArrayOfPointStyleConfig(
       styleArray.push(canvas);
     });
     return layerStyles;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError('Error processing array of point styles', error);
     return {} as TypeVectorLayerStyles;
   }
@@ -1094,7 +1094,7 @@ async function getPointStyleSubRoutine(
 
     layerStyles.Point!.arrayOfCanvas = [];
     return await processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig!);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError('Error getPointStyle sub routine', error);
     return {} as TypeVectorLayerStyles;
   }
@@ -1170,7 +1170,7 @@ export async function getLegendStyles(styleConfig: TypeLayerStyleConfig | undefi
       legendStyles.Polygon = layerStyles.Polygon;
     }
     return legendStyles;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError('Error getLegendStyles', error);
     return {};
   }

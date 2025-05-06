@@ -249,7 +249,7 @@ export class ConfigApi {
 
           // Store the new computed listOfGeoviewLayerConfig in the map.
           (jsonConfig.map.listOfGeoviewLayerConfig as TypeJsonObject[]) = listOfGeoviewLayerConfig;
-        } catch (error) {
+        } catch (error: unknown) {
           // Log the error. The listOfGeoviewLayerConfig returned will be [].
           logger.logError('Failed to get the GeoView layers from url keys', urlParams.keys, error);
         }
@@ -361,7 +361,7 @@ export class ConfigApi {
 
         // return the result according to the config type
         return Array.isArray(config) ? newListOfGeoviewLayerConfig : newListOfGeoviewLayerConfig[0];
-      } catch (error) {
+      } catch (error: unknown) {
         logger.logError('Failed to process the array of GeoCore layers', geocoreArrayOfKeys, geocoreUrl, error);
       }
     } else return config;
@@ -400,7 +400,7 @@ export class ConfigApi {
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
       // will be executed to try to correct the problem in the best possible way.
       ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!, language);
-    } catch (error) {
+    } catch (error: unknown) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
       // an array.
@@ -453,7 +453,7 @@ export class ConfigApi {
       // will be executed to try to correct the problem in the best possible way.
       ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!, language);
       if (errorDetected) ConfigApi.lastMapConfigCreated.setErrorDetectedFlag();
-    } catch (error) {
+    } catch (error: unknown) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
       // an array.
@@ -495,7 +495,7 @@ export class ConfigApi {
         // if the conversion returned an undefined GeoView configuration or throw an error,
         // we return undefined to signal that we cannot create the GeoView layer.
         if (!geoviewLayerConfig) return undefined;
-      } catch (error) {
+      } catch (error: unknown) {
         // Log error
         logger.logError(`Unable to convert GeoCore layer (Id=${serviceAccessString}).`, error);
         return undefined;

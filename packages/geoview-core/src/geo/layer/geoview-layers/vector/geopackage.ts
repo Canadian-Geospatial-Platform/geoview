@@ -188,7 +188,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           };
           xhr.send();
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('initSqlJs in extractGeopackageData in GeoPackage', error);
         });

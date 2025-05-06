@@ -81,7 +81,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         attributions.push(copyrightText);
         this.setAttributions(attributions);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // GV In the case of a geojson, when the metadata fetching fails, we actually skip it with a warning only.
       // G.VCONT If we want to manage this all the way to the UI (LayerAPI), we'll need a 'addLayerLoadWarning' working
       // G.VCONT like the 'addLayerLoadError' and aggregate errors as the process happens. Okay for now.

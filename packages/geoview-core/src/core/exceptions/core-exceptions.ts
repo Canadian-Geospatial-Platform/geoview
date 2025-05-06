@@ -105,10 +105,10 @@ export class CancelledError extends Error {
  */
 export class PromiseRejectErrorWrapper<T> extends Error {
   /** The original error associated with the Promise rejection. */
-  error: Error;
+  readonly error: Error;
 
   /** The associated object providing context about the rejection. */
-  object: T;
+  readonly object: T;
 
   /**
    * Constructor to initialize the PromiseRejectErrorWrapper with the Error and the related object.
@@ -147,13 +147,40 @@ export class PromiseRejectErrorWrapper<T> extends Error {
 }
 
 /**
+ * A custom error class to represent network-related errors.
+ */
+export class NetworkError extends Error {
+  /** The network error code */
+  readonly code: string;
+
+  constructor(message: string, code: string, cause?: Error) {
+    super(message, { cause });
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'NetworkError';
+
+    // Keep the error code and cause
+    this.code = code;
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, NetworkError);
+    }
+
+    // Ensure the prototype chain is correct (required in some transpilation targets)
+    Object.setPrototypeOf(this, NetworkError.prototype);
+  }
+}
+
+/**
  * Custom error class for abort-related errors, typically used in fetch or async operations
  * where an operation is aborted due to an `AbortSignal`.
  * @extends {Error}
  */
 export class RequestAbortedError extends Error {
   /** The AbortSignal that triggered the error (optional) */
-  abortSignal: AbortSignal;
+  readonly abortSignal: AbortSignal;
 
   /**
    * Constructor to initialize the AbortError with a message and an optional AbortSignal.
@@ -270,10 +297,10 @@ export class ResponseEmptyError extends Error {
  */
 export class ResponseTypeError extends Error {
   /** The expected type description */
-  expectedType: string;
+  readonly expectedType: string;
 
   /** The actual value that was received and caused the mismatch. */
-  receivedContent: unknown;
+  readonly receivedContent: unknown;
 
   constructor(
     expectedType: string,

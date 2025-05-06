@@ -190,7 +190,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),
       // TO.DOCONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
       await whenThisThen(() => api && api.hasMapViewer(mapId) && api.getMapViewer(mapId).plugins);
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError(`Couldn't retrieve the plugins instance on Map Viewer`, error);
     }
@@ -211,7 +211,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           document.getElementById(`${mapId}-scaleControlBarMetric`)?.querySelector('.ol-scale-text') &&
           document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text')
       );
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError(`Couldn't retrieve the scale information from the dom tree`, error);
       // TODO: Check - Maybe we want to actually throw the exception here? Logging only for now until couple maps get tested.

@@ -12,7 +12,7 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
  */
 export class LayerError extends GeoViewError {
   /** The GeoView layer path or GeoView layer ID associated with this error. */
-  layerPathOrId: string;
+  readonly layerPathOrId: string;
 
   /**
    * Constructs a new LayerError.

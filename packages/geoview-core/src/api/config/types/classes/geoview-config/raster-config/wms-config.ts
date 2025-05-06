@@ -282,7 +282,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
         this.#processMetadataInheritance();
         this.metadataAccessPath = this.getServiceMetadata().Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
       } else throw new GeoviewLayerConfigError('Unable to read the metadata, value returned is empty.');
-    } catch (error) {
+    } catch (error: unknown) {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
@@ -320,7 +320,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       const serviceMetadata = await this.#executeServiceMetadataRequest();
       this.setServiceMetadata(serviceMetadata);
       this.#processMetadataInheritance();
-    } catch (error) {
+    } catch (error: unknown) {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
@@ -422,7 +422,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
         }
       }
       this.#processMetadataInheritance();
-    } catch (error) {
+    } catch (error: unknown) {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);

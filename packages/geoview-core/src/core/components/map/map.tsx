@@ -67,12 +67,12 @@ export function Map(props: MapProps): JSX.Element {
               mapId,
               viewer,
             })
-          ).catch((error) => {
+          ).catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);
           });
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);
         });

@@ -221,7 +221,7 @@ export function getXMLHttpRequest(url: string): Promise<string> {
         resolve('{}');
       };
       jsonObj.send(null);
-    } catch (error) {
+    } catch (error: unknown) {
       // Log warning
       logger.logWarning(error);
       resolve('{}');
@@ -305,7 +305,7 @@ export function exportPNG(dataUrl: string, name: string): void {
     element.setAttribute('href', dataUrl);
     element.setAttribute('download', filename);
     element.click();
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError(`Error trying to export PNG.`, error);
   }
 }
@@ -531,7 +531,7 @@ export async function createGuideObject(
       guideObject[key] = { heading, content: sectionContent, children };
     }
     return guideObject;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError(mapId, error, 'createGuideObject');
     return undefined;
   }

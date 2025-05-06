@@ -60,7 +60,7 @@ export class EsriGroupLayerConfig extends GroupLayerEntryConfig {
           this.parseLayerMetadata();
           return;
         }
-      } catch (error) {
+      } catch (error: unknown) {
         logger.logError('Error detected while reading Layer metadata.', error);
         this.setErrorDetectedFlag();
       }

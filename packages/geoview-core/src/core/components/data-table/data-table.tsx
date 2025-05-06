@@ -332,7 +332,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
             removeHighlightedFeature('all');
             addHighlightedFeature(feature);
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
           });
@@ -517,7 +517,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
       if (rowsCount > 0) {
         rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('Data table error on sorting action', error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

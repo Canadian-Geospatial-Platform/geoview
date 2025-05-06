@@ -61,7 +61,7 @@ export function unmountMap(mapId: string, mapContainer: HTMLElement): void {
     try {
       reactRoot[mapId].unmount();
       logger.logInfo(`Map ${mapId} is unmounted...`);
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`Error unmounting map ${mapId}:`, error);
     } finally {
       // Remove React-specific attributes
@@ -182,7 +182,7 @@ async function renderMap(mapElement: Element): Promise<void> {
           // Show the error
           api.getMapViewer(mapId).notifications.showError(errorKey, params);
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log promise failed
           logger.logPromiseFailed('Promise failed in getMapViewerAsync in config.initializeMapConfig in app.renderMap', error);
         });
@@ -303,7 +303,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
             callbackMapLayersLoaded?.(mapViewer.mapId); // TODO: Obsolete call, remove it eventually
           });
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('promiseMapInit in init in App', error);
         });
