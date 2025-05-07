@@ -195,7 +195,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected override createVectorSource(
+  protected override onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
@@ -208,7 +208,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     sourceOptions.format = new FormatGeoJSON();
 
     // Call parent
-    return super.createVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
   }
 }
 

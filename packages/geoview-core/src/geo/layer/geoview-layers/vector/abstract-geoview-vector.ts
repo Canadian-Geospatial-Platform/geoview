@@ -50,7 +50,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
 
     // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
-    const vectorSource = this.createVectorSource(layerConfig);
+    const vectorSource = this.onCreateVectorSource(layerConfig);
     const vectorLayer: VectorLayer<VectorSource<Feature<Geometry>>> = this.createVectorLayer(
       layerConfig as VectorLayerEntryConfig,
       vectorSource
@@ -67,9 +67,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {ReadOptions} readOptions - The read options (default: {}).
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  // TODO: createVectorSource should be eventually moved to new layers as well,
-  // TODO: so that the new GV Layers receive something else than a OLSource in their constructor
-  protected createVectorSource(
+  protected onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
@@ -104,8 +102,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Parse the result of the fetch to read the features
         const features = await this.#parseFeatures(url, responseText, layerConfig, vectorSource, projection, extent, readOptions);
 
-        // If no features read, return
-        if (!features || features.length === 0) return;
+        // If no features read, alright, let's put the layer to loaded right away as it's never going to get loaded otherwise
+        if (!features || features.length === 0) {
+          successCallback?.([]);
+          return;
+        }
 
         // Parse the feature metadata
         AbstractGeoViewVector.#processFeatureMetadata(features, layerConfig);
@@ -248,7 +249,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
   // TODO: Add options for featureLimit to config
-  // TODO: Will need to move with createVectorSource
+  // TODO: Will need to move with onCreateVectorSource
   getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit: number = 1000): Promise<TypeJsonObject[]> {
     // Update url
     const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);
@@ -261,22 +262,29 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       urlArray.push(`${baseUrl}&resultOffset=${i}&resultRecordCount=${featureFetchLimit}`);
     }
 
-    // Create interval for logging
+    // Get array of all the promises
+    const promises = urlArray.map((featureUrl) => Fetch.fetchJsonAsObject(featureUrl));
+
+    // Create an all promise for all of them
+    const allPromise = Promise.all(promises);
+
     // TODO: message - Create message for all vector layer fetching. Create a centralized message creator for geoview-layers
+    // Prepare a setInterval to emitMessage every couple seconds while the promise is ongoing
     const timeInterval = setInterval(() => {
       // Emit message about the fetching being slow
       this.emitMessage('layers.slowFetch', [this.geoviewLayerName || '...']);
     }, 15000); // Log every 15 seconds
 
-    try {
-      const promises = urlArray.map((featureUrl) => Fetch.fetchJsonAsObject(featureUrl));
-
-      // Wait for all promises to complete
-      return Promise.all(promises);
-    } finally {
+    // Hook when the promise resolves/rejects
+    // Disabled the eslint no-floating-promises, because we return the 'allPromise' and the catch is done, just higher in the stack
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    allPromise.finally(() => {
       // Clear interval even if there's an error
       clearInterval(timeInterval);
-    }
+    });
+
+    // Return the all promise
+    return allPromise;
   }
 
   /**

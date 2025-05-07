@@ -248,22 +248,16 @@ export abstract class Projection {
     const code = projection.wkid as string;
     const projectionName = `EPSG:${code}`;
 
-    try {
-      // Fetch proj4 definition from epsg.io
-      const definition = await Fetch.fetchText(`https://epsg.io/${code}.proj4`);
+    // Fetch proj4 definition from epsg.io
+    const definition = await Fetch.fetchText(`https://epsg.io/${code}.proj4`);
 
-      // Register in proj4 if fetched
-      proj4.defs(projectionName, definition);
-      register(proj4);
+    // Register in proj4 if fetched
+    proj4.defs(projectionName, definition);
+    register(proj4);
 
-      // Register in supported projections
-      this.PROJECTION_NAMES = { ...this.PROJECTION_NAMES, [code]: projectionName };
-      this.PROJECTIONS[code] = Projection.getProjectionFromString(projectionName);
-    } catch (error: unknown) {
-      // Log
-      logger.logError(`Unable to add projection ${projectionName}, definiton not found`, error);
-      // TODO: Check - Throw?
-    }
+    // Register in supported projections
+    this.PROJECTION_NAMES = { ...this.PROJECTION_NAMES, [code]: projectionName };
+    this.PROJECTIONS[code] = Projection.getProjectionFromString(projectionName);
   }
 
   /**

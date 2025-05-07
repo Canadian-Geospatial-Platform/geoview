@@ -925,7 +925,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides when the layer gets in loaded status.
    */
-  override onLoaded(): void {
+  protected override onLoaded(): void {
     // Call parent
     super.onLoaded();
 
