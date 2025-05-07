@@ -21,7 +21,7 @@ import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { CancelledError, NetworkError, NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { CancelledError, NetworkError, NotImplementedError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigLayerIdNotFoundError,
@@ -33,6 +33,9 @@ export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
   listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
 }
+
+/** Local type to work with a metadata fetch result */
+type MetatadaFetchResult = { layerConfig: TypeLayerEntryConfig; metadata: TypeJsonObject };
 
 /**
  * A class to add wms layer.
@@ -115,7 +118,11 @@ export class WMS extends AbstractGeoViewRaster {
           // A Proxy had to be used to fetch the service metadata, update the layer config with it
           this.metadataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
         });
+
+        // Set the metadata
+        // TODO: Check - without validating if they have Capability property?
         this.metadata = metadata;
+
         this.#processMetadataInheritance();
       } else {
         // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
@@ -123,55 +130,91 @@ export class WMS extends AbstractGeoViewRaster {
         // the end. Even though the "Layers" parameter is ignored by other WMS servers, the drawback of this method is
         // sending unnecessary requests while only one GetCapabilities could be used when the server publishes a small set of
         // metadata. Which is not the case for the Geomet service.
-        const promisedArrayOfMetadata: Promise<TypeJsonObject | null>[] = [];
-        let i: number;
-        layerConfigsToQuery.forEach((layerConfig: TypeLayerEntryConfig, layerIndex: number) => {
-          for (i = 0; layerConfigsToQuery[i].layerId !== layerConfig.layerId; i++);
-          if (i === layerIndex)
-            // This is the first time we execute this query
-            promisedArrayOfMetadata.push(
-              WMS.fetchMetadata(`${metadataUrlGetCap}&Layers=${layerConfig.layerId}`, (proxyUsed: string) => {
-                // A Proxy had to be used to fetch the service metadata, update the layer config with it
-                layerConfigsToQuery[i].source!.dataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
-              })
-            );
-          // query already done. Use previous returned value
-          else promisedArrayOfMetadata.push(promisedArrayOfMetadata[i]);
+        const promisedArrayOfMetadata: Promise<MetatadaFetchResult>[] = [];
+        layerConfigsToQuery.forEach((layerConfig: TypeLayerEntryConfig, currentIndex: number) => {
+          // Find the first index where a layer with the same ID appears
+          const firstOccurrenceIndex = layerConfigsToQuery.findIndex((entry) => entry.layerId === layerConfig.layerId);
+
+          // If first time we see this layerId
+          if (firstOccurrenceIndex === currentIndex) {
+            // Create a promise of a metadata fetch
+            const promise = new Promise<MetatadaFetchResult>((resolve, reject) => {
+              const promiseMetadata = WMS.fetchMetadata(`${metadataUrlGetCap}&Layers=${layerConfig.layerId}`, (proxyUsed: string) => {
+                // A proxy was used; update the data access path accordingly
+                // eslint-disable-next-line no-param-reassign
+                layerConfig.source!.dataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
+              });
+
+              // When done, resolve with information or reject with information
+              promiseMetadata
+                .then((metadata) => {
+                  // If there is indeed a Capability property
+                  if (metadata.Capability) {
+                    // Resolve the metadata GetCap
+                    resolve({ metadata, layerConfig });
+                  } else {
+                    // No Capability property
+                    reject(
+                      new PromiseRejectErrorWrapper(
+                        new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId),
+                        layerConfig
+                      )
+                    );
+                  }
+                })
+                .catch((error: unknown) => {
+                  reject(new PromiseRejectErrorWrapper(error, layerConfig));
+                });
+            });
+
+            // Add the promise in the list
+            promisedArrayOfMetadata.push(promise);
+          } else {
+            // This layerId has already been queried; reuse the previous promise
+            promisedArrayOfMetadata.push(promisedArrayOfMetadata[firstOccurrenceIndex]);
+          }
         });
 
         // Wait for all promises to resolve
-        const arrayOfMetadata = await Promise.all(promisedArrayOfMetadata);
+        const arrayOfMetadata = await Promise.allSettled(promisedArrayOfMetadata);
 
-        // For each array of result, filter on those that have no Capability
-        for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++) {
-          // Track the error
-          this.addLayerLoadError(new LayerNoCapabilitiesError(this.geoviewLayerId), undefined);
+        // If no layers metadata fetch fulfilled (all failed)
+        if (arrayOfMetadata.filter((promise) => promise.status === 'fulfilled').length === 0) {
+          // Set the parent in error status
+          layerConfigsToQuery[0].parentLayerConfig?.setLayerStatusError();
         }
 
-        // Set it
-        this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
+        // For each settled promise
+        arrayOfMetadata.forEach((promise) => {
+          // If the promise fulfilled
+          if (promise.status === 'fulfilled') {
+            // GV This section has been rewritten, in this commit, trying to keep the logic intact best I could and
+            // GV keeping the private functions call too (still seems confusing to me though)
 
-        // TODO: Check - The following code really could use more code documentation
-        // If set
-        if (this.metadata) {
-          // Loop
-          for (i = 0; i < arrayOfMetadata.length; i++) {
-            // If any capability
-            if (arrayOfMetadata[i]?.Capability) {
-              if (!this.#getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
-                const metadataLayerPathToAdd = this.#getMetadataLayerPath(
-                  layerConfigsToQuery[i].layerId!,
-                  arrayOfMetadata[i]!.Capability.Layer
-                );
-                this.#addLayerToMetadataInstance(
-                  metadataLayerPathToAdd,
-                  this.metadata?.Capability?.Layer,
-                  arrayOfMetadata[i]!.Capability.Layer
-                );
-              }
+            // If the metadata hasn't been set yet
+            if (!this.metadata) this.metadata = promise.value.metadata;
+
+            const layerId = promise.value.layerConfig.layerId!;
+            const alreadyExists = this.#getLayerMetadataEntry(layerId);
+
+            // If not already loaded
+            if (!alreadyExists) {
+              const metadataLayerPathToAdd = this.#getMetadataLayerPath(layerId, promise.value.metadata.Capability.Layer);
+
+              this.#addLayerToMetadataInstance(
+                metadataLayerPathToAdd,
+                promise.value.metadata.Capability?.Layer,
+                promise.value.metadata.Capability.Layer
+              );
             }
+          } else {
+            // Get the reason
+            const reason = promise.reason as PromiseRejectErrorWrapper<TypeLayerEntryConfig>;
+
+            // Track the error
+            this.addLayerLoadError(reason.error, reason.object);
           }
-        }
+        });
 
         this.#processMetadataInheritance();
       }
@@ -190,7 +233,8 @@ export class WMS extends AbstractGeoViewRaster {
     // Fetch it
     const capabilities = await WMS.fetchMetadata(metadataUrl, callbackNewMetadataUrl);
 
-    // Set it
+    // Set the metadata
+    // TODO: Check - without validating if they have Capability property?
     this.metadata = capabilities;
 
     this.#processMetadataInheritance();
