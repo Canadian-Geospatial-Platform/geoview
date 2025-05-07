@@ -93,11 +93,13 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
           if (bbox) {
+            console.log(bbox);
             viewer.camera.flyTo({
               destination: Rectangle.fromDegrees(bbox[0], bbox[1], bbox[2], bbox[3]),
               duration: 0,
             });
           } else if (latLng) {
+            console.log(latLng);
             viewer.camera.flyTo({
               destination: Cartesian3.fromDegrees(latLng[1], latLng[0], 50.0),
               duration: 0,
@@ -132,14 +134,13 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
       addCog(url: string, epsg: number): void {
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
-          const provider = TIFFImageryProvider.fromUrl(url, {
-            projFunc: () => {
-              return createCogProjectionObject(epsg);
+          TIFFImageryProvider.fromUrl(url, {
+            projFunc: (code) => {
+              return createCogProjectionObject(code);
             },
           }).catch((e) => {
             throw e;
-          });
-          viewer.imageryLayers.addImageryProvider(provider as unknown as ImageryProvider);
+          }).then((provider) => {viewer.imageryLayers.addImageryProvider(provider as unknown as ImageryProvider)});
         }
       },
     },

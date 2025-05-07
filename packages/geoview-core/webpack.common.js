@@ -106,6 +106,7 @@ const config = {
       '@public': path.resolve(__dirname, 'public'),
       '@config': path.resolve(__dirname, 'src/api/config'),
       'cesium': path.resolve(__dirname, cesiumSource),
+      '@cesium/engine': path.resolve(__dirname, 'vendor/cesium/packages/engine/index.js')
     },
   },
   module: {
