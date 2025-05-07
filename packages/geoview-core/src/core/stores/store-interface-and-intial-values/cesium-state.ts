@@ -1,5 +1,5 @@
 import { MutableRefObject } from 'react';
-import { Cartesian3, ImageryLayer, Rectangle, Viewer } from 'cesium';
+import { Cartesian3, ImageryLayer, Rectangle, Viewer, Ellipsoid } from 'cesium';
 import { useStore } from 'zustand';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -24,6 +24,8 @@ export interface ICesiumState {
     zoomToLayer: (layerPath: string) => void;
     zoomToExtent: (latLng: [number, number], bbox?: [number, number, number, number]) => void;
     zoomToHome: () => void;
+    zoomIn: () => void;
+    zoomOut: () => void;
   };
   setterActions: {
     setCesiumViewer: (viewer: Viewer | null) => void;
@@ -100,6 +102,22 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
           viewer.camera.flyHome(0);
+        }
+      },
+      zoomIn(): void {
+        const viewer = get().cesiumState.cViewerRef.current;
+        if (viewer) {
+          const cameraHeight = Ellipsoid.WGS84.cartesianToCartographic(viewer.scene.camera.position).height;
+          const zoomNum = (cameraHeight - viewer.scene.screenSpaceCameraController.minimumZoomDistance) / 5;
+          viewer.camera.zoomIn(zoomNum);
+        }
+      },
+      zoomOut(): void {
+        const viewer = get().cesiumState.cViewerRef.current;
+        if (viewer) {
+          const cameraHeight = Ellipsoid.WGS84.cartesianToCartographic(viewer.scene.camera.position).height;
+          const zoomNum = (cameraHeight - viewer.scene.screenSpaceCameraController.minimumZoomDistance) / 5;
+          viewer.camera.zoomOut(zoomNum);
         }
       },
     },
