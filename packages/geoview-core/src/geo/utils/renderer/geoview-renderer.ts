@@ -88,10 +88,6 @@ export const getGeometryType = (feature: FeatureLike): TypeStyleGeometry => {
   return (geometryType.startsWith('Multi') ? geometryType.slice(5) : geometryType) as TypeStyleGeometry;
 };
 
-/** The generic icon to use when failing to get a feature canvas */
-export const FORMATTING_NO_LEGEND =
-  'data:image/png;base64,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';
-
 /** Table used to define line symbology to use when drawing lineString and polygon perimeters */
 const lineDashSettings: Record<TypeLineStyle, number[] | undefined> = {
   dash: [16, 4],
@@ -1587,7 +1583,7 @@ export function getFeatureImageSource(
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
   aliasLookup?: TypeAliasLookup
-): string {
+): string | undefined {
   // The image source that will be returned (if calculated successfully)
   let imageSource: string | undefined;
 
@@ -1643,8 +1639,7 @@ export function getFeatureImageSource(
   // If set, all good
   if (imageSource) return imageSource;
 
-  // Here, nothing could be done, use the no_legend template
-  return FORMATTING_NO_LEGEND;
+  return undefined;
 }
 
 /** ***************************************************************************************************************************

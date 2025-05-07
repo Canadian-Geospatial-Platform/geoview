@@ -30,6 +30,7 @@ import {
   Tooltip,
   ZoomInSearchIcon,
   InfoOutlinedIcon,
+  BrowserNotSupportedIcon,
 } from '@/ui';
 
 import TopToolbar from './top-toolbar';
@@ -363,8 +364,16 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     const filterArray = getFilteredDataFromLegendVisibility(data.layerPath, data?.features ?? []);
 
     return (filterArray ?? []).map((feature) => {
+      const icon = feature.featureIcon ? (
+        <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />
+      ) : (
+        <Box component="div" aria-label={feature?.nameField ?? ''} className="layer-icon">
+          <BrowserNotSupportedIcon />
+        </Box>
+      );
+
       const featureInfo = {
-        ICON: <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />,
+        ICON: icon,
         ZOOM: (
           <IconButton
             color="primary"

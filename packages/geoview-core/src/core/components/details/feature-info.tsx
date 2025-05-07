@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { getCenter } from 'ol/extent';
 
-import { List, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper, Box, Typography } from '@/ui';
+import { List, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
 import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
@@ -11,14 +11,13 @@ import { delay } from '@/core/utils/utilities';
 import { TypeFeatureInfoEntry, TypeFieldEntry, TypeGeometry } from '@/api/config/types/map-schema-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
-import { FORMATTING_NO_LEGEND } from '@/geo/utils/renderer/geoview-renderer';
 
 interface FeatureInfoProps {
   feature: TypeFeatureInfoEntry;
 }
 
 interface FeatureHeaderProps {
-  iconSrc: string;
+  iconSrc: string | undefined;
   name: string;
   hasGeometry: boolean;
   checked: boolean;
@@ -56,9 +55,15 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
   return (
     <Box sx={HEADER_STYLES.container}>
       <Box sx={sxClasses.flexBoxAlignCenter}>
-        <Box component="img" src={iconSrc} alt={name} className="layer-icon" />
+        {iconSrc ? (
+          <Box component="img" src={iconSrc} alt={name} className="layer-icon" />
+        ) : (
+          <Box component="div" aria-label={name} className="layer-icon">
+            <BrowserNotSupportedIcon />
+          </Box>
+        )}
         <Typography sx={TYPOGRAPHY_STYLES} component="div">
-          {iconSrc !== FORMATTING_NO_LEGEND ? (
+          {iconSrc ? (
             (name ?? t('details.nullValue'))
           ) : (
             <>

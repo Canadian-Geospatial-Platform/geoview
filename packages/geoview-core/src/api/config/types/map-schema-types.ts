@@ -801,7 +801,7 @@ export type TypeFeatureInfoEntry = {
   geoviewLayerType: TypeGeoviewLayerType;
   extent: Extent | undefined;
   geometry: TypeGeometry | Feature | null;
-  featureIcon: string;
+  featureIcon: string | undefined;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
   nameField: string | null;
   layerPath: string;

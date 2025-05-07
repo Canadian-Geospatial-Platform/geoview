@@ -649,7 +649,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       const queryResult: TypeFeatureInfoEntry[] = [];
 
       // Dict to store created image sources to avoid recreating
-      const imageSourceDict: { [styleAsJsonString: string]: string } = {};
+      const imageSourceDict: { [styleAsJsonString: string]: string | undefined } = {};
       const layerStyle = this.getStyle()!;
 
       features.forEach((feature) => {
