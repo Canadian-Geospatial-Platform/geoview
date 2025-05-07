@@ -1,9 +1,11 @@
 import { MutableRefObject } from 'react';
-import { Cartesian3, ImageryLayer, Rectangle, Viewer, Ellipsoid } from 'cesium';
+import { Cartesian3, ImageryLayer, Rectangle, Viewer, Ellipsoid, ImageryProvider } from 'cesium';
 import { useStore } from 'zustand';
+import TIFFImageryProvider from 'tiff-imagery-provider';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
+import { createCogProjectionObject } from './Projections';
 
 function getImageryLayerByName(viewer: Viewer, name: string): ImageryLayer | undefined {
   // eslint-disable-next-line no-underscore-dangle
@@ -26,10 +28,11 @@ export interface ICesiumState {
     toggleVisibility: (layerPath: string) => void;
     getIsInitialized: () => boolean;
     zoomToLayer: (layerPath: string) => void;
-    zoomToExtent: (latLng: [number, number], bbox?: [number, number, number, number]) => void;
+    zoomToExtent: (latLng?: [number, number], bbox?: [number, number, number, number]) => void;
     zoomToHome: () => void;
     zoomIn: () => void;
     zoomOut: () => void;
+    addCog: (url: string, epsg: number) => void;
   };
   setterActions: {
     setCesiumViewer: (viewer: Viewer | null) => void;
@@ -86,7 +89,7 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
           }
         }
       },
-      zoomToExtent(latLng: [number, number], bbox?: [number, number, number, number]): void {
+      zoomToExtent(latLng?: [number, number], bbox?: [number, number, number, number]): void {
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
           if (bbox) {
@@ -94,11 +97,13 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
               destination: Rectangle.fromDegrees(bbox[0], bbox[1], bbox[2], bbox[3]),
               duration: 0,
             });
-          } else {
+          } else if (latLng) {
             viewer.camera.flyTo({
               destination: Cartesian3.fromDegrees(latLng[1], latLng[0], 50.0),
               duration: 0,
             });
+          } else {
+            throw new Error('No valid point or extents was found when attempting to zoom.');
           }
         }
       },
@@ -122,6 +127,19 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
           const cameraHeight = Ellipsoid.WGS84.cartesianToCartographic(viewer.scene.camera.position).height;
           const zoomNum = (cameraHeight - viewer.scene.screenSpaceCameraController.minimumZoomDistance) / 5;
           viewer.camera.zoomOut(zoomNum);
+        }
+      },
+      addCog(url: string, epsg: number): void {
+        const viewer = get().cesiumState.cViewerRef.current;
+        if (viewer) {
+          const provider = TIFFImageryProvider.fromUrl(url, {
+            projFunc: () => {
+              return createCogProjectionObject(epsg);
+            },
+          }).catch((e) => {
+            throw e;
+          });
+          viewer.imageryLayers.addImageryProvider(provider as unknown as ImageryProvider);
         }
       },
     },

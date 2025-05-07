@@ -3,7 +3,7 @@ import { Suspense, useState, useRef, useEffect } from 'react';
 import { BrowseCollection } from './BrowseCollections';
 import type { callbackType } from './StacContext';
 import { useStacContext } from './StacContext';
-import type { StacItem, StacLink, StacAssetObject, StacCollection } from './Types';
+import type { StacItem, StacLink, StacAssetObject, StacCallbackInputType, StacCollection } from './Types';
 import { stacRootRequest } from './requests';
 import {
   i18nAddItemIds,
@@ -672,7 +672,7 @@ function StacSearch(props: { url: string }): JSX.Element {
   );
 }
 
-export function StacCatalog(props: { url: string; selectCallback: (asset: StacAssetObject) => void }): JSX.Element {
+export function StacCatalog(props: { url: string; selectCallback: (asset: StacCallbackInputType) => void }): JSX.Element {
   const { url, selectCallback } = props;
 
   const { setCallback } = useStacContext();

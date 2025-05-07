@@ -84,6 +84,11 @@ export interface StacAssetObject {
   roles: StacAssetRoleType[];
 }
 
+export interface StacCallbackInputType {
+  asset: StacAssetObject;
+  feature: StacItem;
+}
+
 export interface StacLink {
   href: string;
   rel: StacRelationType;

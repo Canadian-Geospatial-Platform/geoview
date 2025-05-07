@@ -10,22 +10,20 @@ import {
   BoundingSphere,
   WebMapServiceImageryProvider,
   Color,
-  ImageryLayer,
-} from 'cesium';
-import 'cesium/Build/Cesium/Widgets/widgets.css';
-import GeoJSON from 'ol/format/GeoJSON';
-import VectorLayer from 'ol/layer/Vector';
-import ImageLayer from 'ol/layer/Image';
-import ImageWMS from 'ol/source/ImageWMS';
-import { transformExtent } from 'ol/proj';
-import {
   ColorMaterialProperty,
   ConstantProperty,
   ImageryProvider,
   MaterialProperty,
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
-} from '@cesium/engine';
+  ImageryLayer,
+} from 'cesium';
+import 'cesium/Widgets/widgets.css';
+import GeoJSON from 'ol/format/GeoJSON';
+import VectorLayer from 'ol/layer/Vector';
+import ImageLayer from 'ol/layer/Image';
+import ImageWMS from 'ol/source/ImageWMS';
+import { transformExtent } from 'ol/proj';
 import Icon from 'ol/style/Icon';
 import Feature from 'ol/Feature';
 import Style from 'ol/style/Style';

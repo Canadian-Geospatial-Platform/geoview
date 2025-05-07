@@ -1,10 +1,10 @@
 import { StacCatalog } from './StacCatalog';
 import { StacContextProvider } from './StacContext';
-import type { StacAssetObject } from './Types';
+import type { StacCallbackInputType } from './Types';
 
 export function Stac(props: {
   url: string;
-  selectCallback: (asset: StacAssetObject) => void;
+  selectCallback: (asset: StacCallbackInputType) => void;
   bboxSignal: [string, React.Dispatch<React.SetStateAction<string>>];
   intersectsSignal: [string, React.Dispatch<React.SetStateAction<string>>];
   datetimeStartSignal: [string, React.Dispatch<React.SetStateAction<string>>];

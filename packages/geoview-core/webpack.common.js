@@ -9,7 +9,7 @@ const LodashWebpackPlugin = require('lodash-webpack-plugin');
 const glob = require('glob');
 const childProcess = require('child_process');
 const packageJSON = require('./package.json');
-const cesiumSource = 'node_modules/cesium/Source';
+const cesiumSource = 'vendor/cesium/Source';
 const cesiumWorkers = '../Build/Cesium/Workers';
 
 // get date, version numbers and the hash of the current commit
@@ -105,7 +105,7 @@ const config = {
       '@': path.resolve(__dirname, 'src'),
       '@public': path.resolve(__dirname, 'public'),
       '@config': path.resolve(__dirname, 'src/api/config'),
-      'cesium:': path.resolve(__dirname, cesiumSource),
+      'cesium': path.resolve(__dirname, cesiumSource),
     },
   },
   module: {
@@ -124,7 +124,10 @@ const config = {
       },
       {
         test: /\.(ts|tsx|js|jsx)$/,
-        exclude: /node_modules/,
+        exclude: [
+          /node_modules/,
+          /vendor/,
+        ],
         use: [
           {
             loader: 'babel-loader',
@@ -153,7 +156,10 @@ const config = {
       },
       {
         test: /\-worker-script\.(js|ts)$/,
-        exclude: /node_modules/,
+        exclude: [
+          /node_modules/,
+          /vendor/,
+        ],
         use: [
           {
             loader: 'worker-loader',

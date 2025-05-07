@@ -1,7 +1,8 @@
 import { ChangeEvent, useState } from 'react';
 import { Stac } from './stac-browser/Stac';
-import { StacAssetObject } from './stac-browser/Types';
+import { StacCallbackInputType } from './stac-browser/Types';
 import { Box } from '@/ui';
+import { useCesiumStoreActions } from '@/core/stores/store-interface-and-intial-values/cesium-state';
 
 export interface addCatalogObj {
   uid: string;
@@ -11,6 +12,8 @@ export interface addCatalogObj {
 }
 
 export function StacBrowserButton(): JSX.Element {
+  const { addCog, zoomToExtent } = useCesiumStoreActions();
+
   const defaultCatalog = {
     uid: 'stac-fastapi',
     title: 'stac-fastapi',
@@ -20,10 +23,9 @@ export function StacBrowserButton(): JSX.Element {
   const [isCatalogSelected, setIsCatalogSelected] = useState(false);
   const [selectedCatalog, setSelectedCatalog] = useState<addCatalogObj>(defaultCatalog);
 
-  function addStacItemToMap(stacItemProj: StacAssetObject): void {
-    /* eslint-disable-next-line no-void */
-    void stacItemProj;
-    // This function is a placeholder for adding the STAC item to the map.
+  function addStacItemToMap(stacItemProj: StacCallbackInputType): void {
+    addCog(stacItemProj.asset.href, stacItemProj.feature.properties['proj:epsg'] as number);
+    zoomToExtent(undefined, stacItemProj.feature.bbox as [number, number, number, number]);
   }
 
   const bbox = useState('');
