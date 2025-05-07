@@ -105,8 +105,8 @@ const config = {
       '@': path.resolve(__dirname, 'src'),
       '@public': path.resolve(__dirname, 'public'),
       '@config': path.resolve(__dirname, 'src/api/config'),
-      'cesium': path.resolve(__dirname, cesiumSource),
-      '@cesium/engine': path.resolve(__dirname, 'vendor/cesium/packages/engine/index.js')
+      cesium: path.resolve(__dirname, cesiumSource),
+      '@cesium/engine': path.resolve(__dirname, 'vendor/cesium/packages/engine/index.js'),
     },
   },
   module: {
@@ -125,10 +125,7 @@ const config = {
       },
       {
         test: /\.(ts|tsx|js|jsx)$/,
-        exclude: [
-          /node_modules/,
-          /vendor/,
-        ],
+        exclude: [/node_modules/, /vendor/],
         use: [
           {
             loader: 'babel-loader',
@@ -157,10 +154,7 @@ const config = {
       },
       {
         test: /\-worker-script\.(js|ts)$/,
-        exclude: [
-          /node_modules/,
-          /vendor/,
-        ],
+        exclude: [/node_modules/, /vendor/],
         use: [
           {
             loader: 'worker-loader',
@@ -219,18 +213,6 @@ const config = {
           from: path.join(cesiumSource, cesiumWorkers),
           to: 'cesium/Workers',
         },
-        // {
-        //   from: path.join('node_modules', '@cesium/engine', 'Source', 'Widget'),
-        //   to: 'cesium/Widget',
-        // },
-        // {
-        //   from: path.join('node_modules', '@cesium/engine', 'Source', 'ThirdParty'),
-        //   to: 'cesium/ThirdParty',
-        // },
-        // {
-        //   from: path.join('node_modules', '@cesium/engine', 'Source', 'Workers'),
-        //   to: 'cesium/Workers',
-        // },
       ],
     }),
     new webpack.BannerPlugin({
