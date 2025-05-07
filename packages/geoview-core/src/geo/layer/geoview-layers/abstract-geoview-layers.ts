@@ -598,7 +598,7 @@ export abstract class AbstractGeoViewLayer {
    * Processes the layer metadata. It will fill the empty outfields and aliasFields properties of the
    * layer configuration when applicable.
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the AbstractBaseLayerEntryConfig has its metadata processed.
                                                       When the promise fails, the reason is wrapped in a PromiseRejectErrorWrapper
                                                       to attach the layerConfig with it.
    */

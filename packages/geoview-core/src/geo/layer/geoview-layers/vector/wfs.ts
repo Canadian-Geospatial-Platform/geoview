@@ -257,7 +257,7 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected override createVectorSource(
+  protected override onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
@@ -286,7 +286,7 @@ export class WFS extends AbstractGeoViewVector {
     });
 
     // Call parent
-    return super.createVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
   }
 }
 
