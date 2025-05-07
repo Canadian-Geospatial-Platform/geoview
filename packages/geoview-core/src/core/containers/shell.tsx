@@ -37,7 +37,7 @@ import { FocusTrapDialog } from './focus-trap';
 import { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
 import { StacBrowserButton } from '../components/cesium/stac-browser-button';
-import { AppsIcon } from '@/ui/icons';
+import { OpenStacApiIcon } from '@/ui/icons';
 
 type ShellProps = {
   mapViewer: MapViewer;
@@ -222,7 +222,7 @@ export function Shell(props: ShellProps): JSX.Element {
       const button = {
         id: 'stacBrowserButtonId',
         tooltip: 'Open STAC Browser',
-        children: createElement(AppsIcon),
+        children: createElement(OpenStacApiIcon),
       };
 
       const panel = {
@@ -231,7 +231,7 @@ export function Shell(props: ShellProps): JSX.Element {
         content: <StacBrowserButton key="stacBrowser" />,
         convertHtmlContent: true,
         width: geoviewElement?.clientWidth != null ? geoviewElement.clientWidth - 64 : 0,
-        icon: createElement(AppsIcon),
+        icon: createElement(OpenStacApiIcon),
       };
 
       // call an api function to add a panel with a button in the default group

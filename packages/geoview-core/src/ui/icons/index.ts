@@ -109,3 +109,4 @@ export {
 } from '@mui/icons-material';
 
 export { LegendIcon } from '@/ui/svg/svg-icon';
+export * from '../svg/3d/index';

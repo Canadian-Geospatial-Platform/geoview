@@ -14,7 +14,6 @@ import {
   LegendIcon,
   StorageIcon,
   SearchIcon,
-  SendIcon,
   LayersOutlinedIcon,
 } from '@/ui';
 import { Plugin } from '@/api/plugin/plugin';
@@ -49,6 +48,7 @@ import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { OpenIn3dButton } from '../open-in-3d-button/open-in-3d-button';
+import { OpenIn3dIcon } from '@/ui/icons';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -117,7 +117,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     }
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
-      openIn3dButton: { icon: <SendIcon />, content: <OpenIn3dButton key="openIn3dButton" /> },
+      openIn3dButton: { icon: <OpenIn3dIcon />, content: <OpenIn3dButton key="openIn3dButton" /> },
       guide: { icon: <QuestionMarkIcon />, content: <Guide fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       legend: { icon: <LegendIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
