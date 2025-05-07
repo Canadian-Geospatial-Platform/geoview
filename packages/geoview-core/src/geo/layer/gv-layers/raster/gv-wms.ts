@@ -222,7 +222,8 @@ export class GVWMS extends AbstractGVRaster {
       logger.logWarning(`Invalid information returned in the getFeatureInfo for layer ${layerConfig.layerPath}`);
     }
 
-    // No feature url to getFeatureInfo from, should we write a warning in logger?
+    // Log
+    logger.logWarning(`No feature url to get the feature info from for the WMS layer ${layerConfig.layerPath}`);
     return [];
   }
 
@@ -479,7 +480,7 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Overrides when the layer gets in loaded status.
    */
-  override onLoaded(): void {
+  protected override onLoaded(): void {
     // Call parent
     super.onLoaded();
 
@@ -548,7 +549,7 @@ export class GVWMS extends AbstractGVRaster {
       layerConfigBounds = Projection.transformExtentFromProj(layerConfigBounds, Projection.getProjectionLngLat(), projection, stops);
     }
 
-    // Get the layer bounds from metadata, favoring a bounds in the same project as the map
+    // Get the layer bounds from metadata, favoring a bounds in the same projection as the map
     const metadataExtent = this.#getBoundsExtentFromMetadata(projection.getCode());
 
     // If any

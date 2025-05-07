@@ -12,8 +12,8 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "xyzTilesLYR1",
-        "geoviewLayerName": "World_Topo_Map",
-        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/",
+        "geoviewLayerName": "Error metadata",
+        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServerERROR/",
         "geoviewLayerType": "xyzTiles",
         "listOfLayerEntryConfig": [
           {
@@ -25,12 +25,12 @@
       },
       {
         "geoviewLayerId": "xyzTilesLYR2",
-        "geoviewLayerName": "GNOSIS_Blue_Marble",
+        "geoviewLayerName": "Error layerId",
         "metadataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad",
         "geoviewLayerType": "xyzTiles",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "blueMarble",
+            "layerId": "blueMarbleERROR",
             "layerName": "GNOSIS Blue Marble",
             "source": {
               "dataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad/{z}/{y}/{x}.jpg"

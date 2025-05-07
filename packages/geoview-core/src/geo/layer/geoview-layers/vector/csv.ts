@@ -4,7 +4,7 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
@@ -44,13 +44,22 @@ export class CSV extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  protected override onFetchAndSetServiceMetadata(): Promise<void> {
+    // None
+    return Promise.resolve();
+  }
+
+  /**
    * Overrides the way the layer metadata is processed.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
     // process the feature info configuration and attach the config to the instance for access by parent class
-    this.setLayerMetadata(layerConfig.layerPath, Cast<TypeJsonObject>(layerConfig));
+    this.setLayerMetadata(layerConfig.layerPath, layerConfig as unknown as TypeJsonObject);
 
     // Return the layer config
     return Promise.resolve(layerConfig);
@@ -65,7 +74,7 @@ export class CSV extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected override createVectorSource(
+  protected override onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
@@ -78,7 +87,7 @@ export class CSV extends AbstractGeoViewVector {
     sourceOptions.format = new FormatGeoJSON();
 
     // Call parent
-    return super.createVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
   }
 }
 

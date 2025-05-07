@@ -74,6 +74,25 @@ export class GeoPackage extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  protected override onFetchAndSetServiceMetadata(): Promise<void> {
+    // None
+    return Promise.resolve();
+  }
+
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   */
+  protected override onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
+    // Return the layer config
+    return Promise.resolve(layerConfig);
+  }
+
+  /**
    * Create a source configuration for the vector layer.
    *
    * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration.

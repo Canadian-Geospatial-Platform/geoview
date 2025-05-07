@@ -925,7 +925,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides when the layer gets in loaded status.
    */
-  override onLoaded(): void {
+  protected override onLoaded(): void {
     // Call parent
     super.onLoaded();
 
@@ -1033,47 +1033,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
       } catch (error: unknown) {
         logger.logError(`Error fetching geometry from ${queryUrl}`, error);
       }
-
-      // TODO: Cleanup - Keep for reference
-      // // GV: outFields here is not wanted, it is included because some sevices require it in the query. It would be possible to use
-      // // GV cont: OBJECTID, but it is not universal through the services, so we pass a value through.
-      // const outfieldQuery = outfield ? `&outFields=${outfield}` : '';
-      // let precision = '';
-      // let allowableOffset = '';
-      // if ((serviceMetaData?.layers as Array<TypeJsonObject>).every((layer) => layer.geometryType !== 'esriGeometryPoint')) {
-      //   precision = '&geometryPrecision=1';
-      //   allowableOffset = '&maxAllowableOffset=7937.5158750317505';
-      // }
-      // const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=&objectIds=${idString}${outfieldQuery}${precision}&returnGeometry=true${allowableOffset}`;
-
-      // try {
-      //   const responseJson = await fetchJson(queryUrl);
-
-      //   // Convert response json to OL features
-      //   const responseFeatures = new EsriJSON().readFeatures(
-      //     { features: responseJson.features },
-      //     {
-      //       dataProjection: wkid ? `EPSG:${wkid}` : `EPSG:${responseJson.spatialReference.wkid}`,
-      //       featureProjection: this.getMapViewer().getProjection().getCode(),
-      //     }
-      //   );
-
-      //   // Determine max extent from features
-      //   let calculatedExtent: Extent | undefined;
-      //   responseFeatures.forEach((feature) => {
-      //     const extent = feature.getGeometry()?.getExtent();
-
-      //     if (extent) {
-      //       // If extent has not been defined, set it to extent
-      //       if (!calculatedExtent) calculatedExtent = extent;
-      //       else getExtentUnion(calculatedExtent, extent);
-      //     }
-      //   });
-
-      //   return calculatedExtent;
-      // } catch (error: unknown) {
-      //   logger.logError(`Error fetching geometry from ${queryUrl}`, error);
-      // }
     }
     return undefined;
   }

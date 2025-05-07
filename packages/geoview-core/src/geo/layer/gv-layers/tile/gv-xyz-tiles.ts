@@ -90,7 +90,7 @@ export class GVXYZTiles extends AbstractGVTile {
     // Get the layer bounds
     let sourceExtent = layer?.getSource()?.getTileGrid()?.getExtent();
 
-    // If bouth found
+    // If both found
     if (sourceExtent && sourceProjection) {
       // Transform extent to given projection
       sourceExtent = Projection.transformExtentFromProj(sourceExtent, sourceProjection, projection, stops);

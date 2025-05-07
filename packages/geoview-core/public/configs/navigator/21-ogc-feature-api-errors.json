@@ -12,14 +12,29 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "ogcFeatureLYR2",
+        "geoviewLayerName": "Error metadata",
+        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/devERROR",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes",
+            "layerFilter": "name in ('Lake Victoria', 'Lake Superior', 'L. Erie', 'L. Ontario')"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "ogcFeatureLYR1",
-        "geoviewLayerName": "Large Lakes",
+        "geoviewLayerName": "Error layerId",
         "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
         "geoviewLayerType": "ogcFeature",
         "listOfLayerEntryConfig": [
           {
             "layerId": "lakes",
             "layerFilter": "name in ('Lake Victoria', 'Lake Superior', 'L. Erie', 'L. Ontario')"
+          },
+          {
+            "layerId": "lakesERROR"
           }
         ]
       }

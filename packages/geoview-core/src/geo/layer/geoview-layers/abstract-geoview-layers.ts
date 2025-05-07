@@ -416,7 +416,13 @@ export abstract class AbstractGeoViewLayer {
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)
       AbstractGeoViewLayer.#logErrorAndSetStatusErrorAll(formatError(error), this.listOfLayerEntryConfig);
 
-      // If empty response error
+      // If LayerServiceMetadataUnableToFetchError error
+      if (error instanceof LayerServiceMetadataUnableToFetchError) {
+        // Throw as-is
+        throw error;
+      }
+
+      // If ResponseEmptyError error
       if (error instanceof ResponseEmptyError) {
         // Throw higher
         throw new LayerServiceMetadataEmptyError(this.geoviewLayerId);
@@ -428,14 +434,10 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Overridable method to read the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
+   * Must override method to read the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
    * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected onFetchAndSetServiceMetadata(): Promise<void> {
-    // Default, no metadata fetching
-    return Promise.resolve();
-  }
+  protected abstract onFetchAndSetServiceMetadata(): Promise<void>;
 
   /**
    * Recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
@@ -598,7 +600,7 @@ export abstract class AbstractGeoViewLayer {
    * Processes the layer metadata. It will fill the empty outfields and aliasFields properties of the
    * layer configuration when applicable.
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the AbstractBaseLayerEntryConfig has its metadata processed.
                                                       When the promise fails, the reason is wrapped in a PromiseRejectErrorWrapper
                                                       to attach the layerConfig with it.
    */
@@ -618,7 +620,7 @@ export abstract class AbstractGeoViewLayer {
       );
 
       // Return as-is
-      return Promise.resolve(layerConfig);
+      return layerConfig;
     } catch (error: unknown) {
       // Wrap so that we carry the layerConfig into the reject callback and throw it higher
       throw new PromiseRejectErrorWrapper(error, layerConfig);
@@ -626,15 +628,11 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Overridable method to process a layer entry and return a Promise of an Open Layer Base Layer object.
+   * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
    * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
    * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Override this function to process layer metadata
-    return Promise.resolve(layerConfig);
-  }
+  protected abstract onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
 
   /**
    * Recursively processes the list of layer Entries to create the layers and the layer groups.
@@ -701,6 +699,7 @@ export abstract class AbstractGeoViewLayer {
         );
       }
 
+      // TODO: Refactor - Rework this Promise to be "Promise<BaseLayer>"
       const promiseOfLayerCreated: Promise<BaseLayer | undefined>[] = [];
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) {
@@ -726,25 +725,10 @@ export abstract class AbstractGeoViewLayer {
       const listOfLayerCreated = await Promise.all(promiseOfLayerCreated);
 
       // For each resolved promise result
-      // TODO: Check - Do we still need that? This whole function is very confusing to me. I've tried adding a lot of
-      // TO.DOCONT: comments and cleared the logic, but there's likely more work to be done here...
-      // TO.DOCONT: At least now the real error exception that gets thrown gets logged in console.
-      // TO.DOCONT: Code in the else commented out for now, to see, 2025-04-04
       listOfLayerCreated
         .filter((layer) => !!layer)
         .forEach((layer) => {
           layerGroup!.getLayers().push(layer);
-          // else {
-          //  this.layerLoadError.push({
-          //    layer: listOfLayerEntryConfig[i].layerPath,
-          //    layerName: listOfLayerEntryConfig[i].layerName,
-          //    loggerMessage: `Unable to create ${
-          //      layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? CONST_LAYER_ENTRY_TYPES.GROUP : ''
-          //    } layer ${listOfLayerEntryConfig[i].layerPath} on map ${this.mapId}`,
-          //  });
-          //  // Set the layer status to error
-          //  this.getLayerConfig(layerPath)!.setLayerStatusError();
-          // }
         });
 
       return layerGroup;
@@ -882,8 +866,7 @@ export abstract class AbstractGeoViewLayer {
       checkFrequency
     );
 
-    // Resolve successfully, otherwise an exception has been thrown already
-    return Promise.resolve();
+    // Here we resolve successfully, otherwise an exception has been thrown already
   }
 
   /**

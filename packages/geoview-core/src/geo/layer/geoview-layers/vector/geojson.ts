@@ -59,7 +59,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     // The url
     const queryUrl = url.toLowerCase().endsWith('json') || url.toLowerCase().endsWith('meta') ? url : `${url}?f=json`;
 
-    // Set it
+    // Return it
     return Fetch.fetchJsonAsObject(queryUrl);
   }
 
@@ -82,10 +82,14 @@ export class GeoJSON extends AbstractGeoViewVector {
         this.setAttributions(attributions);
       }
     } catch (error: unknown) {
-      // GV In the case of a geojson, when the metadata fetching fails, we actually skip it with a warning only.
-      // G.VCONT If we want to manage this all the way to the UI (LayerAPI), we'll need a 'addLayerLoadWarning' working
-      // G.VCONT like the 'addLayerLoadError' and aggregate errors as the process happens. Okay for now.
-      logger.logWarning("The service metadata for the GeoJson couldn't be read, skipped.", error);
+      // GV In the case of a geojson, when the metadata fetching fails and we were on a .meta file, we actually skip it with a warning only.
+      if (this.metadataAccessPath.toLowerCase().endsWith('meta')) {
+        // Log
+        logger.logWarning("The service metadata for the GeoJson couldn't be read, skipped.", error);
+      } else {
+        // Regular failure
+        throw error;
+      }
     }
   }
 
@@ -180,7 +184,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     }
 
     // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV
-    this.setLayerMetadata(layerConfig.layerPath, Cast<TypeJsonObject>(layerConfig));
+    this.setLayerMetadata(layerConfig.layerPath, layerConfig as unknown as TypeJsonObject);
 
     // Return the layer config
     return Promise.resolve(layerConfig);
@@ -195,7 +199,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected override createVectorSource(
+  protected override onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
@@ -208,7 +212,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     sourceOptions.format = new FormatGeoJSON();
 
     // Call parent
-    return super.createVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
   }
 }
 
