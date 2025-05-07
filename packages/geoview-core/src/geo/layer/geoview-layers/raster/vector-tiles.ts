@@ -186,7 +186,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     }
 
     // Return the layer config
-    return Promise.resolve(layerConfig);
+    return layerConfig;
   }
 }
 

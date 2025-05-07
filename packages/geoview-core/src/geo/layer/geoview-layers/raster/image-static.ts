@@ -39,12 +39,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 
   /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
+   * Overrides the way the layer metadata is processed.
+   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<ImageStaticLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onFetchAndSetServiceMetadata(): Promise<void> {
-    // No metadata
-    return Promise.resolve();
+  protected override onProcessLayerMetadata(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageStaticLayerEntryConfig> {
+    // Return as-is
+    return Promise.resolve(layerConfig);
   }
 
   /**

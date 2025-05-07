@@ -152,28 +152,10 @@ export class LayerServiceMetadataUnableToFetchError extends LayerError {
    * @param {Error} cause - The underlying error that caused this exception (e.g., network failure or timeout).
    */
   constructor(geoviewLayerId: string, cause: Error) {
-    super(geoviewLayerId, `Unable to fetch and read metadata for layer ${geoviewLayerId}`, undefined, { cause });
+    super(geoviewLayerId, `Unable to fetch and read metadata for layer __param__`, [geoviewLayerId], { cause });
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerServiceMetadataUnableToFetchError.prototype);
-  }
-}
-
-/**
- * Custom error class for scenarios where the metadata of a GeoView layer service has an error message inside.
- * This error is typically thrown when a metadata request returns a response with an error message inside.
- * @extends {LayerError}
- */
-export class LayerServiceMetadataWithErrorError extends LayerError {
-  /**
-   * Constructor to initialize the LayerServiceMetadataWithErrorError with the layer ID.
-   * @param {string} geoviewLayerId - The ID of the GeoView layer whose metadata had an error inside.
-   */
-  constructor(geoviewLayerId: string, cause: Error) {
-    super(geoviewLayerId, `Metadata of the service had an error inside for layer __param__`, [geoviewLayerId], { cause });
-
-    // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerServiceMetadataWithErrorError.prototype);
   }
 }
 
