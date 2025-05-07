@@ -163,7 +163,7 @@ export type TypeFeatureInfoResultSet = TypeResultSet<TypeFeatureInfoResultSetEnt
 export type TypeHoverFeatureInfo =
   | {
       geoviewLayerType: TypeGeoviewLayerType;
-      featureIcon: string;
+      featureIcon: string | undefined;
       fieldInfo: TypeFieldEntry | undefined;
       nameField: string | null;
     }
