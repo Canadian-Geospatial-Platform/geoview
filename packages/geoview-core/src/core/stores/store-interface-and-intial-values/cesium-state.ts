@@ -6,6 +6,8 @@ import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { createCogProjectionObject } from './Projections';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeOrderedLayerInfo } from './map-state';
 
 function getImageryLayerByName(viewer: Viewer, name: string): ImageryLayer | undefined {
   // eslint-disable-next-line no-underscore-dangle
@@ -64,15 +66,36 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
       toggleVisibility(layerPath: string): void {
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
-          const [ds] = viewer.dataSources.getByName(layerPath);
-          if (ds) {
-            ds.show = !ds.show;
-            return;
-          }
-          const is = getImageryLayerByName(viewer, layerPath);
-          if (is) {
-            is.show = !is.show;
-          }
+          const curOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(get().mapId);
+          const layerInfos = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(get().mapId, layerPath, curOrderedLayerInfo);
+
+          let allOff = true;
+          layerInfos.forEach((layerInfo: TypeOrderedLayerInfo) => {
+            if (layerInfo) {
+              const [ds] = viewer.dataSources.getByName(layerInfo.layerPath);
+              if (ds) {
+                if (ds.show) allOff = false;
+              }
+              const is = getImageryLayerByName(viewer, layerInfo.layerPath);
+              if (is) {
+                if (is.show) allOff = false;
+              }
+            }
+          });
+
+          layerInfos.forEach((layerInfo: TypeOrderedLayerInfo) => {
+            if (layerInfo) {
+              const [ds] = viewer.dataSources.getByName(layerInfo.layerPath);
+              if (ds) {
+                ds.show = allOff;
+                return;
+              }
+              const is = getImageryLayerByName(viewer, layerInfo.layerPath);
+              if (is) {
+                is.show = allOff;
+              }
+            }
+          });
         }
       },
       zoomToLayer(layerPath: string): void {

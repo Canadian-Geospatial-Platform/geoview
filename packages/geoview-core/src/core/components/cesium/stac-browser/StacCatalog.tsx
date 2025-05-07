@@ -139,6 +139,7 @@ function StacSearch(props: { url: string }): JSX.Element {
     if (bbox && geometryType === 'bbox') {
       if (!isValidBboxString(bbox)) {
         setBboxErrorClass('StacSearchErrorInput');
+        setSearching(false);
         return;
       }
       setBboxErrorClass('');
