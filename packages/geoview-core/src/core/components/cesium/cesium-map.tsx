@@ -17,17 +17,23 @@ import {
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
   ImageryLayer,
+  PointGraphics,
+  EllipsoidGraphics,
+  Cartesian3,
+  Entity,
+  Cartographic,
+  sampleTerrainMostDetailed,
 } from 'cesium';
 import 'cesium/Widgets/widgets.css';
 import GeoJSON from 'ol/format/GeoJSON';
 import VectorLayer from 'ol/layer/Vector';
 import ImageLayer from 'ol/layer/Image';
 import ImageWMS from 'ol/source/ImageWMS';
-import { transformExtent } from 'ol/proj';
+import { toLonLat, transformExtent } from 'ol/proj';
 import Icon from 'ol/style/Icon';
 import Feature from 'ol/Feature';
 import Style from 'ol/style/Style';
-import { Geometry } from 'ol/geom';
+import { Circle, Geometry } from 'ol/geom';
 import VectorSource from 'ol/source/Vector';
 import { TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -38,10 +44,14 @@ import {
   useCesiumSetRef,
 } from '@/core/stores/store-interface-and-intial-values/cesium-state';
 import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
+import CircleStyle from 'ol/style/Circle';
+import proj4 from 'proj4';
 
 type MapProps = {
   viewer: MapViewer;
 };
+
+type olColorType = [number, number, number, number] | string;
 
 interface NamedImageryLayer extends ImageryLayer {
   name: string;
@@ -77,17 +87,24 @@ function olColorToCesiumProperty(olColor: [number, number, number, number] | str
   return new ColorMaterialProperty(Color.fromCssColorString(olColor));
 }
 
-function extractStyleForFeature(_layer: VectorLayer<VectorSource>, feature: Feature<Geometry>): Style | Style[] | null {
-  const styleCandidate = feature.getStyle();
+function olColorToCesiumColor(olColor: [number, number, number, number] | string): MaterialProperty {
+  if (Array.isArray(olColor)) {
+    return Color.fromBytes(olColor[0], olColor[1], olColor[2], olColor[3] * 255) as unknown as ColorMaterialProperty;
+  }
+  return Color.fromCssColorString(olColor) as unknown as ColorMaterialProperty;
+}
+
+function extractStyleForFeature(layer: VectorLayer<VectorSource>, feature: Feature<Geometry>): Style | Style[] | null {
+  const styleCandidate = feature.getStyle() ?? layer.getStyle();
   if (!styleCandidate) return null;
   if (typeof styleCandidate === 'function') {
     const result = styleCandidate(feature, 0);
     return Array.isArray(result) || result instanceof Style ? result : null;
   }
-  return Array.isArray(styleCandidate) || styleCandidate instanceof Style ? styleCandidate : null;
+  return Array.isArray(styleCandidate) || styleCandidate instanceof Style ? styleCandidate as Style : null;
 }
 
-async function VectorLayerDataSource(viewer: MapViewer, layer: VectorLayer): Promise<GeoJsonDataSource | undefined> {
+async function VectorLayerDataSource(cViewer: Viewer, viewer: MapViewer, layer: VectorLayer): Promise<GeoJsonDataSource | undefined> {
   const layerPropsInt = layer.getPropertiesInternal();
   let layerPath;
   if (layerPropsInt?.layerConfig) {
@@ -102,7 +119,45 @@ async function VectorLayerDataSource(viewer: MapViewer, layer: VectorLayer): Pro
       featureProjection: projCode,
       dataProjection: 'EPSG:4326',
     });
+    console.log(features);
+    const circles = features.filter((feature) => {
+      console.log(feature.getGeometry())
+      console.log(feature.getGeometry() instanceof Circle)
+      return feature.getGeometry() instanceof Circle
+    })
+    console.log(circles);
     const gJds = await GeoJsonDataSource.load(geoJson);
+    circles.map(async (circle) => {
+      const style = circle.getStyle();
+      const name = circle.featureId;
+      const geom = circle.getGeometry();
+      const radius = geom.getRadius();
+      const radii = Cartesian3.fromArray([radius, radius, 10000000]);
+      console.log(radii);
+      const centre = geom.getCenter();
+      const lonLat = toLonLat(centre, projCode);
+      const cart = Cartographic.fromDegrees(lonLat[0], lonLat[1]);
+      const pos = await sampleTerrainMostDetailed(cViewer.terrainProvider, [cart])
+      const height = pos[0].height;
+      console.log(height)
+      const position = Cartesian3.fromDegrees(lonLat[1], lonLat[0], height);
+      console.log(position);
+      if(style) {
+        const outlineColor = style.getStroke() ? olColorToCesiumColor(style.getStroke()!.getColor() as olColorType) : blank;
+        const outlineWidth = style.getStroke() ? new ConstantProperty(style.getStroke()!.getWidth()) : ZeroProp;
+        const material = style.getFill() ? olColorToCesiumProperty(style.getFill()!.getColor() as olColorType) : blank;
+        const ellipsoid = new EllipsoidGraphics({ radii, material, outlineColor, outlineWidth});
+        const pointEntity = new Entity({name, position, ellipsoid})
+        gJds.entities.add(pointEntity)
+      } else {
+        const outlineColor = Color.RED;
+        const outlineWidth = new ConstantProperty(7);
+        const material = blank;
+        const ellipsoid = new EllipsoidGraphics({ radii, material, outlineColor, outlineWidth});
+        const pointEntity = new Entity({name, position, ellipsoid})
+        gJds.entities.add(pointEntity)
+      }
+    })
     if (layerPath) {
       gJds.name = layerPath;
     }
@@ -168,6 +223,7 @@ function setOLMapExtent(oViewer: MapViewer, cViewer: Viewer): void {
 /* eslint-disable no-param-reassign */
 function styleVectorDataSource(datasource: GeoJsonDataSource | undefined, layer: VectorLayer): void {
   if (!datasource || !layer) return;
+  datasource.entities.suspendEvents();
   datasource.entities.values.forEach((entity) => {
     const featureId = entity.properties?.featureId?.getValue();
     const layerSource = layer.getSource();
@@ -184,12 +240,12 @@ function styleVectorDataSource(datasource: GeoJsonDataSource | undefined, layer:
       const fill = style.getFill();
 
       if (entity.polygon) {
-        entity.polygon.material = fill ? olColorToCesiumProperty(fill.getColor() as [number, number, number, number]) : blank;
-        entity.polygon.outlineColor = stroke ? olColorToCesiumProperty(stroke.getColor() as [number, number, number, number]) : blank;
+        entity.polygon.material = fill ? olColorToCesiumProperty(fill.getColor() as olColorType) : blank;
+        entity.polygon.outlineColor = stroke ? olColorToCesiumColor(stroke.getColor() as olColorType) : blank;
         entity.polygon.outlineWidth = stroke ? new ConstantProperty(stroke.getWidth()) : ZeroProp;
       }
       if (entity.polyline) {
-        entity.polyline.material = stroke ? olColorToCesiumProperty(stroke.getColor() as [number, number, number, number]) : blank;
+        entity.polyline.material = stroke ? olColorToCesiumProperty(stroke.getColor() as olColorType) : blank;
         entity.polyline.width = stroke ? new ConstantProperty(stroke.getWidth()) : ZeroProp;
       }
       if (entity.billboard) {
@@ -200,10 +256,24 @@ function styleVectorDataSource(datasource: GeoJsonDataSource | undefined, layer:
           entity.billboard.image = new ConstantProperty(src);
           entity.billboard.scale = new ConstantProperty(img.getScale()) || 1;
           entity.billboard.rotation = new ConstantProperty(img.getRotation()) || 0;
+        } else if (img instanceof CircleStyle) {
+          entity.billboard = undefined;
+          const size = img.getSize()
+          const outlineColor = img.getStroke() ? olColorToCesiumColor(img.getStroke()!.getColor() as olColorType) : blank;
+          const outlineWidth = img.getStroke() ? new ConstantProperty(img.getStroke()!.getWidth()) : ZeroProp;
+          if(size[0] != size[1]){
+            const color = img.getFill() ? olColorToCesiumProperty(img.getFill()!.getColor() as olColorType) : blank;
+            const radii = new Cartesian3(size[0] * 10000, size[1] * 10000, 100)
+            entity.ellipsoid = new EllipsoidGraphics({radii: radii, material: color, outlineColor: outlineColor, outlineWidth: outlineWidth});
+          } else {
+            const color = img.getFill() ? olColorToCesiumColor(img.getFill()!.getColor() as olColorType) : blank;
+            entity.point = new PointGraphics({color, pixelSize: size[0], outlineColor: outlineColor, outlineWidth: outlineWidth});
+          }
         }
       }
     }
   });
+  datasource.entities.resumeEvents();
 }
 
 function ImageLayerDataSource(_viewer: MapViewer, layer: ImageLayer<ImageWMS>): ImageryProvider {
@@ -308,7 +378,7 @@ export function CesiumMap(props: MapProps): JSX.Element {
       await Promise.all(
         layers.map(async (layer) => {
           if (layer instanceof VectorLayer) {
-            const datasource = await VectorLayerDataSource(viewer, layer);
+            const datasource = await VectorLayerDataSource(cViewer, viewer, layer);
             if (datasource) {
               await cViewer.dataSources.add(datasource);
               styleVectorDataSource(datasource, layer);
