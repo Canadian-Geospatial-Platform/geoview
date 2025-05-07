@@ -92,7 +92,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {ReadOptions} readOptions - The read options (default: {}).
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected override createVectorSource(
+  protected override onCreateVectorSource(
     layerConfig: EsriFeatureLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
@@ -105,7 +105,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     sourceOptions.format = new EsriJSON();
 
     // Call parent
-    return super.createVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
   }
 }
 
