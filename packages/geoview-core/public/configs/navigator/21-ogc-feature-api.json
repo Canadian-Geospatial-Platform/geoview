@@ -20,9 +20,6 @@
           {
             "layerId": "lakes",
             "layerFilter": "name in ('Lake Victoria', 'Lake Superior', 'L. Erie', 'L. Ontario')"
-          },
-          {
-            "layerId": "lakesss"
           }
         ]
       }
