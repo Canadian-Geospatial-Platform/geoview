@@ -23,6 +23,10 @@ import {
   Entity,
   Cartographic,
   sampleTerrainMostDetailed,
+  ArcGisMapServerImageryProvider,
+  Ellipsoid,
+  WebMapTileServiceImageryProvider,
+  UrlTemplateImageryProvider,
 } from 'cesium';
 import 'cesium/Widgets/widgets.css';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -30,11 +34,16 @@ import VectorLayer from 'ol/layer/Vector';
 import ImageLayer from 'ol/layer/Image';
 import ImageWMS from 'ol/source/ImageWMS';
 import { toLonLat, transformExtent } from 'ol/proj';
+import { WMTS, XYZ } from 'ol/source';
+import ImageArcGISRest from 'ol/source/ImageArcGISRest';
 import Icon from 'ol/style/Icon';
 import Feature from 'ol/Feature';
 import Style from 'ol/style/Style';
 import { Circle, Geometry } from 'ol/geom';
 import VectorSource from 'ol/source/Vector';
+import TileLayer from 'ol/layer/Tile';
+import CircleStyle from 'ol/style/Circle';
+import proj4 from 'proj4';
 import { TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -44,8 +53,6 @@ import {
   useCesiumSetRef,
 } from '@/core/stores/store-interface-and-intial-values/cesium-state';
 import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
-import CircleStyle from 'ol/style/Circle';
-import proj4 from 'proj4';
 
 type MapProps = {
   viewer: MapViewer;
@@ -276,9 +283,24 @@ function styleVectorDataSource(datasource: GeoJsonDataSource | undefined, layer:
   datasource.entities.resumeEvents();
 }
 
-function ImageLayerDataSource(_viewer: MapViewer, layer: ImageLayer<ImageWMS>): ImageryProvider {
+async function ImageLayerDataSource(_viewer: MapViewer, layer: ImageLayer<ImageWMS | ImageArcGISRest>): Promise<ImageryProvider> {
   const source = layer.getSource();
-  // if (source instanceof ImageWMS) {
+  if (source instanceof ImageArcGISRest) {
+    const url = source.getUrl();
+    const params = source.getParams();
+    // This doesnt work for ImageServers.
+    if (url?.includes('ImageServer')) {
+      return new UrlTemplateImageryProvider({
+        url: url!,
+      });
+    }
+    const prov = await ArcGisMapServerImageryProvider.fromUrl(url!, {
+      ellipsoid: Ellipsoid.WGS84,
+      rectangle: params.EXTENT,
+      layers: params.LAYERS,
+    });
+    return prov;
+  }
   const url = source!.getUrl();
   const params = source!.getParams();
   const options: WebMapServiceImageryProvider.ConstructorOptions = {
@@ -291,7 +313,31 @@ function ImageLayerDataSource(_viewer: MapViewer, layer: ImageLayer<ImageWMS>): 
     },
   };
   return new WebMapServiceImageryProvider(options);
-  // }
+}
+
+function TileLayerDataSource(_viewer: MapViewer, layer: TileLayer<XYZ>): ImageryProvider {
+  const source = layer.getSource();
+  if (source instanceof WMTS) {
+    const url = source!.getUrls()![0];
+    const layerId = source!.getLayer();
+    const matrixSet = source!.getMatrixSet();
+    const format = source!.getFormat();
+    const style = source!.getStyle();
+    const credit = source!.getAttributions()!.toString();
+    const conOptions: WebMapTileServiceImageryProvider.ConstructorOptions = {
+      url: url!,
+      layer: layerId!,
+      style: style!,
+      format: format!,
+      tileMatrixSetID: matrixSet!,
+      credit: credit!,
+    };
+    return new WebMapTileServiceImageryProvider(conOptions);
+  }
+  const url = source!.getUrls()![0];
+  return new UrlTemplateImageryProvider({
+    url,
+  });
 }
 
 export function CesiumMap(props: MapProps): JSX.Element {
@@ -384,7 +430,7 @@ export function CesiumMap(props: MapProps): JSX.Element {
               styleVectorDataSource(datasource, layer);
             }
           } else if (layer instanceof ImageLayer) {
-            const imageryProvider = ImageLayerDataSource(viewer, layer);
+            const imageryProvider = await ImageLayerDataSource(viewer, layer);
             const ds = cViewer.imageryLayers.addImageryProvider(imageryProvider);
             const layerPropsInt = layer.getPropertiesInternal();
             let layerPath;
@@ -393,6 +439,18 @@ export function CesiumMap(props: MapProps): JSX.Element {
             }
             (ds as NamedImageryLayer).name = layerPath;
             ds.show = layer.isVisible();
+          } else if (layer instanceof TileLayer) {
+            const imageryProvider = TileLayerDataSource(viewer, layer);
+            if (imageryProvider) {
+              const ds = cViewer.imageryLayers.addImageryProvider(imageryProvider);
+              const layerPropsInt = layer.getPropertiesInternal();
+              let layerPath;
+              if (layerPropsInt?.layerConfig) {
+                layerPath = layerPropsInt.layerConfig.layerPath;
+              }
+              (ds as NamedImageryLayer).name = layerPath;
+              ds.show = layer.isVisible();
+            }
           }
         })
       );
