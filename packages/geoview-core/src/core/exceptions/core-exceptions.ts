@@ -112,17 +112,17 @@ export class PromiseRejectErrorWrapper<T> extends Error {
 
   /**
    * Constructor to initialize the PromiseRejectErrorWrapper with the Error and the related object.
-   * @param {Error} error - The real Error associated with the promise rejection.
+   * @param {unknown} error - The real error (will be formatted to Error if not Error already) associated with the promise rejection.
    * @param {T} object - An object of interest associated with the rejection Error.
    */
-  constructor(error: Error, object: T) {
+  constructor(error: unknown, object: T) {
     super('Wraps the error with an object for a Promise rejection');
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'PromiseRejectErrorWrapper';
 
     // Keep the error and the object associated with it
-    this.error = error;
+    this.error = formatError(error);
     this.object = object;
 
     // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)

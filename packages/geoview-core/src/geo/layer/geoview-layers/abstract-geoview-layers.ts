@@ -621,7 +621,7 @@ export abstract class AbstractGeoViewLayer {
       return Promise.resolve(layerConfig);
     } catch (error: unknown) {
       // Wrap so that we carry the layerConfig into the reject callback and throw it higher
-      throw new PromiseRejectErrorWrapper(error as Error, layerConfig);
+      throw new PromiseRejectErrorWrapper(error, layerConfig);
     }
   }
 
@@ -662,6 +662,8 @@ export abstract class AbstractGeoViewLayer {
         // Get the config to process
         const layerConfig = listOfLayerEntryConfig[0];
 
+        if (layerConfig.layerStatus === 'error') return undefined;
+
         // If working on a group layer
         if (layerEntryIsGroupLayer(layerConfig)) {
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
@@ -675,8 +677,6 @@ export abstract class AbstractGeoViewLayer {
           this.addLayerLoadError(new LayerEntryConfigUnableToCreateGroupLayerError(layerConfig), layerConfig);
           return undefined;
         }
-
-        if (layerConfig.layerStatus === 'error') return undefined;
 
         try {
           // Process entry and catch possible error
