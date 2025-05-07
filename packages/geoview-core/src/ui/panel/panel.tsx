@@ -121,7 +121,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
     } else {
       panelContainerRef.current?.removeAttribute('style');
     }
-  }, [mapSize, panelGroupName, open]);
+  }, [cesiumSize, show3dMap, mapSize, panelGroupName, open]);
 
   return (
     <Box sx={panelContainerStyles} ref={panelContainerRef}>

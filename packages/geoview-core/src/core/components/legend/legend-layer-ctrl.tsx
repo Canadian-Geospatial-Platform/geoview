@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -23,7 +23,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 
-import { useMapStoreActions, useSelectorLayerVisibility, useSelectorLayerInVisibleRange, getGeoViewStore } from '@/core/stores/';
+import { useMapStoreActions, useSelectorLayerVisibility, useSelectorLayerInVisibleRange } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { useAppShow3dMap } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -70,9 +70,6 @@ const useControlActions = (layerPath: string): ControlActions => {
       },
       handleHighlightLayer: (event: React.MouseEvent): void => {
         event.stopPropagation();
-        if (is3dMap) {
-          console.log('HighlightLayerIn3D!');
-        }
         setHighlightLayer(layerPath);
       },
       handleZoomTo: (event: React.MouseEvent): void => {
@@ -86,7 +83,16 @@ const useControlActions = (layerPath: string): ControlActions => {
         }
       },
     }),
-    [toggleVisibility, layerPath, setHighlightLayer, setOrToggleLayerVisibility, zoomToLayerExtent, zoomToLayerVisibleScale, is3dMap]
+    [
+      toggleVisibility,
+      zoomToLayer,
+      layerPath,
+      setHighlightLayer,
+      setOrToggleLayerVisibility,
+      zoomToLayerExtent,
+      zoomToLayerVisibleScale,
+      is3dMap,
+    ]
   );
 };
 

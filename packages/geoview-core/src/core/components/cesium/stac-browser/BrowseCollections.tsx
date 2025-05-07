@@ -43,7 +43,9 @@ export function BrowseCollection(props: { url: string }): JSX.Element {
     setCollections(collections);
   }
   if (!data) {
-    getCollections();
+    getCollections().catch((error) => {
+      throw new Error(`Error fetching STAC collections: ${error}`);
+    });
   }
 
   const collectionPageRef = useRef<HTMLDivElement>(null);
@@ -110,7 +112,7 @@ function StacItems(props: { url: string }): JSX.Element {
         setContent(result);
       })
       .catch((error) => {
-        console.error('Error fetching STAC root:', error);
+        throw new Error(`Error fetching STAC items: ${error}`);
       });
   }, [url]);
 

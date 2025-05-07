@@ -85,7 +85,8 @@
     "yet-another-react-lightbox": "^3.21.6",
     "zustand": "~5.0.0",
     "cesium": "~1.128.0",
-    "@cesium/engine": "~16.0.0"
+    "@cesium/engine": "~16.0.0",
+    "geojson": "~0.5.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.25.7",
@@ -160,7 +161,8 @@
     "webpack-dev-server": "^5.1.0",
     "webpack-merge": "^6.0.1",
     "worker-loader": "^3.0.8",
-    "zustand": "~5.0.0"
+    "zustand": "~5.0.0",
+    "@types/geojson": "~7946.0.16"
   },
   "resolutions": {
     "@types/react": "^18.2.0",

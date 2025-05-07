@@ -7,7 +7,11 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 
 function getImageryLayerByName(viewer: Viewer, name: string): ImageryLayer | undefined {
   // eslint-disable-next-line no-underscore-dangle
-  const layers = viewer.imageryLayers._layers;
+  const layers = [];
+  const layerCollectionLength = viewer.imageryLayers.length;
+  for (let i = 0; i < layerCollectionLength; i += 1) {
+    layers.push(viewer.imageryLayers.get(i));
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return layers.find((layer: any) => layer.name === name);
 }

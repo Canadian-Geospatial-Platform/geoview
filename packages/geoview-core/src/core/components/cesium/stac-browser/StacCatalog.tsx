@@ -9,7 +9,7 @@ import {
   i18nAddItemIds,
   i18nAddToMap,
   i18nAddVertex,
-  i18nAssetHasInvalidFormat,
+  // i18nAssetHasInvalidFormat, This will be used to hook into notification system.
   i18nBack,
   i18nBoundingBox,
   i18nBoundingBoxPlaceholder,
@@ -43,9 +43,7 @@ import {
   i18nResultsReturned,
   i18nSearch,
   i18nSearching,
-  i18nSelectAsset,
   i18nSelectCollections,
-  i18nSelectLimit,
   i18nStartLabel,
   i18nThumbnail,
 } from './StacStrings';
@@ -124,7 +122,7 @@ function StacSearch(props: { url: string }): JSX.Element {
   const [geometryType, setGeometryType] = useState('none');
   const [datetimeErrorClass] = useState('');
   const [bboxErrorClass, setBboxErrorClass] = useState('');
-  async function stacSearchRequest(sUrl: string): Promise<StacSearchResult | undefined> {
+  async function stacSearchRequest(sUrl: string): Promise<void> {
     if (sUrl.trim() === '') {
       setSearching(false);
       return;
@@ -586,7 +584,9 @@ function StacSearch(props: { url: string }): JSX.Element {
               onClick={() => {
                 handleSave();
                 setSearchUrl(baseUrl);
-                getSearchResults();
+                getSearchResults().catch((e) => {
+                  throw new Error(e);
+                });
                 setShowResults(true);
               }}
             >
@@ -628,7 +628,9 @@ function StacSearch(props: { url: string }): JSX.Element {
                 type="button"
                 className="stacButtons"
                 onClick={() => {
-                  pageNavRequest(previous!);
+                  pageNavRequest(previous!).catch((e) => {
+                    throw new Error(e);
+                  });
                 }}
               >
                 {i18nPreviousPage()}
@@ -655,7 +657,9 @@ function StacSearch(props: { url: string }): JSX.Element {
                 type="button"
                 className="stacButtons"
                 onClick={() => {
-                  pageNavRequest(next!);
+                  pageNavRequest(next!).catch((e) => {
+                    throw new Error(e);
+                  });
                 }}
               >
                 {i18nNextPage()}
@@ -736,15 +740,11 @@ export function StacFeature(props: { feature: StacItem }): JSX.Element {
   }, [optionsObject]);
 
   function addToMapClicked(): void {
-    if ((selectedFeature as unknown) === null) {
-      alert(i18nNoAssetSelected());
-    } else if (
-      selectedFeature.type === 'image/tiff; application=geotiff; profile=cloud-optimized' ||
-      selectedFeature.type === 'image/tiff'
-    ) {
+    if (selectedFeature.type === 'image/tiff; application=geotiff; profile=cloud-optimized' || selectedFeature.type === 'image/tiff') {
       handleSelect();
     } else {
-      alert(i18nAssetHasInvalidFormat());
+      // TODO: Hook into Error notification system.
+      throw new Error(i18nNoAssetSelected());
     }
   }
 

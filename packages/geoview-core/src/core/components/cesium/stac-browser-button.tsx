@@ -21,7 +21,9 @@ export function StacBrowserButton(): JSX.Element {
   const [selectedCatalog, setSelectedCatalog] = useState<addCatalogObj>(defaultCatalog);
 
   function addStacItemToMap(stacItemProj: StacAssetObject): void {
-    console.log(stacItemProj);
+    /* eslint-disable-next-line no-void */
+    void stacItemProj;
+    // This function is a placeholder for adding the STAC item to the map.
   }
 
   const bbox = useState('');

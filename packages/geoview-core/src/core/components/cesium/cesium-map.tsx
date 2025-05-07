@@ -10,6 +10,7 @@ import {
   BoundingSphere,
   WebMapServiceImageryProvider,
   Color,
+  ImageryLayer,
 } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -43,6 +44,10 @@ import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-val
 type MapProps = {
   viewer: MapViewer;
 };
+
+interface NamedImageryLayer extends ImageryLayer {
+  name: string;
+}
 
 enum ScaleMode {
   M,
@@ -318,7 +323,7 @@ export function CesiumMap(props: MapProps): JSX.Element {
             if (layerPropsInt?.layerConfig) {
               layerPath = layerPropsInt.layerConfig.layerPath;
             }
-            ds.name = layerPath;
+            (ds as NamedImageryLayer).name = layerPath;
             ds.show = layer.isVisible();
           }
         })
