@@ -175,7 +175,7 @@ export async function esriQueryRelatedRecordsByUrl(url: string, recordGroupIndex
   if ((respJson.relatedRecordGroups.length as number) > 0)
     // Return the array of TypeFeatureInfoEntryPartial
     return esriParseFeatureInfoEntries(respJson.relatedRecordGroups[recordGroupIndex].relatedRecords as TypeJsonObject[]);
-  return Promise.resolve([]);
+  return [];
 }
 
 /**

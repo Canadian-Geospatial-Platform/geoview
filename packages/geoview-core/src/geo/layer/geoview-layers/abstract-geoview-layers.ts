@@ -618,7 +618,7 @@ export abstract class AbstractGeoViewLayer {
       );
 
       // Return as-is
-      return Promise.resolve(layerConfig);
+      return layerConfig;
     } catch (error: unknown) {
       // Wrap so that we carry the layerConfig into the reject callback and throw it higher
       throw new PromiseRejectErrorWrapper(error, layerConfig);
@@ -882,8 +882,7 @@ export abstract class AbstractGeoViewLayer {
       checkFrequency
     );
 
-    // Resolve successfully, otherwise an exception has been thrown already
-    return Promise.resolve();
+    // Here we resolve successfully, otherwise an exception has been thrown already
   }
 
   /**

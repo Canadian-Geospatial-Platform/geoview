@@ -111,8 +111,7 @@ export class API {
       logger.logWarning(`Cannot delete map. Map with ID ${mapId} not found`);
 
       // Return an empty div
-      const div = document.createElement('div');
-      return Promise.resolve(div);
+      return document.createElement('div');
     }
 
     // Only delete from #maps after successful removal
