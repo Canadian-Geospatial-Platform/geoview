@@ -30,6 +30,7 @@ import {
   TypeLayerStyleSettings,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
+  TypeAliasLookup,
 } from '@/api/config/types/map-schema-types';
 import {
   binaryKeywors,
@@ -51,7 +52,8 @@ type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: TypeAliasLookup
 ) => Style | undefined;
 
 let colorCount = 0;
@@ -85,10 +87,6 @@ export const getGeometryType = (feature: FeatureLike): TypeStyleGeometry => {
   if (!geometryType) throw new Error('Features must have a geometry type.');
   return (geometryType.startsWith('Multi') ? geometryType.slice(5) : geometryType) as TypeStyleGeometry;
 };
-
-/** The generic icon to use when failing to get a feature canvas */
-const FORMATTING_NO_LEGEND =
-  'data:image/png;base64,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';
 
 /** Table used to define line symbology to use when drawing lineString and polygon perimeters */
 const lineDashSettings: Record<TypeLineStyle, number[] | undefined> = {
@@ -1227,14 +1225,26 @@ function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): Typ
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
-function searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeLayerStyleConfigInfo[], feature: Feature): number | undefined {
+function searchUniqueValueEntry(
+  fields: string[],
+  uniqueValueStyleInfo: TypeLayerStyleConfigInfo[],
+  feature: Feature,
+  aliasLookup?: TypeAliasLookup
+): number | undefined {
   for (let i = 0; i < uniqueValueStyleInfo.length; i++) {
     for (let j = 0, isEqual = true; j < fields.length && isEqual; j++) {
       // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
       // unique value definition.
-      const fieldName = feature.getKeys().find((key) => {
+      let fieldName = feature.getKeys().find((key) => {
         return key.toLowerCase() === fields[j]?.toLowerCase();
       });
+
+      // Failed to find match: Attempt to find the alias from the names
+      if (!fieldName && aliasLookup && Object.keys(aliasLookup).length > 0) {
+        if (fields[j] in aliasLookup) {
+          fieldName = aliasLookup[fields[j]];
+        }
+      }
 
       if (fieldName) {
         const styleInfoValue =
@@ -1266,14 +1276,15 @@ function processUniqueValuePoint(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchUniqueValueEntry(fields, info, feature!);
+    const i = searchUniqueValueEntry(fields, info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePoint(info[i].settings);
     if (i === undefined && hasDefault && (legendFilterIsOff || styleSettings.info[styleSettings.info.length - 1].visible !== false))
       return processSimplePoint(styleSettings.info[styleSettings.info.length - 1].settings);
@@ -1295,14 +1306,15 @@ function processUniqueLineString(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchUniqueValueEntry(fields, info, feature!);
+    const i = searchUniqueValueEntry(fields, info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimpleLineString(info[i].settings, feature);
     if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimpleLineString(info[info.length - 1].settings, feature);
@@ -1324,16 +1336,17 @@ function processUniquePolygon(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchUniqueValueEntry(fields, info, feature!);
+    const i = searchUniqueValueEntry(fields, info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePolygon(info[i].settings, feature);
-    if (i === undefined && hasDefault !== undefined && (legendFilterIsOff || info[info.length - 1].visible !== false))
+    if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimplePolygon(info[info.length - 1].settings, feature);
   }
   return undefined;
@@ -1348,12 +1361,25 @@ function processUniquePolygon(
  *
  * @returns {number | undefined} The index of the entry. Undefined if unable to find it.
  */
-function searchClassBreakEntry(field: string, classBreakStyleInfo: TypeLayerStyleConfigInfo[], feature: Feature): number | undefined {
+function searchClassBreakEntry(
+  field: string,
+  classBreakStyleInfo: TypeLayerStyleConfigInfo[],
+  feature: Feature,
+  aliasLookup?: TypeAliasLookup
+): number | undefined {
   // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
   // class break definition.
   const featureKey = (feature as Feature).getKeys().filter((key) => {
     return key.toLowerCase() === field.toLowerCase();
   });
+
+  // Failed to find match: Attempt to find the alias key from the names
+  if (featureKey.length !== 1 && aliasLookup && Object.keys(aliasLookup).length > 0) {
+    if (field in Object.keys(aliasLookup)) {
+      featureKey.push(aliasLookup[field]);
+    }
+  }
+
   if (featureKey.length !== 1) return undefined;
 
   const fieldValue = feature.get(featureKey[0]) as number | string;
@@ -1380,14 +1406,15 @@ function processClassBreaksPoint(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'classBreaks') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchClassBreakEntry(fields[0], info, feature!);
+    const i = searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePoint(info[i].settings);
     if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimplePoint(info[info.length - 1].settings);
@@ -1409,14 +1436,15 @@ function processClassBreaksLineString(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'classBreaks') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchClassBreakEntry(fields[0], info, feature!);
+    const i = searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimpleLineString(info[i].settings, feature);
     if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimpleLineString(info[info.length - 1].settings, feature);
@@ -1438,14 +1466,15 @@ function processClassBreaksPolygon(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
+  legendFilterIsOff?: boolean,
+  aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
 
   if (styleSettings.type === 'classBreaks') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchClassBreakEntry(fields[0], info, feature!);
+    const i = searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
     if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePolygon(info[i].settings, feature);
     if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimplePolygon(info[info.length - 1].settings, feature);
@@ -1498,6 +1527,7 @@ export function getAndCreateFeatureStyle(
   label: string,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
+  aliasLookup?: TypeAliasLookup,
   callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
 ): Style | undefined {
   // Get the geometry type
@@ -1524,7 +1554,14 @@ export function getAndCreateFeatureStyle(
     const styleSettings = style![geometryType]!;
     const { type } = styleSettings;
     // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
-    const featureStyle = processStyle[type][geometryType].call('', styleSettings, feature as Feature, filterEquation, legendFilterIsOff);
+    const featureStyle = processStyle[type][geometryType].call(
+      '',
+      styleSettings,
+      feature as Feature,
+      filterEquation,
+      legendFilterIsOff,
+      aliasLookup
+    );
 
     return featureStyle;
   }
@@ -1544,8 +1581,9 @@ export function getFeatureImageSource(
   feature: Feature,
   style: TypeLayerStyleConfig,
   filterEquation?: FilterNodeArrayType,
-  legendFilterIsOff?: boolean
-): string {
+  legendFilterIsOff?: boolean,
+  aliasLookup?: TypeAliasLookup
+): string | undefined {
   // The image source that will be returned (if calculated successfully)
   let imageSource: string | undefined;
 
@@ -1576,7 +1614,7 @@ export function getFeatureImageSource(
       //   });
       // });
 
-      const featureStyle = processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
+      const featureStyle = processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff, aliasLookup);
 
       if (featureStyle) {
         if (geometryType === 'Point') {
@@ -1601,8 +1639,7 @@ export function getFeatureImageSource(
   // If set, all good
   if (imageSource) return imageSource;
 
-  // Here, nothing could be done, use the no_legend template
-  return FORMATTING_NO_LEGEND;
+  return undefined;
 }
 
 /** ***************************************************************************************************************************

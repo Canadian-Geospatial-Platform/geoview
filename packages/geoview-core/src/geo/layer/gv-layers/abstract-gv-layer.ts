@@ -35,6 +35,7 @@ import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -639,6 +640,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       const dictFieldDomains: { [fieldName: string]: codedValueType | rangeDomainType | null } = {};
       // Hold a dictionary build on the fly for the field types
       const dictFieldTypes: { [fieldName: string]: TypeOutfieldsType } = {};
+      // Create lookup dictionary of names to alias
+      const aliasLookup = createAliasLookup(outfields);
 
       // Loop on the promised feature infos
       let featureKeyCounter = 0;
@@ -646,7 +649,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       const queryResult: TypeFeatureInfoEntry[] = [];
 
       // Dict to store created image sources to avoid recreating
-      const imageSourceDict: { [styleAsJsonString: string]: string } = {};
+      const imageSourceDict: { [styleAsJsonString: string]: string | undefined } = {};
       const layerStyle = this.getStyle()!;
 
       features.forEach((feature) => {
@@ -659,7 +662,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         if (layerStyle[geometryType]) {
           const styleSettings = layerStyle[geometryType]!;
           const { type } = styleSettings;
-          const featureStyle = processStyle[type][geometryType](styleSettings, feature, layerConfig.filterEquation, true);
+          const featureStyle = processStyle[type][geometryType](styleSettings, feature, layerConfig.filterEquation, true, aliasLookup);
 
           // Sometimes data is not well fomrated and some features has no style associated, just throw a warning
           if (featureStyle === undefined) {
@@ -673,11 +676,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
           // Use string as dict key
           if (!imageSourceDict[styleString])
-            imageSourceDict[styleString] = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
+            imageSourceDict[styleString] = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, aliasLookup);
           imageSource = imageSourceDict[styleString];
         }
 
-        if (!imageSource) imageSource = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true);
+        if (!imageSource) imageSource = getFeatureImageSource(feature, layerStyle, layerConfig.filterEquation, true, aliasLookup);
 
         let extent;
         if (feature.getGeometry()) extent = feature.getGeometry()!.getExtent();

@@ -10,6 +10,8 @@ import {
   TypeFeatureInfoLayerConfig,
   TypeGeometry,
   TypeOutfieldsType,
+  TypeAliasLookup,
+  TypeOutfields,
 } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -322,4 +324,17 @@ export function parseDateTimeValuesEsriImageOrWMS(filter: string, externalFragme
 
   // Return the filter values to use
   return filterValueToUse;
+}
+
+// Create lookup dictionary of names to aliases
+export function createAliasLookup(outfields: TypeOutfields[] | undefined): TypeAliasLookup {
+  if (!outfields) return {};
+
+  const aliasLookup =
+    outfields?.reduce((acc, field) => {
+      acc[field.name] = field.alias;
+      return acc;
+    }, {} as TypeAliasLookup) ?? {};
+
+  return aliasLookup;
 }

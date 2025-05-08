@@ -1,7 +1,7 @@
 import { memo, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
-import { Box } from '@/ui';
+import { Box, BrowserNotSupportedIcon } from '@/ui';
 
 import {
   getMapPointerPosition,
@@ -98,8 +98,12 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
         top: position.top,
       }}
     >
-      {tooltipContent.content.icon && (
+      {tooltipContent.content.icon ? (
         <Box component="img" className="layer-icon" alt={t('hovertooltip.alticon')!} src={tooltipContent.content.icon} />
+      ) : (
+        <Box component="div" className="layer-icon" aria-label={t('hovertooltip.alticon')!}>
+          <BrowserNotSupportedIcon />
+        </Box>
       )}
       {tooltipContent.content.value && <Box sx={sxClasses.tooltipText}>{tooltipContent.content.value}</Box>}
     </Box>
