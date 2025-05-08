@@ -32,6 +32,8 @@ import {
   RuntimeError,
   CustomDataSource,
   ConstantPositionProperty,
+  Resource,
+  GeographicTilingScheme,
 } from 'cesium';
 import 'cesium/Widgets/widgets.css';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -365,16 +367,69 @@ function styleVectorDataSource(datasource: GeoJsonDataSource | CustomDataSource 
   datasource.entities.resumeEvents();
 }
 
-async function ImageLayerProvider(_viewer: MapViewer, layer: ImageLayer<ImageWMS | ImageArcGISRest>): Promise<ImageryProvider | undefined> {
+type ArcGisImageServerExtent = {
+  xmin: number;
+  ymin: number;
+  xmax: number;
+  ymax: number;
+  spatialReference: {
+    wkid: number;
+    latestWkid: number;
+  };
+};
+
+async function ImageLayerProvider(layer: ImageLayer<ImageWMS | ImageArcGISRest>): Promise<ImageryProvider | undefined> {
   const source = layer.getSource();
   if (source instanceof ImageArcGISRest) {
     const url = source.getUrl();
     const params = source.getParams();
-    // This doesnt work for ImageServers.
+
+    const reqUrl = new Resource({
+      url: `${url}exportImage`,
+      queryParameters: {
+        F: 'image',
+        FORMAT: 'PNG32',
+        TRANSPARENT: true,
+        LAYERS: params.layers,
+        SIZE: '256,256',
+        BBOX: '{westDegrees},{southDegrees},{eastDegrees},{northDegrees}',
+        BBOXSR: '4326',
+        IMAGESR: '4326',
+        DPI: '90',
+      },
+    });
     if (url?.includes('ImageServer')) {
-      return new UrlTemplateImageryProvider({
-        url: url!,
+      const response = await fetch(
+        `${url}?${new URLSearchParams({
+          f: 'pjson',
+        }).toString()}`
+      );
+      const json = await response.json();
+      let extent = json.extent as ArcGisImageServerExtent;
+      if (extent.spatialReference.latestWkid !== 4326) {
+        const projdExtent = transformExtent(
+          [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
+          `EPSG:${extent.spatialReference.latestWkid}`,
+          'EPSG:4326'
+        );
+        extent = {
+          xmin: projdExtent[0],
+          ymin: projdExtent[1],
+          xmax: projdExtent[2],
+          ymax: projdExtent[3],
+          spatialReference: {
+            wkid: 4326,
+            latestWkid: 4326,
+          },
+        };
+      }
+      const provider = new UrlTemplateImageryProvider({
+        url: reqUrl,
+        rectangle: Rectangle.fromDegrees(extent.xmin, extent.ymin, extent.xmax, extent.ymax),
+        tilingScheme: new GeographicTilingScheme(),
       });
+
+      return provider;
     }
     const prov = await ArcGisMapServerImageryProvider.fromUrl(url!, {
       ellipsoid: Ellipsoid.WGS84,
@@ -538,7 +593,7 @@ export function CesiumMap(props: MapProps): JSX.Element {
               }
             }
           } else if (layer instanceof ImageLayer) {
-            const imageryProvider = await ImageLayerProvider(viewer, layer);
+            const imageryProvider = await ImageLayerProvider(layer);
             if (imageryProvider) {
               const ds = cViewer.imageryLayers.addImageryProvider(imageryProvider);
               const layerPropsInt = layer.getPropertiesInternal();
