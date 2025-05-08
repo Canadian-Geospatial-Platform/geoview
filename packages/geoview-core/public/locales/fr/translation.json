@@ -69,8 +69,12 @@
     "layers": "Couches",
     "share": "Partager",
     "version": "À propos de GéoView",
+    "openIn3DButton": "Ouvrir en 3D",
     "repoLink": "Github",
     "removeAllNotifications": "Effacer tout"
+  },
+  "openIn3DButton": {
+    "title": "Ouvrir en 3D"
   },
   "legend": {
     "title": "Légende",

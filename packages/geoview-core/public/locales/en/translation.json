@@ -69,8 +69,12 @@
     "layers": "Layers",
     "share": "Share",
     "version": "About GeoView",
+    "openIn3DButton": "Open in 3D",
     "repoLink": "Github",
     "removeAllNotifications": "Remove all"
+  },
+  "openIn3DButton": {
+    "title": "Open in 3D"
   },
   "legend": {
     "title": "Legend",
