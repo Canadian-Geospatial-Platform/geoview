@@ -1,4 +1,4 @@
-import { ChangeEvent, MouseEventHandler, RefObject, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, MouseEventHandler, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
@@ -16,6 +16,7 @@ import { logger } from '@/core/utils/logger';
 import { useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LegendContainer } from '@/core/components/export/export-legend-utils';
 import { TypeLegendLayer } from '@/core/components/layers/types';
+import { getSxClasses } from './export-modal-style';
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -68,6 +69,40 @@ export default function ExportModal(): JSX.Element {
 
   // Set the legend layers
   const [legendLayers, setLegendLayers] = useState<TypeLegendLayer[]>([]);
+
+  interface TypeScale {
+    scaleId: string;
+    label: string;
+    borderBottom: boolean;
+  }
+
+  const SCALE_MODES = {
+    METRIC: 0,
+    IMPERIAL: 1,
+    NUMERIC: 2,
+  } as const;
+
+  // Memoize values
+  const scaleValues: TypeScale[] = useMemo(
+    () => [
+      {
+        scaleId: '0',
+        label: scale.labelGraphicMetric,
+        borderBottom: true,
+      },
+      {
+        scaleId: '1',
+        label: scale.labelGraphicImperial,
+        borderBottom: true,
+      },
+      {
+        scaleId: '2',
+        label: scale.labelNumeric,
+        borderBottom: false,
+      },
+    ],
+    [scale.labelGraphicMetric, scale.labelGraphicImperial, scale.labelNumeric]
+  );
 
   // resising image from dataurl
   async function resizeImageData(imageUri: string, inFileName: string): Promise<void> {
@@ -148,11 +183,11 @@ export default function ExportModal(): JSX.Element {
                 setActiveAppBarTab(legendId, 'legend', false, false);
                 disableFocusTrap();
               })
-              .catch((error: Error) => {
+              .catch((error) => {
                 logger.logError('Error while resizing the image', error);
               });
           })
-          .catch((error: Error) => {
+          .catch((error) => {
             // Clean up on error too
             document.body.removeChild(tempContainer);
             setIsMapExporting(false);
@@ -181,12 +216,25 @@ export default function ExportModal(): JSX.Element {
     return dialogBox.clientWidth - paddingLeft - paddingRight;
   };
 
+  // Callback
+  const getScaleWidth = useCallback(
+    (mode: number): string => {
+      switch (mode) {
+        case SCALE_MODES.METRIC:
+          return scale.lineWidthMetric;
+        case SCALE_MODES.IMPERIAL:
+          return scale.lineWidthImperial;
+        default:
+          return 'none';
+      }
+    },
+    [scale.lineWidthMetric, scale.lineWidthImperial, SCALE_MODES.METRIC, SCALE_MODES.IMPERIAL]
+  );
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('Export Modal - mount');
     setLegendLayers(layersList);
-
-    const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
@@ -214,7 +262,7 @@ export default function ExportModal(): JSX.Element {
             img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
             mapImage.appendChild(img);
           })
-          .catch((error: Error) => {
+          .catch((error) => {
             logger.logError('Error occured while converting map to image', error);
           });
         setIsLegendLoading(false);
@@ -229,6 +277,11 @@ export default function ExportModal(): JSX.Element {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeModalId, isOpen]);
+
+  const classww = getSxClasses(theme).scaleText;
+  const width = getScaleWidth(0);
+  logger.logInfo('width', width);
+  logger.logInfo('classww', classww);
 
   return (
     <Dialog open={activeModalId === 'export'} onClose={() => disableFocusTrap()} fullWidth maxWidth="xl" disablePortal>
@@ -249,12 +302,16 @@ export default function ExportModal(): JSX.Element {
             {isMapLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
           </Box>
           <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ padding: '1rem', paddingBottom: 0 }}>
-            <Box>
-              {!!scale.labelGraphicMetric && (
-                <Box>
-                  {scale.labelGraphicMetric} {t('exportModal.approx')} <hr />
-                </Box>
-              )}
+            <Box
+              component="span"
+              className="hasScaleLine interaction-static"
+              sx={{
+                ...getSxClasses(theme).scaleText,
+                borderBottom: '1px solid',
+                width: `${parseInt(getScaleWidth(0), 10) + 40}px`,
+              }}
+            >
+              {scaleValues[0].label} {t('exportModal.approx')}
             </Box>
             {northArrow && (
               <Box
