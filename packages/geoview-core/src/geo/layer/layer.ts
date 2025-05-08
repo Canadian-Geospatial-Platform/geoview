@@ -95,6 +95,7 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { ConfigApi } from '@/api/config/config-api';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 // import { LayerMockup } from '@/geo/layer/layer-mockup';
 
 export type GeoViewLayerAddedResult = {
@@ -459,7 +460,7 @@ export class LayerApi {
    * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - An optional array containing layers passed within the map config
    * @returns {Promise<void>}
    */
-  async loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): Promise<void> {
+  async loadListOfGeoviewLayer(mapConfigLayerEntries: MapConfigLayerEntry[]): Promise<void> {
     const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
 
     // set order for layers to appear on the map according to config
@@ -523,9 +524,33 @@ export class LayerApi {
           }
         });
       } else {
-        // Don't care about the failed promises here as they were taken care of earlier as they were related to GeoCore UUIDs not functioning.
+        // Depending on the error
+        let uuids;
+        if (promise.reason instanceof LayerGeoCoreError) {
+          uuids = promise.reason.uuids;
+        }
+
+        // For each uuid that failed
+        uuids?.forEach((uuid) => {
+          // Get the index at which the TypeGeoviewLayerConfig happened
+          const index = validGeoviewLayerConfigs.findIndex((mapLayerEntry) => mapLayerEntry.geoviewLayerId === uuid);
+
+          // If found
+          if (index >= 0) {
+            // Remove the entry
+            validGeoviewLayerConfigs.splice(index, 1);
+          }
+        });
       }
     });
+
+    // At this point, we've removed the duplicated geocore (DuplicateAndMultipleUuidGeoviewLayerConfig) and the
+    // geocore that were failing were removed from the validGeoviewLayerConfigs variable.
+    // Time to update the list we received in param so that the rest of the application works with that list.
+    // This is notably so that the map loads even if no geocore layers were valid
+
+    // Replace the array received in param
+    mapConfigLayerEntries.splice(0, mapConfigLayerEntries.length, ...validGeoviewLayerConfigs);
 
     // Init ordered layer info (?)
     MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), orderedLayerInfos);
