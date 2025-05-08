@@ -56,11 +56,8 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param {string} url - The url to query the metadata from.
    */
   static fetchMetadata(url: string): Promise<TypeJsonObject> {
-    // The url
-    const queryUrl = url.toLowerCase().endsWith('json') || url.toLowerCase().endsWith('meta') ? url : `${url}?f=json`;
-
     // Return it
-    return Fetch.fetchJsonAsObject(queryUrl);
+    return Fetch.fetchJsonAsObject(url);
   }
 
   /**
@@ -68,7 +65,12 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected override async onFetchAndSetServiceMetadata(): Promise<void> {
-    try {
+    // If metadataAccessPath ends with .meta, .json or .geojson
+    if (
+      this.metadataAccessPath.endsWith('.meta') ||
+      this.metadataAccessPath.endsWith('.json') ||
+      this.metadataAccessPath.endsWith('.geojson')
+    ) {
       // Fetch it
       const metadataJson = await GeoJSON.fetchMetadata(this.metadataAccessPath);
 
@@ -81,15 +83,11 @@ export class GeoJSON extends AbstractGeoViewVector {
         attributions.push(copyrightText);
         this.setAttributions(attributions);
       }
-    } catch (error: unknown) {
-      // GV In the case of a geojson, when the metadata fetching fails and we were on a .meta file, we actually skip it with a warning only.
-      if (this.metadataAccessPath.toLowerCase().endsWith('meta')) {
-        // Log
-        logger.logWarning("The service metadata for the GeoJson couldn't be read, skipped.", error);
-      } else {
-        // Regular failure
-        throw error;
-      }
+    } else {
+      // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
+      logger.logWarning(
+        `The metadataAccessPath '${this.metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
+      );
     }
   }
 

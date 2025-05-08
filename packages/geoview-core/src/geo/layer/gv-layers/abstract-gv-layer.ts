@@ -248,23 +248,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Overridable method called when the layer has been loaded correctly
-   */
-  protected onLoaded(): void {
-    // Get the layer config
-    const layerConfig = this.getLayerConfig();
-
-    // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
-    layerConfig.setLayerStatusLoaded();
-
-    // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
-    this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
-
-    // Emit event
-    this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
-  }
-
-  /**
    * Emits a layer-specific message event with localization support
    * @protected
    * @param {string} messageKey - The key used to lookup the localized message OR message
@@ -293,16 +276,39 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Overridable method called when the layer has been loaded correctly
+   */
+  protected onLoaded(): void {
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
+
+    // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
+    layerConfig.setLayerStatusLoaded();
+
+    // Update the parent group if any
+    this.getLayerConfig().updateLayerStatusParent();
+
+    // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
+    this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+
+    // Emit event
+    this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
+  }
+
+  /**
    * Overridable method called when the layer is in error and couldn't be loaded correctly
    */
   protected onError(): void {
     // Log
     logger.logError(
-      `Error loading layer: ${this.getLayerPath()} at zoom level: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`
+      `An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map. Zoom level is: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`
     );
 
     // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
     this.getLayerConfig().setLayerStatusError();
+
+    // Update the parent group if any
+    this.getLayerConfig().updateLayerStatusParent();
 
     // Emit about the error
     this.emitMessage('layers.errorNotLoaded', [this.getLayerName()!], 'error', true);
@@ -320,6 +326,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
     this.getLayerConfig().setLayerStatusError();
+
+    // Update the parent group if any
+    this.getLayerConfig().updateLayerStatusParent();
 
     // Emit about the error
     this.emitMessage(
