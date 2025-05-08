@@ -148,11 +148,11 @@ export default function ExportModal(): JSX.Element {
                 setActiveAppBarTab(legendId, 'legend', false, false);
                 disableFocusTrap();
               })
-              .catch((error: Error) => {
+              .catch((error) => {
                 logger.logError('Error while resizing the image', error);
               });
           })
-          .catch((error: Error) => {
+          .catch((error) => {
             // Clean up on error too
             document.body.removeChild(tempContainer);
             setIsMapExporting(false);
@@ -188,8 +188,6 @@ export default function ExportModal(): JSX.Element {
 
     const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
 
-    const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
-
     let timer: NodeJS.Timeout;
     if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
       const mapImage = mapImageRef.current;
@@ -214,7 +212,7 @@ export default function ExportModal(): JSX.Element {
             img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
             mapImage.appendChild(img);
           })
-          .catch((error: Error) => {
+          .catch((error) => {
             logger.logError('Error occured while converting map to image', error);
           });
         setIsLegendLoading(false);
