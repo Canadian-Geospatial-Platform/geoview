@@ -46,6 +46,9 @@ import {
   i18nStartLabel,
   i18nThumbnail,
 } from './StacStrings';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { Button } from '@/ui/button/button';
 
 interface StacSearchParams {
   collections?: string;
@@ -212,9 +215,9 @@ function StacSearch(props: { url: string }): JSX.Element {
   const [customGeoJson, setCustomGeoJson] = useState<string>();
 
   // Add a new vertex to the polygon
-  function addPolygonCoord(): void {
+  const addPolygonCoord = (): void => {
     setPolygonCoords([...polygonCoords, { lat: '', lon: '' }]);
-  }
+  };
 
   // Update a specific vertex (index i) in the polygon coords array
   function updatePolygonCoord(index: number, field: 'lat' | 'lon', value: string): void {
@@ -382,9 +385,9 @@ function StacSearch(props: { url: string }): JSX.Element {
               </div>
             )
           )}
-          <button type="button" className="stacButtons" onClick={addPolygonCoord}>
+          <Button className="buttonOutlineFilled" onClick={addPolygonCoord} type="text" variant="contained">
             {i18nAddVertex()}
-          </button>
+          </Button>
         </div>
       );
     }
@@ -577,10 +580,8 @@ function StacSearch(props: { url: string }): JSX.Element {
               justifyContent: 'flex-end',
             }}
           >
-            <button
-              type="button"
-              className="stacButtons"
-              style={{ marginRight: '0.5rem' }}
+            <Button
+              className="buttonOutlineFilled"
               onClick={() => {
                 handleSave();
                 setSearchUrl(baseUrl);
@@ -589,34 +590,37 @@ function StacSearch(props: { url: string }): JSX.Element {
                 });
                 setShowResults(true);
               }}
+              type="text"
+              variant="contained"
             >
               {i18nSearch()}
-            </button>
-            <button
-              type="button"
-              className="stacButtons"
-              style={{}}
+            </Button>
+            <Button
+              className="buttonOutlineFilled"
               onClick={() => {
                 clearAllFields();
               }}
+              type="text"
+              variant="contained"
             >
               {i18nClear()}
-            </button>
+            </Button>
           </div>{' '}
         </>
       ) : null}
       {showResults ? (
         <>
-          <button
-            type="button"
-            className="stacButtons"
+          <Button
+            className="buttonOutlineFilled"
             onClick={() => {
               setShowResults(false);
               setSearching(false);
             }}
+            type="text"
+            variant="contained"
           >
             {i18nBack()}
-          </button>
+          </Button>
           <div className="StacSearchResults">
             {loading ? <p>{i18nSearching()}</p> : null}
             {error ? <p className="StacErrorText">{i18nErrorSearchingStac()}</p> : null}
@@ -624,17 +628,18 @@ function StacSearch(props: { url: string }): JSX.Element {
           </div>
           <div className="StacSearchPagingButtons">
             {previous.trim().length > 0 ? (
-              <button
-                type="button"
-                className="stacButtons"
+              <Button
+                className="buttonOutlineFilled"
                 onClick={() => {
                   pageNavRequest(previous!).catch((e) => {
                     throw new Error(e);
                   });
                 }}
+                type="text"
+                variant="contained"
               >
                 {i18nPreviousPage()}
-              </button>
+              </Button>
             ) : null}
             {searching && !loading && !error && searchResults ? (
               <>
@@ -653,17 +658,18 @@ function StacSearch(props: { url: string }): JSX.Element {
               </>
             ) : null}
             {next.trim().length > 0 ? (
-              <button
-                type="button"
-                className="stacButtons"
+              <Button
+                className="buttonOutlineFilled"
                 onClick={() => {
                   pageNavRequest(next!).catch((e) => {
                     throw new Error(e);
                   });
                 }}
+                type="text"
+                variant="contained"
               >
                 {i18nNextPage()}
-              </button>
+              </Button>
             ) : null}
           </div>{' '}
         </>
@@ -701,13 +707,13 @@ export function StacCatalog(props: { url: string; selectCallback: (asset: StacCa
         <Suspense fallback={<p>{i18nGettingStacCatalog()}</p>}>{content}</Suspense>
         <div className="StacNavigationSelector">
           {type === 'collections' ? (
-            <button type="button" className="stacButtons" onClick={() => setType('search')}>
+            <Button className="buttonOutlineFilled" onClick={() => setType('search')} type="text" variant="contained">
               {i18nSearch()}
-            </button>
+            </Button>
           ) : (
-            <button type="button" className="stacButtons" onClick={() => setType('collections')}>
+            <Button className="buttonOutlineFilled" onClick={() => setType('collections')} type="text" variant="contained">
               {i18nCollections()}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -720,6 +726,8 @@ export function StacFeature(props: { feature: StacItem }): JSX.Element {
   const { feature } = props;
   const { callback } = useStacContext();
   const [selectedFeature, setSelectedFeature] = useState<StacAssetObject>(null as unknown as StacAssetObject);
+
+  const mapId = useGeoViewMapId();
   const optionsObject = Object.entries(feature.assets)
     .map(([key, value]) => {
       return {
@@ -739,14 +747,14 @@ export function StacFeature(props: { feature: StacItem }): JSX.Element {
     }
   }, [optionsObject]);
 
-  function addToMapClicked(): void {
+  const addToMapClicked = (): void => {
     if (selectedFeature.type === 'image/tiff; application=geotiff; profile=cloud-optimized' || selectedFeature.type === 'image/tiff') {
       handleSelect();
     } else {
-      // TODO: Hook into Error notification system.
-      throw new Error(i18nAssetHasInvalidFormat());
+      const viewer = MapEventProcessor.getMapViewer(mapId);
+      viewer.notifications.addNotificationError(i18nAssetHasInvalidFormat());
     }
-  }
+  };
 
   return (
     <div className="StacFeature">
@@ -787,9 +795,9 @@ export function StacFeature(props: { feature: StacItem }): JSX.Element {
               </option>
             ))}
           </select>
-          <button type="button" className="stacButtons" onClick={addToMapClicked}>
+          <Button className="buttonOutlineFilled" onClick={addToMapClicked} type="text" variant="contained">
             {i18nAddToMap()}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

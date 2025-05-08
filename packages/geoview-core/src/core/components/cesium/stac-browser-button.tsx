@@ -3,6 +3,9 @@ import { Stac } from './stac-browser/Stac';
 import { StacCallbackInputType } from './stac-browser/Types';
 import { Box } from '@/ui';
 import { useCesiumStoreActions } from '@/core/stores/store-interface-and-intial-values/cesium-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { Button } from '@/ui/button/button';
 
 export interface addCatalogObj {
   uid: string;
@@ -22,10 +25,13 @@ export function StacBrowserButton(): JSX.Element {
   };
   const [isCatalogSelected, setIsCatalogSelected] = useState(false);
   const [selectedCatalog, setSelectedCatalog] = useState<addCatalogObj>(defaultCatalog);
+  const mapId = useGeoViewMapId();
+  const viewer = MapEventProcessor.getMapViewer(mapId);
 
   function addStacItemToMap(stacItemProj: StacCallbackInputType): void {
     addCog(stacItemProj.asset.href, stacItemProj.feature.properties['proj:epsg'] as number);
     zoomToExtent(undefined, stacItemProj.feature.bbox as [number, number, number, number]);
+    viewer.notifications.addNotificationSuccess(`${stacItemProj.asset.title} added to 3D map.`);
   }
 
   const bbox = useState('');
@@ -56,41 +62,22 @@ export function StacBrowserButton(): JSX.Element {
   }
 
   const stacUrlInputStyle = { height: '100%', width: '25rem', marginRight: '0.5rem' };
-  const stacConfirmButtonStyle = {
-    '--tw-bg-opacity': 1,
-    backgroundColor: 'rgb(83 90 164 / var(--tw-bg-opacity, 1))',
-    borderRadius: '0.25rem',
-    paddingLeft: '1.5rem',
-    paddingRight: '1.5rem',
-    paddingTop: '0.5rem',
-    paddingBottom: '0.5rem',
-    fontFamily: 'Open Sans',
-    fontWeight: '600',
-    fontSize: '16px',
-    '--tw-text-opacity': '1',
-    color: 'rgb(255 255 255 / var(--tw-text-opacity, 1))',
-  };
   const stacSelector: JSX.Element = (
     <Box id="catalogSelectorDiv" style={{ display: 'flex' }}>
       <Box id="catalogSelectorSelectDiv">
-        <input
-          style={stacUrlInputStyle}
-          name="stacUrlInput"
-          placeholder="https://datacube.services.geo.ca/stac/api"
-          onChange={changeFunc}
-        />
+        <input style={stacUrlInputStyle} name="stacUrlInput" placeholder={defaultCatalog.url} onChange={changeFunc} />
       </Box>
       <Box id="catalogSelectorButtonsDiv">
-        <button
-          style={stacConfirmButtonStyle}
-          type="button"
-          id="catalogViewButton"
+        <Button
+          className="buttonOutlineFilled"
           onClick={() => {
             setIsCatalogSelected(true);
           }}
+          type="text"
+          variant="contained"
         >
           View Catalog
-        </button>
+        </Button>
       </Box>
     </Box>
   );

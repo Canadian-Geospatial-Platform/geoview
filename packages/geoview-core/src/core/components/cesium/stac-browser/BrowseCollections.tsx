@@ -6,6 +6,7 @@ import { StacFeature } from './StacCatalog';
 import './BrowseCollections.css';
 import { i18nBack, i18nGettingStacCatalog, i18nId, i18nKeywords, i18nLicense } from './StacStrings';
 import { useStacContext } from './StacContext';
+import { Button } from '@/ui/button/button';
 
 function StacCollectionOverview(props: {
   collection: StacCollection;
@@ -142,16 +143,17 @@ function StacCollection(props: {
     <div className="collectionPage-hidden" ref={innerRef as React.RefObject<HTMLDivElement>}>
       <div className="collectionPageInfo">
         <div className="collectionPageInfoTopDiv">
-          <button
-            type="button"
-            className="stacButtons"
+          <Button
+            className="buttonOutlineFilled"
             onClick={() => {
               setCollectionPage(null);
               setIsCollectionPage(false);
             }}
+            type="text"
+            variant="contained"
           >
             <span className="">{i18nBack()}</span>
-          </button>{' '}
+          </Button>{' '}
           <p>{`${i18nId()}${collection ? collection.id : ''}`}</p>
         </div>
         <h3>{collection ? collection.title : ''}</h3>

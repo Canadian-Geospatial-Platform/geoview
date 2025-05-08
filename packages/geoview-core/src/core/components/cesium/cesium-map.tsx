@@ -429,6 +429,7 @@ function TileLayerDataSource(_viewer: MapViewer, layer: TileLayer<XYZ>): Imagery
 }
 
 function sendNotificationError(viewer: MapViewer, message: string): void {
+  viewer.notifications.showError(message, [], false, {});
   viewer.notifications.addNotificationError(message);
 }
 
