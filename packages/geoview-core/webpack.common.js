@@ -9,8 +9,9 @@ const LodashWebpackPlugin = require('lodash-webpack-plugin');
 const glob = require('glob');
 const childProcess = require('child_process');
 const packageJSON = require('./package.json');
-const cesiumSource = 'vendor/cesium/Source';
+const cesiumSource = './cesium/Source';
 const cesiumWorkers = '../Build/Cesium/Workers';
+const CESIUM_BASE_URL = process.env.CESIUM_BASE_URL || './cesium/';
 
 // get date, version numbers and the hash of the current commit
 const date = new Date().toISOString();
@@ -106,7 +107,7 @@ const config = {
       '@public': path.resolve(__dirname, 'public'),
       '@config': path.resolve(__dirname, 'src/api/config'),
       cesium: path.resolve(__dirname, cesiumSource),
-      '@cesium/engine': path.resolve(__dirname, 'vendor/cesium/packages/engine/index.js'),
+      '@cesium/engine': path.resolve(__dirname, 'cesium/packages/engine/index.js'),
     },
   },
   module: {
@@ -228,7 +229,7 @@ const config = {
         patch,
         timestamp: Date.now(),
       },
-      CESIUM_BASE_URL: JSON.stringify('/cesium/'),
+      CESIUM_BASE_URL: JSON.stringify(CESIUM_BASE_URL),
     }),
   ]
     .concat(multipleHtmlPluginsSamples)
