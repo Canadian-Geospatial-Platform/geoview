@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useDataTableSelectedFeature } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { Dialog, DialogTitle, DialogContent, DialogActions, List, Button, Box, Typography } from '@/ui';
+import { Dialog, DialogTitle, DialogContent, DialogActions, List, Button, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
 import { getSxClasses } from './details-style';
 import { FeatureInfoTable } from './feature-info-table';
 import { TypeFieldEntry } from '@/api/config/types/map-schema-types';
@@ -67,7 +67,13 @@ export default function FeatureDetailModal(): JSX.Element {
       <DialogTitle>{t('details.featureDetailModalTitle')}</DialogTitle>
       <DialogContent>
         <Box display="flex" flexDirection="row" alignItems="center" pb={10}>
-          <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />
+          {feature.featureIcon ? (
+            <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />
+          ) : (
+            <Box component="div" aria-label={feature?.nameField ?? ''} className="layer-icon">
+              <BrowserNotSupportedIcon />
+            </Box>
+          )}
           <Typography sx={{ display: 'inline-block' }} component="div">
             {nameFieldValue}
           </Typography>

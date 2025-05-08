@@ -17,7 +17,7 @@ import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
-import { featureInfoGetFieldType, parseDateTimeValuesVector } from '@/geo/layer/gv-layers/utils';
+import { createAliasLookup, featureInfoGetFieldType, parseDateTimeValuesVector } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { getExtentUnion } from '@/geo/utils/utilities';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
@@ -301,8 +301,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Get the style
     const style = layer.getStyle() || {};
 
+    // Create lookup dictionary of names to alias
+    const outfields = (layer.getLayerConfig() as VectorLayerEntryConfig).source?.featureInfo?.outfields;
+    const aliasLookup = createAliasLookup(outfields);
+
     // Get and create Feature style if necessary
-    return getAndCreateFeatureStyle(feature, style, label, filterEquation, legendFilterIsOff, (geometryType, theStyle) => {
+    return getAndCreateFeatureStyle(feature, style, label, filterEquation, legendFilterIsOff, aliasLookup, (geometryType, theStyle) => {
       // A new style has been created
       logger.logDebug('A new style has been created on-the-fly', geometryType, layer);
       // Update the layer style
