@@ -124,15 +124,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Refresh the OL layer (necessary?)
         this.getOLLayer(layerConfig.layerPath)?.changed();
       } catch (error: unknown) {
+        // Log the failure to fetch the vector features
+        logger.logError(error);
+
         // Call the failed callback, this will trigger the onError callback on the layer object (which will put the layerStatus to error)
         // and this will remove the failed extent so that OpenLayers may retry loading it later.
         failureCallback?.();
 
-        // Log the failure to fetch the vector features
-        logger.logError(error);
-
         // Notify listeners about the error
-        this.emitMessage('validation.layer.vectorFeaturesFailed', [layerConfig.layerPath], 'error', true);
+        // Commenting it for now (2025-05-08), because we are already emitting in the onError callback now
+        // this.emitMessage('validation.layer.vectorFeaturesFailed', [layerConfig.layerPath], 'error', true);
       }
     };
 
