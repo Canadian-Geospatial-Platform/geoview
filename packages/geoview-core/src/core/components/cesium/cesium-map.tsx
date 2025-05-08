@@ -237,6 +237,9 @@ function setOLMapExtent(oViewer: MapViewer, cViewer: Viewer): void {
   const east = parseFloat(CesiumMath.toDegrees(rect!.east).toFixed(10));
   const north = parseFloat(CesiumMath.toDegrees(rect!.north).toFixed(10));
   const projdExtent = transformExtent([west, south, east, north], 'EPSG:4326', oViewer.getProjection().getCode());
+  if (projdExtent.some((element) => !Number.isFinite(element))) {
+    return;
+  }
   try {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     MapEventProcessor.zoomToExtent(oViewer.mapId, projdExtent, { padding: [1, 1, 1, 1], maxZoom: 30, duration: 1 }).catch((_e) => {});
