@@ -422,6 +422,7 @@ export function CesiumMap(props: MapProps): JSX.Element {
         orderIndependentTranslucency: false,
       });
       cViewer.scene.screenSpaceCameraController.minimumZoomDistance = 10;
+      cViewer.scene.screenSpaceCameraController.maximumZoomDistance = 25000000;
       cViewerRef.current = cViewer;
       setCesiumViewer(cViewer);
       setCesiumSize([cViewer.canvas.width, cViewer.canvas.height]);
