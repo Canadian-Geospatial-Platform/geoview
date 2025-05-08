@@ -213,7 +213,7 @@ export class GVEsriImage extends AbstractGVRaster {
     let layerBounds;
     if (metadataExtent) {
       // Get the metadata projection
-      const metadataProjection = this.getMetadataProjection();
+      const metadataProjection = this.getMetadataProjection()?.getCode();
       layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
       layerBounds = validateExtent(layerBounds, this.getMapViewer().getProjection().getCode());
     }

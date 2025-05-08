@@ -939,31 +939,31 @@ export class MapViewer {
     if (!status) {
       // Store the extent before any size changes occur
       const currentExtent = this.getView().calculateExtent();
-      const currentZoom = this.getView().getZoom();
+      const currentZoom = this.getMapState().currentZoom!;
+      let sizeChangeHandled = false; // Add flag to track if we've handled the size change
 
-      // Add one-time size change listener only when we are zoomed out to keep the bottom
-      // extent so the viewer does not zoom center Canada
-      if (currentZoom! < 4.5)
-        this.map.once('change:size', () => {
-          // Update map size first
-          this.map.updateSize();
+      // Store the extent and other relevant information
+      const handleSizeChange = (): void => {
+        if (sizeChangeHandled) return; // Skip if we've already handled it
+        sizeChangeHandled = true; // Set flag to prevent multiple executions
 
-          // Calculate the new center to focus on bottom portion
-          const width = currentExtent[2] - currentExtent[0];
-          const height = currentExtent[3] - currentExtent[1];
+        if (currentZoom < 5.5) this.setZoomLevel(currentZoom - 0.5);
+        else
+          this.zoomToExtent(currentExtent, { padding: [0, 0, 0, 0] })
+            .then(() => {
+              // Force render
+              this.map.renderSync();
 
-          // Calculate center point that will show bottom of previous extent
-          const centerX = currentExtent[0] + width / 2;
-          const centerY = currentExtent[1] - height / 2;
+              // Remove the listener after handling
+              this.map.un('change:size', handleSizeChange);
+            })
+            .catch((error) => {
+              logger.logError('Error during zoom after fullscreen exit:', error);
+            });
+      };
 
-          // Set the new center and zoom
-          this.getView().setCenter([centerX, centerY]);
-          this.getView().setZoom(currentZoom!);
-
-          // Force render
-          this.map.renderSync();
-        });
-
+      // Add the listener before exiting fullscreen
+      this.map.on('change:size', handleSizeChange);
       if (document.exitFullscreen) {
         document.exitFullscreen().catch((error) => {
           // Log

@@ -1,9 +1,12 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
-import { BrowserNotSupportedIcon, GroupWorkOutlinedIcon } from '@/ui';
+import { Button, BrowserNotSupportedIcon, GroupWorkOutlinedIcon } from '@/ui';
+import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 
 interface LegendContainerProps {
   layers: TypeLegendLayer[];
@@ -13,6 +16,8 @@ interface LegendContainerProps {
  * LegendContainer component to display a list of layers and their items.
  */
 function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element {
+  const { t } = useTranslation();
+  const theme = useTheme();
   logger.logTraceRender('components/legend/legend-export-utils', layers);
   const styles = {
     legendContainer: {
@@ -23,22 +28,44 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
       flexWrap: 'wrap',
     },
     legendTitle: {
-      paddingRight: '0.5rem',
-      marginLeft: '1em',
+      paddingRight: '0.2rem',
+      marginLeft: '0.2em',
       textAlign: 'left',
       fontWeight: 'bold',
+      fontSize: theme.palette.geoViewFontSize.sm,
     },
-    legendIcon: {
+    legendLayerIcon: {
+      maxWidth: '1.5em',
+      maxHeight: '1.5em',
+      verticalAlign: 'middle',
+      textAlign: 'left',
+    },
+    legendItemIcon: {
       maxWidth: '1.5em',
       verticalAlign: 'middle',
+      marginLeft: '1.5em',
     },
     legendItem: {
       textAlign: 'left',
-      marginLeft: '1.5em',
+      marginLeft: '0.5em',
+      paddingLeft: '0.15rem',
+      fontSize: theme.palette.geoViewFontSize.sm,
     },
     hr: {
       width: '80%',
       marginLeft: '7px',
+    },
+    wmsImage: {
+      maxWidth: '90%',
+      cursor: 'pointer',
+    },
+    iconBtn: {
+      width: '1.5rem',
+      height: '1.5rem',
+      minWidth: 0,
+      padding: 0,
+      '&:hover': { padding: 0, border: '1px solid #92a8d1' },
+      border: '1px solid #a2b9bc',
     },
   } as const;
 
@@ -55,12 +82,26 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
       return <BrowserNotSupportedIcon color="primary" />;
     }
 
-    return <img src={imgUrl} alt={alt} style={styles.legendIcon} />;
+    return <img src={imgUrl} alt={alt} style={styles.legendLayerIcon} />;
+  };
+
+  const renderWMSLayerImage = (layer: TypeLegendLayer, alt: string): JSX.Element => {
+    const imgUrl = layer.icons?.[0]?.iconImage;
+    const isWMSWithLegend =
+      layer.type === CV_CONST_LAYER_TYPES.WMS &&
+      layer.icons?.[0]?.iconImage &&
+      layer.icons?.[0]?.iconImage &&
+      layer.icons[0].iconImage !== 'no data';
+
+    if (isWMSWithLegend) {
+      return <img src={imgUrl ?? ''} alt={alt} style={styles.wmsImage} title={t('general.clickEnlarge')!} />;
+    }
+    return <> </>;
   };
 
   const renderLayerItemIcon = (imgUrl: string | null | undefined, alt: string): JSX.Element => {
     if (!imgUrl) return <> </>;
-    return <img src={imgUrl} alt={alt} style={styles.legendIcon} />;
+    return <img src={imgUrl} alt={alt} style={styles.legendItemIcon} />;
   };
   // Recursive function to render a layer and its children/items
   const renderLayer = (layer: TypeLegendLayer): JSX.Element => {
@@ -72,9 +113,12 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
       <div key={layer.layerPath}>
         {/* Layer icon and name */}
         <div style={styles.legendTitle}>
-          {renderLayerIcon(layer, 'icon')}
-          <span>{layer.layerName}</span>
+          <Button type="text" sx={{ ...styles.iconBtn }}>
+            {renderLayerIcon(layer, 'icon')}
+          </Button>
+          <span style={styles.legendTitle}>{layer.layerName}</span>
           <hr style={styles.hr} />
+          {renderWMSLayerImage(layer, 'icon')}
         </div>
         {/* Children */}
         {layer.children && layer.children.length > 0 && layer.children.map((child) => renderLayer(child))}
@@ -84,7 +128,7 @@ function LegendContainerComponent({ layers }: LegendContainerProps): JSX.Element
             {layer.items.map((item) => (
               <div key={item.name} style={styles.legendItem}>
                 {item.icon && renderLayerItemIcon(item.icon, item.name)}
-                <span>{item.name}</span>
+                <span style={styles.legendItem}>{item.name}</span>
               </div>
             ))}
           </div>

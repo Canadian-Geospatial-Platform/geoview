@@ -15,6 +15,18 @@ export const getSxClasses = (theme: Theme): SxStyles =>
         '&:focus-visible': {
           border: '2px solid inherit',
         },
+        '& td': {
+          paddingTop: '5px',
+          '& img': {
+            verticalAlign: 'bottom',
+          },
+        },
+        '& h3 img': {
+          height: '25px',
+        },
+        '& p img': {
+          height: '20px',
+        },
       },
     },
     rightPanelContainer: {

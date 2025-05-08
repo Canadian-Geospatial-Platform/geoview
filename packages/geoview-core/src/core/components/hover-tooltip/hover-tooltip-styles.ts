@@ -25,6 +25,9 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     top: '-5px',
     left: '3px',
     zIndex: 250,
+    '& .MuiSvgIcon-root': {
+      color: theme.palette.geoViewColor.textColor.main,
+    },
   },
   tooltipText: {
     fontSize: theme.palette.geoViewFontSize.default,

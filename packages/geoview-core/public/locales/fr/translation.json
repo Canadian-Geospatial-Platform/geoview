@@ -86,7 +86,7 @@
     "layerError": "La couche a une erreur...",
     "layerLoading": "La couche se charge...",
     "tableDetails": "Table détaillée",
-    "refreshLayer": "Rafraîchir la couche",
+    "refreshLayer": "Réinitialiser la couche",
     "highlightLayer": "Couche mise en évidence",
     "subLayersCount": "{count} sous-couches",
     "itemsCount": "{count} sur {totalCount} classes",
@@ -161,7 +161,9 @@
     "clearAllfeatures": "Déselctionner tout les Élément",
     "keepFeatureSelected": "Garder l'élément sélectionné",
     "featureDetailsTitle": "Élément {count} sur {total}",
-    "featureDetailModalTitle": "Détails de l'élément"
+    "featureDetailModalTitle": "Détails de l'élément",
+    "notSymbolized": "Non symbolisé",
+    "nullValue": "Nul"
   },
   "lightbox": {
     "next": "Prochaine",

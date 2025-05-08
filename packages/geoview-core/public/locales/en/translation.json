@@ -40,7 +40,7 @@
   },
   "mapctrl": {
     "rotation": {
-      "resetRotation": "Reset Map Rotation",
+      "resetRotation": "Reset map rotation",
       "fixedNorth": "Fix North"
     },
     "mouseposition": {
@@ -86,7 +86,7 @@
     "layerError": "Layer has an error...",
     "layerLoading": "Layer is loading...",
     "tableDetails": "Table details",
-    "refreshLayer": "Refresh layer",
+    "refreshLayer": "Reset layer",
     "highlightLayer": "Highlight layer",
     "subLayersCount": "{count} sublayers",
     "itemsCount": "{count} of {totalCount} classes",
@@ -161,7 +161,9 @@
     "clearAllfeatures": "Clear all feature highlights",
     "keepFeatureSelected": "Keep feature highlighted",
     "featureDetailsTitle": "Feature {count} of {total}",
-    "featureDetailModalTitle": "Feature Detail"
+    "featureDetailModalTitle": "Feature Detail",
+    "notSymbolized": "Not symbolized",
+    "nullValue": "Null"
   },
   "lightbox": {
     "next": "Next",
