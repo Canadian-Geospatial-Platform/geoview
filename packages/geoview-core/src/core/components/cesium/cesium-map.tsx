@@ -29,6 +29,7 @@ import {
   EllipseGraphics,
   HeightReference,
   PolylineGraphics,
+  RuntimeError,
 } from 'cesium';
 import 'cesium/Widgets/widgets.css';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -308,7 +309,10 @@ function styleVectorDataSource(datasource: GeoJsonDataSource | undefined, layer:
   datasource.entities.resumeEvents();
 }
 
-async function ImageLayerDataSource(_viewer: MapViewer, layer: ImageLayer<ImageWMS | ImageArcGISRest>): Promise<ImageryProvider> {
+async function ImageLayerDataSource(
+  _viewer: MapViewer,
+  layer: ImageLayer<ImageWMS | ImageArcGISRest>
+): Promise<ImageryProvider | undefined> {
   const source = layer.getSource();
   if (source instanceof ImageArcGISRest) {
     const url = source.getUrl();
@@ -326,21 +330,24 @@ async function ImageLayerDataSource(_viewer: MapViewer, layer: ImageLayer<ImageW
     });
     return prov;
   }
-  const url = source!.getUrl();
-  const params = source!.getParams();
-  const options: WebMapServiceImageryProvider.ConstructorOptions = {
-    url: url!,
-    layers: params.LAYERS,
-    enablePickFeatures: false,
-    parameters: {
-      FORMAT: 'image/png',
-      TRANSPARENT: 'TRUE',
-    },
-  };
-  return new WebMapServiceImageryProvider(options);
+  if (source instanceof ImageWMS) {
+    const url = source!.getUrl();
+    const params = source!.getParams();
+    const options: WebMapServiceImageryProvider.ConstructorOptions = {
+      url: url!,
+      layers: params.LAYERS,
+      enablePickFeatures: false,
+      parameters: {
+        FORMAT: 'image/png',
+        TRANSPARENT: 'TRUE',
+      },
+    };
+    return new WebMapServiceImageryProvider(options);
+  }
+  return undefined;
 }
 
-function TileLayerDataSource(_viewer: MapViewer, layer: TileLayer<XYZ>): ImageryProvider {
+function TileLayerDataSource(_viewer: MapViewer, layer: TileLayer<XYZ>): ImageryProvider | undefined {
   const source = layer.getSource();
   if (source instanceof WMTS) {
     const url = source!.getUrls()![0];
@@ -359,10 +366,17 @@ function TileLayerDataSource(_viewer: MapViewer, layer: TileLayer<XYZ>): Imagery
     };
     return new WebMapTileServiceImageryProvider(conOptions);
   }
-  const url = source!.getUrls()![0];
-  return new UrlTemplateImageryProvider({
-    url,
-  });
+  if (source instanceof XYZ) {
+    const url = source!.getUrls()![0];
+    return new UrlTemplateImageryProvider({
+      url,
+    });
+  }
+  return undefined;
+}
+
+function sendNotificationError(viewer: MapViewer, message: string): void {
+  viewer.notifications.addNotificationError(message);
 }
 
 export function CesiumMap(props: MapProps): JSX.Element {
@@ -453,17 +467,47 @@ export function CesiumMap(props: MapProps): JSX.Element {
             if (datasource) {
               await cViewer.dataSources.add(datasource);
               styleVectorDataSource(datasource, layer);
+            } else {
+              const layerPropsInt = layer.getPropertiesInternal();
+              let layerPath;
+              let layerTitle = '';
+              if (layerPropsInt?.layerConfig) {
+                layerPath = layerPropsInt.layerConfig.layerPath;
+                const gvLayerName = viewer.layer.getGeoviewLayer(layerPath)?.getGeoviewLayerName();
+                if (gvLayerName) {
+                  layerTitle = gvLayerName;
+                }
+              }
+              if (layerTitle !== '') {
+                sendNotificationError(viewer, `${layerTitle} could not be added to 3D Map.`);
+              }
             }
           } else if (layer instanceof ImageLayer) {
             const imageryProvider = await ImageLayerDataSource(viewer, layer);
-            const ds = cViewer.imageryLayers.addImageryProvider(imageryProvider);
-            const layerPropsInt = layer.getPropertiesInternal();
-            let layerPath;
-            if (layerPropsInt?.layerConfig) {
-              layerPath = layerPropsInt.layerConfig.layerPath;
+            if (imageryProvider) {
+              const ds = cViewer.imageryLayers.addImageryProvider(imageryProvider);
+              const layerPropsInt = layer.getPropertiesInternal();
+              let layerPath;
+              if (layerPropsInt?.layerConfig) {
+                layerPath = layerPropsInt.layerConfig.layerPath;
+              }
+              (ds as NamedImageryLayer).name = layerPath;
+              ds.show = layer.isVisible();
+            } else {
+              const layerPropsInt = layer.getPropertiesInternal();
+              let layerPath;
+              let layerTitle = '';
+              if (layerPropsInt?.layerConfig) {
+                layerPath = layerPropsInt.layerConfig.layerPath;
+                const gvLayerName = viewer.layer.getGeoviewLayer(layerPath)?.getGeoviewLayerName();
+                if (gvLayerName) {
+                  layerTitle = gvLayerName;
+                }
+              }
+              if (layerTitle !== '') {
+                sendNotificationError(viewer, `${layerTitle} could not be added to 3D Map.`);
+              }
             }
-            (ds as NamedImageryLayer).name = layerPath;
-            ds.show = layer.isVisible();
           } else if (layer instanceof TileLayer) {
             const imageryProvider = TileLayerDataSource(viewer, layer);
             if (imageryProvider) {
@@ -475,13 +519,27 @@ export function CesiumMap(props: MapProps): JSX.Element {
               }
               (ds as NamedImageryLayer).name = layerPath;
               ds.show = layer.isVisible();
+            } else {
+              const layerPropsInt = layer.getPropertiesInternal();
+              let layerPath;
+              let layerTitle = '';
+              if (layerPropsInt?.layerConfig) {
+                layerPath = layerPropsInt.layerConfig.layerPath;
+                const gvLayerName = viewer.layer.getGeoviewLayer(layerPath)?.getGeoviewLayerName();
+                if (gvLayerName) {
+                  layerTitle = gvLayerName;
+                }
+              }
+              if (layerTitle !== '') {
+                sendNotificationError(viewer, `${layerTitle} could not be added to 3D Map.`);
+              }
             }
           }
         })
       );
     };
-    initCesium().catch((e) => {
-      throw e;
+    initCesium().catch((e: RuntimeError) => {
+      sendNotificationError(viewer, `Failed to Initialize Cesium: ${e.message}`);
     });
     return () => {};
   });

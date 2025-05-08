@@ -9,7 +9,7 @@ import {
   i18nAddItemIds,
   i18nAddToMap,
   i18nAddVertex,
-  // i18nAssetHasInvalidFormat, This will be used to hook into notification system.
+  i18nAssetHasInvalidFormat,
   i18nBack,
   i18nBoundingBox,
   i18nBoundingBoxPlaceholder,
@@ -31,7 +31,6 @@ import {
   i18nLimitResults,
   i18nLongitude,
   i18nNextPage,
-  i18nNoAssetSelected,
   i18nNone,
   i18nNoThumbnail,
   i18nNotListed,
@@ -745,7 +744,7 @@ export function StacFeature(props: { feature: StacItem }): JSX.Element {
       handleSelect();
     } else {
       // TODO: Hook into Error notification system.
-      throw new Error(i18nNoAssetSelected());
+      throw new Error(i18nAssetHasInvalidFormat());
     }
   }
 
