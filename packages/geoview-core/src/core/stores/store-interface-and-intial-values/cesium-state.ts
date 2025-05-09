@@ -388,41 +388,27 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
               return;
             }
           }
-
+          let coordinates;
           if (ds) {
-            const coordinates = getDataSourceRectangle(ds);
-            const outlineColor = Color.BLACK;
-            const outlineWidth = 2;
-            const fill = new ConstantProperty(false);
-            const outline = new ConstantProperty(true);
-            const rectangle = new RectangleGraphics({
-              coordinates,
-              outline,
-              outlineColor,
-              outlineWidth,
-              fill,
-              heightReference: HeightReference.RELATIVE_TO_3D_TILE,
-            });
-            const entity = new Entity({ rectangle, id, name });
-            viewer.entities.add(entity);
+            coordinates = getDataSourceRectangle(ds);
           }
           if (is) {
-            const coordinates = is.imageryProvider.rectangle;
-            const outlineColor = Color.BLACK;
-            const outlineWidth = 2;
-            const fill = new ConstantProperty(false);
-            const outline = new ConstantProperty(true);
-            const rectangle = new RectangleGraphics({
-              coordinates,
-              outline,
-              outlineColor,
-              outlineWidth,
-              fill,
-              heightReference: HeightReference.RELATIVE_TO_3D_TILE,
-            });
-            const entity = new Entity({ rectangle, id, name });
-            viewer.entities.add(entity);
+            coordinates = is.imageryProvider.rectangle;
           }
+          const outlineColor = Color.BLACK;
+          const outlineWidth = 2;
+          const fill = new ConstantProperty(false);
+          const outline = new ConstantProperty(true);
+          const rectangle = new RectangleGraphics({
+            coordinates,
+            outline,
+            outlineColor,
+            outlineWidth,
+            fill,
+            heightReference: HeightReference.RELATIVE_TO_3D_TILE,
+          });
+          const entity = new Entity({ rectangle, id, name });
+          viewer.entities.add(entity);
           const dataSourcesLength = viewer.dataSources.length;
           for (let i = 0; i < dataSourcesLength; i++) {
             const dataSource = viewer.dataSources.get(i);
