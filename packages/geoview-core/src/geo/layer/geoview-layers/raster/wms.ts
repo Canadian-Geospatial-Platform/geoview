@@ -203,8 +203,8 @@ export class WMS extends AbstractGeoViewRaster {
 
               this.#addLayerToMetadataInstance(
                 metadataLayerPathToAdd,
-                promise.value.metadata.Capability?.Layer,
-                promise.value.metadata.Capability.Layer
+                this.metadata.Capability.Layer,
+                promise.value.metadata.Capability?.Layer
               );
             }
           } else {
@@ -537,7 +537,7 @@ export class WMS extends AbstractGeoViewRaster {
       } else this.WMSStyles = [styleToUse];
 
       const sourceOptions: SourceOptions = {
-        url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
+        url: dataAccessPath,
         params: { LAYERS: layerConfig.layerId, STYLES: styleToUse },
       };
 
@@ -617,8 +617,12 @@ export class WMS extends AbstractGeoViewRaster {
         layerConfig.initialSettings!.bounds = validateExtent(layerCapabilities.EX_GeographicBoundingBox as Extent);
       }
 
-      // Set time dimension
+      // If there's a dimension
       if (layerCapabilities.Dimension) {
+        // TODO: Validate the layerCapabilities.Dimension for example if an interval is even possible
+
+        // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
+
         const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
           (dimension) => dimension.name === 'time'
         );

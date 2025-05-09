@@ -520,7 +520,11 @@ export class GVWMS extends AbstractGVRaster {
         // Parse the filter value to use
         filterValueToUse = parseDateTimeValuesEsriImageOrWMS(filterValueToUse, this.getExternalFragmentsOrder());
 
-        source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
+        // Create the source parameter to update
+        const sourceParam = { [dimension]: filterValueToUse.replace(/\s*/g, '') };
+
+        // Update the source param
+        source.updateParams(sourceParam);
         olLayer.changed();
 
         // Emit event
