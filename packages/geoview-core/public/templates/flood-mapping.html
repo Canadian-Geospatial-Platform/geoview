@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flood Mapping - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      li.source-link {
+        cursor: pointer;
+        color: #6082b6;
+      }
+
+      .sourceLinkCopied {
+        position: fixed;
+        top: 6px;
+        right: 6px;
+        background-color: darkblue;
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        min-width: 150px;
+        text-align: center;
+        border-radius: 5px;
+        z-index: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Flood Mapping</strong></h1>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="./index.html">Main</a><br />
+              <a href="#HUC1">Default Configuration</a><br />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>This page is used to demonstrate the Flood Mapping Process in 3D</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      id="map1"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': []
+        },
+        'theme': 'geo.ca',
+        'components': [],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table', 'geochart', 'time-slider']
+          }
+        },
+        'corePackages': [],
+        'externalPackages': [],
+        'navBar': ['home', 'basemap-select', 'projection', 'fullscreen'],
+        'appBar': {
+          'tabs': {
+            'core': ['openIn3dButton', 'legend', 'layers', 'details', 'data-table', 'geochart']
+          }
+        }
+      }"
+    ></div>
+    <h4>Add Flood-Mapping Layer Examples</h4>
+    <div style="font-size: smaller">
+      <div>
+        Flood Mapping Service Layer
+        <ul>
+          <li class="source-link">
+            https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/forest_industry_hotspots_en/MapServer/0
+          </li>
+        </ul>
+      </div>
+    </div>
+    <hr />
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="mapWMCS" class="panel"></pre>
+    <hr />
+
+    <script src="codedoc.js"></script>
+    <script>
+      function addGeocore() {
+        // Precond
+        if (!document.getElementById('selectGeoCore').value) return;
+
+        // Add the layer on the map
+        cgpv.api.getMapViewer('map1').layer.addGeoviewLayerByGeoCoreUUID(document.getElementById('selectGeoCore').value);
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var sourceLinks = document.querySelectorAll('li.source-link');
+
+        sourceLinks.forEach(function (link) {
+          link.addEventListener('click', function () {
+            // Get the content to copy
+            var contentToCopy = link.innerHTML;
+
+            // Create a temporary textarea element to copy the content
+            var textarea = document.createElement('textarea');
+            textarea.value = contentToCopy;
+            document.body.appendChild(textarea);
+
+            // Select the content and copy it to the clipboard
+            textarea.select();
+            document.execCommand('copy');
+
+            // Remove the temporary textarea
+            document.body.removeChild(textarea);
+
+            // Show a message for 5 seconds
+            var message = document.createElement('div');
+            message.classList.add('sourceLinkCopied');
+            message.innerHTML = 'Copied to clipboard';
+            document.body.appendChild(message);
+            setTimeout(function () {
+              // Remove the message after 5 seconds
+              document.body.removeChild(message);
+            }, 2000);
+          });
+        });
+      });
+    </script>
+
+    <script>
+      function reloadMap() {
+        cgpv.api.getMapViewer('map1').setProjection(Number(document.getElementById('projections').value));
+      }
+
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {
+        // write some code ...
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>
