@@ -75,6 +75,11 @@ interface CoordinatePair {
   lon: string;
 }
 
+/**
+ * Checks if a bbox string is valid.
+ * @param bboxStr bbox string
+ * @returns true if valid, false otherwise.
+ */
 function isValidBboxString(bboxStr: string): boolean {
   const parts = bboxStr.split(',').map((part) => parseFloat(part));
   if (parts.length !== 4 || parts.some((part) => Number.isNaN(part))) {
@@ -99,6 +104,11 @@ function isValidBboxString(bboxStr: string): boolean {
   return true;
 }
 
+/**
+ * Creates STAC Search component
+ * @param props { url: string } STAC URL
+ * @returns STAC Search Component
+ */
 function StacSearch(props: { url: string }): JSX.Element {
   const { url } = props;
   const baseUrl = `${url}/search`;
@@ -124,6 +134,12 @@ function StacSearch(props: { url: string }): JSX.Element {
   const [geometryType, setGeometryType] = useState('none');
   const [datetimeErrorClass] = useState('');
   const [bboxErrorClass, setBboxErrorClass] = useState('');
+
+  /**
+   * Make the STAC Search request based off the values in the search fields.
+   * @param sUrl Search URL
+   * @returns void promise
+   */
   async function stacSearchRequest(sUrl: string): Promise<void> {
     if (sUrl.trim() === '') {
       setSearching(false);
@@ -195,10 +211,17 @@ function StacSearch(props: { url: string }): JSX.Element {
     setSearchResults(json);
   }
 
+  /**
+   * Calls the STAC Search request function with the searchUrl State
+   */
   async function getSearchResults(): Promise<void> {
     await stacSearchRequest(searchUrl);
   }
 
+  /**
+   * Re-calls the STAC Search Function when a next/previous page button is clicked
+   * @param sUrl Search URL.
+   */
   async function pageNavRequest(sUrl: string): Promise<void> {
     setSearchUrl(sUrl);
     await stacSearchRequest(sUrl);
@@ -214,12 +237,22 @@ function StacSearch(props: { url: string }): JSX.Element {
 
   const [customGeoJson, setCustomGeoJson] = useState<string>();
 
-  // Add a new vertex to the polygon
+  const mapId = useGeoViewMapId();
+  const viewer = MapEventProcessor.getMapViewer(mapId);
+
+  /**
+   * Add a new vertex to the polygon
+   */
   const addPolygonCoord = (): void => {
     setPolygonCoords([...polygonCoords, { lat: '', lon: '' }]);
   };
 
-  // Update a specific vertex (index i) in the polygon coords array
+  /**
+   * Update a specific vertex (index i) in the polygon coords array
+   * @param index vertex index
+   * @param field lat or lon
+   * @param value new value
+   */
   function updatePolygonCoord(index: number, field: 'lat' | 'lon', value: string): void {
     setPolygonCoords((coords) => {
       const updated = [...coords];
@@ -228,7 +261,9 @@ function StacSearch(props: { url: string }): JSX.Element {
     });
   }
 
-  // Handle "Save" button in the dialog
+  /**
+   * Handle "Save" button in the dialog
+   */
   function handleSave(): void {
     let geo = null;
 
@@ -295,6 +330,10 @@ function StacSearch(props: { url: string }): JSX.Element {
     }
   }
 
+  /**
+   * Creates the divs shown on selecting radio buttons for intersects.
+   * @returns Div containing the items corresponding to the radio buttons for intersects.
+   */
   function geoSwitch(): JSX.Element {
     if (geometryType === 'point') {
       return (
@@ -416,6 +455,10 @@ function StacSearch(props: { url: string }): JSX.Element {
     return <div />;
   }
 
+  /**
+   * Returns the Intersects radio buttons div
+   * @returns Intersects radio buttons div
+   */
   // eslint-disable-next-line react/no-unstable-nested-components
   function InterceptsDiv(): JSX.Element {
     return (
@@ -586,7 +629,7 @@ function StacSearch(props: { url: string }): JSX.Element {
                 handleSave();
                 setSearchUrl(baseUrl);
                 getSearchResults().catch((e) => {
-                  throw new Error(e);
+                  viewer.notifications.addNotificationError(`Error fetching STAC Search Results: ${e}`);
                 });
                 setShowResults(true);
               }}
@@ -632,7 +675,7 @@ function StacSearch(props: { url: string }): JSX.Element {
                 className="buttonOutlineFilled"
                 onClick={() => {
                   pageNavRequest(previous!).catch((e) => {
-                    throw new Error(e);
+                    viewer.notifications.addNotificationError(`Error fetching STAC Search Results: ${e}`);
                   });
                 }}
                 type="text"
@@ -662,7 +705,7 @@ function StacSearch(props: { url: string }): JSX.Element {
                 className="buttonOutlineFilled"
                 onClick={() => {
                   pageNavRequest(next!).catch((e) => {
-                    throw new Error(e);
+                    viewer.notifications.addNotificationError(`Error fetching STAC Search Results: ${e}`);
                   });
                 }}
                 type="text"
@@ -678,6 +721,14 @@ function StacSearch(props: { url: string }): JSX.Element {
   );
 }
 
+/**
+ * Returns the overarching STAC Catalog component, which contains the STAC Search and Collections apges.
+ * @param props {
+ *    url: STAC URL
+ *    selectCallback: Callback function to call when the Add To Map button is clicked.
+ * }
+ * @returns STAC Catalog container
+ */
 export function StacCatalog(props: { url: string; selectCallback: (asset: StacCallbackInputType) => void }): JSX.Element {
   const { url, selectCallback } = props;
 
@@ -690,16 +741,18 @@ export function StacCatalog(props: { url: string; selectCallback: (asset: StacCa
   const [type, setType] = useState('collections');
 
   const [content, setContent] = useState<React.ReactNode>(<p>{i18nGettingStacCatalog()}</p>);
+  const mapId = useGeoViewMapId();
+  const viewer = MapEventProcessor.getMapViewer(mapId);
 
   useEffect(() => {
     stacRootRequest(url)
       .then((result) => {
         setContent(result);
       })
-      .catch(() => {
-        setContent(<p>{i18nErrorLoadingStac()}</p>);
+      .catch((e) => {
+        viewer.notifications.addNotificationError(`${i18nErrorLoadingStac()}: ${e}`);
       });
-  }, [url]);
+  }, [url, viewer.notifications]);
 
   return (
     <div className="StacCard" id="StacRoot">
@@ -722,6 +775,11 @@ export function StacCatalog(props: { url: string; selectCallback: (asset: StacCa
   );
 }
 
+/**
+ * STAC Feature component which displays the individual STAC features in a collection.
+ * @param props { feature: StacItem } Individual STAC Item.
+ * @returns STAC Feature JSX Element.
+ */
 export function StacFeature(props: { feature: StacItem }): JSX.Element {
   const { feature } = props;
   const { callback } = useStacContext();
@@ -747,6 +805,9 @@ export function StacFeature(props: { feature: StacItem }): JSX.Element {
     }
   }, [optionsObject]);
 
+  /**
+   * Called when the Add To Map button is clicked. Checks feature data type and calls the callback function.
+   */
   const addToMapClicked = (): void => {
     if (selectedFeature.type === 'image/tiff; application=geotiff; profile=cloud-optimized' || selectedFeature.type === 'image/tiff') {
       handleSelect();
@@ -804,6 +865,11 @@ export function StacFeature(props: { feature: StacItem }): JSX.Element {
   );
 }
 
+/**
+ * STAC Collection component which contains a list of StacFeature components.
+ * @param props { featureCollection: StacSearchResult } The StacSearchResult from running the Search Request.
+ * @returns StacFeatureCollection component.
+ */
 function StacFeatureCollection(props: { featureCollection: StacSearchResult }): JSX.Element {
   const { featureCollection } = props;
   return (
@@ -815,6 +881,11 @@ function StacFeatureCollection(props: { featureCollection: StacSearchResult }): 
   );
 }
 
+/**
+ * STAC Component for Search Results, containing a StacFeatureCollection component.
+ * @param props searchResults: The search results.
+ * @returns A StacFeatureCollection component.
+ */
 function StacSearchResult(props: { searchResults: StacSearchResult }): JSX.Element {
   const { searchResults } = props;
   return <StacFeatureCollection featureCollection={searchResults} />;

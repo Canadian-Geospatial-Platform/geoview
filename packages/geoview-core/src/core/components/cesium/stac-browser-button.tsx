@@ -14,6 +14,10 @@ export interface addCatalogObj {
   type: string;
 }
 
+/**
+ * Button for opening the STAC Catalog
+ * @returns STAC Selection Panel JSX.Element
+ */
 export function StacBrowserButton(): JSX.Element {
   const { addCog, zoomToExtent } = useCesiumStoreActions();
 
@@ -28,6 +32,10 @@ export function StacBrowserButton(): JSX.Element {
   const mapId = useGeoViewMapId();
   const viewer = MapEventProcessor.getMapViewer(mapId);
 
+  /**
+   * Callback function that gets called when the 'Add To Map' button is clicked on a COG in the STAC Catalog.
+   * @param stacItemProj A object containing the Asset and Feature of the clicked STAC Item.
+   */
   function addStacItemToMap(stacItemProj: StacCallbackInputType): void {
     addCog(stacItemProj.asset.href, stacItemProj.feature.properties['proj:epsg'] as number);
     zoomToExtent(undefined, stacItemProj.feature.bbox as [number, number, number, number]);
@@ -52,6 +60,10 @@ export function StacBrowserButton(): JSX.Element {
     </Box>
   );
 
+  /**
+   * Sets the SelectedCatalog state when the text input changes.
+   * @param e ChangeEvent
+   */
   function changeFunc(e: ChangeEvent<HTMLInputElement>): void {
     setSelectedCatalog({
       uid: e.target.value,

@@ -7,7 +7,18 @@ import './BrowseCollections.css';
 import { i18nBack, i18nGettingStacCatalog, i18nId, i18nKeywords, i18nLicense } from './StacStrings';
 import { useStacContext } from './StacContext';
 import { Button } from '@/ui/button/button';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
+/**
+ * Overview panel containing a STAC Item's Title and ID for use with listing items.
+ * @param props {
+ *    collection: An object representing a STAC Collection.
+ *    setIsCollectionPage: A callback to set the isCollectionPage state.
+ *    setCollectionPage: A call to set the collectionPage state.
+ * }
+ * @returns asd
+ */
 function StacCollectionOverview(props: {
   collection: StacCollection;
   setIsCollectionPage: React.Dispatch<React.SetStateAction<boolean>>;
@@ -30,6 +41,13 @@ function StacCollectionOverview(props: {
   );
 }
 
+/**
+ * Creates and returns a JSX Element from a STAC URL.
+ * This element will have a scroll list of STAC Collections and, when one is clicked,
+ * overlays the StacCollection element.
+ * @param props { url: string } A url to a STAC Catalog.
+ * @returns JSX Element containing A collection scroll list and a collection page when one is clicked.
+ */
 export function BrowseCollection(props: { url: string }): JSX.Element {
   const { url } = props;
   const { setCollections } = useStacContext();
@@ -37,6 +55,8 @@ export function BrowseCollection(props: { url: string }): JSX.Element {
   const [collectionPage, setCollectionPage] = useState<StacCollection | null>(null);
 
   const [data, setData] = useState<StacCollection[] | null>(null);
+  const mapId = useGeoViewMapId();
+  const viewer = MapEventProcessor.getMapViewer(mapId);
 
   async function getCollections(): Promise<void> {
     const collections = await stacCollectionsRequest(url);
@@ -45,7 +65,7 @@ export function BrowseCollection(props: { url: string }): JSX.Element {
   }
   if (!data) {
     getCollections().catch((error) => {
-      throw new Error(`Error fetching STAC collections: ${error}`);
+      viewer.notifications.addNotificationError(`Error fetching STAC collections: ${error}`);
     });
   }
 
@@ -102,10 +122,17 @@ export function BrowseCollection(props: { url: string }): JSX.Element {
   );
 }
 
+/**
+ * List of STAC Items inside a Collection Page.
+ * @param props { url: string } A url for the STAC Items in a Collection.
+ * @returns JSX.Element of a list of StacFeatures.
+ */
 function StacItems(props: { url: string }): JSX.Element {
   const { url } = props;
 
   const [content, setContent] = useState<StacItem[] | undefined>(undefined);
+  const mapId = useGeoViewMapId();
+  const viewer = MapEventProcessor.getMapViewer(mapId);
 
   useEffect(() => {
     stacItemsRequest(url)
@@ -113,9 +140,9 @@ function StacItems(props: { url: string }): JSX.Element {
         setContent(result);
       })
       .catch((error) => {
-        throw new Error(`Error fetching STAC items: ${error}`);
+        viewer.notifications.addNotificationError(`Error fetching STAC items: ${error}`);
       });
-  }, [url]);
+  }, [url, viewer.notifications]);
 
   if (content !== undefined) {
     return (
@@ -131,6 +158,16 @@ function StacItems(props: { url: string }): JSX.Element {
   return <div />;
 }
 
+/**
+ * A JSX element for a STAC Collection.
+ * @param props {
+ *    innerRef: Ref for the inner collectionPage div.
+ *    collection: A stac collection.
+ *    setCollectionPage: A call to set the collectionPage state.
+ *    setIsCollectionPage: A callback to set the isCollectionPage state.
+ * }
+ * @returns JSX Element for a STAC Collection with all its info and a list of STAC Items.
+ */
 function StacCollection(props: {
   innerRef: React.RefObject<HTMLDivElement | null>;
   collection: StacCollection | null;

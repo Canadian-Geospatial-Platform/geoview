@@ -30,6 +30,12 @@ import { TypeOrderedLayerInfo } from './map-state';
 
 const hiddenAlphaMultiplier = 0.2;
 
+/**
+ * Gets an ImageryLayer from Cesium based off the name of the layer.
+ * @param viewer Cesium Viewer.
+ * @param name Layer Name to return.
+ * @returns ImageryLayer if layer is found, undefined otherwise.
+ */
 function getImageryLayerByName(viewer: Viewer, name: string): ImageryLayer | undefined {
   // eslint-disable-next-line no-underscore-dangle
   const layers = [];
@@ -41,6 +47,9 @@ function getImageryLayerByName(viewer: Viewer, name: string): ImageryLayer | und
   return layers.find((layer: any) => layer.name === name);
 }
 
+/**
+ * State interface for various methods relating to Cesium.
+ */
 export interface ICesiumState {
   cViewerRef: MutableRefObject<Viewer | null>;
   isInitialized: boolean;
@@ -197,12 +206,24 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
     setDefaultConfigValues: (_: TypeMapFeaturesConfig): void => {},
 
     actions: {
+      /**
+       * Returns the Cesium Viewer.
+       * @returns The Cesium Viewer.
+       */
       getCesiumViewerRef: (): MutableRefObject<Viewer | null> => {
         return get().cesiumState.cViewerRef;
       },
+      /**
+       * Returns the isInitialized boolean.
+       * @returns isInitialized.
+       */
       getIsInitialized: (): boolean => {
         return get().cesiumState.isInitialized;
       },
+      /**
+       * Show/Hide a layer in Cesium based off the given layerPath.
+       * @param layerPath OL Layer path.
+       */
       toggleVisibility(layerPath: string): void {
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
@@ -238,6 +259,11 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
           });
         }
       },
+      /**
+       * Zoom Cesium camera to a layer represented by a layer path.
+       * @param layerPath OL Layer Path
+       * @returns void
+       */
       zoomToLayer(layerPath: string): void {
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
@@ -252,6 +278,11 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
           }
         }
       },
+      /**
+       * Zoom Cesium camera to a given lat/long point or bounding box.
+       * @param latLng [Latitude, Longitude] in EPSG:4326.
+       * @param bbox [West, South, East, North] in EPSG:4326.
+       */
       zoomToExtent(latLng?: [number, number], bbox?: [number, number, number, number]): void {
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
@@ -270,12 +301,18 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
           }
         }
       },
+      /**
+       * Zoom Cesium camera to the default extents.
+       */
       zoomToHome(): void {
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
           viewer.camera.flyHome(0);
         }
       },
+      /**
+       * Zoom Cesium camera forward.
+       */
       zoomIn(): void {
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
@@ -284,6 +321,9 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
           viewer.camera.zoomIn(zoomNum);
         }
       },
+      /**
+       * Zoom Cesium camera backward.
+       */
       zoomOut(): void {
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {
@@ -292,6 +332,11 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
           viewer.camera.zoomOut(zoomNum);
         }
       },
+      /**
+       * Adding a COG to the Cesium map.
+       * @param url URL to a Cloud Optimized Geotiff
+       * @param epsg Number representing a EPSG code.
+       */
       addCog(url: string, epsg: number): void {
         const viewer = get().cesiumState.cViewerRef.current;
         if (viewer) {

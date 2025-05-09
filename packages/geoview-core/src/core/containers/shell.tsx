@@ -234,9 +234,10 @@ export function Shell(props: ShellProps): JSX.Element {
         icon: createElement(OpenStacApiIcon),
       };
 
-      // call an api function to add a panel with a button in the default group
+      // call an api function to add a panel with the STAC panel.
       mapViewer.appBarApi.createAppbarPanel(button, panel, '3d_buttons');
     } else {
+      // call an api function to remove the STAC panel.
       if (mapViewer.appBarApi.getAppBarButtonPanelById('StacCatalogPanelId')) {
         mapViewer.appBarApi.removeAppbarPanel('StacCatalogPanelId', '3d_buttons');
       }

@@ -26,6 +26,10 @@ export interface StacContextType {
 // Create the context
 const StacContext = createContext<StacContextType | undefined>(undefined);
 
+/**
+ * Use function for the STAC Context Provider.
+ * @returns Object full of States.
+ */
 function useProviderValue(): {
   collections: StacCollection[];
   setCollections: React.Dispatch<React.SetStateAction<StacCollection[]>>;
@@ -41,7 +45,18 @@ function useProviderValue(): {
     callback,
   };
 }
-// Provide the context
+
+/**
+ * Provide the context
+ * @param param0 {
+      children: Child elements
+      bboxSignal: bbox state to pass in for searching via bounding box.
+      intersectsSignal: intersects state to pass in for searching via intersection
+      datetimeStartSignal: datetime start state to pass in for searching via date time
+      datetimeEndSignal: datetime end state to pass in for searching via date time
+   }
+ * @returns 
+ */
 export function StacContextProvider({
   children,
   bboxSignal,
@@ -82,6 +97,10 @@ export function StacContextProvider({
   );
 }
 
+/**
+ * Use function for STAC Context
+ * @returns Stac Context
+ */
 export const useStacContext = (): StacContextType => {
   const context = useContext(StacContext);
   if (!context) {
