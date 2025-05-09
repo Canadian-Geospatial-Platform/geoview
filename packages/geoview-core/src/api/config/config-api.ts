@@ -17,6 +17,10 @@ import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/u
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core//utils/logger';
 import { createStyleUsingEsriRenderer, EsriBaseRenderer } from '@/api/config/esri-renderer-parser';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { AbstractGeoViewLayer, LayerConfigCreatedEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { formatError } from '@/core/exceptions/core-exceptions';
 
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
@@ -603,5 +607,42 @@ export class ConfigApi {
       return createStyleUsingEsriRenderer(renderer as unknown as EsriBaseRenderer);
     }
     return undefined;
+  }
+
+  /**
+   * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+   * @returns A Promise with the layer configuration
+   */
+  // TODO: REFACTOR CONFIG API
+  static createOGCFeatureConfig(): Promise<ConfigBaseClass> {
+    // Create a TypeOgcFeatureLayerConfig
+    const ogcFeatureLayerConfig = OgcFeature.createOgcFeatureLayerConfig(
+      'ogcFeatureLYR1',
+      'Large Lakes',
+      'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
+      false,
+      [{ id: 'lakes' }] as unknown as TypeJsonArray
+    );
+
+    // Create a OgcFeature class from geoview-layers package
+    const myLayer = new OgcFeature('mapId', ogcFeatureLayerConfig);
+
+    // Create a promise that the layer config will be created
+    const promise = new Promise<ConfigBaseClass>((resolve, reject) => {
+      // Register a handler when the layer config has been created for this config
+      myLayer.onLayerConfigCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerConfigCreatedEvent) => {
+        // Resolve the promise with the ConfigBaseClass
+        resolve(event.config);
+      });
+
+      // Start the geoview-layers config process which will trigger LayerConfigCreated at some point
+      myLayer.createGeoViewLayers().catch((error) => {
+        // Reject
+        reject(formatError(error));
+      });
+    });
+
+    // Return the promise
+    return promise;
   }
 }

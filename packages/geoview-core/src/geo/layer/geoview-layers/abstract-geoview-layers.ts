@@ -128,6 +128,9 @@ export abstract class AbstractGeoViewLayer {
   #onLayerEntryProcessedHandlers: LayerEntryProcessedDelegate[] = [];
 
   // Keep all callback delegate references
+  #onLayerConfigCreatedHandlers: LayerConfigCreatedDelegate[] = [];
+
+  // Keep all callback delegate references
   #onLayerRequestingHandlers: LayerRequestingDelegate[] = [];
 
   // Keep all callback delegate references
@@ -751,6 +754,9 @@ export abstract class AbstractGeoViewLayer {
     // Indicate that the layer config has entered the 'loading' status
     layerConfig.setLayerStatusLoading();
 
+    // Emit that the layer config has been created
+    this.emitLayerConfigCreated({ config: layerConfig });
+
     // Process
     return this.onProcessOneLayerEntry(layerConfig);
   }
@@ -931,6 +937,34 @@ export abstract class AbstractGeoViewLayer {
   offLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerEntryProcessedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
+   * @param {LayerConfigCreatedEvent} event The event to emit
+   * @private
+   */
+  protected emitLayerConfigCreated(event: LayerConfigCreatedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerConfigCreatedHandlers, event);
+  }
+
+  /**
+   * Registers a config created event handler.
+   * @param {LayerConfigCreatedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLayerConfigCreated(callback: LayerConfigCreatedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerConfigCreatedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a config created event handler.
+   * @param {LayerConfigCreatedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLayerConfigCreated(callback: LayerConfigCreatedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerConfigCreatedHandlers, callback);
   }
 
   /**
@@ -1146,6 +1180,19 @@ export type LayerEntryProcessedEvent = {
  * Define a delegate for the event handler function signature
  */
 type LayerEntryProcessedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerEntryProcessedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerConfigCreatedEvent = {
+  // The configuration associated with the layer to be created
+  config: ConfigBaseClass;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerConfigCreatedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerConfigCreatedEvent, void>;
 
 /**
  * Define an event for the delegate

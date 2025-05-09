@@ -6,14 +6,12 @@ import { TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/es
 import { TypeImageStaticLayerConfig } from '@/geo/layer/geoview-layers/raster/image-static';
 import { TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
-import { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { TypeGeoPackageLayerConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { TypeXYZTilesConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { TypeVectorTilesConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -31,6 +29,7 @@ import {
 } from '@/core/exceptions/geocore-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
+import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 
 // The GeoChart Json object coming out of the GeoCore response
 export type GeoChartGeoCoreConfig = TypeJsonObject & {
@@ -264,27 +263,14 @@ export class UUIDmapConfigReader {
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
-            const geoviewLayerConfig: TypeOgcFeatureLayerConfig = {
-              geoviewLayerId: `${idClean}`,
-              geoviewLayerName: name as string,
-              metadataAccessPath: url as string,
-              geoviewLayerType: CONST_LAYER_TYPES.OGC_FEATURE,
-              isTimeAware: isTimeAware as boolean,
-              listOfLayerEntryConfig: [],
-            };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): OgcFeatureLayerEntryConfig => {
-              const ogcFeatureLayerEntryConfig = new OgcFeatureLayerEntryConfig({
-                geoviewLayerConfig,
-                schemaTag: CONST_LAYER_TYPES.OGC_FEATURE,
-                entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
-                layerId: `${item.id}`,
-                source: {
-                  format: 'featureAPI',
-                  dataAccessPath: url as string,
-                },
-              } as OgcFeatureLayerEntryConfig);
-              return ogcFeatureLayerEntryConfig;
-            });
+            // Redirect
+            const geoviewLayerConfig = OgcFeature.createOgcFeatureLayerConfig(
+              `${idClean}`,
+              name as string,
+              url as string,
+              isTimeAware as boolean,
+              layerEntries as TypeJsonArray
+            );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
             const geoviewLayerConfig: TypeGeoJSONLayerConfig = {

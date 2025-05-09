@@ -304,14 +304,22 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       `An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map. Zoom level is: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`
     );
 
+    // Check the layer status before
+    const layerStatusBefore = this.getLayerConfig().layerStatus;
+
     // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
     this.getLayerConfig().setLayerStatusError();
 
     // Update the parent group if any
     this.getLayerConfig().updateLayerStatusParent();
 
-    // Emit about the error
-    this.emitMessage('layers.errorNotLoaded', [this.getLayerName()!], 'error', true);
+    // If we were loaded before
+    if (layerStatusBefore === 'loaded') {
+      // Emit about the error
+      this.emitMessage('layers.errorNotLoaded', [this.getLayerName()!], 'error', true);
+    } else {
+      // We've already emitted an erorr to the user about the layer being in error, skip
+    }
   }
 
   /**
@@ -324,19 +332,27 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       `Error loading source image for layer: ${this.getLayerPath()} at zoom level: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`
     );
 
+    // Check the layer status before
+    const layerStatusBefore = this.getLayerConfig().layerStatus;
+
     // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
     this.getLayerConfig().setLayerStatusError();
 
     // Update the parent group if any
     this.getLayerConfig().updateLayerStatusParent();
 
-    // Emit about the error
-    this.emitMessage(
-      'layers.errorImageLoad',
-      [this.getLayerName()!, Math.round(this.getMapViewer().getView().getZoom() || 0).toString()],
-      'error',
-      true
-    );
+    // If we were loaded before
+    if (layerStatusBefore === 'loaded') {
+      // Emit about the error
+      this.emitMessage(
+        'layers.errorImageLoad',
+        [this.getLayerName()!, Math.round(this.getMapViewer().getView().getZoom() || 0).toString()],
+        'error',
+        true
+      );
+    } else {
+      // We've already emitted an erorr to the user about the layer being in error, skip
+    }
   }
 
   /**

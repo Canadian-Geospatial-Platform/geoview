@@ -4,7 +4,7 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
@@ -13,6 +13,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeBaseVectorSourceInitialConfig,
   TypeOutfields,
+  CONST_LAYER_ENTRY_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
@@ -48,18 +49,6 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   constructor(mapId: string, layerConfig: TypeOgcFeatureLayerConfig) {
     super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig, mapId);
-  }
-
-  /**
-   * Fetches the metadata for a typical OGCFeature class.
-   * @param {string} url - The url to query the metadata from.
-   */
-  static fetchMetadata(url: string): Promise<TypeJsonObject> {
-    // The url
-    const queryUrl = url.endsWith('/') ? `${url}collections?f=json` : `${url}/collections?f=json`;
-
-    // Set it
-    return Fetch.fetchJsonAsObject(queryUrl);
   }
 
   /**
@@ -137,6 +126,31 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /**
+   * Creates a source configuration for the vector layer.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @param {SourceOptions} sourceOptions - The source options (default: {}).
+   * @param {ReadOptions} readOptions - The read options (default: {}).
+   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+   */
+  protected override onCreateVectorSource(
+    layerConfig: VectorLayerEntryConfig,
+    sourceOptions: SourceOptions<Feature> = {},
+    readOptions: ReadOptions = {}
+  ): VectorSource<Feature> {
+    // eslint-disable-next-line no-param-reassign
+    readOptions.dataProjection = (layerConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
+    // eslint-disable-next-line no-param-reassign
+    sourceOptions.url = layerConfig.source!.dataAccessPath!;
+    // eslint-disable-next-line no-param-reassign
+    sourceOptions.url = `${sourceOptions.url}/collections/${layerConfig.layerId}/items?f=json`;
+    // eslint-disable-next-line no-param-reassign
+    sourceOptions.format = new FormatGeoJSON();
+
+    // Call parent
+    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+  }
+
+  /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
@@ -188,28 +202,59 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Creates a source configuration for the vector layer.
-   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {SourceOptions} sourceOptions - The source options (default: {}).
-   * @param {ReadOptions} readOptions - The read options (default: {}).
-   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+   * Fetches the metadata for a typical OGCFeature class.
+   * @param {string} url - The url to query the metadata from.
    */
-  protected override onCreateVectorSource(
-    layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {}
-  ): VectorSource<Feature> {
-    // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = (layerConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = layerConfig.source!.dataAccessPath!;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = `${sourceOptions.url}/collections/${layerConfig.layerId}/items?f=json`;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.format = new FormatGeoJSON();
+  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+    // The url
+    const queryUrl = url.endsWith('/') ? `${url}collections?f=json` : `${url}/collections?f=json`;
 
-    // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+    // Set it
+    return Fetch.fetchJsonAsObject(queryUrl);
+  }
+
+  /**
+   * Creates a configuration object for an OGC Feature layer.
+   * This function constructs a `TypeOgcFeatureLayerConfig` object that describes an OGC Feature layer
+   * and its associated entry configurations based on the provided parameters.
+   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the GeoView layer.
+   * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
+   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {string[]} layerIds - An array of layer IDs to be included in the configuration.
+   * @returns {TypeOgcFeatureLayerConfig} The constructed configuration object for the OGC Feature layer.
+   */
+  static createOgcFeatureLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware: boolean,
+    layerEntries: TypeJsonArray
+  ): TypeOgcFeatureLayerConfig {
+    const geoviewLayerConfig: TypeOgcFeatureLayerConfig = {
+      geoviewLayerId,
+      geoviewLayerName,
+      metadataAccessPath,
+      geoviewLayerType: CONST_LAYER_TYPES.OGC_FEATURE,
+      isTimeAware,
+      listOfLayerEntryConfig: [],
+    };
+    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry: TypeJsonObject) => {
+      const ogcFeatureLayerEntryConfig = new OgcFeatureLayerEntryConfig({
+        geoviewLayerConfig,
+        schemaTag: CONST_LAYER_TYPES.OGC_FEATURE,
+        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
+        layerId: layerEntry.id as string,
+        source: {
+          format: 'featureAPI',
+          dataAccessPath: metadataAccessPath,
+        },
+      } as OgcFeatureLayerEntryConfig);
+      return ogcFeatureLayerEntryConfig;
+    });
+
+    // Return it
+    return geoviewLayerConfig;
   }
 }
 
