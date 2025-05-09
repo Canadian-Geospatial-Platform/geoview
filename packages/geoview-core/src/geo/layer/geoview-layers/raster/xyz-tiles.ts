@@ -84,59 +84,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @returns {Promise<TileLayer<XYZ>>} The GeoView raster layer that has been created.
-   */
-  protected override onProcessOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TileLayer<XYZ>> {
-    // Validate the dataAccessPath exists
-    if (!layerConfig.source?.dataAccessPath) {
-      // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
-    }
-
-    const sourceOptions: SourceOptions = {
-      url: layerConfig.source.dataAccessPath,
-    };
-    sourceOptions.attributions = [(this.metadata?.copyrightText ? this.metadata?.copyrightText : '') as string];
-
-    if (layerConfig.source.crossOrigin) {
-      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-    } else {
-      sourceOptions.crossOrigin = 'Anonymous';
-    }
-    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-    if (layerConfig.source.tileGrid) {
-      const tileGridOptions: TileGridOptions = {
-        origin: layerConfig.source.tileGrid?.origin,
-        resolutions: layerConfig.source.tileGrid?.resolutions as number[],
-      };
-      if (layerConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerConfig.source.tileGrid?.tileSize;
-      if (layerConfig.source.tileGrid?.extent) tileGridOptions.extent = layerConfig.source.tileGrid?.extent;
-      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
-    }
-
-    // Create the source
-    const source = new XYZ(sourceOptions);
-
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
-
-    // If any response
-    let olLayer: TileLayer<XYZ>;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as TileLayer<XYZ>;
-    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
-
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
-
-    // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
-  }
-
-  /**
    * Overrides the way the layer metadata is processed.
    * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
    * @returns {Promise<XYZTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
@@ -190,6 +137,59 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
     // Return the layer config
     return Promise.resolve(layerConfig);
+  }
+
+  /**
+   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+   * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+   * @returns {Promise<TileLayer<XYZ>>} The GeoView raster layer that has been created.
+   */
+  protected override onProcessOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TileLayer<XYZ>> {
+    // Validate the dataAccessPath exists
+    if (!layerConfig.source?.dataAccessPath) {
+      // Throw error missing dataAccessPath
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+    }
+
+    const sourceOptions: SourceOptions = {
+      url: layerConfig.source.dataAccessPath,
+    };
+    sourceOptions.attributions = [(this.metadata?.copyrightText ? this.metadata?.copyrightText : '') as string];
+
+    if (layerConfig.source.crossOrigin) {
+      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+    } else {
+      sourceOptions.crossOrigin = 'Anonymous';
+    }
+    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+    if (layerConfig.source.tileGrid) {
+      const tileGridOptions: TileGridOptions = {
+        origin: layerConfig.source.tileGrid?.origin,
+        resolutions: layerConfig.source.tileGrid?.resolutions as number[],
+      };
+      if (layerConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerConfig.source.tileGrid?.tileSize;
+      if (layerConfig.source.tileGrid?.extent) tileGridOptions.extent = layerConfig.source.tileGrid?.extent;
+      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
+    }
+
+    // Create the source
+    const source = new XYZ(sourceOptions);
+
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+
+    // If any response
+    let olLayer: TileLayer<XYZ>;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as TileLayer<XYZ>;
+    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
+
+    // GV Time to emit about the layer creation!
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+
+    // Return the OpenLayer layer
+    return Promise.resolve(olLayer);
   }
 }
 

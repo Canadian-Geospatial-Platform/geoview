@@ -62,21 +62,6 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
-   * @param {esriIndex} esriIndex - The esri layer index config to check.
-   * @returns {boolean} true if an error is detected.
-   */
-  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
-    if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
-      // Add a layer load error
-      this.addLayerLoadError(new LayerEntryConfigLayerIdNotFeatureLayerError(layerConfig), layerConfig);
-      return true;
-    }
-    return false;
-  }
-
-  /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration to process.
    * @returns {Promise<EsriFeatureLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
@@ -86,7 +71,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Creates a source configuration for the vector layer.
+   * Overrides the creation of the source configuration for the vector layer.
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
    * @param {SourceOptions} sourceOptions - The source options (default: {}).
    * @param {ReadOptions} readOptions - The read options (default: {}).
@@ -106,6 +91,21 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // Call parent
     return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+  }
+
+  /**
+   * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
+   * @param {esriIndex} esriIndex - The esri layer index config to check.
+   * @returns {boolean} true if an error is detected.
+   */
+  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
+    if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
+      // Add a layer load error
+      this.addLayerLoadError(new LayerEntryConfigLayerIdNotFeatureLayerError(layerConfig), layerConfig);
+      return true;
+    }
+    return false;
   }
 }
 

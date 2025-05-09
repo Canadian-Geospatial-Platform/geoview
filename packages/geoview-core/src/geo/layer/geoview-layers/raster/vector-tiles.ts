@@ -58,6 +58,59 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   /**
+   * Overrides the way the layer metadata is processed.
+   * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   */
+  protected override async onProcessLayerMetadata(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTilesLayerEntryConfig> {
+    if (this.metadata) {
+      const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = this.metadata;
+      const newTileGrid: TypeTileGrid = {
+        extent: [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number],
+        origin: [tileInfo.origin.x as number, tileInfo.origin.y as number],
+        resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
+        tileSize: [tileInfo.rows as number, tileInfo.cols as number],
+      };
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.source!.tileGrid = newTileGrid;
+
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
+
+      if (fullExtent.spatialReference && !Projection.getProjectionFromObj(fullExtent.spatialReference))
+        await Projection.addProjection(fullExtent.spatialReference);
+
+      // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
+      // First set the min/max scales based on the service / config
+      // * Infinity and -Infinity are used as extreme zoom level values in case the value is undefined
+      if (minScale) {
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, minScale as number);
+      }
+
+      if (maxScale) {
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, maxScale as number);
+      }
+
+      // Second, set the min/max zoom levels based on the service / config.
+      // GV Vector tiles should always have a minZoom and maxZoom, so -Infinity or Infinity should never be set as a value
+      if (minZoom) {
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minZoom as number);
+      }
+
+      if (maxZoom) {
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxZoom as number);
+      }
+    }
+
+    // Return the layer config
+    return layerConfig;
+  }
+
+  /**
    * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
    * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<VectorTileLayer<VectorTileSource>>} The GeoView raster layer that has been created.
@@ -134,59 +187,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
-  }
-
-  /**
-   * Overrides the way the layer metadata is processed.
-   * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
-   */
-  protected override async onProcessLayerMetadata(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTilesLayerEntryConfig> {
-    if (this.metadata) {
-      const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = this.metadata;
-      const newTileGrid: TypeTileGrid = {
-        extent: [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number],
-        origin: [tileInfo.origin.x as number, tileInfo.origin.y as number],
-        resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
-        tileSize: [tileInfo.rows as number, tileInfo.cols as number],
-      };
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.source!.tileGrid = newTileGrid;
-
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
-
-      if (fullExtent.spatialReference && !Projection.getProjectionFromObj(fullExtent.spatialReference))
-        await Projection.addProjection(fullExtent.spatialReference);
-
-      // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
-      // First set the min/max scales based on the service / config
-      // * Infinity and -Infinity are used as extreme zoom level values in case the value is undefined
-      if (minScale) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.minScale = Math.min(layerConfig.minScale ?? Infinity, minScale as number);
-      }
-
-      if (maxScale) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.maxScale = Math.max(layerConfig.maxScale ?? -Infinity, maxScale as number);
-      }
-
-      // Second, set the min/max zoom levels based on the service / config.
-      // GV Vector tiles should always have a minZoom and maxZoom, so -Infinity or Infinity should never be set as a value
-      if (minZoom) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.minZoom = Math.max(layerConfig.initialSettings.minZoom ?? -Infinity, minZoom as number);
-      }
-
-      if (maxZoom) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.maxZoom = Math.min(layerConfig.initialSettings.maxZoom ?? Infinity, maxZoom as number);
-      }
-    }
-
-    // Return the layer config
-    return layerConfig;
   }
 }
 

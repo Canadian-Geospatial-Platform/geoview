@@ -52,15 +52,6 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /**
-   * Fetches the metadata for a typical GeoJson class.
-   * @param {string} url - The url to query the metadata from.
-   */
-  static fetchMetadata(url: string): Promise<TypeJsonObject> {
-    // Return it
-    return Fetch.fetchJsonAsObject(url);
-  }
-
-  /**
    * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
    * @returns {Promise<void>} A promise that the execution is completed.
    */
@@ -110,27 +101,6 @@ export class GeoJSON extends AbstractGeoViewVector {
 
     // Throw an invalid layer entry config error
     throw new LayerEntryConfigInvalidLayerEntryConfigError(layerConfig);
-  }
-
-  /**
-   * This method is used to do a recursive search in the array of layer entry config.
-   *
-   * @param {string} searchKey The layer list to search.
-   * @param {TypeLayerEntryConfig[]} metadataLayerList The layer list to search.
-   *
-   * @returns {TypeLayerEntryConfig | undefined} The found layer or undefined if not found.
-   * @private
-   */
-  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig | undefined {
-    for (const layerMetadata of metadataLayerList) {
-      if (searchKey === `${layerMetadata.layerId}${layerMetadata.layerIdExtension ? `.${layerMetadata.layerIdExtension}` : ''}`)
-        return layerMetadata;
-      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean)) {
-        const foundLayer = this.#recursiveSearch(searchKey, layerMetadata.listOfLayerEntryConfig);
-        if (foundLayer) return foundLayer;
-      }
-    }
-    return undefined;
   }
 
   /**
@@ -189,12 +159,10 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /**
-   * Create a source configuration for the vector layer.
-   *
+   * Overrides the creation of the source configuration for the vector layer.
    * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
-   *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override onCreateVectorSource(
@@ -211,6 +179,36 @@ export class GeoJSON extends AbstractGeoViewVector {
 
     // Call parent
     return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+  }
+
+  /**
+   * This method is used to do a recursive search in the array of layer entry config.
+   *
+   * @param {string} searchKey The layer list to search.
+   * @param {TypeLayerEntryConfig[]} metadataLayerList The layer list to search.
+   *
+   * @returns {TypeLayerEntryConfig | undefined} The found layer or undefined if not found.
+   * @private
+   */
+  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig | undefined {
+    for (const layerMetadata of metadataLayerList) {
+      if (searchKey === `${layerMetadata.layerId}${layerMetadata.layerIdExtension ? `.${layerMetadata.layerIdExtension}` : ''}`)
+        return layerMetadata;
+      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean)) {
+        const foundLayer = this.#recursiveSearch(searchKey, layerMetadata.listOfLayerEntryConfig);
+        if (foundLayer) return foundLayer;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Fetches the metadata for a typical GeoJson class.
+   * @param {string} url - The url to query the metadata from.
+   */
+  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+    // Return it
+    return Fetch.fetchJsonAsObject(url);
   }
 }
 

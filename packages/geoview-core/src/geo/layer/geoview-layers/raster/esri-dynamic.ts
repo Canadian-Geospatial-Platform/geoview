@@ -71,21 +71,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /**
-   * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
-   * @returns {boolean} true if an error is detected.
-   */
-  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
-    if (this.metadata?.supportsDynamicLayers === false) {
-      // Log a warning, but continue
-      logger.logWarning(
-        `Layer ${layerConfig.layerPath} of map ${this.mapId} does not technically support dynamic layers per its metadata.`
-      );
-    }
-    return false;
-  }
-
-  /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration to process.
    * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
@@ -143,6 +128,21 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
+   * @returns {boolean} true if an error is detected.
+   */
+  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
+    if (this.metadata?.supportsDynamicLayers === false) {
+      // Log a warning, but continue
+      logger.logWarning(
+        `Layer ${layerConfig.layerPath} of map ${this.mapId} does not technically support dynamic layers per its metadata.`
+      );
+    }
+    return false;
   }
 }
 

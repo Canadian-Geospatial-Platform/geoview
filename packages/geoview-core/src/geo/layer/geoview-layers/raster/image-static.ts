@@ -39,16 +39,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
   }
 
   /**
-   * Overrides the way the layer metadata is processed.
-   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<ImageStaticLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
-   */
-  protected override onProcessLayerMetadata(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageStaticLayerEntryConfig> {
-    // Return as-is
-    return Promise.resolve(layerConfig);
-  }
-
-  /**
    * Overrides the validation of a layer entry config.
    * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
    */
@@ -67,6 +57,16 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
     // Throw an invalid layer entry config error
     throw new LayerEntryConfigInvalidLayerEntryConfigError(layerConfig);
+  }
+
+  /**
+   * Overrides the way the layer metadata is processed.
+   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<ImageStaticLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   */
+  protected override onProcessLayerMetadata(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageStaticLayerEntryConfig> {
+    // Return as-is
+    return Promise.resolve(layerConfig);
   }
 
   /**

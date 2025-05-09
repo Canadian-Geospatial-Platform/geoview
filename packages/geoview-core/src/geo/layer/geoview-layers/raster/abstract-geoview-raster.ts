@@ -9,6 +9,29 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
  */
 export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   /**
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
+    // Fetch it
+    const responseJson = await AbstractGeoViewRaster.fetchMetadata(this.metadataAccessPath);
+
+    // Validate the metadata response
+    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, responseJson);
+
+    // Set it
+    this.metadata = responseJson;
+
+    const copyrightText = this.metadata.copyrightText as string;
+    const attributions = this.getAttributions();
+    if (copyrightText && !attributions.includes(copyrightText)) {
+      // Add it
+      attributions.push(copyrightText);
+      this.setAttributions(attributions);
+    }
+  }
+
+  /**
    * Fetches the metadata for a typical AbstractGeoViewRaster class.
    * @param {string} url - The url to query the metadata from.
    */
@@ -30,29 +53,6 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
     if ('error' in metadata && metadata.error.message) {
       // Throw the error as read from the metadata error
       throw new LayerServiceMetadataUnableToFetchError(geoviewLayerId, formatError(metadata.error.message));
-    }
-  }
-
-  /**
-   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected override async onFetchAndSetServiceMetadata(): Promise<void> {
-    // Fetch it
-    const responseJson = await AbstractGeoViewRaster.fetchMetadata(this.metadataAccessPath);
-
-    // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, responseJson);
-
-    // Set it
-    this.metadata = responseJson;
-
-    const copyrightText = this.metadata.copyrightText as string;
-    const attributions = this.getAttributions();
-    if (copyrightText && !attributions.includes(copyrightText)) {
-      // Add it
-      attributions.push(copyrightText);
-      this.setAttributions(attributions);
     }
   }
 }

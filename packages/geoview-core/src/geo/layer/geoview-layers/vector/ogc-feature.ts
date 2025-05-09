@@ -126,7 +126,7 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Creates a source configuration for the vector layer.
+   * Overrides the creation of the source configuration for the vector layer.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
    * @param {SourceOptions} sourceOptions - The source options (default: {}).
    * @param {ReadOptions} readOptions - The read options (default: {}).

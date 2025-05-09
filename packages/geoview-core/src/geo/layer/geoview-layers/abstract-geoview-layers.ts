@@ -55,6 +55,14 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
  * three parameters: mapId, type and mapLayerConfig. Its role is to save in attributes the mapId, type and elements of the
  * mapLayerConfig that are common to all GeoView layers. The main characteristic of a GeoView layer is the presence of an
  * metadataAccessPath attribute whose value is passed as an attribute of the mapLayerConfig object.
+ *
+ * The general order of the overridable methods in the processing is:
+ * 1. onFetchAndSetServiceMetadata
+ * 2. onValidateListOfLayerEntryConfig
+ * 3. onValidateLayerEntryConfig
+ * 4. onProcessLayerMetadata
+ * 5. onProcessOneLayerEntry
+ *
  */
 export abstract class AbstractGeoViewLayer {
   // The default hit tolerance the query should be using

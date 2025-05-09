@@ -53,19 +53,6 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /**
-   * Fetches the metadata for a typical WFS class.
-   * @param {string} url - The url to query the metadata from.
-   */
-  static fetchMetadata(url: string): Promise<TypeJsonObject> {
-    // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
-    const getCapabilitiesUrl = url.indexOf('?') > -1 ? url.substring(url!.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
-    const queryUrl = url!.indexOf('?') > -1 ? url.substring(0, url!.indexOf('?')) : url;
-
-    // Query XML to Json
-    return Fetch.fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
-  }
-
-  /**
    * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
    * @returns {Promise<void>} A promise that the execution is completed.
    */
@@ -192,6 +179,58 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /**
+   * Overrides the creation of the source configuration for the vector layer
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
+   * @param {SourceOptions} sourceOptions The source options (default: {}).
+   * @param {ReadOptions} readOptions The read options (default: {}).
+   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+   */
+  protected override onCreateVectorSource(
+    layerConfig: VectorLayerEntryConfig,
+    sourceOptions: SourceOptions<Feature> = {},
+    readOptions: ReadOptions = {}
+  ): VectorSource<Feature> {
+    // eslint-disable-next-line no-param-reassign
+    readOptions.dataProjection = (layerConfig.source as TypeSourceWfsInitialConfig).dataProjection;
+
+    // eslint-disable-next-line no-param-reassign
+    sourceOptions.url = (extent): string => {
+      // check if url contains metadata parameters for the getCapabilities request and reformat the urls
+      let sourceUrl = layerConfig.source!.dataAccessPath!;
+      sourceUrl = sourceUrl!.indexOf('?') > -1 ? sourceUrl!.substring(0, sourceUrl!.indexOf('?')) : sourceUrl;
+      // GV: Use processUrlParameters('GetFeature') method of GeoView layer config to get the sourceUrl and append &typeName= to it.
+      sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.#version}`;
+      sourceUrl = `${sourceUrl}&typeName=${layerConfig.layerId}`;
+      // if an extent is provided, use it in the url
+      if (sourceOptions.strategy === bbox && Number.isFinite(extent[0])) {
+        sourceUrl = `${sourceUrl}&bbox=${extent},${this.getMapViewer().getProjection().getCode()}`;
+      }
+      return sourceUrl;
+    };
+
+    // eslint-disable-next-line no-param-reassign
+    sourceOptions.format = new FormatWFS({
+      version: this.#version,
+    });
+
+    // Call parent
+    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+  }
+
+  /**
+   * Fetches the metadata for a typical WFS class.
+   * @param {string} url - The url to query the metadata from.
+   */
+  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+    // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
+    const getCapabilitiesUrl = url.indexOf('?') > -1 ? url.substring(url!.indexOf('?')) : `?service=WFS&request=GetCapabilities`;
+    const queryUrl = url!.indexOf('?') > -1 ? url.substring(0, url!.indexOf('?')) : url;
+
+    // Query XML to Json
+    return Fetch.fetchXMLToJson(`${queryUrl}${getCapabilitiesUrl}`);
+  }
+
+  /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
@@ -246,47 +285,6 @@ export class WFS extends AbstractGeoViewVector {
     if (fieldEntryType === 'date') return 'date';
     if (['int', 'number'].includes(fieldEntryType)) return 'number';
     return 'string';
-  }
-
-  /**
-   * Create a source configuration for the vector layer.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
-   * @param {SourceOptions} sourceOptions The source options (default: {}).
-   * @param {ReadOptions} readOptions The read options (default: {}).
-   *
-   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
-   */
-  protected override onCreateVectorSource(
-    layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {}
-  ): VectorSource<Feature> {
-    // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = (layerConfig.source as TypeSourceWfsInitialConfig).dataProjection;
-
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = (extent): string => {
-      // check if url contains metadata parameters for the getCapabilities request and reformat the urls
-      let sourceUrl = layerConfig.source!.dataAccessPath!;
-      sourceUrl = sourceUrl!.indexOf('?') > -1 ? sourceUrl!.substring(0, sourceUrl!.indexOf('?')) : sourceUrl;
-      // GV: Use processUrlParameters('GetFeature') method of GeoView layer config to get the sourceUrl and append &typeName= to it.
-      sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.#version}`;
-      sourceUrl = `${sourceUrl}&typeName=${layerConfig.layerId}`;
-      // if an extent is provided, use it in the url
-      if (sourceOptions.strategy === bbox && Number.isFinite(extent[0])) {
-        sourceUrl = `${sourceUrl}&bbox=${extent},${this.getMapViewer().getProjection().getCode()}`;
-      }
-      return sourceUrl;
-    };
-
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.format = new FormatWFS({
-      version: this.#version,
-    });
-
-    // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
   }
 }
 

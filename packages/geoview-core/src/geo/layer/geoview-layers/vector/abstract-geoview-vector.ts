@@ -61,7 +61,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /**
-   * Create a source configuration for the vector layer.
+   * Overridable function to create a source configuration for the vector layer.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
    * @param {SourceOptions} sourceOptions - The source options (default: { strategy: all }).
    * @param {ReadOptions} readOptions - The read options (default: {}).
@@ -145,6 +145,38 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /**
+   * Creates a vector layer. The layer has in its properties a reference to the layer configuration used at creation time.
+   * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration used by the source.
+   * @param {VectorSource} vectorSource - The source configuration for the vector layer.
+   * @returns {VectorSource<Feature<Geometry>>} The vector layer created.
+   */
+  protected createVectorLayer(
+    layerConfig: VectorLayerEntryConfig,
+    vectorSource: VectorSource
+  ): VectorLayer<VectorSource<Feature<Geometry>>> {
+    // GV Time to request an OpenLayers layer!
+    // TODO: There may be some additional enhancements to be done now that we can notice how emitLayerRequesting and emitLayerCreation are getting "close" to each other.
+    // TO.DOCONT: This whole will be removed when migration to config api... do we invest time in it?
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source: vectorSource });
+
+    // If any response
+    let olLayer: VectorLayer<VectorSource<Feature<Geometry>>> | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as VectorLayer<VectorSource<Feature<Geometry>>>;
+    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
+
+    // GV Time to emit about the layer creation!
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+
+    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
+    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
+    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
+    return olLayer;
+  }
+
+  /**
    * Parses raw response text into OpenLayers features based on the layer's schema type.
    * Handles CSV, ESRI feature services, and default formats supported by the vector source.
    * @param {string} url - The URL used to retrieve the data (relevant for ESRI_FEATURE schema).
@@ -180,7 +212,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const maxRecords = this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount;
 
         // Retrieve the full ESRI feature data
-        const esriData = await this.getEsriFeatures(url, count, maxRecords as number | undefined);
+        const esriData = await this.#getEsriFeatures(url, count, maxRecords as number | undefined);
 
         // Convert each ESRI response chunk to features and flatten the result
         return esriData.flatMap(
@@ -239,8 +271,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /**
-   * Fetch features from ESRI Feature services with query and feature limits.
-   *
+   * Fetches features from ESRI Feature services with query and feature limits.
    * @param {string} url - The base url for the service.
    * @param {number} featureCount - The number of features in the layer.
    * @param {number} maxRecordCount - The max features per query from the service.
@@ -251,7 +282,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
   // TODO: Add options for featureLimit to config
   // TODO: Will need to move with onCreateVectorSource
-  getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit: number = 1000): Promise<TypeJsonObject[]> {
+  #getEsriFeatures(url: string, featureCount: number, maxRecordCount?: number, featureLimit: number = 1000): Promise<TypeJsonObject[]> {
     // Update url
     const baseUrl = url.replace('&returnCountOnly=true', `&outfields=*&geometryPrecision=1&maxAllowableOffset=5`);
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
@@ -281,38 +312,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Return the all promise
     return allPromise;
-  }
-
-  /**
-   * Creates a vector layer. The layer has in its properties a reference to the layer configuration used at creation time.
-   * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
-   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration used by the source.
-   * @param {VectorSource} vectorSource - The source configuration for the vector layer.
-   * @returns {VectorSource<Feature<Geometry>>} The vector layer created.
-   */
-  protected createVectorLayer(
-    layerConfig: VectorLayerEntryConfig,
-    vectorSource: VectorSource
-  ): VectorLayer<VectorSource<Feature<Geometry>>> {
-    // GV Time to request an OpenLayers layer!
-    // TODO: There may be some additional enhancements to be done now that we can notice how emitLayerRequesting and emitLayerCreation are getting "close" to each other.
-    // TO.DOCONT: This whole will be removed when migration to config api... do we invest time in it?
-    const requestResult = this.emitLayerRequesting({ config: layerConfig, source: vectorSource });
-
-    // If any response
-    let olLayer: VectorLayer<VectorSource<Feature<Geometry>>> | undefined;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as VectorLayer<VectorSource<Feature<Geometry>>>;
-    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
-
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
-
-    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
-    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
-    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
-    return olLayer;
   }
 
   /**
