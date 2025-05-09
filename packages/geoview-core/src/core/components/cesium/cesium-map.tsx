@@ -1,3 +1,11 @@
+/**
+ * @fileoverview React component and supporting functions for rendering a Cesium-based 3D map view
+ * alongside OpenLayers, including utility functions for projection, styling, and layer handling.
+ * This code bridges OpenLayers vector/image/tile layers with CesiumJS data sources and imagery providers.
+ *
+ * @author Josh Hussey
+ * @date 2025-05-09
+ */
 import React, { useEffect, useRef } from 'react';
 import {
   Cartesian2,
@@ -94,6 +102,11 @@ const KmToM = 1000;
 const blank = new ColorMaterialProperty(Color.fromBytes(0, 0, 0, 0));
 const ZeroProp = new ConstantProperty(0);
 
+/**
+ * Converts an OpenLayers RGBA or CSS color string into a Cesium ColorMaterialProperty.
+ * @param {[number, number, number, number] | string} olColor - The color to convert.
+ * @returns {MaterialProperty}
+ */
 function olColorToCesiumProperty(olColor: [number, number, number, number] | string): MaterialProperty {
   if (Array.isArray(olColor)) {
     return new ColorMaterialProperty(Color.fromBytes(olColor[0], olColor[1], olColor[2], olColor[3] * 255));
@@ -101,6 +114,13 @@ function olColorToCesiumProperty(olColor: [number, number, number, number] | str
   return new ColorMaterialProperty(Color.fromCssColorString(olColor));
 }
 
+/**
+ * Converts an OpenLayers RGBA or CSS color string into a Cesium Color. Due to issues in CesiumJS
+ * some objects report that they require a ColorMaterialProperty but actually require a Color to function.
+ * This function is a workaround for that issue.
+ * @param {[number, number, number, number] | string} olColor - The color to convert.
+ * @returns {ColorMaterialProperty}
+ */
 function olColorToCesiumColor(olColor: [number, number, number, number] | string): MaterialProperty {
   if (Array.isArray(olColor)) {
     return Color.fromBytes(olColor[0], olColor[1], olColor[2], olColor[3] * 255) as unknown as ColorMaterialProperty;
@@ -108,6 +128,12 @@ function olColorToCesiumColor(olColor: [number, number, number, number] | string
   return Color.fromCssColorString(olColor) as unknown as ColorMaterialProperty;
 }
 
+/**
+ * Extracts and resolves the applicable style for a given feature from its layer.
+ * @param {VectorLayer<VectorSource>} layer - The vector layer.
+ * @param {Feature<Geometry>} feature - The feature to style.
+ * @returns {Style | Style[] | null}
+ */
 function extractStyleForFeature(layer: VectorLayer<VectorSource>, feature: Feature<Geometry>): Style | Style[] | null {
   const styleCandidate = feature.getStyle() ?? layer.getStyle();
   if (!styleCandidate) return null;
@@ -117,12 +143,24 @@ function extractStyleForFeature(layer: VectorLayer<VectorSource>, feature: Featu
   }
   return Array.isArray(styleCandidate) || styleCandidate instanceof Style ? (styleCandidate as Style) : null;
 }
+
+/**
+ * Generates a series of Cesium Cartesian3 positions that form an ellipse outline.
+ * This is used to create a polyline outline for ellipses in Cesium as Cesium does not
+ * support ellipse outlines natively when clamped to ground.
+ * @param {number} centerLon
+ * @param {number} centerLat
+ * @param {number} semiMajor
+ * @param {number} semiMinor
+ * @param {number} [numPoints=128]
+ * @returns {Cartesian3[]}
+ */
 function generateEllipseOutlinePositions(
   centerLon: number,
   centerLat: number,
   semiMajor: number,
   semiMinor: number,
-  numPoints = 128
+  numPoints: number = 128
 ): Cartesian3[] {
   const positions: Cartesian3[] = [];
   for (let i = 0; i <= numPoints; i++) {
@@ -136,6 +174,11 @@ function generateEllipseOutlinePositions(
   return positions;
 }
 
+/**
+ * Builds a CustomDataSource from an OpenLayers CSV vector layer.
+ * @param {VectorLayer} layer - The vector layer.
+ * @returns {CustomDataSource | undefined}
+ */
 function CsvLayerDataSource(layer: VectorLayer): CustomDataSource | undefined {
   const layerConfig = layer.get('layerConfig');
   const source = layer.getSource();
@@ -167,6 +210,12 @@ function CsvLayerDataSource(layer: VectorLayer): CustomDataSource | undefined {
   return dataSource;
 }
 
+/**
+ * Converts a generic OpenLayers vector layer into a Cesium GeoJsonDataSource or CustomDataSource.
+ * @param {MapViewer} viewer - The map viewer.
+ * @param {VectorLayer} layer - The vector layer.
+ * @returns {Promise<GeoJsonDataSource | CustomDataSource | undefined>}
+ */
 async function VectorLayerDataSource(viewer: MapViewer, layer: VectorLayer): Promise<GeoJsonDataSource | CustomDataSource | undefined> {
   if (layer.get('layerConfig') instanceof CsvLayerEntryConfig) {
     return Promise.resolve(CsvLayerDataSource(layer));
@@ -228,6 +277,12 @@ async function VectorLayerDataSource(viewer: MapViewer, layer: VectorLayer): Pro
   return undefined;
 }
 
+/**
+ * Computes a display-friendly scale line label and width based on pixel scale and unit system.
+ * @param {number} pixScale - Pixel size in km or mi.
+ * @param {ScaleMode} mode - The scale unit mode.
+ * @returns {[string, string]} A tuple of line width in px and label string.
+ */
 function drillDownScale(pixScale: number, mode: ScaleMode): [string, string] {
   let scale = mode === ScaleMode.M ? ScaleKm : ScaleMi;
   let unit = mode === ScaleMode.M ? 'km' : 'mi';
@@ -253,6 +308,11 @@ function drillDownScale(pixScale: number, mode: ScaleMode): [string, string] {
   return [`${lw}px`, `${lg} ${unit}`];
 }
 
+/**
+ * Returns a full scale info object based on pixel size.
+ * @param {number} pixSize - Size of a pixel in meters.
+ * @returns {TypeScaleInfo}
+ */
 function getMapScale(pixSize: number): TypeScaleInfo {
   const pixSizeKm = pixSize / KmToM;
   const pixSizeMi = pixSizeKm * KmToMi;
@@ -268,6 +328,11 @@ function getMapScale(pixSize: number): TypeScaleInfo {
   };
 }
 
+/**
+ * Transforms the Cesium camera view rectangle to the OpenLayers map projection and sets the extent.
+ * @param {MapViewer} oViewer - The OpenLayers map viewer.
+ * @param {Viewer} cViewer - The Cesium viewer.
+ */
 function setOLMapExtent(oViewer: MapViewer, cViewer: Viewer): void {
   const scratchRectangle = new Rectangle();
   const rect = cViewer.camera.computeViewRectangle(cViewer.scene.globe.ellipsoid, scratchRectangle);
@@ -287,6 +352,11 @@ function setOLMapExtent(oViewer: MapViewer, cViewer: Viewer): void {
   }
 }
 
+/**
+ * Styles a Cesium data source using OpenLayers feature styles.
+ * @param {GeoJsonDataSource | CustomDataSource | undefined} datasource - Cesium data source.
+ * @param {VectorLayer} layer - The corresponding OpenLayers layer.
+ */
 /* eslint-disable no-param-reassign */
 function styleVectorDataSource(datasource: GeoJsonDataSource | CustomDataSource | undefined, layer: VectorLayer): void {
   if (!datasource || !layer) return;
@@ -378,6 +448,11 @@ type ArcGisImageServerExtent = {
   };
 };
 
+/**
+ * Creates a Cesium ImageryProvider for OpenLayers ImageLayer sources.
+ * @param {ImageLayer<ImageWMS | ImageArcGISRest>} layer - The image layer.
+ * @returns {Promise<ImageryProvider | undefined>}
+ */
 async function ImageLayerProvider(layer: ImageLayer<ImageWMS | ImageArcGISRest>): Promise<ImageryProvider | undefined> {
   const source = layer.getSource();
   if (source instanceof ImageArcGISRest) {
@@ -455,7 +530,12 @@ async function ImageLayerProvider(layer: ImageLayer<ImageWMS | ImageArcGISRest>)
   return undefined;
 }
 
-function TileLayerDataSource(_viewer: MapViewer, layer: TileLayer<XYZ>): ImageryProvider | undefined {
+/**
+ * Creates a Cesium ImageryProvider for OpenLayers TileLayer sources.
+ * @param {TileLayer<XYZ>} layer - The tile layer.
+ * @returns {ImageryProvider | undefined}
+ */
+function TileLayerDataSource(layer: TileLayer<XYZ>): ImageryProvider | undefined {
   const source = layer.getSource();
   if (source instanceof WMTS) {
     const url = source!.getUrls()![0];
@@ -483,11 +563,21 @@ function TileLayerDataSource(_viewer: MapViewer, layer: TileLayer<XYZ>): Imagery
   return undefined;
 }
 
+/**
+ * Sends an error notification through the map viewer.
+ * @param {MapViewer} viewer - The map viewer.
+ * @param {string} message - The message to display.
+ */
 function sendNotificationError(viewer: MapViewer, message: string): void {
   viewer.notifications.showError(message, [], false, {});
   viewer.notifications.addNotificationError(message);
 }
 
+/**
+ * Main React component that initializes a Cesium 3D map view and integrates OpenLayers layers.
+ * @param {MapProps} props
+ * @returns {JSX.Element}
+ */
 export function CesiumMap(props: MapProps): JSX.Element {
   const oViewerRef = useRef<HTMLDivElement>(null);
   const cViewerRef = useCesiumStoreActions().getCesiumViewerRef();
@@ -619,7 +709,7 @@ export function CesiumMap(props: MapProps): JSX.Element {
               }
             }
           } else if (layer instanceof TileLayer) {
-            const imageryProvider = TileLayerDataSource(viewer, layer);
+            const imageryProvider = TileLayerDataSource(layer);
             if (imageryProvider) {
               const ds = cViewer.imageryLayers.addImageryProvider(imageryProvider);
               const layerPropsInt = layer.getPropertiesInternal();
