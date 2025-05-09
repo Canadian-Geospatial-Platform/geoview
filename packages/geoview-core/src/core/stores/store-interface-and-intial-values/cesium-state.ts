@@ -1,5 +1,24 @@
 import { MutableRefObject } from 'react';
-import { Cartesian3, ImageryLayer, Rectangle, Viewer, Ellipsoid, ImageryProvider } from 'cesium';
+import {
+  Cartesian3,
+  ImageryLayer,
+  Rectangle,
+  Viewer,
+  Ellipsoid,
+  ImageryProvider,
+  Entity,
+  RectangleGraphics,
+  Color,
+  HeightReference,
+  ConstantProperty,
+  DataSource,
+  PointGraphics,
+  BillboardGraphics,
+  PolylineGraphics,
+  PolygonGraphics,
+  EllipseGraphics,
+  ColorMaterialProperty,
+} from 'cesium';
 import { useStore } from 'zustand';
 import TIFFImageryProvider from 'tiff-imagery-provider';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
@@ -8,6 +27,8 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { createCogProjectionObject } from './Projections';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeOrderedLayerInfo } from './map-state';
+
+const hiddenAlphaMultiplier = 0.2;
 
 function getImageryLayerByName(viewer: Viewer, name: string): ImageryLayer | undefined {
   // eslint-disable-next-line no-underscore-dangle
@@ -35,12 +56,131 @@ export interface ICesiumState {
     zoomIn: () => void;
     zoomOut: () => void;
     addCog: (url: string, epsg: number) => void;
+    highlightLayer: (layerPath: string) => void;
   };
   setterActions: {
     setCesiumViewer: (viewer: Viewer | null) => void;
     setIsInitialized: (value: boolean) => void;
     setMapSize: (size: [number, number]) => void;
   };
+}
+
+type GenericGraphic = PointGraphics | RectangleGraphics | BillboardGraphics | PolylineGraphics | PolygonGraphics | EllipseGraphics;
+
+const graphicKeys: (keyof Entity)[] = ['point', 'rectangle', 'billboard', 'polyline', 'polygon', 'ellipse'];
+
+/**
+ * Get the Bounding Rectangle for the entities in the datasource.
+ *
+ * @param dataSource  The Datasource containing the entities to get the rectangle bounds from.
+ * @returns           The Rectangle containg all of the data for the dataSource.
+ */
+function getDataSourceRectangle(dataSource: DataSource): Rectangle | undefined {
+  const ellipsoid = Ellipsoid.WGS84;
+  const westArray: number[] = [];
+  const southArray: number[] = [];
+  const eastArray: number[] = [];
+  const northArray: number[] = [];
+  for (const entity of dataSource.entities.values) {
+    const position = entity.position?.getValue();
+    if (position) {
+      const carto = ellipsoid.cartesianToCartographic(position);
+      if (carto) {
+        const lon = carto.longitude;
+        const lat = carto.latitude;
+        westArray.push(lon);
+        eastArray.push(lon);
+        southArray.push(lat);
+        northArray.push(lat);
+      }
+    }
+    for (const key of graphicKeys) {
+      const graphic = entity[key] as GenericGraphic;
+      if (graphic && 'positions' in graphic && graphic.positions?.getValue()) {
+        for (const graphicPosition of graphic.positions.getValue()) {
+          if (graphicPosition) {
+            const carto = ellipsoid.cartesianToCartographic(graphicPosition);
+            if (carto) {
+              const lon = carto.longitude;
+              const lat = carto.latitude;
+              westArray.push(lon);
+              eastArray.push(lon);
+              southArray.push(lat);
+              northArray.push(lat);
+            }
+          }
+        }
+      }
+      if (graphic && 'hierarchy' in graphic && graphic.hierarchy?.getValue()) {
+        const hierarchy = graphic.hierarchy.getValue();
+        if (hierarchy && 'positions' in hierarchy) {
+          for (const graphicPosition of hierarchy.positions) {
+            if (graphicPosition) {
+              const carto = ellipsoid.cartesianToCartographic(graphicPosition);
+              if (carto) {
+                const lon = carto.longitude;
+                const lat = carto.latitude;
+                westArray.push(lon);
+                eastArray.push(lon);
+                southArray.push(lat);
+                northArray.push(lat);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  if (westArray.length === 0 || southArray.length === 0 || eastArray.length === 0 || northArray.length === 0) {
+    return undefined;
+  }
+  return new Rectangle(Math.min(...westArray), Math.min(...southArray), Math.max(...eastArray), Math.max(...northArray));
+}
+
+/**
+ * Update the alpha on all colors for the GenericGraphic object.
+ *
+ * @param graphic   The Graphic to update the color alphas on.
+ * @param hide      Whether or not to reduce or increase the alpha.
+ */
+function updateGraphicAlpha(graphic: GenericGraphic, hide: boolean): void {
+  const alphaMultiplier = hide ? hiddenAlphaMultiplier : 1 / hiddenAlphaMultiplier;
+  if ('outlineColor' in graphic && graphic.outlineColor?.getValue()) {
+    const outlineColor = graphic.outlineColor.getValue();
+    outlineColor.alpha *= alphaMultiplier;
+    // eslint-disable-next-line no-param-reassign
+    graphic.outlineColor = outlineColor;
+  }
+  if ('color' in graphic && graphic.color?.getValue()) {
+    const color = graphic.color.getValue();
+    color.alpha *= alphaMultiplier;
+    // eslint-disable-next-line no-param-reassign
+    graphic.color = color;
+  }
+  if ('material' in graphic && graphic.material?.getValue()) {
+    const material = graphic.material.getValue() as ColorMaterialProperty;
+    const materialColor = material?.color;
+    if (materialColor && 'alpha' in materialColor) {
+      const alpha = materialColor.alpha as number;
+      materialColor.alpha = alpha * alphaMultiplier;
+      // eslint-disable-next-line no-param-reassign
+      graphic.material = new ColorMaterialProperty(materialColor);
+    }
+  }
+}
+/**
+ * Select the graphic objects from all the entities and update the alpha on them.
+ *
+ * @param dataSource  The DataSource containing all of the entities to hide or unhide.
+ * @param hide        Whether or not to reduce or increase the alpha.
+ */
+function updateDataSourceAlpha(dataSource: DataSource, hide: boolean): void {
+  for (const entity of dataSource.entities.values) {
+    for (const key of graphicKeys) {
+      const graphic = entity[key];
+      if (graphic) updateGraphicAlpha(graphic as GenericGraphic, hide);
+    }
+  }
 }
 
 export type CesiumActions = ICesiumState['actions'];
@@ -166,6 +306,94 @@ export function initializeCesiumState(set: TypeSetStore, get: TypeGetStore): ICe
             .catch((e) => {
               throw e;
             });
+        }
+      },
+      /**
+       * Highlight the layer by reducing the alpha of all other layers and draw a black bounding box
+       * surrounding the data in the selected DataSource or ImageryLayer.
+       *
+       * @param layerPath The name of the layer to retrieve the dataSource or ImageryLayer.
+       * @returns         void.
+       */
+      highlightLayer(layerPath: string): void {
+        const viewer = get().cesiumState.cViewerRef.current;
+        if (viewer) {
+          const id = 'highlight_bounding_box';
+          const name = `${layerPath} highlight`;
+          const [ds] = viewer.dataSources.getByName(layerPath);
+          const is = getImageryLayerByName(viewer, layerPath);
+          if (viewer.entities.getById(id)) {
+            const highlightEntity = viewer.entities.getById(id);
+            viewer.entities.remove(highlightEntity!);
+            const dataSourcesLength = viewer.dataSources.length;
+            for (let i = 0; i < dataSourcesLength; i++) {
+              const dataSource = viewer.dataSources.get(i);
+              if (dataSource !== ds) {
+                updateDataSourceAlpha(dataSource, false);
+              }
+            }
+            const imageryLayersLength = viewer.imageryLayers.length;
+            for (let i = 0; i < imageryLayersLength; i++) {
+              const imageryLayer = viewer.imageryLayers.get(i);
+              if (imageryLayer !== is && !imageryLayer.isBaseLayer()) {
+                imageryLayer.alpha *= 1 / hiddenAlphaMultiplier;
+              }
+            }
+            if (highlightEntity!.name === name) {
+              return;
+            }
+          }
+
+          if (ds) {
+            const coordinates = getDataSourceRectangle(ds);
+            const outlineColor = Color.BLACK;
+            const outlineWidth = 2;
+            const fill = new ConstantProperty(false);
+            const outline = new ConstantProperty(true);
+            const rectangle = new RectangleGraphics({
+              coordinates,
+              outline,
+              outlineColor,
+              outlineWidth,
+              fill,
+              heightReference: HeightReference.RELATIVE_TO_3D_TILE,
+            });
+            const entity = new Entity({ rectangle, id, name });
+            viewer.entities.add(entity);
+          }
+          if (is) {
+            const coordinates = is.imageryProvider.rectangle;
+            const outlineColor = Color.BLACK;
+            const outlineWidth = 2;
+            const fill = new ConstantProperty(false);
+            const outline = new ConstantProperty(true);
+            const rectangle = new RectangleGraphics({
+              coordinates,
+              outline,
+              outlineColor,
+              outlineWidth,
+              fill,
+              heightReference: HeightReference.RELATIVE_TO_3D_TILE,
+            });
+            const entity = new Entity({ rectangle, id, name });
+            viewer.entities.add(entity);
+          }
+          const dataSourcesLength = viewer.dataSources.length;
+          for (let i = 0; i < dataSourcesLength; i++) {
+            const dataSource = viewer.dataSources.get(i);
+            if (dataSource !== ds) {
+              updateDataSourceAlpha(dataSource, true);
+            }
+          }
+          const imageryLayersLength = viewer.imageryLayers.length;
+          for (let i = 0; i < imageryLayersLength; i++) {
+            const imageryLayer = viewer.imageryLayers.get(i);
+            if (imageryLayer !== is && !imageryLayer.isBaseLayer()) {
+              imageryLayer.alpha *= hiddenAlphaMultiplier;
+            }
+          }
+          if (is) viewer.imageryLayers.raiseToTop(is);
+          if (ds) viewer.dataSources.raiseToTop(ds);
         }
       },
     },

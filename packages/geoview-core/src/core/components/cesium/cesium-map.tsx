@@ -514,6 +514,9 @@ async function ImageLayerProvider(layer: ImageLayer<ImageWMS | ImageArcGISRest>)
     return prov;
   }
   if (source instanceof ImageWMS) {
+    const layerCapabilities = layer.get('layerCapabilities');
+    const [west, south, east, north] = layerCapabilities.EX_GeographicBoundingBox;
+    const rectangle = Rectangle.fromDegrees(west, south, east, north);
     const url = source!.getUrl();
     const params = source!.getParams();
     const options: WebMapServiceImageryProvider.ConstructorOptions = {
@@ -524,6 +527,7 @@ async function ImageLayerProvider(layer: ImageLayer<ImageWMS | ImageArcGISRest>)
         FORMAT: 'image/png',
         TRANSPARENT: 'TRUE',
       },
+      rectangle,
     };
     return new WebMapServiceImageryProvider(options);
   }
@@ -556,6 +560,15 @@ function TileLayerDataSource(layer: TileLayer<XYZ>): ImageryProvider | undefined
   }
   if (source instanceof XYZ) {
     const url = source!.getUrls()![0];
+    const extent = source.getTileGrid()?.getExtent();
+    if (extent) {
+      const [west, south, east, north] = extent.values();
+      const rectangle = Rectangle.fromDegrees(west, south, east, north);
+      return new UrlTemplateImageryProvider({
+        url,
+        rectangle,
+      });
+    }
     return new UrlTemplateImageryProvider({
       url,
     });

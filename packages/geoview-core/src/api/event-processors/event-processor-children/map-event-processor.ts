@@ -896,7 +896,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Validate the extent coordinates - need to make sure we aren't excluding zero with !number
     if (
       !extent.some((number) => {
-        return (!number && number !== 0) || Number.isNaN(number);
+        return (!number && number !== 0) || Number.isNaN(number) || !Number.isFinite(number);
       })
     ) {
       // store state will be updated by map event

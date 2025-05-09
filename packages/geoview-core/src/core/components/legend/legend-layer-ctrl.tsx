@@ -51,7 +51,7 @@ const useControlActions = (layerPath: string): ControlActions => {
   const is3dMap = useAppShow3dMap();
   const { setOrToggleLayerVisibility } = useMapStoreActions();
   const { setHighlightLayer, zoomToLayerExtent, zoomToLayerVisibleScale } = useLayerStoreActions();
-  const { toggleVisibility, zoomToLayer } = useCesiumStoreActions();
+  const { toggleVisibility, zoomToLayer, highlightLayer } = useCesiumStoreActions();
   return useMemo(
     () => ({
       handleZoomToLayerVisibleScale: (event: React.MouseEvent): void => {
@@ -70,6 +70,9 @@ const useControlActions = (layerPath: string): ControlActions => {
       },
       handleHighlightLayer: (event: React.MouseEvent): void => {
         event.stopPropagation();
+        if (is3dMap) {
+          highlightLayer(layerPath);
+        }
         setHighlightLayer(layerPath);
       },
       handleZoomTo: (event: React.MouseEvent): void => {
@@ -86,6 +89,7 @@ const useControlActions = (layerPath: string): ControlActions => {
     [
       toggleVisibility,
       zoomToLayer,
+      highlightLayer,
       layerPath,
       setHighlightLayer,
       setOrToggleLayerVisibility,
