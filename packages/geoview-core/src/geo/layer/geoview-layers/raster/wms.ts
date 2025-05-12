@@ -17,7 +17,6 @@ import {
 import { DateMgt } from '@/core/utils/date-mgt';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { CV_CONFIG_PROXY_URL } from '@/api/config/types/config-constants';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
@@ -229,9 +228,6 @@ export class WMS extends AbstractGeoViewRaster {
 
       // eslint-disable-next-line no-param-reassign
       if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
-
-      // TODO: Check - Likely not the best place to set the layer as queryable?
-      MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
 
       // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
       // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because

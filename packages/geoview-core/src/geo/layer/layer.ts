@@ -1,9 +1,8 @@
 import BaseLayer from 'ol/layer/Base';
 import { Extent } from 'ol/extent';
 import Collection from 'ol/Collection';
-import { ImageArcGISRest, ImageWMS, Source, VectorTile, XYZ } from 'ol/source';
+import { ImageArcGISRest, ImageWMS, Source, XYZ } from 'ol/source';
 import Static from 'ol/source/ImageStatic';
-import VectorSource from 'ol/source/Vector';
 import LayerGroup from 'ol/layer/Group';
 import { GeoJSONObject } from 'ol/format/GeoJSON';
 
@@ -96,6 +95,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { ConfigApi } from '@/api/config/config-api';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
+import { AbstractGeoViewVector } from './geoview-layers/vector/abstract-geoview-vector';
 // import { LayerMockup } from '@/geo/layer/layer-mockup';
 
 export type GeoViewLayerAddedResult = {
@@ -912,6 +912,16 @@ export class LayerApi {
         this.mapViewer.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
       if (selectedLayerPath && event.config.layerPath.startsWith(selectedLayerPath))
         LegendEventProcessor.setSelectedLayersTabLayer(this.getMapId(), selectedLayerPath as string);
+
+      // If is an AbstractBaseLayerEntryConfig
+      if (event.config instanceof AbstractBaseLayerEntryConfig) {
+        // Set the map layer queryable
+        MapEventProcessor.setMapLayerQueryable(
+          this.getMapId(),
+          event.config.layerPath,
+          event.config.source?.featureInfo?.queryable || false
+        );
+      }
     });
 
     // Register hook when an OpenLayer source has been created
@@ -1037,7 +1047,7 @@ export class LayerApi {
   #createGVLayer(
     mapId: string,
     geoviewLayer: AbstractGeoViewLayer,
-    olSource: Source,
+    olSource: Source | undefined,
     layerConfig: ConfigBaseClass,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     extraConfig?: any
@@ -1097,28 +1107,41 @@ export class LayerApi {
 
     // Create the right GV Layer based on the OLLayer and config type
     let gvLayer;
-    if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriDynamicLayerEntryConfig)
+    if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriDynamicLayerEntryConfig) {
       gvLayer = new GVEsriDynamic(mapId, olSource, layerConfig);
-    else if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriImageLayerEntryConfig)
+    } else if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriImageLayerEntryConfig) {
       gvLayer = new GVEsriImage(mapId, olSource, layerConfig);
-    else if (olSource instanceof Static && layerConfig instanceof ImageStaticLayerEntryConfig)
+    } else if (olSource instanceof Static && layerConfig instanceof ImageStaticLayerEntryConfig) {
       gvLayer = new GVImageStatic(mapId, olSource, layerConfig);
-    else if (olSource instanceof ImageWMS && layerConfig instanceof OgcWmsLayerEntryConfig)
+    } else if (layerConfig instanceof VectorTilesLayerEntryConfig) {
+      // Create the source
+      const source = VectorTiles.createVectorTileSource(layerConfig, this.mapViewer.getProjection().getCode());
+      gvLayer = new GVVectorTiles(mapId, source, layerConfig);
+    } else if (olSource instanceof ImageWMS && layerConfig instanceof OgcWmsLayerEntryConfig) {
       gvLayer = new GVWMS(mapId, olSource, layerConfig, extraConfig.layerCapabilities);
-    else if (olSource instanceof VectorSource && layerConfig instanceof EsriFeatureLayerEntryConfig)
-      gvLayer = new GVEsriFeature(mapId, olSource, layerConfig);
-    else if (olSource instanceof VectorSource && layerConfig instanceof GeoJSONLayerEntryConfig)
-      gvLayer = new GVGeoJSON(mapId, olSource, layerConfig);
-    else if (olSource instanceof VectorSource && layerConfig instanceof OgcFeatureLayerEntryConfig)
-      gvLayer = new GVOGCFeature(mapId, olSource, layerConfig);
-    else if (olSource instanceof VectorSource && layerConfig instanceof WfsLayerEntryConfig)
-      gvLayer = new GVWFS(mapId, olSource, layerConfig);
-    else if (olSource instanceof VectorSource && layerConfig instanceof CsvLayerEntryConfig)
-      gvLayer = new GVCSV(mapId, olSource, layerConfig);
-    else if (olSource instanceof VectorTile && layerConfig instanceof VectorTilesLayerEntryConfig)
-      gvLayer = new GVVectorTiles(mapId, olSource, layerConfig);
-    else if (olSource instanceof XYZ && layerConfig instanceof XYZTilesLayerEntryConfig)
+    } else if (olSource instanceof XYZ && layerConfig instanceof XYZTilesLayerEntryConfig) {
       gvLayer = new GVXYZTiles(mapId, olSource, layerConfig);
+    } else if (geoviewLayer instanceof AbstractGeoViewVector && layerConfig instanceof EsriFeatureLayerEntryConfig) {
+      // Create the source
+      const source = geoviewLayer.createVectorSource(layerConfig);
+      gvLayer = new GVEsriFeature(mapId, source, layerConfig);
+    } else if (geoviewLayer instanceof AbstractGeoViewVector && layerConfig instanceof GeoJSONLayerEntryConfig) {
+      // Create the source
+      const source = geoviewLayer.createVectorSource(layerConfig);
+      gvLayer = new GVGeoJSON(mapId, source, layerConfig);
+    } else if (geoviewLayer instanceof AbstractGeoViewVector && layerConfig instanceof OgcFeatureLayerEntryConfig) {
+      // Create the source
+      const source = geoviewLayer.createVectorSource(layerConfig);
+      gvLayer = new GVOGCFeature(mapId, source, layerConfig);
+    } else if (geoviewLayer instanceof AbstractGeoViewVector && layerConfig instanceof WfsLayerEntryConfig) {
+      // Create the source
+      const source = geoviewLayer.createVectorSource(layerConfig);
+      gvLayer = new GVWFS(mapId, source, layerConfig);
+    } else if (geoviewLayer instanceof AbstractGeoViewVector && layerConfig instanceof CsvLayerEntryConfig) {
+      // Create the source
+      const source = geoviewLayer.createVectorSource(layerConfig);
+      gvLayer = new GVCSV(mapId, source, layerConfig);
+    }
 
     // If created
     if (gvLayer) {

@@ -9,6 +9,7 @@ import {
   transformExtent as olTransformExtent,
   fromLonLat,
   toLonLat,
+  ProjectionLike,
 } from 'ol/proj';
 import { Extent } from 'ol/extent';
 
@@ -320,7 +321,7 @@ export abstract class Projection {
    * @param {string} projection - A code string which is a combination of authority and identifier such as "EPSG:4326".
    * @return {OLProjection | undefined} Projection object, or undefined if not found.
    */
-  static getProjectionFromString(projection: string): OLProjection {
+  static getProjectionFromString(projection: string | ProjectionLike): OLProjection {
     // Get the projection from string
     const proj = OLGetProjection(projection);
 
@@ -328,7 +329,7 @@ export abstract class Projection {
     if (proj) return proj;
 
     // Failed
-    throw new InvalidProjectionError(projection);
+    throw new InvalidProjectionError(projection?.toString() || 'undefined');
   }
 
   /**
