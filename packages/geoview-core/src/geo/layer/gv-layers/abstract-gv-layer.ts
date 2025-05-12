@@ -318,7 +318,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // If we were loaded before
     if (layerStatusBefore === 'loaded') {
       // Emit about the error
-      this.emitMessage('layers.errorNotLoaded', [this.getLayerName()!], 'error', true);
+      this.emitMessage('layers.errorNotLoaded', [this.getLayerName() || this.getLayerPath()], 'error', true);
     } else {
       // We've already emitted an erorr to the user about the layer being in error, skip
     }
@@ -349,7 +349,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       // Emit about the error
       this.emitMessage(
         'layers.errorImageLoad',
-        [this.getLayerName()!, Math.round(this.getMapViewer().getView().getZoom() || 0).toString()],
+        [this.getLayerName() || this.getLayerPath(), Math.round(this.getMapViewer().getView().getZoom() || 0).toString()],
         'error',
         true
       );

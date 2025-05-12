@@ -22,7 +22,6 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
@@ -48,21 +47,28 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: VectorLayerEntryConfig): Promise<BaseLayer> {
+    // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
+    // Create the vector layer
+    const vectorLayer = this.createVectorLayer(layerConfig);
+
+    // Return the OpenLayer layer
+    return Promise.resolve(vectorLayer);
+  }
+
+  /**
+   * Creates a VectorSource from a layer config.
+   * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
+   * @returns An initialized VectorSource ready for use in a layer.
+   */
+  createVectorSource(layerConfig: VectorLayerEntryConfig): VectorSource<Feature> {
     // Validate the dataAccessPath exists
     if (!layerConfig.source?.dataAccessPath) {
       // Throw error missing dataAccessPath
       throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
     }
 
-    // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
-    const vectorSource = this.onCreateVectorSource(layerConfig);
-    const vectorLayer: VectorLayer<VectorSource<Feature<Geometry>>> = this.createVectorLayer(
-      layerConfig as VectorLayerEntryConfig,
-      vectorSource
-    );
-
-    // Return the OpenLayer layer
-    return Promise.resolve(vectorLayer);
+    // Redirect
+    return this.onCreateVectorSource(layerConfig, {}, {});
   }
 
   /**
@@ -74,8 +80,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {}
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
   ): VectorSource<Feature> {
     // If any attributions
     if (this.getAttributions().length > 0) {
@@ -96,7 +102,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // ESlint override about misused-promises, because we're using async in the loader callback instead of returning void, no worries in the end.
     // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-misused-promises
-    sourceOptions.loader = async (extent: Extent, resolution, projection, successCallback, failureCallback) => {
+    sourceOptions.loader = async (extent: Extent, resolution: number, projection: OLProjection, successCallback, failureCallback) => {
       try {
         // Resolve the url
         const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
@@ -156,14 +162,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {VectorSource} vectorSource - The source configuration for the vector layer.
    * @returns {VectorSource<Feature<Geometry>>} The vector layer created.
    */
-  protected createVectorLayer(
-    layerConfig: VectorLayerEntryConfig,
-    vectorSource: VectorSource
-  ): VectorLayer<VectorSource<Feature<Geometry>>> {
+  protected createVectorLayer(layerConfig: VectorLayerEntryConfig): VectorLayer<VectorSource<Feature<Geometry>>> {
     // GV Time to request an OpenLayers layer!
     // TODO: There may be some additional enhancements to be done now that we can notice how emitLayerRequesting and emitLayerCreation are getting "close" to each other.
     // TO.DOCONT: This whole will be removed when migration to config api... do we invest time in it?
-    const requestResult = this.emitLayerRequesting({ config: layerConfig, source: vectorSource });
+    const requestResult = this.emitLayerRequesting({ config: layerConfig });
 
     // If any response
     let olLayer: VectorLayer<VectorSource<Feature<Geometry>>> | undefined;
@@ -208,7 +211,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     switch (layerConfig.schemaTag) {
       case CONST_LAYER_TYPES.CSV:
         // Attempt to convert CSV text to OpenLayers features
-        return AbstractGeoViewVector.convertCsv(this.mapId, responseText, layerConfig);
+        return AbstractGeoViewVector.#convertCsv(responseText, layerConfig, Projection.getProjectionFromString(projection));
 
       case CONST_LAYER_TYPES.ESRI_FEATURE: {
         // Parse the count of features from the initial ESRI response
@@ -403,19 +406,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
   /**
    * Converts csv text to feature array.
-   *
    * @param {string} csvData The data from the .csv file.
    * @param {VectorLayerEntryConfig} layerConfig The config of the layer.
-   *
    * @returns {Feature[]} The array of features.
+   * @private
    */
-  static convertCsv(mapId: string, csvData: string, layerConfig: VectorLayerEntryConfig): Feature[] | undefined {
+  static #convertCsv(csvData: string, layerConfig: VectorLayerEntryConfig, outProjection: OLProjection): Feature[] | undefined {
     // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
     // GV: After moving the code to the mother class, it worked. It'll remain here for now until the config refactoring can take care of it in its re-writing
 
     const inProjection: string = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LNGLAT;
-    const outProjection: OLProjection = MapEventProcessor.getMapViewer(mapId).getProjection();
-
     const inProjectionConv: OLProjection = Projection.getProjectionFromString(inProjection);
 
     const features: Feature[] = [];

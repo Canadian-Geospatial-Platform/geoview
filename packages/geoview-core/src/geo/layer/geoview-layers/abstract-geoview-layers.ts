@@ -554,13 +554,11 @@ export abstract class AbstractGeoViewLayer {
     // For each promise
     arrayOfLayerConfigs.forEach((promise) => {
       // If the promise fulfilled
+      let layerConfig;
       if (promise.status === 'fulfilled') {
         // When we get here, we know that the layer config has completed processing.
         // However, some layerConfig might be in error at this point too.
-        const layerConfig = promise.value;
-
-        // Emit that the layer config has been created
-        this.emitLayerConfigCreated({ config: layerConfig });
+        layerConfig = promise.value;
 
         // If not error
         if (layerConfig.layerStatus !== 'error') {
@@ -585,12 +583,15 @@ export abstract class AbstractGeoViewLayer {
         // The promise failed. Unwrap the reason.
         const reason = promise.reason as PromiseRejectErrorWrapper<TypeLayerEntryConfig>;
 
+        // The layer config
+        layerConfig = reason.object;
+
         // Add the error
         this.addLayerLoadError(reason.error, reason.object);
-
-        // Emit that the layer config has been created (though with errors)
-        this.emitLayerConfigCreated({ config: reason.object });
       }
+
+      // Emit that the layer config has been created
+      this.emitLayerConfigCreated({ config: layerConfig, errors: this.layerLoadError });
     });
   }
 
@@ -1209,6 +1210,7 @@ export type VisibleChangedEvent = {
  * Define an event for the delegate
  */
 export type LayerEntryProcessedEvent = {
+  // The configuration associated with the layer entry processed
   config: ConfigBaseClass;
 };
 
@@ -1223,6 +1225,9 @@ type LayerEntryProcessedDelegate = EventDelegateBase<AbstractGeoViewLayer, Layer
 export type LayerConfigCreatedEvent = {
   // The configuration associated with the layer to be created
   config: ConfigBaseClass;
+
+  // The errors, if any, which happened during config creation
+  errors: Error[];
 };
 
 /**
@@ -1237,7 +1242,8 @@ export type LayerRequestingEvent = {
   // The configuration associated with the layer to be created
   config: ConfigBaseClass;
   // The OpenLayers source associated with the layer to be created
-  source: Source;
+  // TODO: Get rid of this source property, let the LayerApi handle the source creation
+  source?: Source;
   // Extra configuration can be anything (for simplicity)
   extraConfig?: unknown;
 };

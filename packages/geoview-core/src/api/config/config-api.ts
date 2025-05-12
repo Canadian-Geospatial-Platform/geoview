@@ -887,22 +887,13 @@ export class ConfigApi {
     const promise = new Promise<ConfigBaseClass>((resolve, reject) => {
       // Register a handler when the layer config has been created for this config
       layer.onLayerConfigCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerConfigCreatedEvent) => {
-        // Get the aggregated errors if any
-        const aggregatedError = geoviewLayer.aggregateLayerLoadErrors();
-
         // If no errors
-        if (!aggregatedError) {
+        if (event.errors.length === 0) {
           // Resolve
           resolve(event.config);
         } else {
-          // Log the config the process managed to do, though there were some errors
-          logger.logDebug(
-            'The following error happened processing the configuration. Through the errors, the configuration is the following',
-            event.config
-          );
-
-          // Reject
-          reject(aggregatedError);
+          // Errors happened while creating the config, reject
+          reject(new AggregateError(event.errors));
         }
       });
 

@@ -291,7 +291,6 @@ export function commonProcessFeatureInfoConfig(
     layerConfig.source.featureInfo =
       layerConfig.isMetadataLayerGroup || !layerMetadata.fields?.length ? { queryable: false } : { queryable };
   }
-  MapEventProcessor.setMapLayerQueryable(layer.mapId, layerPath, layerConfig.source.featureInfo.queryable);
 
   // dynamic group layer doesn't have fields definition
   if (layerMetadata.type !== 'Group Layer' && layerMetadata.fields) {
