@@ -203,6 +203,8 @@ export type TypeGlobalSettings = {
   canRemoveSublayers?: boolean;
   /** Whether a certain layer type should be disabled */
   disabledLayerTypes?: TypeGeoviewLayerType[];
+  /** Whether to display unsymbolized features in the datatable and other components */
+  showUnsymbolizedFeatures?: boolean;
 };
 
 /** Definition of the map configuration settings. */

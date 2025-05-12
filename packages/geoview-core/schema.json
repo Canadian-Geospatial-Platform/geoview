@@ -2222,6 +2222,10 @@
               }
             ]
           }
+        },
+        "showUnsymbolizedFeatures": {
+          "type": "boolean",
+          "description": "Whether or not to show unsymbolized features. Default = false."
         }
       }
     },
