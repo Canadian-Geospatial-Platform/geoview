@@ -212,7 +212,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
     this.getMapViewer().layer.registerLayerConfigInit(layerConfig);
 
-    const { name, source } = layerInfo;
+    const { name } = layerInfo;
 
     // Extract layer styles if they exist
     if (sld && sld[name]) {
@@ -224,7 +224,7 @@ export class GeoPackage extends AbstractGeoViewVector {
       GeoPackage.#processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as VectorLayerEntryConfig);
     }
 
-    const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, source);
+    const vectorLayer = this.createVectorLayer(layerConfig);
 
     // Set the layer status to processed
     layerConfig.setLayerStatusProcessed();

@@ -79,14 +79,14 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the creation of the source configuration for the vector layer.
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {SourceOptions} sourceOptions - The source options (default: {}).
-   * @param {ReadOptions} readOptions - The read options (default: {}).
+   * @param {SourceOptions} sourceOptions - The source options.
+   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override onCreateVectorSource(
     layerConfig: EsriFeatureLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {}
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
     sourceOptions.url = layerConfig.source!.dataAccessPath!;

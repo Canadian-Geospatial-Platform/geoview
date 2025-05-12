@@ -10,7 +10,6 @@ import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  TypeBaseVectorSourceInitialConfig,
   TypeOutfields,
   CONST_LAYER_ENTRY_TYPES,
   CONST_LAYER_TYPES,
@@ -128,21 +127,19 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the creation of the source configuration for the vector layer.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {SourceOptions} sourceOptions - The source options (default: {}).
-   * @param {ReadOptions} readOptions - The read options (default: {}).
+   * @param {SourceOptions} sourceOptions - The source options.
+   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {}
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = (layerConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
+    readOptions.dataProjection = layerConfig.source?.dataProjection;
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = layerConfig.source!.dataAccessPath!;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = `${sourceOptions.url}/collections/${layerConfig.layerId}/items?f=json`;
+    sourceOptions.url = `${layerConfig.source!.dataAccessPath}/collections/${layerConfig.layerId}/items?f=json`;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatGeoJSON();
 
