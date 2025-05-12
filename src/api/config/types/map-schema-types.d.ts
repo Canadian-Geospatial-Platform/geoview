@@ -511,6 +511,9 @@ export type TypeFieldEntry = {
     alias: string;
     domain: null | codedValueType | rangeDomainType;
 };
+export type TypeAliasLookup = {
+    [key: string]: string;
+};
 /** Styles to apply to the GeoView vector layer by geometry types. */
 export type TypeLayerStyleConfig = Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>>;
 /** Style settings to apply to the GeoView vector layer. */
@@ -640,7 +643,7 @@ export type TypeFeatureInfoEntry = {
     geoviewLayerType: TypeGeoviewLayerType;
     extent: Extent | undefined;
     geometry: TypeGeometry | Feature | null;
-    featureIcon: string;
+    featureIcon: string | undefined;
     fieldInfo: Partial<Record<string, TypeFieldEntry>>;
     nameField: string | null;
     layerPath: string;
