@@ -8,7 +8,7 @@ import { getSxClasses, getSxClassesMain } from './responsive-grid-layout-style';
 import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
-import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppGuide, useAppFullscreenActive, useAppShow3dMap } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   useUIFooterBarIsCollapsed,
   useUIFooterPanelResizeValue,
@@ -18,6 +18,7 @@ import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useCesiumMapSize } from '@/core/stores/store-interface-and-intial-values/cesium-state';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -62,6 +63,8 @@ const ResponsiveGridLayout = forwardRef(
     const footerPanelResizeValue = useUIFooterPanelResizeValue();
     const footerBarIsCollapsed = useUIFooterBarIsCollapsed();
     const mapSize = useMapSize();
+    const cesiumSize = useCesiumMapSize();
+    const show3dMap = useAppShow3dMap();
 
     // Ref for right panel
     const rightMainRef = useRef<HTMLDivElement>();
@@ -91,12 +94,28 @@ const ResponsiveGridLayout = forwardRef(
     }, [rightMainRef, isRightPanelVisible, selectedFooterLayerListItemId]);
 
     const sxClasses = useMemo(
-      () => getSxClasses(theme, isMapFullScreen, footerPanelResizeValue, mapSize[1], footerBarIsCollapsed, containerType!, topHeight),
-      [theme, isMapFullScreen, footerPanelResizeValue, mapSize, footerBarIsCollapsed, containerType, topHeight]
+      () =>
+        getSxClasses(
+          theme,
+          isMapFullScreen,
+          footerPanelResizeValue,
+          show3dMap ? cesiumSize[1] : mapSize[1],
+          footerBarIsCollapsed,
+          containerType!,
+          topHeight
+        ),
+      [theme, isMapFullScreen, footerPanelResizeValue, show3dMap, mapSize, cesiumSize, footerBarIsCollapsed, containerType, topHeight]
     );
     const sxClassesMain = useMemo(
-      () => getSxClassesMain(isMapFullScreen, footerPanelResizeValue, mapSize[1], footerBarIsCollapsed, containerType!),
-      [isMapFullScreen, footerPanelResizeValue, mapSize, footerBarIsCollapsed, containerType]
+      () =>
+        getSxClassesMain(
+          isMapFullScreen,
+          footerPanelResizeValue,
+          show3dMap ? cesiumSize[1] : mapSize[1],
+          footerBarIsCollapsed,
+          containerType!
+        ),
+      [isMapFullScreen, footerPanelResizeValue, show3dMap, mapSize, cesiumSize, footerBarIsCollapsed, containerType]
     );
 
     // Expose imperative methods to parent component

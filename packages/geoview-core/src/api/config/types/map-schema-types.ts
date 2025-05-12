@@ -108,6 +108,7 @@ export type TypeValidAppBarCoreProps =
   | 'geolocator'
   | 'export'
   | 'aoi-panel'
+  | 'openIn3dButton'
   | 'custom-legend'
   | 'geochart'
   | 'guide'

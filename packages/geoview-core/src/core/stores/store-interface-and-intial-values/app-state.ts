@@ -30,6 +30,7 @@ export interface IAppState {
   isCrosshairsActive: boolean;
   isFullscreenActive: boolean;
   notifications: Array<NotificationDetailsType>;
+  show3dMap: boolean;
 
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
@@ -42,6 +43,7 @@ export interface IAppState {
     setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => void;
     removeNotification: (key: string) => void;
     removeAllNotifications: () => void;
+    setShow3dMap: (active: boolean) => void;
   };
 
   setterActions: {
@@ -52,6 +54,7 @@ export interface IAppState {
     setFullScreenActive: (active: boolean) => void;
     setGuide: (guide: TypeGuideObject) => void;
     setNotifications: (notifications: NotificationDetailsType[]) => void;
+    setShow3dMap: (active: boolean) => void;
   };
 }
 
@@ -77,6 +80,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     isCrosshairsActive: false,
     isFullscreenActive: false,
     notifications: [],
+    show3dMap: false,
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -158,6 +162,16 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       setFullScreenActive: (active: boolean, element?: TypeHTMLElement): void => {
         // Redirect to processor
         AppEventProcessor.setFullscreen(get().mapId, active, element);
+      },
+
+      /**
+       * Set full screen state.
+       * @param {boolean} active - New full screen state.
+       * @param {TypeHTMLElement} element - The element to make full screen.
+       */
+      setShow3dMap: (active: boolean): void => {
+        // Redirect to processor
+        get().appState.setterActions.setShow3dMap(active);
       },
 
       /**
@@ -249,6 +263,27 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       },
 
       /**
+       * Sets the show3dMap state.
+       * @param {boolean} active - The new state.
+       */
+      setShow3dMap: (active: boolean): void => {
+        set({
+          appState: {
+            ...get().appState,
+            show3dMap: active,
+          },
+        });
+        if (!active) {
+          set({
+            cesiumState: {
+              ...get().cesiumState,
+              isInitialized: false,
+            },
+          });
+        }
+      },
+
+      /**
        * Sets the guide.
        * @param {TypeGuideObject} guide - The new guide object.
        */
@@ -297,6 +332,7 @@ export const useAppDisabledLayerTypes = (): TypeGeoviewLayerTypeWithGeoCore[] =>
 export const useAppDisplayLanguage = (): TypeDisplayLanguage => useStore(useGeoViewStore(), (state) => state.appState.displayLanguage);
 export const useAppDisplayTheme = (): TypeDisplayTheme => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);
 export const useAppFullscreenActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
+export const useAppShow3dMap = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.show3dMap);
 export const useAppGeolocatorServiceURL = (): string | undefined =>
   useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
 export const useAppMetadataServiceURL = (): string | undefined => useStore(useGeoViewStore(), (state) => state.appState.metadataServiceURL);

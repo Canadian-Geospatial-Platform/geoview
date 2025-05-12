@@ -16,7 +16,6 @@ import {
   SearchIcon,
   LayersOutlinedIcon,
 } from '@/ui';
-
 import { Plugin } from '@/api/plugin/plugin';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
@@ -28,7 +27,12 @@ import {
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import {
+  useAppFullscreenActive,
+  useAppGeoviewHTMLElement,
+  useAppShow3dMap,
+  useAppStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { Guide, Legend, DetailsPanel, AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent, Datapanel, LayersPanel } from '@/core/components';
@@ -43,6 +47,8 @@ import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/conf
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import { OpenIn3dButton } from '../open-in-3d-button/open-in-3d-button';
+import { OpenIn3dIcon } from '@/ui/icons';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -88,10 +94,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const { hideClickMarker } = useMapStoreActions();
 
   const isMapFullScreen = useAppFullscreenActive();
+  const show3dMap = useAppShow3dMap();
 
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
   const { setActiveAppBarTab } = useUIStoreActions();
+  const { setShow3dMap } = useAppStoreActions();
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
@@ -109,6 +117,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     }
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
+      openIn3dButton: { icon: <OpenIn3dIcon />, content: <OpenIn3dButton key="openIn3dButton" /> },
       guide: { icon: <QuestionMarkIcon />, content: <Guide fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       legend: { icon: <LegendIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
@@ -155,9 +164,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
       // Get the button panel
       const buttonPanel = buttonPanelGroups[groupName][buttonId];
+      if (groupName === 'openIn3dButton') {
+        setShow3dMap(!show3dMap);
+      }
       setActiveAppBarTab(buttonId, groupName, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
-    [buttonPanelGroups, setActiveAppBarTab]
+    [buttonPanelGroups, setActiveAppBarTab, show3dMap, setShow3dMap]
   );
 
   const handleGeneralCloseClicked = useCallback(
@@ -423,6 +435,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
               let content = null;
               const buttonPanel = buttonPanels[buttonPanelsKey];
               if (buttonPanel?.groupName === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR) {
+                content = buttonPanel?.panel?.content ?? '';
+              } else if (buttonPanel?.groupName === CV_DEFAULT_APPBAR_CORE.OPEN_3D) {
                 content = buttonPanel?.panel?.content ?? '';
               } else if (buttonPanel?.panel) {
                 content = (

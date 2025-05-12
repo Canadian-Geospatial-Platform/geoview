@@ -12,6 +12,7 @@ import { ITimeSliderState, initializeTimeSliderState } from '@/core/stores/store
 import { IGeochartState, initializeGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { ISwiperState, initializeSwiperState } from '@/core/stores/store-interface-and-intial-values/swiper-state';
 import { IUIState, initializeUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { ICesiumState, initializeCesiumState } from './store-interface-and-intial-values/cesium-state';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
@@ -35,6 +36,7 @@ export interface IGeoviewState {
   layerState: ILayerState;
   mapState: IMapState;
   uiState: IUIState;
+  cesiumState: ICesiumState;
 
   // packages state interface
   geochartState: IGeochartState;
@@ -93,6 +95,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
     layerState: initializeLayerState(set, get),
     mapState: initializeMapState(set, get),
     uiState: initializeUIState(set, get),
+    cesiumState: initializeCesiumState(set, get),
   } as IGeoviewState;
 };
 

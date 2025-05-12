@@ -1,0 +1,109 @@
+.stacButtons {
+  --tw-bg-opacity: 1;
+  background-color: rgb(83 90 164 / var(--tw-bg-opacity, 1));
+  border-radius: 0.25rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-family: Open Sans;
+  font-weight: 600;
+  font-size: 16px;
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+
+.StacCard {
+    border-radius: 0.5rem;
+    color: black;
+    /* background: white; */
+    text-align: left;
+    padding: 0.5rem;
+}
+
+.StacCollectionCard {
+    border: 1px solid black;
+    border-radius: 0.5rem;
+    padding: 0.1rem;
+}
+
+.StacCollectionCard h2 {
+    font-size: 1.1em;
+}
+
+.StacHeader {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 0.5rem;
+}
+
+.StacNavigationSelector {
+    align-self: center;
+}
+
+.StacSearchFilters {
+    display: grid;
+    grid-template-columns: 35% 15% 30% 10% 10%;
+    gap: 0.25em;
+}
+.StacSearchFilters > * {
+    margin-left: 0.2rem;
+    margin-right: 0.2rem;
+}
+
+.StacSearchResults {
+    margin-top: 0.5rem;
+    overflow-y: auto;
+    max-height: 31.5rem;
+}
+
+.StacSearchPagingButtons {
+    display: flex;
+    justify-content:space-evenly ;
+    margin: 0.5rem;
+}
+
+.StacCollectionInfo {
+    border: 1px solid white;
+    padding: 0.5rem;
+    padding-left: 1rem;
+}
+.StacSearchErrorInput {
+    border: 1px solid red;
+    color: red;
+}
+.StacScroll {
+    overflow-y: auto;
+    max-height: 37rem;
+}
+.StacScroll-hidden {
+    display: none;
+}
+
+.StacFeature {
+    border: 1px solid black;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    grid-template-columns: 15% 85%;
+    grid-template-rows: 1fr;
+    margin: 0.5rem;
+}
+.stacFeatureThumbnail {
+    height: 100%;
+    width: 100%;
+}
+
+.stacFeatureAssetSelectionDiv {
+    display: grid;
+    grid-template-columns: 50% 2% 6rem;
+}
+
+.dialog-backdrop {
+    grid-column: 1/6;
+}
+
+.dialog-content {
+    display: grid;
+    grid-template-columns: 30% 70%;
+}

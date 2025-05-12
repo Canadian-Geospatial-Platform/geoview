@@ -25,7 +25,11 @@
     "paths": {
       "@/*": ["./src/*"],
       "@public/*": ["./public/*"]
-    }
+    },
+    "typeRoots": [
+        "./vendor", 
+        "./node_modules/@types"
+      ]
   },
   "include": ["src"],
   "exclude": ["node_modules"]

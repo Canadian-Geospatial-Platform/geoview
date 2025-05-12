@@ -36,6 +36,9 @@ build/Release
 **/build
 **/dist
 
+# Necessary to accomodate cesium bug patch
+!packages/geoview-core/vendor/cesium/Build
+
 # Dependency directories
 **/node_modules
 **/jspm_packages

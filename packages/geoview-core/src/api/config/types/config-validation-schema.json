@@ -237,6 +237,7 @@
       "additionalProperties": false,
       "enum": [
         "geolocator",
+        "openIn3dButton",
         "export",
         "geochart",
         "details",

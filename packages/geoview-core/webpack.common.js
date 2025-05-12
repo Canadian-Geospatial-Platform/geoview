@@ -9,6 +9,9 @@ const LodashWebpackPlugin = require('lodash-webpack-plugin');
 const glob = require('glob');
 const childProcess = require('child_process');
 const packageJSON = require('./package.json');
+const cesiumSource = './cesium/Source';
+const cesiumWorkers = '../Build/Cesium/Workers';
+const CESIUM_BASE_URL = process.env.CESIUM_BASE_URL || './cesium/';
 
 // get date, version numbers and the hash of the current commit
 const date = new Date().toISOString();
@@ -103,6 +106,8 @@ const config = {
       '@': path.resolve(__dirname, 'src'),
       '@public': path.resolve(__dirname, 'public'),
       '@config': path.resolve(__dirname, 'src/api/config'),
+      cesium: path.resolve(__dirname, cesiumSource),
+      '@cesium/engine': path.resolve(__dirname, 'cesium/packages/engine/index.js'),
     },
   },
   module: {
@@ -121,7 +126,7 @@ const config = {
       },
       {
         test: /\.(ts|tsx|js|jsx)$/,
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /vendor/],
         use: [
           {
             loader: 'babel-loader',
@@ -150,7 +155,7 @@ const config = {
       },
       {
         test: /\-worker-script\.(js|ts)$/,
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /vendor/],
         use: [
           {
             loader: 'worker-loader',
@@ -193,6 +198,22 @@ const config = {
         { from: './public/plugins', to: 'plugins', noErrorOnMissing: true },
         { from: './public/favicon.ico' },
         { from: './public/templates/codedoc.js' },
+        {
+          from: path.join(cesiumSource, 'Assets'),
+          to: 'cesium/Assets',
+        },
+        {
+          from: path.join(cesiumSource, 'Widgets'),
+          to: 'cesium/Widgets',
+        },
+        {
+          from: path.join(cesiumSource, 'ThirdParty'),
+          to: 'cesium/ThirdParty',
+        },
+        {
+          from: path.join(cesiumSource, cesiumWorkers),
+          to: 'cesium/Workers',
+        },
       ],
     }),
     new webpack.BannerPlugin({
@@ -208,6 +229,7 @@ const config = {
         patch,
         timestamp: Date.now(),
       },
+      CESIUM_BASE_URL: JSON.stringify(CESIUM_BASE_URL),
     }),
   ]
     .concat(multipleHtmlPluginsSamples)

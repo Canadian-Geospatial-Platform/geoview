@@ -7,6 +7,8 @@ import { getBoldListTitle, getTooltipTitle } from '@/core/components/geolocator/
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
+import { useAppShow3dMap } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useCesiumStoreActions } from '@/core/stores/store-interface-and-intial-values/cesium-state';
 
 type GeoListProps = {
   geoListItems: GeoListItem[];
@@ -29,15 +31,21 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
 
   // Store
   const { zoomToGeoLocatorLocation } = useMapStoreActions();
+  const show3dMap = useAppShow3dMap();
+  const { zoomToExtent } = useCesiumStoreActions();
 
   // Handle the zoom to geolocation
   const handleZoomToGeoLocator = useCallback(
     (latLng: [number, number], bbox: [number, number, number, number]): void => {
-      zoomToGeoLocatorLocation(latLng, bbox).catch((error) => {
-        logger.logPromiseFailed('Failed to zoomToGeoLocatorLocation in GeoList', error);
-      });
+      if (!show3dMap) {
+        zoomToGeoLocatorLocation(latLng, bbox).catch((error) => {
+          logger.logPromiseFailed('Failed to zoomToGeoLocatorLocation in GeoList', error);
+        });
+      } else {
+        zoomToExtent(latLng, bbox);
+      }
     },
-    [zoomToGeoLocatorLocation]
+    [zoomToGeoLocatorLocation, zoomToExtent, show3dMap]
   );
 
   /**

@@ -94,6 +94,7 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
     // logger.logTraceUseMemo('MOUSE-POSITION - pointerPosition', pointerPosition);
 
     const { lnglat, projected } = pointerPosition;
+    if (!lnglat || !projected) return ['', '', ''];
     const DMS = formatCoordinates(lnglat, true, t);
     const DD = formatCoordinates(lnglat, false, t);
 

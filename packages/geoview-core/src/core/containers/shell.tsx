@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, Fragment, useMemo } from 'react';
+import { useEffect, useState, useCallback, Fragment, useMemo, createElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -9,6 +9,7 @@ import { AppBar } from '@/core/components/app-bar/app-bar';
 import { NavBar } from '@/core/components/nav-bar/nav-bar';
 import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { MapInfo } from '@/core/components/map-info/map-info';
+import { CesiumMap } from '@/core/components/cesium/cesium-map';
 
 import { Box, CircularProgress, Link, Modal, Snackbar, Button, TypeModalProps, ModalApi, ModalEvent } from '@/ui';
 import { getShellSxClasses } from './containers-style';
@@ -17,6 +18,7 @@ import {
   useAppCircularProgressActive,
   useAppFullscreenActive,
   useAppGeoviewHTMLElement,
+  useAppShow3dMap,
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   useUIActiveFocusItem,
@@ -34,6 +36,8 @@ import { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/g
 import { FocusTrapDialog } from './focus-trap';
 import { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
+import { StacBrowserButton } from '../components/cesium/stac-browser-button';
+import { OpenStacApiIcon } from '@/ui/icons';
 
 type ShellProps = {
   mapViewer: MapViewer;
@@ -75,6 +79,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const interaction = useMapInteraction();
   const geoviewConfig = useGeoViewConfig();
   const focusItem = useUIActiveFocusItem();
+  const show3dMap = useAppShow3dMap();
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const isFooterBarCollapsed = useUIFooterBarIsCollapsed();
@@ -211,6 +216,35 @@ export function Shell(props: ShellProps): JSX.Element {
     };
   }, [mapViewer, handleMapRemoveComponent, handleModalOpen, handleSnackBarOpen, handleModalClose, handleMapAddComponent]);
 
+  useEffect(() => {
+    if (show3dMap) {
+      document.getElementById(`mapTargetElement-${mapId}`)!.style.display = 'hidden';
+      const button = {
+        id: 'stacBrowserButtonId',
+        tooltip: 'Open STAC Browser',
+        children: createElement(OpenStacApiIcon),
+      };
+
+      const panel = {
+        panelId: 'StacCatalogPanelId',
+        title: 'STAC Browser',
+        content: <StacBrowserButton key="stacBrowser" />,
+        convertHtmlContent: true,
+        width: geoviewElement?.clientWidth != null ? geoviewElement.clientWidth - 64 : 0,
+        icon: createElement(OpenStacApiIcon),
+      };
+
+      // call an api function to add a panel with the STAC panel.
+      mapViewer.appBarApi.createAppbarPanel(button, panel, '3d_buttons');
+    } else {
+      // call an api function to remove the STAC panel.
+      if (mapViewer.appBarApi.getAppBarButtonPanelById('StacCatalogPanelId')) {
+        mapViewer.appBarApi.removeAppbarPanel('StacCatalogPanelId', '3d_buttons');
+      }
+      document.getElementById(`mapTargetElement-${mapId}`)!.style.display = 'flex';
+    }
+  });
+
   return (
     <Box sx={sxClasses.all}>
       <Link id={`toplink-${mapViewer.mapId}`} href={`#bottomlink-${mapViewer.mapId}`} tabIndex={0} sx={{ ...sxClasses.skip, top: '0px' }}>
@@ -225,6 +259,7 @@ export function Shell(props: ShellProps): JSX.Element {
             <MapInfo />
             <Box sx={sxClasses.mapContainer}>
               <Map viewer={mapViewer} />
+              {show3dMap ? <CesiumMap viewer={mapViewer} /> : null}
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
             <Snackbar

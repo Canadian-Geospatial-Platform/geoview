@@ -22,9 +22,12 @@ import {
   useSelectorLayerType,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
+
 import { useMapStoreActions, useSelectorLayerVisibility, useSelectorLayerInVisibleRange } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
+import { useAppShow3dMap } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useCesiumStoreActions } from '@/core/stores/store-interface-and-intial-values/cesium-state';
 
 interface SecondaryControlsProps {
   layerPath: string;
@@ -45,31 +48,55 @@ const styles = {
 // Custom hook for control actions
 const useControlActions = (layerPath: string): ControlActions => {
   // Store
+  const is3dMap = useAppShow3dMap();
   const { setOrToggleLayerVisibility } = useMapStoreActions();
   const { setHighlightLayer, zoomToLayerExtent, zoomToLayerVisibleScale } = useLayerStoreActions();
-
+  const { toggleVisibility, zoomToLayer, highlightLayer } = useCesiumStoreActions();
   return useMemo(
     () => ({
       handleZoomToLayerVisibleScale: (event: React.MouseEvent): void => {
         event.stopPropagation();
+        if (is3dMap) {
+          toggleVisibility(layerPath);
+        }
         zoomToLayerVisibleScale(layerPath);
       },
       handleToggleVisibility: (event: React.MouseEvent): boolean => {
         event.stopPropagation();
+        if (is3dMap) {
+          toggleVisibility(layerPath);
+        }
         return setOrToggleLayerVisibility(layerPath);
       },
       handleHighlightLayer: (event: React.MouseEvent): void => {
         event.stopPropagation();
+        if (is3dMap) {
+          highlightLayer(layerPath);
+        }
         setHighlightLayer(layerPath);
       },
       handleZoomTo: (event: React.MouseEvent): void => {
         event.stopPropagation();
-        zoomToLayerExtent(layerPath).catch((error) => {
-          logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
-        });
+        if (is3dMap) {
+          zoomToLayer(layerPath);
+        } else {
+          zoomToLayerExtent(layerPath).catch((error) => {
+            logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
+          });
+        }
       },
     }),
-    [layerPath, setHighlightLayer, setOrToggleLayerVisibility, zoomToLayerExtent, zoomToLayerVisibleScale]
+    [
+      toggleVisibility,
+      zoomToLayer,
+      highlightLayer,
+      layerPath,
+      setHighlightLayer,
+      setOrToggleLayerVisibility,
+      zoomToLayerExtent,
+      zoomToLayerVisibleScale,
+      is3dMap,
+    ]
   );
 };
 
