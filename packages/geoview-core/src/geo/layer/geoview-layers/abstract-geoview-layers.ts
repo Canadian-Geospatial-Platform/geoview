@@ -1,11 +1,10 @@
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
-import Source from 'ol/source/Source';
 
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { TimeDimension, TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
+import { TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
@@ -15,7 +14,6 @@ import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   layerEntryIsGroupLayer,
-  TypeLayerStyleConfig,
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeStyleGeometry,
@@ -111,15 +109,6 @@ export abstract class AbstractGeoViewLayer {
   /** The service metadata. */
   metadata: TypeJsonObject | null = null;
 
-  /** Layer metadata */
-  #layerMetadata: Record<string, TypeJsonObject> = {};
-
-  /** Layer temporal dimension indexed by layerPath. */
-  #layerTemporalDimension: Record<string, TimeDimension> = {};
-
-  /** Style to apply to the layer. */
-  #layerStyle: Record<string, TypeLayerStyleConfig> = {};
-
   /** Attribution used in the OpenLayer source. */
   #attributions: string[] = [];
 
@@ -131,9 +120,6 @@ export abstract class AbstractGeoViewLayer {
 
   /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
   #isTimeAware: boolean = true;
-
-  // Keep all callback delegates references
-  #onLayerStyleChangedHandlers: LayerStyleChangedDelegate[] = [];
 
   // Keep all callback delegate references
   #onLayerEntryProcessedHandlers: LayerEntryProcessedDelegate[] = [];
@@ -265,23 +251,6 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Gets the layer style
-   * @returns The layer style
-   */
-  getStyle(layerPath: string): TypeLayerStyleConfig | undefined {
-    return this.#layerStyle[layerPath];
-  }
-
-  /**
-   * Sets the layer style
-   * @param {TypeLayerStyleConfig | undefined} style - The layer style
-   */
-  setStyle(layerPath: string, style: TypeLayerStyleConfig): void {
-    this.#layerStyle[layerPath] = style;
-    this.#emitLayerStyleChanged({ style, layerPath });
-  }
-
-  /**
    * Gets the layer attributions
    * @returns {string[]} The layer attributions
    */
@@ -295,49 +264,6 @@ export abstract class AbstractGeoViewLayer {
    */
   setAttributions(attributions: string[]): void {
     this.#attributions = attributions;
-  }
-
-  /**
-   * Get the layer metadata that is associated to the layer.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {TypeJsonObject} The layer metadata.
-   */
-  getLayerMetadata(layerPath: string): TypeJsonObject {
-    return this.#layerMetadata[layerPath];
-  }
-
-  /**
-   * Set the layer metadata for the layer identified by specified layerPath.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration affected by the change.
-   * @param {TypeJsonObject} layerMetadata The value to assign to the layer metadata property.
-   */
-  setLayerMetadata(layerPath: string, layerMetadata: TypeJsonObject): void {
-    this.#layerMetadata[layerPath] = layerMetadata;
-  }
-
-  /**
-   * Get the temporal dimension that is associated to the layer. Returns undefined when the layer config can't be found using the layer
-   * path.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {TimeDimension} The temporal dimension associated to the layer or undefined.
-   */
-  getTemporalDimension(layerPath: string): TimeDimension {
-    return this.#layerTemporalDimension[layerPath];
-  }
-
-  /**
-   * Set the layerTemporalDimension for the layer identified by specified layerPath.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration affected by the change.
-   * @param {TimeDimension} temporalDimension The value to assign to the layer temporal dimension property.
-   */
-  setTemporalDimension(layerPath: string, temporalDimension: TimeDimension): void {
-    this.#layerTemporalDimension[layerPath] = temporalDimension;
   }
 
   /**
@@ -567,9 +493,6 @@ export abstract class AbstractGeoViewLayer {
           // TO.DOCONT: After this point(?) the layerConfig should be full static and the system should rely on the Layer class to do stuff.
           //
 
-          // Save the style in the layer as we're done processing style found in metadata
-          if (layerConfig instanceof AbstractBaseLayerEntryConfig) this.setStyle(layerConfig.layerPath, layerConfig.layerStyle!);
-
           // We need to signal to the layer sets that the 'processed' phase is done.
           layerConfig.setLayerStatusProcessed();
           this.#emitLayerEntryProcessed({ config: layerConfig });
@@ -629,6 +552,12 @@ export abstract class AbstractGeoViewLayer {
    */
   async #processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     try {
+      // If metadata was set
+      if (this.metadata) {
+        // Set the service metadata
+        layerConfig.setServiceMetadata(this.metadata);
+      }
+
       // If no errors already happened on the layer path being processed
       if (layerConfig.layerStatus !== 'error') {
         // Process and, yes, keep the await here, because we want to make extra sure the onProcessLayerMetadata is
@@ -1060,34 +989,6 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Emits an event to all handlers.
-   * @param {LayerStyleChangedEvent} event - The event to emit
-   * @private
-   */
-  #emitLayerStyleChanged(event: LayerStyleChangedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerStyleChangedHandlers, event);
-  }
-
-  /**
-   * Registers a layer style changed event handler.
-   * @param {LayerStyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerStyleChangedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a layer style changed event handler.
-   * @param {LayerStyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
-  }
-
-  /**
    * Registers an individual layer loaded event handler.
    * @param {IndividualLayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
    */
@@ -1241,11 +1142,6 @@ type LayerConfigCreatedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerC
 export type LayerRequestingEvent = {
   // The configuration associated with the layer to be created
   config: ConfigBaseClass;
-  // The OpenLayers source associated with the layer to be created
-  // TODO: Get rid of this source property, let the LayerApi handle the source creation
-  source?: Source;
-  // Extra configuration can be anything (for simplicity)
-  extraConfig?: unknown;
 };
 
 /**
@@ -1272,20 +1168,6 @@ export interface TypeWmsLegendStyle {
   name: string;
   legend: HTMLCanvasElement | null;
 }
-
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerStyleChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerStyleChangedEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type LayerStyleChangedEvent = {
-  // The style
-  style: TypeLayerStyleConfig;
-  layerPath: string;
-};
 
 /**
  * Define a delegate for the event handler function signature

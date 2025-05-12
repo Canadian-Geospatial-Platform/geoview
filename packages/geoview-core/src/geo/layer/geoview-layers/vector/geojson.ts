@@ -153,7 +153,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     }
 
     // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV
-    this.setLayerMetadata(layerConfig.layerPath, layerConfig as unknown as TypeJsonObject);
+    layerConfig.setLayerMetadata(layerConfig as unknown as TypeJsonObject);
 
     // Return the layer config
     return Promise.resolve(layerConfig);

@@ -36,13 +36,13 @@ export class GVWMS extends AbstractGVRaster {
    * @param {ImageWMS} olSource - The OpenLayer source.
    * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig, layerCapabilities: TypeJsonObject) {
+  public constructor(mapId: string, olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig) {
     super(mapId, olSource, layerConfig);
 
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageWMS> = {
       source: olSource,
-      properties: { layerCapabilities, layerConfig },
+      properties: { layerConfig },
     };
 
     // Init the layer options with initial settings
@@ -214,7 +214,7 @@ export class GVWMS extends AbstractGVRaster {
 
       // If managed to read data
       if (featureMember) {
-        const featureInfoResult = this.#formatWmsFeatureInfoResult(featureMember, clickCoordinate);
+        const featureInfoResult = GVWMS.#formatWmsFeatureInfoResult(layerConfig.layerPath, featureMember, clickCoordinate);
         return featureInfoResult;
       }
 
@@ -235,7 +235,7 @@ export class GVWMS extends AbstractGVRaster {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
-      const legendImage = await this.#getLegendImage(layerConfig!);
+      const legendImage = await GVWMS.#getLegendImage(layerConfig!);
       const styleLegends: TypeWmsLegendStyle[] = [];
 
       if (legendImage) {
@@ -270,211 +270,50 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Gets the legend image URL of a layer from the capabilities. Return null if it does not exist.
-   * @param {OgcWmsLayerEntryConfig} layerConfig layer configuration.
-   * @param {string} style the style to get the url for
-   * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
-   * @private
+   * Overrides the way to get the bounds for this layer type.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
+   * @returns {Extent | undefined} The layer bounding box.
    */
-  #getLegendUrlFromCapabilities(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): TypeJsonObject | null {
-    const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
-    if (Array.isArray(layerCapabilities?.Style)) {
-      // check if WMS as a default legend style
-      let isDefaultStyle = false;
-      layerCapabilities!.Style.forEach((style) => {
-        if (style.Name === 'default') isDefaultStyle = true;
-      });
+  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
+    const layerConfig = this.getLayerConfig();
 
-      let legendStyle;
-      if (chosenStyle) {
-        [legendStyle] = layerCapabilities!.Style.filter((style) => {
-          return style.Name === chosenStyle;
-        });
-      } else {
-        legendStyle = layerCapabilities?.Style.find((style) => {
-          if (layerConfig?.source?.wmsStyle && !Array.isArray(layerConfig?.source?.wmsStyle))
-            return layerConfig.source.wmsStyle === style.Name;
+    // Get the layer config bounds
+    let layerConfigBounds = layerConfig?.initialSettings?.bounds;
 
-          // no style found, if default apply, if not use the available style
-          return isDefaultStyle ? style.Name === 'default' : style.Name;
-        });
-      }
+    // If layer bounds were found, project
+    if (layerConfigBounds) {
+      // Transform extent to given projection
+      layerConfigBounds = Projection.transformExtentFromProj(layerConfigBounds, Projection.getProjectionLngLat(), projection, stops);
+    }
 
-      if (Array.isArray(legendStyle?.LegendURL)) {
-        const legendUrl = legendStyle!.LegendURL.find((urlEntry) => {
-          if (urlEntry.Format === 'image/png') return true;
-          return false;
-        });
-        return legendUrl || null;
+    // Get the layer bounds from metadata, favoring a bounds in the same projection as the map
+    const metadataExtent = GVWMS.#getBoundsExtentFromMetadata(layerConfig, projection.getCode());
+
+    // If any
+    let layerBounds;
+    if (metadataExtent) {
+      const [metadataProj, metadataBounds] = metadataExtent;
+
+      // If read something
+      if (metadataProj) {
+        const metadataProjConv = Projection.getProjectionFromString(metadataProj);
+        layerBounds = Projection.transformExtentFromProj(metadataBounds, metadataProjConv, projection, stops);
       }
     }
-    return null;
-  }
 
-  /**
-   * Recursively searches the layerId in the layer entry of the capabilities.
-   * @param {string} layerId - The layer identifier that must exists on the server.
-   * @param {TypeJsonObject | undefined} layer - The layer entry from the capabilities that will be searched.
-   * @returns {TypeJsonObject | null} The found layer from the capabilities or null if not found.
-   * @private
-   */
-  #getLayerMetadataEntry(
-    layerId: string,
-    layer: TypeJsonObject | undefined = this.getLayerConfig().getServiceMetadata()?.Capability?.Layer
-  ): TypeJsonObject | null {
-    if (!layer) return null;
-    if ('Name' in layer && (layer.Name as string) === layerId) return layer;
-    if ('Layer' in layer) {
-      if (Array.isArray(layer.Layer)) {
-        for (let i = 0; i < layer.Layer.length; i++) {
-          const layerFound = this.#getLayerMetadataEntry(layerId, layer.Layer[i]);
-          if (layerFound) return layerFound;
-        }
-        return null;
-      }
-      return this.#getLayerMetadataEntry(layerId, layer.Layer);
+    // If both layer config had bounds and layer has real bounds, take the intersection between them
+    if (layerConfigBounds && layerBounds) {
+      layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
+    } else if (layerConfigBounds && !layerBounds) {
+      layerBounds = layerConfigBounds;
     }
-    return null;
-  }
 
-  /**
-   * Gets the legend image of a layer.
-   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
-   * @param {string | undefined} chosenStyle - Style to get the legend image for.
-   * @returns {blob} A promise of an image blob
-   * @private
-   */
-  #getLegendImage(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
-    const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
-      const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
-        new Promise((resolveImage) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolveImage(reader.result);
-          reader.onerror = () => resolveImage(null);
-          reader.readAsDataURL(blob);
-        });
+    // Validate
+    layerBounds = validateExtentWhenDefined(layerBounds, projection.getCode());
 
-      let queryUrl: string | undefined;
-      const legendUrlFromCapabilities = this.#getLegendUrlFromCapabilities(layerConfig, chosenStyle);
-      if (legendUrlFromCapabilities) queryUrl = legendUrlFromCapabilities.OnlineResource as string;
-      else if (Object.keys(this.getLayerConfig().getServiceMetadata()?.Capability?.Request || {}).includes('GetLegendGraphic'))
-        queryUrl = `${this.getLayerConfig().geoviewLayerConfig
-          .metadataAccessPath!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
-
-      if (queryUrl) {
-        queryUrl = queryUrl.toLowerCase().startsWith('http:') ? `https${queryUrl.slice(4)}` : queryUrl;
-
-        /** For some layers the layer loads fine through the proxy, but fetching the legend fails
-         * We try the fetch first without the proxy and if we get a network error, try again with the proxy.
-         */
-        Fetch.fetchBlob(queryUrl)
-          .then((responseBlob) => {
-            // Expected response, return it as image
-            resolve(readImage(responseBlob));
-          })
-          .catch((error: unknown) => {
-            // If a network error such as CORS
-            if (error instanceof NetworkError) {
-              // Try appending link with proxy url to avoid CORS issues
-              queryUrl = `${CV_CONFIG_PROXY_URL}?${queryUrl}`;
-
-              Fetch.fetchBlob(queryUrl)
-                .then((responseBlob) => {
-                  // Expected response, return it as image
-                  resolve(readImage(responseBlob));
-                })
-                .catch(() => {
-                  // Just absolute fail
-                  resolve(null);
-                });
-            } else {
-              // Not a CORS issue, return null
-              resolve(null);
-            }
-          });
-        // No URL to query
-      } else resolve(null);
-    });
-
-    return promisedImage;
-  }
-
-  /**
-   * Translates the get feature information result set to the TypeFeatureInfoEntry[] used by GeoView.
-   * @param {TypeJsonObject} featureMember - An object formatted using the query syntax.
-   * @param {Coordinate} clickCoordinate - The coordinate where the user has clicked.
-   * @returns {TypeFeatureInfoEntry[]} The feature info table.
-   * @private
-   */
-  #formatWmsFeatureInfoResult(featureMember: TypeJsonObject, clickCoordinate: Coordinate): TypeFeatureInfoEntry[] {
-    const queryResult: TypeFeatureInfoEntry[] = [];
-
-    let featureKeyCounter = 0;
-    let fieldKeyCounter = 0;
-    const featureInfoEntry: TypeFeatureInfoEntry = {
-      // feature key for building the data-grid
-      featureKey: featureKeyCounter++,
-      geoviewLayerType: CONST_LAYER_TYPES.WMS,
-      extent: [clickCoordinate[0], clickCoordinate[1], clickCoordinate[0], clickCoordinate[1]],
-      geometry: null,
-      featureIcon: document.createElement('canvas').toDataURL(),
-      fieldInfo: {},
-      nameField: null,
-      layerPath: this.getLayerConfig().layerPath,
-    };
-    const createFieldEntries = (entry: TypeJsonObject, prefix = ''): void => {
-      const keys = Object.keys(entry);
-      keys.forEach((key) => {
-        if (!key.endsWith('Geometry') && !key.startsWith('@')) {
-          const splitedKey = key.split(':');
-          const fieldName = splitedKey.slice(-1)[0];
-          if (typeof entry[key] === 'object') {
-            if ('#text' in entry[key])
-              featureInfoEntry.fieldInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = {
-                fieldKey: fieldKeyCounter++,
-                value: entry[key]['#text'] as string,
-                dataType: 'string',
-                alias: `${prefix}${prefix ? '.' : ''}${fieldName}`,
-                domain: null,
-              };
-            else createFieldEntries(entry[key], fieldName);
-          } else
-            featureInfoEntry.fieldInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = {
-              fieldKey: fieldKeyCounter++,
-              value: entry[key] as string,
-              dataType: 'string',
-              alias: `${prefix}${prefix ? '.' : ''}${fieldName}`,
-              domain: null,
-            };
-        }
-      });
-    };
-    createFieldEntries(featureMember);
-    queryResult.push(featureInfoEntry);
-
-    return queryResult;
-  }
-
-  /**
-   * Returns the attribute of an object that ends with the specified ending string or null if not found.
-   * @param {TypeJsonObject} jsonObject - The object that is supposed to have the needed attribute.
-   * @param {string} attribute - The attribute searched.
-   * @returns {TypeJsonObject | undefined} The attribute information.
-   * @private
-   */
-  static #getAttribute(jsonObject: TypeJsonObject, attributeEnding: string): TypeJsonObject | undefined {
-    const keyFound = Object.keys(jsonObject).find((key) => key.endsWith(attributeEnding));
-    return keyFound ? jsonObject[keyFound] : undefined;
-  }
-
-  /**
-   * Sets the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
-   * @param {string} wmsStyleId - The style identifier that will be used.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  setWmsStyle(wmsStyleId: string): void {
-    // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
-    this.getOLSource()?.updateParams({ STYLES: wmsStyleId });
+    // Return the calculated bounds
+    return layerBounds;
   }
 
   /**
@@ -486,6 +325,16 @@ export class GVWMS extends AbstractGVRaster {
 
     // Apply view filter immediately
     this.applyViewFilter(this.getLayerConfig().layerFilter || '');
+  }
+
+  /**
+   * Sets the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
+   * @param {string} wmsStyleId - The style identifier that will be used.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  setWmsStyle(wmsStyleId: string): void {
+    // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
+    this.getOLSource()?.updateParams({ STYLES: wmsStyleId });
   }
 
   /**
@@ -536,60 +385,75 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the way to get the bounds for this layer type.
-   * @param {OLProjection} projection - The projection to get the bounds into.
-   * @param {number} stops - The number of stops to use to generate the extent.
-   * @returns {Extent | undefined} The layer bounding box.
+   * Translates the get feature information result set to the TypeFeatureInfoEntry[] used by GeoView.
+   * @param {string} layerPath - The layer path.
+   * @param {TypeJsonObject} featureMember - An object formatted using the query syntax.
+   * @param {Coordinate} clickCoordinate - The coordinate where the user has clicked.
+   * @returns {TypeFeatureInfoEntry[]} The feature info table.
+   * @private
    */
-  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
-    const layerConfig = this.getLayerConfig();
+  static #formatWmsFeatureInfoResult(
+    layerPath: string,
+    featureMember: TypeJsonObject,
+    clickCoordinate: Coordinate
+  ): TypeFeatureInfoEntry[] {
+    const queryResult: TypeFeatureInfoEntry[] = [];
 
-    // Get the layer config bounds
-    let layerConfigBounds = layerConfig?.initialSettings?.bounds;
+    let featureKeyCounter = 0;
+    let fieldKeyCounter = 0;
+    const featureInfoEntry: TypeFeatureInfoEntry = {
+      // feature key for building the data-grid
+      featureKey: featureKeyCounter++,
+      geoviewLayerType: CONST_LAYER_TYPES.WMS,
+      extent: [clickCoordinate[0], clickCoordinate[1], clickCoordinate[0], clickCoordinate[1]],
+      geometry: null,
+      featureIcon: document.createElement('canvas').toDataURL(),
+      fieldInfo: {},
+      nameField: null,
+      layerPath,
+    };
+    const createFieldEntries = (entry: TypeJsonObject, prefix = ''): void => {
+      const keys = Object.keys(entry);
+      keys.forEach((key) => {
+        if (!key.endsWith('Geometry') && !key.startsWith('@')) {
+          const splitedKey = key.split(':');
+          const fieldName = splitedKey.slice(-1)[0];
+          if (typeof entry[key] === 'object') {
+            if ('#text' in entry[key])
+              featureInfoEntry.fieldInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = {
+                fieldKey: fieldKeyCounter++,
+                value: entry[key]['#text'] as string,
+                dataType: 'string',
+                alias: `${prefix}${prefix ? '.' : ''}${fieldName}`,
+                domain: null,
+              };
+            else createFieldEntries(entry[key], fieldName);
+          } else
+            featureInfoEntry.fieldInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = {
+              fieldKey: fieldKeyCounter++,
+              value: entry[key] as string,
+              dataType: 'string',
+              alias: `${prefix}${prefix ? '.' : ''}${fieldName}`,
+              domain: null,
+            };
+        }
+      });
+    };
+    createFieldEntries(featureMember);
+    queryResult.push(featureInfoEntry);
 
-    // If layer bounds were found, project
-    if (layerConfigBounds) {
-      // Transform extent to given projection
-      layerConfigBounds = Projection.transformExtentFromProj(layerConfigBounds, Projection.getProjectionLngLat(), projection, stops);
-    }
-
-    // Get the layer bounds from metadata, favoring a bounds in the same projection as the map
-    const metadataExtent = this.#getBoundsExtentFromMetadata(projection.getCode());
-
-    // If any
-    let layerBounds;
-    if (metadataExtent) {
-      const [metadataProj, metadataBounds] = metadataExtent;
-
-      // If read something
-      if (metadataProj) {
-        const metadataProjConv = Projection.getProjectionFromString(metadataProj);
-        layerBounds = Projection.transformExtentFromProj(metadataBounds, metadataProjConv, projection, stops);
-      }
-    }
-
-    // If both layer config had bounds and layer has real bounds, take the intersection between them
-    if (layerConfigBounds && layerBounds) {
-      layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
-    } else if (layerConfigBounds && !layerBounds) {
-      layerBounds = layerConfigBounds;
-    }
-
-    // Validate
-    layerBounds = validateExtentWhenDefined(layerBounds, projection.getCode());
-
-    // Return the calculated bounds
-    return layerBounds;
+    return queryResult;
   }
 
   /**
    * Gets the bounds as defined in the metadata, favoring the ones in the given projection or returning the first one found
+   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer config from which to read the bounding box
    * @param {string} projection - The projection to favor when looking for the bounds inside the metadata
    * @returns {[string, Extent]} The projection and its extent as provided by the metadata
    */
-  #getBoundsExtentFromMetadata(projection: string): [string, Extent] | undefined {
+  static #getBoundsExtentFromMetadata(layerConfig: OgcWmsLayerEntryConfig, projection: string): [string, Extent] | undefined {
     // Get the bounding boxes in the metadata
-    const boundingBoxes = this.getLayerConfig().getServiceMetadata()?.Capability.Layer.BoundingBox as TypeJsonArray;
+    const boundingBoxes = layerConfig.getServiceMetadata()?.Capability.Layer.BoundingBox as TypeJsonArray;
 
     // If found any
     if (boundingBoxes) {
@@ -616,5 +480,121 @@ export class GVWMS extends AbstractGVRaster {
 
     // Really not found
     return undefined;
+  }
+
+  /**
+   * Gets the legend image URL of a layer from the capabilities. Return null if it does not exist.
+   * @param {OgcWmsLayerEntryConfig} layerConfig layer configuration.
+   * @param {string} style the style to get the url for
+   * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
+   * @private
+   */
+  static #getLegendUrlFromCapabilities(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): TypeJsonObject | null {
+    const layerCapabilities = layerConfig.getLayerMetadata();
+    if (Array.isArray(layerCapabilities?.Style)) {
+      // check if WMS as a default legend style
+      let isDefaultStyle = false;
+      layerCapabilities!.Style.forEach((style) => {
+        if (style.Name === 'default') isDefaultStyle = true;
+      });
+
+      let legendStyle;
+      if (chosenStyle) {
+        [legendStyle] = layerCapabilities!.Style.filter((style) => {
+          return style.Name === chosenStyle;
+        });
+      } else {
+        legendStyle = layerCapabilities?.Style.find((style) => {
+          if (layerConfig?.source?.wmsStyle && !Array.isArray(layerConfig?.source?.wmsStyle))
+            return layerConfig.source.wmsStyle === style.Name;
+
+          // no style found, if default apply, if not use the available style
+          return isDefaultStyle ? style.Name === 'default' : style.Name;
+        });
+      }
+
+      if (Array.isArray(legendStyle?.LegendURL)) {
+        const legendUrl = legendStyle!.LegendURL.find((urlEntry) => {
+          if (urlEntry.Format === 'image/png') return true;
+          return false;
+        });
+        return legendUrl || null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Gets the legend image of a layer.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
+   * @param {string | undefined} chosenStyle - Style to get the legend image for.
+   * @returns {blob} A promise of an image blob
+   * @private
+   */
+  static #getLegendImage(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
+    const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
+      const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
+        new Promise((resolveImage) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolveImage(reader.result);
+          reader.onerror = () => resolveImage(null);
+          reader.readAsDataURL(blob);
+        });
+
+      let queryUrl: string | undefined;
+      const legendUrlFromCapabilities = GVWMS.#getLegendUrlFromCapabilities(layerConfig, chosenStyle);
+      if (legendUrlFromCapabilities) queryUrl = legendUrlFromCapabilities.OnlineResource as string;
+      else if (Object.keys(layerConfig.getServiceMetadata()?.Capability?.Request || {}).includes('GetLegendGraphic'))
+        queryUrl = `${layerConfig.geoviewLayerConfig
+          .metadataAccessPath!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
+
+      if (queryUrl) {
+        queryUrl = queryUrl.toLowerCase().startsWith('http:') ? `https${queryUrl.slice(4)}` : queryUrl;
+
+        /** For some layers the layer loads fine through the proxy, but fetching the legend fails
+         * We try the fetch first without the proxy and if we get a network error, try again with the proxy.
+         */
+        Fetch.fetchBlob(queryUrl)
+          .then((responseBlob) => {
+            // Expected response, return it as image
+            resolve(readImage(responseBlob));
+          })
+          .catch((error: unknown) => {
+            // If a network error such as CORS
+            if (error instanceof NetworkError) {
+              // Try appending link with proxy url to avoid CORS issues
+              queryUrl = `${CV_CONFIG_PROXY_URL}?${queryUrl}`;
+
+              Fetch.fetchBlob(queryUrl)
+                .then((responseBlob) => {
+                  // Expected response, return it as image
+                  resolve(readImage(responseBlob));
+                })
+                .catch(() => {
+                  // Just absolute fail
+                  resolve(null);
+                });
+            } else {
+              // Not a CORS issue, return null
+              resolve(null);
+            }
+          });
+        // No URL to query
+      } else resolve(null);
+    });
+
+    return promisedImage;
+  }
+
+  /**
+   * Returns the attribute of an object that ends with the specified ending string or null if not found.
+   * @param {TypeJsonObject} jsonObject - The object that is supposed to have the needed attribute.
+   * @param {string} attribute - The attribute searched.
+   * @returns {TypeJsonObject | undefined} The attribute information.
+   * @private
+   */
+  static #getAttribute(jsonObject: TypeJsonObject, attributeEnding: string): TypeJsonObject | undefined {
+    const keyFound = Object.keys(jsonObject).find((key) => key.endsWith(attributeEnding));
+    return keyFound ? jsonObject[keyFound] : undefined;
   }
 }
