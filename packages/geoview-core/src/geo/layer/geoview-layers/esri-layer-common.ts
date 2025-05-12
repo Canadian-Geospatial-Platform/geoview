@@ -195,13 +195,9 @@ export function commonValidateListOfLayerEntryConfig(
  *
  * @returns {TypeOutfieldsType} The type of the field.
  */
-export function commonGetFieldType(
-  layer: EsriDynamic | EsriFeature | EsriImage,
-  fieldName: string,
-  layerConfig: AbstractBaseLayerEntryConfig
-): TypeOutfieldsType {
-  const esriFieldDefinitions = layer.getLayerMetadata(layerConfig.layerPath).fields as TypeJsonArray;
-  const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
+export function commonGetFieldType(layerConfig: AbstractBaseLayerEntryConfig, fieldName: string): TypeOutfieldsType {
+  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray | undefined;
+  const fieldDefinition = esriFieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
   if (!fieldDefinition) return 'string';
   const esriFieldType = fieldDefinition.type as string;
   if (esriFieldType === 'esriFieldTypeDate') return 'date';
@@ -225,12 +221,11 @@ export function commonGetFieldType(
  * @returns {null | codedValueType | rangeDomainType} The domain of the field.
  */
 export function commonGetFieldDomain(
-  layer: EsriDynamic | EsriFeature | EsriImage,
-  fieldName: string,
-  layerConfig: AbstractBaseLayerEntryConfig
+  layerConfig: AbstractBaseLayerEntryConfig,
+  fieldName: string
 ): null | codedValueType | rangeDomainType {
-  const esriFieldDefinitions = layer.getLayerMetadata(layerConfig.layerPath).fields as TypeJsonArray;
-  const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
+  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray | undefined;
+  const fieldDefinition = esriFieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
   return fieldDefinition ? Cast<codedValueType | rangeDomainType>(fieldDefinition.domain) : null;
 }
 
@@ -245,16 +240,12 @@ export function commonGetFieldDomain(
 // TODO: Issue #2139 - There is a bug with the temporal dimension returned by service URL:
 // TO.DOCONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
 export function commonProcessTemporalDimension(
-  layer: EsriDynamic | EsriFeature | EsriImage,
-  esriTimeDimension: TypeJsonObject,
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
+  esriTimeDimension: TypeJsonObject,
   singleHandle?: boolean
 ): void {
   if (esriTimeDimension !== undefined && esriTimeDimension.timeExtent) {
-    layer.setTemporalDimension(
-      layerConfig.layerPath,
-      DateMgt.createDimensionFromESRI(Cast<TimeDimensionESRI>(esriTimeDimension), singleHandle)
-    );
+    layerConfig.setTemporalDimension(DateMgt.createDimensionFromESRI(Cast<TimeDimensionESRI>(esriTimeDimension), singleHandle));
   }
 }
 
@@ -267,11 +258,10 @@ export function commonProcessTemporalDimension(
  *         EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessFeatureInfoConfig(
-  layer: EsriDynamic | EsriFeature | EsriImage,
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ): void {
   const { layerPath } = layerConfig;
-  const layerMetadata = layer.getLayerMetadata(layerPath);
+  const layerMetadata = layerConfig.getLayerMetadata()!; // FIXME: Address the '!' marker here..
   const queryable = (layerMetadata.capabilities as string).includes('Query');
   if (layerConfig.source.featureInfo) {
     // if queryable flag is undefined, set it accordingly to what is specified in the metadata
@@ -304,8 +294,8 @@ export function commonProcessFeatureInfoConfig(
         const newOutfield: TypeOutfields = {
           name: fieldEntry.name as string,
           alias: (fieldEntry.alias as string) || (fieldEntry.name as string),
-          type: commonGetFieldType(layer, fieldEntry.name as string, layerConfig),
-          domain: commonGetFieldDomain(layer, fieldEntry.name as string, layerConfig),
+          type: commonGetFieldType(layerConfig, fieldEntry.name as string),
+          domain: commonGetFieldDomain(layerConfig, fieldEntry.name as string),
         };
 
         layerConfig.source.featureInfo!.outfields!.push(newOutfield);
@@ -337,11 +327,10 @@ export function commonProcessFeatureInfoConfig(
  *         EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessInitialSettings(
-  layer: EsriDynamic | EsriFeature | EsriImage,
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ): void {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-  const layerMetadata = layer.getLayerMetadata(layerConfig.layerPath);
+  const layerMetadata = layerConfig.getLayerMetadata()!; // FIXME: Address the '!' here..
   if (layerConfig.initialSettings?.states?.visible === undefined) {
     // eslint-disable-next-line no-param-reassign
     layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
@@ -417,7 +406,7 @@ export async function commonProcessLayerMetadata<
     AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.geoviewLayerConfig.geoviewLayerId, responseJson);
 
     // Set the layer metadata
-    layer.setLayerMetadata(layerConfig.layerPath, responseJson);
+    layerConfig.setLayerMetadata(responseJson);
 
     // The following line allow the type ascention of the type guard functions on the second line below
     if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
@@ -432,11 +421,11 @@ export async function commonProcessLayerMetadata<
       await Projection.addProjection(responseJson.spatialReference);
     }
 
-    commonProcessFeatureInfoConfig(layer, layerConfig);
+    commonProcessFeatureInfoConfig(layerConfig);
 
-    commonProcessInitialSettings(layer, layerConfig);
+    commonProcessInitialSettings(layerConfig);
 
-    commonProcessTemporalDimension(layer, responseJson.timeInfo, layerConfig, layer.type === CONST_LAYER_TYPES.ESRI_IMAGE);
+    commonProcessTemporalDimension(layerConfig, responseJson.timeInfo, layer.type === CONST_LAYER_TYPES.ESRI_IMAGE);
   }
 
   return layerConfig;

@@ -115,7 +115,7 @@ export class OgcFeature extends AbstractGeoViewVector {
         : `${metadataUrl}/collections/${layerConfig.layerId}/queryables?f=json`;
       const queryResultData = await Fetch.fetchJsonAsObject(queryUrl);
       if (queryResultData.properties) {
-        this.setLayerMetadata(layerConfig.layerPath, queryResultData.properties);
+        layerConfig.setLayerMetadata(queryResultData.properties);
         OgcFeature.#processFeatureInfoConfig(queryResultData.properties, layerConfig);
       }
     }

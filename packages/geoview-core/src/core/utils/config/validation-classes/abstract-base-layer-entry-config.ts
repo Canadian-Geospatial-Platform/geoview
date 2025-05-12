@@ -16,6 +16,7 @@ import {
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { TimeDimension } from '@/app';
 
 /**
  * Base type used to define a GeoView layer to display on the map.
@@ -29,6 +30,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** The metadata associated with the layer */
   #layerMetadata?: TypeJsonObject;
+
+  /** The time dimension information */
+  #temporalDimension?: TimeDimension;
 
   /** The calculated filter equation */
   filterEquation?: FilterNodeArrayType;
@@ -66,7 +70,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param {TypeJsonObject} metadata - The service metadata to set
    */
   setServiceMetadata(metadata: TypeJsonObject): void {
-    // TODO: Refactor - Layers refactoring. Reminder: turn this function private eventually?
     this.#serviceMetadata = metadata;
   }
 
@@ -83,8 +86,15 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param {TypeJsonObject} layerMetadata - The layer metadata to set
    */
   setLayerMetadata(layerMetadata: TypeJsonObject): void {
-    // TODO: Refactor - Layers refactoring. Reminder: turn this function private eventually?
     this.#layerMetadata = layerMetadata;
+  }
+
+  getTemporalDimension(): TimeDimension | undefined {
+    return this.#temporalDimension;
+  }
+
+  setTemporalDimension(temporalDimension: TimeDimension): void {
+    this.#temporalDimension = temporalDimension;
   }
 
   /**

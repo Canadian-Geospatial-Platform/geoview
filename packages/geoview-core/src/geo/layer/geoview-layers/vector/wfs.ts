@@ -152,7 +152,7 @@ export class WFS extends AbstractGeoViewVector {
     if (describeFeatureUrl && outputFormat === 'application/json') {
       const layerMetadata = await Fetch.fetchJsonAsObject(describeFeatureUrl);
       if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
-        this.setLayerMetadata(layerConfig.layerPath, layerMetadata.featureTypes[0].properties);
+        layerConfig.setLayerMetadata(layerMetadata.featureTypes[0].properties);
         WFS.#processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
       }
     } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
@@ -172,7 +172,7 @@ export class WFS extends AbstractGeoViewVector {
           featureTypeProperties.push(element['@attributes']);
         });
 
-        this.setLayerMetadata(layerConfig.layerPath, featureTypeProperties as TypeJsonObject);
+        layerConfig.setLayerMetadata(featureTypeProperties as TypeJsonObject);
         WFS.#processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
       }
     }
