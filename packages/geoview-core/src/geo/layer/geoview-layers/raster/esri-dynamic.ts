@@ -17,10 +17,10 @@ import {
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { logger } from '@/core/utils/logger';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { deepMergeObjects } from '@/core/utils/utilities';
+import { LayerEntryConfigNoLayerProvidedError } from '@/core/exceptions/layer-entry-config-exceptions';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview config section
@@ -91,49 +91,54 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {Promise<ImageLayer<ImageArcGISRest>>} The created Open Layer object.
    */
   protected override onProcessOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
-    // Validate the dataAccessPath exists
-    if (!layerConfig.source?.dataAccessPath) {
-      // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
-    }
-
-    const sourceOptions: SourceOptions = {};
-    sourceOptions.attributions = [(this.metadata?.copyrightText ? this.metadata?.copyrightText : '') as string];
-    sourceOptions.url = layerConfig.source.dataAccessPath!;
-    sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
-    if (layerConfig.source.transparent) sourceOptions.params.transparent = layerConfig.source.transparent!;
-    if (layerConfig.source.format) sourceOptions.params.format = layerConfig.source.format!;
-    if (layerConfig.source.crossOrigin) {
-      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-    } else {
-      sourceOptions.crossOrigin = 'Anonymous';
-    }
-    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-
-    // Create the source
-    const source = new ImageArcGISRest(sourceOptions);
-
-    // Raster layer queries do not accept any layerDefs
-    if (this.metadata?.layers[0].type === 'Raster Layer') {
-      const params = source.getParams();
-      source.updateParams({ ...params, layerDefs: '' });
-    }
-
     // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+    const requestResult = this.emitLayerRequesting({ config: layerConfig });
 
     // If any response
     let olLayer: ImageLayer<ImageArcGISRest>;
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
-    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
-
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Creates an ImageArcGISRest source from a layer config.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration for the EsriDynamic layer.
+   * @returns A fully configured ImageArcGISRest source.
+   * @throws If required config fields like dataAccessPath are missing.
+   */
+  createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest {
+    const { source } = layerConfig;
+
+    if (!source?.dataAccessPath) {
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+    }
+
+    const sourceOptions: SourceOptions = {
+      url: source.dataAccessPath,
+      attributions: this.getAttributions(),
+      params: {
+        LAYERS: `show:${layerConfig.layerId}`,
+        ...(source.transparent !== undefined && { transparent: source.transparent }),
+        ...(source.format && { format: source.format }),
+      },
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
+      projection: source.projection ? `EPSG:${source.projection}` : undefined,
+    };
+
+    const arcgisSource = new ImageArcGISRest(sourceOptions);
+
+    // Raster layers do not accept layerDefs — must be cleared
+    if (layerConfig.getServiceMetadata()?.layers?.[0]?.type === 'Raster Layer') {
+      const params = arcgisSource.getParams();
+      arcgisSource.updateParams({ ...params, layerDefs: '' });
+    }
+
+    return arcgisSource;
   }
 
   /**
