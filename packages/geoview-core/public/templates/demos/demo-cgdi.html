@@ -63,13 +63,12 @@
             {
               'geoviewLayerId': 'HMS',
               'geoviewLayerName': 'Hydrometric Monitoring Stations',
-              'metadataAccessPath': 'https://api.weather.gc.ca/collections/hydrometric-stations/',
               'geoviewLayerType': 'GeoJSON',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'hydrometric-stations',
-                  'layerName': 'Hydrometric Stations',
                   'source': {
+                    'format': 'GeoJSON',
                     'dataAccessPath': 'https://api.weather.gc.ca/collections/hydrometric-stations/items?f=json'
                   }
                 }
@@ -94,13 +93,13 @@
                   }
                 },
                 {
-                  'layerId': 'HRDPA.6F_PR',
+                  'layerId': 'RDPA.6F_PR',
                   'source': {
                     'style': 'CAPA24-LINEAR'
                   }
                 },
                 {
-                  'layerId': 'HRDPA.6P_PR',
+                  'layerId': 'RDPA.6P_PR',
                   'source': {
                     'style': 'CAPA24-LINEAR'
                   }
@@ -118,13 +117,13 @@
                   }
                 },
                 {
-                  'layerId': 'HRDPA.24F_PR',
+                  'layerId': 'RDPA.24F_PR',
                   'source': {
                     'style': 'CAPA24-LINEAR'
                   }
                 },
                 {
-                  'layerId': 'HRDPA.24P_PR',
+                  'layerId': 'RDPA.24P_PR',
                   'source': {
                     'style': 'CAPA24-LINEAR'
                   }
@@ -171,7 +170,7 @@
             {
               'geoviewLayerId': 'Active_Inactive_Disposal_at_Sea_Sites',
               'geoviewLayerName': 'Active Inactive Disposal at Sea Sites',
-              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/services/Active_Inactive_Disposal_at_Sea_Sites/MapServer/WMSServer',
+              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/services/DMS/ActiveDisposalSites_SitesImmersionActifs/MapServer/WMSServer',
               'geoviewLayerType': 'ogcWms',
               'listOfLayerEntryConfig': [
                 { 'layerId': '0' }
@@ -180,14 +179,13 @@
             {
               'geoviewLayerId': 'ShorelineSegmentationWithSCATClassification',
               'geoviewLayerName': 'Shoreline Segmentation With SCAT Classification',
-              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/services/EPB_EPO/ShorelineSegmentationWithSCATClassification/MapServer/WMSServer',
+              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/services/DMS/Shoreline_Mapping_Vector_Data/MapServer/WMSServer',
               'geoviewLayerType': 'ogcWms',
               'listOfLayerEntryConfig': [
                 { 'layerId': '0' },
                 { 'layerId': '1' },
                 { 'layerId': '2' },
-                { 'layerId': '3' },
-                { 'layerId': '4' }
+                { 'layerId': '3' }
               ]
             },
             {
