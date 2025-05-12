@@ -150,38 +150,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @returns {Promise<TileLayer<XYZ>>} The GeoView raster layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TileLayer<XYZ>> {
-    // Validate the dataAccessPath exists
-    if (!layerConfig.source?.dataAccessPath) {
-      // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
-    }
-
-    const sourceOptions: SourceOptions = {
-      url: layerConfig.source.dataAccessPath,
-    };
-    sourceOptions.attributions = [(this.metadata?.copyrightText ? this.metadata?.copyrightText : '') as string];
-
-    if (layerConfig.source.crossOrigin) {
-      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-    } else {
-      sourceOptions.crossOrigin = 'Anonymous';
-    }
-    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-    if (layerConfig.source.tileGrid) {
-      const tileGridOptions: TileGridOptions = {
-        origin: layerConfig.source.tileGrid?.origin,
-        resolutions: layerConfig.source.tileGrid?.resolutions as number[],
-      };
-      if (layerConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerConfig.source.tileGrid?.tileSize;
-      if (layerConfig.source.tileGrid?.extent) tileGridOptions.extent = layerConfig.source.tileGrid?.extent;
-      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
-    }
-
-    // Create the source
-    const source = new XYZ(sourceOptions);
-
     // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+    const requestResult = this.emitLayerRequesting({ config: layerConfig });
 
     // If any response
     let olLayer: TileLayer<XYZ>;
@@ -195,6 +165,40 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Creates an XYZ source from a layer config.
+   * @param {XYZTilesLayerEntryConfig} layerConfig - The configuration for the XYZ layer.
+   * @returns A fully configured XYZ source.
+   * @throws If required config fields like dataAccessPath are missing.
+   */
+  createXYZSource(layerConfig: XYZTilesLayerEntryConfig): XYZ {
+    const { source } = layerConfig;
+
+    if (!source?.dataAccessPath) {
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+    }
+
+    const sourceOptions: SourceOptions = {
+      url: source.dataAccessPath,
+      attributions: this.getAttributions(),
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
+      projection: source.projection ? `EPSG:${source.projection}` : undefined,
+    };
+
+    if (source.tileGrid) {
+      const tileGridOptions: TileGridOptions = {
+        origin: source.tileGrid.origin,
+        resolutions: source.tileGrid.resolutions as number[],
+        tileSize: source.tileGrid.tileSize,
+        extent: source.tileGrid.extent,
+      };
+
+      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
+    }
+
+    return new XYZ(sourceOptions);
   }
 
   /**

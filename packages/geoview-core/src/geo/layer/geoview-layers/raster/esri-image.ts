@@ -53,30 +53,8 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @returns {Promise<ImageLayer<ImageArcGISRest>>} The GeoView raster layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
-    // Validate the dataAccessPath exists
-    if (!layerConfig.source?.dataAccessPath) {
-      // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
-    }
-
-    const sourceOptions: SourceOptions = {};
-    sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
-    sourceOptions.url = layerConfig.source.dataAccessPath!;
-    sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
-    if (layerConfig.source.transparent) sourceOptions.params.transparent = layerConfig.source.transparent!;
-    if (layerConfig.source.format) sourceOptions.params.format = layerConfig.source.format!;
-    if (layerConfig.source.crossOrigin) {
-      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-    } else {
-      sourceOptions.crossOrigin = 'Anonymous';
-    }
-    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-
-    // Create the source
-    const source = new ImageArcGISRest(sourceOptions);
-
     // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+    const requestResult = this.emitLayerRequesting({ config: layerConfig });
 
     // If any response
     let olLayer: ImageLayer<ImageArcGISRest>;
@@ -127,6 +105,34 @@ export class EsriImage extends AbstractGeoViewRaster {
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Creates an ImageArcGISRest source from a layer config.
+   * @param {EsriImageLayerEntryConfig} layerConfig - The configuration for the EsriImage layer.
+   * @returns A fully configured ImageArcGISRest source.
+   * @throws If required config fields like dataAccessPath are missing.
+   */
+  static createEsriImageSource(layerConfig: EsriImageLayerEntryConfig): ImageArcGISRest {
+    const { source } = layerConfig;
+
+    if (!source?.dataAccessPath) {
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+    }
+
+    const sourceOptions: SourceOptions = {
+      url: source.dataAccessPath,
+      attributions: [(layerConfig.getServiceMetadata()?.copyrightText as string) ?? ''],
+      params: {
+        LAYERS: `show:${layerConfig.layerId}`,
+        ...(source.transparent !== undefined && { transparent: source.transparent }),
+        ...(source.format && { format: source.format }),
+      },
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
+      projection: source.projection ? `EPSG:${source.projection}` : undefined,
+    };
+
+    return new ImageArcGISRest(sourceOptions);
   }
 }
 

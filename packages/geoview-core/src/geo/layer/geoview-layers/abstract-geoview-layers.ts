@@ -1,7 +1,6 @@
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
-import Source from 'ol/source/Source';
 
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { TypeJsonObject } from '@/api/config/types/config-types';
@@ -1241,11 +1240,6 @@ type LayerConfigCreatedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerC
 export type LayerRequestingEvent = {
   // The configuration associated with the layer to be created
   config: ConfigBaseClass;
-  // The OpenLayers source associated with the layer to be created
-  // TODO: Get rid of this source property, let the LayerApi handle the source creation
-  source?: Source;
-  // Extra configuration can be anything (for simplicity)
-  extraConfig?: unknown;
 };
 
 /**

@@ -88,36 +88,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {Promise<ImageLayer<Static>>} The GeoView raster layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageLayer<Static>> {
-    // Validate the dataAccessPath exists
-    if (!layerConfig.source?.dataAccessPath) {
-      // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
-    }
-
-    // Validate the source extent
-    if (!layerConfig?.source?.extent) throw new LayerEntryConfigParameterExtentNotDefinedInSourceError(layerConfig);
-
-    const sourceOptions: SourceOptions = {
-      url: layerConfig.source.dataAccessPath || '',
-      imageExtent: layerConfig.source.extent,
-    };
-
-    if (layerConfig?.source?.crossOrigin) {
-      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-    } else {
-      sourceOptions.crossOrigin = 'Anonymous';
-    }
-
-    // Validate the source projection
-    if (layerConfig?.source?.projection) {
-      sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-    } else throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(layerConfig);
-
-    // Create the source
-    const source = new Static(sourceOptions);
-
     // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+    const requestResult = this.emitLayerRequesting({ config: layerConfig });
 
     // If any response
     let olLayer: ImageLayer<Static>;
@@ -174,6 +146,39 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Creates a StaticImage source from a layer config.
+   * @param {ImageStaticLayerEntryConfig} layerConfig - Configuration for the image static layer.
+   * @returns A configured ol/source/ImageStatic instance.
+   * @throws If required config fields like dataAccessPath, extent, or projection are missing.
+   */
+  static createImageStaticSource(layerConfig: ImageStaticLayerEntryConfig): Static {
+    const { source } = layerConfig;
+
+    // Validate required properties
+    if (!source?.dataAccessPath) {
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+    }
+
+    if (!source.extent) {
+      throw new LayerEntryConfigParameterExtentNotDefinedInSourceError(layerConfig);
+    }
+
+    if (!source.projection) {
+      throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(layerConfig);
+    }
+
+    // Assemble the source options
+    const sourceOptions: SourceOptions = {
+      url: source.dataAccessPath,
+      imageExtent: source.extent,
+      projection: `EPSG:${source.projection}`,
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
+    };
+
+    return new Static(sourceOptions);
   }
 }
 

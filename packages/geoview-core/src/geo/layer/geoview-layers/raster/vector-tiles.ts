@@ -199,6 +199,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
    * @param {string} fallbackProjection - Fallback projection if none is provided in the config.
    * @returns An initialized VectorTileSource ready for use in a layer.
+   * @throws If required config fields like dataAccessPath are missing.
    */
   static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig, fallbackProjection: string): VectorTileSource {
     const { source } = layerConfig;

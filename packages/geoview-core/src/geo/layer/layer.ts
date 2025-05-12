@@ -1,8 +1,7 @@
 import BaseLayer from 'ol/layer/Base';
 import { Extent } from 'ol/extent';
 import Collection from 'ol/Collection';
-import { ImageArcGISRest, ImageWMS, Source, XYZ } from 'ol/source';
-import Static from 'ol/source/ImageStatic';
+import { Source } from 'ol/source';
 import LayerGroup from 'ol/layer/Group';
 import { GeoJSONObject } from 'ol/format/GeoJSON';
 
@@ -933,7 +932,7 @@ export class LayerApi {
       );
 
       // Create the corresponding GVLayer
-      const gvLayer = this.#createGVLayer(this.getMapId(), geoviewLayer, event.source, event.config, event.extraConfig);
+      const gvLayer = this.#createGVLayer(this.getMapId(), geoviewLayer, event.config);
 
       // If found the GV layer
       if (gvLayer) {
@@ -1043,14 +1042,7 @@ export class LayerApi {
    * @param config - The layer config
    * @returns A new GV Layer which is kept track of in LayerApi and initialized
    */
-  #createGVLayer(
-    mapId: string,
-    geoviewLayer: AbstractGeoViewLayer,
-    olSource: Source | undefined,
-    layerConfig: ConfigBaseClass,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    extraConfig?: any
-  ): AbstractGVLayer | undefined {
+  #createGVLayer(mapId: string, geoviewLayer: AbstractGeoViewLayer, layerConfig: ConfigBaseClass): AbstractGVLayer | undefined {
     // Get the metadata and the time dimension information as processed
     // GV: We use the old abstractGeoviewLayer format as the GV layer is not created yet
     const { metadata } = geoviewLayer;
@@ -1106,20 +1098,34 @@ export class LayerApi {
 
     // Create the right GV Layer based on the OLLayer and config type
     let gvLayer;
-    if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriDynamicLayerEntryConfig) {
-      gvLayer = new GVEsriDynamic(mapId, olSource, layerConfig);
-    } else if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriImageLayerEntryConfig) {
-      gvLayer = new GVEsriImage(mapId, olSource, layerConfig);
-    } else if (olSource instanceof Static && layerConfig instanceof ImageStaticLayerEntryConfig) {
-      gvLayer = new GVImageStatic(mapId, olSource, layerConfig);
+    if (geoviewLayer instanceof EsriDynamic && layerConfig instanceof EsriDynamicLayerEntryConfig) {
+      // Create the source
+      const source = geoviewLayer.createEsriDynamicSource(layerConfig);
+      gvLayer = new GVEsriDynamic(mapId, source, layerConfig);
+    } else if (layerConfig instanceof EsriImageLayerEntryConfig) {
+      // Create the source
+      const source = EsriImage.createEsriImageSource(layerConfig);
+      gvLayer = new GVEsriImage(mapId, source, layerConfig);
+    } else if (layerConfig instanceof ImageStaticLayerEntryConfig) {
+      // Create the source
+      const source = ImageStatic.createImageStaticSource(layerConfig);
+      gvLayer = new GVImageStatic(mapId, source, layerConfig);
     } else if (layerConfig instanceof VectorTilesLayerEntryConfig) {
       // Create the source
       const source = VectorTiles.createVectorTileSource(layerConfig, this.mapViewer.getProjection().getCode());
       gvLayer = new GVVectorTiles(mapId, source, layerConfig);
-    } else if (olSource instanceof ImageWMS && layerConfig instanceof OgcWmsLayerEntryConfig) {
-      gvLayer = new GVWMS(mapId, olSource, layerConfig, extraConfig.layerCapabilities);
-    } else if (olSource instanceof XYZ && layerConfig instanceof XYZTilesLayerEntryConfig) {
-      gvLayer = new GVXYZTiles(mapId, olSource, layerConfig);
+    } else if (geoviewLayer instanceof WMS && layerConfig instanceof OgcWmsLayerEntryConfig) {
+      // Create the source
+      const source = geoviewLayer.createImageWMSSource(layerConfig);
+      gvLayer = new GVWMS(mapId, source, layerConfig);
+    } else if (geoviewLayer instanceof XYZTiles && layerConfig instanceof XYZTilesLayerEntryConfig) {
+      // Create the source
+      const source = geoviewLayer.createXYZSource(layerConfig);
+      gvLayer = new GVXYZTiles(mapId, source, layerConfig);
+    } else if (geoviewLayer instanceof AbstractGeoViewVector && layerConfig instanceof CsvLayerEntryConfig) {
+      // Create the source
+      const source = geoviewLayer.createVectorSource(layerConfig);
+      gvLayer = new GVCSV(mapId, source, layerConfig);
     } else if (geoviewLayer instanceof AbstractGeoViewVector && layerConfig instanceof EsriFeatureLayerEntryConfig) {
       // Create the source
       const source = geoviewLayer.createVectorSource(layerConfig);
@@ -1136,10 +1142,6 @@ export class LayerApi {
       // Create the source
       const source = geoviewLayer.createVectorSource(layerConfig);
       gvLayer = new GVWFS(mapId, source, layerConfig);
-    } else if (geoviewLayer instanceof AbstractGeoViewVector && layerConfig instanceof CsvLayerEntryConfig) {
-      // Create the source
-      const source = geoviewLayer.createVectorSource(layerConfig);
-      gvLayer = new GVCSV(mapId, source, layerConfig);
     }
 
     // If created

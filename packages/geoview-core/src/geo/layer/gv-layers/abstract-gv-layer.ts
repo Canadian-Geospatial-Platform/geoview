@@ -315,8 +315,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Update the parent group if any
     this.getLayerConfig().updateLayerStatusParent();
 
-    // If we were loaded before
-    if (layerStatusBefore === 'loaded') {
+    // If we were not error before
+    if (layerStatusBefore !== 'error') {
       // Emit about the error
       this.emitMessage('layers.errorNotLoaded', [this.getLayerName() || this.getLayerPath()], 'error', true);
     } else {
@@ -344,8 +344,8 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Update the parent group if any
     this.getLayerConfig().updateLayerStatusParent();
 
-    // If we were loaded before
-    if (layerStatusBefore === 'loaded') {
+    // If we were not error before
+    if (layerStatusBefore !== 'error') {
       // Emit about the error
       this.emitMessage(
         'layers.errorImageLoad',

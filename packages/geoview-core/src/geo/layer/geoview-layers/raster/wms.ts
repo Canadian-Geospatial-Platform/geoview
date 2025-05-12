@@ -163,7 +163,7 @@ export class WMS extends AbstractGeoViewRaster {
             if (!this.metadata) this.metadata = promise.value.metadata;
 
             const layerId = promise.value.layerConfig.layerId!;
-            const alreadyExists = this.#getLayerMetadataEntry(layerId);
+            const alreadyExists = this.getLayerCapabilities(layerId);
 
             // If not already loaded
             if (!alreadyExists) {
@@ -194,7 +194,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
    */
   protected override onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
-    const layerFound = this.#getLayerMetadataEntry(layerConfig.layerId!);
+    const layerFound = this.getLayerCapabilities(layerConfig.layerId!);
     if (!layerFound) {
       // Add a layer load error
       this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -216,8 +216,13 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<OgcWmsLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(layerConfig: OgcWmsLayerEntryConfig): Promise<OgcWmsLayerEntryConfig> {
-    const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId)!;
+    // Get the layer capabilities
+    const layerCapabilities = this.getLayerCapabilities(layerConfig.layerId)!;
+
+    // Set the layer metadata (capabilities)
     this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);
+
+    // If found
     if (layerCapabilities) {
       const attributions = this.getAttributions();
       if (layerCapabilities.Attribution && !attributions.includes(layerCapabilities.Attribution?.Title as string)) {
@@ -277,73 +282,112 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<ImageLayer<ImageWMS>>} The GeoView raster layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: OgcWmsLayerEntryConfig): Promise<ImageLayer<ImageWMS>> {
-    // Get the layer capabilities
-    const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig });
 
-    // If layer capabilities found
-    if (layerCapabilities) {
-      // Validate the dataAccessPath exists
-      if (!layerConfig.source?.dataAccessPath) {
-        // Throw error missing dataAccessPath
-        throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
-      }
+    // If any response
+    let olLayer: ImageLayer<ImageWMS>;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as ImageLayer<ImageWMS>;
+    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
 
-      const dataAccessPath = layerConfig.source.dataAccessPath!;
+    // GV Time to emit about the layer creation!
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
 
-      let styleToUse = '';
-      if (Array.isArray(layerConfig.source?.wmsStyle) && layerConfig.source?.wmsStyle) {
-        styleToUse = layerConfig.source?.wmsStyle[0];
-      } else if (layerConfig.source.wmsStyle) {
-        styleToUse = layerConfig.source?.wmsStyle as string;
-      } else if (layerCapabilities.Style) {
-        styleToUse = layerCapabilities.Style[0].Name as string;
-      }
+    // Return the OpenLayer layer
+    return Promise.resolve(olLayer);
+  }
 
-      if (Array.isArray(layerConfig.source?.wmsStyle)) {
-        this.WMSStyles = layerConfig.source.wmsStyle;
-      } else if (layerCapabilities.Style && (layerCapabilities.Style.length as number) > 1) {
-        this.WMSStyles = [];
-        for (let i = 0; i < (layerCapabilities.Style.length as number); i++) {
-          this.WMSStyles.push(layerCapabilities.Style[i].Name as string);
-        }
-      } else this.WMSStyles = [styleToUse];
+  /**
+   * Creates an ImageWMS source from a layer config.
+   * @param {OgcWmsLayerEntryConfig} layerConfig - The configuration for the WMS layer.
+   * @returns A fully configured ImageWMS source.
+   * @throws If required config fields like dataAccessPath are missing.
+   */
+  createImageWMSSource(layerConfig: OgcWmsLayerEntryConfig): ImageWMS {
+    const { source } = layerConfig;
 
-      const sourceOptions: SourceOptions = {
-        url: dataAccessPath,
-        params: { LAYERS: layerConfig.layerId, STYLES: styleToUse },
-      };
-
-      sourceOptions.attributions = this.getAttributions();
-      sourceOptions.serverType = layerConfig.source.serverType;
-      if (layerConfig.source.crossOrigin) {
-        sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-      } else {
-        sourceOptions.crossOrigin = 'Anonymous';
-      }
-      if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-
-      // Create the source
-      const source = new ImageWMS(sourceOptions);
-
-      // GV Time to request an OpenLayers layer!
-      const requestResult = this.emitLayerRequesting({ config: layerConfig, source, extraConfig: { layerCapabilities } });
-
-      // If any response
-      let olLayer: ImageLayer<ImageWMS>;
-      if (requestResult.length > 0) {
-        // Get the OpenLayer that was created
-        olLayer = requestResult[0] as ImageLayer<ImageWMS>;
-      } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
-
-      // GV Time to emit about the layer creation!
-      this.emitLayerCreation({ config: layerConfig, layer: olLayer });
-
-      // Return the OpenLayer layer
-      return Promise.resolve(olLayer);
+    // Validate required data access path
+    if (!source?.dataAccessPath) {
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
     }
 
-    // Error
-    throw new LayerEntryConfigWMSSubLayerNotFoundError(layerConfig, this.geoviewLayerId);
+    const { dataAccessPath } = source;
+
+    // Get the layer capabilities
+    const layerCapabilities = this.getLayerCapabilities(layerConfig.layerId);
+
+    if (!layerCapabilities) {
+      // Throw sub layer not found
+      throw new LayerEntryConfigWMSSubLayerNotFoundError(layerConfig, this.geoviewLayerId);
+    }
+
+    // Update internal style list for UI or info
+    if (Array.isArray(layerConfig.source?.wmsStyle)) {
+      this.WMSStyles = layerConfig.source.wmsStyle;
+    } else if ((layerCapabilities.Style?.length as number) > 1) {
+      this.WMSStyles = (layerCapabilities.Style as TypeJsonArray).map((style: TypeJsonObject) => style.Name as string);
+    } else {
+      const fallbackStyle =
+        layerConfig.source?.wmsStyle ||
+        ((layerCapabilities.Style?.length as number) > 0 && (layerCapabilities.Style?.[0]?.Name as string)) ||
+        '';
+      this.WMSStyles = [fallbackStyle];
+    }
+
+    // Determine the style to use (layer config > capabilities fallback)
+    let styleToUse = '';
+    if (Array.isArray(source.wmsStyle) && source.wmsStyle.length > 0) {
+      [styleToUse] = source.wmsStyle;
+    } else if (typeof source.wmsStyle === 'string') {
+      styleToUse = source.wmsStyle;
+    } else if (layerCapabilities?.Style && (layerCapabilities.Style.length as number) > 0) {
+      styleToUse = layerCapabilities.Style[0].Name as string;
+    }
+
+    const sourceOptions: SourceOptions = {
+      url: dataAccessPath,
+      params: {
+        LAYERS: layerConfig.layerId,
+        STYLES: styleToUse,
+      },
+      attributions: this.getAttributions(),
+      serverType: source.serverType,
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
+    };
+
+    // Optional projection override
+    if (source.projection) {
+      sourceOptions.projection = `EPSG:${source.projection}`;
+    }
+
+    return new ImageWMS(sourceOptions);
+  }
+
+  /**
+   * Recursively finds gets the layer capability for a given layer id.
+   * @param {string} layerId - The layer identifier to get the capabilities for.
+   * @param {TypeJsonObject | undefined} layer - The current layer entry from the capabilities that will be recursively searched.
+   * @returns {TypeJsonObject?} The found layer from the capabilities or undefined if not found.
+   */
+  getLayerCapabilities(
+    layerId: string,
+    currentLayerEntry: TypeJsonObject | undefined = this.metadata?.Capability?.Layer
+  ): TypeJsonObject | undefined {
+    if (!currentLayerEntry) return undefined;
+    if ('Name' in currentLayerEntry && (currentLayerEntry.Name as string) === layerId) return currentLayerEntry;
+    if ('Layer' in currentLayerEntry) {
+      if (Array.isArray(currentLayerEntry.Layer)) {
+        for (let i = 0; i < currentLayerEntry.Layer.length; i++) {
+          const layerFound = this.getLayerCapabilities(layerId, currentLayerEntry.Layer[i]);
+          if (layerFound) return layerFound;
+        }
+        return undefined;
+      }
+      return this.getLayerCapabilities(layerId, currentLayerEntry.Layer);
+    }
+    return undefined;
   }
 
   /**
@@ -576,31 +620,6 @@ export class WMS extends AbstractGeoViewRaster {
     // eslint-disable-next-line no-param-reassign
     layerConfig.listOfLayerEntryConfig = newListOfLayerEntryConfig;
     this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
-  }
-
-  /**
-   * This method search recursively the layerId in the layer entry of the capabilities.
-   *
-   * @param {string} layerId The layer identifier that must exists on the server.
-   * @param {TypeJsonObject | undefined} layer The layer entry from the capabilities that will be searched.
-   *
-   * @returns {TypeJsonObject | null} The found layer from the capabilities or null if not found.
-   * @private
-   */
-  #getLayerMetadataEntry(layerId: string, layer: TypeJsonObject | undefined = this.metadata?.Capability?.Layer): TypeJsonObject | null {
-    if (!layer) return null;
-    if ('Name' in layer && (layer.Name as string) === layerId) return layer;
-    if ('Layer' in layer) {
-      if (Array.isArray(layer.Layer)) {
-        for (let i = 0; i < layer.Layer.length; i++) {
-          const layerFound = this.#getLayerMetadataEntry(layerId, layer.Layer[i]);
-          if (layerFound) return layerFound;
-        }
-        return null;
-      }
-      return this.#getLayerMetadataEntry(layerId, layer.Layer);
-    }
-    return null;
   }
 
   /**
