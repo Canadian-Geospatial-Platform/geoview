@@ -44,12 +44,10 @@ export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
 export class GeoJSON extends AbstractGeoViewVector {
   /**
    * Constructs a GeoJSON Layer configuration processor.
-   *
-   * @param {string} mapId the id of the map
    * @param {TypeGeoJSONLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeGeoJSONLayerConfig) {
-    super(CONST_LAYER_TYPES.GEOJSON, layerConfig, mapId);
+  constructor(layerConfig: TypeGeoJSONLayerConfig) {
+    super(CONST_LAYER_TYPES.GEOJSON, layerConfig);
   }
 
   /**

@@ -29,13 +29,12 @@ export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
 export class EsriImage extends AbstractGeoViewRaster {
   /**
    * Constructs an EsriImage Layer configuration processor.
-   * @param {string} mapId The id of the map.
    * @param {TypeEsriImageLayerConfig} layerConfig The layer configuration.
    */
-  constructor(mapId: string, layerConfig: TypeEsriImageLayerConfig) {
+  constructor(layerConfig: TypeEsriImageLayerConfig) {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
-    super(CONST_LAYER_TYPES.ESRI_IMAGE, layerConfig, mapId);
+    super(CONST_LAYER_TYPES.ESRI_IMAGE, layerConfig);
   }
 
   /**

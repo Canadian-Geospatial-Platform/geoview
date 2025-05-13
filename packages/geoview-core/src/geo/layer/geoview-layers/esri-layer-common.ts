@@ -1,6 +1,5 @@
 import { Extent } from 'ol/extent';
 
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { validateExtent, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
@@ -134,9 +133,8 @@ export function commonValidateListOfLayerEntryConfig(
       listOfLayerEntryConfig[i] = groupLayerConfig;
 
       // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)...
-      // Don't forget to replace the old version in the registered layers
-      // TODO: TEST GROUP LAYER TEST Officially remove setLayerEntryConfigObsolete once passed testing
-      MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(groupLayerConfig);
+      // Alert that we want to register new entry configs
+      layer.emitLayerEntryRegisterInit({ config: groupLayerConfig });
 
       (layer.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
         // Make sure to copy the layerConfig source before recycling it in the constructors. This was causing the 'source' value to leak between layer entry configs
@@ -158,8 +156,8 @@ export function commonValidateListOfLayerEntryConfig(
 
         // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
         // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)... (standardizing this call with the other one above for now)
-        // TODO: TEST GROUP LAYER TEST Officially remove setLayerEntryConfigObsolete once passed testing
-        MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(subLayerEntryConfig);
+        // Alert that we want to register new entry configs
+        layer.emitLayerEntryRegisterInit({ config: subLayerEntryConfig });
       });
 
       layer.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);

@@ -9,7 +9,6 @@ import { logger } from '@/core/utils/logger';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
@@ -28,7 +27,6 @@ import {
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { MapViewer } from '@/geo/map/map-viewer';
 import { SnackbarType } from '@/core/utils/notifications';
 import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
@@ -71,10 +69,6 @@ export abstract class AbstractGeoViewLayer {
   // The default hit tolerance
   hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
 
-  /** The map id on which the GeoView layer will be drawn. */
-  // TODO: REFACTOR - Get rid of the mapId in the geoview-layers classes, this property here
-  mapId: string;
-
   /** The type of GeoView layer that is instantiated. */
   type: TypeGeoviewLayerType;
 
@@ -97,9 +91,6 @@ export abstract class AbstractGeoViewLayer {
    */
   listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
 
-  /** Initial settings to apply to the GeoView layer at creation time. This attribute is allowed only if listOfLayerEntryConfig.length > 1. */
-  initialSettings?: TypeLayerInitialSettings;
-
   /** List of errors for the layers that did not load. */
   layerLoadError: Error[] = [];
 
@@ -109,17 +100,11 @@ export abstract class AbstractGeoViewLayer {
   /** The service metadata. */
   metadata: TypeJsonObject | null = null;
 
-  /** Attribution used in the OpenLayer source. */
-  #attributions: string[] = [];
-
   /** Date format object used to translate server to ISO format and ISO to server format */
   serverDateFragmentsOrder?: TypeDateFragments;
 
-  /** Date format object used to translate internal UTC ISO format to the external format, the one used by the user */
-  externalFragmentsOrder: TypeDateFragments;
-
-  /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
-  #isTimeAware: boolean = true;
+  // Keep all callback delegate references
+  #onLayerEntryRegisterInitHandlers: LayerEntryRegisterInitDelegate[] = [];
 
   // Keep all callback delegate references
   #onLayerEntryProcessedHandlers: LayerEntryProcessedDelegate[] = [];
@@ -143,20 +128,15 @@ export abstract class AbstractGeoViewLayer {
    * Constructor
    * @param {TypeGeoviewLayerType} type - The type of GeoView layer that is instantiated.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration options.
-   * @param {string} mapId - The unique identifier of the map on which the GeoView layer will be drawn.
    */
-  constructor(type: TypeGeoviewLayerType, geoviewLayerConfig: TypeGeoviewLayerConfig, mapId: string) {
-    this.mapId = mapId;
+  constructor(type: TypeGeoviewLayerType, geoviewLayerConfig: TypeGeoviewLayerConfig) {
     this.type = type;
     this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId();
     this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName ? geoviewLayerConfig.geoviewLayerName : DEFAULT_LAYER_NAMES[type];
     if (geoviewLayerConfig.metadataAccessPath) this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath.trim();
-    this.initialSettings = geoviewLayerConfig.initialSettings;
     this.serverDateFragmentsOrder = geoviewLayerConfig.serviceDateFormat
       ? DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat)
       : undefined;
-    this.externalFragmentsOrder = DateMgt.getDateFragmentsOrder(geoviewLayerConfig.externalDateFormat);
-    this.#isTimeAware = geoviewLayerConfig.isTimeAware === undefined ? true : geoviewLayerConfig.isTimeAware;
     this.#setListOfLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
   }
 
@@ -200,78 +180,11 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Gets the MapViewer where the layer resides
-   * @returns {MapViewer} The MapViewer
-   */
-  getMapViewer(): MapViewer {
-    // GV The GVLayers need a reference to the MapViewer to be able to perform operations.
-    // GV This is a trick to obtain it. Otherwise, it'd need to be provided via constructor.
-    return MapEventProcessor.getMapViewer(this.mapId);
-  }
-
-  /**
    * Gets the Geoview layer id.
    * @returns {string} The geoview layer id
    */
   getGeoviewLayerId(): string {
     return this.geoviewLayerId;
-  }
-
-  /**
-   * Gets the layer configuration of the specified layer path.
-   *
-   * @param {string} layerPath The layer path.
-   *
-   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
-   */
-  getLayerConfig(layerPath: string): ConfigBaseClass | undefined {
-    // Trick to get a layer config from a layer class
-    return this.getMapViewer().layer.getLayerEntryConfig(layerPath);
-  }
-
-  /**
-   * Gets the OpenLayer of the specified layer path.
-   *
-   * @param {string} layerPath The layer path.
-   *
-   * @returns {BaseLayer | undefined} The layer configuration or undefined if not found.
-   */
-  getOLLayer(layerPath: string): BaseLayer | undefined {
-    // Trick to get an open layer layer from a layer class
-    return this.getMapViewer().layer.getOLLayer(layerPath);
-  }
-
-  /**
-   * Gets the layer status
-   * @returns The layer status
-   */
-  getLayerStatus(layerPath: string): TypeLayerStatus {
-    // Take the layer status from the config, temporary patch until layers refactoring is done
-    return this.getLayerConfig(layerPath)!.layerStatus;
-  }
-
-  /**
-   * Gets the layer attributions
-   * @returns {string[]} The layer attributions
-   */
-  getAttributions(): string[] {
-    return this.#attributions;
-  }
-
-  /**
-   * Sets the layer attributions
-   * @param {string[]} attributions - The layer attributions
-   */
-  setAttributions(attributions: string[]): void {
-    this.#attributions = attributions;
-  }
-
-  /**
-   * Gets the flag if layer use its time dimension, this can be use to exclude layers from time function like time slider
-   * @returns {boolean} The flag indicating if the layer should be included in time awareness functions such as the Time Slider. True by default..
-   */
-  getIsTimeAware(): boolean {
-    return this.#isTimeAware;
   }
 
   /**
@@ -301,7 +214,7 @@ export abstract class AbstractGeoViewLayer {
 
     // Try to get a key for logging timings
     let logTimingsKey;
-    if (this.listOfLayerEntryConfig.length > 0) logTimingsKey = `${this.mapId} | ${this.listOfLayerEntryConfig[0].layerPath}`;
+    if (this.listOfLayerEntryConfig.length > 0) logTimingsKey = `${this.geoviewLayerId} | ${this.listOfLayerEntryConfig[0].layerPath}`;
 
     // Log
     if (logTimingsKey) logger.logMarkerStart(logTimingsKey);
@@ -381,8 +294,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entries configuration to validate.
    */
   validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     // Log
@@ -391,16 +303,35 @@ export abstract class AbstractGeoViewLayer {
     // When no metadata is provided, there's no validation to be done.
     if (!this.metadata) return;
 
+    // Copy the service metadata in each layer entry config right away
+    listOfLayerEntryConfig.forEach((layerConfig) => {
+      // If an AbstractBaseLayerEntryConfig
+      if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
+        // Copy the service metadata right away
+        layerConfig.setServiceMetadata(this.metadata!);
+
+        // If there's a copyrightText found in the metadata
+        const copyrightText = this.metadata?.copyrightText as string | undefined;
+        const attributions = layerConfig.getAttributions();
+        if (copyrightText && !attributions.includes(copyrightText)) {
+          // Add it
+          attributions.push(copyrightText);
+          layerConfig.setAttributions(attributions);
+        }
+      }
+    });
+
     // Redirect to overridable method
     this.onValidateListOfLayerEntryConfig(listOfLayerEntryConfig);
   }
 
   /**
    * Overridable method to validate the configuration of the layer entries to ensure that each layer is correctly defined.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entries configuration to validate.
    */
   protected onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     // Loop on each layer entry config
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+    listOfLayerEntryConfig.forEach((layerConfig) => {
       // If is a group layer
       if (layerEntryIsGroupLayer(layerConfig)) {
         // Set the layer status to processing
@@ -433,7 +364,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Validates the configuration of the layer entries to ensure that each layer is correctly defined.
-   * @param layerConfig - The layer entry config to validate
+   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate
    */
   validateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void {
     // Set the layer status to processing
@@ -552,12 +483,6 @@ export abstract class AbstractGeoViewLayer {
    */
   async #processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     try {
-      // If metadata was set
-      if (this.metadata) {
-        // Set the service metadata
-        layerConfig.setServiceMetadata(this.metadata);
-      }
-
       // If no errors already happened on the layer path being processed
       if (layerConfig.layerStatus !== 'error') {
         // Process and, yes, keep the await here, because we want to make extra sure the onProcessLayerMetadata is
@@ -878,6 +803,34 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
+   * @param {LayerEntryRegisterInitEvent} event The event to emit
+   */
+  // TODO: Try to make this function private/protected. Public for now in this refactoring..
+  emitLayerEntryRegisterInit(event: LayerEntryRegisterInitEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerEntryRegisterInitHandlers, event);
+  }
+
+  /**
+   * Registers a layer entry config processed event handler.
+   * @param {LayerEntryRegisterInitDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLayerEntryRegisterInit(callback: LayerEntryRegisterInitDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerEntryRegisterInitHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer entry config processed event handler.
+   * @param {LayerEntryRegisterInitDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLayerEntryRegisterInit(callback: LayerEntryRegisterInitDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerEntryRegisterInitHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
    * @param {LayerEntryProcessedEvent} event The event to emit
    * @private
    */
@@ -965,6 +918,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {LayerCreationEvent} event The event to emit
    * @private
    */
+  // TODO: Rename this event to emitLayerGroupCreation
   protected emitLayerCreation(event: LayerCreationEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerCreationHandlers, event);
@@ -1106,6 +1060,19 @@ export type VisibleChangedEvent = {
   layerPath: string;
   visible: boolean;
 };
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerEntryRegisterInitEvent = {
+  // The configuration associated with the layer entry processed
+  config: ConfigBaseClass;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerEntryRegisterInitDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerEntryRegisterInitEvent, void>;
 
 /**
  * Define an event for the delegate

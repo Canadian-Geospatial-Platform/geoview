@@ -19,6 +19,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   declare source: never;
 
   /** The list of layer entry configurations to use from the GeoView layer group. */
+  // TODO: Refactor - Try to type this as ConfigBaseClass[] instead of TypeLayerEntryConfig[]
   listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
 
   /**

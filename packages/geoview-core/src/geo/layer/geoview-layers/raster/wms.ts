@@ -52,11 +52,10 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * Constructs a WMS Layer configuration processor.
-   * @param {string} mapId the id of the map
    * @param {TypeWMSLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeWMSLayerConfig, fullSubLayers: boolean) {
-    super(CONST_LAYER_TYPES.WMS, layerConfig, mapId);
+  constructor(layerConfig: TypeWMSLayerConfig, fullSubLayers: boolean) {
+    super(CONST_LAYER_TYPES.WMS, layerConfig);
     this.WMSStyles = [];
     this.fullSubLayers = fullSubLayers;
   }
@@ -597,8 +596,8 @@ export class WMS extends AbstractGeoViewRaster {
       subLayerEntryConfig.layerName = subLayer.Title as string;
       newListOfLayerEntryConfig.push(subLayerEntryConfig as TypeLayerEntryConfig);
 
-      // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
-      this.getMapViewer().layer.registerLayerConfigInit(subLayerEntryConfig);
+      // Alert that we want to register an extra layer entry
+      this.emitLayerEntryRegisterInit({ config: subLayerEntryConfig });
 
       // If we don't want all sub layers (simulating the 'Private element not on object' error we had for long time)
       if (!this.fullSubLayers) {

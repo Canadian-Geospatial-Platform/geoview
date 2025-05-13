@@ -47,12 +47,10 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
 export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Constructs a XYZTiles Layer configuration processor.
-   *
-   * @param {string} mapId the id of the map
    * @param {TypeXYZTilesConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeXYZTilesConfig) {
-    super(CONST_LAYER_TYPES.XYZ_TILES, layerConfig, mapId);
+  constructor(layerConfig: TypeXYZTilesConfig) {
+    super(CONST_LAYER_TYPES.XYZ_TILES, layerConfig);
   }
 
   /**

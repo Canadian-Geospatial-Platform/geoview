@@ -50,13 +50,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
   /**
    * Constructs an EsriDynamic Layer configuration processor.
-   * @param {string} mapId The id of the map.
    * @param {TypeEsriDynamicLayerConfig} layerConfig The layer configuration.
    */
-  constructor(mapId: string, layerConfig: TypeEsriDynamicLayerConfig) {
+  constructor(layerConfig: TypeEsriDynamicLayerConfig) {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
-    super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig, mapId);
+    super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig);
   }
 
   /**

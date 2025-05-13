@@ -42,12 +42,10 @@ export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 
 export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Constructs a OgcFeature Layer configuration processor.
-   *
-   * @param {string} mapId the id of the map
    * @param {TypeOgcFeatureLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeOgcFeatureLayerConfig) {
-    super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig, mapId);
+  constructor(layerConfig: TypeOgcFeatureLayerConfig) {
+    super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig);
   }
 
   /**
