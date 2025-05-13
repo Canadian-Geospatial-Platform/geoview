@@ -171,7 +171,7 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({ featureInfoList
   const { initLightBox, LightBoxComponent } = useLightBox();
 
   // Remove last item who is the internall geoviewID field
-  if (featureInfoList[featureInfoList.length - 1].alias === 'geoviewID') featureInfoList.pop();
+  if (featureInfoList.length > 0 && featureInfoList[featureInfoList.length - 1].alias === 'geoviewID') featureInfoList.pop();
 
   return (
     <Box sx={sxClasses.boxContainerFeatureInfo}>

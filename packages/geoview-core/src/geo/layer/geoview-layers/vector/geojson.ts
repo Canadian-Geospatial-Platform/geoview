@@ -102,11 +102,15 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
+    // If metadata was previously found
     if (this.metadata) {
+      // Search for the layer metadata
       const layerMetadataFound = this.#recursiveSearch(
         `${layerConfig.layerId}${layerConfig.layerIdExtension ? `.${layerConfig.layerIdExtension}` : ''}`,
         Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
       ) as VectorLayerEntryConfig;
+
+      // If the layer metadata was found
       if (layerMetadataFound) {
         // eslint-disable-next-line no-param-reassign
         layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
