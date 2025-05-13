@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>World of Maps - Canadian Geospatial Platform Viewer</title>
+    <title>EGS - Canadian Geospatial Platform Viewer</title>
     <link rel="shortcut icon" href="./favicon.ico" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="msapplication-config" content="./img/browserconfig.xml" />
@@ -22,7 +22,7 @@
           <tr>
             <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
             <td class="header-title">
-              <h1><strong>World of Maps - NTS Search Demo</strong></h1>
+              <h1><strong>EGS Demo</strong></h1>
             </td>
           </tr>
           <tr>
@@ -33,16 +33,14 @@
       <table>
         <tbody>
           <tr>
-            <td><p>Demonstration of World of Maps - NTS Search</p></td>
+            <td><p>Demonstration of EGS Floods map</p></td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <a href="https://www.worldofmaps.com/topo.cfm">Original RAMP NTS Search</a><br />
-
     <div class="map-title-holder">
-      <h4 id="Hmap1">Water</h4>
+      <h4 id="Hmap1">Floods English</h4>
     </div>
     <button class="collapsible active">Layers Status</button>
     <pre id="Hmap1-state" class="panel map-title-holder"></pre>
@@ -63,16 +61,26 @@
           },
           'listOfGeoviewLayerConfig': [
             {
-              'geoviewLayerId': 'LYR1',
+              'geoviewLayerId': 'FloodLYR',
               'geoviewLayerName': 'Flood Products Current Year',
               'metadataAccessPath': 'https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Flood_Inondation/EGS_Flood_Product_Current_en/MapServer',
-              'geoviewLayerType': 'esriDynamic'
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
             },
             {
-              'geoviewLayerId': 'LYR1',
+              'geoviewLayerId': 'IceLYR',
               'geoviewLayerName': 'River Ice Current Year',
               'metadataAccessPath': 'https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Ice_Glace/EGS_RiverIce_Product_Current_FP_en/MapServer',
-              'geoviewLayerType': 'esriDynamic'
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
             }
           ]
         },
@@ -94,6 +102,69 @@
         }"
     ></div>
 
+    <div class="map-title-holder">
+      <h4 id="Hmap2">Floods French</h4>
+    </div>
+    <button class="collapsible active">Layers Status</button>
+    <pre id="Hmap2-state" class="panel map-title-holder"></pre>
+    <div
+      id="map2"
+      class="geoview-map"
+      data-lang="fr"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'FloodLYR',
+              'geoviewLayerName': 'Inondations – Année courante',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Flood_Inondation/EGS_Flood_Product_Current_fr/MapServer',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'IceLYR',
+              'geoviewLayerName': 'Glace de rivière - Année courante',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Ice_Glace/EGS_RiverIce_Product_Current_FP_fr/MapServer',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['north-arrow', 'overview-map'],
+        'overviewMap': {'hideOnZoom': 6},
+        'navBar': ['zoom', 'fullscreen', 'home', 'location'],
+        'appBar': {
+          'tabs': {
+            'core': ['geolocator', 'legend']
+          }
+        },
+        'footerBar': {
+          'tabs': {
+            'core': ['layers', 'details', 'data-table', 'time-slider']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+        }"
+    ></div>
+  
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
