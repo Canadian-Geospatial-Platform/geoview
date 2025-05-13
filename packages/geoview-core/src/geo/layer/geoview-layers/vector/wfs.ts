@@ -48,11 +48,10 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Constructs a WFS Layer configuration processor.
-   * @param {string} mapId the id of the map
    * @param {TypeWFSLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeWFSLayerConfig) {
-    super(CONST_LAYER_TYPES.WFS, layerConfig, mapId);
+  constructor(layerConfig: TypeWFSLayerConfig) {
+    super(CONST_LAYER_TYPES.WFS, layerConfig);
   }
 
   /**

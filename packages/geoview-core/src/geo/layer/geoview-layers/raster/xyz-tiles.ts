@@ -47,12 +47,10 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
 export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Constructs a XYZTiles Layer configuration processor.
-   *
-   * @param {string} mapId the id of the map
    * @param {TypeXYZTilesConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeXYZTilesConfig) {
-    super(CONST_LAYER_TYPES.XYZ_TILES, layerConfig, mapId);
+  constructor(layerConfig: TypeXYZTilesConfig) {
+    super(CONST_LAYER_TYPES.XYZ_TILES, layerConfig);
   }
 
   /**
@@ -165,40 +163,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /**
-   * Creates an XYZ source from a layer config.
-   * @param {XYZTilesLayerEntryConfig} layerConfig - The configuration for the XYZ layer.
-   * @returns A fully configured XYZ source.
-   * @throws If required config fields like dataAccessPath are missing.
-   */
-  createXYZSource(layerConfig: XYZTilesLayerEntryConfig): XYZ {
-    const { source } = layerConfig;
-
-    if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
-    }
-
-    const sourceOptions: SourceOptions = {
-      url: source.dataAccessPath,
-      attributions: this.getAttributions(),
-      crossOrigin: source.crossOrigin ?? 'Anonymous',
-      projection: source.projection ? `EPSG:${source.projection}` : undefined,
-    };
-
-    if (source.tileGrid) {
-      const tileGridOptions: TileGridOptions = {
-        origin: source.tileGrid.origin,
-        resolutions: source.tileGrid.resolutions as number[],
-        tileSize: source.tileGrid.tileSize,
-        extent: source.tileGrid.extent,
-      };
-
-      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
-    }
-
-    return new XYZ(sourceOptions);
-  }
-
-  /**
    * Creates a configuration object for a XYZTiles layer.
    * This function constructs a `TypeXYZTilesConfig` object that describes an XYZTiles layer
    * and its associated entry configurations based on the provided parameters.
@@ -239,6 +203,40 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Creates an XYZ source from a layer config.
+   * @param {XYZTilesLayerEntryConfig} layerConfig - The configuration for the XYZ layer.
+   * @returns A fully configured XYZ source.
+   * @throws If required config fields like dataAccessPath are missing.
+   */
+  static createXYZSource(layerConfig: XYZTilesLayerEntryConfig): XYZ {
+    const { source } = layerConfig;
+
+    if (!source?.dataAccessPath) {
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+    }
+
+    const sourceOptions: SourceOptions = {
+      url: source.dataAccessPath,
+      attributions: layerConfig.getAttributions(),
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
+      projection: source.projection ? `EPSG:${source.projection}` : undefined,
+    };
+
+    if (source.tileGrid) {
+      const tileGridOptions: TileGridOptions = {
+        origin: source.tileGrid.origin,
+        resolutions: source.tileGrid.resolutions as number[],
+        tileSize: source.tileGrid.tileSize,
+        extent: source.tileGrid.extent,
+      };
+
+      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
+    }
+
+    return new XYZ(sourceOptions);
   }
 }
 

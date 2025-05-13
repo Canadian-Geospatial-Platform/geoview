@@ -639,7 +639,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new EsriDynamic('mapId', layerConfig);
+    const myLayer = new EsriDynamic(layerConfig);
 
     // Process it
     return ConfigApi.#processConfig(myLayer);
@@ -661,7 +661,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new EsriImage('mapId', layerConfig);
+    const myLayer = new EsriImage(layerConfig);
 
     // Process it
     return ConfigApi.#processConfig(myLayer);
@@ -684,7 +684,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new ImageStatic('mapId', layerConfig);
+    const myLayer = new ImageStatic(layerConfig);
 
     // Process it
     return ConfigApi.#processConfig(myLayer);
@@ -707,7 +707,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new VectorTiles('mapId', layerConfig);
+    const myLayer = new VectorTiles(layerConfig);
 
     // Process it
     return ConfigApi.#processConfig(myLayer);
@@ -732,7 +732,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new WMS('mapId', layerConfig, false);
+    const myLayer = new WMS(layerConfig, false);
 
     // Process it
     return ConfigApi.#processConfig(myLayer);
@@ -755,7 +755,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new XYZTiles('mapId', layerConfig);
+    const myLayer = new XYZTiles(layerConfig);
 
     // Process it
     return ConfigApi.#processConfig(myLayer);
@@ -778,7 +778,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new CSV('mapId', layerConfig);
+    const myLayer = new CSV(layerConfig);
 
     // Process it
     return ConfigApi.#processConfig(myLayer);
@@ -801,7 +801,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new EsriFeature('mapId', layerConfig);
+    const myLayer = new EsriFeature(layerConfig);
 
     // Process it
     return ConfigApi.#processConfig(myLayer);
@@ -824,7 +824,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new GeoJSON('mapId', layerConfig);
+    const myLayer = new GeoJSON(layerConfig);
 
     // Process it
     return ConfigApi.#processConfig(myLayer);
@@ -847,7 +847,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new OgcFeature('mapId', layerConfig);
+    const myLayer = new OgcFeature(layerConfig);
 
     // Process it
     return ConfigApi.#processConfig(myLayer);
@@ -870,7 +870,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new WFS('mapId', layerConfig);
+    const myLayer = new WFS(layerConfig);
 
     // Process it
     return ConfigApi.#processConfig(myLayer);

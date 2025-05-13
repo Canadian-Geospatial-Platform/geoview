@@ -52,11 +52,10 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * Constructs a WMS Layer configuration processor.
-   * @param {string} mapId the id of the map
    * @param {TypeWMSLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeWMSLayerConfig, fullSubLayers: boolean) {
-    super(CONST_LAYER_TYPES.WMS, layerConfig, mapId);
+  constructor(layerConfig: TypeWMSLayerConfig, fullSubLayers: boolean) {
+    super(CONST_LAYER_TYPES.WMS, layerConfig);
     this.WMSStyles = [];
     this.fullSubLayers = fullSubLayers;
   }
@@ -225,11 +224,11 @@ export class WMS extends AbstractGeoViewRaster {
 
     // If found
     if (layerCapabilities) {
-      const attributions = this.getAttributions();
+      const attributions = layerConfig.getAttributions();
       if (layerCapabilities.Attribution && !attributions.includes(layerCapabilities.Attribution?.Title as string)) {
         // Add it
         attributions.push(layerCapabilities.Attribution.Title as string);
-        this.setAttributions(attributions);
+        layerConfig.setAttributions(attributions);
       }
 
       // eslint-disable-next-line no-param-reassign
@@ -350,7 +349,7 @@ export class WMS extends AbstractGeoViewRaster {
         LAYERS: layerConfig.layerId,
         STYLES: styleToUse,
       },
-      attributions: this.getAttributions(),
+      attributions: layerConfig.getAttributions(),
       serverType: source.serverType,
       crossOrigin: source.crossOrigin ?? 'Anonymous',
     };
@@ -597,8 +596,8 @@ export class WMS extends AbstractGeoViewRaster {
       subLayerEntryConfig.layerName = subLayer.Title as string;
       newListOfLayerEntryConfig.push(subLayerEntryConfig as TypeLayerEntryConfig);
 
-      // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
-      this.getMapViewer().layer.registerLayerConfigInit(subLayerEntryConfig);
+      // Alert that we want to register an extra layer entry
+      this.emitLayerEntryRegisterInit({ config: subLayerEntryConfig });
 
       // If we don't want all sub layers (simulating the 'Private element not on object' error we had for long time)
       if (!this.fullSubLayers) {

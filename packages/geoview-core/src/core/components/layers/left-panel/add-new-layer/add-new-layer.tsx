@@ -231,7 +231,7 @@ export function AddNewLayer(): JSX.Element {
         listOfLayerEntryConfig: [] as OgcWmsLayerEntryConfig[],
         metadataAccessPath: accessPath,
       } as TypeWMSLayerConfig;
-      const wmsGeoviewLayerInstance = new WmsGeoviewClass(mapId, wmsGeoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
+      const wmsGeoviewLayerInstance = new WmsGeoviewClass(wmsGeoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
       // Synchronize the geoviewLayerId.
       wmsGeoviewLayerConfig.geoviewLayerId = wmsGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(wmsGeoviewLayerInstance);
@@ -308,7 +308,7 @@ export function AddNewLayer(): JSX.Element {
         listOfLayerEntryConfig: [] as WfsLayerEntryConfig[],
         metadataAccessPath: layerURL,
       } as TypeWFSLayerConfig;
-      const wfsGeoviewLayerInstance = new WfsGeoviewClass(mapId, wfsGeoviewLayerConfig);
+      const wfsGeoviewLayerInstance = new WfsGeoviewClass(wfsGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
       wfsGeoviewLayerConfig.geoviewLayerId = wfsGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(wfsGeoviewLayerInstance);
@@ -353,7 +353,7 @@ export function AddNewLayer(): JSX.Element {
         listOfLayerEntryConfig: [] as OgcFeatureLayerEntryConfig[],
         metadataAccessPath: layerURL.split('collections')[0],
       } as TypeOgcFeatureLayerConfig;
-      const ogcFeatureInstance = new OgcFeature(mapId, ogcFeatureGeoviewLayerConfig);
+      const ogcFeatureInstance = new OgcFeature(ogcFeatureGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
       ogcFeatureGeoviewLayerConfig.geoviewLayerId = ogcFeatureInstance.geoviewLayerId;
       setGeoviewLayerInstance(ogcFeatureInstance);
@@ -484,8 +484,8 @@ export function AddNewLayer(): JSX.Element {
             } as TypeEsriFeatureLayerConfig);
       const esriGeoviewLayerInstance =
         type === ESRI_DYNAMIC
-          ? new EsriDynamic(mapId, esriGeoviewLayerConfig as TypeEsriDynamicLayerConfig)
-          : new EsriFeature(mapId, esriGeoviewLayerConfig as TypeEsriFeatureLayerConfig);
+          ? new EsriDynamic(esriGeoviewLayerConfig as TypeEsriDynamicLayerConfig)
+          : new EsriFeature(esriGeoviewLayerConfig as TypeEsriFeatureLayerConfig);
       // Synchronize the geoviewLayerId.
       esriGeoviewLayerConfig.geoviewLayerId = esriGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(esriGeoviewLayerInstance);
@@ -555,7 +555,7 @@ export function AddNewLayer(): JSX.Element {
         listOfLayerEntryConfig: [] as EsriImageLayerEntryConfig[],
         metadataAccessPath: layerURL,
       } as TypeEsriImageLayerConfig;
-      const esriImageGeoviewLayerInstance = new EsriImage(mapId, esriImageGeoviewLayerConfig);
+      const esriImageGeoviewLayerInstance = new EsriImage(esriImageGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
       esriImageGeoviewLayerConfig.geoviewLayerId = esriImageGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(esriImageGeoviewLayerInstance);
@@ -600,7 +600,7 @@ export function AddNewLayer(): JSX.Element {
         geoviewLayerType: XYZ_TILES,
         listOfLayerEntryConfig: [] as XYZTilesLayerEntryConfig[],
       } as TypeXYZTilesConfig;
-      const xyzGeoviewLayerInstance = new XYZTiles(mapId, xyzGeoviewLayerConfig);
+      const xyzGeoviewLayerInstance = new XYZTiles(xyzGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
       xyzGeoviewLayerConfig.geoviewLayerId = xyzGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(xyzGeoviewLayerInstance);
@@ -641,7 +641,7 @@ export function AddNewLayer(): JSX.Element {
         geoviewLayerType: CSV,
         listOfLayerEntryConfig: [] as CsvLayerEntryConfig[],
       } as TypeCSVLayerConfig;
-      const csvGeoviewLayerInstance = new CsvGeoviewClass(mapId, csvGeoviewLayerConfig);
+      const csvGeoviewLayerInstance = new CsvGeoviewClass(csvGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
       csvGeoviewLayerConfig.geoviewLayerId = csvGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(csvGeoviewLayerInstance);
@@ -683,7 +683,7 @@ export function AddNewLayer(): JSX.Element {
           listOfLayerEntryConfig: [] as GeoJSONLayerEntryConfig[],
           metadataAccessPath: layerURL,
         } as TypeGeoJSONLayerConfig;
-        const geojsonGeoviewLayerInstance = new GeoJSON(mapId, geojsonGeoviewLayerConfig);
+        const geojsonGeoviewLayerInstance = new GeoJSON(geojsonGeoviewLayerConfig);
         // Synchronize the geoviewLayerId.
         geojsonGeoviewLayerConfig.geoviewLayerId = geojsonGeoviewLayerInstance.geoviewLayerId;
         setGeoviewLayerInstance(geojsonGeoviewLayerInstance);
@@ -708,7 +708,7 @@ export function AddNewLayer(): JSX.Element {
           geoviewLayerType: GEOJSON,
           listOfLayerEntryConfig: [] as GeoJSONLayerEntryConfig[],
         } as TypeGeoJSONLayerConfig;
-        const geojsonGeoviewLayerInstance = new GeoJSON(mapId, geojsonGeoviewLayerConfig);
+        const geojsonGeoviewLayerInstance = new GeoJSON(geojsonGeoviewLayerConfig);
         // Synchronize the geoviewLayerId.
         geojsonGeoviewLayerConfig.geoviewLayerId = geojsonGeoviewLayerInstance.geoviewLayerId;
         setGeoviewLayerInstance(geojsonGeoviewLayerInstance);
