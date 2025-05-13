@@ -18,8 +18,8 @@ import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes
 import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
+  LayerEntryConfigNoLayerProvidedError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
@@ -114,7 +114,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       }
 
       // metadataLayerConfigFound can not be undefined because we have already validated the config exist
-      this.setLayerMetadata(layerConfig.layerPath, toJsonObject(metadataLayerConfigFound));
+      layerConfig.setLayerMetadata(toJsonObject(metadataLayerConfigFound));
       // eslint-disable-next-line no-param-reassign
       layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound!.source);
       // eslint-disable-next-line no-param-reassign
@@ -158,10 +158,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as TileLayer<XYZ>;
-    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
-
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);

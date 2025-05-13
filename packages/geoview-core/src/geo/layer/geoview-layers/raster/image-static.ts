@@ -14,10 +14,10 @@ import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-clas
 import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
+  LayerEntryConfigNoLayerProvidedError,
   LayerEntryConfigParameterExtentNotDefinedInSourceError,
   LayerEntryConfigParameterProjectionNotDefinedInSourceError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -96,10 +96,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<Static>;
-    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
-
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);

@@ -4,6 +4,8 @@ import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+import { Geometry } from 'ol/geom';
+import VectorLayer from 'ol/layer/Vector';
 import { Feature } from 'ol';
 
 import initSqlJs, { SqlValue } from 'sql.js';
@@ -30,6 +32,7 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
 import { logger } from '@/core/utils/logger';
 import { LayerNotCreatedError } from '@/core/exceptions/layer-exceptions';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { LayerEntryConfigNoLayerProvidedError } from '@/core/exceptions/layer-entry-config-exceptions';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
@@ -224,12 +227,18 @@ export class GeoPackage extends AbstractGeoViewVector {
       GeoPackage.#processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as VectorLayerEntryConfig);
     }
 
-    const vectorLayer = this.createVectorLayer(layerConfig);
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig });
 
-    // Set the layer status to processed
-    layerConfig.setLayerStatusProcessed();
+    // If any response
+    let olLayer: VectorLayer<VectorSource<Feature<Geometry>>> | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as VectorLayer<VectorSource<Feature<Geometry>>>;
+    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
 
-    return Promise.resolve(vectorLayer);
+    // Return the OpenLayer layer
+    return Promise.resolve(olLayer);
   }
 
   /**

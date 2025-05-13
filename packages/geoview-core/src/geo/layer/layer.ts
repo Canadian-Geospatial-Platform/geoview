@@ -952,10 +952,6 @@ export class LayerApi {
         event.config
       );
 
-      // Keep a reference
-      // This is tempting to put in the onLayerRequesting handler, but this one here also traps the LayerGroups
-      this.#olLayers[event.config.layerPath] = event.layer;
-
       // Create the corresponding GVLayer. If group layer was created
       if (event.layer instanceof LayerGroup && event.config instanceof GroupLayerEntryConfig) {
         // Create the GV Group Layer
@@ -1043,59 +1039,6 @@ export class LayerApi {
    * @returns A new GV Layer which is kept track of in LayerApi and initialized
    */
   #createGVLayer(mapId: string, geoviewLayer: AbstractGeoViewLayer, layerConfig: ConfigBaseClass): AbstractGVLayer | undefined {
-    // Get the metadata and the time dimension information as processed
-    // GV: We use the old abstractGeoviewLayer format as the GV layer is not created yet
-    const { metadata } = geoviewLayer;
-    const layerMetadata = geoviewLayer.getLayerMetadata(layerConfig.layerPath);
-    const timeDimension = geoviewLayer.getTemporalDimension(layerConfig.layerPath);
-    const style = geoviewLayer.getStyle(layerConfig.layerPath);
-
-    // HACK: INJECT CONFIGURATION STUFF PRETENDNG THEY WERE PROCESSED
-    // GV Keep this code commented in the source base for now
-    // if (layerConfig.layerPath === 'esriFeatureLYR5/0') {
-    //   metadata = LayerMockup.configTop100Metadata();
-    // } else if (layerConfig.layerPath === 'nonmetalmines/5') {
-    //   metadata = LayerMockup.configNonMetalMetadata();
-    // } else if (layerConfig.layerPath === 'airborne_radioactivity/1') {
-    //   metadata = LayerMockup.configAirborneMetadata();
-    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/polygons.json') {
-    //   metadata = LayerMockup.configPolygonsMetadata();
-    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/lines.json') {
-    //   metadata = LayerMockup.configLinesMetadata();
-    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/icon_points.json') {
-    //   metadata = LayerMockup.configIconPointsMetadata();
-    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points.json') {
-    //   metadata = LayerMockup.configPointsMetadata();
-    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_1.json') {
-    //   metadata = LayerMockup.configPoints1Metadata();
-    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_2.json') {
-    //   metadata = LayerMockup.configPoints2Metadata();
-    // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_3.json') {
-    //   metadata = LayerMockup.configPoints3Metadata();
-    // } else if (layerConfig.layerPath === 'historical-flood/0') {
-    //   metadata = LayerMockup.configHistoricalFloodMetadata();
-    //   timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-    // } else if (layerConfig.layerPath === 'uniqueValueId/1') {
-    //   metadata = LayerMockup.configCESIMetadata();
-    //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-    // } else if (layerConfig.layerPath === 'esriFeatureLYR1/0') {
-    //   metadata = LayerMockup.configTemporalTestBedMetadata();
-    //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-    // } else if (layerConfig.layerPath === 'wmsLYR1-spatiotemporel/RADAR_1KM_RSNO') {
-    //   metadata = LayerMockup.configRadarMetadata();
-    //   timeDimension = LayerMockup.configRadarTemporalDimension();
-    // } else if (layerConfig.layerPath === 'MSI/msi-94-or-more') {
-    //   metadata = LayerMockup.configMSIMetadata();
-    //   timeDimension = LayerMockup.configMSITemporalDimension();
-    // }
-
-    // If good config
-    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
-      // If any metadata
-      if (metadata) layerConfig.setServiceMetadata(metadata);
-      if (layerMetadata) layerConfig.setLayerMetadata(layerMetadata);
-    }
-
     // Create the right GV Layer based on the OLLayer and config type
     let gvLayer;
     if (geoviewLayer instanceof EsriDynamic && layerConfig instanceof EsriDynamicLayerEntryConfig) {
@@ -1148,12 +1091,7 @@ export class LayerApi {
     if (gvLayer) {
       // Keep track
       this.#gvLayers[layerConfig.layerPath] = gvLayer;
-
-      // If any time dimension to inject
-      if (timeDimension) gvLayer.setTemporalDimension(timeDimension);
-
-      // If any style to inject
-      if (style) gvLayer.setStyle(style);
+      this.#olLayers[layerConfig.layerPath] = gvLayer.getOLLayer();
 
       // Initialize the layer, triggering the loaded/error status
       gvLayer.init();
@@ -1184,6 +1122,7 @@ export class LayerApi {
 
     // Keep track
     this.#gvLayers[layerConfig.layerPath] = gvGroupLayer;
+    this.#olLayers[layerConfig.layerPath] = olLayerGroup;
 
     // Set in visible range property for all newly added layers
     this.#setLayerInVisibleRange(gvGroupLayer, layerConfig);

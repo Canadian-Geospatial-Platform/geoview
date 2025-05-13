@@ -19,9 +19,11 @@ import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
-import { LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError } from '@/core/exceptions/layer-entry-config-exceptions';
+import {
+  LayerEntryConfigNoLayerProvidedError,
+  LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError,
+} from '@/core/exceptions/layer-entry-config-exceptions';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -125,10 +127,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as VectorTileLayer<VectorTileSource>;
-    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
-
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
 
     // TODO: Refactor - Layers refactoring. What is this doing? See how we can do this in the new layers. Can it be done before?
     const resolutions = olLayer.getSource()?.getTileGrid()?.getResolutions();

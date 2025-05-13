@@ -25,9 +25,11 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
-import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
+import {
+  LayerEntryConfigNoLayerProvidedError,
+  LayerEntryConfigVectorSourceURLNotDefinedError,
+} from '@/core/exceptions/layer-entry-config-exceptions';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -48,11 +50,18 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected override onProcessOneLayerEntry(layerConfig: VectorLayerEntryConfig): Promise<BaseLayer> {
     // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
-    // Create the vector layer
-    const vectorLayer = this.createVectorLayer(layerConfig);
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig });
+
+    // If any response
+    let olLayer: VectorLayer<VectorSource<Feature<Geometry>>> | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as VectorLayer<VectorSource<Feature<Geometry>>>;
+    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
 
     // Return the OpenLayer layer
-    return Promise.resolve(vectorLayer);
+    return Promise.resolve(olLayer);
   }
 
   /**
@@ -156,35 +165,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /**
-   * Creates a vector layer. The layer has in its properties a reference to the layer configuration used at creation time.
-   * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
-   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration used by the source.
-   * @param {VectorSource} vectorSource - The source configuration for the vector layer.
-   * @returns {VectorSource<Feature<Geometry>>} The vector layer created.
-   */
-  protected createVectorLayer(layerConfig: VectorLayerEntryConfig): VectorLayer<VectorSource<Feature<Geometry>>> {
-    // GV Time to request an OpenLayers layer!
-    // TODO: There may be some additional enhancements to be done now that we can notice how emitLayerRequesting and emitLayerCreation are getting "close" to each other.
-    // TO.DOCONT: This whole will be removed when migration to config api... do we invest time in it?
-    const requestResult = this.emitLayerRequesting({ config: layerConfig });
-
-    // If any response
-    let olLayer: VectorLayer<VectorSource<Feature<Geometry>>> | undefined;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as VectorLayer<VectorSource<Feature<Geometry>>>;
-    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
-
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
-
-    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
-    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
-    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
-    return olLayer;
-  }
-
-  /**
    * Parses raw response text into OpenLayers features based on the layer's schema type.
    * Handles CSV, ESRI feature services, and default formats supported by the vector source.
    * @param {string} url - The URL used to retrieve the data (relevant for ESRI_FEATURE schema).
@@ -218,7 +198,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const { count } = JSON.parse(responseText);
 
         // Determine the maximum number of records allowed
-        const maxRecords = this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount;
+        const maxRecords = layerConfig.getLayerMetadata()?.maxRecordCount;
 
         // Retrieve the full ESRI feature data
         const esriData = await this.#getEsriFeatures(url, count, maxRecords as number | undefined);

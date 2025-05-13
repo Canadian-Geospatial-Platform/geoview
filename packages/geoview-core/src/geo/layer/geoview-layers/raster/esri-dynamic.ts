@@ -17,10 +17,10 @@ import {
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { logger } from '@/core/utils/logger';
-import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { deepMergeObjects } from '@/core/utils/utilities';
+import { LayerEntryConfigNoLayerProvidedError } from '@/core/exceptions/layer-entry-config-exceptions';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview config section
@@ -99,10 +99,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
-    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
-
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);

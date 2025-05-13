@@ -54,9 +54,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig;
 
-  /** Layer temporal dimension */
-  #layerTemporalDimension?: TimeDimension;
-
   /** Date format object used to translate server to ISO format and ISO to server format */
   #serverDateFragmentsOrder?: TypeDateFragments;
 
@@ -212,15 +209,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {TimeDimension | undefined} The temporal dimension associated to the layer or undefined.
    */
   getTemporalDimension(): TimeDimension | undefined {
-    return this.#layerTemporalDimension;
-  }
-
-  /**
-   * Sets the temporal dimension for the layer.
-   * @param {TimeDimension} temporalDimension - The value to assign to the layer temporal dimension property.
-   */
-  setTemporalDimension(temporalDimension: TimeDimension): void {
-    this.#layerTemporalDimension = temporalDimension;
+    return this.getLayerConfig().getTemporalDimension();
   }
 
   /**

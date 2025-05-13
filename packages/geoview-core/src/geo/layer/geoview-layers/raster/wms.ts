@@ -21,10 +21,11 @@ import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { CancelledError, NetworkError, NotImplementedError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
+import { CancelledError, NetworkError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigLayerIdNotFoundError,
+  LayerEntryConfigNoLayerProvidedError,
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -220,7 +221,7 @@ export class WMS extends AbstractGeoViewRaster {
     const layerCapabilities = this.getLayerCapabilities(layerConfig.layerId)!;
 
     // Set the layer metadata (capabilities)
-    this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);
+    layerConfig.setLayerMetadata(layerCapabilities);
 
     // If found
     if (layerCapabilities) {
@@ -267,7 +268,7 @@ export class WMS extends AbstractGeoViewRaster {
 
         // If a temporal dimension was found
         if (temporalDimension) {
-          this.setTemporalDimension(layerConfig.layerPath, DateMgt.createDimensionFromOGC(temporalDimension));
+          layerConfig.setTemporalDimension(DateMgt.createDimensionFromOGC(temporalDimension));
         }
       }
     }
@@ -290,10 +291,7 @@ export class WMS extends AbstractGeoViewRaster {
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
       olLayer = requestResult[0] as ImageLayer<ImageWMS>;
-    } else throw new NotImplementedError("Layer was requested by the framework, but never received. Shouldn't happen by design.");
-
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
