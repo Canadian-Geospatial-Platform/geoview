@@ -12,6 +12,7 @@ import {
   TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { AbortError } from '@/core/exceptions/core-exceptions';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -174,6 +175,11 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
             // Use the response to possibly patch the layer config metadata
             if (arrayOfRecords.length) this.#patchMissingMetadataIfNecessary(layerPath, arrayOfRecords[0]);
+
+            if (!AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId())) {
+              // eslint-disable-next-line no-param-reassign
+              arrayOfRecords = arrayOfRecords.filter((record) => record.featureIcon);
+            }
 
             // Keep the features retrieved
             this.resultSet[layerPath].features = arrayOfRecords;
