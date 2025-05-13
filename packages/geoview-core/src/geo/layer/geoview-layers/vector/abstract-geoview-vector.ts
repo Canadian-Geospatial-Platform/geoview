@@ -1,12 +1,11 @@
 import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
-import { VectorImage as VectorLayer } from 'ol/layer';
 import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
-import { Geometry, Point } from 'ol/geom';
+import { Point } from 'ol/geom';
 import { Extent } from 'ol/extent';
 import { getUid } from 'ol/util';
 
@@ -26,10 +25,8 @@ import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { LayerDataAccessPathMandatoryError, LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
-import {
-  LayerEntryConfigNoLayerProvidedError,
-  LayerEntryConfigVectorSourceURLNotDefinedError,
-} from '@/core/exceptions/layer-entry-config-exceptions';
+import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -50,15 +47,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected override onProcessOneLayerEntry(layerConfig: VectorLayerEntryConfig): Promise<BaseLayer> {
     // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig });
+    // Create the GV Layer
+    const layer = this.createGVLayer(layerConfig) as AbstractGVVector;
 
-    // If any response
-    let olLayer: VectorLayer<VectorSource<Feature<Geometry>>> | undefined;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as VectorLayer<VectorSource<Feature<Geometry>>>;
-    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
+    // Cast
+    const olLayer = layer.getOLLayer();
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);

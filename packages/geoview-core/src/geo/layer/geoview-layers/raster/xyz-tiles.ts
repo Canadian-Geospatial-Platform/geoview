@@ -18,9 +18,9 @@ import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes
 import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
-  LayerEntryConfigNoLayerProvidedError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
+import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -148,18 +148,30 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @returns {Promise<TileLayer<XYZ>>} The GeoView raster layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TileLayer<XYZ>> {
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig });
+    // Redirect
+    const layer = this.createGVLayer(layerConfig) as GVXYZTiles;
 
-    // If any response
-    let olLayer: TileLayer<XYZ>;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as TileLayer<XYZ>;
-    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
+    // Cast
+    const olLayer = layer.getOLLayer();
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVXYZTiles} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: XYZTilesLayerEntryConfig): GVXYZTiles {
+    // Create the source
+    const source = XYZTiles.createXYZSource(layerConfig);
+
+    // Create the GV Layer
+    const gvLayer = new GVXYZTiles(source, layerConfig);
+
+    // Return it
+    return gvLayer;
   }
 
   /**

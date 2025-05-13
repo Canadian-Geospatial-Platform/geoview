@@ -14,11 +14,11 @@ import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-clas
 import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
-  LayerEntryConfigNoLayerProvidedError,
   LayerEntryConfigParameterExtentNotDefinedInSourceError,
   LayerEntryConfigParameterProjectionNotDefinedInSourceError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
+import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
@@ -86,18 +86,30 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {Promise<ImageLayer<Static>>} The GeoView raster layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageLayer<Static>> {
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig });
+    // Redirect
+    const layer = this.createGVLayer(layerConfig) as GVImageStatic;
 
-    // If any response
-    let olLayer: ImageLayer<Static>;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as ImageLayer<Static>;
-    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
+    // Cast
+    const olLayer = layer.getOLLayer();
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVImageStatic} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: ImageStaticLayerEntryConfig): GVImageStatic {
+    // Create the source
+    const source = ImageStatic.createImageStaticSource(layerConfig);
+
+    // Create the GV Layer
+    const gvLayer = new GVImageStatic(source, layerConfig);
+
+    // Return it
+    return gvLayer;
   }
 
   /**

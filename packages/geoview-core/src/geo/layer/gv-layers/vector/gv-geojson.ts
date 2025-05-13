@@ -1,6 +1,7 @@
 import VectorSource from 'ol/source/Vector';
 import { GeoJSONObject } from 'ol/format/GeoJSON';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
+import { Projection as OLProjection } from 'ol/proj';
 
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
@@ -15,12 +16,11 @@ import { Projection } from '@/geo/utils/projection';
 export class GVGeoJSON extends AbstractGVVector {
   /**
    * Constructs a GVGeoJSON layer to manage an OpenLayer layer.
-   * @param {string} mapId - The map id
    * @param {VectorSource} olSource - The OpenLayer source.
    * @param {GeoJSONLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olSource: VectorSource, layerConfig: GeoJSONLayerEntryConfig) {
-    super(mapId, olSource, layerConfig);
+  public constructor(olSource: VectorSource, layerConfig: GeoJSONLayerEntryConfig) {
+    super(olSource, layerConfig);
   }
 
   /**
@@ -36,8 +36,9 @@ export class GVGeoJSON extends AbstractGVVector {
    * Overrides the features of a geojson layer with new geojson.
    *
    * @param {GeoJSONObject | string} geojson - The new geoJSON.
+   * @param {OLProjection} projection - The output projection.
    */
-  setGeojsonSource(geojson: GeoJSONObject | string): void {
+  setGeojsonSource(geojson: GeoJSONObject | string, projection: OLProjection): void {
     // Convert string to geoJSON if necessary
     const geojsonObject = typeof geojson === 'string' ? JSON.parse(geojson) : geojson;
 
@@ -45,7 +46,7 @@ export class GVGeoJSON extends AbstractGVVector {
     const dataProjection = geojsonObject.crs?.properties?.name || Projection.PROJECTION_NAMES.LNGLAT;
     const features = new FormatGeoJSON().readFeatures(geojsonObject, {
       dataProjection,
-      featureProjection: this.getMapViewer().getProjection(),
+      featureProjection: projection,
     });
 
     // Get the OL layer

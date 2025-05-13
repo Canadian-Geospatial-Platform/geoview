@@ -13,7 +13,7 @@ import {
 
 import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
-import { LayerEntryConfigNoLayerProvidedError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -52,18 +52,30 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @returns {Promise<ImageLayer<ImageArcGISRest>>} The GeoView raster layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig });
+    // Redirect
+    const layer = this.createGVLayer(layerConfig) as GVEsriImage;
 
-    // If any response
-    let olLayer: ImageLayer<ImageArcGISRest>;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
-    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
+    // Cast
+    const olLayer = layer.getOLLayer();
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVEsriImage} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: EsriImageLayerEntryConfig): GVEsriImage {
+    // Create the source
+    const source = EsriImage.createEsriImageSource(layerConfig);
+
+    // Create the GV Layer
+    const gvLayer = new GVEsriImage(source, layerConfig);
+
+    // Return it
+    return gvLayer;
   }
 
   /**

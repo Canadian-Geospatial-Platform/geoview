@@ -693,7 +693,7 @@ export class ConfigApi {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new VectorTiles(layerConfig);
+    const myLayer = new VectorTiles(layerConfig, 'EPSG:3978');
 
     // Process it
     return ConfigApi.#processConfig(myLayer);

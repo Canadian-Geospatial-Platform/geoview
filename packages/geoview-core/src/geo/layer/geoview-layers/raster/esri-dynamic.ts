@@ -20,7 +20,7 @@ import { logger } from '@/core/utils/logger';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { deepMergeObjects } from '@/core/utils/utilities';
-import { LayerEntryConfigNoLayerProvidedError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview config section
@@ -90,18 +90,30 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {Promise<ImageLayer<ImageArcGISRest>>} The created Open Layer object.
    */
   protected override onProcessOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig });
+    // Redirect
+    const layer = this.createGVLayer(layerConfig) as GVEsriDynamic;
 
-    // If any response
-    let olLayer: ImageLayer<ImageArcGISRest>;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
-    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
+    // Cast
+    const olLayer = layer.getOLLayer();
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVEsriDynamic} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: EsriDynamicLayerEntryConfig): GVEsriDynamic {
+    // Create the source
+    const source = EsriDynamic.createEsriDynamicSource(layerConfig);
+
+    // Create the GV Layer
+    const gvLayer = new GVEsriDynamic(source, layerConfig);
+
+    // Return it
+    return gvLayer;
   }
 
   /**

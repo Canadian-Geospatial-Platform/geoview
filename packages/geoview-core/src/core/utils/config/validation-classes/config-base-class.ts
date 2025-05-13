@@ -219,7 +219,7 @@ export abstract class ConfigBaseClass {
    */
   setLayerStatus(newLayerStatus: TypeLayerStatus): void {
     // Log
-    logger.logDebug('LAYERS STATUS -', this.layerPath, newLayerStatus);
+    logger.logTraceCore('LAYERS STATUS -', this.layerPath, newLayerStatus);
 
     // GV For quick debug, uncomment the line
     // if (newLayerStatus === 'error') debugger;

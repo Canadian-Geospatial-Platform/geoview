@@ -23,6 +23,7 @@ import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
+import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -143,6 +144,20 @@ export class OgcFeature extends AbstractGeoViewVector {
 
     // Call parent
     return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {OgcFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVOGCFeature} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: OgcFeatureLayerEntryConfig): GVOGCFeature {
+    // Create the source
+    const source = this.createVectorSource(layerConfig);
+    // Create the GV Layer
+    const gvLayer = new GVOGCFeature(source, layerConfig);
+    // Return it
+    return gvLayer;
   }
 
   /**

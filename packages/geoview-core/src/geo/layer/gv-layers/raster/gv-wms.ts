@@ -32,12 +32,11 @@ import { NetworkError } from '@/core/exceptions/core-exceptions';
 export class GVWMS extends AbstractGVRaster {
   /**
    * Constructs a GVWMS layer to manage an OpenLayer layer.
-   * @param {string} mapId - The map id
    * @param {ImageWMS} olSource - The OpenLayer source.
    * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig) {
-    super(mapId, olSource, layerConfig);
+  public constructor(olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig) {
+    super(olSource, layerConfig);
 
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageWMS> = {

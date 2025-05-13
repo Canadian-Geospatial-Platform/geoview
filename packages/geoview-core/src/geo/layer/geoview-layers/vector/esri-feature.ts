@@ -21,6 +21,7 @@ import {
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerEntryConfigLayerIdNotFeatureLayerError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { TypeJsonArray } from '@/api/config/types/config-types';
+import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -95,6 +96,20 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // Call parent
     return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVEsriFeature} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: EsriFeatureLayerEntryConfig): GVEsriFeature {
+    // Create the source
+    const source = this.createVectorSource(layerConfig);
+    // Create the GV Layer
+    const gvLayer = new GVEsriFeature(source, layerConfig);
+    // Return it
+    return gvLayer;
   }
 
   /**

@@ -23,12 +23,11 @@ import { CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 export class GVImageStatic extends AbstractGVRaster {
   /**
    * Constructs a GVImageStatic layer to manage an OpenLayer layer.
-   * @param {string} mapId - The map id
    * @param {Static} olSource - The OpenLayer source.
    * @param {ImageStaticLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olSource: Static, layerConfig: ImageStaticLayerEntryConfig) {
-    super(mapId, olSource, layerConfig);
+  public constructor(olSource: Static, layerConfig: ImageStaticLayerEntryConfig) {
+    super(olSource, layerConfig);
 
     // Create the image layer options.
     const staticImageOptions: ImageOptions<Static> = { source: olSource };

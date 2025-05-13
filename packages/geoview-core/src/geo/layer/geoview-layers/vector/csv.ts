@@ -16,6 +16,7 @@ import {
 } from '@/api/config/types/map-schema-types';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { GVCSV } from '@/geo/layer/gv-layers/vector/gv-csv';
 
 export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'CSV';
@@ -66,9 +67,9 @@ export class CSV extends AbstractGeoViewVector {
 
   /**
    * Overrides the creation of the source configuration for the vector layer
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
-   * @param {SourceOptions} sourceOptions The source options.
-   * @param {ReadOptions} readOptions The read options.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @param {SourceOptions} sourceOptions - The source options.
+   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override onCreateVectorSource(
@@ -85,6 +86,20 @@ export class CSV extends AbstractGeoViewVector {
 
     // Call parent
     return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {CsvLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVCSV} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: CsvLayerEntryConfig): GVCSV {
+    // Create the source
+    const source = this.createVectorSource(layerConfig);
+    // Create the GV Layer
+    const gvLayer = new GVCSV(source, layerConfig);
+    // Return it
+    return gvLayer;
   }
 
   /**

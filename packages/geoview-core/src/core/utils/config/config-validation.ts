@@ -194,17 +194,17 @@ export class ConfigValidation {
       }
     }
 
-    ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
+    ConfigValidation.validateListOfGeoviewLayerConfig(listOfGeoviewLayerConfig);
 
     return listOfGeoviewLayerConfig;
   }
 
   /**
    * Validate and adjust the list of GeoView layer configuration.
-   * @param {TypeGeoviewLayerConfig[]} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and
+   * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and
    * validate.
    */
-  static validateListOfGeoviewLayerConfig(language: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeGeoviewLayerConfig[]): void {
+  static validateListOfGeoviewLayerConfig(listOfGeoviewLayerConfig?: MapConfigLayerEntry[]): void {
     ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
   }
 

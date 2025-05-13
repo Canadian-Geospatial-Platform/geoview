@@ -231,20 +231,3 @@ export class LayerEntryConfigParameterProjectionNotDefinedInSourceError extends 
     Object.setPrototypeOf(this, LayerEntryConfigParameterProjectionNotDefinedInSourceError.prototype);
   }
 }
-
-/**
- * Error thrown when the processing of a layer entry configuration aborted, because no OpenLayers was provided when expected.
- * @extends {LayerEntryConfigError}
- */
-export class LayerEntryConfigNoLayerProvidedError extends LayerEntryConfigError {
-  /**
-   * Constructs a new LayerEntryConfigParameterProjectionNotDefinedInSourceError instance.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration object that caused the error.
-   */
-  constructor(layerConfig: TypeLayerEntryConfig) {
-    super(layerConfig, "Processing aborted, because an OpenLayer object wasn't provided.");
-
-    // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerEntryConfigNoLayerProvidedError.prototype);
-  }
-}

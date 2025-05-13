@@ -32,8 +32,8 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { LayerNotCreatedError } from '@/core/exceptions/layer-exceptions';
-import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { LayerEntryConfigNoLayerProvidedError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { formatError, NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
@@ -226,18 +226,24 @@ export class GeoPackage extends AbstractGeoViewVector {
       GeoPackage.#processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as VectorLayerEntryConfig);
     }
 
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig });
+    // Redirect
+    const layer = this.onCreateGVLayer(layerConfig);
 
-    // If any response
-    let olLayer: VectorLayer<VectorSource<Feature<Geometry>>> | undefined;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as VectorLayer<VectorSource<Feature<Geometry>>>;
-    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
+    // Cast
+    const olLayer = layer.getOLLayer() as VectorLayer<VectorSource<Feature<Geometry>>>;
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {AbstractGVLayer} The GV Layer
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override onCreateGVLayer(layerConfig: VectorLayerEntryConfig): AbstractGVLayer {
+    throw new NotImplementedError('Geopackage.onCreateGVLayer not implemented. No GVGeopackage class.');
   }
 
   /**
