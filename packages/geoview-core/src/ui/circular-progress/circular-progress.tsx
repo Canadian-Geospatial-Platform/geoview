@@ -67,7 +67,7 @@ function CircularProgressUI(props: CircularProgressPropsExtend): JSX.Element {
 
   const sxMerged = { ...sxClasses.loading, ...sx };
   return (
-    <Fade in={!isLoaded} timeout={250} mountOnEnter unmountOnExit>
+    <Fade in={!isLoaded} timeout={{ enter: 0, exit: theme.transitions.duration.splash }} mountOnEnter unmountOnExit>
       <Box sx={sxMerged} style={{ ...style }}>
         <MaterialCircularProgress sx={sxClasses.progress} {...rest} />
       </Box>

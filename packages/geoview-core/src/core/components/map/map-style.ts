@@ -3,15 +3,23 @@ import { SxStyles } from '@/ui/style/types';
 /**
  * Get custom sx classes for the map
  *
+ * @param {string} mapHeight - The height of the map
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (): SxStyles => ({
+export const getSxClasses = (mapHeight: string): SxStyles => ({
   mapContainer: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: '1 1 auto',
     width: '100%',
-    height: '100%',
+    height: mapHeight,
     position: 'relative',
+
+    '& .ol-viewport': {
+      // Target OpenLayers viewport directly
+      height: '100% !important',
+      position: 'absolute',
+      width: '100%',
+    },
 
     '& .ol-overviewmap.ol-custom-overviewmap': {
       bottom: 'auto',

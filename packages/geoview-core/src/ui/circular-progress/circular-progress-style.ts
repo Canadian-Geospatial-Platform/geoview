@@ -20,11 +20,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     zIndex: 10000,
     backgroundColor: theme.palette.geoViewColor?.bgColor.dark[900],
     textAlign: 'center',
-    transition: theme.transitions.create(['visibility', 'opacity'], {
-      delay: theme.transitions.duration.shortest,
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions?.duration?.splash,
-    }),
+    opacity: 1,
   },
   progress: {
     width: '100px !important',

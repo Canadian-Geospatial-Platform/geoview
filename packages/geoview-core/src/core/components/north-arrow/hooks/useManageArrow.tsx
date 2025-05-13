@@ -12,12 +12,13 @@ import {
   useMapZoom,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { CV_MAP_CENTER } from '@/api/config/types/config-constants';
 
 interface ArrowReturn {
   rotationAngle: { angle: number };
   northOffset: number;
 }
+
+const CENTRAL_MERIDIAN = -92;
 
 /**
  * Custom hook to Manage North arrow (rotation and offset) and update store state.
@@ -97,7 +98,6 @@ export const useManageArrow = (): ArrowReturn => {
         const diff = Math.abs(mapRotation - rotationValue);
 
         // Calculate longitude factor
-        const CENTRAL_MERIDIAN = -97; // CV_MAP_CENTER[3978][0];
         const centerLongitude = Projection.transformCoordinates(mapCenterCoord, 'EPSG:3978', 'EPSG:4326')![0];
         const deviationFromCenter = (centerLongitude as number) - CENTRAL_MERIDIAN;
 
@@ -140,8 +140,7 @@ export const useManageArrow = (): ArrowReturn => {
         const MAX_DISTANCE = 10000; // Maximum meaningful distance from north pole
         const distanceFactor = Math.min(distanceFromNorthPole / MAX_DISTANCE, 1);
 
-        // Calculate longitude factor (-90° is center, increases towards -150° and -30°)
-        const CENTRAL_MERIDIAN = CV_MAP_CENTER[3978][0];
+        // Calculate longitude factor (-92° is center, increases towards -150° and -30°)
         const centerLongitude = mapCenterCoord[0];
         const deviationFromCenter = centerLongitude - CENTRAL_MERIDIAN;
         const longitudeFactor = Math.min(Math.abs(deviationFromCenter) / 60, 1); // 60° range to max

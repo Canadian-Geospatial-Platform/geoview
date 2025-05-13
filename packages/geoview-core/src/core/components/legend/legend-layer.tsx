@@ -3,19 +3,23 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui';
 import {
-  useMapStoreActions,
-  useSelectorLayerLegendCollapsed,
-  useSelectorLayerInVisibleRange,
   useSelectorLayerName,
   useSelectorLayerItems,
   useSelectorLayerChildren,
-} from '@/core/stores/';
+  useSelectorLayerType,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useMapStoreActions,
+  useSelectorLayerLegendCollapsed,
+  useSelectorLayerInVisibleRange,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';
 import { CollapsibleContent } from './legend-layer-container';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
+import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 
 interface LegendLayerProps {
   layerPath: string;
@@ -42,6 +46,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
   const layerChildren = useSelectorLayerChildren(layerPath);
   const isCollapsed = useSelectorLayerLegendCollapsed(layerPath);
   const inVisibleRange = useSelectorLayerInVisibleRange(layerPath);
+  const layerType = useSelectorLayerType(layerPath);
 
   // Log
   logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath, isCollapsed);
@@ -59,7 +64,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
           secondary={<SecondaryControls layerPath={layerPath} />}
         />
       </Tooltip>
-      {((layerChildren && layerChildren.length > 1) || (layerItems && layerItems.length > 1)) && (
+      {((layerChildren && layerChildren.length > 1) || (layerItems && layerItems.length > 1) || layerType === CV_CONST_LAYER_TYPES.WMS) && (
         <IconButton className="buttonOutline" edge="end" size="small" tooltip={tooltip}>
           {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
