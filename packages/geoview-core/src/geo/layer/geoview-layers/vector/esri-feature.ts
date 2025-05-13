@@ -40,12 +40,10 @@ export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
 export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Constructs an EsriFeature Layer configuration processor.
-   *
-   * @param {string} mapId The id of the map.
    * @param {TypeEsriFeatureLayerConfig} layerConfig The layer configuration.
    */
-  constructor(mapId: string, layerConfig: TypeEsriFeatureLayerConfig) {
-    super(CONST_LAYER_TYPES.ESRI_FEATURE, layerConfig, mapId);
+  constructor(layerConfig: TypeEsriFeatureLayerConfig) {
+    super(CONST_LAYER_TYPES.ESRI_FEATURE, layerConfig);
   }
 
   /**

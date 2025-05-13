@@ -93,9 +93,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     readOptions: ReadOptions
   ): VectorSource<Feature> {
     // If any attributions
-    if (this.getAttributions().length > 0) {
+    if (layerConfig.getAttributions().length > 0) {
       // eslint-disable-next-line no-param-reassign
-      sourceOptions.attributions = this.getAttributions();
+      sourceOptions.attributions = layerConfig.getAttributions();
     }
 
     // Read strategy
@@ -141,8 +141,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
         successCallback?.(features);
 
-        // Refresh the OL layer (necessary?)
-        this.getOLLayer(layerConfig.layerPath)?.changed();
+        // TODO: Check - Commenting this out, check if it still works
+        // Refresh the OL layer
+        // this.getOLLayer(layerConfig.layerPath)?.changed();
       } catch (error: unknown) {
         // Log the failure to fetch the vector features
         logger.logError(error);

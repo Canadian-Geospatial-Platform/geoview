@@ -7,8 +7,9 @@ import LayerGroup from 'ol/layer/Group';
 import { Geometry } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
 import { Feature } from 'ol';
+import { ProjectionLike } from 'ol/proj';
 
-import initSqlJs, { SqlValue } from 'sql.js';
+import initSqlJs, { ParamsObject, SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
@@ -54,9 +55,9 @@ interface LayerData {
 }
 
 type TableInfo = {
-  table_name: SqlValue;
-  srs_id?: string;
-  geometry_column_name: SqlValue;
+  tableName: SqlValue;
+  srsId?: string;
+  geometryColumnName: SqlValue;
 };
 
 /**
@@ -68,12 +69,10 @@ type TableInfo = {
 export class GeoPackage extends AbstractGeoViewVector {
   /**
    * Constructs a GeoPackage Layer configuration processor.
-   *
-   * @param {string} mapId the id of the map
    * @param {TypeGeoPackageFeatureLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeGeoPackageLayerConfig) {
-    super(CONST_LAYER_TYPES.GEOPACKAGE, layerConfig, mapId);
+  constructor(layerConfig: TypeGeoPackageLayerConfig) {
+    super(CONST_LAYER_TYPES.GEOPACKAGE, layerConfig);
   }
 
   /**
@@ -107,7 +106,7 @@ export class GeoPackage extends AbstractGeoViewVector {
 
     // Prepare a promise
     const promisedLayers = new Promise<BaseLayer>((resolve, reject) => {
-      this.#extractGeopackageData(layerConfig)
+      GeoPackage.#extractGeopackageData(layerConfig)
         .then(async ([layers, slds]) => {
           if (layers.length === 1) {
             this.#processOneGeopackageLayer(layerConfig, layers[0], slds)
@@ -212,8 +211,8 @@ export class GeoPackage extends AbstractGeoViewVector {
     layerInfo: LayerData,
     sld?: SldsInterface
   ): Promise<BaseLayer | undefined> {
-    // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
-    this.getMapViewer().layer.registerLayerConfigInit(layerConfig);
+    // Alert that we want to register an extra layer entry
+    this.emitLayerEntryRegisterInit({ config: layerConfig });
 
     const { name } = layerInfo;
 
@@ -249,18 +248,16 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {ReadOptions} readOptions The read options (default: {}).
    * @private
    */
-  #extractGeopackageData(
+  static #extractGeopackageData(
     layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): Promise<[LayerData[], SldsInterface]> {
     const promisedGeopackageData = new Promise<[LayerData[], SldsInterface]>((resolve) => {
       const url = layerConfig.source!.dataAccessPath!;
-      const attributions = this.getAttributions();
+      const attributions = layerConfig.getAttributions();
       // eslint-disable-next-line no-param-reassign
       if (attributions.length > 0) sourceOptions.attributions = attributions;
-      const layersInfo: LayerData[] = [];
-      const styleSlds: SldsInterface = {};
 
       // TODO: Refactor - Rewrite the xhr here to use utilities.fetch instead. XMLHttpRequest shouldn't be used anymore.
       const xhr = new XMLHttpRequest();
@@ -272,88 +269,86 @@ export class GeoPackage extends AbstractGeoViewVector {
         .then((SQL) => {
           xhr.open('GET', url as string);
           xhr.onload = () => {
-            if (xhr.status === 200) {
-              const db = new SQL.Database(new Uint8Array(xhr.response as ArrayBuffer));
-              const tables: TableInfo[] = [];
+            if (xhr.status !== 200) return;
 
-              let stmt = db.prepare(`
-            SELECT gpkg_contents.table_name, gpkg_contents.srs_id,
-                gpkg_geometry_columns.column_name
-            FROM gpkg_contents JOIN gpkg_geometry_columns
-            WHERE gpkg_contents.data_type='features' AND
-                gpkg_contents.table_name=gpkg_geometry_columns.table_name;
-                `);
+            const db = new SQL.Database(new Uint8Array(xhr.response as ArrayBuffer));
+            const format = new FormatWKB();
+            const layersInfo: LayerData[] = [];
+            const styleSlds: SldsInterface = {};
 
-              while (stmt.step()) {
-                const row = stmt.get();
-                tables.unshift({
-                  table_name: row[0],
-                  srs_id: row[1]?.toString(),
-                  geometry_column_name: row[2],
-                });
-              }
-
-              // Extract styles
-              stmt = db.prepare(`
-            SELECT gpkg_contents.table_name
-            FROM gpkg_contents
-            WHERE gpkg_contents.table_name='layer_styles'
+            // Step 1: Get all feature tables
+            let stmt = db.prepare(`
+              SELECT gpkg_contents.table_name, gpkg_contents.srs_id, gpkg_geometry_columns.column_name
+              FROM gpkg_contents
+              JOIN gpkg_geometry_columns
+                ON gpkg_contents.table_name = gpkg_geometry_columns.table_name
+              WHERE gpkg_contents.data_type = 'features';
             `);
 
-              if (stmt.step()) {
-                stmt = db.prepare('SELECT f_table_name, styleSLD FROM layer_styles');
-                while (stmt.step()) {
-                  const row = stmt.get();
-                  if (row[1]) [, styleSlds[row[0] as string]] = row;
-                }
-              }
-
-              const format = new FormatWKB();
-
-              // Turn each table's geometries into a vector source
-              for (let i = 0; i < tables.length; i++) {
-                const table = tables[i];
-                const tableName = table.table_name;
-                const tableDataProjection = `EPSG:${table.srs_id}`;
-                const columnName = table.geometry_column_name as string;
-                const features: Feature[] = [];
-                let properties;
-
-                stmt = db.prepare(`SELECT * FROM '${tableName}'`);
-                while (stmt.step()) {
-                  properties = stmt.getAsObject();
-                  const geomProp = properties[columnName] as Uint8Array;
-                  delete properties[columnName];
-                  const feature = GeoPackage.parseGpkgGeom(geomProp);
-                  const formattedFeature = format.readFeatures(feature, {
-                    ...readOptions,
-                    dataProjection: tableDataProjection,
-                    featureProjection: this.getMapViewer().getProjection().getCode(),
-                  });
-                  formattedFeature[0].setProperties(properties);
-                  features.push(formattedFeature[0]);
-                }
-
-                const vectorSource = new VectorSource({
-                  ...sourceOptions,
-                  loader(extent, resolution, projection, success, failure) {
-                    if (features !== undefined) {
-                      vectorSource.addFeatures(features);
-                      success!(features);
-                    } else failure!();
-                  },
-                });
-
-                layersInfo.push({
-                  name: tableName as string,
-                  source: vectorSource,
-                  properties,
-                });
-              }
-
-              db.close();
-              resolve([layersInfo, styleSlds]);
+            const tables: TableInfo[] = [];
+            while (stmt.step()) {
+              const row = stmt.get();
+              tables.push({
+                tableName: row[0],
+                srsId: row[1]?.toString(),
+                geometryColumnName: row[2],
+              });
             }
+
+            // Step 2: Load layer_styles table if present
+            stmt = db.prepare(`SELECT f_table_name, styleSLD FROM layer_styles`);
+            while (stmt.step()) {
+              const [tableName, sld] = stmt.get();
+              if (sld) styleSlds[tableName as string] = sld as string;
+            }
+
+            // Step 3: Process each feature table
+            for (const { tableName, srsId, geometryColumnName } of tables) {
+              const dataProjection = `EPSG:${srsId}`;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const rawFeatures: { geom: Uint8Array; properties: any }[] = [];
+
+              stmt = db.prepare(`SELECT * FROM '${tableName}'`);
+              while (stmt.step()) {
+                const row = stmt.getAsObject();
+                const geomBuffer = row[geometryColumnName as string] as Uint8Array;
+                delete row[geometryColumnName as string];
+                rawFeatures.push({ geom: geomBuffer, properties: row });
+              }
+
+              const vectorSource = new VectorSource({
+                ...sourceOptions,
+                loader: (extent, resolution, projection, success, failure) => {
+                  try {
+                    const features = rawFeatures.map(({ geom, properties }) => {
+                      const parsed = GeoPackage.#parseGpkgGeom(geom);
+                      const feature = format.readFeatures(parsed, {
+                        ...readOptions,
+                        dataProjection,
+                        featureProjection: GeoPackage.#getProjectionCode(projection),
+                      })[0];
+                      feature.setProperties(properties);
+                      return feature;
+                    });
+
+                    vectorSource.addFeatures(features);
+                    success?.(features);
+                  } catch (err) {
+                    logger.logError(`Failed to load features for table ${tableName}:`, err);
+                    failure?.();
+                  }
+                },
+              });
+
+              layersInfo.push({
+                name: tableName as string,
+                source: vectorSource,
+                properties: (rawFeatures[0]?.properties as ParamsObject) ?? {},
+              });
+            }
+
+            db.close();
+            resolve([layersInfo, styleSlds]);
           };
           xhr.send();
         })
@@ -579,7 +574,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Uint8Array} Uint8Array Subarray of inputted binary geoametry array.
    */
-  protected static parseGpkgGeom(gpkgBinGeom: Uint8Array): Uint8Array {
+  static #parseGpkgGeom(gpkgBinGeom: Uint8Array): Uint8Array {
     const flags = gpkgBinGeom[3];
     // eslint-disable-next-line no-bitwise
     const eFlags: number = (flags >> 1) & 7;
@@ -602,6 +597,13 @@ export class GeoPackage extends AbstractGeoViewVector {
         throw new NotSupportedError('Invalid geometry envelope size flag in GeoPackage');
     }
     return gpkgBinGeom.subarray(envelopeSize + 8);
+  }
+
+  /**
+   * Utility function to get a projection code from a ProjectionLike
+   */
+  static #getProjectionCode(projection: ProjectionLike): string {
+    return typeof projection === 'string' ? projection : projection!.getCode();
   }
 
   /**

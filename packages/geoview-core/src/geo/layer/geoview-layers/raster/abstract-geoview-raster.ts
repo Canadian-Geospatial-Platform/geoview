@@ -21,14 +21,6 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
 
     // Set it
     this.metadata = responseJson;
-
-    const copyrightText = this.metadata.copyrightText as string;
-    const attributions = this.getAttributions();
-    if (copyrightText && !attributions.includes(copyrightText)) {
-      // Add it
-      attributions.push(copyrightText);
-      this.setAttributions(attributions);
-    }
   }
 
   /**

@@ -34,12 +34,10 @@ export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig,
 export class ImageStatic extends AbstractGeoViewRaster {
   /**
    * Constructs a ImageStatic Layer configuration processor.
-   *
-   * @param {string} mapId the id of the map
    * @param {TypeImageStaticLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeImageStaticLayerConfig) {
-    super(CONST_LAYER_TYPES.IMAGE_STATIC, layerConfig, mapId);
+  constructor(layerConfig: TypeImageStaticLayerConfig) {
+    super(CONST_LAYER_TYPES.IMAGE_STATIC, layerConfig);
   }
 
   /**

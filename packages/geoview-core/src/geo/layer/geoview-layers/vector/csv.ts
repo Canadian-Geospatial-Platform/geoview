@@ -36,12 +36,10 @@ export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
 export class CSV extends AbstractGeoViewVector {
   /**
    * Constructs a CSV Layer configuration processor.
-   *
-   * @param {string} mapId the id of the map
    * @param {TypeCSVLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeCSVLayerConfig) {
-    super(CONST_LAYER_TYPES.CSV, layerConfig, mapId);
+  constructor(layerConfig: TypeCSVLayerConfig) {
+    super(CONST_LAYER_TYPES.CSV, layerConfig);
   }
 
   /**

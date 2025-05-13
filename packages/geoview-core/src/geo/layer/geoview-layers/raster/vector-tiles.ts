@@ -52,12 +52,10 @@ export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'lis
 export class VectorTiles extends AbstractGeoViewRaster {
   /**
    * Constructs a VectorTiles Layer configuration processor.
-   *
-   * @param {string} mapId the id of the map
    * @param {TypeVectorTilesConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeVectorTilesConfig) {
-    super(CONST_LAYER_TYPES.VECTOR_TILES, layerConfig, mapId);
+  constructor(layerConfig: TypeVectorTilesConfig) {
+    super(CONST_LAYER_TYPES.VECTOR_TILES, layerConfig);
   }
 
   /**
