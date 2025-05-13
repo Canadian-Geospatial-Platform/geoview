@@ -24,18 +24,12 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   CONST_LAYER_ENTRY_TYPES,
-  TypeLayerEntryConfig,
-  TypeGeoviewLayerConfig,
   CONST_LAYER_TYPES,
-  TypeGeoviewLayerTypeWithGeoCore,
-  AbstractGeoViewLayer,
-} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import {
-  CONST_LAYER_ENTRY_TYPES,
   EntryConfigBaseClass,
   GroupLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
+  TypeGeoviewLayerTypeWithGeoCore,
 } from '@/api/config/types/map-schema-types';
 
 import { ConfigApi } from '@/api/config/config-api';
@@ -349,7 +343,7 @@ export function AddNewLayer(): JSX.Element {
       const config = new Config(language);
       const configObj = config.initializeMapConfig(mapId, [newGeoViewLayer], (errorKey: string, params: string[]) => {
         // Create the error
-        const error = new GeoViewError(mapId, errorKey, params);
+        const error = new GeoViewError(errorKey, params);
 
         // Log it
         logger.logWarning(`- Map ${mapId}: ${error.message}`);

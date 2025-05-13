@@ -1,11 +1,10 @@
 import { useStore } from 'zustand';
-import { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeDisplayTheme, TypeGeoviewLayerTypeWithGeoCore } from '@/api/config/types/map-schema-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeGeoviewLayerTypeWithGeoCore } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/config/types/config-constants';

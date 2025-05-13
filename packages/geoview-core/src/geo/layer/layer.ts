@@ -20,6 +20,7 @@ import {
   LayerEntryProcessedEvent,
   LayerRequestingEvent,
   LayerCreationEvent,
+  LayerEntryRegisterInitEvent,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   MapConfigLayerEntry,
@@ -349,23 +350,6 @@ export class LayerApi {
     } else if (messageType === 'success') {
       this.mapViewer.notifications.showSuccess(messageKey, messageParams, notification);
     }
-  }
-
-  /**
-   * Obsolete function to set the layer configuration in the registered layers.
-   */
-  setLayerEntryConfigObsolete(layerConfig: ConfigBaseClass): void {
-    // FIXME: This function should be deleted once the Layers refactoring is done. It unregisters and registers an updated layer entry config.
-    // FIX.MECONT: This is because of the EsriDynamic and EsriFeature entry config being generated on-the-fly when registration of layer entry config has already happened.
-    // Get the config already existing if any
-    const alreadyExisting = this.#layerEntryConfigs[layerConfig.layerPath];
-    if (alreadyExisting) {
-      // Unregister the old one
-      this.unregisterLayerConfig(alreadyExisting, false);
-    }
-
-    // Register this new one
-    this.registerLayerConfigInit(layerConfig);
   }
 
   /**
@@ -850,29 +834,29 @@ export class LayerApi {
     // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
     let layerBeingAdded: AbstractGeoViewLayer;
     if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
-      layerBeingAdded = new GeoJSON(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new GeoJSON(geoviewLayerConfig);
     } else if (layerConfigIsGeoPackage(geoviewLayerConfig)) {
-      layerBeingAdded = new GeoPackage(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new GeoPackage(geoviewLayerConfig);
     } else if (layerConfigIsCSV(geoviewLayerConfig)) {
-      layerBeingAdded = new CSV(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new CSV(geoviewLayerConfig);
     } else if (layerConfigIsWMS(geoviewLayerConfig)) {
-      layerBeingAdded = new WMS(this.getMapId(), geoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
+      layerBeingAdded = new WMS(geoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
     } else if (layerConfigIsEsriDynamic(geoviewLayerConfig)) {
-      layerBeingAdded = new EsriDynamic(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new EsriDynamic(geoviewLayerConfig);
     } else if (layerConfigIsEsriFeature(geoviewLayerConfig)) {
-      layerBeingAdded = new EsriFeature(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new EsriFeature(geoviewLayerConfig);
     } else if (layerConfigIsEsriImage(geoviewLayerConfig)) {
-      layerBeingAdded = new EsriImage(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new EsriImage(geoviewLayerConfig);
     } else if (layerConfigIsImageStatic(geoviewLayerConfig)) {
-      layerBeingAdded = new ImageStatic(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new ImageStatic(geoviewLayerConfig);
     } else if (layerConfigIsWFS(geoviewLayerConfig)) {
-      layerBeingAdded = new WFS(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new WFS(geoviewLayerConfig);
     } else if (layerConfigIsOgcFeature(geoviewLayerConfig)) {
-      layerBeingAdded = new OgcFeature(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new OgcFeature(geoviewLayerConfig);
     } else if (layerConfigIsXYZTiles(geoviewLayerConfig)) {
-      layerBeingAdded = new XYZTiles(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new XYZTiles(geoviewLayerConfig);
     } else if (layerConfigIsVectorTiles(geoviewLayerConfig)) {
-      layerBeingAdded = new VectorTiles(this.getMapId(), geoviewLayerConfig);
+      layerBeingAdded = new VectorTiles(geoviewLayerConfig);
     } else {
       // Not implemented
       throw new NotSupportedError('Unsupported layer class type');
@@ -893,11 +877,24 @@ export class LayerApi {
       this.#addInitialFilters(layerConfig);
     });
 
+    // Register a callback when the layer entry config wants to register extra configs
+    layerBeingAdded.onLayerEntryRegisterInit((geoviewLayer: AbstractGeoViewLayer, event: LayerEntryRegisterInitEvent) => {
+      // If already existing
+      const alreadyExisting = this.#layerEntryConfigs[event.config.layerPath];
+      if (alreadyExisting) {
+        // Unregister the old one
+        this.unregisterLayerConfig(alreadyExisting, false);
+      }
+
+      // Register it
+      this.registerLayerConfigInit(event.config);
+    });
+
     // TODO: if we keep geoview layers, regroup the event like what we do for gv layers
-    // Register the messsage handler
+    // Register a callback when layer wants to send a message
     layerBeingAdded.onLayerMessage(this.#handleLayerMessage.bind(this));
 
-    // Register when layer entry config has become processed (catching on-the-fly layer entry configs as they are further processed)
+    // Register a callback when layer entry config has become processed (catching on-the-fly layer entry configs as they are further processed)
     layerBeingAdded.onLayerEntryProcessed((geoviewLayer: AbstractGeoViewLayer, event: LayerEntryProcessedEvent) => {
       // Log
       logger.logDebug(
@@ -923,7 +920,7 @@ export class LayerApi {
       }
     });
 
-    // Register hook when an OpenLayer source has been created
+    // Register a callback when an OpenLayer source has been created
     layerBeingAdded.onLayerRequesting((geoviewLayer: AbstractGeoViewLayer, event: LayerRequestingEvent): BaseLayer => {
       // Log
       logger.logDebug(
@@ -944,7 +941,7 @@ export class LayerApi {
       throw new NotImplementedError('GV layer not implemented for the layer type');
     });
 
-    // Register hook when an OpenLayer layer has been created
+    // Register a callback when a Group Layer has been created
     layerBeingAdded.onLayerCreation((geoviewLayer: AbstractGeoViewLayer, event: LayerCreationEvent) => {
       // Log
       logger.logDebug(
@@ -1042,9 +1039,9 @@ export class LayerApi {
   #createGVLayer(mapId: string, geoviewLayer: AbstractGeoViewLayer, layerConfig: ConfigBaseClass): AbstractGVLayer | undefined {
     // Create the right GV Layer based on the OLLayer and config type
     let gvLayer;
-    if (geoviewLayer instanceof EsriDynamic && layerConfig instanceof EsriDynamicLayerEntryConfig) {
+    if (layerConfig instanceof EsriDynamicLayerEntryConfig) {
       // Create the source
-      const source = geoviewLayer.createEsriDynamicSource(layerConfig);
+      const source = EsriDynamic.createEsriDynamicSource(layerConfig);
       gvLayer = new GVEsriDynamic(mapId, source, layerConfig);
     } else if (layerConfig instanceof EsriImageLayerEntryConfig) {
       // Create the source
@@ -1062,9 +1059,9 @@ export class LayerApi {
       // Create the source
       const source = geoviewLayer.createImageWMSSource(layerConfig);
       gvLayer = new GVWMS(mapId, source, layerConfig);
-    } else if (geoviewLayer instanceof XYZTiles && layerConfig instanceof XYZTilesLayerEntryConfig) {
+    } else if (layerConfig instanceof XYZTilesLayerEntryConfig) {
       // Create the source
-      const source = geoviewLayer.createXYZSource(layerConfig);
+      const source = XYZTiles.createXYZSource(layerConfig);
       gvLayer = new GVXYZTiles(mapId, source, layerConfig);
     } else if (geoviewLayer instanceof AbstractGeoViewVector && layerConfig instanceof CsvLayerEntryConfig) {
       // Create the source

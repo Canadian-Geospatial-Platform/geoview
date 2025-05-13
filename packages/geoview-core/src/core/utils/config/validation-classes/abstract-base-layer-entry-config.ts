@@ -34,6 +34,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The time dimension information */
   #temporalDimension?: TimeDimension;
 
+  /** Attribution used in the OpenLayer source. */
+  #attributions: string[] = [];
+
   /** The calculated filter equation */
   filterEquation?: FilterNodeArrayType;
 
@@ -89,12 +92,36 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     this.#layerMetadata = layerMetadata;
   }
 
+  /**
+   * Gets the temporal dimension, if any, that is associated to the layer.
+   * @returns {TimeDimension | undefined} The temporal dimension.
+   */
   getTemporalDimension(): TimeDimension | undefined {
     return this.#temporalDimension;
   }
 
+  /**
+   * Sets the temporal dimension that is associated to the layer.
+   * @param {TimeDimension} temporalDimension - The temporal dimension.
+   */
   setTemporalDimension(temporalDimension: TimeDimension): void {
     this.#temporalDimension = temporalDimension;
+  }
+
+  /**
+   * Gets the layer attributions
+   * @returns {string[]} The layer attributions
+   */
+  getAttributions(): string[] {
+    return this.#attributions;
+  }
+
+  /**
+   * Sets the layer attributions
+   * @param {string[]} attributions - The layer attributions
+   */
+  setAttributions(attributions: string[]): void {
+    this.#attributions = attributions;
   }
 
   /**
