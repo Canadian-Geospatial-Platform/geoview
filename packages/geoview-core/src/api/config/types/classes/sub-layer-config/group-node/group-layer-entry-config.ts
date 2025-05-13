@@ -2,7 +2,7 @@ import { CV_CONST_SUB_LAYER_TYPES, CV_LAYER_GROUP_SCHEMA_PATH } from '@/api/conf
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
-import { TypeDisplayLanguage, TypeLayerEntryType } from '@/api/config/types/map-schema-types';
+import { TypeLayerEntryType } from '@/api/config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 import { logger } from '@/core/utils/logger';
 
@@ -25,23 +25,16 @@ export abstract class GroupLayerEntryConfig extends EntryConfigBaseClass {
   /**
    * The class constructor.
    * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    * @constructor
    */
-  constructor(
-    layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
-    geoviewLayerConfig: AbstractGeoviewLayerConfig,
-    parentNode?: EntryConfigBaseClass
-  ) {
-    super(layerConfig, language, geoviewLayerConfig, parentNode);
+  constructor(layerConfig: TypeJsonObject, geoviewLayerConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass) {
+    super(layerConfig, geoviewLayerConfig, parentNode);
     this.listOfLayerEntryConfig = (layerConfig.listOfLayerEntryConfig as TypeJsonArray)
       .map((subLayerConfig) => {
-        if (layerEntryIsGroupLayer(subLayerConfig))
-          return geoviewLayerConfig.createGroupNode(subLayerConfig, language, geoviewLayerConfig, this);
-        return geoviewLayerConfig.createLeafNode(subLayerConfig, language, geoviewLayerConfig, this);
+        if (layerEntryIsGroupLayer(subLayerConfig)) return geoviewLayerConfig.createGroupNode(subLayerConfig, geoviewLayerConfig, this);
+        return geoviewLayerConfig.createLeafNode(subLayerConfig, geoviewLayerConfig, this);
       })
       .filter((subLayerConfig) => {
         return subLayerConfig;

@@ -4,7 +4,6 @@ import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@/api/config/types
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { WmsGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/wms-group-layer-config';
 import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { WmsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
@@ -40,10 +39,9 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    * The class constructor.
    *
    * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
    */
-  constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
-    super(geoviewLayerConfig, language);
+  constructor(geoviewLayerConfig: TypeJsonObject) {
+    super(geoviewLayerConfig);
 
     // TODO: remove once datacube URLs are updated
     this.metadataAccessPath = this.metadataAccessPath.replace('wrapper/ramp/ogc', 'ows');
@@ -75,7 +73,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
           // Rebuild the metadataAccessPath
           this.metadataAccessPath = `${metadataAccessPath}${newParameters ? `?${newParameters}` : ''}`;
           // Create the root node of the listOfLayerEntryConfig using the layerId.
-          this.listOfLayerEntryConfig = [this.createLeafNode(toJsonObject({ layerId }), language, this)! as TypeWmsLayerNode];
+          this.listOfLayerEntryConfig = [this.createLeafNode(toJsonObject({ layerId }), this)! as TypeWmsLayerNode];
         }
       }
     }
@@ -107,7 +105,6 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    * type needed.
    *
    * @param {TypeJsonObject} layerConfig The sublayer configuration.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    *
@@ -116,11 +113,10 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    */
   override createLeafNode(
     layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new WmsLayerEntryConfig(layerConfig, language, geoviewConfig, parentNode);
+    return new WmsLayerEntryConfig(layerConfig, geoviewConfig, parentNode);
   }
 
   /**
@@ -128,7 +124,6 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    * type needed.
    *
    * @param {TypeJsonObject} layerConfig The group node configuration.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    *
@@ -137,11 +132,10 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
    */
   override createGroupNode(
     layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new WmsGroupLayerConfig(layerConfig, language, geoviewConfig, parentNode);
+    return new WmsGroupLayerConfig(layerConfig, geoviewConfig, parentNode);
   }
 
   /**
@@ -186,7 +180,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       // Sometime, the Name property is undefined. However, the Title property is mandatory.
       const groupId = (metadataLayer.Name || metadataLayer.Title) as string;
       const jsonConfig = this.#createGroupNodeJsonConfig(groupId, metadataLayer.Layer as TypeJsonArray);
-      return [this.createGroupNode(jsonConfig, this.getLanguage(), this)!];
+      return [this.createGroupNode(jsonConfig, this)!];
     }
 
     // Create a single layer using the metadata
@@ -194,7 +188,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       layerId: metadataLayer.Name,
       layerName: metadataLayer.Name,
     });
-    return [this.createLeafNode(layerConfig, this.getLanguage(), this)!];
+    return [this.createLeafNode(layerConfig, this)!];
   }
 
   /**
@@ -217,7 +211,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
     // if the layerFound is a group layer, create a the layer group.
     if ('Layer' in layerFound) {
       const jsonConfig = this.#createGroupNodeJsonConfig(layerId, layerFound.Layer as TypeJsonObject[]);
-      return this.createGroupNode(jsonConfig, this.getLanguage(), this, parentNode)!;
+      return this.createGroupNode(jsonConfig, this, parentNode)!;
     }
 
     // Create the layer using the metadata
@@ -225,7 +219,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       layerId,
       layerName: layerFound.Title,
     });
-    return this.createLeafNode(layerConfig, this.getLanguage(), this, parentNode)!;
+    return this.createLeafNode(layerConfig, this, parentNode)!;
   }
   // #endregion OVERRIDE
 

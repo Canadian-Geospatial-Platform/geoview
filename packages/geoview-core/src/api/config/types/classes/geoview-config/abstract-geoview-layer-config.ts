@@ -2,7 +2,7 @@ import mergeWith from 'lodash/mergeWith';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { Cast, TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
-import { TypeGeoviewLayerType, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerType } from '@/api/config/types/map-schema-types';
 import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@/api/config/utils';
 import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
@@ -19,9 +19,6 @@ import { logger } from '@/core/utils/logger';
 export abstract class AbstractGeoviewLayerConfig {
   // ==========================
   // #region PRIVATE PROPERTIES
-
-  /** The language used when interacting with this instance of MapFeatureConfig. */
-  #language: TypeDisplayLanguage;
 
   /** Cloned copy of the configuration as provided by the user when the constructor was called. */
   #userGeoviewLayerConfig: TypeJsonObject;
@@ -93,20 +90,16 @@ export abstract class AbstractGeoviewLayerConfig {
    * find any errors that may have been made. It only initalizes the properties needed to query the service and layer metadata.
    *
    * @param {TypeJsonObject} userGeoviewLayerConfig The layer configuration that the user has supplied for instantiation.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
    */
-  constructor(userGeoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
+  constructor(userGeoviewLayerConfig: TypeJsonObject) {
     // Keep a copy of the configuration. It will be used later in the execution flow to overwrite values obtained from the metadata.
     this.#userGeoviewLayerConfig = cloneDeep(userGeoviewLayerConfig);
     if (!isvalidComparedToInputSchema(this.getGeoviewLayerSchema(), this.#userGeoviewLayerConfig)) this.setErrorDetectedFlag();
 
-    this.#language = language;
-
     // GV: GeoCore layers are processed by the configApi. GeoView layer instances do not recognize them as a valid geoView layer Type.
     // GV: However, whe have the isGeocore flag to keep track of geocore layers that were converted to geoview layers.
     this.isGeocore = (userGeoviewLayerConfig.isGeocore as boolean) || false;
-    if (this.isGeocore)
-      this.geoviewLayerName = userGeoviewLayerConfig.geoviewLayerName ? (userGeoviewLayerConfig.geoviewLayerName as string) : '';
+    this.geoviewLayerName = userGeoviewLayerConfig.geoviewLayerName ? (userGeoviewLayerConfig.geoviewLayerName as string) : '';
     this.geoviewLayerId = (userGeoviewLayerConfig.geoviewLayerId || generateId()) as string;
     this.metadataAccessPath = userGeoviewLayerConfig.metadataAccessPath as string;
 
@@ -135,8 +128,8 @@ export abstract class AbstractGeoviewLayerConfig {
     // Instanciate the sublayer list.
     this.listOfLayerEntryConfig = (this.#userGeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)
       ?.map((subLayerConfig) => {
-        if (layerEntryIsGroupLayer(subLayerConfig)) return this.createGroupNode(subLayerConfig, language, this);
-        return this.createLeafNode(subLayerConfig, language, this);
+        if (layerEntryIsGroupLayer(subLayerConfig)) return this.createGroupNode(subLayerConfig, this);
+        return this.createLeafNode(subLayerConfig, this);
       })
       // When a sublayer cannot be created, the value returned is undefined. These values will be filtered.
       ?.filter((subLayerConfig) => {
@@ -177,7 +170,6 @@ export abstract class AbstractGeoviewLayerConfig {
    *
    * @param {TypeJsonObject} layerConfig The sublayer configuration.
    * @param {TypeLayerInitialSettings | TypeJsonObject} initialSettings The initial settings inherited.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
@@ -186,7 +178,6 @@ export abstract class AbstractGeoviewLayerConfig {
    */
   abstract createLeafNode(
     layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass | undefined;
@@ -197,7 +188,6 @@ export abstract class AbstractGeoviewLayerConfig {
    *
    * @param {TypeJsonObject} layerConfig The sublayer configuration.
    * @param {TypeLayerInitialSettings | TypeJsonObject} initialSettings The initial settings inherited.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
@@ -206,7 +196,6 @@ export abstract class AbstractGeoviewLayerConfig {
    */
   abstract createGroupNode(
     layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass | undefined;
@@ -234,15 +223,6 @@ export abstract class AbstractGeoviewLayerConfig {
 
   // =================
   // #region PROTECTED
-  /**
-   * The getter method that returns the language used to create the geoview layer.
-   *
-   * @returns {TypeDisplayLanguage} The language associated to the config.
-   * @protected
-   */
-  protected getLanguage(): TypeDisplayLanguage {
-    return this.#language;
-  }
 
   /**
    * Fetch the metadata of all layer entry configurations defined in the list of layer entry config
@@ -275,7 +255,8 @@ export abstract class AbstractGeoviewLayerConfig {
    * @protected @async
    */
   protected async createLayerTree(): Promise<void> {
-    let layerTreeFilter = this.getMetadataLayerTree();
+    const layerTreeFilter = this.getMetadataLayerTree();
+
     // If a layer tree filter is defined, create the layer tree using it.
     if (layerTreeFilter !== undefined) {
       // When the filter is an empty array, we create the layer tree for all the metadata in the service metadata.
@@ -284,29 +265,16 @@ export abstract class AbstractGeoviewLayerConfig {
         await this.fetchListOfLayerMetadata(layerTree);
         this.setMetadataLayerTree(layerTree);
       } else {
-        // When the filter contains one or many layer identifiers, we create the layer tree using only the specified layers.
-        // If the filter contains several layer identifiers, we create a group layer, as the root of the tree must contain
-        // a single entry.
-        if (layerTreeFilter.length > 1) {
-          layerTreeFilter = [
-            Cast<EntryConfigBaseClass>({
-              layerId: this.geoviewLayerId,
-              layerName: this.geoviewLayerName,
-              isLayerGroup: true,
-              listOfLayerEntryConfig: layerTreeFilter,
-            }),
-          ];
-        }
-
-        // Instanciate the root node. The root of the tree contains a single entry.
-        const rootNode = layerEntryIsGroupLayer(layerTreeFilter[0])
-          ? this.createGroupNode(Cast<TypeJsonObject>(layerTreeFilter[0]), this.getLanguage(), this)
-          : this.createLeafNode(Cast<TypeJsonObject>(layerTreeFilter[0]), this.getLanguage(), this);
-        if (rootNode) layerTreeFilter = [rootNode];
-        else throw new GeoviewLayerConfigError('The layer tree creation returned an empty root node.');
+        const newLayerTree: EntryConfigBaseClass[] | undefined = [];
+        layerTreeFilter.forEach((layerTreeEntry) => {
+          const rootNode = layerEntryIsGroupLayer(layerTreeEntry)
+            ? this.createGroupNode(Cast<TypeJsonObject>(layerTreeEntry), this)
+            : this.createLeafNode(Cast<TypeJsonObject>(layerTreeEntry), this);
+          if (rootNode) newLayerTree.push(rootNode);
+        });
 
         this.applyDefaultValues();
-        this.setMetadataLayerTree(this.processListOfLayerEntryConfig(layerTreeFilter));
+        this.setMetadataLayerTree(this.processListOfLayerEntryConfig(newLayerTree));
       }
       await this.fetchListOfLayerMetadata(this.getMetadataLayerTree());
     }

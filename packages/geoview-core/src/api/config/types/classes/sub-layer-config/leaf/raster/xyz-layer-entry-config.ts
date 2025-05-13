@@ -1,35 +1,33 @@
 import { merge } from 'lodash';
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@/api/config/types/config-constants';
-import { Cast } from '@/api/config/types/config-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import {
   TypeLayerStyleConfig,
   TypeLayerEntryType,
-  TypeBaseVectorSourceInitialConfig,
-  TypeFeatureInfoLayerConfig,
-  TypeStyleGeometry,
+  TypeSourceTileInitialConfig,
   TypeLayerInitialSettings,
   Extent,
 } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
-import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/geojson-config';
 import { isvalidComparedToInternalSchema } from '@/api/config/utils';
 import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { TimeDimension } from '@/core/utils/date-mgt';
+import { XyzLayerConfig } from '../../../geoview-config/raster-config/xyz-tile-config';
+import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 
 // ====================
 // #region CLASS HEADER
 /**
- * The GeoJson geoview sublayer class.
+ * The XYZ tile geoview sublayer class.
  */
 
-export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export class XyzLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   // ==================
   // #region PROPERTIES
   /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeBaseVectorSourceInitialConfig;
+  source?: TypeSourceTileInitialConfig;
 
   /** Style to apply to the raster layer. */
   layerStyle?: TypeLayerStyleConfig;
@@ -51,7 +49,7 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @protected @override
    */
   protected override getSchemaPath(): string {
-    return CV_CONST_LEAF_LAYER_SCHEMA_PATH.GEOJSON;
+    return CV_CONST_LEAF_LAYER_SCHEMA_PATH.XYZ_TILES;
   }
 
   /**
@@ -61,18 +59,18 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @protected @override
    */
   protected override getEntryType(): TypeLayerEntryType {
-    return CV_CONST_SUB_LAYER_TYPES.VECTOR;
+    return CV_CONST_SUB_LAYER_TYPES.RASTER_TILE;
   }
 
   /**
-   * Shadow method used to do a cast operation on the parent method to return GeoJsonLayerConfig instead of
+   * Shadow method used to do a cast operation on the parent method to returXyzLayerConfig instead of
    * AbstractGeoviewLayerConfig.
    *
-   * @returns {GeoJsonLayerConfig} The Geoview layer configuration that owns this GeoJson layer entry config.
+   * @returns {XyzLayerConfig} The Geoview layer configuration that owns this XYZ tile layer entry config.
    * @override
    */
-  override getGeoviewLayerConfig(): GeoJsonLayerConfig {
-    return super.getGeoviewLayerConfig() as GeoJsonLayerConfig;
+  override getGeoviewLayerConfig(): XyzLayerConfig {
+    return super.getGeoviewLayerConfig() as XyzLayerConfig;
   }
 
   /**
@@ -84,7 +82,7 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // If an error has already been detected, then the layer is unusable.
     if (this.getErrorDetectedFlag()) return Promise.resolve();
 
-    // If the GeoJson GeoView layer doesn't have service metadata, the layer metadata are set using an empty object and they
+    // If the XYZ tile GeoView layer doesn't have service metadata, the layer metadata are set using an empty object and they
     // will be fetch on the fly by the layer api.
     if (Object.keys(this.getGeoviewLayerConfig().getServiceMetadata()).length === 0) {
       this.setLayerMetadata({});
@@ -120,8 +118,6 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   override applyDefaultValues(): void {
     super.applyDefaultValues();
     this.source = {
-      strategy: 'all',
-      maxRecordCount: 0,
       crossOrigin: 'Anonymous',
       featureInfo: {
         queryable: true,
@@ -141,16 +137,9 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     if (Object.keys(layerMetadata).length === 0) return;
 
     if (layerMetadata?.attributions) this.attributions.push(layerMetadata.attributions as string);
-    this.geometryType = (layerMetadata.geometryType || this.geometryType) as TypeStyleGeometry;
     this.layerName = layerMetadata.layerName as string;
-    // Need to compare to user provided value to see which to use
-    this.minScale = (layerMetadata?.minScale || this.minScale) as number;
-    this.maxScale = (layerMetadata?.maxScale || this.maxScale) as number;
 
     this.initialSettings = Cast<TypeLayerInitialSettings>(merge(this.initialSettings, layerMetadata.initialSettings));
-    this.source.featureInfo = Cast<TypeFeatureInfoLayerConfig>(merge(this.source.featureInfo, layerMetadata.source.featureInfo));
-    this.layerStyle = Cast<TypeLayerStyleConfig>(merge(this.layerStyle, layerMetadata.style));
-    this.temporalDimension = Cast<TimeDimension>(merge(this.temporalDimension, layerMetadata.temporalDimension));
 
     if (layerMetadata?.initialSettings?.extent) {
       this.initialSettings.extent = validateExtentWhenDefined(layerMetadata.initialSettings.extent as Extent);
@@ -167,6 +156,37 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
           `The bounds specified in the metadata for the layer path “${this.getLayerPath()}” is considered invalid and has been corrected.`
         );
     }
+
+    let metadataLayerConfigFound: XYZTilesLayerEntryConfig | TypeJsonObject | undefined;
+    if (layerMetadata?.listOfLayerEntryConfig) {
+      metadataLayerConfigFound = Cast<XYZTilesLayerEntryConfig[]>(layerMetadata?.listOfLayerEntryConfig).find(
+        (metadataLayerConfig) => metadataLayerConfig.layerId === this.layerId
+      );
+    }
+
+    // For ESRI MapServer XYZ Tiles
+    if (layerMetadata?.layers) {
+      metadataLayerConfigFound = (layerMetadata?.layers as TypeJsonArray).find(
+        (metadataLayerConfig) => metadataLayerConfig.id.toString() === this.layerId
+      );
+    }
+
+    // Set zoom limits for max / min zooms
+    const maxScale = metadataLayerConfigFound?.maxScale as number;
+    const minScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.minScaleDenominator as number;
+    // eslint-disable-next-line no-param-reassign
+    this.maxScale =
+      !maxScale && !minScaleDenominator
+        ? this.maxScale
+        : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, this.maxScale ?? -Infinity);
+
+    const minScale = metadataLayerConfigFound?.minScale as number;
+    const maxScaleDenominator = (metadataLayerConfigFound as TypeJsonObject)?.maxScaleDenominator as number;
+    // eslint-disable-next-line no-param-reassign
+    this.minScale =
+      !minScale && !maxScaleDenominator
+        ? this.minScale
+        : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, this.minScale ?? Infinity);
   }
 
   // #endregion OVERRIDE
