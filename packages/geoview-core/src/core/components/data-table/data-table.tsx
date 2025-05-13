@@ -363,8 +363,6 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     // get filtered feature for unique value info style so non visible class is not in the table
     const filterArray = getFilteredDataFromLegendVisibility(data.layerPath, data?.features ?? []);
 
-    // TODO Filter features based on current map extent olLayer.getSource().getFeaturesInExtent(extent, projection)
-
     return (filterArray ?? []).map((feature) => {
       const icon = feature.featureIcon ? (
         <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />
