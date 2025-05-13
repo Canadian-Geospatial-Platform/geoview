@@ -144,6 +144,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
               );
             }
 
+            // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
             if (!AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId())) {
               // eslint-disable-next-line no-param-reassign
               arrayOfRecords = arrayOfRecords.filter((record) => record.featureIcon);
