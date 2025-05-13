@@ -56,15 +56,6 @@ export async function commonFetchAndSetServiceMetadata(layer: EsriDynamic | Esri
   // Set it
   // eslint-disable-next-line no-param-reassign
   layer.metadata = responseJson;
-
-  // Here, content is good
-  const copyrightText = layer.metadata.copyrightText as string;
-  const attributions = layer.getAttributions();
-  if (copyrightText && !attributions.includes(copyrightText)) {
-    // Add it
-    attributions.push(copyrightText);
-    layer.setAttributions(attributions);
-  }
 }
 
 /**
@@ -395,38 +386,36 @@ export async function commonProcessLayerMetadata<
   // The url
   let queryUrl = layer.metadataAccessPath;
 
-  if (queryUrl) {
-    if (layerConfig.geoviewLayerConfig.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_IMAGE)
-      queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
+  if (layerConfig.geoviewLayerConfig.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_IMAGE)
+    queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
 
-    // Fetch the layer metadata
-    const responseJson = await Fetch.fetchJsonAsObject(`${queryUrl}?f=json`);
+  // Fetch the layer metadata
+  const responseJson = await Fetch.fetchJsonAsObject(`${queryUrl}?f=json`);
 
-    // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.geoviewLayerConfig.geoviewLayerId, responseJson);
+  // Validate the metadata response
+  AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.geoviewLayerConfig.geoviewLayerId, responseJson);
 
-    // Set the layer metadata
-    layerConfig.setLayerMetadata(responseJson);
+  // Set the layer metadata
+  layerConfig.setLayerMetadata(responseJson);
 
-    // The following line allow the type ascention of the type guard functions on the second line below
-    if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
-      if (!layerConfig.layerStyle) {
-        const renderer = Cast<EsriBaseRenderer>(responseJson.drawingInfo?.renderer);
-        // eslint-disable-next-line no-param-reassign
-        if (renderer) layerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
-      }
+  // The following line allow the type ascention of the type guard functions on the second line below
+  if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
+    if (!layerConfig.layerStyle) {
+      const renderer = Cast<EsriBaseRenderer>(responseJson.drawingInfo?.renderer);
+      // eslint-disable-next-line no-param-reassign
+      if (renderer) layerConfig.layerStyle = getStyleFromEsriRenderer(renderer);
     }
-
-    if (responseJson.spatialReference && !Projection.getProjectionFromObj(responseJson.spatialReference)) {
-      await Projection.addProjection(responseJson.spatialReference);
-    }
-
-    commonProcessFeatureInfoConfig(layerConfig);
-
-    commonProcessInitialSettings(layerConfig);
-
-    commonProcessTemporalDimension(layerConfig, responseJson.timeInfo, layer.type === CONST_LAYER_TYPES.ESRI_IMAGE);
   }
+
+  if (responseJson.spatialReference && !Projection.getProjectionFromObj(responseJson.spatialReference)) {
+    await Projection.addProjection(responseJson.spatialReference);
+  }
+
+  commonProcessFeatureInfoConfig(layerConfig);
+
+  commonProcessInitialSettings(layerConfig);
+
+  commonProcessTemporalDimension(layerConfig, responseJson.timeInfo, layer.type === CONST_LAYER_TYPES.ESRI_IMAGE);
 
   return layerConfig;
 }

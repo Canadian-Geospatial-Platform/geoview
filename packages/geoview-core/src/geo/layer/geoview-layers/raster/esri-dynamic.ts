@@ -106,42 +106,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /**
-   * Creates an ImageArcGISRest source from a layer config.
-   * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration for the EsriDynamic layer.
-   * @returns A fully configured ImageArcGISRest source.
-   * @throws If required config fields like dataAccessPath are missing.
-   */
-  createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest {
-    const { source } = layerConfig;
-
-    if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
-    }
-
-    const sourceOptions: SourceOptions = {
-      url: source.dataAccessPath,
-      attributions: this.getAttributions(),
-      params: {
-        LAYERS: `show:${layerConfig.layerId}`,
-        ...(source.transparent !== undefined && { transparent: source.transparent }),
-        ...(source.format && { format: source.format }),
-      },
-      crossOrigin: source.crossOrigin ?? 'Anonymous',
-      projection: source.projection ? `EPSG:${source.projection}` : undefined,
-    };
-
-    const arcgisSource = new ImageArcGISRest(sourceOptions);
-
-    // Raster layers do not accept layerDefs — must be cleared
-    if (layerConfig.getServiceMetadata()?.layers?.[0]?.type === 'Raster Layer') {
-      const params = arcgisSource.getParams();
-      arcgisSource.updateParams({ ...params, layerDefs: '' });
-    }
-
-    return arcgisSource;
-  }
-
-  /**
    * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
    * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
    * @returns {boolean} true if an error is detected.
@@ -201,6 +165,42 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Creates an ImageArcGISRest source from a layer config.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration for the EsriDynamic layer.
+   * @returns A fully configured ImageArcGISRest source.
+   * @throws If required config fields like dataAccessPath are missing.
+   */
+  static createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest {
+    const { source } = layerConfig;
+
+    if (!source?.dataAccessPath) {
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+    }
+
+    const sourceOptions: SourceOptions = {
+      url: source.dataAccessPath,
+      attributions: layerConfig.getAttributions(),
+      params: {
+        LAYERS: `show:${layerConfig.layerId}`,
+        ...(source.transparent !== undefined && { transparent: source.transparent }),
+        ...(source.format && { format: source.format }),
+      },
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
+      projection: source.projection ? `EPSG:${source.projection}` : undefined,
+    };
+
+    const arcgisSource = new ImageArcGISRest(sourceOptions);
+
+    // Raster layers do not accept layerDefs — must be cleared
+    if (layerConfig.getServiceMetadata()?.layers?.[0]?.type === 'Raster Layer') {
+      const params = arcgisSource.getParams();
+      arcgisSource.updateParams({ ...params, layerDefs: '' });
+    }
+
+    return arcgisSource;
   }
 }
 

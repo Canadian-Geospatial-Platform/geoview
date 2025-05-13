@@ -1041,9 +1041,9 @@ export class LayerApi {
   #createGVLayer(mapId: string, geoviewLayer: AbstractGeoViewLayer, layerConfig: ConfigBaseClass): AbstractGVLayer | undefined {
     // Create the right GV Layer based on the OLLayer and config type
     let gvLayer;
-    if (geoviewLayer instanceof EsriDynamic && layerConfig instanceof EsriDynamicLayerEntryConfig) {
+    if (layerConfig instanceof EsriDynamicLayerEntryConfig) {
       // Create the source
-      const source = geoviewLayer.createEsriDynamicSource(layerConfig);
+      const source = EsriDynamic.createEsriDynamicSource(layerConfig);
       gvLayer = new GVEsriDynamic(mapId, source, layerConfig);
     } else if (layerConfig instanceof EsriImageLayerEntryConfig) {
       // Create the source
@@ -1061,9 +1061,9 @@ export class LayerApi {
       // Create the source
       const source = geoviewLayer.createImageWMSSource(layerConfig);
       gvLayer = new GVWMS(mapId, source, layerConfig);
-    } else if (geoviewLayer instanceof XYZTiles && layerConfig instanceof XYZTilesLayerEntryConfig) {
+    } else if (layerConfig instanceof XYZTilesLayerEntryConfig) {
       // Create the source
-      const source = geoviewLayer.createXYZSource(layerConfig);
+      const source = XYZTiles.createXYZSource(layerConfig);
       gvLayer = new GVXYZTiles(mapId, source, layerConfig);
     } else if (geoviewLayer instanceof AbstractGeoViewVector && layerConfig instanceof CsvLayerEntryConfig) {
       // Create the source

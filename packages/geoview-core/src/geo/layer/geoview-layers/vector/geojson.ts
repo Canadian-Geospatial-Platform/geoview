@@ -59,22 +59,15 @@ export class GeoJSON extends AbstractGeoViewVector {
   protected override async onFetchAndSetServiceMetadata(): Promise<void> {
     // If metadataAccessPath ends with .meta, .json or .geojson
     if (
-      this.metadataAccessPath.endsWith('.meta') ||
-      this.metadataAccessPath.endsWith('.json') ||
-      this.metadataAccessPath.endsWith('.geojson')
+      this.metadataAccessPath.toLowerCase().endsWith('.meta') ||
+      this.metadataAccessPath.toLowerCase().endsWith('.json') ||
+      this.metadataAccessPath.toLowerCase().endsWith('.geojson')
     ) {
       // Fetch it
       const metadataJson = await GeoJSON.fetchMetadata(this.metadataAccessPath);
 
       // Set it
       this.metadata = metadataJson;
-      const copyrightText = this.metadata.copyrightText as string;
-      const attributions = this.getAttributions();
-      if (copyrightText && !attributions.includes(copyrightText)) {
-        // Add it
-        attributions.push(copyrightText);
-        this.setAttributions(attributions);
-      }
     } else {
       // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
       logger.logWarning(

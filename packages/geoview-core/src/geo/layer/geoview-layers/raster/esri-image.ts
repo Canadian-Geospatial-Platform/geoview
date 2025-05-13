@@ -119,7 +119,7 @@ export class EsriImage extends AbstractGeoViewRaster {
 
     const sourceOptions: SourceOptions = {
       url: source.dataAccessPath,
-      attributions: [(layerConfig.getServiceMetadata()?.copyrightText as string) ?? ''],
+      attributions: layerConfig.getAttributions(),
       params: {
         LAYERS: `show:${layerConfig.layerId}`,
         ...(source.transparent !== undefined && { transparent: source.transparent }),

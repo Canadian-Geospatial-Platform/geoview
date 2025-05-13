@@ -256,7 +256,7 @@ export class GeoPackage extends AbstractGeoViewVector {
   ): Promise<[LayerData[], SldsInterface]> {
     const promisedGeopackageData = new Promise<[LayerData[], SldsInterface]>((resolve) => {
       const url = layerConfig.source!.dataAccessPath!;
-      const attributions = this.getAttributions();
+      const attributions = layerConfig.getAttributions();
       // eslint-disable-next-line no-param-reassign
       if (attributions.length > 0) sourceOptions.attributions = attributions;
       const layersInfo: LayerData[] = [];

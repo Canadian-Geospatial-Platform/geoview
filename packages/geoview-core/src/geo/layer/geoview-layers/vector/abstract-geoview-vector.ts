@@ -93,9 +93,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     readOptions: ReadOptions
   ): VectorSource<Feature> {
     // If any attributions
-    if (this.getAttributions().length > 0) {
+    if (layerConfig.getAttributions().length > 0) {
       // eslint-disable-next-line no-param-reassign
-      sourceOptions.attributions = this.getAttributions();
+      sourceOptions.attributions = layerConfig.getAttributions();
     }
 
     // Read strategy
