@@ -20,12 +20,11 @@ import { Projection } from '@/geo/utils/projection';
 export class GVXYZTiles extends AbstractGVTile {
   /**
    * Constructs a GVXYZTiles layer to manage an OpenLayer layer.
-   * @param {string} mapId - The map id
    * @param {XYZ} olSource - The OpenLayer source.
    * @param {XYZTilesLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olSource: XYZ, layerConfig: XYZTilesLayerEntryConfig) {
-    super(mapId, olSource, layerConfig);
+  public constructor(olSource: XYZ, layerConfig: XYZTilesLayerEntryConfig) {
+    super(olSource, layerConfig);
 
     // Create the tile layer options.
     const tileLayerOptions: TileOptions<XYZ> = { source: olSource };

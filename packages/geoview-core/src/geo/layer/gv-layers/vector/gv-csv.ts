@@ -11,11 +11,10 @@ import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vecto
 export class GVCSV extends AbstractGVVector {
   /**
    * Constructs a GVCSV layer to manage an OpenLayer layer.
-   * @param {string} mapId - The map id
    * @param {VectorSource} olSource - The OpenLayer source.
    * @param {CsvLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olSource: VectorSource, layerConfig: CsvLayerEntryConfig) {
-    super(mapId, olSource, layerConfig);
+  public constructor(olSource: VectorSource, layerConfig: CsvLayerEntryConfig) {
+    super(olSource, layerConfig);
   }
 }

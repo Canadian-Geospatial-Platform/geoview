@@ -25,11 +25,11 @@ import { CancelledError, NetworkError, PromiseRejectErrorWrapper } from '@/core/
 import { LayerDataAccessPathMandatoryError, LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerEntryConfigLayerIdNotFoundError,
-  LayerEntryConfigNoLayerProvidedError,
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { deepMergeObjects } from '@/core/utils/utilities';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -282,18 +282,30 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<ImageLayer<ImageWMS>>} The GeoView raster layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: OgcWmsLayerEntryConfig): Promise<ImageLayer<ImageWMS>> {
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig });
+    // Redirect
+    const layer = this.createGVLayer(layerConfig) as GVWMS;
 
-    // If any response
-    let olLayer: ImageLayer<ImageWMS>;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as ImageLayer<ImageWMS>;
-    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
+    // Cast
+    const olLayer = layer.getOLLayer();
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVWMS} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: OgcWmsLayerEntryConfig): GVWMS {
+    // Create the source
+    const source = this.createImageWMSSource(layerConfig);
+
+    // Create the GV Layer
+    const gvLayer = new GVWMS(source, layerConfig);
+
+    // Return it
+    return gvLayer;
   }
 
   /**

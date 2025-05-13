@@ -28,12 +28,11 @@ import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions
 export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Constructs a GeoView Vector layer to manage an OpenLayer layer.
-   * @param {string} mapId - The map id
    * @param {VectorSource<Feature<Geometry>>} olSource - The OpenLayer source.
    * @param {VectorLayerEntryConfig} layerConfig - The layer configuration.
    */
-  protected constructor(mapId: string, olSource: VectorSource<Feature<Geometry>>, layerConfig: VectorLayerEntryConfig) {
-    super(mapId, olSource, layerConfig);
+  protected constructor(olSource: VectorSource<Feature<Geometry>>, layerConfig: VectorLayerEntryConfig) {
+    super(olSource, layerConfig);
 
     // Get the style label in case we need it later
     const label = layerConfig.layerName || layerConfig.layerId;

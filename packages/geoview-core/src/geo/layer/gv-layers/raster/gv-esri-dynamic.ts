@@ -60,12 +60,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
-   * @param {string} mapId - The map id
    * @param {ImageArcGISRest} olSource - The OpenLayer source.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
-    super(mapId, olSource, layerConfig);
+  public constructor(olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
+    super(olSource, layerConfig);
 
     // TODO: Performance - Do we need worker pool or one worker per layer is enough. If a worker is already working we should terminate it
     // TO.DOCONT: and use the abort controller to cancel the fetch and start a new one. So every esriDynamic layer has it's own worker.

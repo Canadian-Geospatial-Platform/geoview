@@ -9,9 +9,6 @@ import { logger } from '@/core/utils/logger';
  * Abstract Base Layer managing an OpenLayer layer, including a layer group.
  */
 export abstract class AbstractBaseLayer {
-  // The map id
-  #mapId: string;
-
   // The layer configuration
   #layerConfig: ConfigBaseClass;
 
@@ -32,11 +29,9 @@ export abstract class AbstractBaseLayer {
 
   /**
    * Constructs a GeoView base layer to manage an OpenLayer layer, including group layers.
-   * @param {string} mapId - The map id
    * @param {ConfigBaseClass} layerConfig - The layer configuration.
    */
-  protected constructor(mapId: string, layerConfig: ConfigBaseClass) {
-    this.#mapId = mapId;
+  protected constructor(layerConfig: ConfigBaseClass) {
     this.#layerConfig = layerConfig;
     this.#layerName = layerConfig.layerName;
   }
@@ -53,14 +48,6 @@ export abstract class AbstractBaseLayer {
   public getClassName(): string {
     // Return the name of the class
     return this.constructor.name;
-  }
-
-  /**
-   * Gets the Map Id
-   * @returns The Map id
-   */
-  getMapId(): string {
-    return this.#mapId;
   }
 
   /**

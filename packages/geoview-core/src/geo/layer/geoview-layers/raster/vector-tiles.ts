@@ -20,10 +20,8 @@ import { Projection } from '@/geo/utils/projection';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
-import {
-  LayerEntryConfigNoLayerProvidedError,
-  LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError,
-} from '@/core/exceptions/layer-entry-config-exceptions';
+import { LayerEntryConfigVectorTileProjectionNotMatchingMapProjectionError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -50,12 +48,17 @@ export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'lis
  * @class VectorTiles
  */
 export class VectorTiles extends AbstractGeoViewRaster {
+  // TODO: Refactor - Review the purpose of this property
+  /** Fallback projection (the map projection) */
+  fallbackProjection: string;
+
   /**
    * Constructs a VectorTiles Layer configuration processor.
    * @param {TypeVectorTilesConfig} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeVectorTilesConfig) {
+  constructor(layerConfig: TypeVectorTilesConfig, fallbackProjection: string) {
     super(CONST_LAYER_TYPES.VECTOR_TILES, layerConfig);
+    this.fallbackProjection = fallbackProjection;
   }
 
   /**
@@ -117,15 +120,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {Promise<VectorTileLayer<VectorTileSource>>} The GeoView raster layer that has been created.
    */
   protected override onProcessOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTileLayer<VectorTileSource>> {
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig });
+    // Redirect
+    const layer = this.createGVLayer(layerConfig) as GVVectorTiles;
 
-    // If any response
-    let olLayer: VectorTileLayer<VectorTileSource>;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as VectorTileLayer<VectorTileSource>;
-    } else throw new LayerEntryConfigNoLayerProvidedError(layerConfig);
+    // Cast
+    const olLayer = layer.getOLLayer();
 
     // TODO: Refactor - Layers refactoring. What is this doing? See how we can do this in the new layers. Can it be done before?
     const resolutions = olLayer.getSource()?.getTileGrid()?.getResolutions();
@@ -145,6 +144,22 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
     // Return the OpenLayer layer
     return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVVectorTiles} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: VectorTilesLayerEntryConfig): GVVectorTiles {
+    // Create the source
+    const source = VectorTiles.createVectorTileSource(layerConfig, this.fallbackProjection);
+
+    // Create the GV Layer
+    const gvLayer = new GVVectorTiles(source, layerConfig);
+
+    // Return it
+    return gvLayer;
   }
 
   /**

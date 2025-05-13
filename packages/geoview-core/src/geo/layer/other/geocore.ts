@@ -49,7 +49,7 @@ export class GeoCore {
     const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.#displayLanguage, [uuid.split(':')[0]]);
 
     // Validate the generated Geoview Layer Config
-    ConfigValidation.validateListOfGeoviewLayerConfig(this.#displayLanguage, response.layers);
+    ConfigValidation.validateListOfGeoviewLayerConfig(response.layers);
 
     // For each found geochart associated with the Geocore UUIDs
     response.geocharts?.forEach((geochartConfig) => {

@@ -31,12 +31,11 @@ import { TypeJsonArray } from '@/api/config/types/config-types';
 export class GVEsriImage extends AbstractGVRaster {
   /**
    * Constructs a GVEsriImage layer to manage an OpenLayer layer.
-   * @param {string} mapId - The map id
    * @param {ImageArcGISRest} olSource - The OpenLayer source.
    * @param {EsriImageLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olSource: ImageArcGISRest, layerConfig: EsriImageLayerEntryConfig) {
-    super(mapId, olSource, layerConfig);
+  public constructor(olSource: ImageArcGISRest, layerConfig: EsriImageLayerEntryConfig) {
+    super(olSource, layerConfig);
 
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageArcGISRest> = {

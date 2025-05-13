@@ -25,6 +25,7 @@ import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
+import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -152,9 +153,9 @@ export class GeoJSON extends AbstractGeoViewVector {
 
   /**
    * Overrides the creation of the source configuration for the vector layer.
-   * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration.
-   * @param {SourceOptions} sourceOptions The source options.
-   * @param {ReadOptions} readOptions The read options.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @param {SourceOptions} sourceOptions - The source options.
+   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override onCreateVectorSource(
@@ -171,6 +172,20 @@ export class GeoJSON extends AbstractGeoViewVector {
 
     // Call parent
     return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {GeoJSONLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVGeoJSON} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: GeoJSONLayerEntryConfig): GVGeoJSON {
+    // Create the source
+    const source = this.createVectorSource(layerConfig);
+    // Create the GV Layer
+    const gvLayer = new GVGeoJSON(source, layerConfig);
+    // Return it
+    return gvLayer;
   }
 
   /**

@@ -26,6 +26,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { LayerNoCapabilitiesError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -182,9 +183,9 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Overrides the creation of the source configuration for the vector layer
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
-   * @param {SourceOptions} sourceOptions The source options.
-   * @param {ReadOptions} readOptions The read options.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @param {SourceOptions} sourceOptions - The source options.
+   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected override onCreateVectorSource(
@@ -217,6 +218,20 @@ export class WFS extends AbstractGeoViewVector {
 
     // Call parent
     return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {WfsLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVWFS} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: WfsLayerEntryConfig): GVWFS {
+    // Create the source
+    const source = this.createVectorSource(layerConfig);
+    // Create the GV Layer
+    const gvLayer = new GVWFS(source, layerConfig);
+    // Return it
+    return gvLayer;
   }
 
   /**
