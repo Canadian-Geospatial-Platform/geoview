@@ -14,7 +14,7 @@ import { isvalidComparedToInternalSchema } from '@/api/config/utils';
 import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
-import { fetchJson } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
 
 // ====================
@@ -107,7 +107,7 @@ export class OgcFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       const queryUrl = metadataUrl.endsWith('/')
         ? `${metadataUrl}collections/${this.layerId}/queryables?f=json`
         : `${metadataUrl}/collections/${this.layerId}/queryables?f=json`;
-      const queryResult = await fetchJson(queryUrl);
+      const queryResult = await Fetch.fetchJsonAsObject(queryUrl);
       if (queryResult.data.properties) {
         this.setLayerMetadata(queryResult);
         // Parse the raw layer metadata and build the geoview configuration.

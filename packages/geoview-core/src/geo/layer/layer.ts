@@ -877,7 +877,7 @@ export class LayerApi {
       // Create the corresponding GVLayer. If group layer was created
       if (event.layer instanceof LayerGroup && event.config instanceof GroupLayerEntryConfig) {
         // Create the GV Group Layer
-        this.#createGVGroupLayer(this.getMapId(), event.layer, event.config);
+        this.#createGVGroupLayer(event.layer, event.config);
       }
     });
 
@@ -954,15 +954,14 @@ export class LayerApi {
 
   /**
    * Creates a GVLayer based on the provided OLLayer and layer config.
-   * @param mapId - The map id
    * @param geoviewLayer - The GeoView layer (just to retrieve config-calculated information from it)
    * @param olLayer - The OpenLayer layer
    * @param config - The layer config
    * @returns A new GV Layer which is kept track of in LayerApi and initialized
    */
-  #createGVGroupLayer(mapId: string, olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig): GVGroupLayer | undefined {
+  #createGVGroupLayer(olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig): GVGroupLayer | undefined {
     // Create the GV Group Layer
-    const gvGroupLayer = new GVGroupLayer(mapId, olLayerGroup, layerConfig);
+    const gvGroupLayer = new GVGroupLayer(olLayerGroup, layerConfig);
 
     // Keep track
     this.#gvLayers[layerConfig.layerPath] = gvGroupLayer;
