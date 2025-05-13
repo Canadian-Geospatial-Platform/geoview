@@ -447,6 +447,11 @@
               }
             ]
           }
+        },
+        "showUnsymbolizedFeatures": {
+          "description": "Whether or not to show unsymbolized features.",
+          "type": "boolean",
+          "default": false
         }
       }
     },

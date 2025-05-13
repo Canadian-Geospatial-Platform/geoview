@@ -206,7 +206,11 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
     proxyUrl: CV_CONFIG_PROXY_URL,
     metadataUrl: CV_CONFIG_METADATA_RECORDS_URL,
   },
-  globalSettings: { canRemoveSublayers: true, disabledLayerTypes: [] },
+  globalSettings: {
+    canRemoveSublayers: true,
+    disabledLayerTypes: [],
+    showUnsymbolizedFeatures: false,
+  },
   schemaVersionUsed: '1.0',
 });
 

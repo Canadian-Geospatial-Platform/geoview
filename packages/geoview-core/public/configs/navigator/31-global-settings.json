@@ -11,6 +11,10 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8",
+        "geoviewLayerType": "geoCore"
+      },
+      {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "GeoJSON Sample",
         "metadataAccessPath": "./datasets/geojson/metadata.meta",
@@ -88,6 +92,7 @@
       "ogcWms",
       "imageStatic",
       "vectorTiles"
-    ]
+    ],
+    "showUnsymbolizedFeatures": true
   }
 }
