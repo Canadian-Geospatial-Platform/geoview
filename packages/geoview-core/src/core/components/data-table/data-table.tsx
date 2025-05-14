@@ -426,6 +426,16 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
   // Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components Error Component Stack
 
   let useTable: MRTTableInstance<ColumnsType> | null = null;
+
+  // Filter the pinned columns. If one of these is not visible and is pinned
+  // it will cause the data-table to not work properly
+  const getPinnedColumns = useCallback(() => {
+    return ['ICON', 'ZOOM', 'DETAILS'].filter(column => 
+      useTable?.getState().columnVisibility?.[column] !== false
+  );
+  
+  }, [useTable]);
+
   // Create the Material React Table
   useTable = useMaterialReactTable({
     columns,
@@ -445,7 +455,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
       columnFilters,
       density,
       showColumnFilters,
-      columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
+      columnPinning: { left: getPinnedColumns() },
       globalFilter,
     },
     enableColumnFilterModes: true,
