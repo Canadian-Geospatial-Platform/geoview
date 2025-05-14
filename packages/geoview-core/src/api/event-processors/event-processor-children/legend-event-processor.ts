@@ -14,7 +14,8 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { MapEventProcessor } from './map-event-processor';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -137,19 +138,18 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The layer path
    * @param {string[]} objectIds - The IDs of features to get extents from.
    * @param {string} outfield - ID field to return for services that require a value in outfields.
-   * @returns {Promise<Extent | undefined>} The extent of the feature, if available
+   * @returns {Promise<Extent>} The extent of the feature, if available
    */
-  static getExtentFromFeatures(
-    mapId: string,
-    layerPath: string,
-    objectIds: string[],
-    outfield?: string
-  ): Promise<Extent | undefined> | undefined {
+  static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[], outfield?: string): Promise<Extent> {
     // Get the layer api
     const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
 
+    // Get the layer
+    const layer = layerApi.getGeoviewLayer(layerPath);
+    if (!layer) throw new LayerNotFoundError(layerPath);
+
     // Get extent from features calling the GV Layer method
-    return layerApi.getGeoviewLayer(layerPath)?.getExtentFromFeatures(objectIds, layerApi.mapViewer.getProjection(), outfield);
+    return layer.getExtentFromFeatures(objectIds, layerApi.mapViewer.getProjection(), outfield);
   }
 
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {

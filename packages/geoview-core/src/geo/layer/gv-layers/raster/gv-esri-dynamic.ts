@@ -37,7 +37,7 @@ import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
-import { NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
+import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
@@ -983,41 +983,41 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
-   * @returns {Promise<Extent | undefined>} The extent of the features, if available.
+   * @returns {Promise<Extent>} The extent of the features, if available.
    */
-  override async getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent | undefined> {
+  override async getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig();
     let baseUrl = layerEntryConfig.source.dataAccessPath;
 
+    // If no base url
+    if (!baseUrl) throw new NoExtentError(this.getLayerPath());
+
+    // Construct query
+    if (!baseUrl.endsWith('/')) baseUrl += '/';
+
+    // Use the returnExtentOnly=true to get only the extent of ids
+    // TODO: We should return a real extent geometry Projection.transformAndDensifyExtent
     const idString = objectIds.join('%2C');
-    if (baseUrl) {
-      // Construct query
-      if (!baseUrl.endsWith('/')) baseUrl += '/';
+    const outfieldQuery = outfield ? `&outFields=${outfield}` : '';
+    const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&objectIds=${idString}${outfieldQuery}&returnExtentOnly=true`;
 
-      // Use the returnExtentOnly=true to get only the extent of ids
-      // TODO: We should return a real extent geometry Projection.transformAndDensifyExtent
-      const outfieldQuery = outfield ? `&outFields=${outfield}` : '';
-      const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&objectIds=${idString}${outfieldQuery}&returnExtentOnly=true`;
+    // Fetch
+    const responseJson = await Fetch.fetchJsonAsObject(queryUrl);
+    const { extent } = responseJson;
 
-      try {
-        const responseJson = await Fetch.fetchJsonAsObject(queryUrl);
-        const { extent } = responseJson;
+    const projectionExtent: OLProjection | undefined = Projection.getProjectionFromObj(extent.spatialReference);
 
-        const projectionExtent: OLProjection | undefined = Projection.getProjectionFromObj(extent.spatialReference);
-
-        if (extent && projectionExtent) {
-          const projExtent = Projection.transformExtentFromProj(
-            [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number],
-            projectionExtent,
-            outProjection
-          );
-          return validateExtent(projExtent, outProjection.getCode());
-        }
-      } catch (error: unknown) {
-        logger.logError(`Error fetching geometry from ${queryUrl}`, error);
-      }
+    if (extent && projectionExtent) {
+      const projExtent = Projection.transformExtentFromProj(
+        [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number],
+        projectionExtent,
+        outProjection
+      );
+      return validateExtent(projExtent, outProjection.getCode());
     }
-    return undefined;
+
+    // Throw
+    throw new NoExtentError(this.getLayerPath());
   }
 }
