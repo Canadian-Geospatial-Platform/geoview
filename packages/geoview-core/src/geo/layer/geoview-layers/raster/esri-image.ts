@@ -1,6 +1,5 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
-import { Image as ImageLayer } from 'ol/layer';
 
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -44,22 +43,6 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   protected override onProcessLayerMetadata(layerConfig: EsriImageLayerEntryConfig): Promise<EsriImageLayerEntryConfig> {
     return commonProcessLayerMetadata(this, layerConfig);
-  }
-
-  /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @returns {Promise<ImageLayer<ImageArcGISRest>>} The GeoView raster layer that has been created.
-   */
-  protected override onProcessOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
-    // Redirect
-    const layer = this.createGVLayer(layerConfig) as GVEsriImage;
-
-    // Cast
-    const olLayer = layer.getOLLayer();
-
-    // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
   }
 
   /**

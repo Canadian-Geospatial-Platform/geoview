@@ -1,4 +1,3 @@
-import TileLayer from 'ol/layer/Tile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 
@@ -140,22 +139,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
     // Return the layer config
     return Promise.resolve(layerConfig);
-  }
-
-  /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @returns {Promise<TileLayer<XYZ>>} The GeoView raster layer that has been created.
-   */
-  protected override onProcessOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TileLayer<XYZ>> {
-    // Redirect
-    const layer = this.createGVLayer(layerConfig) as GVXYZTiles;
-
-    // Cast
-    const olLayer = layer.getOLLayer();
-
-    // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
   }
 
   /**

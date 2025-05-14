@@ -30,7 +30,9 @@ import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/laye
 import { SnackbarType } from '@/core/utils/notifications';
 import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -61,6 +63,7 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
  * 3. onValidateLayerEntryConfig
  * 4. onProcessLayerMetadata
  * 5. onProcessOneLayerEntry
+ * 6. onCreateGVLayer
  *
  */
 export abstract class AbstractGeoViewLayer {
@@ -114,10 +117,10 @@ export abstract class AbstractGeoViewLayer {
   #onLayerConfigCreatedHandlers: LayerConfigCreatedDelegate[] = [];
 
   // Keep all callback delegate references
-  #onLayerGVCreatedHandlers: LayerGVCreatedDelegate[] = [];
+  #onLayerGroupCreatedHandlers: LayerGroupCreatedDelegate[] = [];
 
   // Keep all callback delegate references
-  #onLayerCreationHandlers: LayerCreationDelegate[] = [];
+  #onLayerGVCreatedHandlers: LayerGVCreatedDelegate[] = [];
 
   // Keep all callback delegates references
   #onIndividualLayerLoadedHandlers: IndividualLayerLoadedDelegate[] = [];
@@ -210,9 +213,6 @@ export abstract class AbstractGeoViewLayer {
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
 
-    // Log
-    logger.logTraceCore(`LAYERS - 2 - Creating GeoViewLayers for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
-
     // Try to get a key for logging timings
     let logTimingsKey;
     if (this.listOfLayerEntryConfig.length > 0) logTimingsKey = `${this.geoviewLayerId} | ${this.listOfLayerEntryConfig[0].layerPath}`;
@@ -240,7 +240,10 @@ export abstract class AbstractGeoViewLayer {
     if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to get additional service definition');
 
     // Process list of layers and await
-    this.olRootLayer = await this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+    const layer = await this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+
+    // Keep the OL reference
+    this.olRootLayer = layer?.getOLLayer();
 
     // Log the time it took thus far
     if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
@@ -256,7 +259,7 @@ export abstract class AbstractGeoViewLayer {
       // If there's a metadata access path
       if (this.metadataAccessPath) {
         // Log
-        logger.logTraceCore(`LAYERS - 3 - Fetching and setting service metadata for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
+        logger.logTraceCore(`LAYERS - 2 - Fetching and setting service metadata for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
 
         // Process and, yes, keep the await here, because we want to make extra sure the onFetchAndSetServiceMetadata is
         // executed asynchronously, even if the implementation of the overriden method is synchronous.
@@ -299,7 +302,7 @@ export abstract class AbstractGeoViewLayer {
    */
   validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     // Log
-    logger.logTraceCore(`LAYERS - 4 - Validating list of layer entry configs for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
+    logger.logTraceCore(`LAYERS - 3 - Validating list of layer entry configs for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
 
     // When no metadata is provided, there's no validation to be done.
     if (!this.metadata) return;
@@ -392,7 +395,7 @@ export abstract class AbstractGeoViewLayer {
   async #processListOfLayerMetadata(listOfLayerEntryConfig: ConfigBaseClass[]): Promise<void> {
     // Log
     logger.logTraceCore(
-      `LAYERS - 5 - Processing list of layer entry metadata, building promises, for: ${this.geoviewLayerId}}`,
+      `LAYERS - 4 - Processing list of layer entry metadata, building promises, for: ${this.geoviewLayerId}}`,
       listOfLayerEntryConfig
     );
 
@@ -405,7 +408,7 @@ export abstract class AbstractGeoViewLayer {
 
     // Log
     logger.logTraceCore(
-      `LAYERS - 6 - Processing list of layer entry metadata, promises done, for: ${this.geoviewLayerId}`,
+      `LAYERS - 5 - Processing list of layer entry metadata, promises done, for: ${this.geoviewLayerId}`,
       listOfLayerEntryConfig
     );
 
@@ -524,8 +527,8 @@ export abstract class AbstractGeoViewLayer {
   // TO.DOCONT: throw an exception in the undefined cases instead and let the exception be managed higher.
   async #processListOfLayerEntryConfig(
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
-    layerGroup?: LayerGroup
-  ): Promise<BaseLayer | undefined> {
+    layerGroup?: GVGroupLayer
+  ): Promise<AbstractBaseLayer | undefined> {
     // Log
     logger.logTraceCore(`LAYERS - 8 - Loading list of layer entry for the Open Layer, for: ${this.geoviewLayerId}`, listOfLayerEntryConfig);
 
@@ -542,7 +545,7 @@ export abstract class AbstractGeoViewLayer {
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
           const groupReturned = await this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup);
           if (groupReturned) {
-            if (layerGroup) layerGroup.getLayers().push(groupReturned);
+            if (layerGroup) layerGroup.getOLLayer().getLayers().push(groupReturned.getOLLayer());
             return groupReturned;
           }
 
@@ -553,8 +556,8 @@ export abstract class AbstractGeoViewLayer {
 
         try {
           // Process entry and catch possible error
-          const baseLayer = await this.#processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig);
-          if (layerGroup) layerGroup.getLayers().push(baseLayer);
+          const baseLayer = await this.#processOneLayerEntry(layerConfig);
+          if (layerGroup) layerGroup.getOLLayer().getLayers().push(baseLayer.getOLLayer());
           return layerGroup || baseLayer;
         } catch (error: unknown) {
           // Add a layer load error
@@ -568,14 +571,11 @@ export abstract class AbstractGeoViewLayer {
       if (!layerGroup) {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
         // eslint-disable-next-line no-param-reassign
-        layerGroup = this.createLayerGroup(
-          listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
-          listOfLayerEntryConfig[0].initialSettings!
-        );
+        layerGroup = this.createLayerGroup(listOfLayerEntryConfig[0].parentLayerConfig!, listOfLayerEntryConfig[0].initialSettings!);
       }
 
-      // TODO: Refactor - Rework this Promise to be "Promise<BaseLayer>"
-      const promiseOfLayerCreated: Promise<BaseLayer | undefined>[] = [];
+      // TODO: Refactor - Rework this Promise to be "Promise<AbstractBaseLayer>"
+      const promiseOfLayerCreated: Promise<AbstractBaseLayer | undefined>[] = [];
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) {
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings);
@@ -603,7 +603,7 @@ export abstract class AbstractGeoViewLayer {
       listOfLayerCreated
         .filter((layer) => !!layer)
         .forEach((layer) => {
-          layerGroup!.getLayers().push(layer);
+          layerGroup!.getOLLayer().getLayers().push(layer.getOLLayer());
         });
 
       return layerGroup;
@@ -623,7 +623,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
    * @private
    */
-  #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer> {
+  #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayer> {
     // Indicate that the layer config has entered the 'loading' status
     layerConfig.setLayerStatusLoading();
 
@@ -632,11 +632,17 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
+   * Overridable method to process a layer entry and return a Promise of an Open Layer Base Layer object.
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
    */
-  protected abstract onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer>;
+  protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayer> {
+    // Redirect
+    const layer = this.createGVLayer(layerConfig);
+
+    // Return the layer
+    return Promise.resolve(layer);
+  }
 
   /**
    * Creates a GV Layer from a layer configuration.
@@ -663,11 +669,11 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Creates a layer group.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {GroupLayerEntryConfig} layerConfig The layer group configuration.
    * @param {TypeLayerInitialSettings } initialSettings Initial settings to apply to the layer.
    * @returns {LayerGroup} A new layer group.
    */
-  protected createLayerGroup(layerConfig: TypeLayerEntryConfig, initialSettings: TypeLayerInitialSettings): LayerGroup {
+  protected createLayerGroup(layerConfig: GroupLayerEntryConfig, initialSettings: TypeLayerInitialSettings): GVGroupLayer {
     const layerGroupOptions: LayerGroupOptions = {
       layers: new Collection(),
       properties: { layerConfig },
@@ -678,11 +684,14 @@ export abstract class AbstractGeoViewLayer {
     // Create the OpenLayer layer
     const layerGroup = new LayerGroup(layerGroupOptions);
 
+    // Create the GV Group Layer
+    const gvGroupLayer = new GVGroupLayer(layerGroup, layerConfig);
+
     // Emit about it
-    this.emitLayerCreation({ config: layerConfig, layer: layerGroup });
+    this.emitLayerGroupCreated({ layer: gvGroupLayer });
 
     // Return it
-    return layerGroup;
+    return gvGroupLayer;
   }
 
   /**
@@ -936,31 +945,30 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerCreationEvent} event The event to emit
+   * @param {LayerGroupCreatedEvent} event The event to emit
    * @private
    */
-  // TODO: Rename this event to emitLayerGroupCreation
-  protected emitLayerCreation(event: LayerCreationEvent): void {
+  protected emitLayerGroupCreated(event: LayerGroupCreatedEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerCreationHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerGroupCreatedHandlers, event);
   }
 
   /**
    * Registers a layer creation event handler.
-   * @param {LayerCreationDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LayerGroupCreatedDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onLayerCreation(callback: LayerCreationDelegate): void {
+  onLayerGroupCreated(callback: LayerGroupCreatedDelegate): void {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerCreationHandlers, callback);
+    EventHelper.onEvent(this.#onLayerGroupCreatedHandlers, callback);
   }
 
   /**
    * Unregisters a layer creation event handler.
-   * @param {LayerCreationDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LayerGroupCreatedDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offLayerCreation(callback: LayerCreationDelegate): void {
+  offLayerGroupCreated(callback: LayerGroupCreatedDelegate): void {
     // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerCreationHandlers, callback);
+    EventHelper.offEvent(this.#onLayerGroupCreatedHandlers, callback);
   }
 
   /**
@@ -1140,17 +1148,15 @@ type LayerGVCreatedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerGVCre
 /**
  * Define an event for the delegate
  */
-export type LayerCreationEvent = {
-  // The configuration associated with the created layer
-  config: ConfigBaseClass;
-  // The created layer
-  layer: BaseLayer;
+export type LayerGroupCreatedEvent = {
+  // The created layer group
+  layer: GVGroupLayer;
 };
 
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerCreationDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerCreationEvent, void>;
+type LayerGroupCreatedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerGroupCreatedEvent, void>;
 
 export interface TypeWmsLegendStyle {
   name: string;

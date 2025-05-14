@@ -3,7 +3,6 @@ import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
-import BaseLayer from 'ol/layer/Base';
 import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import { Point } from 'ol/geom';
 import { Extent } from 'ol/extent';
@@ -26,7 +25,6 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { LayerDataAccessPathMandatoryError, LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
-import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -40,23 +38,6 @@ const NAME_FIELD_KEYWORDS = ['^name$', '^title$', '^label$'];
  * The AbstractGeoViewVector class.
  */
 export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
-  /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
-   */
-  protected override onProcessOneLayerEntry(layerConfig: VectorLayerEntryConfig): Promise<BaseLayer> {
-    // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
-    // Create the GV Layer
-    const layer = this.createGVLayer(layerConfig) as AbstractGVVector;
-
-    // Cast
-    const olLayer = layer.getOLLayer();
-
-    // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
-  }
-
   /**
    * Creates a VectorSource from a layer config.
    * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.

@@ -1,4 +1,3 @@
-import VectorTileLayer from 'ol/layer/VectorTile';
 import VectorTileSource, { Options as SourceOptions } from 'ol/source/VectorTile';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 
@@ -119,22 +118,19 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<VectorTileLayer<VectorTileSource>>} The GeoView raster layer that has been created.
    */
-  protected override onProcessOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTileLayer<VectorTileSource>> {
-    // Redirect
-    const layer = this.createGVLayer(layerConfig) as GVVectorTiles;
-
-    // Cast
-    const olLayer = layer.getOLLayer();
+  protected override async onProcessOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<GVVectorTiles> {
+    // Sure call parent
+    const layer = (await super.onProcessOneLayerEntry(layerConfig)) as GVVectorTiles;
 
     // TODO: Refactor - Layers refactoring. What is this doing? See how we can do this in the new layers. Can it be done before?
-    const resolutions = olLayer.getSource()?.getTileGrid()?.getResolutions();
+    const resolutions = layer.getOLSource()?.getTileGrid()?.getResolutions();
 
     let appliedStyle = layerConfig.styleUrl || (this.metadata?.defaultStyles as string);
 
     if (appliedStyle) {
       if (!appliedStyle.endsWith('/root.json')) appliedStyle = `${appliedStyle}/root.json`;
 
-      applyStyle(olLayer, appliedStyle, {
+      applyStyle(layer.getOLLayer(), appliedStyle, {
         resolutions: resolutions?.length ? resolutions : [],
       }).catch((error: unknown) => {
         // Log
@@ -142,8 +138,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
       });
     }
 
-    // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
+    // Return the layer
+    return layer;
   }
 
   /**
@@ -190,6 +186,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     };
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new VectorTilesLayerEntryConfig({
+        geoviewLayerConfig,
         schemaTag: CONST_LAYER_TYPES.VECTOR_TILES,
         entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
         layerId: layerEntry.id as string,
@@ -197,7 +194,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         source: {
           dataAccessPath: metadataAccessPath,
         },
-      } as VectorTilesLayerEntryConfig);
+      } as unknown as VectorTilesLayerEntryConfig);
       return layerEntryConfig;
     });
 
