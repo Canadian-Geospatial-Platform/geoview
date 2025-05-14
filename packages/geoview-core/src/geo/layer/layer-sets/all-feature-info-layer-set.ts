@@ -1,3 +1,4 @@
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { QueryType, TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -141,6 +142,12 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
                 this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig,
                 arrayOfRecords
               );
+            }
+
+            // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
+            if (!AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId())) {
+              // eslint-disable-next-line no-param-reassign
+              arrayOfRecords = arrayOfRecords.filter((record) => record.featureIcon);
             }
 
             // Keep the features retrieved
