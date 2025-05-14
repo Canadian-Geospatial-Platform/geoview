@@ -995,7 +995,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (homeView!.extent) {
       const lnglatExtent = homeView!.extent as Extent;
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
-      extent = isExtentLngLat(extent)
+      extent = isExtentLngLat(lnglatExtent)
         ? Projection.transformExtentFromProj(
             lnglatExtent,
             Projection.getProjectionLngLat(),
@@ -1016,6 +1016,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         Projection.getProjectionLngLat(),
         Projection.getProjectionFromString(`EPSG:${currProjection}`)
       );
+
     return this.zoomToExtent(mapId, extent, options);
   }
 
