@@ -61,7 +61,7 @@ export default i18n;
  */
 export const createI18nInstance = async (language: TypeDisplayLanguage) => {
   const i18nInstance = i18n.createInstance();
-  
+
   await i18nInstance
     .use(initReactI18next)
     .init({

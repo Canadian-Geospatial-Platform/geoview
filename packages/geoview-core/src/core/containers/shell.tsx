@@ -56,7 +56,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getShellSxClasses(theme), [theme]);
-  logger.logDebug('test')
+
   // State render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
   const [modalProps, setModalProps] = useState<TypeModalProps>();
