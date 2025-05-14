@@ -55,9 +55,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
   // The default hit tolerance the query should be using
   static override DEFAULT_HIT_TOLERANCE: number = 7;
 
-  // Override the hit tolerance for a GVEsriDynamic layer
-  override hitTolerance: number = GVEsriDynamic.DEFAULT_HIT_TOLERANCE;
-
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
    * @param {ImageArcGISRest} olSource - The OpenLayer source.
@@ -166,6 +163,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
   override getLayerConfig(): EsriDynamicLayerEntryConfig {
     // Call parent and cast
     return super.getLayerConfig() as EsriDynamicLayerEntryConfig;
+  }
+
+  /**
+   * Overrides the hit tolerance of the layer
+   * @returns {number} The hit tolerance for a GV Esri Dynamic layer
+   */
+  override getHitTolerance(): number {
+    // Override the hit tolerance for a GVEsriDynamic layer
+    return GVEsriDynamic.DEFAULT_HIT_TOLERANCE;
   }
 
   /**
@@ -350,7 +356,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Identify query to get oid features value and attributes, at this point we do not query geometry
     identifyUrl =
-      `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
+      `${identifyUrl}identify?f=json&tolerance=${this.getHitTolerance()}` +
       `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
       `&imageDisplay=${size[0]},${size[1]},96` +
       `&layers=visible:${layerConfig.layerId}` +

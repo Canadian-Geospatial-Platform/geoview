@@ -317,7 +317,7 @@ export abstract class ConfigBaseClass {
     if (pathEnding === undefined)
       pathEnding =
         layerConfig.layerIdExtension === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerIdExtension}`;
-    if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig!.geoviewLayerId!}/${pathEnding}`;
+    if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig.geoviewLayerId}/${pathEnding}`;
     return this.#evaluateLayerPath(
       layerConfig.parentLayerConfig as GroupLayerEntryConfig,
       `${(layerConfig.parentLayerConfig as GroupLayerEntryConfig).layerId}/${pathEnding}`

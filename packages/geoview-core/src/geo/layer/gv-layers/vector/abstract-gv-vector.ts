@@ -128,7 +128,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     };
 
     // Query the map using the layer filter and a hit tolerance
-    const features = this.getMapViewer().map.getFeaturesAtPixel(location, { hitTolerance: this.hitTolerance, layerFilter }) as Feature[];
+    const features = this.getMapViewer().map.getFeaturesAtPixel(location, {
+      hitTolerance: this.getHitTolerance(),
+      layerFilter,
+    }) as Feature[];
 
     // Format and return the features
     return Promise.resolve(this.formatFeatureInfoResult(features, this.getLayerConfig()));
