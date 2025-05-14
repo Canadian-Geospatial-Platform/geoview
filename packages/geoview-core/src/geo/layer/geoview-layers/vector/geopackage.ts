@@ -2,10 +2,6 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { WKB as FormatWKB } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
-import BaseLayer from 'ol/layer/Base';
-import LayerGroup from 'ol/layer/Group';
-import { Geometry } from 'ol/geom';
-import VectorLayer from 'ol/layer/Vector';
 import { Feature } from 'ol';
 import { ProjectionLike } from 'ol/proj';
 
@@ -33,7 +29,9 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
 import { logger } from '@/core/utils/logger';
 import { LayerNotCreatedError } from '@/core/exceptions/layer-exceptions';
 import { formatError, NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
@@ -100,12 +98,12 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
    * @returns {Promise<BaseLayer>} The GeoView base layer that has been created.
    */
-  protected override onProcessOneLayerEntry(layerConfig: VectorLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer> {
+  protected override onProcessOneLayerEntry(layerConfig: VectorLayerEntryConfig, layerGroup?: GVGroupLayer): Promise<AbstractBaseLayer> {
     // TODO: Refactor - This function implementation needs revision, because it doesn't return a single 'BaseLayer', it can
     // TO.DOCONT: create more than one layer which seems to differ from the other layer classes.
 
     // Prepare a promise
-    const promisedLayers = new Promise<BaseLayer>((resolve, reject) => {
+    const promisedLayers = new Promise<AbstractBaseLayer>((resolve, reject) => {
       GeoPackage.#extractGeopackageData(layerConfig)
         .then(async ([layers, slds]) => {
           if (layers.length === 1) {
@@ -115,7 +113,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                   // Set the layer status to processed
                   layerConfig.setLayerStatusProcessed();
 
-                  if (layerGroup) layerGroup.getLayers().push(baseLayer);
+                  if (layerGroup) layerGroup.getOLLayer().getLayers().push(baseLayer.getOLLayer());
                   resolve(layerGroup || baseLayer);
                 } else {
                   // Throw error
@@ -131,13 +129,13 @@ export class GeoPackage extends AbstractGeoViewVector {
             layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
             // eslint-disable-next-line no-param-reassign
             (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
-            const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
+            const newLayerGroup = this.createLayerGroup(layerConfig as unknown as GroupLayerEntryConfig, layerConfig.initialSettings!);
 
             // For each layer
-            const promises: Promise<BaseLayer>[] = [];
+            const promises: Promise<AbstractGVLayer>[] = [];
             for (let i = 0; i < layers.length; i++) {
               promises.push(
-                new Promise<BaseLayer>((resolve2, reject2) => {
+                new Promise((resolve2, reject2) => {
                   // "Clone" the config, patch until that layer type logic is rebuilt
                   const newLayerEntryConfig = layerConfig.clone() as VectorLayerEntryConfig;
                   newLayerEntryConfig.layerId = layers[i].name;
@@ -149,7 +147,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                     .then((baseLayer) => {
                       if (baseLayer) {
                         (layerConfig as unknown as GroupLayerEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
-                        newLayerGroup.getLayers().push(baseLayer);
+                        newLayerGroup.getOLLayer().getLayers().push(baseLayer.getOLLayer());
 
                         // Set the layer status to processed
                         layerConfig.setLayerStatusProcessed();
@@ -210,7 +208,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     layerConfig: VectorLayerEntryConfig,
     layerInfo: LayerData,
     sld?: SldsInterface
-  ): Promise<BaseLayer | undefined> {
+  ): Promise<AbstractGVLayer | undefined> {
     // Alert that we want to register an extra layer entry
     this.emitLayerEntryRegisterInit({ config: layerConfig });
 
@@ -229,11 +227,8 @@ export class GeoPackage extends AbstractGeoViewVector {
     // Redirect
     const layer = this.onCreateGVLayer(layerConfig);
 
-    // Cast
-    const olLayer = layer.getOLLayer() as VectorLayer<VectorSource<Feature<Geometry>>>;
-
     // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
+    return Promise.resolve(layer);
   }
 
   /**

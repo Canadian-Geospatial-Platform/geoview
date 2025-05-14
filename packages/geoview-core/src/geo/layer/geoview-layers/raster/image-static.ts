@@ -1,5 +1,4 @@
 import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
-import ImageLayer from 'ol/layer/Image';
 
 import { Cast, TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -78,22 +77,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
   protected override onProcessLayerMetadata(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageStaticLayerEntryConfig> {
     // Return as-is
     return Promise.resolve(layerConfig);
-  }
-
-  /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @returns {Promise<ImageLayer<Static>>} The GeoView raster layer that has been created.
-   */
-  protected override onProcessOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageLayer<Static>> {
-    // Redirect
-    const layer = this.createGVLayer(layerConfig) as GVImageStatic;
-
-    // Cast
-    const olLayer = layer.getOLLayer();
-
-    // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
   }
 
   /**

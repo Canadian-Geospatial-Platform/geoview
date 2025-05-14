@@ -19,7 +19,12 @@ import { logger } from '@/core//utils/logger';
 import { createStyleUsingEsriRenderer, EsriBaseRenderer } from '@/api/config/esri-renderer-parser';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { AbstractGeoViewLayer, LayerConfigCreatedEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import {
+  AbstractGeoViewLayer,
+  LayerConfigCreatedEvent,
+  LayerGroupCreatedEvent,
+  LayerGVCreatedEvent,
+} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
@@ -873,6 +878,8 @@ export class ConfigApi {
     const promise = new Promise<ConfigBaseClass>((resolve, reject) => {
       // Register a handler when the layer config has been created for this config
       layer.onLayerConfigCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerConfigCreatedEvent) => {
+        // A Layer Config was created
+
         // If no errors
         if (event.errors.length === 0) {
           // Resolve
@@ -881,6 +888,18 @@ export class ConfigApi {
           // Errors happened while creating the config, reject
           reject(new AggregateError(event.errors));
         }
+      });
+
+      // (Extra) Register a handler when a Group layer has been created for this config
+      layer.onLayerGroupCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGroupCreatedEvent) => {
+        // A Group Layer was created
+        logger.logDebug('Group Layer created', event.layer);
+      });
+
+      // (Extra) Register a handler when a GV layer has been created for this config
+      layer.onLayerGVCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGVCreatedEvent) => {
+        // A GV Layer was created
+        logger.logDebug('GV Layer created', event.layer);
       });
 
       // Start the geoview-layers config process which will trigger LayerConfigCreated at some point

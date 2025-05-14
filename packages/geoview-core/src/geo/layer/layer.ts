@@ -2,7 +2,6 @@ import BaseLayer from 'ol/layer/Base';
 import { Extent } from 'ol/extent';
 import Collection from 'ol/Collection';
 import { Source } from 'ol/source';
-import LayerGroup from 'ol/layer/Group';
 import { GeoJSONObject } from 'ol/format/GeoJSON';
 
 import { GeoCore } from '@/geo/layer/other/geocore';
@@ -18,7 +17,7 @@ import { logger } from '@/core/utils/logger';
 import {
   AbstractGeoViewLayer,
   LayerEntryProcessedEvent,
-  LayerCreationEvent,
+  LayerGroupCreatedEvent,
   LayerEntryRegisterInitEvent,
   LayerGVCreatedEvent,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -73,7 +72,6 @@ import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { ConfigApi } from '@/api/config/config-api';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
@@ -805,6 +803,12 @@ export class LayerApi {
 
     // Register a callback when the layer entry config wants to register extra configs
     layerBeingAdded.onLayerEntryRegisterInit((geoviewLayer: AbstractGeoViewLayer, event: LayerEntryRegisterInitEvent) => {
+      // Log
+      logger.logTraceCore(
+        `LAYERS - 1.5 - Registering an extra layer entry config ${event.config.layerPath} on map ${this.getMapId()}`,
+        event.config
+      );
+
       // If already existing
       const alreadyExisting = this.#layerEntryConfigs[event.config.layerPath];
       if (alreadyExisting) {
@@ -824,7 +828,7 @@ export class LayerApi {
     layerBeingAdded.onLayerEntryProcessed((geoviewLayer: AbstractGeoViewLayer, event: LayerEntryProcessedEvent) => {
       // Log
       logger.logTraceCore(
-        `LAYERS - 7 - Layer entry config processed for ${event.config.layerPath} on map ${this.getMapId()}`,
+        `LAYERS - 6 - Layer entry config processed for ${event.config.layerPath} on map ${this.getMapId()}`,
         event.config.layerStatus,
         event.config
       );
@@ -846,39 +850,53 @@ export class LayerApi {
       }
     });
 
-    // Register a callback when a GV Layer has been created
-    layerBeingAdded.onLayerGVCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGVCreatedEvent) => {
-      // Get the GV Layer
-      const gvLayer = event.layer;
+    // Register a callback when a Group Layer has been created
+    layerBeingAdded.onLayerGroupCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGroupCreatedEvent) => {
+      // Get the Group Layer and the config
+      const groupLayer = event.layer;
+      const layerConfig = groupLayer.getLayerConfig();
+
+      // Log
+      logger.logTraceCore(
+        `LAYERS - 7 - Group Layer created for ${layerConfig.layerPath} on map ${this.getMapId()}`,
+        layerConfig.layerStatus,
+        layerConfig
+      );
 
       // Keep track
-      this.#gvLayers[gvLayer.getLayerConfig().layerPath] = gvLayer;
-      this.#olLayers[gvLayer.getLayerConfig().layerPath] = gvLayer.getOLLayer();
+      this.#gvLayers[layerConfig.layerPath] = groupLayer;
+      this.#olLayers[layerConfig.layerPath] = groupLayer.getOLLayer();
+
+      // TODO: Check - Do we need this line here? And if so, why only for Group Layers?
+      // Set in visible range property for all newly added layers
+      this.#setLayerInVisibleRange(groupLayer, layerConfig);
+    });
+
+    // Register a callback when a GV Layer has been created
+    layerBeingAdded.onLayerGVCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGVCreatedEvent) => {
+      // Get the GV Layer and the config
+      const gvLayer = event.layer;
+      const layerConfig = gvLayer.getLayerConfig();
+
+      // Log
+      logger.logTraceCore(
+        `LAYERS - 9 - GV Layer created for ${layerConfig.layerPath} on map ${this.getMapId()}`,
+        layerConfig.layerStatus,
+        layerConfig
+      );
+
+      // Keep track
+      this.#gvLayers[layerConfig.layerPath] = gvLayer;
+      this.#olLayers[layerConfig.layerPath] = gvLayer.getOLLayer();
 
       // Attach the map viewer on the GV Layer
       gvLayer.setMapViewer(this.mapViewer);
 
-      // Init it
-      gvLayer.init();
-
       // Attach the events handler
       this.#attachEventsOnLayer(gvLayer);
-    });
 
-    // Register a callback when a Group Layer has been created
-    layerBeingAdded.onLayerCreation((geoviewLayer: AbstractGeoViewLayer, event: LayerCreationEvent) => {
-      // Log
-      logger.logTraceCore(
-        `LAYERS - 9.5 - OpenLayer created for ${event.config.layerPath} on map ${this.getMapId()}`,
-        event.config.layerStatus,
-        event.config
-      );
-
-      // Create the corresponding GVLayer. If group layer was created
-      if (event.layer instanceof LayerGroup && event.config instanceof GroupLayerEntryConfig) {
-        // Create the GV Group Layer
-        this.#createGVGroupLayer(event.layer, event.config);
-      }
+      // Init it
+      gvLayer.init();
     });
 
     // Create a promise about the layer will be on the map
@@ -950,28 +968,6 @@ export class LayerApi {
         logger.logPromiseFailed('in registerLayer in registerLayerUpdate', error);
       });
     });
-  }
-
-  /**
-   * Creates a GVLayer based on the provided OLLayer and layer config.
-   * @param geoviewLayer - The GeoView layer (just to retrieve config-calculated information from it)
-   * @param olLayer - The OpenLayer layer
-   * @param config - The layer config
-   * @returns A new GV Layer which is kept track of in LayerApi and initialized
-   */
-  #createGVGroupLayer(olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig): GVGroupLayer | undefined {
-    // Create the GV Group Layer
-    const gvGroupLayer = new GVGroupLayer(olLayerGroup, layerConfig);
-
-    // Keep track
-    this.#gvLayers[layerConfig.layerPath] = gvGroupLayer;
-    this.#olLayers[layerConfig.layerPath] = olLayerGroup;
-
-    // Set in visible range property for all newly added layers
-    this.#setLayerInVisibleRange(gvGroupLayer, layerConfig);
-
-    // Return the GV Group Layer
-    return gvGroupLayer;
   }
 
   #setLayerInVisibleRange(gvLayer: AbstractGVLayer | GVGroupLayer, layerConfig: TypeLayerEntryConfig): void {

@@ -1,6 +1,5 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
-import { Image as ImageLayer } from 'ol/layer';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -82,22 +81,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   protected override onProcessLayerMetadata(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriDynamicLayerEntryConfig> {
     return commonProcessLayerMetadata(this, layerConfig);
-  }
-
-  /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @returns {Promise<ImageLayer<ImageArcGISRest>>} The created Open Layer object.
-   */
-  protected override onProcessOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
-    // Redirect
-    const layer = this.createGVLayer(layerConfig) as GVEsriDynamic;
-
-    // Cast
-    const olLayer = layer.getOLLayer();
-
-    // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
   }
 
   /**

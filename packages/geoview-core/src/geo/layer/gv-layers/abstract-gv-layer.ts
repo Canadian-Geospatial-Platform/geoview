@@ -45,9 +45,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   // The default hit tolerance the query should be using
   static DEFAULT_HIT_TOLERANCE: number = 4;
 
-  // The default hit tolerance
-  hitTolerance: number = AbstractGVLayer.DEFAULT_HIT_TOLERANCE;
-
   // The OpenLayer source
   #olSource: Source;
 
@@ -211,17 +208,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
-   * Gets the bounds for the layer in the given projection.
-   * @param {OLProjection} projection - The projection to get the bounds into.
-   * @param {number} stops - The number of stops to use to generate the extent.
-   * @returns {Extent | undefined} The layer bounding box.
-   */
-  getBounds(projection: OLProjection, stops: number): Extent | undefined {
-    // Redirect to overridable method
-    return this.onGetBounds(projection, stops);
-  }
-
-  /**
    * Gets the MapViewer where the layer resides
    * @returns {MapViewer} The MapViewer
    */
@@ -269,6 +255,15 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Gets the hit tolerance associated with the layer.
+   * @returns {number} The hit tolerance
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  getHitTolerance(): number {
+    return AbstractGVLayer.DEFAULT_HIT_TOLERANCE;
+  }
+
+  /**
    * Gets the layer style
    * @returns The layer style
    */
@@ -283,6 +278,17 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   setStyle(style: TypeLayerStyleConfig): void {
     this.#layerStyle = style;
     this.#emitLayerStyleChanged({ style });
+  }
+
+  /**
+   * Gets the bounds for the layer in the given projection.
+   * @param {OLProjection} projection - The projection to get the bounds into.
+   * @param {number} stops - The number of stops to use to generate the extent.
+   * @returns {Extent | undefined} The layer bounding box.
+   */
+  getBounds(projection: OLProjection, stops: number): Extent | undefined {
+    // Redirect to overridable method
+    return this.onGetBounds(projection, stops);
   }
 
   /**

@@ -1,4 +1,3 @@
-import ImageLayer from 'ol/layer/Image';
 import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
@@ -274,22 +273,6 @@ export class WMS extends AbstractGeoViewRaster {
 
     // Return the layer config
     return Promise.resolve(layerConfig);
-  }
-
-  /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @returns {Promise<ImageLayer<ImageWMS>>} The GeoView raster layer that has been created.
-   */
-  protected override onProcessOneLayerEntry(layerConfig: OgcWmsLayerEntryConfig): Promise<ImageLayer<ImageWMS>> {
-    // Redirect
-    const layer = this.createGVLayer(layerConfig) as GVWMS;
-
-    // Cast
-    const olLayer = layer.getOLLayer();
-
-    // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
   }
 
   /**
