@@ -73,7 +73,7 @@ export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   XYZ_TILES: 'https://cgpv/schema#/definitions/TileLayerEntryConfig',
   VECTOR_TILES: 'https://cgpv/schema#/definitions/TileLayerEntryConfig',
   OGC_FEATURE: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
-  CSV: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
+  CSV: 'https://cgpv/schema#/definitions/CsvLayerEntryConfig',
 };
 
 export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
@@ -86,10 +86,10 @@ export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
 
   IMAGE_STATIC: '',
   GEOPACKAGE: '',
-  XYZ_TILES: '',
-  VECTOR_TILES: '',
-  OGC_FEATURE: '',
-  CSV: '',
+  XYZ_TILES: 'https://cgpv/schema#/definitions/XyzLayerConfig',
+  VECTOR_TILES: 'https://cgpv/schema#/definitions/VectorTileLayerConfig',
+  OGC_FEATURE: 'https://cgpv/schema#/definitions/OgcFeatureLayerConfig',
+  CSV: 'https://cgpv/schema#/definitions/CsvLayerConfig',
 };
 export const CV_MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/MapFeatureConfig';
 export const CV_LAYER_GROUP_SCHEMA_PATH = 'https://cgpv/schema#/definitions/GroupLayerEntryConfig';
@@ -206,7 +206,11 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
     proxyUrl: CV_CONFIG_PROXY_URL,
     metadataUrl: CV_CONFIG_METADATA_RECORDS_URL,
   },
-  globalSettings: { canRemoveSublayers: true, disabledLayerTypes: [] },
+  globalSettings: {
+    canRemoveSublayers: true,
+    disabledLayerTypes: [],
+    showUnsymbolizedFeatures: false,
+  },
   schemaVersionUsed: '1.0',
 });
 
@@ -218,7 +222,7 @@ export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
     highlight: true,
     hover: true,
     opacity: true,
-    query: false,
+    query: true,
     remove: true,
     table: true,
     visibility: true,
@@ -228,7 +232,7 @@ export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
     visible: true,
     opacity: 1,
     hoverable: true,
-    queryable: false,
+    queryable: true,
   },
 };
 

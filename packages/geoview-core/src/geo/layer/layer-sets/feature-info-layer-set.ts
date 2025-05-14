@@ -1,7 +1,7 @@
 import { Coordinate } from 'ol/coordinate';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, TypeResultSet } from '@/api/config/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -12,6 +12,7 @@ import {
   TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { AbortError } from '@/core/exceptions/core-exceptions';
+import { logger } from '@/core/utils/logger';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -174,6 +175,12 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
             // Use the response to possibly patch the layer config metadata
             if (arrayOfRecords.length) this.#patchMissingMetadataIfNecessary(layerPath, arrayOfRecords[0]);
+
+            // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
+            if (!AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId())) {
+              // eslint-disable-next-line no-param-reassign
+              arrayOfRecords = arrayOfRecords.filter((record) => record.featureIcon);
+            }
 
             // Keep the features retrieved
             this.resultSet[layerPath].features = arrayOfRecords;

@@ -1,35 +1,35 @@
 import { mergeWith } from 'lodash';
-import { CV_CONST_LAYER_TYPES, CV_CONST_SUB_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@/api/config/types/config-constants';
+import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@/api/config/types/config-constants';
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { GeoJsonGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/geojson-group-layer-config';
 import { toJsonObject, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { GeoJsonLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
+import { VectorTileLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/vector-tile-layer-entry-config';
+import { VectorTileGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/vector-tile-group-layer-config';
+import { Projection } from '@/geo/utils/projection';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
+import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
 
-import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
-import { isJsonString } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
-export type TypeGeoJsonLayerNode = GeoJsonGroupLayerConfig | GeoJsonLayerEntryConfig;
+export type TypeVectorTileLayerNode = VectorTileGroupLayerConfig | VectorTileLayerEntryConfig;
 
 // ========================
 // #region CLASS HEADER
 
 /**
- * The GeoJson geoview layer class.
+ * The vector tile geoview layer class.
  */
-export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
+export class VectorTileLayerConfig extends AbstractGeoviewLayerConfig {
   // ==================
   // #region PROPERTIES
 
   /**
    * Type of GeoView layer.
    */
-  override geoviewLayerType = CV_CONST_LAYER_TYPES.GEOJSON;
+  override geoviewLayerType = CV_CONST_LAYER_TYPES.VECTOR_TILES;
 
   /** The layer entries to use from the GeoView layer. */
-  declare listOfLayerEntryConfig: EntryConfigBaseClass[] | TypeGeoJsonLayerNode[];
+  declare listOfLayerEntryConfig: EntryConfigBaseClass[] | TypeVectorTileLayerNode[];
   // #endregion PROPERTIES
 
   // ===================
@@ -41,22 +41,16 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    */
   constructor(geoviewLayerConfig: TypeJsonObject) {
     super(geoviewLayerConfig);
+
     if (this.metadataAccessPath) {
-      const metadataAccessPathItems = this.metadataAccessPath.split('/');
-      const pathItemLength = metadataAccessPathItems.length;
-      const lastPathItem = metadataAccessPathItems[pathItemLength - 1];
-      if (lastPathItem.toLowerCase().endsWith('.json') || lastPathItem.toLowerCase().endsWith('.geojson')) {
-        // The metadataAccessPath ends with a layer reference. It is therefore a path to a data layer rather than a path to service metadata.
+      if (this.metadataAccessPath.toLowerCase().endsWith('tile/{z}/{y}/{x}.pbf')) {
+        // The metadataAccessPath ends with a tile reference. It is therefore a path to a tiles rather than a path to service metadata.
         // We therefore need to correct the configuration by separating the layer index and the path to the service metadata.
-        this.metadataAccessPath = metadataAccessPathItems.slice(0, -1).join('/');
-        if (this.listOfLayerEntryConfig.length) {
-          this.setErrorDetectedFlag();
-          logger.logError('When a GeoJson metadataAccessPath ends with a layer file name, the listOfLayerEntryConfig must be empty.');
-        }
-        this.listOfLayerEntryConfig = [this.createLeafNode(toJsonObject({ layerId: lastPathItem, layerName: lastPathItem }), this)!];
+        this.metadataAccessPath = this.metadataAccessPath.toLowerCase().replace('tile/{z}/{y}/{x}.pbf', '');
       }
     }
   }
+
   // #endregion CONSTRUCTOR
 
   // ===============
@@ -75,8 +69,8 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
    * @protected @override
    */
   protected override getGeoviewLayerSchema(): string {
-    /** The GeoView layer schema associated to GeoJsonLayerConfig */
-    return CV_GEOVIEW_SCHEMA_PATH.GEOJSON;
+    /** The GeoView layer schema associated to VectorTileLayerConfig */
+    return CV_GEOVIEW_SCHEMA_PATH.VECTOR_TILES;
   }
 
   /**
@@ -95,7 +89,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new GeoJsonLayerEntryConfig(layerConfig, geoviewConfig, parentNode);
+    return new VectorTileLayerEntryConfig(layerConfig, geoviewConfig, parentNode);
   }
 
   /**
@@ -114,58 +108,56 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass {
-    return new GeoJsonGroupLayerConfig(layerConfig, geoviewConfig, parentNode);
+    return new VectorTileGroupLayerConfig(layerConfig, geoviewConfig, parentNode);
   }
 
   /**
-   * Get the service metadata from the metadataAccessPath and store it in the private property of the geoview layer.
-   * @override @async
+   * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
   override async fetchServiceMetadata(): Promise<void> {
-    let metadataUrl = this.metadataAccessPath;
-    if (
-      !metadataUrl.toLowerCase().endsWith('.json') &&
-      !metadataUrl.toLowerCase().endsWith('f=json') &&
-      !metadataUrl.toLowerCase().endsWith('.geojson') &&
-      !metadataUrl.toLowerCase().endsWith('.meta')
-    )
-      metadataUrl = this.metadataAccessPath.endsWith('/') ? `${this.metadataAccessPath}?f=json` : `${this.metadataAccessPath}/?f=json`;
     try {
-      if (metadataUrl.toLowerCase().endsWith('.meta') || metadataUrl.toLowerCase().endsWith('f=json')) {
-        const fetchResponse = await fetch(metadataUrl);
-        if (fetchResponse.status === 404) throw new GeoviewLayerConfigError('The service metadata fetch returned a 404 status (Not Found)');
-        const layerMetadataString = await fetchResponse.text();
-        let layerMetadata = null;
-        // Check if the response text is valid json. isJsonString will throw an error if it is not, and we want to catch it separately.
-        try {
-          if (isJsonString(layerMetadataString)) layerMetadata = toJsonObject(JSON.parse(layerMetadataString));
-        } catch (err) {
-          logger.logError('Response from metadataAccessPath was not JSON', err);
+      const metadataUrl = this.metadataAccessPath.endsWith('/')
+        ? `${this.metadataAccessPath}?f=json`
+        : `${this.metadataAccessPath}/?f=json`;
+      const metadataResponse = await fetch(metadataUrl);
+      if (metadataResponse) {
+        const jsonMetadata = await metadataResponse.json();
+        // Other than the error generated above, if the returned JSON object is valid and contains the error property, something went wrong
+        if ('error' in jsonMetadata) {
+          logger.logError('The service metadata request returned an an error object.\n', jsonMetadata.error);
+          throw new GeoviewLayerConfigError('See error description above');
+        } else {
+          this.setServiceMetadata(jsonMetadata);
+
+          // Add projection definition if not already included
+          if (jsonMetadata?.tileInfo?.spatialReference && !Projection.getProjectionFromObj(jsonMetadata.tileInfo.spatialReference))
+            await Projection.addProjection(jsonMetadata.tileInfo.spatialReference);
+
+          this.listOfLayerEntryConfig = this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+          await this.fetchListOfLayerMetadata();
+
+          await this.createLayerTree();
         }
-        if (layerMetadata) this.setServiceMetadata(layerMetadata);
-        else throw new GeoviewLayerConfigError('The metadata object returned is undefined');
-
-        this.listOfLayerEntryConfig = this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
-        await this.fetchListOfLayerMetadata();
+      } else {
+        throw new GeoviewLayerConfigError('An empty metadata object was returned');
       }
-
-      await this.createLayerTree();
     } catch (error) {
-      // GV In the case of a geojson, when the metadata fetching fails, we actually skip it with a warning only.
-      // G.VCONT If we want to manage this all the way to the UI (LayerAPI), we'll need a 'addLayerLoadWarning' working
-      // G.VCONT like the 'addLayerLoadError' and aggregate errors as the process happens. Okay for now.
-      logger.logWarning("The service metadata for the GeoJson couldn't be read, skipped.", error);
+      // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
+      this.setErrorDetectedFlag();
+      this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
+      logger.logError(`Error detected while reading metadata for geoview layer ${this.geoviewLayerId}.\n`, error);
     }
   }
 
   /**
-   * Create a layer entry node for a specific layerId using the service metadata. The node returned can only be a
-   * layer leaf or a layer group.
+   * Create a layer entry node for a specific layerId using the service metadata. The node returned can be a
+   * layer or a group layer.
    *
    * @param {string} layerId The layer id to use for the subLayer creation.
-   * @param {EntryConfigBaseClass | undefined} parentNode The layer's parent node.
+   * @param {TypeVectorTileLayerNode | undefined} parentNode The layer's parent node.
    *
-   * @returns {EntryConfigBaseClass} The subLayer created from the metadata.
+   * @returns {TypeVectorTileLayerNode} The subLayer created from the metadata.
    * @protected @override
    */
   protected override createLayerEntryNode(layerId: string, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass {
@@ -185,6 +177,7 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
     });
 
     if (layerEntryIsGroupLayer(layerFound)) return this.createGroupNode(layerConfig, this, parentNode);
+
     return this.createLeafNode(layerConfig, this, parentNode)!;
   }
 
@@ -216,33 +209,24 @@ export class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
   // ==============
   // #region PUBLIC
   /** ****************************************************************************************************************************
-   * This method search recursively the layerId in the layer entry of the service metadata.
+   * This method search recursively the layerId in the layer entry of the capabilities.
    *
    * @param {string} layerId The layer identifier that must exists on the server.
+   * @param {TypeJsonObject | undefined} layer The layer entry from the capabilities that will be searched.
    *
    * @returns {TypeJsonObject | null} The found layer from the capabilities or null if not found.
    */
-  findLayerMetadataEntry(
-    layerId: string,
-    listOfLayerEntryConfig = this.getServiceMetadata()?.listOfLayerEntryConfig as TypeJsonArray
-  ): TypeJsonObject | null {
-    if (listOfLayerEntryConfig === undefined) return null;
-    return listOfLayerEntryConfig.reduce(
-      (layerFound, layerEntry) => {
-        if (layerFound) return layerFound;
+  findLayerMetadataEntry(layerId: string, metadata: TypeJsonObject | undefined = this.getServiceMetadata()): TypeJsonObject | null {
+    let metadataLayerConfigFound: TypeJsonObject | undefined | null = null;
+    if (metadata?.listOfLayerEntryConfig) {
+      metadataLayerConfigFound = (metadata?.listOfLayerEntryConfig as TypeJsonArray).find(
+        (metadataLayerConfig) => metadataLayerConfig.layerId === layerId
+      );
+    }
 
-        if (layerEntry.layerId === layerId) {
-          return layerEntry;
-        }
+    if (metadataLayerConfigFound === undefined) metadataLayerConfigFound = null;
 
-        if (layerEntry.isLayerGroup || layerEntry.entryType === CV_CONST_SUB_LAYER_TYPES.GROUP) {
-          return this.findLayerMetadataEntry(layerId, layerEntry.listOfLayerEntryConfig as TypeJsonArray);
-        }
-
-        return null;
-      },
-      null as TypeJsonObject | null
-    );
+    return metadataLayerConfigFound;
   }
 
   // #endregion PUBLIC

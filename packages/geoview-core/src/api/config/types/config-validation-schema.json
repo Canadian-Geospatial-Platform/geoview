@@ -443,10 +443,17 @@
               },
               {
                 "type": "string",
-                "enum": ["geoCore"]
+                "enum": [
+                  "geoCore"
+                ]
               }
             ]
           }
+        },
+        "showUnsymbolizedFeatures": {
+          "description": "Whether or not to show unsymbolized features.",
+          "type": "boolean",
+          "default": false
         }
       }
     },
@@ -1037,6 +1044,46 @@
         }
       ]
     },
+    "CsvLayerConfig": {
+      "description": "Structure used by the viewer to describe the configuration of a CSV layer.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractGeoviewLayerConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "geoviewLayerType": {
+              "enum": [
+                "CSV"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "OgcFeatureLayerConfig": {
+      "description": "Structure used by the viewer to describe the configuration of a CSV layer.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractGeoviewLayerConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "geoviewLayerType": {
+              "enum": [
+                "ogcFeature"
+              ]
+            }
+          }
+        }
+      ]
+    },
     "GeoJsonLayerConfig": {
       "description": "Structure used by the viewer to describe the configuration of a GeoJSON layer.",
       "type": "object",
@@ -1051,6 +1098,46 @@
             "geoviewLayerType": {
               "enum": [
                 "GeoJSON"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "VectorTileLayerConfig": {
+      "description": "Structure used by the viewer to describe the configuration of a vector tile layer.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractGeoviewLayerConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "geoviewLayerType": {
+              "enum": [
+                "vectorTiles"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "XyzLayerConfig": {
+      "description": "Structure used by the viewer to describe the configuration of a XYZ tile layer.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractGeoviewLayerConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "geoviewLayerType": {
+              "enum": [
+                "xyzTiles"
               ]
             }
           }
@@ -1206,6 +1293,27 @@
             "listOfLayerEntryConfig": {
               "description": "The list of layer entry configurations to use from the GeoView layer group.",
               "$ref": "#/definitions/TypeListOfLayerEntryConfig"
+            }
+          }
+        }
+      ]
+    },
+    "CsvLayerEntryConfig": {
+      "description": "Class from which we derive all the CSV leaf nodes in the layer tree.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/AbstractBaseLayerEntryConfig"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "source": {
+              "$ref": "#/definitions/TypeSourceTileInitialConfig"
+            },
+            "layerStyle": {
+              "$ref": "#/definitions/TypeLayerStyleConfig"
             }
           }
         }
@@ -1851,8 +1959,12 @@
         "default": {
           "type": "string"
         },
-        "unitSymbol": {
-          "type": "string"
+        "displayPattern": {
+          "type": "array",
+          "items": {
+            "datePrecision": "#/definitions/TypeDatePrecision",
+            "timePrecision": "#/definitions/TypeTimePrecision"
+          }
         },
         "range": {
           "$ref": "#/definitions/TypeRangeItems"
@@ -1865,6 +1977,9 @@
         },
         "singleHandle": {
           "type": "boolean"
+        },
+        "unitSymbol": {
+          "type": "string"
         }
       }
     },
@@ -1883,6 +1998,22 @@
           }
         }
       }
+    },
+    "TypeDatePrecision": {
+      "description": "Level of precision to show for date.",
+      "enum": [
+        "year",
+        "month",
+        "day"
+      ]
+    },
+    "TypeTimePrecision": {
+      "description": "Level of precision to show for time.",
+      "enum": [
+        "hour",
+        "minute",
+        "second"
+      ]
     },
     "TypeLayerStyleConfig": {
       "additionalProperties": false,
