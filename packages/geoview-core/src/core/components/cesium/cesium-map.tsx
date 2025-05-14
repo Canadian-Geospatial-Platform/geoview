@@ -515,6 +515,11 @@ async function ImageLayerProvider(layer: ImageLayer<ImageWMS | ImageArcGISRest>)
   }
   if (source instanceof ImageWMS) {
     const layerCapabilities = layer.get('layerCapabilities');
+    const crsFromLayerCapabilities = layerCapabilities.CRS as string[];
+    let offersCrs84 = false;
+    if (crsFromLayerCapabilities.includes('CRS:84')) {
+      offersCrs84 = true;
+    }
     const [west, south, east, north] = layerCapabilities.EX_GeographicBoundingBox;
     const rectangle = Rectangle.fromDegrees(west, south, east, north);
     const url = source!.getUrl();
@@ -526,8 +531,11 @@ async function ImageLayerProvider(layer: ImageLayer<ImageWMS | ImageArcGISRest>)
       parameters: {
         FORMAT: 'image/png',
         TRANSPARENT: 'TRUE',
+        VERSION: '1.3.0',
+        CRS: offersCrs84 ? 'CRS:84' : 'EPSG:4326',
       },
       rectangle,
+      crs: offersCrs84 ? 'CRS:84' : 'EPSG:4326',
     };
     return new WebMapServiceImageryProvider(options);
   }
