@@ -11,6 +11,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
+import { shared as iconImageCache } from 'ol/style/IconImageCache';
 
 import queryString from 'query-string';
 import {
@@ -30,6 +31,7 @@ import {
   TypeDisplayTheme,
   TypeMapViewSettings,
   MapConfigLayerEntry,
+  TypeStyleGeometry,
 } from '@/api/config/types/map-schema-types';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
 
@@ -66,6 +68,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
 
@@ -1350,6 +1353,30 @@ export class MapViewer {
     const fullExtent = extent.length === 2 ? [extent[0], extent[1], extent[0], extent[1]] : extent;
     const projectedExtent = Projection.transformExtentFromProj(fullExtent, Projection.getProjectionLngLat(), this.getProjection());
     return MapEventProcessor.zoomToExtent(this.mapId, projectedExtent, options);
+  }
+
+  /**
+   * Update the size of the icon image list based on styles.
+   * @param {TypeLegend} legend - The legend to check.
+   */
+  updateIconImageCache(legend: TypeLegend): void {
+    // GV This will need to be revised if functionality to add additional icons to a layer is added
+    let styleCount = this.iconImageCacheSize;
+    if (legend.styleConfig)
+      Object.keys(legend.styleConfig).forEach((geometry) => {
+        if (
+          legend.styleConfig &&
+          (legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'uniqueValue' ||
+            legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'classBreaks')
+        ) {
+          if (legend.styleConfig[geometry as TypeStyleGeometry]!.info?.length)
+            styleCount += legend.styleConfig[geometry as TypeStyleGeometry]!.info.length;
+        }
+      });
+    // Set the openlayers icon image cache
+    iconImageCache.setSize(styleCount);
+    // Update the cache size for the map viewer
+    this.iconImageCacheSize = styleCount;
   }
 
   // #endregion

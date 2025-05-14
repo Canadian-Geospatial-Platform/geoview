@@ -444,11 +444,12 @@ export abstract class AbstractLayerSet {
   /**
    * Checks if the layer is in visible range.
    * @param {AbstractGVLayer} layer - The layer
+   * @param {number | undefined} currentZoom - The map current zoom level
    * @returns {boolean} True if the state is queryable or undefined
    */
-  protected static isInVisibleRange(layer: AbstractGVLayer): boolean {
+  protected static isInVisibleRange(layer: AbstractGVLayer, currentZoom: number | undefined): boolean {
     // Return false when false or undefined
-    return layer.getInVisibleRange() ?? false;
+    return layer.getInVisibleRange(currentZoom);
   }
 
   /**
