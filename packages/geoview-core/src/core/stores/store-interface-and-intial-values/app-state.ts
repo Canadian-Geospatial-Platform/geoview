@@ -1,4 +1,5 @@
 import { useStore } from 'zustand';
+import { i18n } from 'i18next';
 import { TypeDisplayLanguage, TypeDisplayTheme, TypeGeoviewLayerTypeWithGeoCore } from '@/api/config/types/map-schema-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
@@ -9,7 +10,6 @@ import { logger } from '@/core/utils/logger';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/config/types/config-constants';
 import { SnackbarType } from '@/core/utils/notifications';
-import { i18n } from 'i18next';
 import { createI18nInstance } from '@/core/translation/i18n';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with AppEventProcessor vs AppState
