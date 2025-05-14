@@ -56,7 +56,7 @@ import { Translate } from '@/geo/interaction/translate';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
-import { createEmptyBasemap, getPointerPositionFromMapEvent } from '@/geo/utils/utilities';
+import { createEmptyBasemap, getPointerPositionFromMapEvent, isExtentLngLat } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
@@ -665,8 +665,12 @@ export class MapViewer {
 
     // Zoom to extent provided in config, if provided.
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent) {
+      // If extent is not lon/lat, we assume it is in the map projection and use it as is.
+      const extent = isExtentLngLat(this.mapFeaturesConfig.map.viewSettings.initialView!.extent)
+        ? this.convertExtentLngLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent)
+        : this.mapFeaturesConfig.map.viewSettings.initialView!.extent;
       // Zoom to extent
-      this.zoomToExtent(this.convertExtentLngLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent), {
+      this.zoomToExtent(extent, {
         padding: [0, 0, 0, 0],
       }).catch((error: unknown) => {
         // Log
