@@ -37,6 +37,8 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
+  const COLUMNS_TO_REMOVE = ['ICON', 'ZOOM', 'DETAILS', 'geoviewID'];
+
   /**
    * Shows export menu.
    */
@@ -65,7 +67,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
     logger.logTraceUseMemo('DATA-TABLE - EXPORT BUTTON - getCsvOptions', columns);
 
     // Remove the utility columns
-    const filteredColumns = columns.filter((col) => !['ICON', 'ZOOM', 'DETAILS', 'geoviewID'].includes(col.id as string));
+    const filteredColumns = columns.filter((col) => !COLUMNS_TO_REMOVE.includes(col.id as string));
 
     return (): Options => ({
       filename: `table-${getLayer(layerPath)?.layerName.replaceAll(' ', '-')}`,
@@ -90,7 +92,10 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
     const csvRows = rows.map((row) => {
       const mappedRow = Object.keys(row).reduce(
         (acc, curr) => {
-          acc[curr] = row[curr]?.value ?? '';
+          // Only add the field if it's not a utility column
+          if (!COLUMNS_TO_REMOVE.includes(curr)) {
+            acc[curr] = row[curr]?.value ?? '';
+          }
           return acc;
         },
         {} as Record<string, unknown>

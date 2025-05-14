@@ -57,39 +57,29 @@ export class ConfigApi {
   static guessLayerType(url: string): string | undefined {
     if (!url) return undefined;
 
-    const urlItems = url.toUpperCase().split('?');
-    const [upperUrl] = urlItems;
-    const upperParams = urlItems[1] || '';
-    const upperParamArray = upperParams ? upperParams.split('&') : [];
-    const urlTokens = upperUrl.split('/');
-    const layerIdString = urlTokens[urlTokens.length - 1];
-    // GV: Important - Testing for NaN after parseInt is not a good way to check whether a string is a number, as parseInt('1a2', 10)
-    // GV: returns 1 instead of NaN. To be detected as NaN, the string passed to parseInt must not begin with a number.
-    // GV: Regex /^\d+$/ is used instead to check whether a string is a number.
-    const layerId = /^\d+$/.test(layerIdString) ? parseInt(layerIdString, 10) : Number.NaN;
+    const [upperUrl] = url.toUpperCase().split('?');
+
+    if (/\{z\}\/{[xy]}\/{[xy]}/i.test(url)) return CV_CONST_LAYER_TYPES.XYZ_TILES;
 
     if (upperUrl.endsWith('MAPSERVER') || upperUrl.endsWith('MAPSERVER/')) return CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
-    if (upperUrl.indexOf('FEATURESERVER') !== -1 || (upperUrl.indexOf('MAPSERVER') !== -1 && !Number.isNaN(layerId)))
-      return CV_CONST_LAYER_TYPES.ESRI_FEATURE;
+    if (/(?:FEATURESERVER|MAPSERVER(?:\/\d+)+)/i.test(url)) return CV_CONST_LAYER_TYPES.ESRI_FEATURE;
 
-    if (upperUrl.indexOf('IMAGESERVER') !== -1) return CV_CONST_LAYER_TYPES.ESRI_IMAGE;
+    if (/IMAGESERVER/i.test(url)) return CV_CONST_LAYER_TYPES.ESRI_IMAGE;
 
-    if (upperParamArray.indexOf('SERVICE=WFS') !== -1 || upperUrl.indexOf('WFS') !== -1) return CV_CONST_LAYER_TYPES.WFS;
+    if (/WFS/i.test(url)) return CV_CONST_LAYER_TYPES.WFS;
 
-    if (upperUrl.endsWith('.META') || upperUrl.endsWith('.JSON') || upperUrl.endsWith('.GEOJSON')) return CV_CONST_LAYER_TYPES.GEOJSON;
+    if (/.(?:GEO)?JSON(?:$|\?)/i.test(url)) return CV_CONST_LAYER_TYPES.GEOJSON;
 
     if (upperUrl.endsWith('.GPKG')) return CV_CONST_LAYER_TYPES.GEOPACKAGE;
 
     if (upperUrl.includes('VECTORTILESERVER')) return CV_CONST_LAYER_TYPES.VECTOR_TILES;
 
-    if (upperUrl.indexOf('{Z}/{X}/{Y}') !== -1 || upperUrl.indexOf('{Z}/{Y}/{X}') !== -1) return CV_CONST_LAYER_TYPES.XYZ_TILES;
-
     if (ConfigApi.isValidUUID(url)) return CV_CONFIG_GEOCORE_TYPE;
 
-    if (upperParamArray.indexOf('SERVICE=WMS') !== -1 || upperUrl.indexOf('WMS') !== -1) return CV_CONST_LAYER_TYPES.WMS;
+    if (/WMS/i.test(url)) return CV_CONST_LAYER_TYPES.WMS;
 
-    if (upperUrl.endsWith('.CSV')) return CV_CONST_LAYER_TYPES.CSV;
+    if (/.CSV(?:$|\?)/i.test(url)) return CV_CONST_LAYER_TYPES.CSV;
 
     if (upperUrl.includes('COLLECTIONS')) return CV_CONST_LAYER_TYPES.OGC_FEATURE;
 
@@ -271,19 +261,17 @@ export class ConfigApi {
     // Trace the detail config read from url
     logger.logTraceDetailed('URL Config - ', jsonConfig);
 
-    return new MapFeatureConfig(jsonConfig, displayLanguage);
+    return new MapFeatureConfig(jsonConfig);
   }
 
   /**
    * Get the default values that are applied to the map feature configuration when the user doesn't provide a value for a field
    * that is covered by a default value.
-   * @param {TypeDisplayLanguage} language The language of the map feature config we want to produce.
-   *
    * @returns {MapFeatureConfig} The map feature configuration default values.
    * @static
    */
-  static getDefaultMapFeatureConfig(language: TypeDisplayLanguage): MapFeatureConfig {
-    return new MapFeatureConfig(toJsonObject(CV_DEFAULT_MAP_FEATURE_CONFIG), language);
+  static getDefaultMapFeatureConfig(): MapFeatureConfig {
+    return new MapFeatureConfig(toJsonObject(CV_DEFAULT_MAP_FEATURE_CONFIG));
   }
 
   /**
@@ -379,12 +367,10 @@ export class ConfigApi {
    * and all changes made will be logged in the console.
    *
    * @param {string | TypeJsonObject} mapConfig The map feature configuration to validate.
-   * @param {TypeDisplayLanguage} language The language of the map feature config we want to produce.
-   *
    * @returns {MapFeatureConfig} The validated map feature configuration.
    * @static
    */
-  static validateMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): MapFeatureConfig {
+  static validateMapConfig(mapConfig: string | TypeJsonObject): MapFeatureConfig {
     // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
     // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
     // be translated to a json object.
@@ -398,14 +384,14 @@ export class ConfigApi {
 
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
       // will be executed to try to correct the problem in the best possible way.
-      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!, language);
+      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!);
     } catch (error) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
       // an array.
       if (error instanceof MapConfigError) logger.logError(error.message);
       else logger.logError('ConfigApi.validateMapConfig - An error occured', error);
-      const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig(language);
+      const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig();
       defaultMapConfig.setErrorDetectedFlag();
       ConfigApi.lastMapConfigCreated = defaultMapConfig;
     }
@@ -450,7 +436,7 @@ export class ConfigApi {
 
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
       // will be executed to try to correct the problem in the best possible way.
-      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!, language);
+      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!);
       if (errorDetected) ConfigApi.lastMapConfigCreated.setErrorDetectedFlag();
     } catch (error) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
@@ -458,7 +444,7 @@ export class ConfigApi {
       // an array.
       if (error instanceof MapConfigError) logger.logError(error.message);
       else logger.logError('ConfigApi.createMapConfig - An error occured', error);
-      const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig(language);
+      const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig();
       defaultMapConfig.setErrorDetectedFlag();
       ConfigApi.lastMapConfigCreated = defaultMapConfig;
     }
@@ -513,7 +499,7 @@ export class ConfigApi {
     }
 
     // Create the GeoView layer configuration instance and validate it against the schema.
-    ConfigApi.lastLayerConfigCreated = MapFeatureConfig.nodeFactory(geoviewLayerConfig, language);
+    ConfigApi.lastLayerConfigCreated = MapFeatureConfig.nodeFactory(geoviewLayerConfig);
     return ConfigApi.lastLayerConfigCreated;
   }
 

@@ -30,6 +30,7 @@ export interface IAppState {
   isCrosshairsActive: boolean;
   isFullscreenActive: boolean;
   notifications: Array<NotificationDetailsType>;
+  showUnsymbolizedFeatures: boolean;
 
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
@@ -77,6 +78,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     isCrosshairsActive: false,
     isFullscreenActive: false,
     notifications: [],
+    showUnsymbolizedFeatures: false,
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -92,6 +94,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocatorUrl,
           metadataServiceURL: geoviewConfig.serviceUrls?.metadataUrl,
           geoviewHTMLElement: document.getElementById(get().mapId)!,
+          showUnsymbolizedFeatures: geoviewConfig.globalSettings?.showUnsymbolizedFeatures || false,
         },
       });
     },
