@@ -618,7 +618,7 @@ export class ConfigApi {
    * @experimental
    */
   // TODO: REFACTOR CONFIG API
-  static createEsriDynamicConfig(): Promise<ConfigBaseClass> {
+  static createEsriDynamicConfig(): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = EsriDynamic.createEsriDynamicLayerConfig(
       'gvLayerID',
@@ -642,7 +642,7 @@ export class ConfigApi {
    * @experimental
    */
   // TODO: REFACTOR CONFIG API
-  static createEsriImageConfig(): Promise<ConfigBaseClass> {
+  static createEsriImageConfig(): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = EsriImage.createEsriImageLayerConfig(
       'gvLayerID',
@@ -664,7 +664,7 @@ export class ConfigApi {
    * @experimental
    */
   // TODO: REFACTOR CONFIG API
-  static createImageStaticConfig(): Promise<ConfigBaseClass> {
+  static createImageStaticConfig(): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = ImageStatic.createImageStaticLayerConfig(
       'gvLayerID',
@@ -687,7 +687,7 @@ export class ConfigApi {
    * @experimental
    */
   // TODO: REFACTOR CONFIG API
-  static createVectorTilesConfig(): Promise<ConfigBaseClass> {
+  static createVectorTilesConfig(): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = VectorTiles.createVectorTilesLayerConfig(
       'gvLayerID',
@@ -710,7 +710,7 @@ export class ConfigApi {
    * @experimental
    */
   // TODO: REFACTOR CONFIG API
-  static createWMSConfig(): Promise<ConfigBaseClass> {
+  static createWMSConfig(): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = WMS.createWMSLayerConfig(
       'gvLayerID',
@@ -735,7 +735,7 @@ export class ConfigApi {
    * @experimental
    */
   // TODO: REFACTOR CONFIG API
-  static createXYZTilesConfig(): Promise<ConfigBaseClass> {
+  static createXYZTilesConfig(): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = XYZTiles.createXYZTilesLayerConfig(
       'gvLayerID',
@@ -758,7 +758,7 @@ export class ConfigApi {
    * @experimental
    */
   // TODO: REFACTOR CONFIG API
-  static createCSVFeatureConfig(): Promise<ConfigBaseClass> {
+  static createCSVFeatureConfig(): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = CSV.createCSVLayerConfig(
       'gvLayerID',
@@ -781,7 +781,7 @@ export class ConfigApi {
    * @experimental
    */
   // TODO: REFACTOR CONFIG API
-  static createEsriFeatureConfig(): Promise<ConfigBaseClass> {
+  static createEsriFeatureConfig(): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = EsriFeature.createEsriFeatureLayerConfig(
       'gvLayerID',
@@ -804,7 +804,7 @@ export class ConfigApi {
    * @experimental
    */
   // TODO: REFACTOR CONFIG API
-  static createGeoJsonLayerConfig(): Promise<ConfigBaseClass> {
+  static createGeoJsonLayerConfig(): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = GeoJSON.createGeoJsonLayerConfig(
       'gvLayerID',
@@ -827,7 +827,7 @@ export class ConfigApi {
    * @experimental
    */
   // TODO: REFACTOR CONFIG API
-  static createOGCFeatureConfig(): Promise<ConfigBaseClass> {
+  static createOGCFeatureConfig(): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = OgcFeature.createOgcFeatureLayerConfig(
       'gvLayerID',
@@ -850,7 +850,7 @@ export class ConfigApi {
    * @experimental
    */
   // TODO: REFACTOR CONFIG API
-  static createWFSConfig(): Promise<ConfigBaseClass> {
+  static createWFSConfig(): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = WFS.createWfsFeatureLayerConfig(
       'gvLayerID',
@@ -873,22 +873,19 @@ export class ConfigApi {
    * @returns {Promise<ConfigBaseClass>} The promise of a generated ConfigBaseClass.
    * @private
    */
-  static #processConfig(layer: AbstractGeoViewLayer): Promise<ConfigBaseClass> {
+  static #processConfig(layer: AbstractGeoViewLayer): Promise<ConfigBaseClass[]> {
     // Create a promise that the layer config will be created
-    const promise = new Promise<ConfigBaseClass>((resolve, reject) => {
+    const promise = new Promise<ConfigBaseClass[]>((resolve, reject) => {
+      // Keep the config as they get created
+      const configs: ConfigBaseClass[] = [];
+
       // Register a handler when the layer config has been created for this config
       layer.onLayerConfigCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerConfigCreatedEvent) => {
         // A Layer Config was created
         logger.logDebug('Config created', event.config);
 
-        // If no errors
-        if (event.errors.length === 0) {
-          // Resolve
-          resolve(event.config);
-        } else {
-          // Errors happened while creating the config, reject
-          reject(new AggregateError(event.errors));
-        }
+        // Add the config
+        configs.push(event.config);
       });
 
       // (Extra) Register a handler when a Group layer has been created for this config
@@ -903,11 +900,26 @@ export class ConfigApi {
         logger.logDebug('GV Layer created', event.layer);
       });
 
-      // Start the geoview-layers config process which will trigger LayerConfigCreated at some point
-      layer.createGeoViewLayers().catch((error) => {
-        // Reject
-        reject(formatError(error));
-      });
+      // Start the geoview-layers config process
+      layer
+        .createGeoViewLayers()
+        .then(() => {
+          // If no errors
+          if (layer.layerLoadError.length === 0) {
+            // Resolve with the configurations
+            resolve(configs);
+          } else {
+            // Errors happened
+            // If only one, throw as-is
+            if (layer.layerLoadError.length === 1) throw layer.layerLoadError[0];
+            // Throw them all inside an AggregateError
+            layer.throwAggregatedLayerLoadErrors();
+          }
+        })
+        .catch((error: unknown) => {
+          // Reject
+          reject(formatError(error));
+        });
     });
 
     // Return the promise
