@@ -60,7 +60,7 @@
           {
             "layerId": "8",
             "layerName": "Error query filter",
-            "layerFilter": "Total_CSO_Volumeeeeeeee > 5000000",
+            "layerFilter": "Total_CSO_VolumeERROR > 5000000",
             "layerStyle": {
               "Point": {
                 "type": "classBreaks",

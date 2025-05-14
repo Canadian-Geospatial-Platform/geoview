@@ -5,7 +5,6 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import { Layer } from 'ol/layer';
 import Source from 'ol/source/Source';
-import { shared as iconImageCache } from 'ol/style/IconImageCache';
 import { Projection as OLProjection } from 'ol/proj';
 
 import { Style } from 'ol/style';
@@ -150,10 +149,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   protected onError(event: unknown): void {
     // Log
-    logger.logError(
-      `An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map. Zoom level is: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`,
-      event
-    );
+    logger.logError(`An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map.`, event);
 
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
@@ -179,10 +175,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   protected onImageLoadError(event: unknown): void {
     // Log
-    logger.logError(
-      `Error loading source image for layer: ${this.getLayerPath()}. Zoom level is: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`,
-      event
-    );
+    logger.logError(`Error loading source image for layer: ${this.getLayerPath()}.`, event);
 
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
@@ -196,12 +189,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // If we were not error before
     if (layerStatusBefore !== 'error') {
       // Emit about the error
-      this.emitMessage(
-        'layers.errorImageLoad',
-        [this.getLayerName() || this.getLayerPath(), Math.round(this.getMapViewer().getView().getZoom() || 0).toString()],
-        'error',
-        true
-      );
+      this.emitMessage('layers.errorImageLoad', [this.getLayerName() || this.getLayerPath()], 'error', true);
     } else {
       // We've already emitted an erorr to the user about the layer being in error, skip
     }
@@ -331,11 +319,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Gets the in visible range value
+   * @param {number | undefined} currentZoom - The map current zoom
    * @returns {boolean} true if the layer is in visible range
    */
-  getInVisibleRange(): boolean {
-    const mapZoom = this.getMapViewer().getView().getZoom();
-    return mapZoom! > this.getMinZoom() && mapZoom! <= this.getMaxZoom();
+  getInVisibleRange(currentZoom: number | undefined): boolean {
+    if (!currentZoom) return false;
+    return currentZoom > this.getMinZoom() && currentZoom <= this.getMaxZoom();
   }
 
   /**
@@ -580,8 +569,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         if (legend) {
           // Save the style according to the legend
           this.onSetStyleAccordingToLegend(legend);
-          // Check for possible number of icons and set icon cache size
-          this.updateIconImageCache(legend);
           // Emit legend information once retrieved
           this.#emitLegendQueried({ legend });
         }
@@ -593,30 +580,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Return the promise
     return promiseLegend;
-  }
-
-  /**
-   * Update the size of the icon image list based on styles.
-   * @param {TypeLegend} legend - The legend to check.
-   */
-  updateIconImageCache(legend: TypeLegend): void {
-    // GV This will need to be revised if functionality to add additional icons to a layer is added
-    let styleCount = this.getMapViewer().iconImageCacheSize;
-    if (legend.styleConfig)
-      Object.keys(legend.styleConfig).forEach((geometry) => {
-        if (
-          legend.styleConfig &&
-          (legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'uniqueValue' ||
-            legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'classBreaks')
-        ) {
-          if (legend.styleConfig[geometry as TypeStyleGeometry]!.info?.length)
-            styleCount += legend.styleConfig[geometry as TypeStyleGeometry]!.info.length;
-        }
-      });
-    // Set the openlayers icon image cache
-    iconImageCache.setSize(styleCount);
-    // Update the cache size for the map viewer
-    this.getMapViewer().iconImageCacheSize = styleCount;
   }
 
   /**
