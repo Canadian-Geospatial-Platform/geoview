@@ -879,6 +879,7 @@ export class ConfigApi {
       // Register a handler when the layer config has been created for this config
       layer.onLayerConfigCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerConfigCreatedEvent) => {
         // A Layer Config was created
+        logger.logDebug('Config created', event.config);
 
         // If no errors
         if (event.errors.length === 0) {
