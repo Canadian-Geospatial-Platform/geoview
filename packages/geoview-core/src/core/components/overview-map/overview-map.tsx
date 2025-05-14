@@ -9,12 +9,11 @@ import { ThemeProvider } from '@mui/material/styles';
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage, useAppI18nInstance } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapOverviewMapHideZoom, useMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
-import i18n from '@/core/translation/i18n';
 
 /**
  * Creates an overview map control and adds it to the map
@@ -31,6 +30,7 @@ export function OverviewMap(): JSX.Element {
   const zoomLevel = useMapZoom();
   const hideOnZoom = useMapOverviewMapHideZoom();
   const displayLanguage = useAppDisplayLanguage();
+  const i18n = useAppI18nInstance();
 
   // State
   const [visibility, setVisibility] = useState<boolean>(!(zoomLevel > hideOnZoom));

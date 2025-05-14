@@ -22,7 +22,6 @@ import { TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
-import i18n from '@/core/translation/i18n';
 import { logger } from '@/core/utils/logger';
 import { getLocalizedMessage, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -163,9 +162,6 @@ async function renderMap(mapElement: Element): Promise<void> {
   // TODO: refactor - remove this config once we get layers from the new one
   // create a new config for this map element
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
-
-  // Set the i18n language to the language specified in the config
-  await i18n.changeLanguage(lang);
 
   const config = new Config(lang);
   const configObj = config.initializeMapConfig(
