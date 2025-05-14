@@ -42,6 +42,7 @@ export const Guide = memo(function GuidePanel({ fullWidth = false, containerType
   const guide = useAppGuide();
   const mapId = useGeoViewMapId();
 
+  logger.logDebug('TESTS', t('mapnav.home'), mapId)
   // Calbacks & Memoize values
   /**
    * Creates a markdown component with the given content

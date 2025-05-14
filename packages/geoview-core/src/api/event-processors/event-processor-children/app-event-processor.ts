@@ -8,7 +8,6 @@ import { MapEventProcessor } from './map-event-processor';
 import { SnackbarType } from '@/core/utils/notifications';
 import { logger } from '@/core/utils/logger';
 import { api } from '@/app';
-import i18n from '@/core/translation/i18n';
 import { formatError } from '@/core/exceptions/core-exceptions';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -131,7 +130,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
     // Return a new promise of void when all will be done instead of promise of array of voids
     return new Promise((resolve, reject) => {
       // Change language in i18n for the useTranslation used by the ui components
-      const promiseChangeLanguage = i18n.changeLanguage(lang);
+      const promiseChangeLanguage = this.getAppState(mapId).i18nInstance!.changeLanguage(lang);
 
       this.getAppState(mapId).setterActions.setDisplayLanguage(lang);
 

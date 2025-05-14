@@ -9,6 +9,8 @@ import { logger } from '@/core/utils/logger';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/config/types/config-constants';
 import { SnackbarType } from '@/core/utils/notifications';
+import { i18n } from 'i18next';
+import { createI18nInstance } from '@/core/translation/i18n';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with AppEventProcessor vs AppState
 
@@ -17,6 +19,7 @@ import { SnackbarType } from '@/core/utils/notifications';
 type AppActions = IAppState['actions'];
 
 export interface IAppState {
+  i18nInstance: i18n | undefined;
   disabledLayerTypes: TypeGeoviewLayerTypeWithGeoCore[];
   displayLanguage: TypeDisplayLanguage;
   displayTheme: TypeDisplayTheme;
@@ -65,6 +68,7 @@ export interface IAppState {
  */
 export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppState {
   return {
+    i18nInstance: undefined,
     disabledLayerTypes: [],
     displayLanguage: 'en' as TypeDisplayLanguage,
     displayTheme: 'geo.ca',
@@ -80,13 +84,14 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     showUnsymbolizedFeatures: false,
 
     // initialize default stores section from config information when store receive configuration file
-    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+    setDefaultConfigValues: async (geoviewConfig: TypeMapFeaturesConfig) => {
       const lang = VALID_DISPLAY_LANGUAGE.includes(geoviewConfig.displayLanguage as TypeDisplayLanguage)
         ? geoviewConfig.displayLanguage
         : 'en';
       set({
         appState: {
           ...get().appState,
+          i18nInstance: await createI18nInstance(lang!),
           disabledLayerTypes: geoviewConfig.globalSettings?.disabledLayerTypes || [],
           displayLanguage: lang as TypeDisplayLanguage,
           displayTheme: geoviewConfig.theme || 'geo.ca',
@@ -301,6 +306,7 @@ export const useAppDisplayTheme = (): TypeDisplayTheme => useStore(useGeoViewSto
 export const useAppFullscreenActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
 export const useAppGeolocatorServiceURL = (): string | undefined =>
   useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
+export const useAppI18nInstance = (): i18n => useStore(useGeoViewStore(), (state) => state.appState.i18nInstance!);
 export const useAppMetadataServiceURL = (): string | undefined => useStore(useGeoViewStore(), (state) => state.appState.metadataServiceURL);
 export const useAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
 export const useAppGeoviewAssetsURL = (): string => useStore(useGeoViewStore(), (state) => state.appState.geoviewAssetsURL);
@@ -313,6 +319,7 @@ export const useAppDisplayLanguageById = (mapId: string): TypeDisplayLanguage =>
   useStore(getGeoViewStore(mapId), (state) => state.appState.displayLanguage);
 export const useAppDisplayThemeById = (mapId: string): TypeDisplayTheme =>
   useStore(getGeoViewStore(mapId), (state) => state.appState.displayTheme);
+export const useAppI18nInstanceById = (mapId: string): i18n => useStore(getGeoViewStore(mapId), (state) => state.appState.i18nInstance!);
 
 // Getter function for one-time access, there is no subcription to modification
 export const getAppCrosshairsActive = (mapId: string): boolean => getGeoViewStore(mapId).getState().appState.isCrosshairsActive;

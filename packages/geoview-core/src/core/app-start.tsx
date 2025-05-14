@@ -9,9 +9,8 @@ import { getTheme, cgpvTheme } from '@/ui/style/theme';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
-import i18n from '@/core/translation/i18n';
 import { api } from '@/app';
-import { useAppDisplayThemeById } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayThemeById, useAppI18nInstanceById } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks
@@ -56,6 +55,7 @@ function AppStart(props: AppStartProps): JSX.Element {
   // GV get store values by id because context is not set.... it is the only atomic selector by id
   // once context is define, map id is available
   const theme = useAppDisplayThemeById(mapId);
+  const i18n = useAppI18nInstanceById(mapId);
 
   /**
    * Create maps from inline configs with class name geoview-map
