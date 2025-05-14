@@ -4,7 +4,7 @@ import { Projection as OLProjection } from 'ol/proj';
 import { Extent, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { logger } from '@/core/utils/logger';
+import { NotImplementedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Abstract Base Layer managing an OpenLayer layer, including a layer group.
@@ -143,11 +143,11 @@ export abstract class AbstractBaseLayer {
    * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string} outfield - ID field to return for services that require a value in outfields.
-   * @returns {Promise<Extent | undefined>} The extent of the features, if available
+   * @returns {Promise<Extent>} The extent of the features, if available
    */
-  getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent | undefined> {
-    logger.logError(`Feature geometry for ${objectIds}-${outfield} is unavailable from ${this.getLayerPath()}`);
-    return Promise.resolve(undefined);
+  getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+    // Not implemented
+    throw new NotImplementedError(`Feature geometry for ${objectIds}-${outfield} is unavailable from ${this.getLayerPath()}`);
   }
 
   /**

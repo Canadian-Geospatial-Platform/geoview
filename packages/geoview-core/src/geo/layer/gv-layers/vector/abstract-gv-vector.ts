@@ -21,6 +21,7 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { getExtentUnion, validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
+import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -107,7 +108,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   ): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
-    const features = this.getOLSource()!.getFeatures();
+    const features = this.getOLSource().getFeatures();
     return Promise.resolve(this.formatFeatureInfoResult(features, layerConfig));
   }
 
@@ -263,30 +264,37 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {string[]} objectIds - The uids of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
-   * @returns {Promise<Extent | undefined>} The extent of the features, if available.
+   * @returns {Promise<Extent>} The extent of the features, if available.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent | undefined> {
-    // Get array of features
-    const requestedFeatures = objectIds.map((id) => this.getOLLayer().getSource()?.getFeatureById(id));
+  override getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+    // Get the feature source
+    const source = this.getOLLayer().getSource();
 
-    if (requestedFeatures) {
-      // Determine max extent from features
-      let calculatedExtent: Extent | undefined;
-      requestedFeatures.forEach((feature) => {
-        if ((feature as unknown as Feature)?.getGeometry()) {
-          const extent = (feature as unknown as Feature).getGeometry()?.getExtent();
-          if (extent) {
-            // If calculatedExtent has not been defined, set it to extent
-            if (!calculatedExtent) calculatedExtent = extent;
-            else getExtentUnion(calculatedExtent, extent);
-          }
+    // Get array of features and only keep the ones we could find by id
+    const requestedFeatures = objectIds.map((id) => source?.getFeatureById(id)).filter((feature) => !!feature);
+
+    // Determine max extent from features
+    let calculatedExtent: Extent | undefined;
+    requestedFeatures.forEach((feature) => {
+      // Get the geometry
+      const geom = feature.getGeometry();
+      if (geom) {
+        // Get the extent
+        const extent = geom.getExtent();
+        if (extent) {
+          // If calculatedExtent has not been defined, set it to extent
+          if (!calculatedExtent) calculatedExtent = extent;
+          else getExtentUnion(calculatedExtent, extent);
         }
-      });
+      }
+    });
 
-      return Promise.resolve(calculatedExtent);
-    }
-    return Promise.resolve(undefined);
+    // If no calculated extent
+    if (!calculatedExtent) throw new NoExtentError(this.getLayerPath());
+
+    // Resolve
+    return Promise.resolve(calculatedExtent);
   }
 
   /**
