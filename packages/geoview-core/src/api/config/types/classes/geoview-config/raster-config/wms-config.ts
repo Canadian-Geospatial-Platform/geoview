@@ -10,6 +10,7 @@ import { layerEntryIsGroupLayer } from '@/api/config/types/type-guards';
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { xmlToJson } from '@/core/utils/utilities';
 
 export type TypeWmsLayerNode = WmsGroupLayerConfig | WmsLayerEntryConfig;
@@ -268,15 +269,14 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
   async #fetchXmlServiceMetadata(metadataUrl: string): Promise<void> {
     try {
       const parser = new WMSCapabilities();
-      const response = await fetch(metadataUrl);
-      const capabilitiesString = await response.text();
+      const capabilitiesString = await Fetch.fetchText(metadataUrl);
       this.setServiceMetadata(parser.read(capabilitiesString));
       // GV: If this.getServiceMetadata() returns {}, we need to verify if the object is empty to conclude there is no metadata.
       if (Object.keys(this.getServiceMetadata()).length) {
         this.#processMetadataInheritance();
         this.metadataAccessPath = this.getServiceMetadata().Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
       } else throw new GeoviewLayerConfigError('Unable to read the metadata, value returned is empty.');
-    } catch (error) {
+    } catch (error: unknown) {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
@@ -314,7 +314,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       const serviceMetadata = await this.#executeServiceMetadataRequest();
       this.setServiceMetadata(serviceMetadata);
       this.#processMetadataInheritance();
-    } catch (error) {
+    } catch (error: unknown) {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
@@ -359,8 +359,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
       newUrl = `${newUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
     }
 
-    const response = await fetch(newUrl);
-    const capabilitiesString = await response.text();
+    const capabilitiesString = await Fetch.fetchText(newUrl);
 
     const xmlDomResponse = new DOMParser().parseFromString(capabilitiesString, 'text/xml');
     const jsonResponse = xmlToJson(xmlDomResponse);
@@ -417,7 +416,7 @@ export class WmsLayerConfig extends AbstractGeoviewLayerConfig {
         }
       }
       this.#processMetadataInheritance();
-    } catch (error) {
+    } catch (error: unknown) {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);

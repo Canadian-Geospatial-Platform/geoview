@@ -31,7 +31,7 @@ i18n
       useSuspense: true,
     },
   })
-  .catch((error) => {
+  .catch((error: unknown) => {
     // Log
     logger.logPromiseFailed('in init in translation/i18n', error);
   });

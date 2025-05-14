@@ -21,17 +21,15 @@ import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { Config } from '@/core/utils/config/config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import {
-  CONST_LAYER_TYPES,
-  TypeGeoviewLayerTypeWithGeoCore,
-  AbstractGeoViewLayer,
-} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
   EntryConfigBaseClass,
   GroupLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
+  TypeGeoviewLayerTypeWithGeoCore,
 } from '@/api/config/types/map-schema-types';
 
 import { ConfigApi } from '@/api/config/config-api';
@@ -148,7 +146,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError(`${serviceName} ${t('layers.errorServer')}`, [], false);
+    api.getMapViewer(mapId).notifications.showError('layers.errorServer', [serviceName], false);
   };
 
   const setLayerTypeIfAllowed = (layerTypeValue: TypeGeoviewLayerTypeWithGeoCore): boolean => {
@@ -280,7 +278,7 @@ export function AddNewLayer(): JSX.Element {
             setStepButtonEnabled(false);
           }
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('promise of layer validation in handleStep2 in AddNewLayer', error);
         });
@@ -345,7 +343,7 @@ export function AddNewLayer(): JSX.Element {
       const config = new Config(language);
       const configObj = config.initializeMapConfig(mapId, [newGeoViewLayer], (errorKey: string, params: string[]) => {
         // Create the error
-        const error = new GeoViewError(mapId, errorKey, params);
+        const error = new GeoViewError(errorKey, params);
 
         // Log it
         logger.logWarning(`- Map ${mapId}: ${error.message}`);

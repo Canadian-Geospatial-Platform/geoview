@@ -13,12 +13,6 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
-    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
-      throw new Error(
-        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} when the metadataAccessPath is undefined.`
-      );
-    }
-
     // Value for this.source.format can only be WFS.
     if (!this.source) this.source = { format: 'WFS' };
     if (!this.source.format) this.source.format = 'WFS';

@@ -13,12 +13,11 @@ import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 export class GVWFS extends AbstractGVVector {
   /**
    * Constructs a GVWFS layer to manage an OpenLayer layer.
-   * @param {string} mapId - The map id
    * @param {VectorSource} olSource - The OpenLayer source.
    * @param {WfsLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olSource: VectorSource, layerConfig: WfsLayerEntryConfig) {
-    super(mapId, olSource, layerConfig);
+  public constructor(olSource: VectorSource, layerConfig: WfsLayerEntryConfig) {
+    super(olSource, layerConfig);
   }
 
   /**

@@ -155,7 +155,7 @@ export abstract class AbstractLayerSet {
           // If the layer could be found
           if (layer) {
             // Register the layer itself (not the layer config) automatically in the layer set
-            this.registerLayer(layer).catch((error) => {
+            this.registerLayer(layer).catch((error: unknown) => {
               // Log
               logger.logPromiseFailed('in registerLayer in registerLayerConfig', error);
             });
@@ -164,7 +164,7 @@ export abstract class AbstractLayerSet {
 
         // Emit that the layerConfig got their status changed
         this.#emitLayerStatusUpdated({ layer: layerConfig });
-      } catch (error) {
+      } catch (error: unknown) {
         // Error happened when trying to register the layer coming from the layer config
         logger.logError('Error trying to register the layer coming from the layer config', error);
       }
@@ -338,7 +338,7 @@ export abstract class AbstractLayerSet {
 
       // Emit the layer set updated changed event
       this.onLayerSetUpdatedProcess(layerConfig.layerPath);
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('CAUGHT in handleLayerStatusChanged', layerConfig.layerPath, error);
     }
@@ -364,7 +364,7 @@ export abstract class AbstractLayerSet {
         // Inform that the layer set has been updated
         this.onLayerSetUpdatedProcess(layerPath);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('CAUGHT in handleLayerStatusChanged', layerPath, error);
     }

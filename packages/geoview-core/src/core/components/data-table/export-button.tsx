@@ -18,6 +18,9 @@ interface ExportButtonProps {
   children?: ReactElement | undefined;
 }
 
+/** The columns to remove from the data when exporting */
+const COLUMNS_TO_REMOVE = ['ICON', 'ZOOM', 'DETAILS', 'geoviewID'];
+
 /**
  * Custom  export button which will help to download data table data in csv format.
  * @param {string} layerPath id of the layer
@@ -36,8 +39,6 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
   const { t } = useTranslation<string>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-
-  const COLUMNS_TO_REMOVE = ['ICON', 'ZOOM', 'DETAILS', 'geoviewID'];
 
   /**
    * Shows export menu.

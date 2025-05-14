@@ -298,17 +298,6 @@
         ]
       },
       {
-        "geoviewLayerId": "esriFeatureLYR4",
-        "geoviewLayerName": "Temporal_Test_Bed_en",
-        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/",
-        "geoviewLayerType": "esriDynamic",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0"
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "classBreaksId",
         "geoviewLayerName": "classBreaks",
         "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/",

@@ -26,7 +26,7 @@ import { logger } from '@/core/utils/logger';
  */
 
 // #region CHECK "IS" FUNCTIONS
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseRenderer as an EsriUniqueValueRenderer if the type attribute of the
  * verifyIfRenderer parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
  * this function.
@@ -39,7 +39,7 @@ export const esriRendererIsUniqueValue = (verifyIfRenderer: EsriBaseRenderer): v
   return verifyIfRenderer?.type === 'uniqueValue';
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseSymbol as an EsriSimpleMarkerSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriSMS'. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -51,7 +51,7 @@ export const isSimpleMarkerSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSy
   return verifyIfSymbol?.type === 'esriSMS';
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseSymbol as an EsriSimpleFillSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriSFS'. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -63,7 +63,7 @@ export const isEsriSimpleFillSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIf
   return verifyIfSymbol?.type === 'esriSFS';
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseSymbol as an EsriSimpleLineSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriSLS'. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -75,7 +75,7 @@ export const isSimpleLineSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymb
   return verifyIfSymbol?.type === 'esriSLS';
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseSymbol as an EsriPictureMarkerSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriPMS'. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -87,7 +87,7 @@ export const isPictureMarkerSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfS
   return verifyIfSymbol?.type === 'esriPMS';
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseRenderer as an EsriSimpleRenderer if the type attribute of the verifyIfRenderer
  * parameter is 'simple'. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -99,7 +99,7 @@ export const esriRendererIsSimple = (verifyIfRenderer: EsriBaseRenderer): verify
   return verifyIfRenderer?.type === 'simple';
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseRenderer as an EsriClassBreakRenderer if the type attribute of the
  * verifyIfRenderer parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use this
  * function.
@@ -114,7 +114,7 @@ export const esriRendererIsClassBreaks = (verifyIfRenderer: EsriBaseRenderer): v
 // #endregion CHECK "IS" FUNCTIONS
 
 // #region CONVERSION FUNCTIONS
-/** *****************************************************************************************************************************
+/**
  * Convert the ESRI line style to the GeoView line style.
  *
  * @param {EsriLineStyle} lineStyle - ESRI line style to convert.
@@ -154,7 +154,7 @@ function convertLineStyle(lineStyle: EsriLineStyle): TypeLineStyle {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * Convert the ESRI fill style to the GeoView fill style.
  *
  * @param {EsriFillStyle} fillStyle - ESRI fill style to convert.
@@ -186,7 +186,7 @@ function convertFillStyle(fillStyle: EsriFillStyle): TypeFillStyle {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * Convert the ESRI symbol style to the GeoView symbol style.
  *
  * @param {EsriSymbolStyle} symbolStyle - ESRI symbol style to convert.
@@ -214,7 +214,7 @@ function convertSymbolStyle(symbolStyle: EsriSymbolStyle): TypeSymbol {
   }
 }
 
-/** *****************************************************************************************************************************
+/**
  * Convert an ESRI color to a GeoView color.
  *
  * @param {TypeEsriColor} color - ESRI color to convert.
@@ -226,7 +226,7 @@ function convertEsriColor(color: TypeEsriColor): string {
   return 'rgba(0,0,0,0)';
 }
 
-/** *****************************************************************************************************************************
+/**
  * Convert an ESRI symbol to a GeoView symbol.
  *
  * @param {EsriSymbol} symbol - ESRI symbol to convert.
@@ -301,7 +301,7 @@ function convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined
 }
 // #endregion CONVERSION FUNCTIONS
 
-/** *****************************************************************************************************************************
+/**
  * Get the configuration key of the style.
  *
  * @param {TypeKindOfVectorSettings} settings - GeoView settings.
@@ -315,7 +315,7 @@ function getStyleGeometry(settings: TypeKindOfVectorSettings): TypeStyleGeometry
   return undefined;
 }
 
-/** *****************************************************************************************************************************
+/**
  * Process ESRI unique value renderer and convert it to a GeoView style.
  *
  * @param {EsriUniqueValueRenderer} renderer - ESRI renderer to convert.
@@ -378,7 +378,7 @@ function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeLaye
   return undefined;
 }
 
-/** *****************************************************************************************************************************
+/**
  * Process ESRI simple renderer and convert it to a GeoView style.
  *
  * @param {EsriSimpleRenderer} renderer - ESRI renderer to convert.
@@ -408,7 +408,7 @@ function processSimpleRenderer(renderer: EsriSimpleRenderer): TypeLayerStyleConf
   return undefined;
 }
 
-/** *****************************************************************************************************************************
+/**
  * Process ESRI class break renderer and convert it to a GeoView style.
  *
  * @param {EsriClassBreakRenderer} EsriRenderer - ESRI renderer to convert.
@@ -472,7 +472,7 @@ function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeLa
   return undefined;
 }
 
-/** *****************************************************************************************************************************
+/**
  * Get GeoView style from Esri renderer.
  *
  * @param {EsriBaseRenderer} renderer - ESRI renderer to convert.

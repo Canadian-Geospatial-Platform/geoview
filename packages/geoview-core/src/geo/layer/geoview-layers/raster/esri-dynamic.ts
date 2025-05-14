@@ -1,20 +1,25 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
-import { Image as ImageLayer } from 'ol/layer';
 
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import {
+  TypeLayerEntryConfig,
+  TypeGeoviewLayerConfig,
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
+} from '@/api/config/types/map-schema-types';
 
 import {
   commonFetchAndSetServiceMetadata,
   commonProcessLayerMetadata,
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { deepMergeObjects } from '@/core/utils/utilities';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview config section
@@ -44,13 +49,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
   /**
    * Constructs an EsriDynamic Layer configuration processor.
-   * @param {string} mapId The id of the map.
    * @param {TypeEsriDynamicLayerConfig} layerConfig The layer configuration.
    */
-  constructor(mapId: string, layerConfig: TypeEsriDynamicLayerConfig) {
+  constructor(layerConfig: TypeEsriDynamicLayerConfig) {
     // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
-    super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig, mapId);
+    super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig);
   }
 
   /**
@@ -71,6 +75,31 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /**
+   * Overrides the way the layer metadata is processed.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   */
+  protected override onProcessLayerMetadata(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriDynamicLayerEntryConfig> {
+    return commonProcessLayerMetadata(this, layerConfig);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVEsriDynamic} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: EsriDynamicLayerEntryConfig): GVEsriDynamic {
+    // Create the source
+    const source = EsriDynamic.createEsriDynamicSource(layerConfig);
+
+    // Create the GV Layer
+    const gvLayer = new GVEsriDynamic(source, layerConfig);
+
+    // Return it
+    return gvLayer;
+  }
+
+  /**
    * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
    * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
    * @returns {boolean} true if an error is detected.
@@ -78,72 +107,94 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
     if (this.metadata?.supportsDynamicLayers === false) {
       // Log a warning, but continue
-      logger.logWarning(
-        `Layer ${layerConfig.layerPath} of map ${this.mapId} does not technically support dynamic layers per its metadata.`
-      );
+      logger.logWarning(`Layer ${layerConfig.layerPath} does not technically support dynamic layers per its metadata.`);
     }
     return false;
   }
 
   /**
-   * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * Creates a configuration object for a Esri Dynamic layer.
+   * This function constructs a `TypeEsriDynamicLayerConfig` object that describes an Esri Dynamic layer
+   * and its associated entry configurations based on the provided parameters.
+   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the GeoView layer.
+   * @param {string} metadataAccessPath - The URL or path to access metadata.
+   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @returns {TypeEsriDynamicLayerConfig} The constructed configuration object for the Esri Dynamic layer.
    */
-  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof EsriDynamicLayerEntryConfig))
-      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
-    return commonProcessLayerMetadata(this, layerConfig);
+  static createEsriDynamicLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware: boolean,
+    layerEntries: TypeJsonArray,
+    customGeocoreLayerConfig: TypeJsonObject
+  ): TypeEsriDynamicLayerConfig {
+    const geoviewLayerConfig: TypeEsriDynamicLayerConfig = {
+      geoviewLayerId,
+      geoviewLayerName,
+      metadataAccessPath,
+      geoviewLayerType: CONST_LAYER_TYPES.ESRI_DYNAMIC,
+      isTimeAware,
+      listOfLayerEntryConfig: [],
+    };
+    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      const layerEntryConfig = {
+        geoviewLayerConfig,
+        schemaTag: CONST_LAYER_TYPES.ESRI_DYNAMIC,
+        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
+        layerId: layerEntry.index as string,
+        source: {
+          dataAccessPath: metadataAccessPath,
+        },
+      };
+
+      // Overwrite default from geocore custom config
+      const mergedConfig = deepMergeObjects(layerEntryConfig as unknown as TypeJsonObject, customGeocoreLayerConfig);
+
+      // Reconstruct
+      return new EsriDynamicLayerEntryConfig(mergedConfig as unknown as EsriDynamicLayerEntryConfig);
+    });
+
+    // Return it
+    return geoviewLayerConfig;
   }
 
   /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @returns {Promise<ImageLayer<ImageArcGISRest>>} The created Open Layer object.
+   * Creates an ImageArcGISRest source from a layer config.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration for the EsriDynamic layer.
+   * @returns A fully configured ImageArcGISRest source.
+   * @throws If required config fields like dataAccessPath are missing.
    */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>> {
-    // Instance check
-    if (!(layerConfig instanceof EsriDynamicLayerEntryConfig))
-      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+  static createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest {
+    const { source } = layerConfig;
 
-    const sourceOptions: SourceOptions = {};
-    sourceOptions.attributions = [(this.metadata?.copyrightText ? this.metadata?.copyrightText : '') as string];
-    sourceOptions.url = layerConfig.source.dataAccessPath!;
-    sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
-    if (layerConfig.source.transparent) sourceOptions.params.transparent = layerConfig.source.transparent!;
-    if (layerConfig.source.format) sourceOptions.params.format = layerConfig.source.format!;
-    if (layerConfig.source.crossOrigin) {
-      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-    } else {
-      sourceOptions.crossOrigin = 'Anonymous';
-    }
-    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-
-    // Create the source
-    const source = new ImageArcGISRest(sourceOptions);
-
-    // Raster layer queries do not accept any layerDefs
-    if (this.metadata?.layers[0].type === 'Raster Layer') {
-      const params = source.getParams();
-      source.updateParams({ ...params, layerDefs: '' });
+    if (!source?.dataAccessPath) {
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
     }
 
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+    const sourceOptions: SourceOptions = {
+      url: source.dataAccessPath,
+      attributions: layerConfig.getAttributions(),
+      params: {
+        LAYERS: `show:${layerConfig.layerId}`,
+        ...(source.transparent !== undefined && { transparent: source.transparent }),
+        ...(source.format && { format: source.format }),
+      },
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
+      projection: source.projection ? `EPSG:${source.projection}` : undefined,
+    };
 
-    // If any response
-    let olLayer: ImageLayer<ImageArcGISRest>;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
-    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
+    const arcgisSource = new ImageArcGISRest(sourceOptions);
 
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
+    // Raster layers do not accept layerDefs — must be cleared
+    if (layerConfig.getServiceMetadata()?.layers?.[0]?.type === 'Raster Layer') {
+      const params = arcgisSource.getParams();
+      arcgisSource.updateParams({ ...params, layerDefs: '' });
+    }
 
-    // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
+    return arcgisSource;
   }
 }
 

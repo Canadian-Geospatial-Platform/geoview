@@ -400,7 +400,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       setProjection: (projectionCode: TypeValidMapProjectionCodes): void => {
         // Redirect to processor
-        MapEventProcessor.setProjection(get().mapId, projectionCode).catch((error) => {
+        MapEventProcessor.setProjection(get().mapId, projectionCode).catch((error: unknown) => {
           logger.logError('Map-State Failed to set projection', error);
         });
       },

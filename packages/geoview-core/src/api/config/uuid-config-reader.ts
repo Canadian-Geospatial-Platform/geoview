@@ -1,27 +1,23 @@
-import axios, { AxiosResponse } from 'axios';
-
 import { TypeJsonObject, TypeJsonArray, toJsonObject } from '@/api/config/types/config-types';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
 import { deepMergeObjects } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
+import { LayerGeoCoreInvalidResponseError, LayerGeoCoreNoLayersError } from '@/core/exceptions/geocore-exceptions';
 
-// The GeoChart Json object coming out of the GeoCore response
-export type GeoChartGeoCoreConfig = TypeJsonObject & {
-  layers: {
-    layerId: string;
-  };
-}; // TypeJsonObject, because the definition is in the external package
+// // The GeoChart Json object coming out of the GeoCore response
+// export type GeoChartGeoCoreConfig = TypeJsonObject & {
+//   layers: {
+//     layerId: string;
+//   };
+// }; // TypeJsonObject, because the definition is in the external package
 
-// #region GeoChart type
+// // #region GeoChart type
 
-// The GeoChart Json object expected by GeoView
-export type GeoChartConfig = TypeJsonObject & {
-  layers: [
-    {
-      layerId: string;
-    },
-  ];
-}; // TypeJsonObject, because the definition is in the external package
+// // The GeoChart Json object expected by GeoView
+// export type GeoChartConfig = TypeJsonObject & {
+//   layers: { layerId: string }[];
+// }; // TypeJsonObject, because the definition is in the external package
 
 // #endregion
 
@@ -32,25 +28,48 @@ export type GeoChartConfig = TypeJsonObject & {
  */
 export class UUIDmapConfigReader {
   /**
+   * Generates GeoView layers and package configurations (i.e. geochart), from GeoCore API, using a list of UUIDs.
+   * @param {string} baseUrl the base url of GeoCore API
+   * @param {string} lang the language to get the config for
+   * @param {string[]} uuids a list of uuids to get the configurations for
+   * @returns {Promise<TypeJsonObject[]>} layers and geocharts read and parsed from uuids results from GeoCore
+   */
+  static async getGVConfigFromUUIDs(baseUrl: string, lang: string, uuids: string[]): Promise<TypeJsonObject[]> {
+    // Build the url
+    const url = `${baseUrl}/vcs?lang=${lang}&id=${uuids.toString()}`;
+
+    // Fetch the config
+    const result = await Fetch.fetchJsonAsObject(url);
+
+    // FIXME: It should look like this to return the geochart information as well, because that information is already coming off the payload response, so let's get it
+    // FIX.ME: View our other uuid-config-reader.ts which does so
+    // // Return the parsed response
+    // return {
+    //   layers: this.#getLayerConfigFromResponse(uuids, result, lang),
+    //   geocharts: this.#getGeoChartConfigFromResponse(result, lang),
+    // } as unknown as TypeJsonObject;
+    return this.#getLayerConfigFromResponse(uuids, result, lang);
+  }
+
+  /**
    * Reads and parses Layers configs from uuid request result
    *
-   * @param {AxiosResponse<TypeJsonObject>} result the uuid request result
-   * @param {string} lang the language to use
-   *
+   * @param {TypeJsonObject} resultData - the uuid request result
+   * @param {string} lang - the language to use
    * @returns {TypeJsonObject[]} layers parsed from uuid result
    * @static @private
    */
-  static #getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject[] {
+  static #getLayerConfigFromResponse(uuids: string[], resultData: TypeJsonObject, lang: string): TypeJsonObject[] {
     // If invalid response
-    if (!result?.data || !result.data.response || !result.data.response.rcs || !result.data.response.rcs[lang]) {
-      const errorMessage = result?.data?.errorMessage || '';
-      throw new Error(`Invalid response from GeoCore service\n${errorMessage}\n`);
+    if (!resultData || !resultData.response || !resultData.response.rcs || !resultData.response.rcs[lang]) {
+      const errorMessage = resultData?.errorMessage || '<no error description>';
+      throw new LayerGeoCoreInvalidResponseError(uuids, errorMessage);
     }
-    if (result.data.response.rcs[lang].length === 0) throw new Error('No layers returned by GeoCore service');
+    if (resultData.response.rcs[lang].length === 0) throw new LayerGeoCoreNoLayersError(uuids);
 
     const listOfGeoviewLayerConfig: TypeJsonObject[] = [];
-    for (let i = 0; i < (result.data.response.rcs[lang] as TypeJsonArray).length; i++) {
-      const data = result.data.response.rcs[lang][i];
+    for (let i = 0; i < (resultData.response.rcs[lang] as TypeJsonArray).length; i++) {
+      const data = resultData.response.rcs[lang][i];
 
       if (data?.layers && (data.layers as TypeJsonArray).length > 0) {
         const layer = data.layers[0];
@@ -61,7 +80,7 @@ export class UUIDmapConfigReader {
           // Get Geocore custom config layer entries values
           // TODO: The proof of concept is done only for WMS layers. We need to implement other layer types after the refactor
           // TO.DOCONT: We need to support config for the geoviewLAyer and children layer entries...
-          const customGeocoreLayerConfig = this.#getGeocoreCustomLayerConfig(result, lang);
+          const customGeocoreLayerConfig = this.#getGeocoreCustomLayerConfig(resultData, lang);
 
           const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
@@ -314,67 +333,47 @@ export class UUIDmapConfigReader {
 
   /**
    * Reads the layers config from uuid request result
-   * @param {AxiosResponse<GeoChartGeoCoreConfig>} result - the uuid request result
+   * @param {GeoChartGeoCoreConfig} resultData - the uuid request result
    * @param {string} lang - the language to use to read results
    * @returns {TypeJsonObject} the layers snippet configs
    * @private
    */
-  static #getGeocoreCustomLayerConfig(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject {
+  static #getGeocoreCustomLayerConfig(resultData: TypeJsonObject, lang: string): TypeJsonObject {
     // If no custon geocore information
-    if (!result?.data || !result.data.response || !result.data.response.gcs || !Array.isArray(result.data.response.gcs)) return {};
+    if (!resultData || !resultData.response || !resultData.response.gcs || !Array.isArray(resultData.response.gcs)) return {};
 
     // TODO: Once refactor done rename to layers
     // TODO: Before moving to the new api, layers will need to link to ids inside the gsc response so we can customize group, or specific id
     // Find custom layer entry configuration
-    const foundConfigs = result.data.response.gcs.map((gcs) => gcs?.[lang]?.layersNew as TypeJsonObject);
+    const foundConfigs = resultData.response.gcs.map((gcs) => gcs?.[lang]?.layersNew as TypeJsonObject);
 
     return foundConfigs[0] || {};
   }
 
-  // GV This is important, it sets the geochart config, we need to relink
-  // TODO: Check - Commented out as not called anymore by method `getGVConfigFromUUIDs`, but maybe it should still?
   // /**
   //  * Reads and parses GeoChart configs from uuid request result
-  //  * @param {AxiosResponse<GeoChartGeoCoreConfig>} result the uuid request result
+  //  * @param {TypeJsonObject} resultData - the uuid request result
   //  * @param {string} lang the language to use to read results
   //  * @returns {GeoChartConfig[]} the list of GeoChart configs
   //  * @private
   //  */
-  // static #getGeoChartConfigFromResponse(result: AxiosResponse<GeoChartGeoCoreConfig>, lang: string): GeoChartConfig[] {
+  // static #getGeoChartConfigFromResponse(resultData: TypeJsonObject, lang: string): TypeJsonObject[] {
   //   // If no geochart information
-  //   if (!result?.data || !result.data.reponse || !result.data.reponse.gcs || !Array.isArray(result.data.reponse.gcs)) return [];
+  //   if (!resultData || !resultData.response || !resultData.response.gcs || !Array.isArray(resultData.response.gcs)) return [];
 
   //   // Find all Geochart configs
-  //   const foundConfigs = result.data.reponse.gcs
-  //     .map((gcs) => gcs?.[lang]?.packages?.geochart as GeoChartGeoCoreConfig)
+  //   const foundConfigs = resultData.response.gcs
+  //     .flatMap((gcs) => gcs?.[lang]?.packages?.geochart)
   //     .filter((geochartValue) => !!geochartValue);
 
   //   // For each found config, parse
-  //   const parsedConfigs: GeoChartConfig[] = [];
-  //   foundConfigs.forEach((foundConfig) => {
+  //   const parsedConfigs: TypeJsonObject[] = [];
+  //   foundConfigs.forEach((foundConfig: TypeJsonObject) => {
   //     // Transform GeoChartGeoCoreConfig to GeoChartConfig
-  //     parsedConfigs.push({ ...(foundConfig as object), layers: [foundConfig.layers] } as GeoChartConfig);
+  //     parsedConfigs.push({ ...(foundConfig as object), layers: [foundConfig.layers] } as unknown as TypeJsonObject); // Trick it with unknown on this class which is less strongly typed than our other uuid-config-reader.ts
   //   });
 
   //   // Return all configs
   //   return parsedConfigs;
   // }
-
-  /**
-   * Generates GeoView layers and package configurations (i.e. geochart), from GeoCore API, using a list of UUIDs.
-   * @param {string} baseUrl the base url of GeoCore API
-   * @param {string} lang the language to get the config for
-   * @param {string[]} uuids a list of uuids to get the configurations for
-   * @returns {Promise<UUIDmapConfigReaderResponse>} layers and geocharts read and parsed from uuids results from GeoCore
-   */
-  static async getGVConfigFromUUIDs(baseUrl: string, lang: string, uuids: string[]): Promise<TypeJsonObject[]> {
-    // Build the url
-    const url = `${baseUrl}/vcs?lang=${lang}&id=${uuids.toString()}`;
-
-    // Fetch the config
-    const result = await axios.get<GeoChartGeoCoreConfig>(url);
-
-    // Return the parsed response
-    return this.#getLayerConfigFromResponse(result, lang);
-  }
 }

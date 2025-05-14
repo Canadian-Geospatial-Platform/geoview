@@ -2,7 +2,7 @@ import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig } from '@/api/config/type
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 
-/** ******************************************************************************************************************************
+/**
  * Type used to define a layer group.
  */
 export class GroupLayerEntryConfig extends ConfigBaseClass {
@@ -19,6 +19,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   declare source: never;
 
   /** The list of layer entry configurations to use from the GeoView layer group. */
+  // TODO: Refactor - Try to type this as ConfigBaseClass[] instead of TypeLayerEntryConfig[]
   listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
 
   /**

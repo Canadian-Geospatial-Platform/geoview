@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { AbstractPlugin } from './abstract-plugin';
 import { MapContext } from '@/core/app-start';
 
-/** ******************************************************************************************************************************
+/**
  * Map Plugin abstract class.
  */
 export abstract class MapPlugin extends AbstractPlugin {
