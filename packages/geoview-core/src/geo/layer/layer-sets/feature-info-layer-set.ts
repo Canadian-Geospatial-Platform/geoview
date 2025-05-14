@@ -152,6 +152,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
         // Process query on results data
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
+          this.layerApi.mapViewer.map,
           layer,
           queryType,
           longLatCoordinate,

@@ -146,7 +146,14 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         this.#abortControllers[layerPath] = new AbortController();
 
         // Process query on results data
-        AbstractLayerSet.queryLayerFeatures(layer, queryType, pixelCoordinate, false, this.#abortControllers[layerPath])
+        AbstractLayerSet.queryLayerFeatures(
+          this.layerApi.mapViewer.map,
+          layer,
+          queryType,
+          pixelCoordinate,
+          false,
+          this.#abortControllers[layerPath]
+        )
           .then((arrayOfRecords) => {
             if (arrayOfRecords.length) {
               const nameField = arrayOfRecords![0].nameField || (Object.entries(arrayOfRecords![0].fieldInfo)[0] as unknown as string);

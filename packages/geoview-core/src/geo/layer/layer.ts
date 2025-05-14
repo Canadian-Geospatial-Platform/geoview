@@ -889,9 +889,6 @@ export class LayerApi {
       this.#gvLayers[layerConfig.layerPath] = gvLayer;
       this.#olLayers[layerConfig.layerPath] = gvLayer.getOLLayer();
 
-      // Attach the map viewer on the GV Layer
-      gvLayer.setMapViewer(this.mapViewer);
-
       // Attach the events handler
       this.#attachEventsOnLayer(gvLayer);
 

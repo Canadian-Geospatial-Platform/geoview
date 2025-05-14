@@ -1,4 +1,5 @@
 import BaseLayer from 'ol/layer/Base';
+import { Projection as OLProjection } from 'ol/proj';
 
 import { Extent, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
@@ -140,12 +141,11 @@ export abstract class AbstractBaseLayer {
   /**
    * Overridable function that gets the extent of an array of features.
    * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+   * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent | undefined>} The extent of the features, if available
    */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  getExtentFromFeatures(objectIds: string[], outfield?: string): Promise<Extent | undefined> {
+  getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent | undefined> {
     logger.logError(`Feature geometry for ${objectIds}-${outfield} is unavailable from ${this.getLayerPath()}`);
     return Promise.resolve(undefined);
   }

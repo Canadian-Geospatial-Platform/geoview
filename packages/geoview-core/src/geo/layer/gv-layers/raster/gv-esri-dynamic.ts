@@ -2,12 +2,12 @@ import { ImageArcGISRest } from 'ol/source';
 import { Image as ImageLayer } from 'ol/layer';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
 import { EsriJSON } from 'ol/format';
 import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 import { Projection as OLProjection } from 'ol/proj';
+import { Map as OLMap } from 'ol';
 
 import { getMetersPerPixel, validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
@@ -254,38 +254,24 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the return of feature information at a given pixel location.
-   * @param {Pixel} location - The pixel coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
-   */
-  protected override getFeatureInfoAtPixel(
-    location: Pixel,
-    queryGeometry: boolean = true,
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
-    // Redirect to getFeatureInfoAtCoordinate
-    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), queryGeometry, abortController);
-  }
-
-  /**
    * Overrides the return of feature information at a given coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
    * @param {Coordinate} location - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtCoordinate(
+    map: OLMap,
     location: Coordinate,
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // Transform coordinate from map project to lntlat
-    const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
+    // Transform coordinate from map projection to lntlat
+    const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
 
     // Redirect to getFeatureInfoAtLongLat
-    return this.getFeatureInfoAtLongLat(projCoordinate, queryGeometry, abortController);
+    return this.getFeatureInfoAtLongLat(map, projCoordinate, queryGeometry, abortController);
   }
 
   /**
@@ -320,12 +306,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At Long Lat from.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override async getFeatureInfoAtLongLat(
+    map: OLMap,
     lnglat: Coordinate,
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
@@ -346,13 +334,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // GV: We cannot directly use the view extent and reproject. If we do so some layers (issue #2413) identify will return empty resultset
     // GV.CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the reprojection it works
-    const mapViewer = this.getMapViewer();
-    const mapExtent = mapViewer.getView().calculateExtent();
-    const boundsLL = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[0], mapExtent[1]]);
-    const boundsUR = mapViewer.convertCoordinateMapProjToLngLat([mapExtent[2], mapExtent[3]]);
+    const mapExtent = map.getView().calculateExtent();
+    const boundsLL = Projection.transformToLonLat([mapExtent[0], mapExtent[1]], map.getView().getProjection());
+    const boundsUR = Projection.transformToLonLat([mapExtent[2], mapExtent[3]], map.getView().getProjection());
     const extent = { xmin: boundsLL[0], ymin: boundsLL[1], xmax: boundsUR[0], ymax: boundsUR[1] };
     const layerDefs = this.getOLSource()?.getParams()?.layerDefs || '';
-    const size = mapViewer.map.getSize()!;
+    const size = map.getSize()!;
+    const mapProjNumber = parseInt(map.getView().getProjection().getCode()?.split(':')[1] || '', 10);
 
     // Identify query to get oid features value and attributes, at this point we do not query geometry
     identifyUrl =
@@ -380,11 +368,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
     const maxAllowableOffset = queryGeometry
-      ? getMetersPerPixel(
-          mapViewer.getMapState().currentProjection as TypeValidMapProjectionCodes,
-          mapViewer.getView().getResolution() || 7000,
-          lnglat[1]
-        )
+      ? getMetersPerPixel(mapProjNumber as TypeValidMapProjectionCodes, map.getView().getResolution() || 7000, lnglat[1])
       : 0;
 
     // TODO: Performance - We need to separate the query attribute from geometry. We can use the attributes returned by identify to show details panel
@@ -430,13 +414,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
       // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
       // TO.DOCONT: the esri query (was working with identify). But identify was failing on huge geometry...
-      this.fetchFeatureInfoGeometryWithWorker(
-        layerConfig,
-        objectIds.map(Number),
-        true,
-        mapViewer.getMapState().currentProjection,
-        maxAllowableOffset
-      )
+      this.fetchFeatureInfoGeometryWithWorker(layerConfig, objectIds.map(Number), true, mapProjNumber, maxAllowableOffset)
         .then((featuresJSON) => {
           (featuresJSON.features as TypeJsonObject[]).forEach((feat: TypeJsonObject, index: number) => {
             // If cancelled
@@ -1003,10 +981,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Sends a query to get ESRI Dynamic feature geometries and calculates an extent from them.
    * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
-   * @param {string} outfield - ID field to return for services that require a value in outfields.
+   * @param {OLProjection} outProjection - The output projection for the extent.
+   * @param {string?} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent | undefined>} The extent of the features, if available.
    */
-  override async getExtentFromFeatures(objectIds: string[], outfield?: string): Promise<Extent | undefined> {
+  override async getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent | undefined> {
     // Get url for service from layer entry config
     const layerEntryConfig = this.getLayerConfig();
     let baseUrl = layerEntryConfig.source.dataAccessPath;
@@ -1031,9 +1010,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
           const projExtent = Projection.transformExtentFromProj(
             [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number],
             projectionExtent,
-            this.getMapViewer().getProjection()
+            outProjection
           );
-          return validateExtent(projExtent, this.getMapViewer().getProjection().getCode());
+          return validateExtent(projExtent, outProjection.getCode());
         }
       } catch (error: unknown) {
         logger.logError(`Error fetching geometry from ${queryUrl}`, error);

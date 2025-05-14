@@ -1,3 +1,5 @@
+import { Map as OLMap } from 'ol';
+
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
   QueryType,
@@ -405,6 +407,7 @@ export abstract class AbstractLayerSet {
 
   /**
    * Processes layer data to query features on it, if the layer path can be queried.
+   * @param {OLMap} map - The Map to query layer features from.
    * @param {AbstractGVLayer} geoviewLayer - The geoview layer
    * @param {QueryType} queryType - The query type
    * @param {TypeLocation} location - The location for the query
@@ -413,6 +416,7 @@ export abstract class AbstractLayerSet {
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise resolving to the query results
    */
   protected static queryLayerFeatures(
+    map: OLMap,
     geoviewLayer: AbstractGVLayer,
     queryType: QueryType,
     location: TypeLocation,
@@ -420,7 +424,7 @@ export abstract class AbstractLayerSet {
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
     // Get Feature Info
-    return geoviewLayer.getFeatureInfo(queryType, location, queryGeometry, abortController);
+    return geoviewLayer.getFeatureInfo(map, queryType, location, queryGeometry, abortController);
   }
 
   /**

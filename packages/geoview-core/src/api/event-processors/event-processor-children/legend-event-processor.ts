@@ -145,7 +145,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     objectIds: string[],
     outfield?: string
   ): Promise<Extent | undefined> | undefined {
-    return MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.getExtentFromFeatures(objectIds, outfield);
+    // Get the layer api
+    const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
+
+    // Get extent from features calling the GV Layer method
+    return layerApi.getGeoviewLayer(layerPath)?.getExtentFromFeatures(objectIds, layerApi.mapViewer.getProjection(), outfield);
   }
 
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
