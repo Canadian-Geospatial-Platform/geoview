@@ -27,7 +27,6 @@ import { logger } from '@/core/utils/logger';
 import { getLocalizedMessage, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/external-types';
@@ -176,10 +175,13 @@ async function renderMap(mapElement: Element): Promise<void> {
       api
         .getMapViewerAsync(mapId)
         .then(() => {
-          // Log it
-          logger.logError(`- Map ${mapId}: ${getLocalizedMessage(AppEventProcessor.getDisplayLanguage(mapId), errorKey, params)}`);
+          // Get the message for the logger
+          const message = getLocalizedMessage(lang, errorKey, params);
 
-          // Show the error
+          // Log it
+          logger.logError(`- Map ${mapId}: ${message}`);
+
+          // Show the error using its key (which will get translated)
           api.getMapViewer(mapId).notifications.showError(errorKey, params);
         })
         .catch((error: unknown) => {

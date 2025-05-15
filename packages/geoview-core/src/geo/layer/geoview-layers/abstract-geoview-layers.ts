@@ -286,7 +286,7 @@ export abstract class AbstractGeoViewLayer {
       }
 
       // Throw higher
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, error as Error);
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, formatError(error));
     }
   }
 
@@ -359,7 +359,7 @@ export abstract class AbstractGeoViewLayer {
             // Cancelled.. skip (this is notably to support WMS special grouping)
           } else {
             // A validation of a layer entry config failed
-            this.addLayerLoadError(error as Error, layerConfig);
+            this.addLayerLoadError(formatError(error), layerConfig);
           }
         }
       }
@@ -495,11 +495,6 @@ export abstract class AbstractGeoViewLayer {
         return await this.onProcessLayerMetadata(layerConfig);
       }
 
-      // Skip it, that layer entry already had issues
-      logger.logWarning(
-        `Layer metadata processing skipped for layer path '${layerConfig.layerPath}', an error was already detected during validation phase.`
-      );
-
       // Return as-is
       return layerConfig;
     } catch (error: unknown) {
@@ -561,7 +556,7 @@ export abstract class AbstractGeoViewLayer {
           return layerGroup || baseLayer;
         } catch (error: unknown) {
           // Add a layer load error
-          this.addLayerLoadError(error as Error, layerConfig);
+          this.addLayerLoadError(formatError(error), layerConfig);
           return undefined;
         }
       }
