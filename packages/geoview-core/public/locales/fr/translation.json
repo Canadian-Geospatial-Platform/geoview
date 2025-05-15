@@ -186,7 +186,7 @@
   "validation": {
     "layer": {
       "loadfailed": "Le chargement de la couche '__param__' a échoué sur la carte.",
-      "layerIdNotFound": "Identifiant de couche introuvable '__param__'.",
+      "layerIdNotFound": "L'identifiant '__param__' de la couche '__param__' est introuvable .",
       "layerIdMustBeNumber": "L'identifiant de la couche ESRI doit être un nombre, mais était '__param__' pour la couche '__param__'.",
       "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la couche '__param__'.",
       "usedtwice": "Utilisation en double de l'identifiant de couche '__param__'.",
@@ -205,7 +205,7 @@
       "wmsSubLayerNotfound": "La sous-couche '__param__' de la couche '__param__' n'existe pas sur le serveur.",
       "csvNoGeographicData": "Aucune donnée géographique trouvée dans le fichier CSV '__param__'.",
       "invalidMetadata": "Métadonnées invalides (listOfLayerEntryConfig) empêchant le chargement de la couche '__param__'.",
-      "emptyLayerGroup": "Groupe de couches vide '__param__'.",
+      "emptyLayerGroup": "Groupe de couches vide pour la couche '__param__'.",
       "unableToCreateGroupLayer": "Impossible de créer le groupe de couches '__param__'.",
       "vectorSourceUrlNotDefined": "L'URL de la source vectorielle n'est pas définie pour la couche '__param__'.",
       "vectorTileLayerProjectionMismatch": "La projection de la couche vectorielle tuilée '__param__' ne correspond pas à celle de la carte.",

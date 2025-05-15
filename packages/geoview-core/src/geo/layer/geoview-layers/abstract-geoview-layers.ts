@@ -84,10 +84,10 @@ export abstract class AbstractGeoViewLayer {
   /** The GeoView layer name. The value of this attribute is extracted from the mapLayerConfig parameter. If its value is
    * undefined, a default value is generated.
    */
-  geoviewLayerName: string = '';
+  geoviewLayerName: string;
 
   /** The GeoView layer metadataAccessPath. The name attribute is optional */
-  metadataAccessPath: string = '';
+  metadataAccessPath: string;
 
   /**
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
@@ -137,7 +137,7 @@ export abstract class AbstractGeoViewLayer {
     this.type = type;
     this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId();
     this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName ? geoviewLayerConfig.geoviewLayerName : DEFAULT_LAYER_NAMES[type];
-    if (geoviewLayerConfig.metadataAccessPath) this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath.trim();
+    this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath?.trim() || '';
     this.serverDateFragmentsOrder = geoviewLayerConfig.serviceDateFormat
       ? DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat)
       : undefined;
@@ -282,11 +282,11 @@ export abstract class AbstractGeoViewLayer {
       // If ResponseEmptyError error
       if (error instanceof ResponseEmptyError) {
         // Throw higher
-        throw new LayerServiceMetadataEmptyError(this.geoviewLayerId);
+        throw new LayerServiceMetadataEmptyError(this.geoviewLayerId, this.geoviewLayerName);
       }
 
       // Throw higher
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.geoviewLayerName, formatError(error));
     }
   }
 

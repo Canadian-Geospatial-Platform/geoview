@@ -149,6 +149,16 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Gets the layer name of the entry layer or
+   * fallbacks on the geoviewLayerName from the GeoViewLayerConfig or
+   * fallbacks on the geoviewLayerId from the GeoViewLayerConfig or
+   * fallsback on the layerPath.
+   */
+  getLayerName(): string {
+    return this.layerName || this.geoviewLayerConfig.geoviewLayerName || this.geoviewLayerConfig.geoviewLayerId || this.layerPath;
+  }
+
+  /**
    * Returns the sibling layer configurations of the current layer.
    * If the current layer has a parent, this method retrieves all layer entry
    * configs under the same parent. It can optionally exclude layers of type 'group'.
