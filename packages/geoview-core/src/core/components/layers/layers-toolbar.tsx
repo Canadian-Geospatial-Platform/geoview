@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useRef } from 'react';
+import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
 import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, VisibilityOutlinedIcon, Button } from '@/ui';
 import {
   useLayerStoreActions,
@@ -90,6 +91,7 @@ export function LayersToolbar(): JSX.Element {
           {t('general.remove')}
         </Button>
       </ButtonGroup>
+      <ToggleAll source="toolbar" />
     </Box>
   );
 }

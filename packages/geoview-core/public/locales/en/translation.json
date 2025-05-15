@@ -250,6 +250,10 @@
     "resizeTooltip": "Resize",
     "noTab": "No tab"
   },
+  "toggle-all": {
+    "show": "Show All",
+    "collapse": "Collapse All"
+  },
   "error": {
     "generic": "An error happened, contact us or view console for details",
     "metadata": {

@@ -580,6 +580,30 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return -1;
   }
 
+  static getLegendCollapsibleLayers(mapId: string): TypeOrderedLayerInfo[] {
+    // Get collapsible layers
+    const orderedLayerInfo = this.getMapOrderedLayerInfo(mapId);
+    const { legendLayers } = this.getState(mapId).layerState;
+
+    return orderedLayerInfo.filter((layer) => {
+      const legendLayer = LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath);
+      return (
+        (legendLayer?.children && legendLayer.children.length > 0) ||
+        (legendLayer?.items && legendLayer.items.length > 1) ||
+        (legendLayer?.type === CONST_LAYER_TYPES.WMS && legendLayer?.icons?.some((icon) => icon.iconImage && icon.iconImage !== 'no data'))
+      );
+    });
+  }
+
+  static getAllLegendLayersCollapsed(mapId: string): boolean {
+    // Get whether all the collapsible layers are collapsed
+    const collapsibleLayers = MapEventProcessor.getLegendCollapsibleLayers(mapId);
+
+    // If there are no collapsible layers, return true
+    if (collapsibleLayers.length === 0) return true;
+    return collapsibleLayers.every((layer) => layer.legendCollapsed);
+  }
+
   static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get legend status of a layer
     return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.legendCollapsed !== false;

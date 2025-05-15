@@ -430,10 +430,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
   // Filter the pinned columns. If one of these is not visible and is pinned
   // it will cause the data-table to not work properly
   const getPinnedColumns = useCallback(() => {
-    return ['ICON', 'ZOOM', 'DETAILS'].filter(column => 
-      useTable?.getState().columnVisibility?.[column] !== false
-  );
-  
+    return ['ICON', 'ZOOM', 'DETAILS'].filter((column) => useTable?.getState().columnVisibility?.[column] !== false);
   }, [useTable]);
 
   // Create the Material React Table
