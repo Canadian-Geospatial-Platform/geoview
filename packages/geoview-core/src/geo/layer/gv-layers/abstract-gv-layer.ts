@@ -374,10 +374,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         promiseGetFeature = this.getFeatureInfoAtLongLat(map, location as Coordinate, queryGeometry, abortController);
         break;
       case 'using_a_bounding_box':
-        promiseGetFeature = this.getFeatureInfoUsingBBox(location as Coordinate[], queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoUsingBBox(map, location as Coordinate[], queryGeometry, abortController);
         break;
       case 'using_a_polygon':
-        promiseGetFeature = this.getFeatureInfoUsingPolygon(location as Coordinate[], queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoUsingPolygon(map, location as Coordinate[], queryGeometry, abortController);
         break;
       default:
         // Not implemented
@@ -467,12 +467,14 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overridable function to return of feature information at the provided bounding box.
+   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
    * @param {Coordinate} location - The bounding box that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected getFeatureInfoUsingBBox(
+    map: OLMap,
     location: Coordinate[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
@@ -485,6 +487,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overridable function to return of feature information at the provided polygon.
+   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
    * @param {Coordinate} location - The polygon that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
@@ -492,6 +495,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoUsingPolygon(
+    map: OLMap,
     location: Coordinate[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,

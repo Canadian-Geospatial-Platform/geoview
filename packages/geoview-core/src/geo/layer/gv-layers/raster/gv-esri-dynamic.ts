@@ -39,6 +39,7 @@ import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
+import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -991,7 +992,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     let baseUrl = layerEntryConfig.source.dataAccessPath;
 
     // If no base url
-    if (!baseUrl) throw new NoExtentError(this.getLayerPath());
+    if (!baseUrl) throw new LayerDataAccessPathMandatoryError(this.getLayerPath());
 
     // Construct query
     if (!baseUrl.endsWith('/')) baseUrl += '/';
