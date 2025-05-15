@@ -285,18 +285,18 @@
     }
   },
   "error": {
-    "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour détails",
+    "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour plus de détails.",
     "layer": {
       "layerNotFound": "La couche à l'emplacement '__param__' est introuvable.",
       "notAGeoJsonLayer": "Ce n'est pas une couche GeoJSON pour la couche '__param__'.",
       "notAnEsriDynamicLayer": "Ce n'est pas une couche dynamique Esri pour la couche '__param__'.",
       "notAFeatureLayer": "L'identifiant de couche n'est pas une couche d'entités '__param__'.",
       "notQueryableLayer": "La couche '__param__' n'est pas interrogeable.",
-      "notAbleToQuery": "Impossible de téléchager les données pour __param__"
+      "notAbleToQuery": "Impossible de téléchager les données pour '__param__'."
     },
     "map": {
       "mapIdNotFound": "La carte avec l'identifiant '__param__' est introuvable.",
-      "geoviewStoreNotFound": "Le 'React Store' sur ma carte '__param__' est introuvable."
+      "geoviewStoreNotFound": "Le 'React Store' sur la carte '__param__' est introuvable."
     },
     "geocore": {
       "uuidNotFound": "L'identifiant de couche GeoCore '__param__' n'existe pas sur le serveur.",

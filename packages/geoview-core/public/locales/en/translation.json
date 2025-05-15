@@ -286,14 +286,14 @@
     }
   },
   "error": {
-    "generic": "An error happened, contact us or view console for details",
+    "generic": "An error happened, contact us or view console for details.",
     "layer": {
       "layerNotFound": "Layer at layer path '__param__' not found.",
       "notAGeoJsonLayer": "Not a GeoJson layer for layer '__param__'.",
       "notAnEsriDynamicLayer": "Not an Esri Dynamic layer for layer '__param__'.",
       "notAFeatureLayer": "Layer id not a feature layer '__param__'.",
       "notQueryableLayer": "Layer '__param__' is not queryable.",
-      "notAbleToQuery": "Not able to download records for __param__"
+      "notAbleToQuery": "Not able to download records for '__param__'"
     },
     "map": {
       "mapIdNotFound": "Map with ID '__param__' not found.",
