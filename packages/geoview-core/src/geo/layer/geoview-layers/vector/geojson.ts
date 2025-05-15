@@ -6,22 +6,26 @@ import Feature from 'ol/Feature';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeBaseVectorSourceInitialConfig,
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
 } from '@/api/config/types/map-schema-types';
 import { validateExtentWhenDefined } from '@/geo/utils/utilities';
-import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { fetchJson } from '@/core/utils/utilities';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
+import {
+  LayerEntryConfigInvalidLayerEntryConfigError,
+  LayerEntryConfigLayerIdNotFoundError,
+} from '@/core/exceptions/layer-entry-config-exceptions';
+import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -41,24 +45,10 @@ export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
 export class GeoJSON extends AbstractGeoViewVector {
   /**
    * Constructs a GeoJSON Layer configuration processor.
-   *
-   * @param {string} mapId the id of the map
    * @param {TypeGeoJSONLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeGeoJSONLayerConfig) {
-    super(CONST_LAYER_TYPES.GEOJSON, layerConfig, mapId);
-  }
-
-  /**
-   * Fetches the metadata for a typical GeoJson class.
-   * @param {string} url - The url to query the metadata from.
-   */
-  static fetchMetadata(url: string): Promise<TypeJsonObject> {
-    // The url
-    const queryUrl = url.toLowerCase().endsWith('json') || url.toLowerCase().endsWith('meta') ? url : `${url}?f=json`;
-
-    // Set it
-    return fetchJson(queryUrl);
+  constructor(layerConfig: TypeGeoJSONLayerConfig) {
+    super(CONST_LAYER_TYPES.GEOJSON, layerConfig);
   }
 
   /**
@@ -66,24 +56,22 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected override async onFetchAndSetServiceMetadata(): Promise<void> {
-    try {
+    // If metadataAccessPath ends with .meta, .json or .geojson
+    if (
+      this.metadataAccessPath.toLowerCase().endsWith('.meta') ||
+      this.metadataAccessPath.toLowerCase().endsWith('.json') ||
+      this.metadataAccessPath.toLowerCase().endsWith('.geojson')
+    ) {
       // Fetch it
       const metadataJson = await GeoJSON.fetchMetadata(this.metadataAccessPath);
 
       // Set it
       this.metadata = metadataJson;
-      const copyrightText = this.metadata.copyrightText as string;
-      const attributions = this.getAttributions();
-      if (copyrightText && !attributions.includes(copyrightText)) {
-        // Add it
-        attributions.push(copyrightText);
-        this.setAttributions(attributions);
-      }
-    } catch (error) {
-      // GV In the case of a geojson, when the metadata fetching fails, we actually skip it with a warning only.
-      // G.VCONT If we want to manage this all the way to the UI (LayerAPI), we'll need a 'addLayerLoadWarning' working
-      // G.VCONT like the 'addLayerLoadError' and aggregate errors as the process happens. Okay for now.
-      logger.logWarning("The service metadata for the GeoJson couldn't be read, skipped.", error);
+    } else {
+      // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
+      logger.logWarning(
+        `The metadataAccessPath '${this.metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
+      );
     }
   }
 
@@ -99,52 +87,30 @@ export class GeoJSON extends AbstractGeoViewVector {
       );
       if (!foundEntry) {
         // Add a layer load error
-        this.addLayerLoadError(layerConfig, `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
       }
       return;
     }
 
-    throw new GeoViewError(
-      this.mapId,
-      `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
-    );
-  }
-
-  /**
-   * This method is used to do a recursive search in the array of layer entry config.
-   *
-   * @param {string} searchKey The layer list to search.
-   * @param {TypeLayerEntryConfig[]} metadataLayerList The layer list to search.
-   *
-   * @returns {TypeLayerEntryConfig | undefined} The found layer or undefined if not found.
-   * @private
-   */
-  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig | undefined {
-    for (const layerMetadata of metadataLayerList) {
-      if (searchKey === `${layerMetadata.layerId}${layerMetadata.layerIdExtension ? `.${layerMetadata.layerIdExtension}` : ''}`)
-        return layerMetadata;
-      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean)) {
-        const foundLayer = this.#recursiveSearch(searchKey, layerMetadata.listOfLayerEntryConfig);
-        if (foundLayer) return foundLayer;
-      }
-    }
-    return undefined;
+    // Throw an invalid layer entry config error
+    throw new LayerEntryConfigInvalidLayerEntryConfigError(layerConfig);
   }
 
   /**
    * Overrides the way the layer metadata is processed.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
-    // Instance check
-    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
-
+  protected override onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
+    // If metadata was previously found
     if (this.metadata) {
+      // Search for the layer metadata
       const layerMetadataFound = this.#recursiveSearch(
         `${layerConfig.layerId}${layerConfig.layerIdExtension ? `.${layerConfig.layerIdExtension}` : ''}`,
         Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig)
       ) as VectorLayerEntryConfig;
+
+      // If the layer metadata was found
       if (layerMetadataFound) {
         // eslint-disable-next-line no-param-reassign
         layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
@@ -183,25 +149,23 @@ export class GeoJSON extends AbstractGeoViewVector {
     }
 
     // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV
-    this.setLayerMetadata(layerConfig.layerPath, Cast<TypeJsonObject>(layerConfig));
+    layerConfig.setLayerMetadata(layerConfig as unknown as TypeJsonObject);
 
     // Return the layer config
     return Promise.resolve(layerConfig);
   }
 
   /**
-   * Create a source configuration for the vector layer.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
-   * @param {SourceOptions} sourceOptions The source options (default: {}).
-   * @param {ReadOptions} readOptions The read options (default: {}).
-   *
+   * Overrides the creation of the source configuration for the vector layer.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @param {SourceOptions} sourceOptions - The source options.
+   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected override createVectorSource(
-    layerConfig: AbstractBaseLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature> = {},
-    readOptions: ReadOptions = {}
+  protected override onCreateVectorSource(
+    layerConfig: VectorLayerEntryConfig,
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
     readOptions.dataProjection = (layerConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
@@ -209,8 +173,97 @@ export class GeoJSON extends AbstractGeoViewVector {
     sourceOptions.url = layerConfig.source!.dataAccessPath!;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatGeoJSON();
-    const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
-    return vectorSource;
+
+    // Call parent
+    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+  }
+
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {GeoJSONLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVGeoJSON} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: GeoJSONLayerEntryConfig): GVGeoJSON {
+    // Create the source
+    const source = this.createVectorSource(layerConfig);
+    // Create the GV Layer
+    const gvLayer = new GVGeoJSON(source, layerConfig);
+    // Return it
+    return gvLayer;
+  }
+
+  /**
+   * This method is used to do a recursive search in the array of layer entry config.
+   *
+   * @param {string} searchKey The layer list to search.
+   * @param {TypeLayerEntryConfig[]} metadataLayerList The layer list to search.
+   *
+   * @returns {TypeLayerEntryConfig | undefined} The found layer or undefined if not found.
+   * @private
+   */
+  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryConfig[]): TypeLayerEntryConfig | undefined {
+    for (const layerMetadata of metadataLayerList) {
+      if (searchKey === `${layerMetadata.layerId}${layerMetadata.layerIdExtension ? `.${layerMetadata.layerIdExtension}` : ''}`)
+        return layerMetadata;
+      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean)) {
+        const foundLayer = this.#recursiveSearch(searchKey, layerMetadata.listOfLayerEntryConfig);
+        if (foundLayer) return foundLayer;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Fetches the metadata for a typical GeoJson class.
+   * @param {string} url - The url to query the metadata from.
+   */
+  static fetchMetadata(url: string): Promise<TypeJsonObject> {
+    // Return it
+    return Fetch.fetchJsonAsObject(url);
+  }
+
+  /**
+   * Creates a configuration object for a GeoJson Feature layer.
+   * This function constructs a `TypeGeoJSONLayerConfig` object that describes an GeoJson Feature layer
+   * and its associated entry configurations based on the provided parameters.
+   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the GeoView layer.
+   * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
+   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @returns {TypeGeoJSONLayerConfig} The constructed configuration object for the GeoJson Feature layer.
+   */
+  static createGeoJsonLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware: boolean,
+    layerEntries: TypeJsonArray
+  ): TypeGeoJSONLayerConfig {
+    const geoviewLayerConfig: TypeGeoJSONLayerConfig = {
+      geoviewLayerId,
+      geoviewLayerName,
+      metadataAccessPath,
+      geoviewLayerType: CONST_LAYER_TYPES.OGC_FEATURE,
+      isTimeAware,
+      listOfLayerEntryConfig: [],
+    };
+    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      const layerEntryConfig = new GeoJSONLayerEntryConfig({
+        geoviewLayerConfig,
+        schemaTag: CONST_LAYER_TYPES.GEOJSON,
+        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
+        layerId: layerEntry.id as string,
+        source: {
+          format: 'GeoJSON',
+          dataAccessPath: metadataAccessPath,
+        },
+      } as GeoJSONLayerEntryConfig);
+      return layerEntryConfig;
+    });
+
+    // Return it
+    return geoviewLayerConfig;
   }
 }
 

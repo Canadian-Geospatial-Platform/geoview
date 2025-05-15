@@ -3,6 +3,8 @@ import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores
 import { cleanPostalCode, getDecimalDegreeItem } from '@/core/components/geolocator/utilities';
 import { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { logger } from '@/core/utils/logger';
+import { Fetch } from '@/core/utils/fetch-helper';
+import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 
 interface UseGeolocatorReturn {
   /** Array of geolocation results */
@@ -106,13 +108,9 @@ export const useGeolocator = (): UseGeolocatorReturn => {
         abortControllerRef.current = newAbortController;
 
         const currentUrl = `${geolocatorServiceURL}&lang=${displayLanguageRef.current}`;
-        const response = await fetch(`${currentUrl}&q=${encodeURIComponent(`${cleanSearchTerm}*`)}`, {
+        const result = await Fetch.fetchJsonAs<GeoListItem[]>(`${currentUrl}&q=${encodeURIComponent(`${cleanSearchTerm}*`)}`, {
           signal: abortControllerRef.current.signal,
         });
-
-        if (!response.ok) throw new Error('Error');
-
-        const result = (await response.json()) as GeoListItem[];
 
         // If cleanSearchTerm is a coordinate, add it to the list
         const ddSupport = getDecimalDegreeItem(cleanSearchTerm);
@@ -123,8 +121,6 @@ export const useGeolocator = (): UseGeolocatorReturn => {
         setIsLoading(false);
         clearTimeout(fetchTimerRef.current);
       }
-
-      return Promise.resolve();
     },
     [geolocatorServiceURL]
   );
@@ -133,12 +129,16 @@ export const useGeolocator = (): UseGeolocatorReturn => {
   const getGeolocations = useCallback(
     (searchTerm: string): void => {
       fetchGeolocations(searchTerm).catch((err) => {
-        // Handle or log any errors here if needed
-        if (err.name !== 'AbortError') {
-          setError(true);
-          setData(undefined);
-          logger.logError('GEOLOCATOR - search failed', err);
+        // If aborted response
+        if (err instanceof RequestAbortedError) {
+          // Cancel...
+          return;
         }
+
+        // Handle or log any errors here if needed
+        setError(true);
+        setData(undefined);
+        logger.logError('GEOLOCATOR - search failed', err);
       });
     },
     [fetchGeolocations]

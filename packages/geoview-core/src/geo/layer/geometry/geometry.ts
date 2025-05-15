@@ -16,6 +16,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { logger } from '@/core/utils/logger';
 
 import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from '@/geo/layer/geometry/geometry-types';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Store a group of features
@@ -266,9 +267,11 @@ export class GeometryApi {
 
     const featureId = optionalFeatureId || generateId();
 
+    const projectionConv = Projection.getProjectionFromString(`EPSG:${options?.projection || 4326}`);
+
     const projectedCoordinates = Projection.transform(
       coordinate,
-      `EPSG:${options?.projection || 4326}`,
+      projectionConv,
       Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
     );
 
@@ -569,7 +572,7 @@ export class GeometryApi {
     try {
       geometryGroup.vectorLayer.getSource()?.addFeature(geometry as never);
       geometryGroup.vectorLayer.changed();
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`Error adding geometry to group ${geometryGroupId}`, error);
     }
   }
@@ -786,7 +789,8 @@ export class GeometryApi {
 
       // Add support for other geometry types as needed
       default:
-        throw new Error(`Unsupported geometry type: ${geometryType}`);
+        // Unsupported geometry type
+        throw new NotSupportedError(`Unsupported geometry type: ${geometryType}`);
     }
   }
 

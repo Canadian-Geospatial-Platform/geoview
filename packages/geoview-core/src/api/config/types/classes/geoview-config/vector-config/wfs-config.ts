@@ -110,7 +110,7 @@ export class WfsLayerConfig extends AbstractGeoviewLayerConfig {
       await this.fetchListOfLayerMetadata();
 
       await this.createLayerTree();
-    } catch (error) {
+    } catch (error: unknown) {
       // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
       this.setErrorDetectedFlag();
       this.setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);

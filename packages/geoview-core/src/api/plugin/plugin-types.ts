@@ -2,7 +2,7 @@ import React from 'react';
 import { TypeJsonObject, TypeJsonValue, AnySchemaObject } from '@/api/config/types/config-types';
 import { API } from '@/api';
 
-/** ******************************************************************************************************************************
+/**
  * interface used when creating the actual plugin.
  */
 export type TypePluginStructure = {
@@ -22,7 +22,7 @@ export type TypePluginStructure = {
   onSelected?: () => void;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Record of plugins.
  */
 export type TypeRecordOfPlugin = { [pluginId: string]: TypePluginStructure };

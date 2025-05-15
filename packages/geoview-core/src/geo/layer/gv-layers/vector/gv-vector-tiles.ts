@@ -17,12 +17,11 @@ import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 export class GVVectorTiles extends AbstractGVVectorTile {
   /**
    * Constructs a GVVectorTiles layer to manage an OpenLayer layer.
-   * @param {string} mapId - The map id
    * @param {VectorTile} olSource - The OpenLayer source.
    * @param {VectorTilesLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olSource: VectorTile, layerConfig: VectorTilesLayerEntryConfig) {
-    super(mapId, olSource, layerConfig);
+  public constructor(olSource: VectorTile, layerConfig: VectorTilesLayerEntryConfig) {
+    super(olSource, layerConfig);
 
     // Create the tile layer options.
     const tileLayerOptions: TileOptions<VectorTile> = { source: olSource };

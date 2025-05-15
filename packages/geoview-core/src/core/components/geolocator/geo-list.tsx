@@ -33,7 +33,7 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
   // Handle the zoom to geolocation
   const handleZoomToGeoLocator = useCallback(
     (latLng: [number, number], bbox: [number, number, number, number]): void => {
-      zoomToGeoLocatorLocation(latLng, bbox).catch((error) => {
+      zoomToGeoLocatorLocation(latLng, bbox).catch((error: unknown) => {
         logger.logPromiseFailed('Failed to zoomToGeoLocatorLocation in GeoList', error);
       });
     },

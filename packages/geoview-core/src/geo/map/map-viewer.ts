@@ -9,7 +9,7 @@ import OLMap from 'ol/Map';
 import View, { FitOptions, ViewOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
-import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
+import { Projection as OLProjection } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
 
 import queryString from 'query-string';
@@ -56,7 +56,7 @@ import { Translate } from '@/geo/interaction/translate';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
-import { createEmptyBasemap, getPointerPositionFromMapEvent } from '@/geo/utils/utilities';
+import { createEmptyBasemap, getPointerPositionFromMapEvent, isExtentLngLat } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
@@ -67,6 +67,7 @@ import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -244,7 +245,7 @@ export class MapViewer {
     // Register handler when basemap has error
     this.basemap.onBasemapError((sender, event) => {
       // Show the error
-      this.notifications.showError(event.error.message, [], true);
+      this.notifications.showErrorFromError(event.error);
     });
   }
 
@@ -262,11 +263,7 @@ export class MapViewer {
 
     let extentProjected: Extent | undefined;
     if (mapViewSettings.maxExtent)
-      extentProjected = Projection.transformExtentFromProj(
-        mapViewSettings.maxExtent,
-        Projection.PROJECTION_NAMES.LNGLAT,
-        projection.getCode()
-      );
+      extentProjected = Projection.transformExtentFromProj(mapViewSettings.maxExtent, Projection.getProjectionLngLat(), projection);
 
     const initialMap = new OLMap({
       target: mapElement,
@@ -320,10 +317,12 @@ export class MapViewer {
 
     // Load the list of geoview layers in the config to add all layers on the map
     // TODO: refactor - remove the cast as MapConfigLayerEntry[] everywhere
-    this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[]).catch((error) => {
-      // Log
-      logger.logPromiseFailed('loadListOfGeoviewLayer in initMap in MapViewer', error);
-    });
+    this.layer
+      .loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[])
+      .catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('loadListOfGeoviewLayer in initMap in MapViewer', error);
+      });
 
     // check if geometries are provided from url
     this.loadGeometries();
@@ -332,7 +331,7 @@ export class MapViewer {
     this.#mapInit = true;
     this.#emitMapInit();
 
-    MapEventProcessor.resetBasemap(this.mapId).catch((error) => {
+    MapEventProcessor.resetBasemap(this.mapId).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed(' MapEventProcessor.resetBasemap in map-viewer', error);
     });
@@ -391,7 +390,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapMoveEnd({ lnglat: centerCoordinates });
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapMoveEnd', error);
     }
@@ -415,7 +414,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapPointerMove(pointerPosition);
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapPointerMove', error);
     }
@@ -436,7 +435,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapPointerStop(pointerPosition);
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapPointerStopped', error);
     }
@@ -460,7 +459,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapSingleClick(pointerPosition);
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapSingleClick', error);
     }
@@ -515,7 +514,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapZoomEnd({ zoom });
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapZoomEnd', error);
     }
@@ -537,7 +536,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapRotation({ rotation });
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapRotation', error);
     }
@@ -563,7 +562,7 @@ export class MapViewer {
 
       // Emit to the outside
       this.#emitMapChangeSize({ size });
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError('Failed in MapViewer.#handleMapChangeSize', error);
     }
@@ -599,7 +598,7 @@ export class MapViewer {
           logger.logMarkerCheck(`mapReady-${this.mapId}`, `for map to be ready. Layers are still being processed...`);
 
           // Redirect
-          this.#checkMapReadyGo().catch((error) => {
+          this.#checkMapReadyGo().catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('checkMapReadyGo in checkMapReady in MapViewer', error);
           });
@@ -622,7 +621,7 @@ export class MapViewer {
     MapEventProcessor.initMapControls(this.mapId);
 
     // Load the guide
-    AppEventProcessor.setGuide(this.mapId).catch((error) => {
+    AppEventProcessor.setGuide(this.mapId).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('in setGuide in #checkMapReadyGo', error);
     });
@@ -643,7 +642,7 @@ export class MapViewer {
     });
 
     // Start checking for layers result sets to be ready
-    this.#checkLayerResultSetReady().catch((error) => {
+    this.#checkLayerResultSetReady().catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('Failed in #checkMapReadyGo in #checkLayerResultSetReady', error);
     });
@@ -666,10 +665,14 @@ export class MapViewer {
 
     // Zoom to extent provided in config, if provided.
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent) {
+      // If extent is not lon/lat, we assume it is in the map projection and use it as is.
+      const extent = isExtentLngLat(this.mapFeaturesConfig.map.viewSettings.initialView!.extent)
+        ? this.convertExtentLngLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent)
+        : this.mapFeaturesConfig.map.viewSettings.initialView!.extent;
       // Zoom to extent
-      this.zoomToExtent(this.convertExtentLngLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent), {
+      this.zoomToExtent(extent, {
         padding: [0, 0, 0, 0],
-      }).catch((error) => {
+      }).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('Failed in #checkMapReadyGo in zoomToExtent', error);
       });
@@ -693,7 +696,7 @@ export class MapViewer {
         // Zoom to calculated extent
         if (layerExtents.length) {
           // Zoom on the layers extents
-          this.zoomToExtent(layerExtents).catch((error) => {
+          this.zoomToExtent(layerExtents).catch((error: unknown) => {
             // Log
             logger.logPromiseFailed('Failed in #checkMapReadyGo in onMapLayersLoaded', error);
           });
@@ -919,7 +922,7 @@ export class MapViewer {
     // enter fullscreen
     if (status && element) {
       if (element.requestFullscreen) {
-        element.requestFullscreen().catch((error) => {
+        element.requestFullscreen().catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('element.requestFullscreen', error);
         });
@@ -957,7 +960,7 @@ export class MapViewer {
               // Remove the listener after handling
               this.map.un('change:size', handleSizeChange);
             })
-            .catch((error) => {
+            .catch((error: unknown) => {
               logger.logError('Error during zoom after fullscreen exit:', error);
             });
       };
@@ -965,7 +968,7 @@ export class MapViewer {
       // Add the listener before exiting fullscreen
       this.map.on('change:size', handleSizeChange);
       if (document.exitFullscreen) {
-        document.exitFullscreen().catch((error) => {
+        document.exitFullscreen().catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('document.exitFullscreen', error);
         });
@@ -1015,7 +1018,7 @@ export class MapViewer {
     }
 
     // Unsupported
-    this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
+    this.notifications.addNotificationError(getLocalizedMessage(displayLanguage, 'validation.changeDisplayLanguage'));
   }
 
   /**
@@ -1059,7 +1062,7 @@ export class MapViewer {
   setTheme(displayTheme: TypeDisplayTheme): void {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
       AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
-    } else this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayTheme', this.getDisplayLanguage()));
+    } else this.notifications.addNotificationError(getLocalizedMessage(this.getDisplayLanguage(), 'validation.changeDisplayTheme'));
   }
 
   /**
@@ -1073,10 +1076,10 @@ export class MapViewer {
     viewOptions.projection = `EPSG:${mapView.projection}`;
     viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
     viewOptions.center = mapView.initialView?.zoomAndCenter
-      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], viewOptions.projection)
+      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], Projection.getProjectionFromString(viewOptions.projection))
       : Projection.transformFromLonLat(
           Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
-          viewOptions.projection
+          Projection.getProjectionFromString(viewOptions.projection)
         );
     viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
     viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
@@ -1084,8 +1087,8 @@ export class MapViewer {
     if (mapView.maxExtent)
       viewOptions.extent = Projection.transformExtentFromProj(
         mapView.maxExtent,
-        Projection.PROJECTION_NAMES.LNGLAT,
-        `EPSG:${mapView.projection}`
+        Projection.getProjectionLngLat(),
+        Projection.getProjectionFromString(`EPSG:${mapView.projection}`)
       );
 
     const newView = new View(viewOptions);
@@ -1160,7 +1163,7 @@ export class MapViewer {
       },
       minZoom: currentView.getMinZoom(),
       maxZoom: currentView.getMaxZoom(),
-      maxExtent: Projection.transformExtentFromProj(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection()),
+      maxExtent: Projection.transformExtentFromProj(extent, Projection.getProjectionLngLat(), currentView.getProjection()),
       projection: currentView.getProjection().getCode().split(':')[1] as unknown as TypeValidMapProjectionCodes,
     };
 
@@ -1227,28 +1230,17 @@ export class MapViewer {
 
       // for the moment, only polygon are supported but if need be, other geometries can easely be use as well
       geoms.forEach((key: string) => {
-        fetch(`${servEndpoint}${key}`)
-          .then((response) => {
-            // only process valid response
-            if (response.status === 200) {
-              response
-                .json()
-                .then((data) => {
-                  if (data.geometry !== undefined) {
-                    // add the geometry
-                    // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
-                    this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId());
-                  }
-                })
-                .catch((error) => {
-                  // Log
-                  logger.logPromiseFailed('response.json in loadGeometry in MapViewer', error);
-                });
+        Fetch.fetchJsonAsObject(`${servEndpoint}${key}`)
+          .then((data) => {
+            if (data.geometry !== undefined) {
+              // add the geometry
+              // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
+              this.layer.geometry.addPolygon(data.geometry.coordinates as number[] | Coordinate[][], undefined, generateId());
             }
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             // Log
-            logger.logPromiseFailed('fetch in loadGeometries in MapViewer', error);
+            logger.logPromiseFailed('fetchJson in loadGeometry in MapViewer', error);
           });
       });
     }
@@ -1277,9 +1269,9 @@ export class MapViewer {
     // Remove all layers
     try {
       this.layer.removeAllGeoviewLayers();
-    } catch (err) {
+    } catch (error: unknown) {
       // Failed to remove layers, eat the exception and continue to remove the map
-      logger.logError('Failed to remove layers', err);
+      logger.logError('Failed to remove layers', error);
     }
 
     // Delete store and event processor
@@ -1310,7 +1302,7 @@ export class MapViewer {
     const mapDiv = await this.remove(false);
 
     // TODO: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
-    api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height).catch((error) => {
+    api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height).catch((error: unknown) => {
       // Log
       logger.logError(`Couldn't reload the map in map-viewer`, error);
     });
@@ -1323,7 +1315,7 @@ export class MapViewer {
    */
   reloadWithCurrentState(maintainGeocoreLayerNames: boolean = true): void {
     const currentMapConfig = this.createMapConfigFromMapState(maintainGeocoreLayerNames);
-    this.reload(currentMapConfig).catch((error) => {
+    this.reload(currentMapConfig).catch((error: unknown) => {
       // Log
       logger.logError(`Couldn't reload the map in map-viewer`, error);
     });
@@ -1360,11 +1352,7 @@ export class MapViewer {
    */
   zoomToLngLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void> {
     const fullExtent = extent.length === 2 ? [extent[0], extent[1], extent[0], extent[1]] : extent;
-    const projectedExtent = Projection.transformExtentFromProj(
-      fullExtent,
-      Projection.PROJECTION_NAMES.LNGLAT,
-      `EPSG:${this.getMapState().currentProjection}`
-    );
+    const projectedExtent = Projection.transformExtentFromProj(fullExtent, Projection.getProjectionLngLat(), this.getProjection());
     return MapEventProcessor.zoomToExtent(this.mapId, projectedExtent, options);
   }
 
@@ -1528,7 +1516,7 @@ export class MapViewer {
       // return angle (180 is pointing north)
       return ((bearing + 360) % 360).toFixed(1);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch (error: unknown) {
       return '180.0';
     }
   }
@@ -1540,7 +1528,7 @@ export class MapViewer {
    */
   convertCoordinateLngLatToMapProj(coordinate: Coordinate): Coordinate {
     // Redirect
-    return this.convertCoordinateFromProjToMapProj(coordinate, Projection.PROJECTION_NAMES.LNGLAT);
+    return this.convertCoordinateFromProjToMapProj(coordinate, Projection.getProjectionLngLat());
   }
 
   /**
@@ -1550,7 +1538,7 @@ export class MapViewer {
    */
   convertCoordinateMapProjToLngLat(coordinate: Coordinate): Coordinate {
     // Redirect
-    return this.convertCoordinateFromMapProjToProj(coordinate, Projection.PROJECTION_NAMES.LNGLAT);
+    return this.convertCoordinateFromMapProjToProj(coordinate, Projection.getProjectionLngLat());
   }
 
   /**
@@ -1561,7 +1549,7 @@ export class MapViewer {
    */
   convertExtentLngLatToMapProj(extent: Extent, stops: number = MapViewer.DEFAULT_STOPS): Extent {
     // Redirect
-    return this.convertExtentFromProjToMapProj(extent, Projection.PROJECTION_NAMES.LNGLAT, stops);
+    return this.convertExtentFromProjToMapProj(extent, Projection.getProjectionLngLat(), stops);
   }
 
   /**
@@ -1571,18 +1559,18 @@ export class MapViewer {
    */
   convertExtentMapProjToLngLat(extent: Extent): Extent {
     // Redirect
-    return this.convertExtentFromMapProjToProj(extent, Projection.PROJECTION_NAMES.LNGLAT);
+    return this.convertExtentFromMapProjToProj(extent, Projection.getProjectionLngLat());
   }
 
   /**
    * Transforms coordinate from given projection to the current projection of the map.
    * @param {Coordinate} coordinate - The given coordinate
-   * @param {ProjectionLike} fromProj - The projection of the given coordinate
+   * @param {OLProjection} fromProj - The projection of the given coordinate
    * @returns {Coordinate} The coordinate in the map projection
    */
-  convertCoordinateFromProjToMapProj(coordinate: Coordinate, fromProj: ProjectionLike): Coordinate {
+  convertCoordinateFromProjToMapProj(coordinate: Coordinate, fromProj: OLProjection): Coordinate {
     // If different projections
-    if (fromProj !== this.getProjection().getCode()) {
+    if (fromProj.getCode() !== this.getProjection().getCode()) {
       return Projection.transform(coordinate, fromProj, this.getProjection());
     }
 
@@ -1593,12 +1581,12 @@ export class MapViewer {
   /**
    * Transforms coordinate from map projection to given projection.
    * @param {Coordinate} coordinate - The given coordinate
-   * @param {ProjectionLike} toProj - The projection that should be output
+   * @param {OLProjection} toProj - The projection that should be output
    * @returns {Coordinate} The coordinate in the map projection
    */
-  convertCoordinateFromMapProjToProj(coordinate: Coordinate, toProj: ProjectionLike): Coordinate {
+  convertCoordinateFromMapProjToProj(coordinate: Coordinate, toProj: OLProjection): Coordinate {
     // If different projections
-    if (toProj !== this.getProjection().getCode()) {
+    if (toProj.getCode() !== this.getProjection().getCode()) {
       return Projection.transform(coordinate, this.getProjection(), toProj);
     }
 
@@ -1609,13 +1597,13 @@ export class MapViewer {
   /**
    * Transforms extent from given projection to the current projection of the map.
    * @param {Extent} extent - The given extent
-   * @param {ProjectionLike} fromProj - The projection of the given extent
+   * @param {OLProjection} fromProj - The projection of the given extent
    * @param {number} stops - The number of stops to perform densification on the extent
    * @returns {Extent} The extent in the map projection
    */
-  convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike, stops: number = MapViewer.DEFAULT_STOPS): Extent {
+  convertExtentFromProjToMapProj(extent: Extent, fromProj: OLProjection, stops: number = MapViewer.DEFAULT_STOPS): Extent {
     // If different projections
-    if (fromProj !== this.getProjection().getCode()) {
+    if (fromProj.getCode() !== this.getProjection().getCode()) {
       return Projection.transformExtentFromProj(extent, fromProj, this.getProjection(), stops);
     }
 
@@ -1626,13 +1614,13 @@ export class MapViewer {
   /**
    * Transforms extent from map projection to given projection. If the projects are the same, the extent is simply returned.
    * @param {Extent} extent - The given extent
-   * @param {ProjectionLike} toProj - The projection that should be output
+   * @param {OLProjection} toProj - The projection that should be output
    * @returns {Extent} The extent in the map projection
    */
-  convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent {
+  convertExtentFromMapProjToProj(extent: Extent, toProj: OLProjection, stops: number = MapViewer.DEFAULT_STOPS): Extent {
     // If different projections
-    if (toProj !== this.getProjection().getCode()) {
-      return Projection.transformExtentFromProj(extent, this.getProjection(), toProj);
+    if (toProj.getCode() !== this.getProjection().getCode()) {
+      return Projection.transformExtentFromProj(extent, this.getProjection(), toProj, stops);
     }
 
     // Same projection

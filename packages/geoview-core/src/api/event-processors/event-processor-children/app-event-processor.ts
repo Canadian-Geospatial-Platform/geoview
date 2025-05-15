@@ -9,6 +9,7 @@ import { SnackbarType } from '@/core/utils/notifications';
 import { logger } from '@/core/utils/logger';
 import { api } from '@/app';
 import i18n from '@/core/translation/i18n';
+import { formatError } from '@/core/exceptions/core-exceptions';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -149,10 +150,9 @@ export class AppEventProcessor extends AbstractEventProcessor {
           // Now resolve
           resolve();
         })
-        .catch((error) => {
-          // Log and reject
-          logger.logPromiseFailed('inner promise in app-event-processor.setDisplayLanguage', error);
-          reject();
+        .catch((error: unknown) => {
+          // Reject
+          reject(formatError(error));
         });
     });
   }

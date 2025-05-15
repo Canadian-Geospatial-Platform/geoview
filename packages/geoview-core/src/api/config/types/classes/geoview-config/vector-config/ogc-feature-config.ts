@@ -7,7 +7,7 @@ import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-confi
 import { GeoviewLayerConfigError, GeoviewLayerInvalidParameterError } from '@/api/config/types/classes/config-exceptions';
 
 import { logger } from '@/core/utils/logger';
-import { fetchJson } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 export type TypeOgcFeatureLayerNode = OgcFeatureGroupLayerConfig | OgcFeatureLayerEntryConfig;
 
@@ -120,7 +120,7 @@ export class OgcFeatureLayerConfig extends AbstractGeoviewLayerConfig {
         : `${this.metadataAccessPath}/collections?f=json`;
 
       // Set it
-      const metadataJson = await fetchJson(queryUrl);
+      const metadataJson = await Fetch.fetchJsonAsObject(queryUrl);
 
       if (metadataJson && metadataJson !== '{}') {
         this.setServiceMetadata(metadataJson);

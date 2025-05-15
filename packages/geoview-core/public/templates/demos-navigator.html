@@ -141,18 +141,28 @@
           <option value="./configs/navigator/12-a-package-swiper.json">Package swiper</option>
           <option value="./configs/navigator/13-all-layers.json">All Layer Types</option>
           <option value="./configs/navigator/14-wms-layer.json">Layer - WMS -</option>
+          <option value="./configs/navigator/14-wms-layer-errors.json">Layer - WMS - errors</option>
           <option value="./configs/navigator/15-xyz-tile.json">Layer - XYZ Tile -</option>
+          <option value="./configs/navigator/15-xyz-tile-errors.json">Layer - XYZ Tile - errors</option>
           <option value="./configs/navigator/16-esri-dynamic.json">Layer - ESRI Dynamic -</option>
+          <option value="./configs/navigator/16-esri-dynamic-errors.json">Layer - ESRI Dynamic - errors</option>
           <option value="./configs/navigator/17-esri-feature.json">Layer - ESRI Feature -</option>
+          <option value="./configs/navigator/17-esri-feature-errors.json">Layer - ESRI Feature - errors</option>
           <option value="./configs/navigator/18-esri-image.json">Layer - ESRI Image -</option>
+          <option value="./configs/navigator/18-esri-image-errors.json">Layer - ESRI Image - errors</option>
           <option value="./configs/navigator/19-geojson.json">Layer - GeoJSON -</option>
+          <option value="./configs/navigator/19-geojson-errors.json">Layer - GeoJSON - errors</option>
           <option value="./configs/navigator/20-wfs.json">Layer - WFS -</option>
+          <option value="./configs/navigator/20-wfs-errors.json">Layer - WFS - errors</option>
           <option value="./configs/navigator/21-ogc-feature-api.json">Layer - OGC Feature API -</option>
+          <option value="./configs/navigator/21-ogc-feature-api-errors.json">Layer - OGC Feature API - errors</option>
           <option value="./configs/navigator/22-static-image.json">Layer - Static Image -</option>
+          <option value="./configs/navigator/22-static-image-errors.json">Layer - Static Image - errors</option>
           <option value="./configs/navigator/23-csv.json">Layer - CSV -</option>
           <option value="./configs/navigator/24-vector-tile.json">Layer - Vector Tile -</option>
           <option value="./configs/navigator/25-geojson-multi.json">Layer - GeoJSON MutiPolygon -</option>
           <option value="./configs/navigator/28-geocore.json">Layer GeoView - GeoCore -</option>
+          <option value="./configs/navigator/28-geocore-errors.json">Layer GeoView - GeoCore - errors</option>
           <option value="./configs/navigator/28-geocore-custom-inline-config.json">Layer GeoView - GeoCore Custom Inline Config -</option>
           <option value="./configs/navigator/27-geocore-custom.json">Layer GeoView - GeoCore Custom Config -</option>
           <option value="./configs/navigator/28-geocore-duplicates.json">Layer GeoView - Duplicate GeoCore Config -</option>
@@ -238,7 +248,11 @@
           }
 
           // create map
-          cgpv.api.createMapFromConfig('map1', e.target.value, 800).then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'));
+          cgpv.api.createMapFromConfig('map1', e.target.value, 800)
+            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'))
+            .catch((error) => {
+              console.error('Failed to create map from config', error);
+            });
         }, 1500);
 
         // fetch JSON config file to show in the text are section

@@ -1,5 +1,3 @@
-import axios, { AxiosResponse } from 'axios';
-
 import { Extent } from 'ol/extent';
 import { XYZ, OSM, VectorTile } from 'ol/source';
 import TileGrid from 'ol/tilegrid/TileGrid';
@@ -21,8 +19,9 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { CoreBasemapCreationError } from '@/core/exceptions/geoview-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { Fetch } from '@/core/utils/fetch-helper';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -71,7 +70,7 @@ export class BasemapApi {
     this.basemapOptions = basemapOptions;
 
     // Create the overview default basemap (no label, no shaded)
-    this.setOverviewMap().catch((error) => {
+    this.setOverviewMap().catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('setOverviewMap in constructor of layer/basemap', error);
     });
@@ -206,13 +205,12 @@ export class BasemapApi {
   }
 
   async setOverviewMap(): Promise<void> {
-    const overviewMap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
-
-    // Overview Map Config
-    if (overviewMap) this.overviewMap = overviewMap;
-    else {
+    try {
+      // Create the Core Basemap
+      this.overviewMap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
+    } catch (error: unknown) {
       // Emit about the error
-      this.#emitBasemapError({ error: new GeoViewError(this.mapViewer.mapId, 'mapctrl.overviewmap.error') });
+      this.#emitBasemapError({ error: error as Error });
     }
 
     // Overview Map Control
@@ -257,124 +255,99 @@ export class BasemapApi {
     let urlProj = 0;
     let copyright = '';
 
-    // ? The actual response expected by AxiosResponse is `any`
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function requestBasemap(url: string, timeout: number): Promise<AxiosResponse<any, any>> {
-      return new Promise((resolve, reject) => {
-        axios.get(url).then(resolve, reject);
-        setTimeout(reject, timeout);
-      });
-    }
-
     // Should we do a get request to get the layer information from the server?
     if (rest && (basemapLayer.jsonUrl as string)) {
-      try {
-        // Get info from server
-        // TODO: Check/Refactor - Document the necessity to explicitely reject after Basemap.REQUEST_DELAY_MAX
-        const request = await requestBasemap(basemapLayer.jsonUrl as string, BasemapApi.REQUEST_DELAY_MAX);
+      // Get info from server
+      // TODO: Check/Refactor - Document the necessity to explicitely reject after Basemap.REQUEST_DELAY_MAX
+      const result = await Fetch.fetchJsonAsObject(basemapLayer.jsonUrl as string, undefined, BasemapApi.REQUEST_DELAY_MAX);
 
-        if (request) {
-          const result = toJsonObject(request.data);
+      // Get minimum scale
+      const minScale = result.minScale as number;
 
-          // Get minimum scale
-          const minScale = result.minScale as number;
+      // Get maximum scale
+      const maxScale = result.maxScale as number;
 
-          // Get maximum scale
-          const maxScale = result.maxScale as number;
+      // Get extent
+      const fullExtent = toJsonObject(result.fullExtent);
 
-          // Get extent
-          const fullExtent = toJsonObject(result.fullExtent);
+      // Get the tile grid info
+      const tileInfo = toJsonObject(result.tileInfo);
 
-          // Get the tile grid info
-          const tileInfo = toJsonObject(result.tileInfo);
+      const lods: TypeJsonObject = {};
 
-          const lods: TypeJsonObject = {};
+      // Get resolutions and scale from tile grid info
+      (tileInfo.lods as TypeJsonArray)?.forEach((lod) => {
+        const scale = lod.scale as number;
+        const resolution = lod.resolution as number;
 
-          // Get resolutions and scale from tile grid info
-          (tileInfo.lods as TypeJsonArray)?.forEach((lod) => {
-            const scale = lod.scale as number;
-            const resolution = lod.resolution as number;
+        resolutions.push(resolution);
 
-            resolutions.push(resolution);
+        lods[scale] = lod;
+      });
 
-            lods[scale] = lod;
-          });
+      // Set layer origin
+      origin = [tileInfo?.origin?.x || 0, tileInfo?.origin?.y || 0] as number[];
 
-          // Set layer origin
-          origin = [tileInfo?.origin?.x || 0, tileInfo?.origin?.y || 0] as number[];
+      // set minimum zoom for this layer
+      minZoom = lods[minScale] ? (lods[minScale].level as number) : 0;
 
-          // set minimum zoom for this layer
-          minZoom = lods[minScale] ? (lods[minScale].level as number) : 0;
+      // Set max zoom for this layer
+      maxZoom = lods[maxScale] ? (lods[maxScale].level as number) : 23;
 
-          // Set max zoom for this layer
-          maxZoom = lods[maxScale] ? (lods[maxScale].level as number) : 23;
+      // Set extent for this layer
+      extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
 
-          // Set extent for this layer
-          extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
+      // Set copyright text for this layer
+      copyright = result.copyrightText as string;
 
-          // Set copyright text for this layer
-          copyright = result.copyrightText as string;
+      // Set the spatial Reference for this layer
+      urlProj = tileInfo.spatialReference.latestWkid as number;
 
-          // Set the spatial Reference for this layer
-          urlProj = tileInfo.spatialReference.latestWkid as number;
-
-          let source;
-          if (basemapLayer.styleUrl) {
-            const tileSize = [tileInfo.rows as number, tileInfo.cols as number];
-            source = new VectorTile({
-              attributions: getLocalizedMessage(
-                'mapctrl.attribution.defaultnrcan',
-                AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)
-              ),
-              projection: Projection.PROJECTIONS[urlProj],
-              url: basemapLayer.url as string,
-              format: new MVT(),
-              tileGrid: new TileGrid({
-                tileSize,
-                extent,
-                origin,
-                resolutions,
-              }),
-            });
-          } else {
-            source = new XYZ({
-              attributions: getLocalizedMessage(
-                'mapctrl.attribution.defaultnrcan',
-                AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)
-              ),
-              projection: Projection.PROJECTIONS[urlProj],
-              url: basemapLayer.url as string,
-              crossOrigin: 'Anonymous',
-              tileGrid: new TileGrid({
-                extent,
-                origin,
-                resolutions,
-              }),
-            });
-          }
-
-          // Return a basemap layer
-          return {
-            basemapId,
-            type: basemapId,
-            url: basemapLayer.url as string,
-            jsonUrl: basemapLayer.jsonUrl as string,
-            styleUrl: basemapLayer.styleUrl as string,
-            source,
-            opacity,
-            origin,
+      let source;
+      if (basemapLayer.styleUrl) {
+        const tileSize = [tileInfo.rows as number, tileInfo.cols as number];
+        source = new VectorTile({
+          attributions: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
+          projection: Projection.PROJECTIONS[urlProj],
+          url: basemapLayer.url as string,
+          format: new MVT(),
+          tileGrid: new TileGrid({
+            tileSize,
             extent,
-            resolutions, // ? is this use somewhere, modifying values has no effect. Issue 643
-            minScale: minZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
-            maxScale: maxZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
-            copyright,
-          };
-        }
-      } catch (error) {
-        // Log error
-        logger.logError(error);
-        return null;
+            origin,
+            resolutions,
+          }),
+        });
+      } else {
+        source = new XYZ({
+          attributions: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
+          projection: Projection.PROJECTIONS[urlProj],
+          url: basemapLayer.url as string,
+          crossOrigin: 'Anonymous',
+          tileGrid: new TileGrid({
+            extent,
+            origin,
+            resolutions,
+          }),
+        });
       }
+
+      // Return a basemap layer
+      return {
+        basemapId,
+        type: basemapId,
+        url: basemapLayer.url as string,
+        jsonUrl: basemapLayer.jsonUrl as string,
+        styleUrl: basemapLayer.styleUrl as string,
+        source,
+        opacity,
+        origin,
+        extent,
+        resolutions, // ? is this use somewhere, modifying values has no effect. Issue 643
+        minScale: minZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
+        maxScale: maxZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
+        copyright,
+      };
     }
     return null;
   }
@@ -384,13 +357,13 @@ export class BasemapApi {
    * @param {TypeBasemapOptions} basemapOptions - Basemap options.
    * @param {TypeValidMapProjectionCodes} projection - Optional projection code.
    * @param {TypeDisplayLanguage} language - Optional language.
-   * @return {Promise<TypeBasemapProps | undefined>} The core basemap.
+   * @return {Promise<TypeBasemapProps>} The core basemap.
    */
   async createCoreBasemap(
     basemapOptions: TypeBasemapOptions,
     projection?: TypeValidMapProjectionCodes,
     language?: TypeDisplayLanguage
-  ): Promise<TypeBasemapProps | undefined> {
+  ): Promise<TypeBasemapProps> {
     const basemapLayers: TypeBasemapLayer[] = [];
     const basemaplayerTypes: string[] = [];
     const defaultOpacity = 1;
@@ -534,11 +507,11 @@ export class BasemapApi {
           coreBasemapOptions.basemapId === 'osm'
             ? [
                 '© OpenStreetMap',
-                getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)),
+                getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
               ]
             : [
                 basemapLayers.find((layer) => coreBasemapOptions.basemapId === layer.basemapId)?.copyright || '',
-                getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId)),
+                getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
               ],
         zoomLevels: {
           min: minZoom,
@@ -557,8 +530,8 @@ export class BasemapApi {
       return basemap;
     }
 
-    // No basemap set
-    return undefined;
+    // Failed
+    throw new CoreBasemapCreationError();
   }
 
   /**
@@ -624,18 +597,16 @@ export class BasemapApi {
    * @param {TypeDisplayLanguage} language - Optional language.
    */
   async loadDefaultBasemaps(projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<void> {
+    // Create the core basemap
     const basemap = await this.createCoreBasemap(MapEventProcessor.getBasemapOptions(this.mapViewer.mapId), projection, language);
 
-    if (basemap) {
-      // Info used by create custom basemap
-      this.defaultOrigin = basemap?.defaultOrigin;
-      this.defaultResolutions = basemap?.defaultResolutions;
-      this.defaultExtent = basemap?.defaultExtent;
+    // Info used by create custom basemap
+    this.defaultOrigin = basemap?.defaultOrigin;
+    this.defaultResolutions = basemap?.defaultResolutions;
+    this.defaultExtent = basemap?.defaultExtent;
 
-      this.setBasemap(basemap);
-      return this.setOverviewMap();
-    }
-    return Promise.resolve();
+    this.setBasemap(basemap);
+    return this.setOverviewMap();
   }
 
   /**
@@ -802,7 +773,7 @@ type BasemapChangedDelegate = EventDelegateBase<BasemapApi, BasemapChangedEvent,
  * Define an event for the delegate.
  */
 export type BasemapErrorEvent = {
-  error: GeoViewError;
+  error: Error;
 };
 
 /**

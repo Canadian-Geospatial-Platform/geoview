@@ -219,7 +219,7 @@ export class AppBarApi {
 
       // trigger an event that a panel has been removed to update the state and re-render
       this.#emitAppBarRemoved({ buttonPanelId, group });
-    } catch (error) {
+    } catch (error: unknown) {
       // Log
       logger.logError(`Failed to get app bar panel button ${group}/${buttonPanelId}`, error);
     }

@@ -28,7 +28,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
         logger.logTraceCoreStoreSubscription('FEATURE-INFO EVENT PROCESSOR - layerDataArray', cur);
 
         // Also propagate in the batched array
-        FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(store.getState().mapId, cur).catch((error) => {
+        FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(store.getState().mapId, cur).catch((error: unknown) => {
           // Log
           logger.logPromiseFailed(
             'propagateFeatureInfoToStoreBatch in layerDataArrayUpdateBatch subscribe in feature-info-event-processor',

@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 import { MapBrowserEvent } from 'ol';
 import { WMSCapabilities, WKT, GeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -16,12 +14,12 @@ import View from 'ol/View';
 
 import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { xmlToJson } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
 
-import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 
 import { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
@@ -43,12 +41,9 @@ export const layerTypes = CONST_LAYER_TYPES;
  * @param {string} url the url of the ESRI map server
  * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
  */
-export async function getESRIServiceMetadata(url: string): Promise<TypeJsonObject> {
+export function getESRIServiceMetadata(url: string): Promise<TypeJsonObject> {
   // fetch the map server returning a json object
-  const response = await fetch(`${url}?f=json`);
-  const result = await response.json();
-
-  return result;
+  return Fetch.fetchJsonAsObject(`${url}?f=json`);
 }
 
 /**
@@ -60,31 +55,14 @@ export async function getESRIServiceMetadata(url: string): Promise<TypeJsonObjec
  */
 export async function getWMSServiceMetadata(url: string, layers: string): Promise<TypeJsonObject> {
   const parser = new WMSCapabilities();
-
   let capUrl = `${url}?service=WMS&version=1.3.0&request=GetCapabilities`;
   if (layers.length > 0) capUrl = capUrl.concat(`&layers=${layers}`);
 
-  const response = await fetch(capUrl);
+  // Fetch the GetCap
+  const responseText = await Fetch.fetchText(capUrl);
 
-  const result = parser.read(await response.text());
-
-  return result;
-}
-
-/**
- * Fetch the json response from the XML response of a WFS getCapabilities request
- * @function getWFSServiceMetadata
- * @param {string} url the url of the WFS server
- * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
- */
-export async function getWFSServiceMetadata(url: string): Promise<TypeJsonObject> {
-  const res = await axios.get<TypeJsonObject>(url, {
-    params: { request: 'getcapabilities', service: 'WFS' },
-  });
-  const xmlDOM = new DOMParser().parseFromString(res.data as string, 'text/xml');
-  const json = xmlToJson(xmlDOM);
-  const capabilities = json['wfs:WFS_Capabilities'];
-  return capabilities;
+  // Parse it and return
+  return parser.read(responseText);
 }
 
 /**
@@ -226,7 +204,7 @@ export function createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile> {
   return emptyLayer;
 }
 
-/** ***************************************************************************************************************************
+/**
  * This method gets the legend styles used by the the layer as specified by the style configuration.
  *
  * @param {TypeLayerStyleConfig} styleConfig - Layer style configuration.
@@ -434,6 +412,27 @@ export function validateExtent(extent: Extent, code: string = 'EPSG:4326'): Exte
   }
 
   return validatedExtent;
+}
+
+/**
+ * Checks if a given extent is long/lat.
+ * @param {Extent} extent - The extent to check.
+ * @returns {boolean} Whether or not the extent is long/lat
+ */
+export function isExtentLngLat(extent: Extent): boolean {
+  if (
+    extent.length === 4 &&
+    extent[0] >= -180 &&
+    extent[0] <= 180 &&
+    extent[1] >= -90 &&
+    extent[1] <= 90 &&
+    extent[2] >= -180 &&
+    extent[2] <= 180 &&
+    extent[3] >= -90 &&
+    extent[3] <= 90
+  )
+    return true;
+  return false;
 }
 
 /**

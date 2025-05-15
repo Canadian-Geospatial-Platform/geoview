@@ -27,7 +27,7 @@ export default function Home(): JSX.Element {
    * Handles a click on the home button
    */
   const handleZoom = (): void => {
-    zoomToInitialExtent().catch((error) => {
+    zoomToInitialExtent().catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('Failed to zoomToInitialExtent in home.handleZoom', error);
     });

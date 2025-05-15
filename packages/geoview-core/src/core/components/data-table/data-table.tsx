@@ -42,14 +42,13 @@ import { useUIFooterPanelResizeValue, useUIStoreActions } from '@/core/stores/st
 import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
+import { CONST_LAYER_TYPES, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import { DataTableProps, ColumnsType } from './data-table-types';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/config/types/config-constants';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /**
  * Build Data table from map.
@@ -526,7 +525,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
       if (rowsCount > 0) {
         rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('Data table error on sorting action', error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,14 +1,23 @@
 import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
-import ImageLayer from 'ol/layer/Image';
 
-import { Cast } from '@/api/config/types/config-types';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { Cast, TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import {
+  TypeLayerEntryConfig,
+  TypeGeoviewLayerConfig,
+  CONST_LAYER_ENTRY_TYPES,
+  CONST_LAYER_TYPES,
+} from '@/api/config/types/map-schema-types';
 
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import {
+  LayerEntryConfigInvalidLayerEntryConfigError,
+  LayerEntryConfigLayerIdNotFoundError,
+  LayerEntryConfigParameterExtentNotDefinedInSourceError,
+  LayerEntryConfigParameterProjectionNotDefinedInSourceError,
+} from '@/core/exceptions/layer-entry-config-exceptions';
+import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
+import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
@@ -24,12 +33,10 @@ export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig,
 export class ImageStatic extends AbstractGeoViewRaster {
   /**
    * Constructs a ImageStatic Layer configuration processor.
-   *
-   * @param {string} mapId the id of the map
    * @param {TypeImageStaticLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeImageStaticLayerConfig) {
-    super(CONST_LAYER_TYPES.IMAGE_STATIC, layerConfig, mapId);
+  constructor(layerConfig: TypeImageStaticLayerConfig) {
+    super(CONST_LAYER_TYPES.IMAGE_STATIC, layerConfig);
   }
 
   /**
@@ -53,63 +60,115 @@ export class ImageStatic extends AbstractGeoViewRaster {
       const foundEntry = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerConfig.layerId);
       if (!foundEntry) {
         // Add a layer load error
-        this.addLayerLoadError(layerConfig, `ImageStatic layer not found (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`);
-        return;
+        this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
       }
       return;
     }
 
-    throw new GeoViewError(
-      this.mapId,
-      `Invalid ImageStatic metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`
-    );
+    // Throw an invalid layer entry config error
+    throw new LayerEntryConfigInvalidLayerEntryConfigError(layerConfig);
   }
 
   /**
-   * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-   * @returns {Promise<ImageLayer<Static>>} The GeoView raster layer that has been created.
+   * Overrides the way the layer metadata is processed.
+   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @returns {Promise<ImageStaticLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<Static>> {
-    // Instance check
-    if (!(layerConfig instanceof ImageStaticLayerEntryConfig))
-      throw new GeoViewError(this.mapId, 'Invalid layer configuration type provided');
+  protected override onProcessLayerMetadata(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageStaticLayerEntryConfig> {
+    // Return as-is
+    return Promise.resolve(layerConfig);
+  }
 
-    if (!layerConfig?.source?.extent)
-      throw new GeoViewError(this.mapId, 'Parameter extent is not defined in source element of layerConfig.');
-    const sourceOptions: SourceOptions = {
-      url: layerConfig.source.dataAccessPath || '',
-      imageExtent: layerConfig.source.extent,
+  /**
+   * Overrides the creation of the GV Layer
+   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @returns {GVImageStatic} The GV Layer
+   */
+  protected override onCreateGVLayer(layerConfig: ImageStaticLayerEntryConfig): GVImageStatic {
+    // Create the source
+    const source = ImageStatic.createImageStaticSource(layerConfig);
+
+    // Create the GV Layer
+    const gvLayer = new GVImageStatic(source, layerConfig);
+
+    // Return it
+    return gvLayer;
+  }
+
+  /**
+   * Creates a configuration object for a Static Image layer.
+   * This function constructs a `TypeImageStaticLayerConfig` object that describes an Static Image layer
+   * and its associated entry configurations based on the provided parameters.
+   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param {string} geoviewLayerName - The display name of the GeoView layer.
+   * @param {string} metadataAccessPath - The URL or path to access metadata.
+   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @returns {TypeImageStaticLayerConfig} The constructed configuration object for the Static Image layer.
+   */
+  static createImageStaticLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware: boolean,
+    layerEntries: TypeJsonArray
+  ): TypeImageStaticLayerConfig {
+    const geoviewLayerConfig: TypeImageStaticLayerConfig = {
+      geoviewLayerId,
+      geoviewLayerName,
+      metadataAccessPath,
+      geoviewLayerType: CONST_LAYER_TYPES.IMAGE_STATIC,
+      isTimeAware,
+      listOfLayerEntryConfig: [],
     };
+    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      const layerEntryConfig = new ImageStaticLayerEntryConfig({
+        geoviewLayerConfig,
+        schemaTag: CONST_LAYER_TYPES.IMAGE_STATIC,
+        entryType: CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE,
+        layerId: layerEntry.id as string,
+        source: {
+          dataAccessPath: metadataAccessPath,
+        },
+      } as ImageStaticLayerEntryConfig);
+      return layerEntryConfig;
+    });
 
-    if (layerConfig?.source?.crossOrigin) {
-      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
-    } else {
-      sourceOptions.crossOrigin = 'Anonymous';
+    // Return it
+    return geoviewLayerConfig;
+  }
+
+  /**
+   * Creates a StaticImage source from a layer config.
+   * @param {ImageStaticLayerEntryConfig} layerConfig - Configuration for the image static layer.
+   * @returns A configured ol/source/ImageStatic instance.
+   * @throws If required config fields like dataAccessPath, extent, or projection are missing.
+   */
+  static createImageStaticSource(layerConfig: ImageStaticLayerEntryConfig): Static {
+    const { source } = layerConfig;
+
+    // Validate required properties
+    if (!source?.dataAccessPath) {
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
     }
 
-    if (layerConfig?.source?.projection) {
-      sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-    } else throw new GeoViewError(this.mapId, 'Parameter projection is not define in source element of layerConfig.');
+    if (!source.extent) {
+      throw new LayerEntryConfigParameterExtentNotDefinedInSourceError(layerConfig);
+    }
 
-    // Create the source
-    const source = new Static(sourceOptions);
+    if (!source.projection) {
+      throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(layerConfig);
+    }
 
-    // GV Time to request an OpenLayers layer!
-    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+    // Assemble the source options
+    const sourceOptions: SourceOptions = {
+      url: source.dataAccessPath,
+      imageExtent: source.extent,
+      projection: `EPSG:${source.projection}`,
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
+    };
 
-    // If any response
-    let olLayer: ImageLayer<Static>;
-    if (requestResult.length > 0) {
-      // Get the OpenLayer that was created
-      olLayer = requestResult[0] as ImageLayer<Static>;
-    } else throw new GeoViewError(this.mapId, 'Error on layerRequesting event');
-
-    // GV Time to emit about the layer creation!
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
-
-    // Return the OpenLayer layer
-    return Promise.resolve(olLayer);
+    return new Static(sourceOptions);
   }
 }
 
