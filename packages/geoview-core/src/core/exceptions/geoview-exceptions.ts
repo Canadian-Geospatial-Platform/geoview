@@ -103,7 +103,7 @@ export class MapViewerNotFoundError extends GeoViewError {
  */
 export class GeoViewStoreOnMapNotFoundError extends GeoViewError {
   /**
-   * Creates an instance of MapViewerNotFoundError.
+   * Creates an instance of GeoViewStoreOnMapNotFoundError.
    * @param {string} mapId - The unique identifier of the map on which toe GeoView Store was not found.
    */
   constructor(mapId: string) {
@@ -114,6 +114,26 @@ export class GeoViewStoreOnMapNotFoundError extends GeoViewError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, GeoViewStoreOnMapNotFoundError.prototype);
+  }
+}
+
+/**
+ * Error thrown when GeoView map on a specific map ID already exist.
+ * @extends {GeoViewError}
+ */
+export class GeoViewMapIdAlreadyExist extends GeoViewError {
+  /**
+   * Creates an instance of GeoViewMapIdAlreadyExist.
+   * @param {string} mapId - The unique identifier of the map.
+   */
+  constructor(mapId: string) {
+    super(`GeoView Map ID ${mapId} alreday exist`);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'GeoViewMapIdAlreadyExist';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, GeoViewMapIdAlreadyExist.prototype);
   }
 }
 
