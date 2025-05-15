@@ -50,7 +50,7 @@ export async function commonFetchAndSetServiceMetadata(layer: EsriDynamic | Esri
   const responseJson = await Fetch.fetchJsonAsObject(`${layer.metadataAccessPath}?f=json`);
 
   // Validate the metadata response
-  AbstractGeoViewRaster.throwIfMetatadaHasError(layer.geoviewLayerId, responseJson);
+  AbstractGeoViewRaster.throwIfMetatadaHasError(layer.geoviewLayerId, layer.geoviewLayerName, responseJson);
 
   // Set it
   // eslint-disable-next-line no-param-reassign
@@ -97,7 +97,11 @@ export function commonValidateListOfLayerEntryConfig(
     if (!Number.isInteger(esriIndex)) {
       // Add a layer load error
       layer.addLayerLoadError(
-        new LayerEntryConfigLayerIdEsriMustBeNumberError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.layerId),
+        new LayerEntryConfigLayerIdEsriMustBeNumberError(
+          layerConfig.geoviewLayerConfig.geoviewLayerId,
+          layerConfig.layerId,
+          layerConfig.getLayerName()
+        ),
         layerConfig
       );
       return;
@@ -390,7 +394,7 @@ export async function commonProcessLayerMetadata<
   const responseJson = await Fetch.fetchJsonAsObject(`${queryUrl}?f=json`);
 
   // Validate the metadata response
-  AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.geoviewLayerConfig.geoviewLayerId, responseJson);
+  AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.getLayerName(), responseJson);
 
   // Set the layer metadata
   layerConfig.setLayerMetadata(responseJson);

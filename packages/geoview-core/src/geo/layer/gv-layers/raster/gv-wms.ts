@@ -151,7 +151,7 @@ export class GVWMS extends AbstractGVRaster {
       else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
       else {
         // Failed
-        throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath);
+        throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerName());
       }
 
     const wmsSource = this.getOLSource();

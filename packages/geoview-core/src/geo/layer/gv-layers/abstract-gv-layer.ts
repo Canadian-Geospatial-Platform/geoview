@@ -351,7 +351,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // If the layer is not queryable
     if (layerConfig.source?.featureInfo?.queryable === false) {
       // Throw error
-      throw new LayerNotQueryableError(layerConfig.layerPath);
+      throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     // Log
