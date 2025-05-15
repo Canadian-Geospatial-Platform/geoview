@@ -69,7 +69,7 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
             <ListItemButton onClick={() => handleZoomToGeoLocator([geoListItem.lng, geoListItem.lat], geoListItem.bbox)}>
               <Grid container sx={{ width: '100%' }}>
                 <Grid size={{ xs: 12, sm: 8 }}>
-                  <Typography sx={sxClassesList.listStyle}>
+                  <Typography component="div" sx={sxClassesList.listStyle}>
                     {transformListTitle(
                       geoListItem.name,
                       searchValue,
@@ -79,7 +79,7 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }} sx={{ textAlign: 'right' }}>
                   {!!geoListItem.category && geoListItem.category !== 'null' && (
-                    <Typography component="p" sx={sxClassesList.main}>
+                    <Typography component="div" sx={sxClassesList.main}>
                       <Typography component="span"> {geoListItem.category}</Typography>
                     </Typography>
                   )}

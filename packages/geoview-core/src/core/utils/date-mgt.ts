@@ -88,6 +88,7 @@ export type TimeDimension = {
   nearestValues: 'discrete' | 'absolute';
   singleHandle: boolean;
   displayPattern: [DatePrecision | undefined, TimePrecision | undefined];
+  isValid: boolean;
 };
 
 /**
@@ -375,6 +376,7 @@ export abstract class DateMgt {
       nearestValues: startTimeField === '' ? 'absolute' : 'discrete',
       singleHandle,
       displayPattern: DateMgt.guessDisplayPattern(rangeItem.range),
+      isValid: rangeItem.range.length >= 1 && rangeItem.range[0] !== rangeItem.range[rangeItem.range.length - 1],
     };
 
     return timeDimension;
@@ -396,6 +398,7 @@ export abstract class DateMgt {
       nearestValues: dimensionObject.nearestValues !== false ? 'absolute' : 'discrete',
       singleHandle: true,
       displayPattern: DateMgt.guessDisplayPattern(rangeItem.range),
+      isValid: rangeItem.range.length >= 1 && rangeItem.range[0] !== rangeItem.range[rangeItem.range.length - 1],
     };
 
     return timeDimension;

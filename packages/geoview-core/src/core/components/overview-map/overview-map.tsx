@@ -14,7 +14,6 @@ import { useMapOverviewMapHideZoom, useMapZoom } from '@/core/stores/store-inter
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
-import i18n from '@/core/translation/i18n';
 
 /**
  * Creates an overview map control and adds it to the map
@@ -31,6 +30,7 @@ export function OverviewMap(): JSX.Element {
   const zoomLevel = useMapZoom();
   const hideOnZoom = useMapOverviewMapHideZoom();
   const displayLanguage = useAppDisplayLanguage();
+  const i18n = MapEventProcessor.getMapViewer(mapId).getI18nInstance();
 
   // State
   const [visibility, setVisibility] = useState<boolean>(!(zoomLevel > hideOnZoom));
@@ -86,7 +86,7 @@ export function OverviewMap(): JSX.Element {
       }, 0);
       setIsInitialized(false);
     };
-  }, [mapId, displayLanguage]);
+  }, [mapId, displayLanguage, i18n]);
 
   return <Box />;
 }

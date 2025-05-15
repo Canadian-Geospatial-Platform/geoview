@@ -126,10 +126,11 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', visibleLayers, arrayOfLayerDataBatch);
 
-    // Set the layers list
+    // Set the layers list (filter: visible - visible in range and isQueryable)
     const layerListEntries = visibleLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
       .filter((layer) => layer && visibleRangeLayers.includes(layer.layerPath))
+      .filter((layer) => layer && layer.eventListenerEnabled)
       .map(
         (layer) =>
           ({

@@ -1,4 +1,7 @@
 import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@mui/material/styles';
+
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { DownloadIcon } from '@/ui/icons/index';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -19,6 +22,7 @@ interface ExportProps {
  */
 export default function ExportButton({ className = '', sxDetails }: ExportProps): JSX.Element {
   // Hooks
+  const theme = useTheme();
   const { t } = useTranslation<string>();
 
   // get store function
@@ -32,7 +36,7 @@ export default function ExportButton({ className = '', sxDetails }: ExportProps)
       aria-label={t('appbar.export') as string}
       tooltipPlacement="bottom-end"
       onClick={() => enableFocusTrap({ activeElementId: 'export', callbackElementId: `${mapId}-export-btn` })}
-      sx={sxDetails}
+      sx={{ [theme.breakpoints.down('md')]: { display: 'none' }, ...sxDetails }}
       className={className}
     >
       <DownloadIcon />

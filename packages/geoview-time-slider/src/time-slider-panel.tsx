@@ -59,7 +59,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
   /**
    * Get dates for current filters
-   * @param {TypeTimeSliderValuesListEntry} timeSliderLayerInfo Time slider layer info.
+   * @param {TypeTimeSliderValues} timeSliderLayerInfo - Time slider layer info.
    */
   const getFilterInfo = (timeSliderLayerInfo: TypeTimeSliderValues): string | null => {
     if (timeSliderLayerInfo.filtering) {
