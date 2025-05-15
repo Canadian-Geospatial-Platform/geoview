@@ -22,6 +22,7 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { CoreBasemapCreationError } from '@/core/exceptions/geoview-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { Fetch } from '@/core/utils/fetch-helper';
+import { formatError } from '@/core/exceptions/core-exceptions';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -210,7 +211,7 @@ export class BasemapApi {
       this.overviewMap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
     } catch (error: unknown) {
       // Emit about the error
-      this.#emitBasemapError({ error: error as Error });
+      this.#emitBasemapError({ error: formatError(error) });
     }
 
     // Overview Map Control

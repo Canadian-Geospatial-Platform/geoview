@@ -111,18 +111,22 @@
     "service": "Service type",
     "name": "Name",
     "layerSelect": "Select layer(s)",
-    "errorDisabled": "The layer type '__param__' is disabled in this map",
-    "errorEmpty": "cannot be empty",
-    "errorNone": "No file or source added",
-    "errorFile": "Only geoJSON and CSV files can be used",
-    "errorServer": "The __param__ source is not valid",
-    "errorNotLoaded": "An error occurred with the layer '__param__'",
-    "errorImageLoad": "An error occured with source image for layer '__param__'",
-    "errorProj": "does not support current map projection",
-    "fetchProgress": "Fetching data... Retrieved __param__ of __param__ records",
-    "fetchDone": "Data fetched - __param__ records",
+    "errorDisabled": "The layer type '__param__' is disabled in this map.",
+    "errorEmpty": "__param__ cannot be empty.",
+    "errorNone": "No file or source added.",
+    "errorFile": "Only geoJSON and CSV files can be used.",
+    "errorServer": "The __param__ source is not valid.",
+    "errorNotLoaded": "An error occurred with the layer '__param__'.",
+    "errorImageLoad": "An error occured with source image for layer '__param__'.",
+    "errorProj": "Projection '__param__' invalid.",
+    "errorResponseNoFeaturesProperty": "The response from the service didn't provide a 'features' property.",
+    "errorNoBounds": "Couldn't find bounds for layer '__param__'.",
+    "errorNoExtent": "No extent for layer '__param__'.",
+    "errorInvalidExtent": "Invalid extent '__param__'.",
+    "fetchProgress": "Fetching data... Retrieved __param__ of __param__ records.",
+    "fetchDone": "Data fetched - __param__ records.",
     "fetchStart": "Start fetching data...",
-    "slowFetch": "Downloading __param__ is taking longer then expected",
+    "slowFetch": "Downloading __param__ is taking longer then expected.",
     "only": "only",
     "opacity": "Opacity",
     "opacityMax": "Maximum from parent",
@@ -181,16 +185,36 @@
   },
   "validation": {
     "layer": {
-      "loadfailed": "Layer __param__ failed to load on map",
-      "notfound": "The sublayer __param__ of the layer __param__ does not exist on the server",
-      "createtwice": "Can not execute the createGeoViewRasterLayers method twice for the layer __param__ on map",
-      "usedtwice": "Duplicate use of layer identifier __param__ on map",
-      "multipleUUID": "GeoCore layers may only have one GeoCore id per layer",
-      "vectorFeaturesFailed": "Failed to load the vector features on layer __param__"
+      "loadfailed": "Layer '__param__' failed to load on map.",
+      "layerIdNotFound": "Layer id not found '__param__'.",
+      "layerIdMustBeNumber": "ESRI layer id must be a number, was '__param__' for layer '__param__'.",
+      "createtwice": "Can not execute the createGeoViewRasterLayers method twice for the layer '__param__'.",
+      "usedtwice": "Duplicate use of layer identifier __param__.",
+      "multipleUUID": "GeoCore layers may only have one GeoCore id per layer.",
+      "vectorFeaturesFailed": "Failed to load the vector features on layer '__param__'.",
+      "invalidGeoviewLayerType": "Invalid GeoView Layer Type '__param__'.",
+      "geoviewLayerIdMandatoryForLayerType": "geoviewLayerId is mandatory for GeoView layer of type '__param__'.",
+      "metadataAccessPathMissing": "metadataAccessPath is mandatory for GeoView layer '__param__' of type '__param__'.",
+      "dataAccessPathMissing": "dataAccessPath is mandatory for GeoView layer '__param__'.",
+      "unableToFetch": "Unable to fetch and read metadata for layer '__param__'.",
+      "serviceMetadataEmpty": "Metadata of the service was empty for layer '__param__'.",
+      "invalidLayerFilter": "Layer '__param__' has an invalid layer filter.\nfilter = '__param__'\ninternal filter = '__param__'.",
+      "failedToCreateLayer": "Failed to create the layer '__param__'.",
+      "noCapabilitiesOrEmpty": "No capabilities (or empty) found for layer '__param__'.",
+      "wmsServiceFormatParameter": "Parameter 'Format' of GetFeatureInfo only support text/xml, text/html and text/plain for WMS services, '__param__'.",
+      "wmsSubLayerNotfound": "The sublayer __param__ of the layer __param__ does not exist on the server.",
+      "csvNoGeographicData": "Could not find geographic data in the CSV '__param__'.",
+      "invalidMetadata": "Invalid metadata (listOfLayerEntryConfig) preventing load of layer '__param__'.",
+      "emptyLayerGroup": "Empty layer group '__param__'.",
+      "unableToCreateGroupLayer": "Unable to create group layer '__param__'.",
+      "vectorSourceUrlNotDefined": "Vector source URL is not defined for layer '__param__'.",
+      "vectorTileLayerProjectionMismatch": "Vector tile layer '__param__' projection does not match the map projection.",
+      "extentParameterNotDefined": "Parameter extent is not defined in source element for layer '__param__'.",
+      "projectionParameterNotDefined": "Parameter projection is not defined in source element for layer '__param__'."
     },
     "schema": {
       "notFound": "A schema error was found, check the console to see what is wrong.",
-      "wrongPath": "Cannot find schema (__param__)"
+      "wrongPath": "Cannot find schema '__param__'."
     },
     "changeDisplayLanguageLayers": "Layers can not be relaoded because the configuration does not support this language",
     "changeDisplayLanguage": "Only 'en' and 'fr' are supported",
@@ -224,7 +248,7 @@
     "zoom": "ZOOM",
     "details": "DETAILS",
     "exportBtn": "Download",
-    "downloadAsGeoJSON": "Download GeoJSON",
+    "downloadAsGeoJSON": "Download GeoJSON __param__",
     "downloadAsCSV": "Download CSV",
     "filterMap": "Filter map",
     "stopFilterMap": "Stop filter map",
@@ -250,29 +274,36 @@
     "resizeTooltip": "Resize",
     "noTab": "No tab"
   },
+  "warning": {
+    "layer": {
+      "vectorTileRemoved": "The vector tile __param__ had to be removed due to a projection conflict."
+    }
+  },
   "error": {
     "generic": "An error happened, contact us or view console for details",
-    "metadata": {
-      "unableRead": "Unable to read metadata",
-      "empty": "Value returned is empty",
-      "capability": "Value returned doesn't contain Capability, Layer or is empty"
-    },
     "layer": {
-      "createGroup": "Unable to create group layer",
-      "emptyGroup": "Empty layer group",
-      "esriId": "ESRI layerId must be a number",
-      "esriIdNotFound": "ESRI layerId not found",
-      "notAbleToQuery": "Not able to download records for __param__",
-      "unsuportedProjection": "Layer __param__ projection does not match map projection",
-      "noCSVGeometry": "Could not find geographic data in the CSV layer __param__"
+      "layerNotFound": "Layer at layer path '__param__' not found.",
+      "notAGeoJsonLayer": "Not a GeoJson layer for layer '__param__'.",
+      "notAnEsriDynamicLayer": "Not an Esri Dynamic layer for layer '__param__'.",
+      "notAFeatureLayer": "Layer id not a feature layer '__param__'.",
+      "notQueryableLayer": "Layer '__param__' is not queryable.",
+      "notAbleToQuery": "Not able to download records for __param__"
+    },
+    "map": {
+      "mapIdNotFound": "Map with ID '__param__' not found.",
+      "geoviewStoreNotFound": "GeoView Store on Map '__param__' not found."
     },
     "geocore": {
-      "uuidNotFound": "GeoCore layer identifier __param__ does not exist on the server",
-      "invalidResponse": "Invalid response (__param__) from GeoCore service for UUID __param__",
-      "noLayer": "No layers returned by GeoCore service for UUID __param__"
+      "uuidNotFound": "GeoCore layer identifier '__param__' does not exist on the server.",
+      "invalidResponse": "Invalid response '__param__' from GeoCore service for UUID '__param__'.",
+      "noLayer": "No layers returned by GeoCore service for UUID '__param__'."
     },
     "geolocator": {
       "noService": "Geolocator service not available"
     }
+  },
+  "templates": {
+    "firstSnackbar": "This is my first snackbar!",
+    "canApplyFunction": "I can even apply a function"
   }
 }

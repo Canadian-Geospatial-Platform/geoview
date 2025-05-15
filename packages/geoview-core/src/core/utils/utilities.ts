@@ -33,6 +33,12 @@ export function replaceParams(params: unknown[], message: string): string {
  * @returns {string} The translated message with values replaced
  */
 export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: string, params: unknown[] | undefined = undefined): string {
+  // Check if the message key exists, before translating it and log a warning when it doesn't exist
+  if (!i18n.exists(messageKey, { lng: language })) {
+    // Log error
+    logger.logError(`MISSING MESSAGE KEY FOR MESSAGE: ${messageKey}`);
+  }
+
   const trans = i18n.getFixedT(language);
   let message = trans(messageKey);
 

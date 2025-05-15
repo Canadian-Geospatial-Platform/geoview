@@ -123,10 +123,10 @@
           });
 
           // snackbar notification
-          cgpv.api.getMapViewer('map1').notifications.showWarning('This is my first snackbar!');
+          cgpv.api.getMapViewer('map1').notifications.showWarning('templates.firstSnackbar');
 
           setInterval(() => {
-            cgpv.api.getMapViewer('map1').notifications.showMessage('I can even apply a function', [], false, {
+            cgpv.api.getMapViewer('map1').notifications.showMessage('templates.canApplyFunction', [], false, {
               label: 'Click me!',
               action: () => {
                 alert('You clicked me!');

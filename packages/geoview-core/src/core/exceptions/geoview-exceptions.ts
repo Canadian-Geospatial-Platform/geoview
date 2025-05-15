@@ -87,7 +87,7 @@ export class MapViewerNotFoundError extends GeoViewError {
    * @param {string} mapId - The unique identifier of the map that was not found.
    */
   constructor(mapId: string) {
-    super(`Map with ID ${mapId} not found`);
+    super('error.map.mapIdNotFound', [mapId]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'MapViewerNotFoundError';
@@ -107,7 +107,7 @@ export class GeoViewStoreOnMapNotFoundError extends GeoViewError {
    * @param {string} mapId - The unique identifier of the map on which toe GeoView Store was not found.
    */
   constructor(mapId: string) {
-    super(`GeoView Store on Map ID ${mapId} not found`);
+    super('error.map.geoviewStoreNotFound', [mapId]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'GeoViewStoreOnMapNotFoundError';
@@ -147,7 +147,7 @@ export class InvalidProjectionError extends GeoViewError {
    * @param {string} projectionCode - The invalid projection code that caused the error.
    */
   constructor(projectionCode: string) {
-    super('Invalid projection code', [projectionCode]);
+    super('layers.errorProj', [projectionCode]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'InvalidProjectionError';
@@ -168,7 +168,7 @@ export class InvalidExtentError extends GeoViewError {
    * @param {Extent} extent - The invalid extent that caused the error.
    */
   constructor(extent: Extent) {
-    super('Invalid extent', [extent]);
+    super('layers.errorInvalidExtent', [extent]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'InvalidExtentError';
@@ -189,7 +189,7 @@ export class NoFeaturesPropertyError extends GeoViewError {
    * Creates an instance of NoFeaturesPropertyError.
    */
   constructor() {
-    super("The response from the service didn't provide a 'features' property.");
+    super('layers.errorResponseNoFeaturesProperty');
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'NoFeaturesPropertyError';
@@ -229,7 +229,7 @@ export class NoBoundsError extends GeoViewError {
    * @param {string} layerPath - The path or identifier of the layer that caused the error.
    */
   constructor(layerPath: string) {
-    super(`Couldn't find bounds for layer: ${layerPath}`);
+    super('layers.errorNoBounds', [layerPath]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'NoBoundsError';
@@ -251,7 +251,7 @@ export class NoExtentError extends GeoViewError {
    * @param {Extent} layerPath - The layer path for which we tried to get an Extent.
    */
   constructor(layerPath: string) {
-    super('No extent', [layerPath]);
+    super('layers.errorNoExtent', [layerPath]);
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'NoExtentError';
