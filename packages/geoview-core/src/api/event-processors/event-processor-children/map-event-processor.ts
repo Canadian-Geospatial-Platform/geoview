@@ -32,7 +32,7 @@ import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { Projection } from '@/geo/utils/projection';
-import { isPointInExtent } from '@/geo/utils/utilities';
+import { isPointInExtent, isExtentLngLat } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
@@ -994,11 +994,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // If extent is in config, use it
     if (homeView!.extent) {
       const lnglatExtent = homeView!.extent as Extent;
-      extent = Projection.transformExtentFromProj(
-        lnglatExtent,
-        Projection.getProjectionLngLat(),
-        Projection.getProjectionFromString(`EPSG:${currProjection}`)
-      );
+      // If extent is not lon/lat, we assume it is in the map projection and use it as is.
+      extent = isExtentLngLat(extent)
+        ? Projection.transformExtentFromProj(
+            lnglatExtent,
+            Projection.getProjectionLngLat(),
+            Projection.getProjectionFromString(`EPSG:${currProjection}`)
+          )
+        : lnglatExtent;
+
       options.padding = [0, 0, 0, 0];
     }
 

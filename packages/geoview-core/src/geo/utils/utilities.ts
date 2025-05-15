@@ -415,6 +415,27 @@ export function validateExtent(extent: Extent, code: string = 'EPSG:4326'): Exte
 }
 
 /**
+ * Checks if a given extent is long/lat.
+ * @param {Extent} extent - The extent to check.
+ * @returns {boolean} Whether or not the extent is long/lat
+ */
+export function isExtentLngLat(extent: Extent): boolean {
+  if (
+    extent.length === 4 &&
+    extent[0] >= -180 &&
+    extent[0] <= 180 &&
+    extent[1] >= -90 &&
+    extent[1] <= 90 &&
+    extent[2] >= -180 &&
+    extent[2] <= 180 &&
+    extent[3] >= -90 &&
+    extent[3] <= 90
+  )
+    return true;
+  return false;
+}
+
+/**
  * Validates lat long, LCC, or Web Mercator extent if it is defined.
  * @param {Extent} extent - The extent to validate.
  * @param {string} code - The projection code of the extent. Default EPSG:4326.
