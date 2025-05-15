@@ -210,7 +210,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const { source } = layerConfig;
 
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     const sourceOptions: SourceOptions = {

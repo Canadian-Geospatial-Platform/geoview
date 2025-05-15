@@ -117,7 +117,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                   resolve(layerGroup || baseLayer);
                 } else {
                   // Throw error
-                  throw new LayerNotCreatedError(layerConfig.layerPath);
+                  throw new LayerNotCreatedError(layerConfig.layerPath, layerConfig.getLayerName());
                 }
               })
               .catch((error: unknown) => {
@@ -155,7 +155,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                         resolve2(baseLayer);
                       } else {
                         // Throw error
-                        throw new LayerNotCreatedError(layerConfig.layerPath);
+                        throw new LayerNotCreatedError(layerConfig.layerPath, layerConfig.getLayerName());
                       }
                     })
                     .catch((error: unknown) => {

@@ -149,7 +149,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
     // Validate required properties
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     if (!source.extent) {

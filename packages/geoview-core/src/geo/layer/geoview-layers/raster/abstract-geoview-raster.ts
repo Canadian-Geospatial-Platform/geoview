@@ -17,7 +17,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
     const responseJson = await AbstractGeoViewRaster.fetchMetadata(this.metadataAccessPath);
 
     // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, responseJson);
+    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.geoviewLayerName, responseJson);
 
     // Set it
     this.metadata = responseJson;
@@ -40,11 +40,11 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * @param {string} geoviewLayerId - The geoview layer id
    * @param {TypeJsonObject} metadata - The metadata to check
    */
-  static throwIfMetatadaHasError(geoviewLayerId: string, metadata: TypeJsonObject): void {
+  static throwIfMetatadaHasError(geoviewLayerId: string, layerName: string | undefined, metadata: TypeJsonObject): void {
     // If there's an error in the content of the response itself
     if ('error' in metadata && metadata.error.message) {
       // Throw the error as read from the metadata error
-      throw new LayerServiceMetadataUnableToFetchError(geoviewLayerId, formatError(metadata.error.message));
+      throw new LayerServiceMetadataUnableToFetchError(geoviewLayerId, layerName, formatError(metadata.error.message));
     }
   }
 }

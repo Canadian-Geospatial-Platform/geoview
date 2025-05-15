@@ -121,7 +121,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
     if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
       // Add a layer load error
-      this.addLayerLoadError(new LayerNotFeatureLayerError(layerConfig.layerPath), layerConfig);
+      this.addLayerLoadError(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerName()), layerConfig);
       return true;
     }
     return false;
