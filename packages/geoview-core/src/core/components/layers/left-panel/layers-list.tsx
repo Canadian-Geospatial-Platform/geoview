@@ -68,5 +68,10 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
     });
   }, [depth, isLayoutEnlarged, mapId, showLayerDetailsPanel, layersList, layerPathOrder]);
 
-  return <Box sx={getListClass()}>{memoLegendItems}</Box>;
+  return (
+    <Box sx={getListClass()}>
+      {/* Add Toggle Component Here? */}
+      {memoLegendItems}
+    </Box>
+  );
 }

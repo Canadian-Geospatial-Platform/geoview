@@ -249,6 +249,10 @@
     "resizeTooltip": "Redimensionner",
     "noTab": "Pas d'onglet"
   },
+  "toggle-all": {
+    "show": "Tout afficher",
+    "collapse": "Réduire tout"
+  },
   "error": {
     "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour détails",
     "metadata": {

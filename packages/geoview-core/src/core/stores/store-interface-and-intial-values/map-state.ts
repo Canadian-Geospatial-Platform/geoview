@@ -1061,6 +1061,15 @@ export const useSelectorLayerVisibility = (layerPath: string): boolean => {
   );
 };
 
+export const useAllLayersVisible = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo.every((layer) => layer.visible));
+
+export const useMapHasCollapsibleLayers = (): boolean =>
+  useStore(useGeoViewStore(), (state) => MapEventProcessor.getLegendCollapsibleLayers(state.mapId).length > 0);
+
+export const useAllLayersCollapsed = (): boolean =>
+  useStore(useGeoViewStore(), (state) => MapEventProcessor.getAllLegendLayersCollapsed(state.mapId));
+
 export const useSelectorLayerInVisibleRange = (layerPath: string): boolean => {
   // Hook
   return useStore(
