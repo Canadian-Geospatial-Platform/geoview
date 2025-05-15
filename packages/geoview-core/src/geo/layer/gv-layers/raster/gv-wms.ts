@@ -1,10 +1,10 @@
 import ImageLayer from 'ol/layer/Image';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
 import { ImageWMS } from 'ol/source';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
+import { Map as OLMap } from 'ol';
 
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -79,48 +79,36 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the return of feature information at a given pixel location.
-   * @param {Pixel} location - The pixel coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
-   */
-  protected override getFeatureInfoAtPixel(
-    location: Pixel,
-    queryGeometry: boolean = true,
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
-    // Redirect to getFeatureInfoAtCoordinate
-    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), queryGeometry, abortController);
-  }
-
-  /**
    * Overrides the return of feature information at a given coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
    * @param {Coordinate} location - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtCoordinate(
+    map: OLMap,
     location: Coordinate,
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // Transform coordinate from map project to lntlat
-    const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
+    // Transform coordinate from map projection to lntlat
+    const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
 
     // Redirect to getFeatureInfoAtLongLat
-    return this.getFeatureInfoAtLongLat(projCoordinate, queryGeometry, abortController);
+    return this.getFeatureInfoAtLongLat(map, projCoordinate, queryGeometry, abortController);
   }
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override async getFeatureInfoAtLongLat(
+    map: OLMap,
     lnglat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
@@ -135,17 +123,18 @@ export class GVWMS extends AbstractGVRaster {
     // TODO: Check - Why are we checking if bounds are properly set in this getFeatureInfoAtLongLat override? Seems late or out of order?
     // Check if bounds are properly set
     if (!layerConfig.initialSettings!.bounds) {
-      const newBounds = this.getBounds(this.getMapViewer().getView().getProjection(), MapViewer.DEFAULT_STOPS);
+      const newBounds = this.getBounds(map.getView().getProjection(), MapViewer.DEFAULT_STOPS);
       if (newBounds)
         layerConfig.initialSettings!.bounds = Projection.transformExtentFromProj(
           newBounds,
-          this.getMapViewer().getView().getProjection(),
+          map.getView().getProjection(),
           Projection.getProjectionLngLat()
         );
       else return [];
     }
 
-    const clickCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
+    // Project the lnglat to map projection
+    const clickCoordinate = Projection.transformFromLonLat(lnglat, map.getView().getProjection());
     if (
       lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
       layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
@@ -166,8 +155,8 @@ export class GVWMS extends AbstractGVRaster {
       }
 
     const wmsSource = this.getOLSource();
-    const viewResolution = this.getMapViewer().getView().getResolution()!;
-    const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, this.getMapViewer().getProjection().getCode(), {
+    const viewResolution = map.getView().getResolution()!;
+    const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, map.getView().getProjection().getCode(), {
       INFO_FORMAT: infoFormat,
     });
 

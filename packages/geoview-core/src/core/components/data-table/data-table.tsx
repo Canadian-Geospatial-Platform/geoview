@@ -309,10 +309,18 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
           ? Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]!.dataType === 'oid') || undefined
           : undefined;
 
-      // If there is no extent, the layer is ESRI Dynamic, get the feature extent using its oid field
-      if (!extent && oidField !== undefined)
-        extent = await getExtentFromFeatures(layerPath, [feature.fieldInfo[oidField]!.value as string], oidField);
+      // If there is no extent, but there's an OID field (ESRI Dynamic layer?)
+      if (!extent && oidField !== undefined) {
+        try {
+          // Get the feature extent using its oid field
+          extent = await getExtentFromFeatures(layerPath, [feature.fieldInfo[oidField]!.value as string], oidField);
+        } catch (error: unknown) {
+          // Log error
+          logger.logError(error);
+        }
+      }
 
+      // If the extent was found
       if (extent) {
         // Project
         const center = getCenter(extent);

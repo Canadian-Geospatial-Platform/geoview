@@ -5,8 +5,8 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import { Layer } from 'ol/layer';
 import Source from 'ol/source/Source';
-import { shared as iconImageCache } from 'ol/style/IconImageCache';
 import { Projection as OLProjection } from 'ol/proj';
+import { Map as OLMap } from 'ol';
 
 import { Style } from 'ol/style';
 import cloneDeep from 'lodash/cloneDeep';
@@ -30,12 +30,10 @@ import {
 } from '@/api/config/types/map-schema-types';
 import { getLegendStyles, getFeatureImageSource, processStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
-import { MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
 import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
 
 /**
@@ -47,9 +45,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   // The OpenLayer source
   #olSource: Source;
-
-  // The MapViewer
-  #mapViewer?: MapViewer;
 
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig;
@@ -150,10 +145,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   protected onError(event: unknown): void {
     // Log
-    logger.logError(
-      `An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map. Zoom level is: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`,
-      event
-    );
+    logger.logError(`An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map.`, event);
 
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
@@ -179,10 +171,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   protected onImageLoadError(event: unknown): void {
     // Log
-    logger.logError(
-      `Error loading source image for layer: ${this.getLayerPath()}. Zoom level is: ${Math.round(this.getMapViewer().getView().getZoom() || 0)}`,
-      event
-    );
+    logger.logError(`Error loading source image for layer: ${this.getLayerPath()}.`, event);
 
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
@@ -196,37 +185,10 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // If we were not error before
     if (layerStatusBefore !== 'error') {
       // Emit about the error
-      this.emitMessage(
-        'layers.errorImageLoad',
-        [this.getLayerName() || this.getLayerPath(), Math.round(this.getMapViewer().getView().getZoom() || 0).toString()],
-        'error',
-        true
-      );
+      this.emitMessage('layers.errorImageLoad', [this.getLayerName() || this.getLayerPath()], 'error', true);
     } else {
       // We've already emitted an erorr to the user about the layer being in error, skip
     }
-  }
-
-  /**
-   * Gets the MapViewer where the layer resides
-   * @returns {MapViewer} The MapViewer
-   */
-  getMapViewer(): MapViewer {
-    // If set
-    if (this.#mapViewer) {
-      return this.#mapViewer;
-    }
-
-    // MapViewer not set
-    throw new MapViewerNotFoundError('undefined');
-  }
-
-  /**
-   * Sets the MapViewer to enable more functionality
-   * @param {MapViewer} mapViewer - The MapViewer
-   */
-  setMapViewer(mapViewer: MapViewer): void {
-    this.#mapViewer = mapViewer;
   }
 
   /**
@@ -331,11 +293,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Gets the in visible range value
+   * @param {number | undefined} currentZoom - The map current zoom
    * @returns {boolean} true if the layer is in visible range
    */
-  getInVisibleRange(): boolean {
-    const mapZoom = this.getMapViewer().getView().getZoom();
-    return mapZoom! > this.getMinZoom() && mapZoom! <= this.getMaxZoom();
+  getInVisibleRange(currentZoom: number | undefined): boolean {
+    if (!currentZoom) return false;
+    return currentZoom > this.getMinZoom() && currentZoom <= this.getMaxZoom();
   }
 
   /**
@@ -368,6 +331,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Returns feature information for the layer specified.
+   * @param {OLMap} map - The Map to get feature info from.
    * @param {QueryType} queryType - The type of query to perform.
    * @param {TypeLocation} location - An pixel, coordinate or polygon that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
@@ -375,6 +339,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {Promise<TypeFeatureInfoEntry[]>} The feature info table.
    */
   async getFeatureInfo(
+    map: OLMap,
     queryType: QueryType,
     location: TypeLocation,
     queryGeometry: boolean = true,
@@ -400,19 +365,19 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         promiseGetFeature = this.getAllFeatureInfo(abortController);
         break;
       case 'at_pixel':
-        promiseGetFeature = this.getFeatureInfoAtPixel(location as Pixel, queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoAtPixel(map, location as Pixel, queryGeometry, abortController);
         break;
       case 'at_coordinate':
-        promiseGetFeature = this.getFeatureInfoAtCoordinate(location as Coordinate, queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoAtCoordinate(map, location as Coordinate, queryGeometry, abortController);
         break;
       case 'at_long_lat':
-        promiseGetFeature = this.getFeatureInfoAtLongLat(location as Coordinate, queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoAtLongLat(map, location as Coordinate, queryGeometry, abortController);
         break;
       case 'using_a_bounding_box':
-        promiseGetFeature = this.getFeatureInfoUsingBBox(location as Coordinate[], queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoUsingBBox(map, location as Coordinate[], queryGeometry, abortController);
         break;
       case 'using_a_polygon':
-        promiseGetFeature = this.getFeatureInfoUsingPolygon(location as Coordinate[], queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoUsingPolygon(map, location as Coordinate[], queryGeometry, abortController);
         break;
       default:
         // Not implemented
@@ -434,7 +399,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getAllFeatureInfo(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
@@ -445,31 +409,32 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overridable function to return of feature information at a given pixel location.
+   * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
    * @param {Pixel} location - The pixel coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected getFeatureInfoAtPixel(
+    map: OLMap,
     location: Pixel,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // Crash on purpose
-    throw new NotImplementedError(`getFeatureInfoAtPixel not implemented on layer path ${this.getLayerPath()}`);
+    // Redirect to getFeatureInfoAtCoordinate
+    return this.getFeatureInfoAtCoordinate(map, map.getCoordinateFromPixel(location), queryGeometry, abortController);
   }
 
   /**
    * Overridable function to return of feature information at a given coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
    * @param {Coordinate} location - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtCoordinate(
+    map: OLMap,
     location: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
@@ -482,13 +447,14 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overridable function to return of feature information at the provided long lat coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtLongLat(
+    map: OLMap,
     lnglat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
@@ -501,13 +467,14 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overridable function to return of feature information at the provided bounding box.
+   * @param {OLMap} map - The Map where to get Feature using BBox from.
    * @param {Coordinate} location - The bounding box that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoUsingBBox(
+    map: OLMap,
     location: Coordinate[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
@@ -520,6 +487,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Overridable function to return of feature information at the provided polygon.
+   * @param {OLMap} map - The Map where to get Feature Info using Polygon from.
    * @param {Coordinate} location - The polygon that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
@@ -527,6 +495,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoUsingPolygon(
+    map: OLMap,
     location: Coordinate[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
@@ -580,8 +549,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
         if (legend) {
           // Save the style according to the legend
           this.onSetStyleAccordingToLegend(legend);
-          // Check for possible number of icons and set icon cache size
-          this.updateIconImageCache(legend);
           // Emit legend information once retrieved
           this.#emitLegendQueried({ legend });
         }
@@ -593,30 +560,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Return the promise
     return promiseLegend;
-  }
-
-  /**
-   * Update the size of the icon image list based on styles.
-   * @param {TypeLegend} legend - The legend to check.
-   */
-  updateIconImageCache(legend: TypeLegend): void {
-    // GV This will need to be revised if functionality to add additional icons to a layer is added
-    let styleCount = this.getMapViewer().iconImageCacheSize;
-    if (legend.styleConfig)
-      Object.keys(legend.styleConfig).forEach((geometry) => {
-        if (
-          legend.styleConfig &&
-          (legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'uniqueValue' ||
-            legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'classBreaks')
-        ) {
-          if (legend.styleConfig[geometry as TypeStyleGeometry]!.info?.length)
-            styleCount += legend.styleConfig[geometry as TypeStyleGeometry]!.info.length;
-        }
-      });
-    // Set the openlayers icon image cache
-    iconImageCache.setSize(styleCount);
-    // Update the cache size for the map viewer
-    this.getMapViewer().iconImageCacheSize = styleCount;
   }
 
   /**

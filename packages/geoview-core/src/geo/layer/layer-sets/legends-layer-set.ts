@@ -162,6 +162,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
         ?.then((legend: TypeLegend | null | undefined) => {
           // If legend received
           if (legend) {
+            // Check for possible number of icons and set icon cache size
+            this.layerApi.mapViewer.updateIconImageCache(legend);
+
             // Flag
             this.resultSet[layerPath].legendQueryStatus = 'queried';
 
