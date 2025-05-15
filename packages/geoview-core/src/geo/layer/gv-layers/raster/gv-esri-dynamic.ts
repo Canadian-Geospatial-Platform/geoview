@@ -39,6 +39,7 @@ import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
+import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -306,7 +307,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At Long Lat from.
+   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
@@ -991,7 +992,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     let baseUrl = layerEntryConfig.source.dataAccessPath;
 
     // If no base url
-    if (!baseUrl) throw new NoExtentError(this.getLayerPath());
+    if (!baseUrl) throw new LayerDataAccessPathMandatoryError(this.getLayerPath());
 
     // Construct query
     if (!baseUrl.endsWith('/')) baseUrl += '/';
