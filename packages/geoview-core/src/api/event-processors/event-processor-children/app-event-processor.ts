@@ -130,7 +130,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
     // Return a new promise of void when all will be done instead of promise of array of voids
     return new Promise((resolve, reject) => {
       // Change language in i18n for the useTranslation used by the ui components
-      const promiseChangeLanguage = this.getAppState(mapId).i18nInstance!.changeLanguage(lang);
+      const promiseChangeLanguage = MapEventProcessor.getMapViewer(mapId).getI18nInstance().changeLanguage(lang);
 
       this.getAppState(mapId).setterActions.setDisplayLanguage(lang);
 

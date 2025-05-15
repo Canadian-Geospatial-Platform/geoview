@@ -9,7 +9,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useAppDisplayLanguage, useAppI18nInstance } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapOverviewMapHideZoom, useMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -30,7 +30,7 @@ export function OverviewMap(): JSX.Element {
   const zoomLevel = useMapZoom();
   const hideOnZoom = useMapOverviewMapHideZoom();
   const displayLanguage = useAppDisplayLanguage();
-  const i18n = useAppI18nInstance();
+  const i18n = MapEventProcessor.getMapViewer(mapId).getI18nInstance();
 
   // State
   const [visibility, setVisibility] = useState<boolean>(!(zoomLevel > hideOnZoom));
@@ -86,7 +86,7 @@ export function OverviewMap(): JSX.Element {
       }, 0);
       setIsInitialized(false);
     };
-  }, [mapId, displayLanguage]);
+  }, [mapId, displayLanguage, i18n]);
 
   return <Box />;
 }
