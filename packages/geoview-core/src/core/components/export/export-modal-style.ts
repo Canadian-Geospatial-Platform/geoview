@@ -1,5 +1,4 @@
 import { Theme } from '@mui/material/styles';
-import { SxStyles } from '@/ui/style/types';
 
 /**
  * Get custom sx classes for the export modal
@@ -7,77 +6,103 @@ import { SxStyles } from '@/ui/style/types';
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme): SxStyles => ({
-  content: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(2),
-    padding: theme.spacing(2),
-    '& .MuiFormControl-root': {
-      marginTop: theme.spacing(2),
-    },
-  },
-  exportContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(2),
-  },
-  mapContainer: {
-    width: '100%',
-    marginBottom: theme.spacing(2),
-    '& img': {
-      maxWidth: '100%',
-      height: 'auto',
-    },
-  },
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getSxClasses = (theme: Theme): any => ({
   legendContainer: {
-    width: '100%',
-    marginTop: theme.spacing(2),
-    '& img': {
-      maxWidth: '100%',
-      height: 'auto',
+    padding: '1rem',
+    margin: '1rem',
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'stretch',
+  },
+  legendSpacing: {
+    margin: '0.2rem',
+  },
+  legendTitle: {
+    paddingRight: '0.2rem',
+    marginLeft: '0.2em',
+    textAlign: 'left',
+    fontWeight: 'bold',
+    fontSize: theme.palette.geoViewFontSize.sm,
+    display: 'flex',
+    flexWrap: 'nowrap',
+  },
+  legendLayerIcon: {
+    maxWidth: '1.5em',
+    maxHeight: '1.5em',
+    verticalAlign: 'middle',
+    textAlign: 'left',
+  },
+  legendItemIcon: {
+    maxWidth: '1.5em',
+    verticalAlign: 'middle',
+    marginLeft: '0.5em',
+    marginRight: '0.5em',
+  },
+  legendItem: {
+    textAlign: 'left',
+    marginLeft: '0.5em',
+    marginTop: '0.2em',
+    display: 'block',
+    fontSize: theme.palette.geoViewFontSize.sm,
+  },
+  hr: {
+    width: '80%',
+    marginLeft: '7px',
+  },
+  wmsImage: {
+    maxWidth: '90%',
+    cursor: 'arrow',
+  },
+  iconBtn: {
+    width: '1.5rem',
+    height: '1.5rem',
+    minWidth: 0,
+    padding: 0,
+    border: '1px solid #a2b9bc',
+    '&:hover': {
+      border: '1px solid #92a8d1',
     },
   },
-  exportTitle: {
-    width: '100%',
-    textAlign: 'center',
-    marginBottom: theme.spacing(2),
-    color: theme.palette.text.primary,
+  toLine: {
+    display: 'block',
   },
-  attributionContainer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    marginTop: theme.spacing(2),
-    padding: theme.spacing(1),
-    backgroundColor: theme.palette.background.default,
-  },
-  northArrowContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    '& svg': {
-      width: '24px',
-      height: '24px',
+  scaleText: {
+    fontSize: theme.palette.geoViewFontSize.default,
+    color: theme.palette.geoViewColor.grey.dark[800],
+    whiteSpace: 'nowrap',
+    borderBottom: `1px solid ${theme.palette.geoViewColor.primary.light[300]}`,
+    textTransform: 'lowercase',
+    position: 'relative',
+    display: 'inline-block',
+
+    '&.interaction-static': {
+      fontSize: theme.palette.geoViewFontSize.md,
+      fontWeight: 'bold',
+      borderBottom: '1px solid',
+
+      '&.hasScaleLine::before, &.hasScaleLine::after': {
+        backgroundColor: `${theme.palette.geoViewColor.grey.dark[800]} !important`,
+        width: '1px !important',
+      },
     },
-  },
-  scaleContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    fontSize: '0.875rem',
-  },
-  loadingContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    height: '200px',
-  },
-  dialogContent: {
-    minHeight: '400px',
-    maxHeight: '80vh',
-    overflow: 'auto',
+
+    '&.hasScaleLine::before, &.hasScaleLine::after': {
+      content: '""',
+      position: 'absolute',
+      bottom: '-1px',
+      width: '1px',
+      height: '8px',
+      backgroundColor: theme.palette.geoViewColor.grey.dark[800],
+    },
+
+    '&.hasScaleLine::before': {
+      left: '-0px',
+    },
+
+    '&.hasScaleLine::after': {
+      right: '-0px',
+    },
   },
 });
