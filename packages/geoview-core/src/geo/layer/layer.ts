@@ -1072,9 +1072,9 @@ export class LayerApi {
       const geoviewLayer = this.getGeoviewLayer(layerConfig.layerPath);
 
       // If the layer is loaded AND flag is true to use time dimension, continue
-      if (geoviewLayer instanceof AbstractGVLayer && geoviewLayer.getIsTimeAware()) {
-        // Check and add time slider layer when needed
-        TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layerConfig);
+      if (geoviewLayer instanceof AbstractGVLayer && geoviewLayer.getIsTimeAware() && geoviewLayer.getTemporalDimension()) {
+        // Check (if dimension is valid) and add time slider layer when needed
+        if (geoviewLayer.getTemporalDimension()!.isValid) TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layerConfig);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: unknown) {

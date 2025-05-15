@@ -127,9 +127,9 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
             >
               {layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />}
               <Box sx={sxClasses.listPrimaryText}>
-                <Typography className="layerTitle">{layer.layerName}</Typography>
+                <Typography component="div" className="layerTitle">{layer.layerName}</Typography>
                 <Box display="flex" alignContent="center">
-                  <Typography component="p" variant="subtitle1" noWrap display="block">
+                  <Typography component="div" variant="subtitle1" noWrap display="block">
                     {getLayerStatus()}
                   </Typography>
                 </Box>
