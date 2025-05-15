@@ -95,19 +95,17 @@ export abstract class AbstractBaseLayer {
    * Gets the layer status
    * @returns The layer status
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getLayerStatus(): TypeLayerStatus {
     // Take the layer status from the config
     return this.getLayerConfig()!.layerStatus;
   }
 
   /**
-   * Gets the layer name
+   * Gets the layer name or fallsback on the layer name in the layer configuration.
    * @returns The layer name
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getLayerName(): string | undefined {
-    return this.#layerName;
+    return this.#layerName || this.getLayerConfig().getLayerName();
   }
 
   /**

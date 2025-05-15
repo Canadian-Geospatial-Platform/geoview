@@ -187,7 +187,7 @@
   "validation": {
     "layer": {
       "loadfailed": "Layer '__param__' failed to load on map.",
-      "layerIdNotFound": "Layer id not found '__param__'.",
+      "layerIdNotFound": "Layer id '__param__' not found for layer '__param__'.",
       "layerIdMustBeNumber": "ESRI layer id must be a number, was '__param__' for layer '__param__'.",
       "createtwice": "Can not execute the createGeoViewRasterLayers method twice for the layer '__param__'.",
       "usedtwice": "Duplicate use of layer identifier __param__.",
@@ -206,7 +206,7 @@
       "wmsSubLayerNotfound": "The sublayer __param__ of the layer __param__ does not exist on the server.",
       "csvNoGeographicData": "Could not find geographic data in the CSV '__param__'.",
       "invalidMetadata": "Invalid metadata (listOfLayerEntryConfig) preventing load of layer '__param__'.",
-      "emptyLayerGroup": "Empty layer group '__param__'.",
+      "emptyLayerGroup": "Empty layer group for layer '__param__'.",
       "unableToCreateGroupLayer": "Unable to create group layer '__param__'.",
       "vectorSourceUrlNotDefined": "Vector source URL is not defined for layer '__param__'.",
       "vectorTileLayerProjectionMismatch": "Vector tile layer '__param__' projection does not match the map projection.",

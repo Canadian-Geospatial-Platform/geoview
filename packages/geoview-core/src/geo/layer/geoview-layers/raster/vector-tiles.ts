@@ -215,7 +215,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
     // Ensure the dataAccessPath is defined; required for fetching tiles
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     // Create the source options

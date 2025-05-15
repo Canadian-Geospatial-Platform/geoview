@@ -225,7 +225,13 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       layerConfig.filterEquation = filterEquation;
     } catch (error: unknown) {
       // Failed
-      throw new LayerInvalidLayerFilterError(layerConfig.layerPath, filterValueToUse, this.getLayerFilter(), formatError(error));
+      throw new LayerInvalidLayerFilterError(
+        layerConfig.layerPath,
+        layerConfig.getLayerName(),
+        filterValueToUse,
+        this.getLayerFilter(),
+        formatError(error)
+      );
     }
 
     olLayer.changed();

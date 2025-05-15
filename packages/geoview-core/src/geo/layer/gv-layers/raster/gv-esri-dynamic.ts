@@ -992,7 +992,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     let baseUrl = layerEntryConfig.source.dataAccessPath;
 
     // If no base url
-    if (!baseUrl) throw new LayerDataAccessPathMandatoryError(this.getLayerPath());
+    if (!baseUrl) throw new LayerDataAccessPathMandatoryError(layerEntryConfig.layerPath, layerEntryConfig.getLayerName());
 
     // Construct query
     if (!baseUrl.endsWith('/')) baseUrl += '/';

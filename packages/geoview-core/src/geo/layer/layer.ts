@@ -49,7 +49,7 @@ import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { LayerCreatedTwiceError, LayerNotGeoJsonError } from '@/core/exceptions/layer-exceptions';
+import { LayerCreatedTwiceError, LayerNotFoundError, LayerNotGeoJsonError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer, LayerMessageEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -721,7 +721,7 @@ export class LayerApi {
     // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
     if (this.getGeoviewLayerIds().includes(geoviewLayerConfig.geoviewLayerId)) {
       // Throw that the geoview layer id was already created
-      throw new LayerCreatedTwiceError(geoviewLayerConfig.geoviewLayerId);
+      throw new LayerCreatedTwiceError(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig.geoviewLayerName);
     } else {
       // Process the addition of the layer
       const result: GeoViewLayerAddedResult = this.#addGeoviewLayerStep2(geoviewLayerConfig);
@@ -1620,29 +1620,29 @@ export class LayerApi {
     // Get the GeoviewLayer
     const gvLayer = this.getGeoviewLayer(layerPath);
 
-    // If of right type
-    if (gvLayer instanceof GVGeoJSON) {
-      // Override the GeoJson source
-      gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
+    // If not found
+    if (!gvLayer) throw new LayerNotFoundError(layerPath);
 
-      // Update the bounds in the store
-      const bounds = gvLayer.getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
-      if (bounds) {
-        LegendEventProcessor.setLayerBounds(mapId, layerPath, bounds);
-      }
+    // If not of right type
+    if (!(gvLayer instanceof GVGeoJSON)) throw new LayerNotGeoJsonError(layerPath, gvLayer.getLayerName());
 
-      // Reset the feature info result set
-      FeatureInfoEventProcessor.resetResultSet(mapId, layerPath, 'name');
+    // Override the GeoJson source
+    gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
 
-      // Update feature info
-      DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerPath).catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed(`Update all feature info in setGeojsonSource failed for layer ${layerPath}`, error);
-      });
-    } else {
-      // Layer not GeoJson
-      throw new LayerNotGeoJsonError(layerPath);
+    // Update the bounds in the store
+    const bounds = gvLayer.getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
+    if (bounds) {
+      LegendEventProcessor.setLayerBounds(mapId, layerPath, bounds);
     }
+
+    // Reset the feature info result set
+    FeatureInfoEventProcessor.resetResultSet(mapId, layerPath, 'name');
+
+    // Update feature info
+    DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerPath).catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed(`Update all feature info in setGeojsonSource failed for layer ${layerPath}`, error);
+    });
   }
 
   /**

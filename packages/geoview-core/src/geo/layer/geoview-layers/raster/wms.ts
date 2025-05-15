@@ -123,7 +123,7 @@ export class WMS extends AbstractGeoViewRaster {
                     // No Capability property
                     reject(
                       new PromiseRejectErrorWrapper(
-                        new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId),
+                        new LayerNoCapabilitiesError(layerConfig.geoviewLayerConfig.geoviewLayerId, layerConfig.getLayerName()),
                         layerConfig
                       )
                     );
@@ -302,7 +302,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     // Validate required data access path
     if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     const { dataAccessPath } = source;

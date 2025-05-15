@@ -16,17 +16,16 @@ import {
   TypeResultSet,
   TypeResultSetEntry,
   TypeLayerControls,
-  layerEntryIsEsriDynamic,
   TypeGeoviewLayerType,
 } from '@/api/config/types/map-schema-types';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { esriQueryRecordsByUrlObjectIds } from '@/geo/layer/gv-layers/utils';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
-import { LayerNotEsriDynamicError } from '@/core/exceptions/layer-exceptions';
+import { LayerNotEsriDynamicError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 
 // #region INTERFACES & TYPES
@@ -132,37 +131,36 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        */
       queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]): Promise<TypeFeatureInfoEntryPartial[]> => {
         // Get the layer config
-        const layerConfig = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getLayerEntryConfig(
-          layerPath
-        ) as AbstractBaseLayerEntryConfig;
+        const layerConfig = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getLayerEntryConfig(layerPath);
+
+        // If not found
+        if (!layerConfig) throw new LayerNotFoundError(layerPath);
+
+        // If not EsriDynamic
+        if (!(layerConfig instanceof EsriDynamicLayerEntryConfig))
+          throw new LayerNotEsriDynamicError(layerPath, layerConfig.getLayerName());
 
         // Get the geometry type
         const [geometryType] = layerConfig.getTypeGeometries();
 
-        // Check if EsriDynamic config
-        if (layerConfig && layerEntryIsEsriDynamic(layerConfig)) {
-          // Get oid field
-          const oidField =
-            layerConfig.source.featureInfo && layerConfig.source.featureInfo.outfields
-              ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
-              : 'OBJECTID';
+        // Get oid field
+        const oidField =
+          layerConfig.source.featureInfo && layerConfig.source.featureInfo.outfields
+            ? layerConfig.source.featureInfo.outfields.filter((field) => field.type === 'oid')[0].name
+            : 'OBJECTID';
 
-          // Query for the specific object ids
-          // TODO: Put the server original projection in the config metadata (add a new optional param in source for esri)
-          // TO.DOCONT: When we get the projection we can get the projection in original server (will solve error trying to reproject https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7 in 3857)
-          // TO.DOCONT: Then we need to modify the DownloadGeoJSON to use mapProjection for vector and original projection for dynamic.
-          return esriQueryRecordsByUrlObjectIds(
-            `${layerConfig.source?.dataAccessPath}/${layerConfig.layerId}`,
-            geometryType,
-            objectIDs,
-            oidField,
-            true,
-            MapEventProcessor.getMapState(get().mapId).currentProjection
-          );
-        }
-
-        // Not an EsriDynamic layer
-        throw new LayerNotEsriDynamicError(layerPath);
+        // Query for the specific object ids
+        // TODO: Put the server original projection in the config metadata (add a new optional param in source for esri)
+        // TO.DOCONT: When we get the projection we can get the projection in original server (will solve error trying to reproject https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7 in 3857)
+        // TO.DOCONT: Then we need to modify the DownloadGeoJSON to use mapProjection for vector and original projection for dynamic.
+        return esriQueryRecordsByUrlObjectIds(
+          `${layerConfig.source?.dataAccessPath}/${layerConfig.layerId}`,
+          geometryType,
+          objectIDs,
+          oidField,
+          true,
+          MapEventProcessor.getMapState(get().mapId).currentProjection
+        );
       },
 
       /**

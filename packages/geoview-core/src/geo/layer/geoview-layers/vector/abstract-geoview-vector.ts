@@ -47,7 +47,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Validate the dataAccessPath exists
     if (!layerConfig.source?.dataAccessPath) {
       // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     // Redirect
@@ -385,7 +385,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     if (latIndex === undefined || lonIndex === undefined) {
       // Failed
-      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath);
+      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     AbstractGeoViewVector.#processFeatureInfoConfig(headers, csvRows[1], EXCLUDED_HEADERS, layerConfig);
