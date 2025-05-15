@@ -65,16 +65,16 @@ function AppStart(props: AppStartProps): JSX.Element {
     logger.logTraceUseEffect('APP-START - initializeMap', mapId);
 
     async function initializeMap(): Promise<void> {
+      // If a map with this id already exist, throw error
+      if (api.hasMapViewer(mapId)) throw new GeoViewMapIdAlreadyExist(mapId);
+
+      // Create i18n istance for the map
       const i18n = await createI18nInstance(lang);
 
       // create a new map viewer instance and add it to the api
       // TODO: use store, remove the use of feature by viewer class and use state to gather values
-      if (!api.hasMapViewer(mapId)) {
-        const mapViewer = new MapViewer(mapFeaturesConfig, i18n);
-        api.setMapViewer(mapId, mapViewer, onMapViewerInit);
-      } else {
-        throw new GeoViewMapIdAlreadyExist(mapId);
-      }
+      const mapViewer = new MapViewer(mapFeaturesConfig, i18n);
+      api.setMapViewer(mapId, mapViewer, onMapViewerInit);
 
       setContent(
         <I18nextProvider i18n={i18n}>
