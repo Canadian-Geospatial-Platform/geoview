@@ -481,7 +481,7 @@ export class LayerApi {
       });
     } else {
       // Cast the error
-      const theError = error as Error;
+      const theError = formatError(error);
 
       // Read the layer path if possible, more precise
       let layerPathOrId = geoviewLayerId;
