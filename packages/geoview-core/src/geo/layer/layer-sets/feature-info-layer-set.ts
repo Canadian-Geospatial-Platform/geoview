@@ -132,7 +132,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       // If layer was found
       if (layer && layer instanceof AbstractGVLayer) {
         // If state is not in visible range
-        if (!AbstractLayerSet.isInVisibleRange(layer)) return;
+        if (!AbstractLayerSet.isInVisibleRange(layer, this.layerApi.mapViewer.getView().getZoom())) return;
 
         // Flag processing
         this.resultSet[layerPath].features = undefined;
@@ -152,6 +152,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
         // Process query on results data
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
+          this.layerApi.mapViewer.map,
           layer,
           queryType,
           longLatCoordinate,

@@ -134,7 +134,14 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
         this.#abortControllers[layerPath] = new AbortController();
 
         // Process query on results data
-        const promiseResult = AbstractLayerSet.queryLayerFeatures(layer, queryType, layerPath, false, this.#abortControllers[layerPath])
+        const promiseResult = AbstractLayerSet.queryLayerFeatures(
+          this.layerApi.mapViewer.map,
+          layer,
+          queryType,
+          layerPath,
+          false,
+          this.#abortControllers[layerPath]
+        )
           .then((arrayOfRecords) => {
             // Use the response to align arrayOfRecords fields with layerConfig fields
             if (arrayOfRecords.length) {

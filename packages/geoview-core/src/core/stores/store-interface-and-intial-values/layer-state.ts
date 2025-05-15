@@ -45,7 +45,7 @@ export interface ILayerState {
 
   actions: {
     deleteLayer: (layerPath: string) => void;
-    getExtentFromFeatures: (layerPath: string, featureIds: string[], outfield?: string) => Promise<Extent | undefined>;
+    getExtentFromFeatures: (layerPath: string, featureIds: string[], outfield?: string) => Promise<Extent>;
     queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
@@ -110,7 +110,14 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         get().layerState.setterActions.setLayerDeleteInProgress(false);
       },
 
-      getExtentFromFeatures: (layerPath: string, featureIds: string[], outfield?: string) => {
+      /**
+       * Gets the extent from the features
+       * @param {string} layerPath - The layer path of the layer with the features
+       * @param {string[]} featureIds - The feature ids to get the extent of
+       * @param {string?} outfield - The out field
+       * @returns {Promise<Extent>} The Promise of an Extent
+       */
+      getExtentFromFeatures: (layerPath: string, featureIds: string[], outfield?: string): Promise<Extent> => {
         // Redirect to event processor
         return LegendEventProcessor.getExtentFromFeatures(get().mapId, layerPath, featureIds, outfield);
       },

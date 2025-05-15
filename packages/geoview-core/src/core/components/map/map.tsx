@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, MutableRefObject, useMemo } from 'react';
+import { useEffect, useRef, useCallback, MutableRefObject, useMemo, useState } from 'react';
 
 import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -20,6 +20,7 @@ import { toJsonObject } from '@/api/config/types/config-types';
 
 type MapProps = {
   viewer: MapViewer;
+  mapHeight: string;
 };
 
 /**
@@ -32,10 +33,10 @@ export function Map(props: MapProps): JSX.Element {
   // Log
   logger.logTraceRender('components/map/map');
 
-  const { viewer } = props;
+  const { viewer, mapHeight } = props;
 
   const defaultTheme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(), []);
+  const sxClasses = useMemo(() => getSxClasses(mapHeight), [mapHeight]);
 
   // internal state - get ref to div element
   const mapElement = useRef<HTMLElement | undefined>();
@@ -49,6 +50,7 @@ export function Map(props: MapProps): JSX.Element {
   const mapStoreConfig = useGeoViewConfig();
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const isMapInitialized = useRef<boolean>(false);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   const initCGPVMap = useCallback((): void => {
     // Log
@@ -79,19 +81,23 @@ export function Map(props: MapProps): JSX.Element {
     });
   }, [mapId, mapStoreConfig?.corePackages, viewer]);
 
-  useEffect((): void => {
-    // Log
-    logger.logTraceUseEffect('map.initMap');
+  useEffect(() => {
+    logger.logTraceUseEffect('MAP - initCGPVMap');
 
-    // check if map is initialized and if not, initialize it
-    if (!isMapInitialized.current) {
-      // Init the map on first render
-      viewer.createMap(mapElement.current!);
+    if (mapElement.current && !isMapReady && !isMapInitialized.current) {
+      // Create map
+      viewer.createMap(mapElement.current);
+
+      // Listen for map ready event which includes proper extent
+      viewer.onMapReady(() => {
+        // Map is fully initialized with proper extent
+        setIsMapReady(true);
+      });
 
       initCGPVMap();
       isMapInitialized.current = true;
     }
-  }, [initCGPVMap, viewer]);
+  }, [viewer, initCGPVMap, isMapReady]);
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation

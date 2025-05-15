@@ -117,7 +117,7 @@
     "errorFile": "Seuls les fichiers geoJSON et CSV peuvent être utilisés",
     "errorServer": "La source du __param__ n'est pas valide",
     "errorNotLoaded": "Une erreur est survenue avec la couche '__param__'",
-    "errorImageLoad": "Une erreur est survenue avec l'image source pour la couche '__param__' au niveau de zoom __param__",
+    "errorImageLoad": "Une erreur est survenue avec l'image source pour la couche '__param__'",
     "errorProj": "ne prend pas en charge la projection cartographique actuelle",
     "fetchProgress": "Téléchargement des données... Téléchargé __param__ de __param__ enregistrements",
     "fetchDone": "Données téléchargées - __param__ enregistrements",

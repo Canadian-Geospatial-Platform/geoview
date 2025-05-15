@@ -117,7 +117,7 @@
     "errorFile": "Only geoJSON and CSV files can be used",
     "errorServer": "The __param__ source is not valid",
     "errorNotLoaded": "An error occurred with the layer '__param__'",
-    "errorImageLoad": "An error occured with source image for layer '__param__' at zoom level __param__",
+    "errorImageLoad": "An error occured with source image for layer '__param__'",
     "errorProj": "does not support current map projection",
     "fetchProgress": "Fetching data... Retrieved __param__ of __param__ records",
     "fetchDone": "Data fetched - __param__ records",

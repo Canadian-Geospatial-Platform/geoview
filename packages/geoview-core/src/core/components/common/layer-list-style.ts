@@ -32,7 +32,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       minWidth: '2rem',
     },
     '& .MuiListItemText-root': {
-      '>span': {
+      '> span': {
         fontSize: theme.palette.geoViewFontSize.default,
       },
       '> p': {
@@ -59,6 +59,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       paddingRight: '10px',
+      display: 'block',
     },
     '>div': {
       display: 'flex',

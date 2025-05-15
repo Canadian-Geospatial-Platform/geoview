@@ -1,5 +1,5 @@
 import BaseLayer from 'ol/layer/Base';
-import { Feature } from 'ol';
+import { Map as OLMap, Feature } from 'ol';
 import { FeatureLike } from 'ol/Feature';
 import { Geometry } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
@@ -21,6 +21,7 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { getExtentUnion, validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
+import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -107,16 +108,17 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   ): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
-    const features = this.getOLSource()!.getFeatures();
+    const features = this.getOLSource().getFeatures();
     return Promise.resolve(this.formatFeatureInfoResult(features, layerConfig));
   }
 
   /**
    * Overrides the return of feature information at a given pixel location.
+   * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
    * @param {Pixel} location - The pixel coordinate that will be used by the query.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[]> {
+  protected override getFeatureInfoAtPixel(map: OLMap, location: Pixel): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer source
     const layerSource = this.getOLSource();
 
@@ -128,7 +130,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     };
 
     // Query the map using the layer filter and a hit tolerance
-    const features = this.getMapViewer().map.getFeaturesAtPixel(location, {
+    const features = map.getFeaturesAtPixel(location, {
       hitTolerance: this.getHitTolerance(),
       layerFilter,
     }) as Feature[];
@@ -139,12 +141,14 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the return of feature information at a given coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
    * @param {Coordinate} location - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtCoordinate(
+    map: OLMap,
     location: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
@@ -152,17 +156,19 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
     // Redirect to getFeatureInfoAtPixel
-    return this.getFeatureInfoAtPixel(this.getMapViewer().map.getPixelFromCoordinate(location));
+    return this.getFeatureInfoAtPixel(map, map.getPixelFromCoordinate(location));
   }
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtLongLat(
+    map: OLMap,
     lnglat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
@@ -170,10 +176,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
     // Convert Coordinates LngLat to map projection
-    const projCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
+    const projCoordinate = Projection.transformFromLonLat(lnglat, map.getView().getProjection());
 
     // Redirect to getFeatureInfoAtPixel
-    return this.getFeatureInfoAtPixel(this.getMapViewer().map.getPixelFromCoordinate(projCoordinate));
+    return this.getFeatureInfoAtPixel(map, map.getPixelFromCoordinate(projCoordinate));
   }
 
   /**
@@ -256,29 +262,39 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Gets the extent of an array of features.
    * @param {string[]} objectIds - The uids of the features to calculate the extent from.
-   * @returns {Promise<Extent | undefined>} The extent of the features, if available.
+   * @param {OLProjection} outProjection - The output projection for the extent.
+   * @param {string?} outfield - ID field to return for services that require a value in outfields.
+   * @returns {Promise<Extent>} The extent of the features, if available.
    */
-  override getExtentFromFeatures(objectIds: string[]): Promise<Extent | undefined> {
-    // Get array of features
-    const requestedFeatures = objectIds.map((id) => this.getOLLayer().getSource()?.getFeatureById(id));
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
+    // Get the feature source
+    const source = this.getOLLayer().getSource();
 
-    if (requestedFeatures) {
-      // Determine max extent from features
-      let calculatedExtent: Extent | undefined;
-      requestedFeatures.forEach((feature) => {
-        if ((feature as unknown as Feature)?.getGeometry()) {
-          const extent = (feature as unknown as Feature).getGeometry()?.getExtent();
-          if (extent) {
-            // If calculatedExtent has not been defined, set it to extent
-            if (!calculatedExtent) calculatedExtent = extent;
-            else getExtentUnion(calculatedExtent, extent);
-          }
+    // Get array of features and only keep the ones we could find by id
+    const requestedFeatures = objectIds.map((id) => source?.getFeatureById(id)).filter((feature) => !!feature);
+
+    // Determine max extent from features
+    let calculatedExtent: Extent | undefined;
+    requestedFeatures.forEach((feature) => {
+      // Get the geometry
+      const geom = feature.getGeometry();
+      if (geom) {
+        // Get the extent
+        const extent = geom.getExtent();
+        if (extent) {
+          // If calculatedExtent has not been defined, set it to extent
+          if (!calculatedExtent) calculatedExtent = extent;
+          else getExtentUnion(calculatedExtent, extent);
         }
-      });
+      }
+    });
 
-      return Promise.resolve(calculatedExtent);
-    }
-    return Promise.resolve(undefined);
+    // If no calculated extent
+    if (!calculatedExtent) throw new NoExtentError(this.getLayerPath());
+
+    // Resolve
+    return Promise.resolve(calculatedExtent);
   }
 
   /**

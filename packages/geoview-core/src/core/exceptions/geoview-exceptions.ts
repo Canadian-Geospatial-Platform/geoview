@@ -103,7 +103,7 @@ export class MapViewerNotFoundError extends GeoViewError {
  */
 export class GeoViewStoreOnMapNotFoundError extends GeoViewError {
   /**
-   * Creates an instance of MapViewerNotFoundError.
+   * Creates an instance of GeoViewStoreOnMapNotFoundError.
    * @param {string} mapId - The unique identifier of the map on which toe GeoView Store was not found.
    */
   constructor(mapId: string) {
@@ -114,6 +114,26 @@ export class GeoViewStoreOnMapNotFoundError extends GeoViewError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, GeoViewStoreOnMapNotFoundError.prototype);
+  }
+}
+
+/**
+ * Error thrown when GeoView map on a specific map ID already exist.
+ * @extends {GeoViewError}
+ */
+export class GeoViewMapIdAlreadyExist extends GeoViewError {
+  /**
+   * Creates an instance of GeoViewMapIdAlreadyExist.
+   * @param {string} mapId - The unique identifier of the map.
+   */
+  constructor(mapId: string) {
+    super(`GeoView Map ID ${mapId} alreday exist`);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'GeoViewMapIdAlreadyExist';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, GeoViewMapIdAlreadyExist.prototype);
   }
 }
 
@@ -206,7 +226,6 @@ export class CoreBasemapCreationError extends GeoViewError {
 export class NoBoundsError extends GeoViewError {
   /**
    * Creates an instance of NoBoundsError.
-   *
    * @param {string} layerPath - The path or identifier of the layer that caused the error.
    */
   constructor(layerPath: string) {
@@ -217,5 +236,27 @@ export class NoBoundsError extends GeoViewError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, NoBoundsError.prototype);
+  }
+}
+
+/**
+ * Error class representing the absence of an extent.
+ * This is thrown when a geographic operation expects a bounding extent
+ * (e.g., from a layer, source, or feature) but none is found or provided.
+ * @extends {GeoViewError}
+ */
+export class NoExtentError extends GeoViewError {
+  /**
+   * Creates an instance of NoExtentError.
+   * @param {Extent} layerPath - The layer path for which we tried to get an Extent.
+   */
+  constructor(layerPath: string) {
+    super('No extent', [layerPath]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'NoExtentError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, NoExtentError.prototype);
   }
 }

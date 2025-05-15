@@ -224,7 +224,7 @@ export function Shell(props: ShellProps): JSX.Element {
             {mapLoaded && <AppBar api={mapViewer.appBarApi} />}
             <MapInfo />
             <Box sx={sxClasses.mapContainer}>
-              <Map viewer={mapViewer} />
+              <Map viewer={mapViewer} mapHeight={mapShellContainerRef.current?.style.height || '100px'} />
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
             <Snackbar

@@ -446,10 +446,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
       ];
       const newProjection = projectionCode as TypeValidMapProjectionCodes;
 
-      // If maxExtent was provided, apply
+      // If maxExtent was provided and native projection, apply
       // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
       // GV We may have to keep extent as array for configuration file but, technically, user does not change projection often.
-      const mapMaxExtent = this.getGeoViewMapConfig(mapId)?.map.viewSettings.maxExtent ? CV_MAP_EXTENTS[newProjection] : undefined;
+      // GV A wider LCC extent like [-125, 30, -60, 89] (minus -125) will introduce distortion on larger screen...
+      // GV It is why we apply the max extent only on native projection
+      const viewSettings = this.getGeoViewMapConfig(mapId)?.map.viewSettings;
+      const mapMaxExtent =
+        viewSettings!.maxExtent && newProjection === viewSettings!.projection ? CV_MAP_EXTENTS[newProjection] : undefined;
 
       // create new view settings
       const newView: TypeViewSettings = {
@@ -499,6 +503,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // When the map projection is changed, all layer bounds must be recalculated
       this.getMapViewer(mapId).layer.recalculateBoundsAll();
+
+      // Remove layer higlight if present to avoid bad reprojection
+      const highlightName = LegendEventProcessor.getLayerPanelState(mapId, 'highlightedLayer') as string;
+      if (highlightName !== '') {
+        MapEventProcessor.changeOrRemoveLayerHighlight(mapId, highlightName, highlightName);
+      }
 
       // Reset the map object of overview map control
       MapEventProcessor.setOverviewMapVisibility(mapId, true);
@@ -687,6 +697,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static changeOrRemoveLayerHighlight(mapId: string, layerPath: string, highlightedLayerPath: string): string {
     // If layer is currently highlighted layer, remove highlight
     if (highlightedLayerPath === layerPath) {
+      LegendEventProcessor.setHighlightLayer(mapId, '');
       MapEventProcessor.getMapViewerLayerAPI(mapId).removeHighlightLayer();
       return '';
     }
@@ -995,7 +1006,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (homeView!.extent) {
       const lnglatExtent = homeView!.extent as Extent;
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
-      extent = isExtentLngLat(extent)
+      extent = isExtentLngLat(lnglatExtent)
         ? Projection.transformExtentFromProj(
             lnglatExtent,
             Projection.getProjectionLngLat(),
@@ -1016,6 +1027,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         Projection.getProjectionLngLat(),
         Projection.getProjectionFromString(`EPSG:${currProjection}`)
       );
+
     return this.zoomToExtent(mapId, extent, options);
   }
 
