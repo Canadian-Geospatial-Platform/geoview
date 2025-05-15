@@ -22,6 +22,7 @@ import { getExtentUnion, validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
+import { formatError } from '@/core/exceptions/core-exceptions';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -224,7 +225,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       layerConfig.filterEquation = filterEquation;
     } catch (error: unknown) {
       // Failed
-      throw new LayerInvalidLayerFilterError(layerConfig.layerPath, filterValueToUse, this.getLayerFilter(), error as Error);
+      throw new LayerInvalidLayerFilterError(layerConfig.layerPath, filterValueToUse, this.getLayerFilter(), formatError(error));
     }
 
     olLayer.changed();

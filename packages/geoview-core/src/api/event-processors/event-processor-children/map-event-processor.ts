@@ -485,11 +485,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           this.getMapViewerLayerAPI(mapId).removeLayerUsingPath(layer.getLayerPath());
 
           // Log
-          this.getMapViewer(mapId).notifications.showWarning(
-            `The vector tile ${layer.getLayerName()} had to be removed due to a projection conflict.`,
-            [],
-            true
-          );
+          this.getMapViewer(mapId).notifications.showWarning('warning.layer.vectorTileRemoved', [layer.getLayerName()], true);
         });
 
       // set new view

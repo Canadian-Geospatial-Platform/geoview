@@ -6,6 +6,7 @@ import { generateId } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { TypeDisplayLanguage, GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to add geoCore layer to the map
@@ -71,9 +72,9 @@ export class GeoCore {
       if (!tempLayerConfig.geoviewLayerName) tempLayerConfig.geoviewLayerName = response.layers[0].geoviewLayerName;
 
       const config = new Config(this.#displayLanguage);
-      const newLayerConfig = config.getValidMapConfig([tempLayerConfig], (error) => {
+      const newLayerConfig = config.getValidMapConfig([tempLayerConfig], (errorKey: string, params: string[]) => {
         // When an error happens, raise the exception, we handle it higher in this case
-        throw error;
+        throw new GeoViewError(errorKey, params);
       });
       return newLayerConfig as TypeGeoviewLayerConfig[];
     }
