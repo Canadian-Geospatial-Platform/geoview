@@ -127,7 +127,7 @@
   "components": ["overview-map"],
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details"]
+      "core": ["legend", "layers", "details", "time-slider"]
     }
   },
   "corePackages": [],
