@@ -100,9 +100,12 @@ export class Notifications {
    * @private
    */
   #showSnackbarMessage(type: SnackbarType, messageKey: string, params: unknown[], button?: ISnackbarButton): void {
+    // Get the localized message
+    const message = getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapId), messageKey, params);
+
     const snackbar: SnackBarOpenEvent = {
       snackbarType: type,
-      message: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapId), messageKey, params),
+      message,
       button,
     };
     // Emit

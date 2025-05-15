@@ -169,7 +169,8 @@ export abstract class Plugin {
 
               // Log
               logger.logError(errorMessage);
-              api.getMapViewer(mapId).notifications.showError(errorMessage);
+              // Don't show error message as it can contain non-translated elements via Ajv error messages, only log for now
+              // api.getMapViewer(mapId).notifications.showError(errorMessage);
             }
           }
         }
