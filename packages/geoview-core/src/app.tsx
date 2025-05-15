@@ -194,7 +194,7 @@ async function renderMap(mapElement: Element): Promise<void> {
 
   // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
   return new Promise<void>((resolve) => {
-    reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} onMapViewerInit={(): void => resolve()} />);
+    reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} lang={lang} onMapViewerInit={(): void => resolve()} />);
   });
 }
 

@@ -55,11 +55,11 @@ export default i18n;
 /**
  * Creates a new i18n instance with specified language
  * @function
- * @param {('en'|'fr')} language - The language to initialize the instance with
+ * @param {TypeDisplayLanguage} language - The language to initialize the instance with
  * @returns {Promise<i18n>} A promise that resolves to the new i18n instance
  * @throws {Error} If initialization fails
  */
-export const createI18nInstance = async (language: TypeDisplayLanguage) => {
+export const createI18nInstance = async (language: TypeDisplayLanguage): Promise<typeof i18n> => {
   const i18nInstance = i18n.createInstance();
 
   await i18nInstance

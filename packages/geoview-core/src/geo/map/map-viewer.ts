@@ -911,6 +911,14 @@ export class MapViewer {
   }
 
   /**
+   * Gets the i18nInstance for localization.
+   * @returns {i18n[]} The i18n instance
+   */
+  getI18nInstance(): i18n {
+    return this.#i18nInstance;
+  }
+
+  /**
    * set fullscreen / exit fullscreen
    *
    * @param status - Toggle fullscreen or exit fullscreen status

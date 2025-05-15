@@ -82,18 +82,20 @@ export function Map(props: MapProps): JSX.Element {
   }, [mapId, mapStoreConfig?.corePackages, viewer]);
 
   useEffect(() => {
+    logger.logTraceUseEffect('MAP - initCGPVMap');
+
     if (mapElement.current && !isMapReady && !isMapInitialized.current) {
       // Create map
       viewer.createMap(mapElement.current);
-
-      initCGPVMap();
-      isMapInitialized.current = true;
 
       // Listen for map ready event which includes proper extent
       viewer.onMapReady(() => {
         // Map is fully initialized with proper extent
         setIsMapReady(true);
       });
+
+      initCGPVMap();
+      isMapInitialized.current = true;
     }
   }, [viewer, initCGPVMap, isMapReady]);
 
