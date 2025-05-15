@@ -161,7 +161,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At Long Lat from.
+   * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} abortController - The optional abort controller.
