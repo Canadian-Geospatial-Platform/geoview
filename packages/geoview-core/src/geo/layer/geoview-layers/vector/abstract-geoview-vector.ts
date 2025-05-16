@@ -266,7 +266,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Prepare a setInterval to emitMessage every couple seconds while the promise is ongoing
     const timeInterval = setInterval(() => {
       // Emit message about the fetching being slow
-      this.emitMessage('layers.slowFetch', [this.geoviewLayerName || '...']);
+      this.emitMessage('warning.layer.slowFetch', [this.geoviewLayerName]);
     }, 15000); // Log every 15 seconds
 
     // Create an all promise for all of them and hook when the promise resolves/rejects

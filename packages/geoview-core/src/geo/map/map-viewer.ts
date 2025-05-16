@@ -322,25 +322,28 @@ export class MapViewer {
     // TODO: refactor - remove the cast as MapConfigLayerEntry[] everywhere
     this.layer
       .loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig as MapConfigLayerEntry[])
+      .then(() => {
+        // The layers are ready to be processed and the GeoCore layers were validated
+
+        // check if geometries are provided from url
+        this.loadGeometries();
+
+        // Emit map init
+        this.#mapInit = true;
+        this.#emitMapInit();
+
+        MapEventProcessor.resetBasemap(this.mapId).catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed(' MapEventProcessor.resetBasemap in map-viewer', error);
+        });
+
+        // Start checking for when the map will be ready
+        this.#checkMapReady();
+      })
       .catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('loadListOfGeoviewLayer in initMap in MapViewer', error);
       });
-
-    // check if geometries are provided from url
-    this.loadGeometries();
-
-    // Emit map init
-    this.#mapInit = true;
-    this.#emitMapInit();
-
-    MapEventProcessor.resetBasemap(this.mapId).catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed(' MapEventProcessor.resetBasemap in map-viewer', error);
-    });
-
-    // Start checking for when the map will be ready
-    this.#checkMapReady();
   }
 
   /**

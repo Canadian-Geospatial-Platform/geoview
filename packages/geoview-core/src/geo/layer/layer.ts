@@ -90,6 +90,12 @@ export type GeoViewLayerAddedResult = {
  * @class LayerApi
  */
 export class LayerApi {
+  // Maximum time duration to wait when registering a layer for the time slider
+  static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
+
+  // Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up
+  static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
+
   /** used to reference the map viewer */
   mapViewer: MapViewer;
 
@@ -152,12 +158,6 @@ export class LayerApi {
 
   // Keep all callback delegates references
   #onLayerItemVisibilityToggledHandlers: LayerItemVisibilityToggledDelegate[] = [];
-
-  // Maximum time duration to wait when registering a layer for the time slider
-  static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
-
-  // Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up
-  static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
@@ -410,6 +410,7 @@ export class LayerApi {
       ? MapEventProcessor.getMapOrderedLayerInfo(this.getMapId())
       : [];
     const promisedLayers = await Promise.allSettled(promisesOfGeoCoreGeoviewLayers);
+
     // For each layers in the fulfilled promises only
     promisedLayers.forEach((promise) => {
       // If fullfilled

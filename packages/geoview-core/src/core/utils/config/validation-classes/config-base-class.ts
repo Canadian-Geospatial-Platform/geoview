@@ -234,8 +234,8 @@ export abstract class ConfigBaseClass {
     // GV For quick debug, uncomment the line
     // if (newLayerStatus === 'error') debugger;
 
-    // Check if we're not accidentally trying to set a status less than the current one
-    if (!this.isGreaterThanOrEqualTo(newLayerStatus)) {
+    // Check if we're not accidentally trying to set a status less than the current one (or setting loading, it's allowed to jump between loading and loaded)
+    if (!this.isGreaterThanOrEqualTo(newLayerStatus) || newLayerStatus === 'loading') {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
 
