@@ -38,8 +38,8 @@ import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
-import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
+import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
+import { LayerDataAccessPathMandatoryError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -55,6 +55,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   // The default hit tolerance the query should be using
   static override DEFAULT_HIT_TOLERANCE: number = 7;
+
+  // The default filter when all should be included
+  static DEFAULT_FILTER_1EQUALS1: string = '(1=1)';
 
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
@@ -85,13 +88,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
       source: olSource,
       properties: { layerConfig },
     };
-
-    // Set the image spatial reference to the service source - performance is better when open layers does the conversion
-    // Older versions of ArcGIS Server are not properly converted, so this is only used for version 10.8+
-    const version = layerConfig.getLayerMetadata()?.currentVersion as number;
-    const sourceSr =
-      layerConfig.getLayerMetadata()?.sourceSpatialReference?.latestWkid || layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;
-    if (sourceSr && version && version >= 10.8) imageLayerOptions.source?.updateParams({ imageSR: sourceSr });
 
     // Init the layer options with initial settings
     AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
@@ -520,12 +516,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const styleSettings = layerConfig.getFirstStyleSettings()!;
 
       if (styleSettings.type === 'simple') {
-        return layerFilter || '(1=1)';
+        return layerFilter || GVEsriDynamic.DEFAULT_FILTER_1EQUALS1;
       }
       if (styleSettings.type === 'uniqueValue') {
         setAllUndefinedVisibilityFlagsToYes(styleSettings);
         if (featuresAreAllVisible(styleSettings.info as { visible: boolean }[]))
-          return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
+          return `${GVEsriDynamic.DEFAULT_FILTER_1EQUALS1}${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         // This section of code optimize the query to reduce it at it shortest expression.
         const fieldOfTheSameValue = GVEsriDynamic.#countFieldOfTheSameValue(styleSettings);
@@ -539,7 +535,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       if (styleSettings.type === 'classBreaks') {
         setAllUndefinedVisibilityFlagsToYes(styleSettings);
         if (featuresAreAllVisible(styleSettings.info as { visible: boolean }[]))
-          return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
+          return `${GVEsriDynamic.DEFAULT_FILTER_1EQUALS1}${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         const filterArray: string[] = [];
         let visibleWhenGreatherThisIndex = -1;
@@ -677,7 +673,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         return `${filterValue}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }
     }
-    return '(1=1)';
+    return GVEsriDynamic.DEFAULT_FILTER_1EQUALS1;
   }
 
   /**
@@ -918,11 +914,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // If first time
     if (firstTime) {
-      // If there's a filter that should be applied
-      if (this.getLayerConfig().layerFilter) {
-        // Apply view filter immediately
-        this.applyViewFilter(this.getLayerConfig().layerFilter!);
-      }
+      // Apply view filter immediately
+      this.applyViewFilter(this.getLayerConfig().layerFilter);
     }
   }
 
@@ -932,36 +925,65 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
    * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
-   * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(filter: string, combineLegendFilter: boolean = true): void {
+  applyViewFilter(filter: string | undefined = ''): void {
     // Log
     logger.logTraceCore('GV-ESRI-DYNAMIC - applyViewFilter', this.getLayerPath());
 
     const layerConfig = this.getLayerConfig();
     const olLayer = this.getOLLayer();
 
-    // TODO: Check - applyViewFilter implementation? Read the GV notes here
-    // GV This code section differs from example GVEsriImage and GVWMS with the way the source is checked in the other classes implementation
-    // GV Also, in this implementation, the layerConfig.layerFilter is updated with the timmed filter, not in the other classes implementations
-    // GV ..which furthermore is actually only set in the `if (combineLegendFilter)` clause in the other classes implementations
-    let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
-    layerConfig.legendFilterIsOff = !combineLegendFilter;
-    layerConfig.layerFilter = filterValueToUse;
-    if (combineLegendFilter) filterValueToUse = this.getViewFilter();
-
     // Parse the filter value to use
-    filterValueToUse = parseDateTimeValuesEsriDynamic(filterValueToUse, this.getExternalFragmentsOrder());
+    let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
 
-    // Raster layer queries do not accept any layerDefs
-    const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
-    olLayer?.getSource()?.updateParams({ layerDefs });
-    olLayer?.changed();
+    try {
+      // Update the layer config information
+      layerConfig.legendFilterIsOff = false;
+      layerConfig.layerFilter = filterValueToUse;
+      filterValueToUse = this.getViewFilter();
 
-    // Emit event
-    this.emitLayerFilterApplied({
-      filter: filterValueToUse,
-    });
+      // Parse the filter value to use
+      filterValueToUse = parseDateTimeValuesEsriDynamic(filterValueToUse, this.getExternalFragmentsOrder());
+
+      // Create the source parameter to update
+      const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
+
+      // Get the current filter
+      const currentFilter = olLayer.getSource()?.getParams().layerDefs;
+
+      // Define what is considered the default filter (e.g., "1=1")
+      const isDefaultFilter = filterValueToUse === GVEsriDynamic.DEFAULT_FILTER_1EQUALS1;
+
+      // Define what is a no operation
+      const isNewFilterEffectivelyNoop = isDefaultFilter && !currentFilter;
+
+      // Check whether the current filter is different from the new one
+      const filterChanged = layerDefs !== currentFilter;
+
+      // Determine if we should apply or reset filter
+      const shouldUpdateFilter = (filterChanged && !isNewFilterEffectivelyNoop) || (!!currentFilter && isDefaultFilter);
+
+      // If should update the filtering
+      if (shouldUpdateFilter) {
+        // Update the source params
+        olLayer.getSource()?.updateParams({ layerDefs });
+        olLayer.changed();
+
+        // Emit event
+        this.emitLayerFilterApplied({
+          filter: filterValueToUse,
+        });
+      }
+    } catch (error: unknown) {
+      // Failed
+      throw new LayerInvalidLayerFilterError(
+        layerConfig.layerPath,
+        layerConfig.getLayerName(),
+        filterValueToUse,
+        this.getLayerFilter(),
+        formatError(error)
+      );
+    }
   }
 
   /**
