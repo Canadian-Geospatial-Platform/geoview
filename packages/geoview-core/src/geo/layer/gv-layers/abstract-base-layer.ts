@@ -104,7 +104,7 @@ export abstract class AbstractBaseLayer {
    * Gets the layer name or fallsback on the layer name in the layer configuration.
    * @returns The layer name
    */
-  getLayerName(): string | undefined {
+  getLayerName(): string {
     return this.#layerName || this.getLayerConfig().getLayerName();
   }
 

@@ -2,7 +2,7 @@ import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 
-import { delay, generateId, whenThisThen } from '@/core/utils/utilities';
+import { doUntil, generateId, whenThisThen } from '@/core/utils/utilities';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -68,10 +68,10 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
  */
 export abstract class AbstractGeoViewLayer {
   /** The default hit tolerance the query should be using */
-  static DEFAULT_HIT_TOLERANCE: number = 4;
+  static readonly DEFAULT_HIT_TOLERANCE: number = 4;
 
   /** The default waiting time before showing a warning about the metadata taking a long time to get processed */
-  static DEFAULT_WAIT_PERIOD_METADATA_WARNING: number = 10 * 1000; // 10 seconds
+  static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number = 10 * 1000; // 10 seconds
 
   /** The default hit tolerance */
   hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
@@ -217,14 +217,16 @@ export abstract class AbstractGeoViewLayer {
     logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
 
     // Try to get a key for logging timings
-    let logTimingsKey;
-    if (this.listOfLayerEntryConfig.length > 0) logTimingsKey = `${this.geoviewLayerId} | ${this.listOfLayerEntryConfig[0].layerPath}`;
+    const logTimingsKey = this.geoviewLayerId;
 
     // Log
-    if (logTimingsKey) logger.logMarkerStart(logTimingsKey);
+    logger.logMarkerStart(logTimingsKey);
 
     // Fetch and set the service metadata
     await this.#fetchAndSetServiceMetadata();
+
+    // Log the time it took thus far
+    logger.logMarkerCheck(logTimingsKey, 'to fetch the service metadata');
 
     // If layers, validate the metadata
     if (this.listOfLayerEntryConfig.length) {
@@ -237,10 +239,10 @@ export abstract class AbstractGeoViewLayer {
 
       // Process the layer metadata for each layer entry
       await this.#processListOfLayerMetadata(this.listOfLayerEntryConfig);
-    }
 
-    // Log the time it took thus far
-    if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to get additional service definition');
+      // Log the time it took thus far
+      logger.logMarkerCheck(logTimingsKey, `to process the (${this.listOfLayerEntryConfig.length}) layer metadata(s)`);
+    }
 
     // Process list of layers and await
     const layer = await this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
@@ -249,7 +251,7 @@ export abstract class AbstractGeoViewLayer {
     this.olRootLayer = layer?.getOLLayer();
 
     // Log the time it took thus far
-    if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
+    logger.logMarkerCheck(logTimingsKey, 'to create the layers');
   }
 
   /**
@@ -273,7 +275,7 @@ export abstract class AbstractGeoViewLayer {
         await this.onFetchAndSetServiceMetadata();
       } else {
         // TODO: Check - Is this else really happening? Do we need the if (this.metadataAccessPath) at all?
-        logger.logDebug('WOW IT HAPPENED! A LAYER HAD NO METADATA ACCESS PATH!');
+        logger.logDebug(`WOW IT HAPPENED! '${this.geoviewLayerId}' HAD NO METADATA ACCESS PATH!`);
       }
     } catch (error: unknown) {
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)
@@ -837,19 +839,17 @@ export abstract class AbstractGeoViewLayer {
    * @private
    */
   #startMetadataFetchWatcher(): void {
-    // Start a delay
-    delay(AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING)
-      .then(() => {
-        // Check if the layer config was processed, if not, emit a message about the delay
-        if (!ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) {
-          // Emit message
-          this.emitMessage('warning.layer.metadataTakingLongTime', [this.geoviewLayerName || this.geoviewLayerId]);
-        }
-      })
-      .catch((error) => {
-        // Log error (shouldn't happen really)
-        logger.logPromiseFailed('Failed in the check metadata inside delay', error);
-      });
+    // Do the following thing until we stop it
+    doUntil(() => {
+      // Check if the layer configs were all at least processed, we're done
+      if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) return true;
+
+      // Emit message
+      this.emitMessage('warning.layer.metadataTakingLongTime', [this.geoviewLayerName || this.geoviewLayerId]);
+
+      // Continue loop
+      return false;
+    }, AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING);
   }
 
   // #region EVENTS

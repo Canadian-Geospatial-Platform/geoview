@@ -60,6 +60,7 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -1150,8 +1151,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
         const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
         const filter = filters.join(' and ');
 
-        // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
-        geoviewLayer.applyViewFilter(filter);
+        // If EsriDynamic
+        if (geoviewLayer instanceof GVEsriDynamic) {
+          // Force the layer to applyfilter so it refreshes its layerDefs
+          geoviewLayer.applyViewFilter(filter);
+        } else if (geoviewLayer instanceof AbstractGVVector) {
+          // Force the layer to applyfilter so it refreshes its layer config filter
+          geoviewLayer.applyViewFilter(filter);
+        } else {
+          // Not supported
+          throw new NotSupportedError('Layer type not supported when trying to perform an applyLayerFilters.');
+        }
       }
     }
   }

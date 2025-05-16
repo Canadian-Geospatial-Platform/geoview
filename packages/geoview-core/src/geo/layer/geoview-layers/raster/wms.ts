@@ -354,7 +354,14 @@ export class WMS extends AbstractGeoViewRaster {
       sourceOptions.projection = `EPSG:${source.projection}`;
     }
 
-    return new ImageWMS(sourceOptions);
+    // Create the source
+    const olSource = new ImageWMS(sourceOptions);
+
+    // Apply the filter on the source right away, before the first load
+    GVWMS.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.layerFilter);
+
+    // Return the source
+    return olSource;
   }
 
   /**
