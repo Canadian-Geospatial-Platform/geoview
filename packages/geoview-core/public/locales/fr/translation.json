@@ -282,6 +282,7 @@
   "warning": {
     "layer": {
       "slowFetch": "Le téléchargement de '__param__' prend plus de temps que prévu.",
+      "slowRender": "La couche '__param__' est lente à se dessiner sur la carte, svp patientez...",
       "basemapTakingLongTime": "La couche de base prend plus de temps que prévu à répondre...",
       "metadataTakingLongTime": "Les métadonnées pour la couche '__param__' prennent plus de temps que prévu à récupérer...",
       "vectorTileRemoved": "La tuile vectorielle '__param__' a dû être retirée en raison d'un conflit de projection."

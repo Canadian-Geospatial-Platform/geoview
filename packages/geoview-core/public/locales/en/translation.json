@@ -283,6 +283,7 @@
   "warning": {
     "layer": {
       "slowFetch": "Downloading '__param__' is taking longer then expected...",
+      "slowRender": "The layer '__param__' is slow the render on the map, please be patient...",
       "basemapTakingLongTime": "The basemap is taking a long time to respond...",
       "metadataTakingLongTime": "The metadata for the layer '__param__' is taking longer than expected to fetch...",
       "vectorTileRemoved": "The vector tile __param__ had to be removed due to a projection conflict."

@@ -12,7 +12,7 @@ import { applyStyle } from 'ol-mapbox-style';
 
 import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
-import { delay, getLocalizedMessage } from '@/core/utils/utilities';
+import { doUntil, getLocalizedMessage } from '@/core/utils/utilities';
 import { TypeBasemapProps, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -363,22 +363,17 @@ export class BasemapApi {
    * @private
    */
   #startBasemapCreationWatcher(): void {
-    // Start a delay
-    delay(BasemapApi.DEFAULT_WAIT_PERIOD_BASEMAP_WARNING)
-      .then(() => {
-        // Check if the basemap has terminated being created
-        if (!this.created) {
-          // Create the error
-          const error = new BasemapTakingLongTimeError();
+    // Do the following thing until we stop it
+    doUntil(() => {
+      // If the basemap has been created
+      if (this.created) return true;
 
-          // Emit about the error
-          this.#emitBasemapError({ error });
-        }
-      })
-      .catch((error: unknown) => {
-        // Log error (shouldn't happen really)
-        logger.logPromiseFailed('Failed in the check basemap creation inside delay', error);
-      });
+      // Emit about the error
+      this.#emitBasemapError({ error: new BasemapTakingLongTimeError() });
+
+      // Continue loop
+      return false;
+    }, BasemapApi.DEFAULT_WAIT_PERIOD_BASEMAP_WARNING);
   }
 
   /**
