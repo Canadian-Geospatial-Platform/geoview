@@ -11,11 +11,10 @@ import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 export declare class GVOGCFeature extends AbstractGVVector {
     /**
      * Constructs a GVOGCFeature layer to manage an OpenLayer layer.
-     * @param {string} mapId - The map id
      * @param {VectorSource} olSource - The OpenLayer source.
      * @param {OgcFeatureLayerEntryConfig} layerConfig - The layer configuration.
      */
-    constructor(mapId: string, olSource: VectorSource, layerConfig: OgcFeatureLayerEntryConfig);
+    constructor(olSource: VectorSource, layerConfig: OgcFeatureLayerEntryConfig);
     /**
      * Overrides the get of the layer configuration associated with the layer.
      * @returns {OgcFeatureLayerEntryConfig} The layer configuration or undefined if not found.

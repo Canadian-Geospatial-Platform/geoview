@@ -1,4 +1,4 @@
-import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceGeoJsonInitialConfig } from '@/api/config/types/map-schema-types';
+import { TypeLayerStyleConfig, TypeLayerEntryType, TypeBaseVectorSourceInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/geojson-config';
 /**
@@ -6,7 +6,7 @@ import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/ve
  */
 export declare class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     /** Source settings to apply to the GeoView image layer source at creation time. */
-    source: TypeSourceGeoJsonInitialConfig;
+    source: TypeBaseVectorSourceInitialConfig;
     /** Style to apply to the raster layer. */
     layerStyle?: TypeLayerStyleConfig;
     /**

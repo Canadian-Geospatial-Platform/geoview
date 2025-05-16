@@ -1,4 +1,5 @@
 import BaseLayer from 'ol/layer/Base';
+import { Projection as OLProjection } from 'ol/proj';
 import { Extent, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -10,10 +11,9 @@ export declare abstract class AbstractBaseLayer {
     protected olLayer: BaseLayer;
     /**
      * Constructs a GeoView base layer to manage an OpenLayer layer, including group layers.
-     * @param {string} mapId - The map id
      * @param {ConfigBaseClass} layerConfig - The layer configuration.
      */
-    protected constructor(mapId: string, layerConfig: ConfigBaseClass);
+    protected constructor(layerConfig: ConfigBaseClass);
     /**
      * Must override method to get the layer attributions
      * @returns {string[]} The layer attributions
@@ -23,11 +23,6 @@ export declare abstract class AbstractBaseLayer {
      * A quick getter to help identify which layer class the current instance is coming from.
      */
     getClassName(): string;
-    /**
-     * Gets the Map Id
-     * @returns The Map id
-     */
-    getMapId(): string;
     /**
      * Gets the layer configuration associated with the layer.
      * @returns {ConfigBaseClass} The layer configuration
@@ -84,10 +79,11 @@ export declare abstract class AbstractBaseLayer {
     /**
      * Overridable function that gets the extent of an array of features.
      * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+     * @param {OLProjection} outProjection - The output projection for the extent.
      * @param {string} outfield - ID field to return for services that require a value in outfields.
-     * @returns {Promise<Extent | undefined>} The extent of the features, if available
+     * @returns {Promise<Extent>} The extent of the features, if available
      */
-    getExtentFromFeatures(objectIds: string[], outfield?: string): Promise<Extent | undefined>;
+    getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
      * Gets the opacity of the layer (between 0 and 1).
      * @returns {number} The opacity of the layer.

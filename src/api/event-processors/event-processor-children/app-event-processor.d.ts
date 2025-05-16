@@ -30,6 +30,12 @@ export declare class AppEventProcessor extends AbstractEventProcessor {
      */
     static getDisplayTheme(mapId: string): TypeDisplayTheme;
     /**
+     * Shortcut to get the display theme for a given map id
+     * @param {string} mapId - The mapId
+     * @returns {TypeDisplayTheme} The display theme.
+     */
+    static getShowUnsymbolizedFeatures(mapId: string): boolean;
+    /**
      * Adds a snackbar message (optional add to notification).
      * @param {SnackbarType} type - The type of message.
      * @param {string} message - The message.

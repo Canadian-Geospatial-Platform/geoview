@@ -1,6 +1,6 @@
 import { TypeTabs } from '@/ui/tabs/tabs';
 import { AbstractPlugin } from './abstract-plugin';
-/** ******************************************************************************************************************************
+/**
  * Footer Plugin abstract class.
  */
 export declare abstract class FooterPlugin extends AbstractPlugin {

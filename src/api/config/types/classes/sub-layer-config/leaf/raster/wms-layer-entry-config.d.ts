@@ -1,4 +1,5 @@
-import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceWmsInitialConfig, WmsLayerConfig } from '@/api/config/types/map-schema-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
+import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceWmsInitialConfig, WmsLayerConfig, AbstractGeoviewLayerConfig, EntryConfigBaseClass } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 /**
  * The OGC WMS geoview sublayer class.
@@ -9,6 +10,7 @@ export declare class WmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     source: TypeSourceWmsInitialConfig;
     /** Style to apply to the raster layer. */
     layerStyle?: TypeLayerStyleConfig;
+    constructor(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode: EntryConfigBaseClass | undefined);
     /**
      * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
      * used to do its validation.

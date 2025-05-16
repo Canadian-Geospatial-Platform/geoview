@@ -95,10 +95,6 @@ export declare class LayerApi {
      */
     getLayerEntryConfig(layerPath: string): ConfigBaseClass | undefined;
     /**
-     * Obsolete function to set the layer configuration in the registered layers.
-     */
-    setLayerEntryConfigObsolete(layerConfig: ConfigBaseClass): void;
-    /**
      * Returns the OpenLayer instance associated with the layer path.
      * @param {string} layerPath - The layer path to the layer's configuration.
      * @returns {BaseLayer} Returns the geoview instance associated to the layer path.
@@ -115,17 +111,11 @@ export declare class LayerApi {
      */
     getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer>;
     /**
-     * Generate an array of layer info for the orderedLayerList.
-     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
-     * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
-     */
-    static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[];
-    /**
      * Load layers that was passed in with the map config
      * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - An optional array containing layers passed within the map config
      * @returns {Promise<void>}
      */
-    loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): Promise<void>;
+    loadListOfGeoviewLayer(mapConfigLayerEntries: MapConfigLayerEntry[]): Promise<void>;
     /**
      * Show the errors that happened during layers loading.
      * If it's an aggregate error, log and show all of them.
@@ -133,7 +123,7 @@ export declare class LayerApi {
      * @param error - The error to log and show.
      * @param geoviewLayerId - The Geoview layer id for which the error happened.
      */
-    logAndShowLayerError(error: unknown, geoviewLayerId: string): void;
+    showLayerError(error: unknown, geoviewLayerId: string): void;
     /**
      * Refreshes GeoCore Layers
      */
@@ -337,6 +327,12 @@ export declare class LayerApi {
      * @param {LayerItemVisibilityToggledDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerItemVisibilityToggled(callback: LayerItemVisibilityToggledDelegate): void;
+    /**
+     * Generate an array of layer info for the orderedLayerList.
+     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
+     * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
+     */
+    static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[];
 }
 /**
  * Define a delegate for the event handler function signature

@@ -5,6 +5,8 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import { Layer } from 'ol/layer';
 import Source from 'ol/source/Source';
+import { Projection as OLProjection } from 'ol/proj';
+import { Map as OLMap } from 'ol';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -13,7 +15,6 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeLayerStyleConfig, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { SnackbarType } from '@/core/utils/notifications';
 /**
@@ -22,34 +23,37 @@ import { SnackbarType } from '@/core/utils/notifications';
 export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     #private;
     static DEFAULT_HIT_TOLERANCE: number;
-    hitTolerance: number;
     /**
      * Constructs a GeoView layer to manage an OpenLayer layer.
-     * @param {string} mapId - The map id
      * @param {BaseLayer} olLayer - The OpenLayer layer.
      * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
      */
-    protected constructor(mapId: string, olSource: Source, layerConfig: AbstractBaseLayerEntryConfig);
+    protected constructor(olSource: Source, layerConfig: AbstractBaseLayerEntryConfig);
     /**
-     * Gets the bounds for the layer.
-     * @returns {Extent | undefined} The layer bounding box.
-     */
-    getBounds(): Extent | undefined;
-    /**
-     * Must override method to return the bounds of a layer.
+     * Must override method to return the bounds of a layer in the given projection.
+     * @param {OLProjection} projection - The projection to get the bounds into.
+     * @param {number} stops - The number of stops to use to generate the extent.
      * @returns {Extent} The layer bounding box.
      */
-    abstract onGetBounds(): Extent | undefined;
+    abstract onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
     /**
      * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
      * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
      */
     init(): void;
     /**
-     * Gets the MapViewer where the layer resides
-     * @returns {MapViewer} The MapViewer
+     * Overridable method called when the layer has been loaded correctly
      */
-    getMapViewer(): MapViewer;
+    protected onLoaded(): void;
+    /**
+     * Overridable method called when the layer is in error and couldn't be loaded correctly
+     */
+    protected onError(event: unknown): void;
+    /**
+     * Overridable method called when the layer image is in error and couldn't be loaded correctly.
+     * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
+     */
+    protected onImageLoadError(event: unknown): void;
     /**
      * Overrides the get of the OpenLayers Layer
      * @returns {Layer} The OpenLayers Layer
@@ -66,6 +70,11 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     getLayerConfig(): AbstractBaseLayerEntryConfig;
     /**
+     * Gets the hit tolerance associated with the layer.
+     * @returns {number} The hit tolerance
+     */
+    getHitTolerance(): number;
+    /**
      * Gets the layer style
      * @returns The layer style
      */
@@ -76,6 +85,13 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     setStyle(style: TypeLayerStyleConfig): void;
     /**
+     * Gets the bounds for the layer in the given projection.
+     * @param {OLProjection} projection - The projection to get the bounds into.
+     * @param {number} stops - The number of stops to use to generate the extent.
+     * @returns {Extent | undefined} The layer bounding box.
+     */
+    getBounds(projection: OLProjection, stops: number): Extent | undefined;
+    /**
      * Gets the layer attributions
      * @returns {string[]} The layer attributions
      */
@@ -85,11 +101,6 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * @returns {TimeDimension | undefined} The temporal dimension associated to the layer or undefined.
      */
     getTemporalDimension(): TimeDimension | undefined;
-    /**
-     * Sets the temporal dimension for the layer.
-     * @param {TimeDimension} temporalDimension - The value to assign to the layer temporal dimension property.
-     */
-    setTemporalDimension(temporalDimension: TimeDimension): void;
     /**
      * Gets the flag if layer use its time dimension, this can be use to exclude layers from time function like time slider
      * @returns {boolean} The flag indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
@@ -102,13 +113,10 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     getExternalFragmentsOrder(): TypeDateFragments | undefined;
     /**
      * Gets the in visible range value
+     * @param {number | undefined} currentZoom - The map current zoom
      * @returns {boolean} true if the layer is in visible range
      */
-    getInVisibleRange(): boolean;
-    /**
-     * Overridable method called when the layer has been loaded correctly
-     */
-    protected onLoaded(): void;
+    getInVisibleRange(currentZoom: number | undefined): boolean;
     /**
      * Emits a layer-specific message event with localization support
      * @protected
@@ -130,23 +138,15 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      */
     protected emitMessage(messageKey: string, messageParams: string[], messageType?: SnackbarType, notification?: boolean): void;
     /**
-     * Overridable method called when the layer is in error and couldn't be loaded correctly
-     */
-    protected onError(): void;
-    /**
-     * Overridable method called when the layer image is in error and couldn't be loaded correctly.
-     * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
-     */
-    protected onImageLoadError(): void;
-    /**
      * Returns feature information for the layer specified.
+     * @param {OLMap} map - The Map to get feature info from.
      * @param {QueryType} queryType - The type of query to perform.
      * @param {TypeLocation} location - An pixel, coordinate or polygon that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} The feature info table.
      */
-    getFeatureInfo(queryType: QueryType, location: TypeLocation, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    getFeatureInfo(map: OLMap, queryType: QueryType, location: TypeLocation, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to get all feature information for all the features stored in the layer.
      * @param {AbortController?} abortController - The optional abort controller.
@@ -155,44 +155,49 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
     protected getAllFeatureInfo(abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at a given pixel location.
+     * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
      * @param {Pixel} location - The pixel coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtPixel(location: Pixel, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtPixel(map: OLMap, location: Pixel, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at a given coordinate.
+     * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
      * @param {Coordinate} location - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at the provided long lat coordinate.
+     * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
      * @param {Coordinate} lnglat - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtLongLat(map: OLMap, lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at the provided bounding box.
+     * @param {OLMap} map - The Map where to get Feature using BBox from.
      * @param {Coordinate} location - The bounding box that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoUsingBBox(location: Coordinate[], queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoUsingBBox(map: OLMap, location: Coordinate[], queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at the provided polygon.
+     * @param {OLMap} map - The Map where to get Feature Info using Polygon from.
      * @param {Coordinate} location - The polygon that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoUsingPolygon(location: Coordinate[], queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoUsingPolygon(map: OLMap, location: Coordinate[], queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return the domain of the specified field or null if the field has no domain.
      * @param {string} fieldName - The field name for which we want to get the domain.
@@ -212,11 +217,6 @@ export declare abstract class AbstractGVLayer extends AbstractBaseLayer {
      * @returns {Promise<TypeLegend | null>} The promise when the legend (or null) will be received
      */
     queryLegend(): Promise<TypeLegend | null>;
-    /**
-     * Update the size of the icon image list based on styles.
-     * @param {TypeLegend} legend - The legend to check.
-     */
-    updateIconImageCache(legend: TypeLegend): void;
     /**
      * Overridable function returning the legend of the layer. Returns null when the layerPath specified is not found. If the style property
      * of the layerConfig object is undefined, the legend property of the object returned will be null.

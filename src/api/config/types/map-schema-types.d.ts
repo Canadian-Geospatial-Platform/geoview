@@ -14,7 +14,7 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
-/** ******************************************************************************************************************************
+/**
  *  Definition of the map feature instance according to what is specified in the schema.
  */
 export type TypeMapFeaturesInstance = {
@@ -165,6 +165,8 @@ export type TypeGlobalSettings = {
     canRemoveSublayers?: boolean;
     /** Whether a certain layer type should be disabled */
     disabledLayerTypes?: TypeGeoviewLayerType[];
+    /** Whether to display unsymbolized features in the datatable and other components */
+    showUnsymbolizedFeatures?: boolean;
 };
 /** Definition of the map configuration settings. */
 export type TypeMapConfig = {
@@ -278,8 +280,24 @@ export { EsriDynamicLayerConfig } from '@/api/config/types/classes/geoview-confi
 export { EsriFeatureLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/esri-feature-config';
 export { WmsLayerConfig } from '@/api/config/types/classes/geoview-config/raster-config/wms-config';
 export { WfsLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/wfs-config';
+/** Definition of the keys used to create the constants of the GeoView layer */
+type LayerTypesKey = 'CSV' | 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOPACKAGE' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 /** Definition of the geoview layer types accepted by the viewer. */
 export type TypeGeoviewLayerType = 'CSV' | 'esriDynamic' | 'esriFeature' | 'esriImage' | 'GeoJSON' | 'GeoPackage' | 'imageStatic' | 'ogcFeature' | 'ogcWfs' | 'ogcWms' | 'vectorTiles' | 'xyzTiles';
+/**
+ * This type is created to only be used when validating the configuration schema types.
+ * Indeed, GeoCore is not an official Abstract Geoview Layer, but it can be used in schema types.
+ */
+export type TypeGeoviewLayerTypeWithGeoCore = TypeGeoviewLayerType | typeof CONST_LAYER_ENTRY_TYPES.GEOCORE;
+/**
+ * Definition of the GeoView layer constants
+ */
+export declare const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType>;
+/**
+ * Definition of the sub schema to use for each type of Geoview layer
+ */
+export declare const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string>;
+export declare const validVectorLayerLegendTypes: TypeGeoviewLayerType[];
 /** Initial settings to apply to the GeoView layer at creation time. */
 export type TypeLayerInitialSettings = {
     /** Settings for availablity of controls */
@@ -338,6 +356,9 @@ export { EsriFeatureLayerEntryConfig } from '@/api/config/types/classes/sub-laye
 export { WmsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/wms-layer-entry-config';
 export { WfsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
 export { GeoJsonLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
+export { CsvLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/csv-layer-entry-config';
+export { XyzLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/raster/xyz-layer-entry-config';
+export { OgcFeatureLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/ogc-feature-layer-entry-config';
 /** Valid keys for the geometryType property. */
 export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
@@ -353,7 +374,9 @@ export type TypeRangeItems = {
 export type TypeNearestValues = 'discrete' | 'absolute';
 /** Base type from which we derive the source properties for all the leaf nodes in the layer tree. */
 export type TypeBaseSourceInitialConfig = {
-    /** Path used to access the data. */
+    /**
+     * The service endpoint of the layer. Added during creation of specific layer entry config.
+     */
     dataAccessPath?: string;
     /**
      * Spatial Reference EPSG code supported (https://epsg.io/). We support lat/long, Web Mercator and Lambert Conical Conform Canada.
@@ -436,10 +459,6 @@ export type TypeTileGrid = {
 };
 /** Type that defines the vector layer source formats. */
 export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV' | 'MVT';
-/** Type from which we derive the source properties for all the ESRI feature leaf nodes in the layer tree. */
-export type TypeSourceEsriFeatureInitialConfig = TypeBaseVectorSourceInitialConfig;
-/** Type from which we derive the source properties for all the GeoJson feature leaf nodes in the layer tree. */
-export type TypeSourceGeoJsonInitialConfig = TypeBaseVectorSourceInitialConfig;
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
     /** Maximum number of records to fetch (default: 0). */

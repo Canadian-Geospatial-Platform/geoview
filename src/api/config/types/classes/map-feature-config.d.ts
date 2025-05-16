@@ -1,6 +1,6 @@
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { TypeAppBarProps, TypeDisplayLanguage, TypeDisplayTheme, TypeExternalPackages, TypeFooterBarProps, TypeGlobalSettings, TypeMapComponents, TypeMapConfig, TypeMapCorePackages, TypeCorePackagesConfig, TypeNavBarProps, TypeOverviewMapProps, TypeServiceUrls } from '@/api/config/types/map-schema-types';
+import { TypeAppBarProps, TypeDisplayTheme, TypeExternalPackages, TypeFooterBarProps, TypeGlobalSettings, TypeMapComponents, TypeMapConfig, TypeMapCorePackages, TypeCorePackagesConfig, TypeNavBarProps, TypeOverviewMapProps, TypeServiceUrls } from '@/api/config/types/map-schema-types';
 /**
  * The map feature configuration class.
  */
@@ -42,10 +42,9 @@ export declare class MapFeatureConfig {
      * from the configuration passed as a parameter or from the default values.
      *
      * @param {TypeJsonObject} userMapFeatureConfig The map feature configuration to instantiate.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
      * @constructor
      */
-    constructor(userMapFeatureConfig: TypeJsonObject, language: TypeDisplayLanguage);
+    constructor(userMapFeatureConfig: TypeJsonObject);
     /**
      * The getter method that returns the errorDetected flag.
      *
@@ -85,11 +84,9 @@ export declare class MapFeatureConfig {
      * needed.
      *
      * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
-     * @param {MapFeatureConfig} mapFeatureConfig An optional mapFeatureConfig instance if the layer is part of it.
      *
      * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer instance or undefined if there is an error.
      * @static
      */
-    static nodeFactory(layerConfig: TypeJsonObject, language: TypeDisplayLanguage): AbstractGeoviewLayerConfig | undefined;
+    static nodeFactory(layerConfig: TypeJsonObject): AbstractGeoviewLayerConfig | undefined;
 }

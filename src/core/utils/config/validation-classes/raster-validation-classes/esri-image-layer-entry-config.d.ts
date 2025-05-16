@@ -1,11 +1,11 @@
 import { TypeSourceImageEsriInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-/** ******************************************************************************************************************************
+/**
  * Type used to define a GeoView image layer to display on the map.
  */
 export declare class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     /** Tag used to link the entry to a specific schema. */
-    schemaTag: import("@/geo/layer/geoview-layers/abstract-geoview-layers").TypeGeoviewLayerType;
+    schemaTag: import("@/api/config/types/map-schema-types").TypeGeoviewLayerType;
     /** Layer entry data type. */
     entryType: import("@/api/config/types/map-schema-types").TypeLayerEntryType;
     /** Filter to apply on feature of this layer. */

@@ -4,14 +4,14 @@ import { useTheme } from '@mui/material/styles';
 import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeJsonObject, AnySchemaObject } from '@/api/config/types/config-types';
-/** ******************************************************************************************************************************
+/**
  * interface used by all plugins to define their options.
  */
 export type TypePluginOptions = {
     mapId: string;
     viewer?: MapViewer;
 };
-/** ******************************************************************************************************************************
+/**
  * Plugin abstract base class.
  */
 export declare abstract class AbstractPlugin {

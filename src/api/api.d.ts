@@ -28,29 +28,32 @@ export declare class API {
     constructor();
     /**
      * Gets the list of all map IDs currently in the collection.
-     *
      * @returns {string[]} Array of map IDs
      */
     getMapViewerIds(): string[];
     /**
      * Gets a map viewer instance by its ID.
-     *
      * @param {string} mapId - The unique identifier of the map to retrieve
      * @returns {MapViewer} The map viewer instance if found
-     * @throws {Error} If the map with the specified ID is not found
+     * @throws {MapViewerNotFoundError} If the map with the specified ID is not found
      */
     getMapViewer(mapId: string): MapViewer;
     /**
-     * Delete a map viewer instance by its ID.
-     *
+     * Asynchronously gets a map viewer instance by its ID.
+     * @param {string} mapId - The unique identifier of the map to retrieve
+     * @returns {Promise<MapViewer>} The map viewer instance when/if found.
+     * @throws {Error} If the map with the specified ID is not found
+     */
+    getMapViewerAsync(mapId: string): Promise<MapViewer>;
+    /**
+     * Deletes a map viewer instance by its ID.
      * @param {string} mapId - The unique identifier of the map to delete
      * @param {boolean} deleteContainer - True if we want to delete div from the page
      * @returns {Promise<HTMLElement>} The Promise containing the HTML element
      */
     deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement>;
     /**
-     * Return true if a map id is already registered.
-     *
+     * Returns true if a map id is already registered.
      * @param {string} mapId - The unique identifier of the map to retrieve
      * @returns {boolean} True if map exist
      */

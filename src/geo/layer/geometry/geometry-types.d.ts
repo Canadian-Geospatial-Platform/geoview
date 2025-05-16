@@ -1,16 +1,16 @@
-/** ******************************************************************************************************************************
+/**
  * interface used to define the geometry types.
  */
 export type TypeOfGeometry = 'polyline' | 'polygon' | 'circle' | 'marker';
-/** ******************************************************************************************************************************
+/**
  * interface used to define the geometry type keys.
  */
 export type TypeGeometryKeys = 'POLYLINE' | 'POLYGON' | 'CIRCLE' | 'MARKER';
-/** ******************************************************************************************************************************
+/**
  * constant used to specify available geometry to draw.
  */
 export declare const CONST_GEOMETRY_TYPES: Record<TypeGeometryKeys, TypeOfGeometry>;
-/** ******************************************************************************************************************************
+/**
  * Line, Polygon, Marker styles.
  */
 export type TypeFeatureStyle = {
@@ -20,7 +20,7 @@ export type TypeFeatureStyle = {
     fillColor?: string;
     fillOpacity?: number;
 };
-/** ******************************************************************************************************************************
+/**
  * Marker icon styles.
  */
 export type TypeIconStyle = {
@@ -31,7 +31,7 @@ export type TypeIconStyle = {
     anchorYUnits?: string;
     src: string;
 };
-/** ******************************************************************************************************************************
+/**
  * Circle and Circle marker styles.
  */
 export interface TypeFeatureCircleStyle extends TypeFeatureStyle {

@@ -10,11 +10,10 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
 export declare class GVGroupLayer extends AbstractBaseLayer {
     /**
      * Constructs a Group layer to manage an OpenLayer Group Layer.
-     * @param {string} mapId - The map id
      * @param {LayerGroup} olLayerGroup - The OpenLayer group layer.
      * @param {GroupLayerEntryConfig} layerConfig - The layer configuration.
      */
-    constructor(mapId: string, olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig);
+    constructor(olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig);
     /**
      * Gets the layer configuration associated with the layer.
      * @returns {GroupLayerEntryConfig} The layer configuration

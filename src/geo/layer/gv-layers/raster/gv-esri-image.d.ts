@@ -1,6 +1,7 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -13,11 +14,10 @@ import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/laye
 export declare class GVEsriImage extends AbstractGVRaster {
     /**
      * Constructs a GVEsriImage layer to manage an OpenLayer layer.
-     * @param {string} mapId - The map id
      * @param {ImageArcGISRest} olSource - The OpenLayer source.
      * @param {EsriImageLayerEntryConfig} layerConfig - The layer configuration.
      */
-    constructor(mapId: string, olSource: ImageArcGISRest, layerConfig: EsriImageLayerEntryConfig);
+    constructor(olSource: ImageArcGISRest, layerConfig: EsriImageLayerEntryConfig);
     /**
      * Overrides the get of the OpenLayers Layer
      * @returns {ImageLayer<ImageArcGISRest>} The OpenLayers Layer
@@ -46,7 +46,7 @@ export declare class GVEsriImage extends AbstractGVRaster {
     /**
      * Overrides when the layer gets in loaded status.
      */
-    onLoaded(): void;
+    protected onLoaded(): void;
     /**
      * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
@@ -58,9 +58,11 @@ export declare class GVEsriImage extends AbstractGVRaster {
     applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
     /**
      * Overrides the way to get the bounds for this layer type.
+     * @param {OLProjection} projection - The projection to get the bounds into.
+     * @param {number} stops - The number of stops to use to generate the extent.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    onGetBounds(): Extent | undefined;
+    onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
 }
 export interface TypeEsriImageLayerLegend {
     layers: {

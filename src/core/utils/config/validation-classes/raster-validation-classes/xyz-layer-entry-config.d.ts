@@ -4,7 +4,7 @@ export declare class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
     source: TypeSourceImageXYZTilesInitialConfig;
     /**
      * The class constructor.
-     * @param {TypeXYZTilesLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+     * @param {XYZTilesLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: XYZTilesLayerEntryConfig);
 }

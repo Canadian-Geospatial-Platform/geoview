@@ -1,25 +1,114 @@
-/**
- * Custom error class for handling request timeout scenarios
- * @extends Error
- */
-export declare class RequestTimeoutError extends Error {
-    constructor(timeoutMs: number);
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+export declare class Fetch {
+    #private;
+    /**
+     * Fetches a url for a json response.
+     * @param {string} url - The url to fetch.
+     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+     * @param {number?} delayMs - The option delay before performing the actual fetch command (mostly for testing purposes).
+     * @returns {Promise<TypeJsonObject>} The fetched json response.
+     * @throws {ResponseError} If the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} If the JSON response is empty.
+     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+     * @throws {Error} For any other unexpected failures.
+     */
+    static fetchJson(url: string, init?: RequestInit, timeoutMs?: number, delayMs?: number): Promise<TypeJsonObject | TypeJsonArray>;
+    /**
+     * Fetches a url for a json response in the form of an object (not an array).
+     * @param {string} url - The url to fetch.
+     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+     * @returns {Promise<T>} The fetched json response.
+     * @throws {ResponseError} If the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} If the JSON response is empty.
+     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+     * @throws {ResponseTypeError} If the response from the service is an array instead of an object.
+     * @throws {Error} For any other unexpected failures.
+     */
+    static fetchJsonAsObject(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject>;
+    /**
+     * Fetches a url for a json response in the form of an array (not an object).
+     * @param {string} url - The url to fetch.
+     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+     * @returns {Promise<T>} The fetched json response.
+     * @throws {ResponseError} If the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} If the JSON response is empty.
+     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+     * @throws {ResponseTypeError} If the response from the service is an object instead of an array.
+     * @throws {Error} For any other unexpected failures.
+     */
+    static fetchJsonAsArray(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonArray>;
+    /**
+     * Fetches a url for a json response and casts the json as 'T'. It doesn't validate the Json structure. It's up to the caller to do so.
+     * @param {string} url - The url to fetch.
+     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+     * @returns {Promise<T>} The fetched json response.
+     * @throws {ResponseError} If the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} If the JSON response is empty.
+     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+     * @throws {Error} For any other unexpected failures.
+     */
+    static fetchJsonAs<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T>;
+    /**
+     * Fetches a url for a text response.
+     * @param {string} url - The url to fetch.
+     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+     * @returns {Promise<TypeJsonObject>} The fetched text response.
+     * @throws {ResponseError} If the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} If the JSON response is empty.
+     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+     * @throws {Error} For any other unexpected failures.
+     */
+    static fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string>;
+    /**
+     * Fetches a url for a blob response.
+     * @param {string} url - The url to fetch.
+     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+     * @returns {Promise<Blob>} The fetched blob response.
+     * @throws {ResponseError} If the response is not OK (non-2xx).
+     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+     * @throws {Error} For any other unexpected failures.
+     */
+    static fetchBlob(url: string, init?: RequestInit, timeoutMs?: number): Promise<Blob>;
+    /**
+     * Fetches a url for a xml response then converts the response to a json response.
+     * @param {string} url - The url to fetch.
+     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+     * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
+     * @returns {Promise<TypeJsonObject>} The fetched json response.
+     * @throws {ResponseError} If the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} If the JSON response is empty.
+     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+     * @throws {Error} For any other unexpected failures.
+     */
+    static fetchXMLToJson(url: string, init?: RequestInit, timeoutMs?: number): Promise<TypeJsonObject>;
+    /**
+     * Performs a fetch request with timeout capability
+     * @template T - The expected type of the JSON response
+     * @param {string} url - The URL to fetch from
+     * @param {RequestInit?} init - The optional initialization parameters for the fetch.
+     * @param {number?} timeoutMs - Timeout in milliseconds before the request is aborted, defaults to 7 seconds
+     * @returns {Promise<T>} A promise that resolves with the parsed JSON response
+     * @throws {ResponseError} If the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} If the JSON response is empty.
+     * @throws {RequestAbortedError | RequestTimeoutError} If the request was cancelled or timed out.
+     * @throws {Error} For any other unexpected failures.
+     *
+     * @example
+     * try {
+     *   const data = await fetchWithTimeout<MyDataType>('https://api.example.com/data', {
+     *     method: 'POST',
+     *     body: JSON.stringify({ id: 123 })
+     *   }, 3000);
+     */
+    static fetchWithTimeout<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T>;
+    /**
+     * Tests different fetch situations to explain how to use fetching functions with combination of AbortControllers and/or timeouts.
+     */
+    static testJson(url: string): void;
 }
-/**
- * Performs a fetch request with timeout capability
- * @template T - The expected type of the JSON response
- * @param {string} url - The URL to fetch from
- * @param {RequestInit} [options={}] - Fetch options to be passed to the fetch call
- * @param {number} [timeoutMs=7000] - Timeout in milliseconds before the request is aborted
- * @returns {Promise<T>} A promise that resolves with the parsed JSON response
- * @throws {RequestTimeoutError} When the request exceeds the timeout duration
- * @throws {Error} When the response is not OK (status outside 200-299)
- *
- * @example
- * try {
- *   const data = await fetchWithTimeout<MyDataType>('https://api.example.com/data', {
- *     method: 'POST',
- *     body: JSON.stringify({ id: 123 })
- *   }, 3000);
- */
-export declare const fetchWithTimeout: <T>(url: string, options?: RequestInit, timeoutMs?: number) => Promise<T>;

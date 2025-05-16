@@ -1,10 +1,9 @@
-import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.XYZ_TILES;
@@ -19,28 +18,45 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
 export declare class XYZTiles extends AbstractGeoViewRaster {
     /**
      * Constructs a XYZTiles Layer configuration processor.
-     *
-     * @param {string} mapId the id of the map
      * @param {TypeXYZTilesConfig} layerConfig the layer configuration
      */
-    constructor(mapId: string, layerConfig: TypeXYZTilesConfig);
+    constructor(layerConfig: TypeXYZTilesConfig);
     /**
      * Overrides the validation of a layer entry config.
      * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to validate.
      */
     protected onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void;
     /**
-     * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-     * @returns {Promise<TileLayer<XYZ>>} The GeoView raster layer that has been created.
-     */
-    protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TileLayer<XYZ>>;
-    /**
      * Overrides the way the layer metadata is processed.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-     * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+     * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @returns {Promise<XYZTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: XYZTilesLayerEntryConfig): Promise<XYZTilesLayerEntryConfig>;
+    /**
+     * Overrides the creation of the GV Layer
+     * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration.
+     * @returns {GVXYZTiles} The GV Layer
+     */
+    protected onCreateGVLayer(layerConfig: XYZTilesLayerEntryConfig): GVXYZTiles;
+    /**
+     * Creates a configuration object for a XYZTiles layer.
+     * This function constructs a `TypeXYZTilesConfig` object that describes an XYZTiles layer
+     * and its associated entry configurations based on the provided parameters.
+     * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+     * @param {string} geoviewLayerName - The display name of the GeoView layer.
+     * @param {string} metadataAccessPath - The URL or path to access metadata.
+     * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+     * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+     * @returns {TypeXYZTilesConfig} The constructed configuration object for the XYZTiles layer.
+     */
+    static createXYZTilesLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean, layerEntries: TypeJsonArray): TypeXYZTilesConfig;
+    /**
+     * Creates an XYZ source from a layer config.
+     * @param {XYZTilesLayerEntryConfig} layerConfig - The configuration for the XYZ layer.
+     * @returns A fully configured XYZ source.
+     * @throws If required config fields like dataAccessPath are missing.
+     */
+    static createXYZSource(layerConfig: XYZTilesLayerEntryConfig): XYZ;
 }
 /**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeXYZTilesConfig if the geoviewLayerType attribute of the

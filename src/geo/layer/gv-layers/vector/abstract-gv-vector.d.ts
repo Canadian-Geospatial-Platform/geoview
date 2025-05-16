@@ -1,4 +1,4 @@
-import { Feature } from 'ol';
+import { Map as OLMap, Feature } from 'ol';
 import { FeatureLike } from 'ol/Feature';
 import { Geometry } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
@@ -7,6 +7,7 @@ import Style from 'ol/style/Style';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
+import { Projection as OLProjection } from 'ol/proj';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
@@ -17,11 +18,10 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 export declare abstract class AbstractGVVector extends AbstractGVLayer {
     /**
      * Constructs a GeoView Vector layer to manage an OpenLayer layer.
-     * @param {string} mapId - The map id
      * @param {VectorSource<Feature<Geometry>>} olSource - The OpenLayer source.
      * @param {VectorLayerEntryConfig} layerConfig - The layer configuration.
      */
-    protected constructor(mapId: string, olSource: VectorSource<Feature<Geometry>>, layerConfig: VectorLayerEntryConfig);
+    protected constructor(olSource: VectorSource<Feature<Geometry>>, layerConfig: VectorLayerEntryConfig);
     /**
      * Overrides the get of the OpenLayers Layer
      * @returns {VectorLayer<Feature>} The OpenLayers Layer
@@ -51,26 +51,29 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     protected getAllFeatureInfo(abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at a given pixel location.
+     * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
      * @param {Pixel} location - The pixel coordinate that will be used by the query.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtPixel(map: OLMap, location: Pixel): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at a given coordinate.
+     * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
      * @param {Coordinate} location - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
+     * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
      * @param {Coordinate} lnglat - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtLongLat(map: OLMap, lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides when the layer gets in loaded status.
      */
@@ -86,20 +89,19 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
     /**
      * Overrides the way to get the bounds for this layer type.
+     * @param {OLProjection} projection - The projection to get the bounds into.
+     * @param {number} stops - The number of stops to use to generate the extent.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    onGetBounds(): Extent | undefined;
+    onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
     /**
      * Gets the extent of an array of features.
      * @param {string[]} objectIds - The uids of the features to calculate the extent from.
-     * @returns {Promise<Extent | undefined>} The extent of the features, if available.
+     * @param {OLProjection} outProjection - The output projection for the extent.
+     * @param {string?} outfield - ID field to return for services that require a value in outfields.
+     * @returns {Promise<Extent>} The extent of the features, if available.
      */
-    getExtentFromFeatures(objectIds: string[]): Promise<Extent | undefined>;
-    /**
-     * Return the vector layer as a GeoJSON object
-     * @returns {JSON} Layer's features as GeoJSON
-     */
-    getFeaturesAsGeoJSON(): JSON;
+    getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
      * Calculates a style for the given feature, based on the layer current style and options.
      * @param {AbstractGVLayer} layer - The layer on which to work for the style.

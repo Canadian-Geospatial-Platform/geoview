@@ -1,10 +1,9 @@
 import { ImageArcGISRest } from 'ol/source';
-import { Image as ImageLayer } from 'ol/layer';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
     listOfLayerEntryConfig: EsriDynamicLayerEntryConfig[];
@@ -20,10 +19,9 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
     hitTolerance: number;
     /**
      * Constructs an EsriDynamic Layer configuration processor.
-     * @param {string} mapId The id of the map.
      * @param {TypeEsriDynamicLayerConfig} layerConfig The layer configuration.
      */
-    constructor(mapId: string, layerConfig: TypeEsriDynamicLayerConfig);
+    constructor(layerConfig: TypeEsriDynamicLayerConfig);
     /**
      * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
      * @returns {Promise<void>} A promise that the execution is completed.
@@ -35,23 +33,42 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      */
     protected onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
     /**
+     * Overrides the way the layer metadata is processed.
+     * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+     */
+    protected onProcessLayerMetadata(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriDynamicLayerEntryConfig>;
+    /**
+     * Overrides the creation of the GV Layer
+     * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration.
+     * @returns {GVEsriDynamic} The GV Layer
+     */
+    protected onCreateGVLayer(layerConfig: EsriDynamicLayerEntryConfig): GVEsriDynamic;
+    /**
      * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
      * @param {TypeLayerEntryConfig} layerConfig - The layer config to check.
      * @returns {boolean} true if an error is detected.
      */
     esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean;
     /**
-     * Overrides the way the layer metadata is processed.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-     * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+     * Creates a configuration object for a Esri Dynamic layer.
+     * This function constructs a `TypeEsriDynamicLayerConfig` object that describes an Esri Dynamic layer
+     * and its associated entry configurations based on the provided parameters.
+     * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+     * @param {string} geoviewLayerName - The display name of the GeoView layer.
+     * @param {string} metadataAccessPath - The URL or path to access metadata.
+     * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+     * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+     * @returns {TypeEsriDynamicLayerConfig} The constructed configuration object for the Esri Dynamic layer.
      */
-    protected onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
+    static createEsriDynamicLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean, layerEntries: TypeJsonArray, customGeocoreLayerConfig: TypeJsonObject): TypeEsriDynamicLayerConfig;
     /**
-     * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-     * @returns {Promise<ImageLayer<ImageArcGISRest>>} The created Open Layer object.
+     * Creates an ImageArcGISRest source from a layer config.
+     * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration for the EsriDynamic layer.
+     * @returns A fully configured ImageArcGISRest source.
+     * @throws If required config fields like dataAccessPath are missing.
      */
-    protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>>;
+    static createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest;
 }
 /**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of

@@ -1,5 +1,5 @@
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { TypeGeoviewLayerType, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerType } from '@/api/config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 /**
  *  Base class for the definition of a Geoview layer configuration.
@@ -32,9 +32,8 @@ export declare abstract class AbstractGeoviewLayerConfig {
      * find any errors that may have been made. It only initalizes the properties needed to query the service and layer metadata.
      *
      * @param {TypeJsonObject} userGeoviewLayerConfig The layer configuration that the user has supplied for instantiation.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
      */
-    constructor(userGeoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage);
+    constructor(userGeoviewLayerConfig: TypeJsonObject);
     /**
      * The getter method that returns the geoview layer schema to use for the validation.
      *
@@ -54,28 +53,26 @@ export declare abstract class AbstractGeoviewLayerConfig {
      *
      * @param {TypeJsonObject} layerConfig The sublayer configuration.
      * @param {TypeLayerInitialSettings | TypeJsonObject} initialSettings The initial settings inherited.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
      * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
      *
      * @returns {EntryConfigBaseClass | undefined} The sublayer instance or undefined if there is an error.
      * @abstract
      */
-    abstract createLeafNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass | undefined;
+    abstract createLeafNode(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass | undefined;
     /**
      * The method used to implement the class factory model that returns the instance of the class based on the group
      * type needed.
      *
      * @param {TypeJsonObject} layerConfig The sublayer configuration.
      * @param {TypeLayerInitialSettings | TypeJsonObject} initialSettings The initial settings inherited.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
      * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
      *
      * @returns {EntryConfigBaseClass | undefined} The sublayer instance or undefined if there is an error.
      * @abstract
      */
-    abstract createGroupNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass | undefined;
+    abstract createGroupNode(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass | undefined;
     /**
      * Create a layer entry node for a specific layerId using the service metadata. The node returned can be a
      * layer or a group layer.
@@ -94,13 +91,6 @@ export declare abstract class AbstractGeoviewLayerConfig {
      * @protected @abstract
      */
     protected abstract createLayerTreeFromServiceMetadata(): EntryConfigBaseClass[];
-    /**
-     * The getter method that returns the language used to create the geoview layer.
-     *
-     * @returns {TypeDisplayLanguage} The language associated to the config.
-     * @protected
-     */
-    protected getLanguage(): TypeDisplayLanguage;
     /**
      * Fetch the metadata of all layer entry configurations defined in the list of layer entry config
      * or the ressulting layer tree.

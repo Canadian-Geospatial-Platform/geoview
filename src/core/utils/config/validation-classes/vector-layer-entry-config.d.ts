@@ -1,6 +1,6 @@
 import { TypeVectorSourceInitialConfig } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
-/** ******************************************************************************************************************************
+/**
  * Type used to define a GeoView vector layer to display on the map.
  */
 export declare abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {

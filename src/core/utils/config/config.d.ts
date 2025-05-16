@@ -17,13 +17,13 @@ export declare class Config {
      * @param {TypeDisplayLanguage} language - The language
      */
     constructor(language: TypeDisplayLanguage);
-    /** ***************************************************************************************************************************
+    /**
      * Get a valid map configuration.
      * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig Config object to validate.
      * @returns {MapConfigLayerEntry} A valid map config layer entry.
      */
     getValidMapConfig(listOfGeoviewLayerConfig: MapConfigLayerEntry[], onErrorCallback: (errorKey: string, params: string[]) => void): MapConfigLayerEntry[];
-    /** ***************************************************************************************************************************
+    /**
      * Initialize a map config from either inline div, url params, json file.
      *
      * @returns {Promise<TypeMapFeaturesConfig | undefined>} The initialized valid map config.

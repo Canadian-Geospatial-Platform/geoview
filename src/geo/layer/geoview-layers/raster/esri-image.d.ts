@@ -1,10 +1,8 @@
 import { ImageArcGISRest } from 'ol/source';
-import { Image as ImageLayer } from 'ol/layer';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
     listOfLayerEntryConfig: EsriImageLayerEntryConfig[];
@@ -18,22 +16,39 @@ export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
 export declare class EsriImage extends AbstractGeoViewRaster {
     /**
      * Constructs an EsriImage Layer configuration processor.
-     * @param {string} mapId The id of the map.
      * @param {TypeEsriImageLayerConfig} layerConfig The layer configuration.
      */
-    constructor(mapId: string, layerConfig: TypeEsriImageLayerConfig);
+    constructor(layerConfig: TypeEsriImageLayerConfig);
     /**
      * Overrides the way the layer metadata is processed.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-     * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+     * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @returns {Promise<EsriImageLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: EsriImageLayerEntryConfig): Promise<EsriImageLayerEntryConfig>;
     /**
-     * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-     * @returns {Promise<ImageLayer<ImageArcGISRest>>} The GeoView raster layer that has been created.
+     * Overrides the creation of the GV Layer
+     * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry configuration.
+     * @returns {GVEsriImage} The GV Layer
      */
-    protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<ImageArcGISRest>>;
+    protected onCreateGVLayer(layerConfig: EsriImageLayerEntryConfig): GVEsriImage;
+    /**
+     * Creates a configuration object for a Esri Image layer.
+     * This function constructs a `TypeEsriImageLayerConfig` object that describes an Esri Image layer
+     * and its associated entry configurations based on the provided parameters.
+     * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+     * @param {string} geoviewLayerName - The display name of the GeoView layer.
+     * @param {string} metadataAccessPath - The URL or path to access metadata.
+     * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+     * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
+     */
+    static createEsriImageLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean): TypeEsriImageLayerConfig;
+    /**
+     * Creates an ImageArcGISRest source from a layer config.
+     * @param {EsriImageLayerEntryConfig} layerConfig - The configuration for the EsriImage layer.
+     * @returns A fully configured ImageArcGISRest source.
+     * @throws If required config fields like dataAccessPath are missing.
+     */
+    static createEsriImageSource(layerConfig: EsriImageLayerEntryConfig): ImageArcGISRest;
 }
 /**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriImageLayerConfig if the geoviewLayerType attribute of

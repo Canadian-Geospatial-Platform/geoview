@@ -30,7 +30,7 @@ export declare function commonValidateListOfLayerEntryConfig(layer: EsriDynamic 
  *
  * @returns {TypeOutfieldsType} The type of the field.
  */
-export declare function commonGetFieldType(layer: EsriDynamic | EsriFeature | EsriImage, fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): TypeOutfieldsType;
+export declare function commonGetFieldType(layerConfig: AbstractBaseLayerEntryConfig, fieldName: string): TypeOutfieldsType;
 /**
  * Return the type of the specified field.
  *
@@ -40,7 +40,7 @@ export declare function commonGetFieldType(layer: EsriDynamic | EsriFeature | Es
  *
  * @returns {null | codedValueType | rangeDomainType} The domain of the field.
  */
-export declare function commonGetFieldDomain(layer: EsriDynamic | EsriFeature | EsriImage, fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType;
+export declare function commonGetFieldDomain(layerConfig: AbstractBaseLayerEntryConfig, fieldName: string): null | codedValueType | rangeDomainType;
 /**
  * This method will create a Geoview temporal dimension if it exist in the service metadata
  *
@@ -49,7 +49,7 @@ export declare function commonGetFieldDomain(layer: EsriDynamic | EsriFeature | 
  * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure
  * @param {boolean} singleHandle True for ESRI Image
  */
-export declare function commonProcessTemporalDimension(layer: EsriDynamic | EsriFeature | EsriImage, esriTimeDimension: TypeJsonObject, layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig, singleHandle?: boolean): void;
+export declare function commonProcessTemporalDimension(layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig, esriTimeDimension: TypeJsonObject, singleHandle?: boolean): void;
 /**
  * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
  *
@@ -58,7 +58,7 @@ export declare function commonProcessTemporalDimension(layer: EsriDynamic | Esri
  *         EsriDynamicLayerEntryConfig |
  *         EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
  */
-export declare function commonProcessFeatureInfoConfig(layer: EsriDynamic | EsriFeature | EsriImage, layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig): void;
+export declare function commonProcessFeatureInfoConfig(layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig): void;
 /**
  * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
  *
@@ -67,7 +67,7 @@ export declare function commonProcessFeatureInfoConfig(layer: EsriDynamic | Esri
  *         EsriDynamicLayerEntryConfig |
  *         EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
  */
-export declare function commonProcessInitialSettings(layer: EsriDynamic | EsriFeature | EsriImage, layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig): void;
+export declare function commonProcessInitialSettings(layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig): void;
 /**
  * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
  * initial settings, fields and aliases).

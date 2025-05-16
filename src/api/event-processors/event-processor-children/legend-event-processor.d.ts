@@ -46,11 +46,11 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * @param {string} layerPath - The layer path
      * @param {string[]} objectIds - The IDs of features to get extents from.
      * @param {string} outfield - ID field to return for services that require a value in outfields.
-     * @returns {Promise<Extent | undefined>} The extent of the feature, if available
+     * @returns {Promise<Extent>} The extent of the feature, if available
      */
-    static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[], outfield?: string): Promise<Extent | undefined> | undefined;
+    static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[], outfield?: string): Promise<Extent>;
     static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined;
-    /** ***************************************************************************************************************************
+    /**
      * This method propagates the information stored in the legend layer set to the store.
      *
      * @param {string} mapId The map identifier.

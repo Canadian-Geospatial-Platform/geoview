@@ -1,8 +1,7 @@
-import { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeDisplayTheme, TypeGeoviewLayerTypeWithGeoCore } from '@/api/config/types/map-schema-types';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeGeoviewLayerTypeWithGeoCore } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { SnackbarType } from '@/core/utils/notifications';
 type AppActions = IAppState['actions'];
 export interface IAppState {
@@ -18,6 +17,7 @@ export interface IAppState {
     isCrosshairsActive: boolean;
     isFullscreenActive: boolean;
     notifications: Array<NotificationDetailsType>;
+    showUnsymbolizedFeatures: boolean;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         addMessage: (type: SnackbarType, message: string, param?: string[]) => void;

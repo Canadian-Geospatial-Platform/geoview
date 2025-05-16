@@ -5,13 +5,19 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
  */
 export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
     /**
+     * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
+     * @returns {Promise<void>} A promise that the execution is completed.
+     */
+    protected onFetchAndSetServiceMetadata(): Promise<void>;
+    /**
      * Fetches the metadata for a typical AbstractGeoViewRaster class.
      * @param {string} url - The url to query the metadata from.
      */
     static fetchMetadata(url: string): Promise<TypeJsonObject>;
     /**
-     * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
-     * @returns {Promise<void>} A promise that the execution is completed.
+     * Throws a LayerServiceMetadataUnableToFetchError if the provided metadata has an error in its content.
+     * @param {string} geoviewLayerId - The geoview layer id
+     * @param {TypeJsonObject} metadata - The metadata to check
      */
-    protected onFetchAndSetServiceMetadata(): Promise<void>;
+    static throwIfMetatadaHasError(geoviewLayerId: string, metadata: TypeJsonObject): void;
 }

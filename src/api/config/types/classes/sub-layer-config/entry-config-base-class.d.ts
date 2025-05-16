@@ -1,6 +1,6 @@
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { TypeGeoviewLayerType, TypeLayerEntryType, TypeLayerInitialSettings, TypeDisplayLanguage, Extent } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeLayerEntryType, TypeLayerInitialSettings, Extent } from '@/api/config/types/map-schema-types';
 /**
  * Base type used to define a GeoView sublayer to display on the map. The sublayer can be a group or an abstract sublayer.
  */
@@ -33,12 +33,11 @@ export declare abstract class EntryConfigBaseClass {
      * layer group.
      *
      * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
      * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
      * @constructor
      */
-    constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewLayerConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass);
+    constructor(layerConfig: TypeJsonObject, geoviewLayerConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass);
     /**
      * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
      * used to do its validation.
@@ -125,18 +124,6 @@ export declare abstract class EntryConfigBaseClass {
      * @returns {EntryConfigBaseClass | undefined} The parentNode property associated to the entry config.
      */
     getParentNode(): EntryConfigBaseClass | undefined;
-    /**
-     * The setter method that sets the language used to create the sublayer.
-     *
-     * @param {TypeDisplayLanguage} language The language associated to the config.
-     */
-    setLanguage(language: TypeDisplayLanguage): void;
-    /**
-     * The getter method that returns the language used to create the sublayer.
-     *
-     * @returns {TypeDisplayLanguage} The language associated to the config.
-     */
-    getLanguage(): TypeDisplayLanguage;
     /**
      * This method returns the json string of the entry configuration. The output representation is a multi-line indented
      * string. Indentation can be controled using the ident parameter. Private variables are not serialized.
