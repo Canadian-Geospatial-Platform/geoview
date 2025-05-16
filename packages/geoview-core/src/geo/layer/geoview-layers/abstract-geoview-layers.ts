@@ -2,7 +2,7 @@ import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 
-import { delay, generateId, whenThisThen } from '@/core/utils/utilities';
+import { doUntil, generateId, whenThisThen } from '@/core/utils/utilities';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -837,19 +837,17 @@ export abstract class AbstractGeoViewLayer {
    * @private
    */
   #startMetadataFetchWatcher(): void {
-    // Start a delay
-    delay(AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING)
-      .then(() => {
-        // Check if the layer config was processed, if not, emit a message about the delay
-        if (!ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) {
-          // Emit message
-          this.emitMessage('warning.layer.metadataTakingLongTime', [this.geoviewLayerName || this.geoviewLayerId]);
-        }
-      })
-      .catch((error) => {
-        // Log error (shouldn't happen really)
-        logger.logPromiseFailed('Failed in the check metadata inside delay', error);
-      });
+    // Do the following thing until we stop it
+    doUntil(() => {
+      // Check if the layer configs were all at least processed, we're done
+      if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) return true;
+
+      // Emit message
+      this.emitMessage('warning.layer.metadataTakingLongTime', [this.geoviewLayerName || this.geoviewLayerId]);
+
+      // Continue watcher
+      return false;
+    }, AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING);
   }
 
   // #region EVENTS
