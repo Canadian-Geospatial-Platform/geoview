@@ -307,12 +307,21 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Overrides when the layer gets in loaded status.
    */
-  protected override onLoaded(): void {
-    // Call parent
-    super.onLoaded();
+  protected override onLoaded(event: unknown): void {
+    // Check if first time
+    const firstTime = !this.loadedOnce;
 
-    // Apply view filter immediately
-    this.applyViewFilter(this.getLayerConfig().layerFilter || '');
+    // Call parent
+    super.onLoaded(event);
+
+    // If first time
+    if (firstTime) {
+      // If there's a filter that should be applied
+      if (this.getLayerConfig().layerFilter) {
+        // Apply view filter immediately
+        this.applyViewFilter(this.getLayerConfig().layerFilter!);
+      }
+    }
   }
 
   /**
