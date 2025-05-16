@@ -767,9 +767,29 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setLegendCollapsed(layerPath, collapsed);
   }
 
+  static setAllMapLayerCollapsed(mapId: string, newCollapsed: boolean): void {
+    // Set the collapsed state for all layers
+    const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
+    orderedLayerInfo.forEach((layer) => {
+      if (layer.legendCollapsed !== newCollapsed) {
+        this.setMapLegendCollapsed(mapId, layer.layerPath, newCollapsed);
+      }
+    });
+  }
+
   static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean {
     // Redirect to layerAPI
     return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
+  }
+
+  static setAllMapLayerVisibility(mapId: string, newVisibility: boolean): void {
+    // Set the visibility for all layers
+    const layerApi = this.getMapViewerLayerAPI(mapId);
+    layerApi.getGeoviewLayers().forEach((layer) => {
+      if (layer.getVisible() !== newVisibility) {
+        layerApi.setOrToggleLayerVisibility(layer.getLayerPath(), newVisibility);
+      }
+    });
   }
 
   static reorderLayer(mapId: string, layerPath: string, move: number): void {

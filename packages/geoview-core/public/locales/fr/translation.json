@@ -251,7 +251,9 @@
   },
   "toggle-all": {
     "show": "Tout afficher",
-    "collapse": "Réduire tout"
+    "show-tooltip": "Toggles the visibility of all layers in the map",
+    "collapse": "Réduire tout",
+    "collapse-tooltip": "Toggles whether sublayers are shown in the legend / layer list"
   },
   "error": {
     "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour détails",

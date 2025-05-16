@@ -406,7 +406,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             <Switch
               size="small"
               onChange={() => setLayerHoverable(layerDetails.layerPath, !layerDetails.hoverable!)}
-              title={t('layers.layerHoverable')!}
+              label={t('layers.layerHoverable')!}
               checked={layerDetails.hoverable}
             />
           )}
@@ -414,7 +414,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             <Switch
               size="small"
               onChange={() => setLayerQueryable(layerDetails.layerPath, !layerDetails.queryable!)}
-              title={t('layers.layerQueryable')!}
+              label={t('layers.layerQueryable')!}
               checked={layerDetails.queryable}
             />
           )}
