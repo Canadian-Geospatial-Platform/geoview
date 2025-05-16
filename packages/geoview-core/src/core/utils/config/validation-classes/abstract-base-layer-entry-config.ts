@@ -15,7 +15,7 @@ import {
 } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { TimeDimension } from '@/app';
 
 /**
@@ -38,7 +38,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   #attributions: string[] = [];
 
   /** The calculated filter equation */
-  filterEquation?: FilterNodeArrayType;
+  filterEquation?: FilterNodeType[];
 
   /** Indicates if filter is on/off */
   legendFilterIsOff: boolean = false;
