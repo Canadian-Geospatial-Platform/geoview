@@ -10,8 +10,9 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { Projection as OLProjection } from 'ol/proj';
+import isEqual from 'lodash/isEqual';
 
-import { FilterNodeArrayType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { FilterNodeType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
@@ -195,11 +196,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     // If first time
     if (firstTime) {
-      // If there's a filter that should be applied
-      if (this.getLayerConfig().layerFilter) {
-        // Apply view filter immediately
-        this.applyViewFilter(this.getLayerConfig().layerFilter!);
-      }
+      // Apply view filter immediately
+      this.applyViewFilter(this.getLayerConfig().layerFilter);
     }
   }
 
@@ -209,9 +207,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
    * @param {string} filter - A filter to be used in place of the getViewFilter value.
-   * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(filter: string, combineLegendFilter: boolean = true): void {
+  applyViewFilter(filter: string | undefined = ''): void {
     // Log
     logger.logTraceCore('ABSTRACT-GV-VECTOR - applyViewFilter', this.getLayerPath());
 
@@ -219,8 +216,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const olLayer = this.getOLLayer();
 
     // Update the layer config on the fly (maybe not ideal to do this?)
-    layerConfig.legendFilterIsOff = !combineLegendFilter;
-    if (combineLegendFilter) layerConfig.layerFilter = filter;
+    layerConfig.legendFilterIsOff = false;
+    layerConfig.layerFilter = filter;
 
     // Parse the filter value to use
     let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
@@ -231,7 +228,37 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
       // Analyze the layer filter
       const filterEquation = analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
-      layerConfig.filterEquation = filterEquation;
+
+      // Get the current filter
+      const currentFilter = layerConfig.filterEquation;
+
+      // Define what is considered the default filter
+      const isDefaultFilter = !filterValueToUse;
+
+      // Define what is a no operation
+      const isNewFilterEffectivelyNoop = isDefaultFilter && !currentFilter;
+
+      // Check whether the current filter is different from the new one
+      const filterChanged = !isEqual(layerConfig.filterEquation, filterEquation);
+
+      // Determine if we should apply or reset filter
+      const shouldUpdateFilter = (filterChanged && !isNewFilterEffectivelyNoop) || (!!currentFilter && isDefaultFilter);
+
+      // If should update the filtering
+      if (shouldUpdateFilter) {
+        // Update the filter equation
+        layerConfig.filterEquation = filterEquation;
+
+        // Flag about the change.
+        // GV This will force a callback on the source style callback, which for us is the 'calculateStyleForFeature' function and
+        // GV since we've changed the filterEquation, the style will be recreated using that filterEquation.
+        olLayer.changed();
+
+        // Emit event
+        this.emitLayerFilterApplied({
+          filter: filterValueToUse,
+        });
+      }
     } catch (error: unknown) {
       // Failed
       throw new LayerInvalidLayerFilterError(
@@ -242,13 +269,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         formatError(error)
       );
     }
-
-    olLayer.changed();
-
-    // Emit event
-    this.emitLayerFilterApplied({
-      filter: filterValueToUse,
-    });
   }
 
   /**
@@ -318,7 +338,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {AbstractGVLayer} layer - The layer on which to work for the style.
    * @param {FeatureLike} feature - Feature that need its style to be defined.
    * @param {string} label - The style label when one has to be created
-   * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+   * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
    * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
    * @returns {Style} The style for the feature
    */
@@ -326,7 +346,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     layer: AbstractGVLayer,
     feature: FeatureLike,
     label: string,
-    filterEquation?: FilterNodeArrayType,
+    filterEquation?: FilterNodeType[],
     legendFilterIsOff?: boolean
   ): Style | undefined {
     // Get the style

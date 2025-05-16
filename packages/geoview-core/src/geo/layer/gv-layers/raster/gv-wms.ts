@@ -17,11 +17,13 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { CONST_LAYER_TYPES, TypeFeatureInfoEntry } from '@/api/config/types/map-schema-types';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { Projection } from '@/geo/utils/projection';
 import { CV_CONFIG_PROXY_URL } from '@/api/config/types/config-constants';
-import { LayerInvalidFeatureInfoFormatWMSError } from '@/core/exceptions/layer-exceptions';
+import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { NetworkError } from '@/core/exceptions/core-exceptions';
+import { formatError, NetworkError } from '@/core/exceptions/core-exceptions';
+import { TypeDateFragments } from '@/core/utils/date-mgt';
 
 /**
  * Manages a WMS layer.
@@ -316,11 +318,8 @@ export class GVWMS extends AbstractGVRaster {
 
     // If first time
     if (firstTime) {
-      // If there's a filter that should be applied
-      if (this.getLayerConfig().layerFilter) {
-        // Apply view filter immediately
-        this.applyViewFilter(this.getLayerConfig().layerFilter!);
-      }
+      // Apply view filter immediately
+      this.applyViewFilter(this.getLayerConfig().layerFilter);
     }
   }
 
@@ -341,44 +340,18 @@ export class GVWMS extends AbstractGVRaster {
    * is done.
    * TODO ! The combination of the legend filter and the dimension filter probably does not apply to WMS. The code can be simplified.
    * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
-   * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(filter: string, combineLegendFilter: boolean = true): void {
+  applyViewFilter(filter: string | undefined = ''): void {
     // Log
     logger.logTraceCore('GV-WMS - applyViewFilter', this.getLayerPath());
 
-    const layerConfig = this.getLayerConfig();
-    const olLayer = this.getOLLayer();
-
-    // Get source
-    const source = olLayer.getSource();
-    if (source) {
-      // Update the layer config on the fly (maybe not ideal to do this?)
-      layerConfig.legendFilterIsOff = !combineLegendFilter;
-      if (combineLegendFilter) layerConfig.layerFilter = filter;
-
-      if (filter) {
-        let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
-        const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
-        const dimension = queryElements[0].trim();
-        filterValueToUse = queryElements[1].trim();
-
-        // Parse the filter value to use
-        filterValueToUse = parseDateTimeValuesEsriImageOrWMS(filterValueToUse, this.getExternalFragmentsOrder());
-
-        // Create the source parameter to update
-        const sourceParam = { [dimension]: filterValueToUse.replace(/\s*/g, '') };
-
-        // Update the source param
-        source.updateParams(sourceParam);
-        olLayer.changed();
-
-        // Emit event
-        this.emitLayerFilterApplied({
-          filter: filterValueToUse,
-        });
-      }
-    }
+    // Process the layer filtering using the static method shared between EsriImage and WMS
+    GVWMS.processApplyFilter(this, filter, this.getExternalFragmentsOrder(), (filterToUse: string) => {
+      // Emit event
+      this.emitLayerFilterApplied({
+        filter: filterToUse,
+      });
+    });
   }
 
   /**
@@ -593,5 +566,82 @@ export class GVWMS extends AbstractGVRaster {
   static #getAttribute(jsonObject: TypeJsonObject, attributeEnding: string): TypeJsonObject | undefined {
     const keyFound = Object.keys(jsonObject).find((key) => key.endsWith(attributeEnding));
     return keyFound ? jsonObject[keyFound] : undefined;
+  }
+
+  /**
+   * Applies a temporal or dimensional filter to a WMS or Esri Image layer.
+   * This function parses the given filter string, updates the OpenLayers source parameters,
+   * and triggers a layer refresh if the filter has changed.
+   * @param {GVWMS | GVEsriImage} layer - The GeoView layer object (either WMS or Esri Image) to which the filter should be applied.
+   * @param {string} filter - The raw filter string, typically in the format `'dimension=value'` (e.g., `'time=2023-01-01'`).
+   * @param {TypeDateFragments | undefined} externalFragmentsOrder - Optional date/time fragment order to assist with parsing complex temporal values.
+   * @param {Function} callbackWhenUpdated - Callback function to be invoked with the processed filter value when the layer is updated.
+   * @throws {LayerInvalidLayerFilterError} If the filter is invalid or cannot be parsed/applied to the layer.
+   */
+  static processApplyFilter(
+    layer: GVWMS | GVEsriImage,
+    filter: string,
+    externalFragmentsOrder: TypeDateFragments | undefined,
+    callbackWhenUpdated: (filterToUse: string) => void
+  ): void {
+    // Get the layer config and OL Layer
+    const layerConfig = layer.getLayerConfig();
+    const olLayer = layer.getOLLayer();
+
+    // Parse
+    let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
+
+    try {
+      // Update the layer config on the fly (maybe not ideal to do this?)
+      layerConfig.legendFilterIsOff = false;
+      layerConfig.layerFilter = filter;
+
+      const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
+      const dimension = queryElements[0].trim();
+      // If there's a specific filter
+      if (queryElements.length > 1) {
+        filterValueToUse = queryElements[1].trim();
+      }
+
+      // Parse the filter value to use
+      filterValueToUse = parseDateTimeValuesEsriImageOrWMS(filterValueToUse, externalFragmentsOrder);
+
+      // Create the source parameter to update
+      const sourceParams = { [dimension]: filterValueToUse.replace(/\s*/g, '') };
+
+      // Get the current filter
+      const currentFilter = olLayer.getSource()?.getParams()[dimension];
+
+      // Define what is considered the default filter
+      const isDefaultFilter = !filterValueToUse;
+
+      // Define what is a no operation
+      const isNewFilterEffectivelyNoop = isDefaultFilter && !currentFilter;
+
+      // Check whether the current filter is different from the new one
+      const filterChanged = sourceParams[dimension] !== currentFilter;
+
+      // Determine if we should apply or reset filter
+      const shouldUpdateFilter = (filterChanged && !isNewFilterEffectivelyNoop) || (!!currentFilter && isDefaultFilter);
+
+      // If should update the filtering
+      if (shouldUpdateFilter) {
+        // Update the source param
+        olLayer.getSource()?.updateParams(sourceParams);
+        olLayer.changed();
+
+        // Updated
+        callbackWhenUpdated?.(filterValueToUse);
+      }
+    } catch (error: unknown) {
+      // Failed
+      throw new LayerInvalidLayerFilterError(
+        layerConfig.layerPath,
+        layerConfig.getLayerName(),
+        filterValueToUse,
+        layer.getLayerFilter(),
+        formatError(error)
+      );
+    }
   }
 }

@@ -37,7 +37,6 @@ import {
   defaultColor,
   FillPaternLine,
   FillPaternSettings,
-  FilterNodeArrayType,
   FilterNodeType,
   groupKeywords,
   NodeType,
@@ -51,7 +50,7 @@ import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
   aliasLookup?: TypeAliasLookup
 ) => Style | undefined;
@@ -308,9 +307,9 @@ function createStrokeOptions(settings: TypeSimpleSymbolVectorConfig | TypeLineSt
  * is pushed back on the data stack. If a problem is detected, an error object is thrown with an explanatory message.
  *
  * @param {FilterNodeType} operator - Operator to execute.
- * @param {FilterNodeArrayType} dataStack - Data stack to use for the operator execution.
+ * @param {FilterNodeType[]} dataStack - Data stack to use for the operator execution.
  */
-function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayType): void {
+function executeOperator(operator: FilterNodeType, dataStack: FilterNodeType[]): void {
   if (operator.nodeType === NodeType.binary) {
     if (dataStack.length < 2 || dataStack[dataStack.length - 2].nodeValue === '(')
       throw new Error(`binary operator error - operator = '${operator.nodeValue}'`);
@@ -496,15 +495,15 @@ function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayTyp
  * Use the filter equation and the feature fields to determine if the feature is visible.
  *
  * @param {Feature} feature - Feature used to find the visibility value to return.
- * @param {FilterNodeArrayType} filterEquation - Filter used to find the visibility value to return.
+ * @param {FilterNodeType[]} filterEquation - Filter used to find the visibility value to return.
  *
  * @returns {boolean | undefined} The visibility flag for the feature specified.
  */
-function featureIsNotVisible(feature: Feature, filterEquation: FilterNodeArrayType): boolean | undefined {
-  const operatorStack: FilterNodeArrayType = [];
-  const dataStack: FilterNodeArrayType = [];
+function featureIsNotVisible(feature: Feature, filterEquation: FilterNodeType[]): boolean | undefined {
+  const operatorStack: FilterNodeType[] = [];
+  const dataStack: FilterNodeType[] = [];
 
-  const operatorAt = (index: number, stack: FilterNodeArrayType): FilterNodeType | undefined => {
+  const operatorAt = (index: number, stack: FilterNodeType[]): FilterNodeType | undefined => {
     if (index < 0 && stack.length + index >= 0) return stack[stack.length + index];
     if (index > 0 && index < stack.length) return stack[index];
     return undefined;
@@ -760,14 +759,14 @@ const processSymbol: Record<TypeSymbol, (settings: TypeSimpleSymbolVectorConfig)
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
  * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
- * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processSimplePoint(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType
+  filterEquation?: FilterNodeType[]
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -786,14 +785,14 @@ function processSimplePoint(
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
  * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
- * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processSimpleLineString(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType
+  filterEquation?: FilterNodeType[]
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -977,14 +976,14 @@ const processFillStyle: Record<TypeFillStyle, (settings: TypePolygonVectorConfig
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
  * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
- * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processSimplePolygon(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType
+  filterEquation?: FilterNodeType[]
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
     if (featureIsNotVisible(feature, filterEquation!)) return undefined;
@@ -1267,7 +1266,7 @@ function searchUniqueValueEntry(
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
  * @param {Feature} feature - Feature used to test the unique value conditions.
- * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
@@ -1275,7 +1274,7 @@ function searchUniqueValueEntry(
 function processUniqueValuePoint(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
@@ -1297,7 +1296,7 @@ function processUniqueValuePoint(
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
  * @param {Feature} feature - Feature used to test the unique value conditions.
- * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
@@ -1305,7 +1304,7 @@ function processUniqueValuePoint(
 function processUniqueLineString(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
@@ -1327,7 +1326,7 @@ function processUniqueLineString(
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
  * @param {Feature} feature - Feature used to test the unique value conditions.
- * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
@@ -1335,7 +1334,7 @@ function processUniqueLineString(
 function processUniquePolygon(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
@@ -1397,7 +1396,7 @@ function searchClassBreakEntry(
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
  * @param {Feature} feature - Feature used to test the unique value conditions.
- * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
@@ -1405,7 +1404,7 @@ function searchClassBreakEntry(
 function processClassBreaksPoint(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
@@ -1427,7 +1426,7 @@ function processClassBreaksPoint(
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
  * @param {Feature} feature - Feature used to test the unique value conditions.
- * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
@@ -1435,7 +1434,7 @@ function processClassBreaksPoint(
 function processClassBreaksLineString(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
@@ -1457,7 +1456,7 @@ function processClassBreaksLineString(
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
  * @param {Feature} feature - Feature used to test the unique value conditions.
- * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
@@ -1465,7 +1464,7 @@ function processClassBreaksLineString(
 function processClassBreaksPolygon(
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
@@ -1516,7 +1515,7 @@ export const processStyle: Record<TypeLayerStyleConfigType, Record<TypeStyleGeom
  * @param {FeatureLike} feature - Feature that need its style to be defined.
  * @param {TypeStyleConfig} style - The style to use
  * @param {string} label - The style label when one has to be created
- * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  * @param {() => Promise<string | null>} callbackWhenCreatingStyle - An optional callback to execute when a new style had to be created
  * @returns {Style | undefined} The style applied to the feature or undefined if not found.
@@ -1525,7 +1524,7 @@ export function getAndCreateFeatureStyle(
   feature: FeatureLike,
   style: TypeLayerStyleConfig,
   label: string,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
   aliasLookup?: TypeAliasLookup,
   callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
@@ -1573,14 +1572,14 @@ export function getAndCreateFeatureStyle(
  * This method gets the image source from the style of the feature using the layer entry config.
  * @param {Feature} feature - The feature that need its icon to be defined.
  * @param {TypeStyleConfig} style - The style to use
- * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  * @returns {string} The icon associated to the feature or a default empty one.
  */
 export function getFeatureImageSource(
   feature: Feature,
   style: TypeLayerStyleConfig,
-  filterEquation?: FilterNodeArrayType,
+  filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
   aliasLookup?: TypeAliasLookup
 ): string | undefined {
@@ -1647,11 +1646,11 @@ export function getFeatureImageSource(
  * only at the end that we can determine there node type. Nodes that start with a number are numbers, otherwise they are
  * variables. If a problem is detected, an error object is thrown with an explanatory message.
  *
- * @param {FilterNodeArrayType} keywordArray - Array of keywords to process.
+ * @param {FilterNodeType[]} keywordArray - Array of keywords to process.
  *
- * @returns {FilterNodeArrayType} The new keywords array with all nodes classified.
+ * @returns {FilterNodeType[]} The new keywords array with all nodes classified.
  */
-function classifyUnprocessedNodes(keywordArray: FilterNodeArrayType): FilterNodeArrayType {
+function classifyUnprocessedNodes(keywordArray: FilterNodeType[]): FilterNodeType[] {
   return keywordArray.map((node, i) => {
     if (node.nodeType === NodeType.unprocessedNode) {
       if (Number.isNaN(Number((node.nodeValue as string).slice(0, 1)))) {
@@ -1691,13 +1690,13 @@ function classifyUnprocessedNodes(keywordArray: FilterNodeArrayType): FilterNode
  * Extract the specified keyword and associate a node type to their nodes. In some cases, the extraction uses an optionally
  * regular expression.
  *
- * @param {FilterNodeArrayType} FilterNodeArrayType - Array of keywords to process.
+ * @param {FilterNodeType[]} FilterNodeArrayType - Array of keywords to process.
  * @param {string} keyword - Keyword to extract.
  * @param {RegExp} regExp - An optional regular expression to use for the extraction.
  *
- * @returns {FilterNodeArrayType} The new keywords array.
+ * @returns {FilterNodeType[]} The new keywords array.
  */
-function extractKeyword(filterNodeArray: FilterNodeArrayType, keyword: string, regExp?: RegExp): FilterNodeArrayType {
+function extractKeyword(filterNodeArray: FilterNodeType[], keyword: string, regExp?: RegExp): FilterNodeType[] {
   // eslint-disable-next-line no-nested-ternary
   const getNodeType = (keywordValue: string): NodeType => {
     if (['+', '-'].includes(keywordValue)) return NodeType.unprocessedNode;
@@ -1723,12 +1722,12 @@ function extractKeyword(filterNodeArray: FilterNodeArrayType, keyword: string, r
             nodeArray.push({ nodeType: NodeType.unprocessedNode, nodeValue: splitNode.trim() });
             nodeArray.push({ nodeType: getNodeType(keyword), nodeValue: keyword });
             return nodeArray;
-          }, [] as FilterNodeArrayType)
+          }, [] as FilterNodeType[])
           .slice(0, -1)
       );
     }
     return newKeywordArray;
-  }, [] as FilterNodeArrayType);
+  }, [] as FilterNodeType[]);
 }
 
 /**
@@ -1736,11 +1735,11 @@ function extractKeyword(filterNodeArray: FilterNodeArrayType, keyword: string, r
  * to considere Keywords in a string as a normal word. If a problem is detected, an error object is thrown with an explanatory
  * message.
  *
- * @param {FilterNodeArrayType} keywordArray - Array of keywords to process.
+ * @param {FilterNodeType[]} keywordArray - Array of keywords to process.
  *
- * @returns {FilterNodeArrayType} The new keywords array with all string nodes classified.
+ * @returns {FilterNodeType[]} The new keywords array with all string nodes classified.
  */
-function extractStrings(keywordArray: FilterNodeArrayType): FilterNodeArrayType {
+function extractStrings(keywordArray: FilterNodeType[]): FilterNodeType[] {
   let stringNeeded = false;
   let stringHasBegun = false;
   let contiguousApostrophes = 0;
@@ -1774,7 +1773,7 @@ function extractStrings(keywordArray: FilterNodeArrayType): FilterNodeArrayType 
       stringNeeded = true;
     } else newKeywordArray.push(node);
     return newKeywordArray;
-  }, [] as FilterNodeArrayType);
+  }, [] as FilterNodeType[]);
   if (stringHasBegun)
     if (!stringNeeded && contiguousApostrophes === 1) keywordArrayToReturn.push({ nodeType: NodeType.string, nodeValue: stringValue });
     else throw new Error(`string not closed`);
@@ -1785,11 +1784,11 @@ function extractStrings(keywordArray: FilterNodeArrayType): FilterNodeArrayType 
  * Analyse the filter and split it in syntaxique nodes.  If a problem is detected, an error object is thrown with an
  * explanatory message.
  *
- * @param {FilterNodeArrayType} filterNodeArrayType - Node array to analyse.
+ * @param {FilterNodeType[]} filterNodeArrayType - Node array to analyse.
  *
- * @returns {FilterNodeArrayType} The new node array with all nodes classified.
+ * @returns {FilterNodeType[]} The new node array with all nodes classified.
  */
-export function analyzeLayerFilter(filterNodeArrayType: FilterNodeArrayType): FilterNodeArrayType {
+export function analyzeLayerFilter(filterNodeArrayType: FilterNodeType[]): FilterNodeType[] {
   let resultingKeywordArray = filterNodeArrayType;
   resultingKeywordArray[0].nodeValue = (resultingKeywordArray[0].nodeValue as string).replaceAll(/\s{2,}/g, ' ').trim();
   resultingKeywordArray[0].nodeValue = resultingKeywordArray[0].nodeValue.split(/^date '|(?<=\s)date '/gi).join("date°'");
