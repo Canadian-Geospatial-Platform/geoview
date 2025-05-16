@@ -183,8 +183,22 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         ...(source.format && { format: source.format }),
       },
       crossOrigin: source.crossOrigin ?? 'Anonymous',
-      projection: source.projection ? `EPSG:${source.projection}` : undefined,
     };
+
+    // If using native projection
+    if (source.useNativeProjection) {
+      // Find the SRID from the layer metadata
+      const srid =
+        layerConfig.getLayerMetadata()?.sourceSpatialReference?.latestWkid || layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;
+
+      // Tweak the source params and projection to force it to use the native projection of the service, not the projection of the map
+      // GV Set the image spatial reference to the service source - performance is better when open layers does the conversion
+      // GV.CONT Older versions of ArcGIS Server are not properly converted, so this is only used for version 10.8+
+      // GV This line (especially bboxSR) fixes an issue with EsriDynamic not taking in consideration the map projection in sourceOptions.projection (maybe an old Esri service?)
+      sourceOptions.projection = `EPSG:${srid}`;
+      sourceOptions.params!.imageSR = srid;
+      sourceOptions.params!.bboxSR = srid;
+    }
 
     const arcgisSource = new ImageArcGISRest(sourceOptions);
 

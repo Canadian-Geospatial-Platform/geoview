@@ -208,12 +208,12 @@ export abstract class AbstractLayerSet {
    * @param {AbstractBaseLayer} layer - The layer
    */
   async registerLayer(layer: AbstractBaseLayer): Promise<void> {
+    // If the layer is already registered, skip it, we don't register twice
+    if (this.getRegisteredLayerPaths().includes(layer.getLayerPath())) return;
+
     // Wait a maximum of 20 seconds for the layer to get to loaded state so that it can get registered, otherwise another attempt will have to be made
     // This await is important when devs call this method directly to register ad-hoc layers.
     await whenThisThen(() => layer.getLayerStatus() === 'loaded', 20000);
-
-    // If the layer is already registered, skip it, we don't register twice
-    if (this.getRegisteredLayerPaths().includes(layer.getLayerPath())) return;
 
     // Update the registration of all layer sets
     if (this.onRegisterLayerCheck(layer)) {
