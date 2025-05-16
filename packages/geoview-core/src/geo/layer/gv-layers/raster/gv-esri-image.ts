@@ -150,23 +150,6 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
-   * Overrides when the layer gets in loaded status.
-   */
-  protected override onLoaded(event: unknown): void {
-    // Check if first time
-    const firstTime = !this.loadedOnce;
-
-    // Call parent
-    super.onLoaded(event);
-
-    // If first time
-    if (firstTime) {
-      // Apply view filter immediately
-      this.applyViewFilter(this.getLayerConfig().layerFilter);
-    }
-  }
-
-  /**
    * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
@@ -178,12 +161,19 @@ export class GVEsriImage extends AbstractGVRaster {
     logger.logTraceCore('GV-ESRI-IMAGE - applyViewFilter', this.getLayerPath());
 
     // Process the layer filtering using the static method shared between EsriImage and WMS
-    GVWMS.processApplyFilter(this, filter, this.getExternalFragmentsOrder(), (filterToUse: string) => {
-      // Emit event
-      this.emitLayerFilterApplied({
-        filter: filterToUse,
-      });
-    });
+    GVWMS.applyViewFilterOnSource(
+      this.getLayerConfig(),
+      this.getOLSource(),
+      this.getExternalFragmentsOrder(),
+      this,
+      filter,
+      (filterToUse: string) => {
+        // Emit event
+        this.emitLayerFilterApplied({
+          filter: filterToUse,
+        });
+      }
+    );
   }
 
   /**

@@ -40,8 +40,11 @@ import { createAliasLookup } from '@/geo/layer/gv-layers/utils';
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
 export abstract class AbstractGVLayer extends AbstractBaseLayer {
-  // The default hit tolerance the query should be using
+  /** The default hit tolerance the query should be using */
   static DEFAULT_HIT_TOLERANCE: number = 4;
+
+  /** The default loading period before we show a message to the user about a layer taking a long time to render on map */
+  static DEFAULT_LOADING_PERIOD: number = 8 * 1000; // 8 seconds
 
   /** Indicates if the layer has become in loaded status at least once already */
   loadedOnce: boolean = false;
@@ -88,7 +91,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
-   * @param {BaseLayer} olLayer - The OpenLayer layer.
+   * @param {Source} olSource - The OpenLayer Source.
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
    */
   protected constructor(olSource: Source, layerConfig: AbstractBaseLayerEntryConfig) {
@@ -99,7 +102,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.#serverDateFragmentsOrder = layerConfig.geoviewLayerConfig.serviceDateFormat
       ? DateMgt.getDateFragmentsOrder(layerConfig.geoviewLayerConfig.serviceDateFormat)
       : undefined;
-    this.#externalFragmentsOrder = DateMgt.getDateFragmentsOrder(layerConfig.geoviewLayerConfig.externalDateFormat);
+    this.#externalFragmentsOrder = layerConfig.getExternalFragmentsOrder();
 
     // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
     this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
@@ -153,6 +156,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Set the layer has loading
     layerConfig.setLayerStatusLoading();
+
+    // Start a watcher and bind the loadingCounter with it
+    this.#startLoadingPeriodWatcher(this.loadingCounter);
   }
 
   /**
@@ -215,7 +221,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       this.getLayerConfig().updateLayerStatusParent();
 
       // Emit about the error
-      this.emitMessage('layers.errorNotLoaded', [this.getLayerName() || this.getLayerPath()], 'error', true);
+      this.emitMessage('layers.errorNotLoaded', [this.getLayerName()], 'error', true);
     } else {
       // We've already emitted an erorr to the user about the layer being in error, skip
     }
@@ -242,7 +248,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       this.getLayerConfig().updateLayerStatusParent();
 
       // Emit about the error
-      this.emitMessage('layers.errorImageLoad', [this.getLayerName() || this.getLayerPath()], 'error', true);
+      this.emitMessage('layers.errorImageLoad', [this.getLayerName()], 'error', true);
     } else {
       // We've already emitted an erorr to the user about the layer being in error, skip
     }
@@ -869,6 +875,46 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // Throw error
     throw new NotImplementedError(`Not implemented event wrapper for layer ${this.getLayerPath()}`);
+  }
+
+  /**
+   * Starts a periodic timer that monitors the loading status of a layer.
+   * Every `DEFAULT_LOADING_PERIOD` milliseconds, it checks whether the layer is still loading. If so, it emits a warning message indicating
+   * that the rendering is taking longer than expected. The interval stops automatically when the layer finishes loading
+   * or encounters an error, or if a new loading process supersedes the current one (based on the loading counter).
+   * @param {number} loadingCounter - A unique counter representing the loading instance. Only the interval tied to the current
+   *                                  loading process will continue monitoring; outdated intervals will self-terminate.
+   */
+  #startLoadingPeriodWatcher(loadingCounter: number): void {
+    // Start a recurrent timer
+    const interval = setInterval(() => {
+      // Indicate if we should clear the interval
+      let shouldClearInterval = false;
+
+      // Check if the loadingCounter is the same as our current counter (we're on the right timer for the right loading checker)
+      if (this.loadingCounter === loadingCounter) {
+        // This is the right interval that we want to be checking the layer status
+        const { layerStatus } = this.getLayerConfig();
+
+        // If still loading
+        if (layerStatus === 'loading') {
+          // Emit about the delay
+          this.emitMessage('warning.layer.slowRender', [this.getLayerName()]);
+        }
+
+        // If loaded or error, we're done
+        if (layerStatus === 'loaded' || layerStatus === 'error') {
+          // Should clear this interval
+          shouldClearInterval = true;
+        }
+      } else {
+        // We don't need this interval anymore
+        shouldClearInterval = true;
+      }
+
+      // If clearing the interval
+      if (shouldClearInterval) clearInterval(interval);
+    }, AbstractGVLayer.DEFAULT_LOADING_PERIOD);
   }
 
   // #region EVENTS
