@@ -12,6 +12,7 @@ import { TypeJsonObject } from '@/api/config/types/config-types';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -173,6 +174,14 @@ export abstract class ConfigBaseClass {
 
     // No siblings
     return [];
+  }
+
+  /**
+   * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
+   * @returns {TypeDateFragments} The Date Fragments
+   */
+  getExternalFragmentsOrder(): TypeDateFragments {
+    return DateMgt.getDateFragmentsOrder(this.geoviewLayerConfig.externalDateFormat);
   }
 
   /**

@@ -40,6 +40,7 @@ import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerDataAccessPathMandatoryError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
+import { TypeDateFragments } from '@/core/utils/date-mgt';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -494,12 +495,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * associated to the layer.
    * @returns {string} The filter associated to the layer
    */
-  getViewFilter(): string {
-    const layerConfig = this.getLayerConfig();
+  static getViewFilter(layerConfig: EsriDynamicLayerEntryConfig, style: TypeLayerStyleConfig | undefined): string {
     const { layerFilter } = layerConfig;
-
-    // Get the style
-    const style = this.getStyle();
 
     if (style) {
       const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeLayerStyleSettings): void => {
@@ -528,7 +525,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         const fieldOrder = GVEsriDynamic.#sortFieldOfTheSameValue(styleSettings, fieldOfTheSameValue);
         const queryTree = GVEsriDynamic.#getQueryTree(styleSettings, fieldOfTheSameValue, fieldOrder);
         // TODO: Refactor - Layers refactoring. Use the source.featureInfo from the layer, not the layerConfig anymore, here and below
-        const query = this.#buildQuery(queryTree, 0, fieldOrder, styleSettings, layerConfig.source.featureInfo!);
+        const query = GVEsriDynamic.#buildQuery(queryTree, 0, fieldOrder, styleSettings, layerConfig.source.featureInfo!);
         return `${query}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }
 
@@ -766,7 +763,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {string} The resulting query.
    * @private
    */
-  #buildQuery(
+  static #buildQuery(
     queryTree: TypeQueryTree,
     level: number,
     fieldOrder: number[],
@@ -781,7 +778,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         // If i > 0 (true) then we add a OR clause
         if (i) queryString = `${queryString} or `;
         // Add to the query the 'fieldName = value and ' + the result of the recursive call to buildQuery using the next field and level
-        queryString = `${queryString}${styleSettings.fields[fieldOrder[level]]} = ${value} and ${this.#buildQuery(
+        queryString = `${queryString}${styleSettings.fields[fieldOrder[level]]} = ${value} and ${GVEsriDynamic.#buildQuery(
           queryTree[i].nextField,
           level + 1,
           fieldOrder,
@@ -903,53 +900,71 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Overrides when the layer gets in loaded status.
-   */
-  protected override onLoaded(event: unknown): void {
-    // Check if first time
-    const firstTime = !this.loadedOnce;
-
-    // Call parent
-    super.onLoaded(event);
-
-    // If first time
-    if (firstTime) {
-      // Apply view filter immediately
-      this.applyViewFilter(this.getLayerConfig().layerFilter);
-    }
-  }
-
-  /**
-   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
-   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-   * is done.
-   * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
+   * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
+   * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
    */
   applyViewFilter(filter: string | undefined = ''): void {
     // Log
-    logger.logTraceCore('GV-ESRI-DYNAMIC - applyViewFilter', this.getLayerPath());
+    logger.logTraceCore('GV-ESRI-DYNAMIC - applyViewFilterOnSource', this.getLayerPath());
 
-    const layerConfig = this.getLayerConfig();
-    const olLayer = this.getOLLayer();
+    // Redirect
+    GVEsriDynamic.applyViewFilterOnSource(
+      this.getLayerConfig(),
+      this.getOLSource(),
+      this.getStyle(),
+      this.getExternalFragmentsOrder(),
+      this,
+      filter,
+      (filterToUse: string) => {
+        // Emit event
+        this.emitLayerFilterApplied({
+          filter: filterToUse,
+        });
+      }
+    );
+  }
 
+  /**
+   * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
+   * This function is responsible for generating the appropriate filter expression based on the layer configuration,
+   * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration object for the Esri Dynamic layer.
+   * @param {ImageArcGISRest} source - The OpenLayers `ImageArcGISRest` source instance to which the filter will be applied.
+   * @param {TypeLayerStyleConfig | undefined} style - Optional style configuration that may influence filter expression generation.
+   * @param {TypeDateFragments | undefined} externalDateFragments - Optional external date fragments used to assist in formatting time-based filters.
+   * @param {GVEsriDynamic | undefined} layer - Optional GeoView layer containing the source (if exists) in order to trigger a redraw.
+   * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
+   * @param {Function?} callbackWhenUpdated - Optional callback that is invoked with the final filter string if the layer was updated.
+   * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
+   */
+  static applyViewFilterOnSource(
+    layerConfig: EsriDynamicLayerEntryConfig,
+    source: ImageArcGISRest,
+    style: TypeLayerStyleConfig | undefined,
+    externalDateFragments: TypeDateFragments | undefined,
+    layer: GVEsriDynamic | undefined,
+    filter: string | undefined = '',
+    callbackWhenUpdated: ((filterToUse: string) => void) | undefined = undefined
+  ): void {
     // Parse the filter value to use
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
 
+    // Get the current filter
+    const currentFilter = source.getParams().layerDefs;
+
     try {
-      // Update the layer config information
+      // Update the layer config information (not ideal to do this here...)
+      // eslint-disable-next-line no-param-reassign
       layerConfig.legendFilterIsOff = false;
+      // eslint-disable-next-line no-param-reassign
       layerConfig.layerFilter = filterValueToUse;
-      filterValueToUse = this.getViewFilter();
+      filterValueToUse = GVEsriDynamic.getViewFilter(layerConfig, style);
 
       // Parse the filter value to use
-      filterValueToUse = parseDateTimeValuesEsriDynamic(filterValueToUse, this.getExternalFragmentsOrder());
+      filterValueToUse = parseDateTimeValuesEsriDynamic(filterValueToUse, externalDateFragments);
 
       // Create the source parameter to update
       const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
-
-      // Get the current filter
-      const currentFilter = olLayer.getSource()?.getParams().layerDefs;
 
       // Define what is considered the default filter (e.g., "1=1")
       const isDefaultFilter = filterValueToUse === GVEsriDynamic.DEFAULT_FILTER_1EQUALS1;
@@ -966,13 +981,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // If should update the filtering
       if (shouldUpdateFilter) {
         // Update the source params
-        olLayer.getSource()?.updateParams({ layerDefs });
-        olLayer.changed();
+        source.updateParams({ layerDefs });
+        layer?.getOLLayer().changed();
 
-        // Emit event
-        this.emitLayerFilterApplied({
-          filter: filterValueToUse,
-        });
+        // Callback
+        callbackWhenUpdated?.(filterValueToUse);
       }
     } catch (error: unknown) {
       // Failed
@@ -980,7 +993,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         layerConfig.layerPath,
         layerConfig.getLayerName(),
         filterValueToUse,
-        this.getLayerFilter(),
+        currentFilter,
         formatError(error)
       );
     }

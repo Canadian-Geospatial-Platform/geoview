@@ -111,7 +111,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Add the features in the source
         vectorSource.addFeatures(features);
 
-        // Call the success callback with the features. This will trigger the onLoad callback on the layer object (though it
+        // Call the success callback with the features. This will trigger the onLoaded callback on the layer object (though it
         // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
         successCallback?.(features);
 

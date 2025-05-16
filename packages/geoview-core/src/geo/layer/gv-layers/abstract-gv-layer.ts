@@ -88,7 +88,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
-   * @param {BaseLayer} olLayer - The OpenLayer layer.
+   * @param {Source} olSource - The OpenLayer Source.
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
    */
   protected constructor(olSource: Source, layerConfig: AbstractBaseLayerEntryConfig) {
@@ -99,7 +99,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.#serverDateFragmentsOrder = layerConfig.geoviewLayerConfig.serviceDateFormat
       ? DateMgt.getDateFragmentsOrder(layerConfig.geoviewLayerConfig.serviceDateFormat)
       : undefined;
-    this.#externalFragmentsOrder = DateMgt.getDateFragmentsOrder(layerConfig.geoviewLayerConfig.externalDateFormat);
+    this.#externalFragmentsOrder = layerConfig.getExternalFragmentsOrder();
 
     // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
     this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;

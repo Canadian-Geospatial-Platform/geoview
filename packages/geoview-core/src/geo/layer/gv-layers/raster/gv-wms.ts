@@ -1,7 +1,7 @@
 import ImageLayer from 'ol/layer/Image';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Coordinate } from 'ol/coordinate';
-import { ImageWMS } from 'ol/source';
+import { ImageArcGISRest, ImageWMS } from 'ol/source';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Map as OLMap } from 'ol';
@@ -24,6 +24,7 @@ import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } f
 import { MapViewer } from '@/geo/map/map-viewer';
 import { formatError, NetworkError } from '@/core/exceptions/core-exceptions';
 import { TypeDateFragments } from '@/core/utils/date-mgt';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 
 /**
  * Manages a WMS layer.
@@ -307,23 +308,6 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Overrides when the layer gets in loaded status.
-   */
-  protected override onLoaded(event: unknown): void {
-    // Check if first time
-    const firstTime = !this.loadedOnce;
-
-    // Call parent
-    super.onLoaded(event);
-
-    // If first time
-    if (firstTime) {
-      // Apply view filter immediately
-      this.applyViewFilter(this.getLayerConfig().layerFilter);
-    }
-  }
-
-  /**
    * Sets the style to be used by the wms layer. This methode does nothing if the layer path can't be found.
    * @param {string} wmsStyleId - The style identifier that will be used.
    */
@@ -346,12 +330,19 @@ export class GVWMS extends AbstractGVRaster {
     logger.logTraceCore('GV-WMS - applyViewFilter', this.getLayerPath());
 
     // Process the layer filtering using the static method shared between EsriImage and WMS
-    GVWMS.processApplyFilter(this, filter, this.getExternalFragmentsOrder(), (filterToUse: string) => {
-      // Emit event
-      this.emitLayerFilterApplied({
-        filter: filterToUse,
-      });
-    });
+    GVWMS.applyViewFilterOnSource(
+      this.getLayerConfig(),
+      this.getOLSource(),
+      this.getExternalFragmentsOrder(),
+      this,
+      filter,
+      (filterToUse: string) => {
+        // Emit event
+        this.emitLayerFilterApplied({
+          filter: filterToUse,
+        });
+      }
+    );
   }
 
   /**
@@ -569,31 +560,33 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Applies a temporal or dimensional filter to a WMS or Esri Image layer.
-   * This function parses the given filter string, updates the OpenLayers source parameters,
-   * and triggers a layer refresh if the filter has changed.
-   * @param {GVWMS | GVEsriImage} layer - The GeoView layer object (either WMS or Esri Image) to which the filter should be applied.
-   * @param {string} filter - The raw filter string, typically in the format `'dimension=value'` (e.g., `'time=2023-01-01'`).
-   * @param {TypeDateFragments | undefined} externalFragmentsOrder - Optional date/time fragment order to assist with parsing complex temporal values.
-   * @param {Function} callbackWhenUpdated - Callback function to be invoked with the processed filter value when the layer is updated.
-   * @throws {LayerInvalidLayerFilterError} If the filter is invalid or cannot be parsed/applied to the layer.
+   * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
+   * This function is responsible for generating the appropriate filter expression based on the layer configuration,
+   * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
+   * @param {OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The configuration object for the WMS or Esri Image layer.
+   * @param {ImageWMS | ImageArcGISRest} source - The OpenLayers `ImageWMS` or `ImageArcGISRest` source instance to which the filter will be applied.
+   * @param {TypeDateFragments | undefined} externalDateFragments - Optional external date fragments used to assist in formatting time-based filters.
+   * @param {GVWMS | GVEsriImage | undefined} layer - Optional GeoView layer containing the source (if exists) in order to trigger a redraw.
+   * @param {string} filter - The raw filter string input (defaults to an empty string if not provided).
+   * @param {Function?} callbackWhenUpdated - Optional callback that is invoked with the final filter string if the layer was updated.
+   * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
    */
-  static processApplyFilter(
-    layer: GVWMS | GVEsriImage,
-    filter: string,
-    externalFragmentsOrder: TypeDateFragments | undefined,
-    callbackWhenUpdated: (filterToUse: string) => void
+  static applyViewFilterOnSource(
+    layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig,
+    source: ImageWMS | ImageArcGISRest,
+    externalDateFragments: TypeDateFragments | undefined,
+    layer: GVWMS | GVEsriImage | undefined,
+    filter: string | undefined = '',
+    callbackWhenUpdated: ((filterToUse: string) => void) | undefined = undefined
   ): void {
-    // Get the layer config and OL Layer
-    const layerConfig = layer.getLayerConfig();
-    const olLayer = layer.getOLLayer();
-
     // Parse
     let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
-
+    let currentFilter;
     try {
       // Update the layer config on the fly (maybe not ideal to do this?)
+      // eslint-disable-next-line no-param-reassign
       layerConfig.legendFilterIsOff = false;
+      // eslint-disable-next-line no-param-reassign
       layerConfig.layerFilter = filter;
 
       const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
@@ -604,13 +597,13 @@ export class GVWMS extends AbstractGVRaster {
       }
 
       // Parse the filter value to use
-      filterValueToUse = parseDateTimeValuesEsriImageOrWMS(filterValueToUse, externalFragmentsOrder);
+      filterValueToUse = parseDateTimeValuesEsriImageOrWMS(filterValueToUse, externalDateFragments);
 
       // Create the source parameter to update
       const sourceParams = { [dimension]: filterValueToUse.replace(/\s*/g, '') };
 
       // Get the current filter
-      const currentFilter = olLayer.getSource()?.getParams()[dimension];
+      currentFilter = source.getParams()[dimension];
 
       // Define what is considered the default filter
       const isDefaultFilter = !filterValueToUse;
@@ -627,8 +620,8 @@ export class GVWMS extends AbstractGVRaster {
       // If should update the filtering
       if (shouldUpdateFilter) {
         // Update the source param
-        olLayer.getSource()?.updateParams(sourceParams);
-        olLayer.changed();
+        source.updateParams(sourceParams);
+        layer?.getOLLayer().changed();
 
         // Updated
         callbackWhenUpdated?.(filterValueToUse);
@@ -639,7 +632,7 @@ export class GVWMS extends AbstractGVRaster {
         layerConfig.layerPath,
         layerConfig.getLayerName(),
         filterValueToUse,
-        layer.getLayerFilter(),
+        currentFilter,
         formatError(error)
       );
     }
