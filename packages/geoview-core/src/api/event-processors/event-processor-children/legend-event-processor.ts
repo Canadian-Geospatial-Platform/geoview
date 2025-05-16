@@ -271,7 +271,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(entryLayerPath);
 
       // Interpret the layer name the best we can
-      const layerName = layer?.getLayerName() || 'no name';
+      const layerName = layer?.getLayerName() || layerConfig.getLayerName() || 'no name';
 
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {

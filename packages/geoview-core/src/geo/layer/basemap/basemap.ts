@@ -12,14 +12,14 @@ import { applyStyle } from 'ol-mapbox-style';
 
 import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
-import { getLocalizedMessage } from '@/core/utils/utilities';
+import { delay, getLocalizedMessage } from '@/core/utils/utilities';
 import { TypeBasemapProps, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { CoreBasemapCreationError } from '@/core/exceptions/geoview-exceptions';
+import { BasemapTakingLongTimeError, CoreBasemapCreationError } from '@/core/exceptions/geoview-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
@@ -33,8 +33,11 @@ import { formatError } from '@/core/exceptions/core-exceptions';
  * @class Basemap
  */
 export class BasemapApi {
-  // The maximum delay to wait before we abandon(?) a basemap
-  static REQUEST_DELAY_MAX = 3000;
+  /** The maximum delay to wait before we warn about the basemap taking a long time */
+  static DEFAULT_WAIT_PERIOD_BASEMAP_WARNING = 5 * 1000; // 5 seconds
+
+  /** Indicates if the basemap has been created successfully */
+  created: boolean = false;
 
   // The map viewer
   mapViewer: MapViewer;
@@ -259,8 +262,7 @@ export class BasemapApi {
     // Should we do a get request to get the layer information from the server?
     if (rest && (basemapLayer.jsonUrl as string)) {
       // Get info from server
-      // TODO: Check/Refactor - Document the necessity to explicitely reject after Basemap.REQUEST_DELAY_MAX
-      const result = await Fetch.fetchJsonAsObject(basemapLayer.jsonUrl as string, undefined, BasemapApi.REQUEST_DELAY_MAX);
+      const result = await Fetch.fetchJsonAsObject(basemapLayer.jsonUrl as string);
 
       // Get minimum scale
       const minScale = result.minScale as number;
@@ -354,6 +356,32 @@ export class BasemapApi {
   }
 
   /**
+   * Starts a delayed check to monitor the basemap creation process.
+   * After a predefined maximum wait period (`DEFAULT_WAIT_PERIOD_BASEMAP_WARNING`), it verifies whether the basemap has been created.
+   * If not, it emits a `BasemapTakingLongTimeError` to notify the system of a potential delay or failure.
+   * This serves as a safeguard against stalled or unresponsive basemap creation.
+   * @private
+   */
+  #startBasemapCreationWatcher(): void {
+    // Start a delay
+    delay(BasemapApi.DEFAULT_WAIT_PERIOD_BASEMAP_WARNING)
+      .then(() => {
+        // Check if the basemap has terminated being created
+        if (!this.created) {
+          // Create the error
+          const error = new BasemapTakingLongTimeError();
+
+          // Emit about the error
+          this.#emitBasemapError({ error });
+        }
+      })
+      .catch((error: unknown) => {
+        // Log error (shouldn't happen really)
+        logger.logPromiseFailed('Failed in the check basemap creation inside delay', error);
+      });
+  }
+
+  /**
    * Create the core basemap and add the layers to it.
    * @param {TypeBasemapOptions} basemapOptions - Basemap options.
    * @param {TypeValidMapProjectionCodes} projection - Optional projection code.
@@ -383,6 +411,9 @@ export class BasemapApi {
 
     // Check if basemap options are provided for the basemap creation
     const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
+
+    // Start a timer to see if the basemap will get processed after a while
+    this.#startBasemapCreationWatcher();
 
     if (coreBasemapOptions) {
       // Create shaded layer
@@ -528,6 +559,10 @@ export class BasemapApi {
         thumbnailUrl: '',
       };
 
+      // Done
+      this.created = true;
+
+      // Return the basemap
       return basemap;
     }
 

@@ -43,6 +43,16 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   // The default hit tolerance the query should be using
   static DEFAULT_HIT_TOLERANCE: number = 4;
 
+  /** Indicates if the layer has become in loaded status at least once already */
+  loadedOnce: boolean = false;
+
+  /** Counts the number of times the loading happened. */
+  loadingCounter: number = 0;
+
+  /** Marks the latest loading count for the layer.
+   * This useful to know when the put the layer loaded status back correctly with parallel processing happening */
+  loadingMarker: number = 0;
+
   // The OpenLayer source
   #olSource: Source;
 
@@ -113,17 +123,55 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   init(): void {
     // Activation of the load end/error listeners
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).once(['featuresloadend', 'imageloadend', 'tileloadend'], this.onLoaded.bind(this));
+    (this.#olSource as any).on(['featuresloadstart', 'imageloadstart', 'tileloadstart'], this.onLoading.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).once(['featuresloaderror', 'tileloaderror'], this.onError.bind(this));
+    (this.#olSource as any).on(['featuresloadend', 'imageloadend', 'tileloadend'], this.onLoaded.bind(this));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).on(['featuresloaderror', 'tileloaderror'], this.onError.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).on(['imageloaderror'], this.onImageLoadError.bind(this));
   }
 
   /**
-   * Overridable method called when the layer has been loaded correctly
+   * Overridable method called when the layer has started to load itself on the map.
+   * @param {unknown} event - The event which is being triggered.
    */
-  protected onLoaded(): void {
+  protected onLoading(event: unknown): void {
+    // Increment the counter
+    this.loadingCounter++;
+
+    // Mark the current event with the loading counter, this is a trick using the wrapper to reget it in the 'onLoaded'
+    // eslint-disable-next-line no-underscore-dangle
+    this.#findWrapperBetweenEventHandlers(event)._loadingCounter = this.loadingCounter;
+
+    // Log it, leaving the logDebug for dev purposes
+    // eslint-disable-next-line no-underscore-dangle
+    // logger.logDebug('PRIOR', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
+
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
+
+    // Set the layer has loading
+    layerConfig.setLayerStatusLoading();
+  }
+
+  /**
+   * Overridable method called when the layer has been loaded correctly.
+   * @param {unknown} event - The event which is being triggered.
+   */
+  protected onLoaded(event: unknown): void {
+    // Log it, leaving the logDebug for dev purposes
+    // eslint-disable-next-line no-underscore-dangle
+    // logger.logDebug('AFTER', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
+
+    // If it's not the 'loaded' that correspond to the last 'loading' (asynchronicity thing)
+    // eslint-disable-next-line no-underscore-dangle
+    if (this.loadingCounter !== this.#findWrapperBetweenEventHandlers(event)._loadingCounter) return;
+
+    // Log it, leaving the logDebug for dev purposes
+    // eslint-disable-next-line no-underscore-dangle
+    // logger.logDebug('AFTER CHECKED', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
+
     // Get the layer config
     const layerConfig = this.getLayerConfig();
 
@@ -133,15 +181,23 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Update the parent group if any
     this.getLayerConfig().updateLayerStatusParent();
 
-    // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
-    this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
+    // If first time
+    if (!this.loadedOnce) {
+      // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
+      this.setVisible(layerConfig.initialSettings?.states?.visible !== false);
 
-    // Emit event
-    this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
+      // Emit event for the first time the layer got loaded
+      // TODO: Do we want to emit an event on every time the layer is 'loaded'? (every map pan and such?)
+      this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
+    }
+
+    // Flag
+    this.loadedOnce = true;
   }
 
   /**
-   * Overridable method called when the layer is in error and couldn't be loaded correctly
+   * Overridable method called when the layer is in error and couldn't be loaded correctly.
+   * @param {unknown} event - The event which is being triggered.
    */
   protected onError(event: unknown): void {
     // Log
@@ -150,14 +206,14 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
 
-    // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
-    this.getLayerConfig().setLayerStatusError();
-
-    // Update the parent group if any
-    this.getLayerConfig().updateLayerStatusParent();
-
     // If we were not error before
     if (layerStatusBefore !== 'error') {
+      // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
+      this.getLayerConfig().setLayerStatusError();
+
+      // Update the parent group if any
+      this.getLayerConfig().updateLayerStatusParent();
+
       // Emit about the error
       this.emitMessage('layers.errorNotLoaded', [this.getLayerName() || this.getLayerPath()], 'error', true);
     } else {
@@ -168,6 +224,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable method called when the layer image is in error and couldn't be loaded correctly.
    * We do not put the layer status as error, as this could be specific to a zoom level and the layer is otherwise fine.
+   * @param {unknown} event - The event which is being triggered.
    */
   protected onImageLoadError(event: unknown): void {
     // Log
@@ -176,14 +233,14 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
 
-    // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
-    this.getLayerConfig().setLayerStatusError();
-
-    // Update the parent group if any
-    this.getLayerConfig().updateLayerStatusParent();
-
     // If we were not error before
     if (layerStatusBefore !== 'error') {
+      // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
+      this.getLayerConfig().setLayerStatusError();
+
+      // Update the parent group if any
+      this.getLayerConfig().updateLayerStatusParent();
+
       // Emit about the error
       this.emitMessage('layers.errorImageLoad', [this.getLayerName() || this.getLayerPath()], 'error', true);
     } else {
@@ -779,6 +836,39 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     if (layerConfig.initialSettings?.extent !== undefined) layerOptions.extent = layerConfig.initialSettings.extent;
     // eslint-disable-next-line no-param-reassign
     if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
+  }
+
+  /**
+   * Extracts the relevant image, tile, or dispatching_ object from the event based on its structure.
+   * This method attempts to find the corresponding object (`image`, `tile`, or `dispatching_`) in the event.
+   * @param event - The event object, which could contain either an `image`, `tile`, or `dispatching_` property.
+   * @returns {unknown} - The extracted object (either image, tile, or dispatching_).
+   * @throws {NotImplementedError} - If the event doesn't match the expected structures.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  #findWrapperBetweenEventHandlers(event: unknown): any {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const eventAny = event as any;
+
+    if ('image' in eventAny) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return eventAny.image;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ('tile' in eventAny) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
+      return eventAny.tile;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ('target' in eventAny && 'dispatching_' in eventAny.target) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
+      return eventAny.target.dispatching_;
+    }
+
+    // Throw error
+    throw new NotImplementedError(`Not implemented event wrapper for layer ${this.getLayerPath()}`);
   }
 
   // #region EVENTS
