@@ -516,3 +516,8 @@ export const useSelectorLayerIcons = (layerPath: string): TypeLegendLayerItem[] 
     return LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.icons;
   });
 };
+
+export const useSelectorEntryConfig = (mapId: string, layerPath: string): AbstractBaseLayerEntryConfig => {
+  // Redirect to LegendEventProcessorLegendEventProcessor
+  return LegendEventProcessor.getLayerEntryConfig(mapId, layerPath);
+};

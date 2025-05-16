@@ -113,6 +113,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
+  static getLayerEntryConfig(mapId: string, layerPath: string): AbstractBaseLayerEntryConfig {
+    // Get the layer config
+    return MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath) as AbstractBaseLayerEntryConfig;
+  }
+
   /**
    * Sets the layer bounds for a layer path
    * @param {string} mapId - The map id
