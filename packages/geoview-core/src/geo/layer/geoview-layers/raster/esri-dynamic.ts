@@ -200,15 +200,27 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       sourceOptions.params!.bboxSR = srid;
     }
 
-    const arcgisSource = new ImageArcGISRest(sourceOptions);
+    // Create the source
+    const olSource = new ImageArcGISRest(sourceOptions);
 
     // Raster layers do not accept layerDefs — must be cleared
     if (layerConfig.getServiceMetadata()?.layers?.[0]?.type === 'Raster Layer') {
-      const params = arcgisSource.getParams();
-      arcgisSource.updateParams({ ...params, layerDefs: '' });
+      const params = olSource.getParams();
+      olSource.updateParams({ ...params, layerDefs: '' });
     }
 
-    return arcgisSource;
+    // Apply the filter on the source right away, before the first load
+    GVEsriDynamic.applyViewFilterOnSource(
+      layerConfig,
+      olSource,
+      layerConfig.layerStyle,
+      layerConfig.getExternalFragmentsOrder(),
+      undefined,
+      layerConfig.layerFilter
+    );
+
+    // Return the source
+    return olSource;
   }
 }
 

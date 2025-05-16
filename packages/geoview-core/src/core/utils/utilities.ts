@@ -449,6 +449,51 @@ export const delay = (ms: number): Promise<void> => {
 };
 
 /**
+ * Repeatedly invokes a callback function at a given interval until it returns `true`.
+ * Once the callback returns `true`, the interval is cleared and the polling stops.
+ * @param {() => boolean} callback - A function that is called every `ms` milliseconds.
+ *                                   If it returns `true`, the interval is cleared.
+ * @param {number} ms - The interval time in milliseconds between callback executions.
+ * @returns {NodeJS.Timeout} The interval timer ID, which can be used to clear the interval manually if needed.
+ */
+export const doUntil = (callback: () => boolean, ms: number): NodeJS.Timeout => {
+  // Start a recurrent timer
+  const interval = setInterval(() => {
+    // Callback
+    const shouldClearInterval = callback();
+
+    // If clearing the interval
+    if (shouldClearInterval) clearInterval(interval);
+  }, ms);
+
+  // Return the interval timer
+  return interval;
+};
+
+/**
+ * Repeatedly invokes a callback function at a specified interval until one of two conditions is met:
+ * - The callback function explicitly returns `true`, indicating the interval should be cleared.
+ * - All provided promises have resolved or rejected.
+ * This is useful for performing a recurring action (e.g., logging or polling) that can end either due to
+ * external completion logic or once all promises are settled.
+ * @param {() => boolean} callback - A function executed on each interval. If it returns `true`, the interval is cleared.
+ * @param {Promise<unknown>[]} promises - An array of promises whose completion will also stop the interval.
+ * @param {number} ms - The interval duration in milliseconds.
+ * @returns {NodeJS.Timeout} The interval timer, which can be cleared manually if needed.
+ */
+export const doUntilPromises = (callback: () => boolean, promises: Promise<unknown>[], ms: number): NodeJS.Timeout => {
+  // Start a recurrent timer
+  const interval = doUntil(callback, ms);
+
+  // Disble eslint here, it should be caught by the creator of the promise
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  Promise.all(promises).finally(() => clearInterval(interval));
+
+  // Return the interval timer
+  return interval;
+};
+
+/**
  * Escape special characters from string
  * @param {string} text - The text to escape
  * @returns {string} Espaced string

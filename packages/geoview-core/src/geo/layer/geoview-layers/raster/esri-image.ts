@@ -13,6 +13,7 @@ import {
 import { commonProcessLayerMetadata } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -123,7 +124,14 @@ export class EsriImage extends AbstractGeoViewRaster {
       projection: source.projection ? `EPSG:${source.projection}` : undefined,
     };
 
-    return new ImageArcGISRest(sourceOptions);
+    // Create the source
+    const olSource = new ImageArcGISRest(sourceOptions);
+
+    // Apply the filter on the source right away, before the first load
+    GVWMS.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.layerFilter);
+
+    // Return the source
+    return olSource;
   }
 }
 
