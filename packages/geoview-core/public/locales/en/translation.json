@@ -252,7 +252,9 @@
   },
   "toggle-all": {
     "show": "Show All",
-    "collapse": "Collapse All"
+    "show-tooltip": "Toggles the visibility of all layers in the map",
+    "collapse": "Collapse All",
+    "collapse-tooltip": "Toggles whether sublayers are shown in the legend / layer list"
   },
   "error": {
     "generic": "An error happened, contact us or view console for details",
