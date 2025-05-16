@@ -126,7 +126,6 @@
     "fetchProgress": "Téléchargement des données... Téléchargé __param__ de __param__ enregistrements.",
     "fetchDone": "Données téléchargées - __param__ enregistrements.",
     "fetchStart": "Début du téléchargement des données...",
-    "slowFetch": "Le téléchargement de __param__ prend plus de temps que prévu.",
     "only": "seulement",
     "opacity": "Opacité",
     "opacityMax": "Maximum du parent",
@@ -275,6 +274,9 @@
   },
   "warning": {
     "layer": {
+      "slowFetch": "Le téléchargement de '__param__' prend plus de temps que prévu.",
+      "basemapTakingLongTime": "La couche de base prend plus de temps que prévu à répondre...",
+      "metadataTakingLongTime": "Les métadonnées pour la couche '__param__' prennent plus de temps que prévu à récupérer...",
       "vectorTileRemoved": "La tuile vectorielle '__param__' a dû être retirée en raison d'un conflit de projection."
     }
   },

@@ -220,6 +220,26 @@ export class CoreBasemapCreationError extends GeoViewError {
 }
 
 /**
+ * Error thrown when the basemap creation process takes longer than expected.
+ * This error is typically used to notify that the basemap did not complete its creation
+ * within a predefined timeout period.
+ */
+export class BasemapTakingLongTimeError extends GeoViewError {
+  /**
+   * Constructs a BasemapTakingLongTimeError error for the specified map ID.
+   */
+  constructor() {
+    super('warning.layer.basemapTakingLongTime');
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'BasemapTakingLongTimeError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, BasemapTakingLongTimeError.prototype);
+  }
+}
+
+/**
  * Custom error class representing a failure to retrieve geographic bounds
  * for a specific map layer.
  * @extends {GeoViewError}
