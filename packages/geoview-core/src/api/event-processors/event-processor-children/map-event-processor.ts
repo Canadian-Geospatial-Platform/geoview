@@ -675,7 +675,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Set the group markers, and update on the map
     curMarkers[group] = groupMarkers;
     this.getMapStateProtected(mapId).setterActions.setPointMarkers(curMarkers);
-    MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.pointMarkers.updatePointMarkers(curMarkers);
+    MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.pointMarkers?.updatePointMarkers(curMarkers);
   }
 
   /**
@@ -705,7 +705,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Set the pointMarkers and update on map
     this.getMapStateProtected(mapId).setterActions.setPointMarkers(curMarkers);
-    MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.pointMarkers.updatePointMarkers(curMarkers);
+    MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.pointMarkers?.updatePointMarkers(curMarkers);
   }
 
   /**

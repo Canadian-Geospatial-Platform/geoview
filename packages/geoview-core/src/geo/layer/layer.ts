@@ -96,7 +96,7 @@ export class LayerApi {
   // Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up
   static DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
 
-  /** used to reference the map viewer */
+  /** Reference on the map viewer */
   mapViewer: MapViewer;
 
   // used to access geometry API to create and manage geometries
@@ -834,12 +834,6 @@ export class LayerApi {
         event.config
       );
 
-      const selectedLayerPath =
-        this.mapViewer.mapFeaturesConfig.footerBar?.selectedLayersLayerPath ||
-        this.mapViewer.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
-      if (selectedLayerPath && event.config.layerPath.startsWith(selectedLayerPath))
-        LegendEventProcessor.setSelectedLayersTabLayer(this.getMapId(), selectedLayerPath as string);
-
       // If is an AbstractBaseLayerEntryConfig
       if (event.config instanceof AbstractBaseLayerEntryConfig) {
         // Set the map layer queryable
@@ -1154,15 +1148,10 @@ export class LayerApi {
   /**
    * Checks if the layer results sets are all greater than or equal to the provided status
    */
-  checkLayerStatus(
-    status: TypeLayerStatus,
-    layerEntriesToCheck: MapConfigLayerEntry[] | undefined,
-    callbackNotGood?: (layerConfig: ConfigBaseClass) => void
-  ): [boolean, number] {
+  checkLayerStatus(status: TypeLayerStatus, callbackNotGood?: (layerConfig: ConfigBaseClass) => void): [boolean, number] {
     // If no layer entries at all or there are layer entries and there are geoview layers to check
-    let allGood = layerEntriesToCheck?.length === 0 || this.getGeoviewLayerIds().length > 0;
+    let allGood = true;
 
-    // For each registered layer entry
     this.getLayerEntryConfigs().forEach((layerConfig) => {
       const layerIsGood = ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo(status, [layerConfig]);
       if (!layerIsGood) {
@@ -1173,32 +1162,7 @@ export class LayerApi {
     });
 
     // Return if all good
-    return [allGood, this.getGeoviewLayerIds().length];
-  }
-
-  /**
-   * Checks if the layer results sets are all ready using the resultSet from the FeatureInfo LayerSet
-   */
-  checkFeatureInfoLayerResultSetsReady(callbackNotReady?: (layerEntryConfig: AbstractBaseLayerEntryConfig) => void): boolean {
-    // For each registered layer entry
-    let allGood = true;
-    this.getLayerEntryConfigs().forEach((layerConfig) => {
-      // If not instance of AbstractBaseLayerEntryConfig, don't expect a result set
-      if (!(layerConfig instanceof AbstractBaseLayerEntryConfig)) return;
-      // If not queryable, don't expect a result set
-      if (!layerConfig.source?.featureInfo?.queryable) return;
-
-      const { resultSet } = this.featureInfoLayerSet;
-      const layerResultSetReady = Object.keys(resultSet).includes(layerConfig.layerPath);
-      if (!layerResultSetReady) {
-        // Callback about it
-        callbackNotReady?.(layerConfig);
-        allGood = false;
-      }
-    });
-
-    // Return if all good
-    return allGood;
+    return [allGood, this.getLayerEntryConfigs().length];
   }
 
   /**

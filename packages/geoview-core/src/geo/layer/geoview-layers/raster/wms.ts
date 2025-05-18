@@ -598,14 +598,14 @@ export class WMS extends AbstractGeoViewRaster {
       subLayerEntryConfig.layerName = subLayer.Title as string;
       newListOfLayerEntryConfig.push(subLayerEntryConfig as TypeLayerEntryConfig);
 
-      // Alert that we want to register an extra layer entry
-      this.emitLayerEntryRegisterInit({ config: subLayerEntryConfig });
-
       // If we don't want all sub layers (simulating the 'Private element not on object' error we had for long time)
       if (!this.fullSubLayers) {
         // Skip the rest on purpose (ref TODO: Bug above)
         throw new CancelledError();
       }
+
+      // Alert that we want to register an extra layer entry
+      this.emitLayerEntryRegisterInit({ config: subLayerEntryConfig });
     });
 
     // TODO: Bug - Continuation of the TODO Bug above.. Purposely don't do this anymore (the throw will cause skipping of this)
