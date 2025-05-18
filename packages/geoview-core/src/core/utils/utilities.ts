@@ -364,6 +364,63 @@ export function stringify(str: unknown): unknown | string {
 }
 
 /**
+ * Delay helper function.
+ * @param {number} ms - The number of milliseconds to wait for.
+ * @returns {Promise<void>} Promise which resolves when the delay timeout expires.
+ */
+export const delay = (ms: number): Promise<void> => {
+  return new Promise((resolve) => {
+    // Wait
+    setTimeout(resolve, ms);
+  });
+};
+
+/**
+ * Repeatedly invokes a callback function at a given interval until it returns `true`.
+ * Once the callback returns `true`, the interval is cleared and the polling stops.
+ * @param {() => T} callback - A function that is called every `ms` milliseconds.
+ *                                   If it returns `true`, the interval is cleared.
+ * @param {number} ms - The interval time in milliseconds between callback executions.
+ * @returns {NodeJS.Timeout} The interval timer ID, which can be used to clear the interval manually if needed.
+ */
+export const doUntil = <T>(callback: () => T, ms: number): NodeJS.Timeout => {
+  // Start a recurrent timer
+  const interval = setInterval(() => {
+    // Callback
+    const shouldClearInterval = callback();
+
+    // If clearing the interval
+    if (shouldClearInterval) clearInterval(interval);
+  }, ms);
+
+  // Return the interval timer
+  return interval;
+};
+
+/**
+ * Repeatedly invokes a callback function at a specified interval until one of two conditions is met:
+ * - The callback function explicitly returns `true`, indicating the interval should be cleared.
+ * - All provided promises have resolved or rejected.
+ * This is useful for performing a recurring action (e.g., logging or polling) that can end either due to
+ * external completion logic or once all promises are settled.
+ * @param {() => T} callback - A function executed on each interval. If it returns `true`, the interval is cleared.
+ * @param {Promise<unknown>[]} promises - An array of promises whose completion will also stop the interval.
+ * @param {number} ms - The interval duration in milliseconds.
+ * @returns {NodeJS.Timeout} The interval timer, which can be cleared manually if needed.
+ */
+export const doUntilPromises = <T>(callback: () => T, promises: Promise<unknown>[], ms: number): NodeJS.Timeout => {
+  // Start a recurrent timer
+  const interval = doUntil(callback, ms);
+
+  // Disble eslint here, it should be caught by the creator of the promise
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  Promise.all(promises).finally(() => clearInterval(interval));
+
+  // Return the interval timer
+  return interval;
+};
+
+/**
  * Internal function to work with async "whenThisThat"... methods.
  * This function is recursive and checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
@@ -373,7 +430,7 @@ export function stringify(str: unknown): unknown | string {
  * @param {function} failCallback - The function executed when checkCallback has failed for too long (went over the timeout)
  * @param {Date} startDate - The initial date this task was started
  * @param {number} timeout - The duration in milliseconds until the task is aborted
- * @param {number} checkFrequency - The frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
+ * @param {number} checkFrequency - The frequency in milliseconds to callback for a check.
  */
 // eslint-disable-next-line no-underscore-dangle
 function _whenThisThenThat<T>(
@@ -384,21 +441,26 @@ function _whenThisThenThat<T>(
   timeout: number,
   checkFrequency: number
 ): void {
-  // Check if we're good
-  const v = checkCallback();
-  if (v) {
-    // Do that
-    doCallback(v);
-  } else if (new Date().getTime() - startDate.getTime() <= timeout) {
-    // Check again later
-    setTimeout(() => {
-      // Recursive call
-      _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, timeout, checkFrequency);
-    }, checkFrequency);
-  } else {
-    // Failed, took too long, this throws an exception in typical async/await contexts
-    failCallback('Task abandonned, took too long.');
-  }
+  // Do until
+  doUntil(() => {
+    // Check if we're good
+    const result = checkCallback();
+
+    // If got something
+    if (result) {
+      // Do the 'that' and we're done
+      doCallback(result);
+      return true;
+    }
+    if (Date.now() - startDate.getTime() > timeout) {
+      // We're done, timeout expired
+      failCallback(`Task abandoned, took too long (over ${timeout} ms).`);
+      return true;
+    }
+
+    // Continue loop
+    return false;
+  }, checkFrequency);
 }
 
 /**
@@ -435,63 +497,6 @@ export function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkF
     whenThisThenThat(checkCallback, resolve, reject, timeout, checkFrequency);
   });
 }
-
-/**
- * Delay helper function.
- * @param {number} ms - The number of milliseconds to wait for.
- * @returns {Promise<void>} Promise which resolves when the delay timeout expires.
- */
-export const delay = (ms: number): Promise<void> => {
-  return new Promise((resolve) => {
-    // Wait
-    setTimeout(resolve, ms);
-  });
-};
-
-/**
- * Repeatedly invokes a callback function at a given interval until it returns `true`.
- * Once the callback returns `true`, the interval is cleared and the polling stops.
- * @param {() => boolean} callback - A function that is called every `ms` milliseconds.
- *                                   If it returns `true`, the interval is cleared.
- * @param {number} ms - The interval time in milliseconds between callback executions.
- * @returns {NodeJS.Timeout} The interval timer ID, which can be used to clear the interval manually if needed.
- */
-export const doUntil = (callback: () => boolean, ms: number): NodeJS.Timeout => {
-  // Start a recurrent timer
-  const interval = setInterval(() => {
-    // Callback
-    const shouldClearInterval = callback();
-
-    // If clearing the interval
-    if (shouldClearInterval) clearInterval(interval);
-  }, ms);
-
-  // Return the interval timer
-  return interval;
-};
-
-/**
- * Repeatedly invokes a callback function at a specified interval until one of two conditions is met:
- * - The callback function explicitly returns `true`, indicating the interval should be cleared.
- * - All provided promises have resolved or rejected.
- * This is useful for performing a recurring action (e.g., logging or polling) that can end either due to
- * external completion logic or once all promises are settled.
- * @param {() => boolean} callback - A function executed on each interval. If it returns `true`, the interval is cleared.
- * @param {Promise<unknown>[]} promises - An array of promises whose completion will also stop the interval.
- * @param {number} ms - The interval duration in milliseconds.
- * @returns {NodeJS.Timeout} The interval timer, which can be cleared manually if needed.
- */
-export const doUntilPromises = (callback: () => boolean, promises: Promise<unknown>[], ms: number): NodeJS.Timeout => {
-  // Start a recurrent timer
-  const interval = doUntil(callback, ms);
-
-  // Disble eslint here, it should be caught by the creator of the promise
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  Promise.all(promises).finally(() => clearInterval(interval));
-
-  // Return the interval timer
-  return interval;
-};
 
 /**
  * Escape special characters from string
