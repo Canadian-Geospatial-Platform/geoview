@@ -22,15 +22,18 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
  * @class FeatureHighlight
  */
 export class FeatureHighlight {
+  /** Reference on the map viewer */
+  mapViewer: MapViewer;
+
   /** The vector source to use for the highlight features */
   highlightSource: VectorSource = new VectorSource();
 
   /** The hidden layer to display highlight. */
   // GV It's public, to save an eslint warning, because even if it's not read in this class, it's actually important to instanciate per OpenLayer design.
-  overlayLayer: VectorLayer;
+  overlayLayer?: VectorLayer;
 
   // Used to access point markers
-  pointMarkers: PointMarkers;
+  pointMarkers?: PointMarkers;
 
   /** The fill for the highlight */
   #highlightColor: TypeHighlightColors = 'black';
@@ -51,14 +54,23 @@ export class FeatureHighlight {
   #bboxTimeout: NodeJS.Timeout | null = null;
 
   /**
-   * Initializes feature higlight classes
-   * @param {MapViewer} mapViewer a reference to the map viewer
+   * Constructor
+   * @param {MapViewer} mapViewer - A reference to the map viewer
    */
   constructor(mapViewer: MapViewer) {
-    this.overlayLayer = new VectorLayer({ source: this.highlightSource, map: mapViewer.map });
-    this.pointMarkers = new PointMarkers(mapViewer, this);
-    if (MapEventProcessor.getFeatureHighlightColor(mapViewer.mapId) !== 'black')
-      this.changeHighlightColor(MapEventProcessor.getFeatureHighlightColor(mapViewer.mapId));
+    // Keep the reference
+    this.mapViewer = mapViewer;
+  }
+
+  /**
+   * Initializes the FeatureHightlight with the MapViewer, now that the map is accessible inside the MapViewer.
+   */
+  init(): void {
+    // Initialize the Feature Hightlight
+    this.overlayLayer = new VectorLayer({ source: this.highlightSource, map: this.mapViewer.map });
+    this.pointMarkers = new PointMarkers(this.mapViewer, this);
+    if (MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId) !== 'black')
+      this.changeHighlightColor(MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId));
   }
 
   /**
@@ -195,7 +207,7 @@ export class FeatureHighlight {
       });
       newFeature.setStyle(radStyle);
     }
-    this.overlayLayer.changed();
+    this.overlayLayer?.changed();
   }
 
   /**
