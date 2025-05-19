@@ -194,9 +194,12 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
               // Log
               logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
             } else {
-              // Error
-              this.resultSet[layerPath].queryStatus = 'error';
-              this.resultSet[layerPath].feature = undefined;
+              // If there's a resultSet for the layer path
+              if (this.resultSet[layerPath]) {
+                // Error
+                this.resultSet[layerPath].queryStatus = 'error';
+                this.resultSet[layerPath].feature = undefined;
+              }
 
               // Log
               logger.logPromiseFailed('queryLayerFeatures in queryLayers in hoverFeatureInfoLayerSet', error);

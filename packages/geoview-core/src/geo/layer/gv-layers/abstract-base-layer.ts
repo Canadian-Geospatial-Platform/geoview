@@ -322,7 +322,7 @@ export type LayerNameChangedEvent = {
 /**
  * Define a delegate for the event handler function signature.
  */
-type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerNameChangedEvent, void>;
+export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerNameChangedEvent, void>;
 
 /**
  * Define an event for the delegate

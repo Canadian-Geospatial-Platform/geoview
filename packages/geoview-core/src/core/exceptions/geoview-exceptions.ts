@@ -289,6 +289,26 @@ export class NoExtentError extends GeoViewError {
  * Error thrown when a map-related function is called at the wrong time or under invalid conditions during initialization.
  * Typically used to indicate misuse of the initialization sequence.
  */
+export class InitDivNotExistError extends GeoViewError {
+  /**
+   * Creates an instance of InitDivNotExistError.
+   * @param {string} mapId - The map id for which a wront function call was made.
+   */
+  constructor(mapId: string) {
+    super('error.map.mapDivNotExists', [mapId]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'InitDivNotExistError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, InitDivNotExistError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a map-related function is called at the wrong time or under invalid conditions during initialization.
+ * Typically used to indicate misuse of the initialization sequence.
+ */
 export class InitMapWrongCallError extends GeoViewError {
   /**
    * Creates an instance of InitMapWrongCallError.

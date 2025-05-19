@@ -52,7 +52,13 @@ import { formatError, NotSupportedError } from '@/core/exceptions/core-exception
 import { LayerCreatedTwiceError, LayerNotFoundError, LayerNotGeoJsonError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { AbstractGVLayer, LayerMessageEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import {
+  AbstractGVLayer,
+  IndividualLayerLoadedDelegate,
+  IndividualLayerLoadedEvent,
+  LayerMessageDelegate,
+  LayerMessageEvent,
+} from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { getExtentUnion, getZoomFromScale } from '@/geo/utils/utilities';
@@ -159,6 +165,12 @@ export class LayerApi {
   // Keep all callback delegates references
   #onLayerItemVisibilityToggledHandlers: LayerItemVisibilityToggledDelegate[] = [];
 
+  // Keep a bounded reference to the handle layer message
+  #boundedHandleLayerMessage: LayerMessageDelegate;
+
+  // Keep a bounded reference to the handle layer individual layer loaded
+  #boundedHandleIndividualLayerLoaded: IndividualLayerLoadedDelegate;
+
   /**
    * Initializes layer types and listen to add/remove layer events from outside
    * @param {MapViewer} mapViewer - A reference to the map viewer
@@ -173,6 +185,10 @@ export class LayerApi {
 
     this.geometry = new GeometryApi(this.mapViewer);
     this.featureHighlight = new FeatureHighlight(this.mapViewer);
+
+    // Keep a bounded reference to the handle
+    this.#boundedHandleLayerMessage = this.#handleLayerMessage.bind(this);
+    this.#boundedHandleIndividualLayerLoaded = this.#handleIndividualLayerLoaded.bind(this);
   }
 
   /**
@@ -275,24 +291,25 @@ export class LayerApi {
    *
    * @private
    */
-  #attachEventsOnLayer(gvLayer: AbstractGVLayer): void {
+  #registerLayerHandlers(gvLayer: AbstractGVLayer): void {
     // Add a handler on layer's message
-    gvLayer.onLayerMessage(this.#handleLayerMessage.bind(this));
+    gvLayer.onLayerMessage(this.#boundedHandleLayerMessage);
 
     // Register a hook when a layer is loaded on the map
-    gvLayer.onIndividualLayerLoaded((sender, payload) => {
-      // Log
-      logger.logTraceCore(`LAYERS - 10 - ${payload.layerPath} loaded on map ${this.getMapId()}`);
+    gvLayer.onIndividualLayerLoaded(this.#boundedHandleIndividualLayerLoaded);
+  }
 
-      // Set in visible range property for all newly added layers
-      this.#setLayerInVisibleRange(sender, gvLayer.getLayerConfig());
+  /**
+   * Detaches the events registration on the layer
+   * @param {AbstractGVLayer} gvLayer - The layer to deattach events registrations from.
+   * @private
+   */
+  #unregisterLayerHandlers(gvLayer: AbstractGVLayer): void {
+    // Unregisters handler on layer's message
+    gvLayer.offLayerMessage(this.#boundedHandleLayerMessage);
 
-      // Ensure that the layer bounds are set when the layer is loaded
-      const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), payload.layerPath);
-      if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), payload.layerPath);
-
-      this.#emitLayerLoaded({ layer: sender, layerPath: payload.layerPath });
-    });
+    // Unregisters handler on layers loaded
+    gvLayer.offIndividualLayerLoaded(this.#boundedHandleIndividualLayerLoaded);
   }
 
   /**
@@ -330,6 +347,26 @@ export class LayerApi {
     } else if (messageType === 'success') {
       this.mapViewer.notifications.showSuccess(messageKey, messageParams, notification);
     }
+  }
+
+  /**
+   * Handles when a layer is loaded on the map
+   * @param {AbstractGVLayer} layer - The layer that's become loaded.
+   * @param {IndividualLayerLoadedEvent} loadedEvent - The event associated with the layer.
+   */
+  #handleIndividualLayerLoaded(layer: AbstractGVLayer, loadedEvent: IndividualLayerLoadedEvent): void {
+    // Log
+    logger.logTraceCore(`LAYERS - 10 - ${loadedEvent.layerPath} loaded on map ${this.getMapId()}`);
+
+    // Set in visible range property for all newly added layers
+    this.#setLayerInVisibleRange(layer, layer.getLayerConfig());
+
+    // Ensure that the layer bounds are set when the layer is loaded
+    const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), loadedEvent.layerPath);
+    if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), loadedEvent.layerPath);
+
+    // Emit about it
+    this.#emitLayerLoaded({ layer, layerPath: loadedEvent.layerPath });
   }
 
   /**
@@ -884,8 +921,8 @@ export class LayerApi {
       this.#gvLayers[layerConfig.layerPath] = gvLayer;
       this.#olLayers[layerConfig.layerPath] = gvLayer.getOLLayer();
 
-      // Attach the events handler
-      this.#attachEventsOnLayer(gvLayer);
+      // Register events handler for the layer
+      this.#registerLayerHandlers(gvLayer);
 
       // Init it
       gvLayer.init();
@@ -1231,6 +1268,10 @@ export class LayerApi {
 
         // Unregister layer config from the application
         this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath)!);
+
+        // Unregister the events on the layer
+        if (this.#gvLayers[registeredLayerPath] instanceof AbstractGVLayer)
+          this.#unregisterLayerHandlers(this.#gvLayers[registeredLayerPath]);
 
         // Remove from registered layer configs
         delete this.#layerEntryConfigs[registeredLayerPath];

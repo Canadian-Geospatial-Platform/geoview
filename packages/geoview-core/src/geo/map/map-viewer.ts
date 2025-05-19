@@ -702,6 +702,10 @@ export class MapViewer {
     this.#i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
   }
 
+  /**
+   * Emits a map single click event.
+   * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to emit.
+   */
   emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void {
     // Emit the event
     this.#emitMapSingleClick(clickCoordinates);
@@ -1523,7 +1527,7 @@ export class MapViewer {
     logger.logInfo(`Map is ready. Layers are still being processed...`, this.mapId);
 
     // Log Marker Start
-    logger.logMarkerStart(`mapReady-${this.mapId}`);
+    logger.logMarkerStart(`readyMap-${this.mapId}`);
 
     // Is ready
     this.#mapReady = true;
@@ -1533,6 +1537,7 @@ export class MapViewer {
     MapEventProcessor.initMapControls(this.mapId);
 
     // Load the guide
+    // TODO: Check - Do we really need to await on the guide?
     await AppEventProcessor.setGuide(this.mapId);
 
     // Check how load in milliseconds has it been processing thus far
@@ -1561,10 +1566,10 @@ export class MapViewer {
     // Await for all layers to be 'processed'
     await this.#checkMapLayersProcessed();
 
-    // Zoom to extent if necessary
+    // Zoom to extent if necessary, but don't wait for it
     this.#zoomOnExtentMaybe().catch((error: unknown) => {
       // Log
-      logger.logPromiseFailed('in #zoomOnExtentMaybe in #checkMapReady', error);
+      logger.logPromiseFailed('in #zoomOnExtentMaybe in #readyMap', error);
     });
 
     // If there's a layer path that should be selected in footerBar or appBar configs, select it
@@ -1575,18 +1580,42 @@ export class MapViewer {
     // Await for all layers to be 'loaded'
     await this.#checkMapLayersLoaded();
 
-    // Zoom on layers ids, if necessary
+    // Zoom on layers ids, if necessary, but don't wait for it
     this.#zoomOnLayerIdsMaybe().catch((error: unknown) => {
       // Log
-      logger.logPromiseFailed('in #zoomOnLayerIdsMaybe in #checkMapReady', error);
+      logger.logPromiseFailed('in #zoomOnLayerIdsMaybe in #readyMap', error);
     });
 
     // Create and dispatch the resolution change event to force the registration of layers in the
     // inVisibleRange array when layers are loaded.
-    const event = new ObjectEvent('change:resolution', 'visibleRange', null);
-    this.getView().dispatchEvent(event);
+    this.getView().dispatchEvent(new ObjectEvent('change:resolution', 'visibleRange', null));
 
     // Done
+    return Promise.resolve();
+  }
+
+  /**
+   * Zooms the map on the to the extents of specified layers once they are fully loaded or to the extent specified in initialView and do so right away.
+   * - If `initialView.extent` is defined, it tries to create the extent and zoom on it.
+   * - If `initialView.extent` is undefined, it won't do anything.
+   * @private
+   */
+  #zoomOnExtentMaybe(): Promise<void> {
+    // Zoom to extents of layers selected in config, if provided
+    if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent) {
+      // Not zooming on layers, but we have an extent to zoom to instead
+      // If extent is not lon/lat, we assume it is in the map projection and use it as is.
+      const extent = isExtentLngLat(this.mapFeaturesConfig.map.viewSettings.initialView!.extent)
+        ? this.convertExtentLngLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent)
+        : this.mapFeaturesConfig.map.viewSettings.initialView!.extent;
+
+      // Zoom to extent
+      return this.zoomToExtent(extent, {
+        padding: [0, 0, 0, 0],
+      });
+    }
+
+    // No zoom to do, resolve
     return Promise.resolve();
   }
 
@@ -1624,31 +1653,6 @@ export class MapViewer {
   }
 
   /**
-   * Zooms the map on the to the extents of specified layers once they are fully loaded or to the extent specified in initialView and do so right away.
-   * - If `initialView.extent` is defined, it tries to create the extent and zoom on it.
-   * - If `initialView.extent` is undefined, it won't do anything.
-   * @private
-   */
-  #zoomOnExtentMaybe(): Promise<void> {
-    // Zoom to extents of layers selected in config, if provided
-    if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent) {
-      // Not zooming on layers, but we have an extent to zoom to instead
-      // If extent is not lon/lat, we assume it is in the map projection and use it as is.
-      const extent = isExtentLngLat(this.mapFeaturesConfig.map.viewSettings.initialView!.extent)
-        ? this.convertExtentLngLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView!.extent as Extent)
-        : this.mapFeaturesConfig.map.viewSettings.initialView!.extent;
-
-      // Zoom to extent
-      return this.zoomToExtent(extent, {
-        padding: [0, 0, 0, 0],
-      });
-    }
-
-    // No zoom to do, resolve
-    return Promise.resolve();
-  }
-
-  /**
    * Function called to monitor when the map has its layers in processed state.
    * @private
    */
@@ -1658,7 +1662,7 @@ export class MapViewer {
 
     // Log
     logger.logInfo(`Map is ready with ${layersCount} processed layer entries`, this.mapId);
-    logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all ${layersCount} layer entries to be processed`);
+    logger.logMarkerCheck(`readyMap-${this.mapId}`, `for all ${layersCount} layer entries to be processed`);
 
     // Is ready
     this.#mapLayersProcessed = true;
@@ -1675,7 +1679,7 @@ export class MapViewer {
 
     // Log
     logger.logInfo(`Map is ready with ${layersCount} loaded layer entries`, this.mapId);
-    logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all ${layersCount} layer entries to be loaded`);
+    logger.logMarkerCheck(`readyMap-${this.mapId}`, `for all ${layersCount} layer entries to be loaded`);
 
     // Is ready
     this.#mapLayersLoaded = true;
