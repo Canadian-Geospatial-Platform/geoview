@@ -114,14 +114,17 @@
         });
       }
 
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init((mapId) => {
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
         // If all maps initialized
-        if (mapId === 'map1') {
+        if (mapViewer.mapId === 'map1') {
           // Init map
-          initMap1(cgpv.api.getMapViewer('map1'));
+          initMap1(mapViewer);
         }
       });
+
+      // initialize cgpv
+      cgpv.init();
 
       // create snippets
       window.addEventListener('load', () => {

@@ -261,7 +261,9 @@
 
           // create map
           cgpv.api.createMapFromConfig('map1', e.target.value, 800)
-            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'))
+            .then((mapViewer) => {
+              listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
+            })
             .catch((error) => {
               console.error('Failed to create map from config', error);
             });

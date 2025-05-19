@@ -64,16 +64,14 @@
 
     <script src="codedoc.js"></script>
     <script>
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(
-        (mapId) => {
-          // write some code ...
-        },
-        (mapId) => {
-          if (mapId === 'map1') {
+
+      // Register handler when map has been initialized
+      cgpv.onLayersLoaded((mapViewer) => {
+        if (mapViewer.mapId === 'map1') {
+            // TODO: Check - Why delay it here?
             window.setInterval(() => {
               const displayField1 = document.getElementById('HUC3-state');
-              const featureInfoLayerSet = cgpv.api.getMapViewer('map1').layer.featureInfoLayerSet.resultSet;
+              const featureInfoLayerSet = mapViewer.layer.featureInfoLayerSet.resultSet;
               if (featureInfoLayerSet) {
                 const output = Object.keys(featureInfoLayerSet).reduce((outputValue, layerId) => {
                   const { layerStatus } = featureInfoLayerSet[layerId];
@@ -83,8 +81,10 @@
               } else displayField1.textContent = '(undefined)';
             }, 250);
           }
-        }
-      );
+      });
+
+      // initialize cgpv
+      cgpv.init();
 
       function addSwiper() {
         cgpv.api.getMapViewer('map1').plugins['swiper'].activateForLayer(document.getElementById('mapWM3Input').value);

@@ -206,7 +206,7 @@ export class API {
    * @param {number} divHeight - height of the div to inject the map in (mandatory if the map reloads)
    */
   // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
-  async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<void> {
+  async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer> {
     // Get the map div
     const mapDiv = document.getElementById(divId);
     if (divHeight) mapDiv!.style.height = `${divHeight}px`;
@@ -214,9 +214,9 @@ export class API {
     // If found the map div
     if (mapDiv) {
       // Init by function call
-      await initMapDivFromFunctionCall(mapDiv, mapConfig);
+      const mapViewer = await initMapDivFromFunctionCall(mapDiv, mapConfig);
       this.#emitMapAddedToDiv({ mapId: divId });
-      return;
+      return mapViewer;
     }
 
     // Failed

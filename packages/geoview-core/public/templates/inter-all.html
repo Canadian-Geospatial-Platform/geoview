@@ -202,11 +202,6 @@
     }
 
     let map1;
-    function initMap1(map) {
-      // Keep reference and nothing else, rest is driven by the user interface
-      map1 = map;
-    }
-
     function btnClearGroup(groupKey) {
       // Delete the geometries from the group
       map1.layer.geometry.deleteGeometriesFromGroup(groupKey);
@@ -359,14 +354,17 @@
       }
     }
 
-    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init((mapId) => {
+    // Register handler when map has been initialized
+    cgpv.onMapInit((mapViewer) => {
       // If all maps initialized
-      if (mapId === 'map1') {
-        // Init map
-        initMap1(cgpv.api.getMapViewer('map1'));
+      if (mapViewer.mapId === 'map1') {
+        // Keep reference and nothing else, rest is driven by the user interface
+        map1 = mapViewer;
       }
     });
+
+    // initialize cgpv
+    cgpv.init();
 
     // create snippets
     window.addEventListener('load', () => {

@@ -147,9 +147,9 @@
         // return root;
       }
 
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init((mapId) => {
-        if (mapId === 'map1') {
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        if (mapViewer.mapId === 'map1') {
           /**
            * RANGE SLIDER UI SECTION START
            */
@@ -172,12 +172,8 @@
               ],
               track: 'normal',
               onChange: (dates) => {
-                const field = cgpv.api.getMapViewer('map1').layer
-                  .getGeoviewLayer('historical-flood/0')
-                  .getTemporalDimension().field;
-                cgpv.api.getMapViewer('map1').layer
-                  .getGeoviewLayer('historical-flood/0')
-                  .applyViewFilter(`${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
+                const field = mapViewer.layer.getGeoviewLayer('historical-flood/0').getTemporalDimension().field;
+                mapViewer.layer.getGeoviewLayer('historical-flood/0').applyViewFilter(`${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
               },
             })
           );
@@ -209,7 +205,7 @@
             onChange: (zoomLevel) => {
               const lat = 50;
               const lng = -95;
-              cgpv.api.getMapViewer('map1').getView().animate({ zoom: zoomLevel });
+              mapViewer.getView().animate({ zoom: zoomLevel });
             },
           };
 
@@ -260,6 +256,9 @@
            */
         }
       });
+
+      // initialize cgpv
+      cgpv.init();
 
       // create snippets
       window.addEventListener('load', () => {
