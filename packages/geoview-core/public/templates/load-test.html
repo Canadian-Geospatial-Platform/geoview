@@ -139,13 +139,13 @@
       let tzoom0 = 0;
       const jsonFeatureOptionValues = ['jsonPoint', 'jsonLine', 'jsonPolygon'];
 
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init((mapId) => {
-        if (mapId === 'map1') {
-          setTimeout(() => cgpv.api.getMapViewer('map1').map.on('movestart', () => (tzoom0 = performance.now())), 1000);
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        if (mapViewer.mapId === 'map1') {
+          setTimeout(() => mapViewer.map.on('movestart', () => (tzoom0 = performance.now())), 1000);
           setTimeout(
             () =>
-              cgpv.api.getMapViewer('map1').map.on('moveend', () => {
+            mapViewer.map.on('moveend', () => {
                 var tzoom1 = performance.now();
                 document.getElementById('zoomtime').innerText = Math.round(tzoom1 - tzoom0) / 1000 + ' Seconds';
               }),
@@ -153,6 +153,9 @@
           );
         }
       });
+
+      // initialize cgpv
+      cgpv.init();
 
       // ADD GEOJSON FEATURE SECTION
       var addFeatureButton = document.getElementById('load-features-btn');

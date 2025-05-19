@@ -89,10 +89,13 @@
 
     <script src="codedoc.js"></script>
     <script>
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init((mapId) => {
-          listenToLegendLayerSetChanges(`H${mapId}-state`, mapId);
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
       });
+
+      // initialize cgpv
+      cgpv.init();
 
       // create snippets
       window.addEventListener('load', () => {

@@ -10,6 +10,7 @@ import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import * as UI from '@/ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { TypeJsonObject } from '@/api/config/types/config-types';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 export { getGeoViewStore } from '@/core/stores/stores-managers';
 
@@ -74,7 +75,7 @@ export type TypeCGPV = {
  * Type used for a callback function.
  */
 export type CGPVInitCallback = (callbackMapsInit?: (mapId: string) => void, callbackMapsLayersLoaded?: (mapId: string) => void) => void;
-export type CGPVCallback = (callback: (mapId: string) => void) => void;
+export type CGPVCallback = (callback: (mapViewer: MapViewer) => void) => void;
 
 /**
  * Type used for exporting UI

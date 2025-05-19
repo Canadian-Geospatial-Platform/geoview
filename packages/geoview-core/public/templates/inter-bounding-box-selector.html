@@ -252,16 +252,16 @@
         const westEl = document.getElementById('west');
 
         // Find input values based on coordinates
-        const northVal = coordinates.find((coord, i, arr) => 
+        const northVal = coordinates.find((coord, i, arr) =>
           i > 0 && coord[1] > arr[i - 1][1]
         )[1];
-        const eastVal = coordinates.find((coord, i, arr) => 
+        const eastVal = coordinates.find((coord, i, arr) =>
           i > 0 && coord[0] > arr[i - 1][0]
         )[0];
-        const southVal = coordinates.find((coord, i, arr) => 
+        const southVal = coordinates.find((coord, i, arr) =>
           i > 0 && coord[1] < arr[i - 1][1]
         )[1];
-        const westVal = coordinates.find((coord, i, arr) => 
+        const westVal = coordinates.find((coord, i, arr) =>
           i > 0 && coord[0] < arr[i - 1][0]
         )[0];
 
@@ -325,14 +325,17 @@
         geometry.setFeatureCoords(bboxId, newCoordinates, lonLatProjection);
       }
 
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init((mapId) => {
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
         // If all maps initialized
-        if (mapId === 'map1') {
+        if (mapViewer.mapId === 'map1') {
           // Init map
-          initMap1(cgpv.api.getMapViewer('map1'));
+          initMap1(mapViewer);
         }
       });
+
+      // initialize cgpv
+      cgpv.init();
 
       // create snippets
       window.addEventListener('load', () => {

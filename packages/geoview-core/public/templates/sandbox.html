@@ -248,7 +248,9 @@
           // Regex expression to cature all single quotes (') except those preceded by a backslash (\)
           const regexExp = /(?<!\\)'/g
           cgpv.api.createMapFromConfig('map1', document.getElementById('configGeoview').value.replaceAll(regexExp, '"'))
-            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'))
+            .then((mapViewer) => {
+              listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
+            })
             .catch((error) => {
               console.error('Failed to create map from config', error);
             });
@@ -418,15 +420,13 @@
               'theme': 'geo.ca'
         })
       )
-      .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'))
+      .then(() => listenToLegendLayerSetChanges('sandboxMap-state', cgpv.api.getMapViewer('map1')))
       .catch((error) => {
         console.error('Failed to create map from config', error);
       });
 
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init((mapId) => {
-        // write some code ...
-      });
+      // initialize cgpv
+      cgpv.init();
 
       // create snippets
       window.addEventListener('load', () => {

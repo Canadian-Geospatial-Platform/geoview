@@ -88,55 +88,58 @@
 
     <script src="codedoc.js"></script>
     <script>
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init((mapId) => {
-        if (mapId === 'map1') {
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        if (mapViewer.mapId === 'map1') {
           //get map position panel
           const mapPosition = document.getElementsByClassName('maps-position')[0];
           const mapRotation = document.getElementsByClassName('maps-rotation')[0];
 
           document.getElementById('success-notif-but').addEventListener('click', function (e) {
-            cgpv.api.getMapViewer('map1').notifications.addNotificationSuccess('this is a success notification title');
+            mapViewer.notifications.addNotificationSuccess('this is a success notification title');
           });
 
           document.getElementById('info-notif-but').addEventListener('click', function (e) {
-            cgpv.api.getMapViewer('map1').notifications.addNotificationMessage('this is an info notification');
+            mapViewer.notifications.addNotificationMessage('this is an info notification');
           });
 
           document.getElementById('warning-notif-but').addEventListener('click', function (e) {
-            cgpv.api.getMapViewer('map1').notifications.addNotificationWarning('this is an warning notification');
+            mapViewer.notifications.addNotificationWarning('this is an warning notification');
           });
 
           document.getElementById('error-notif-but').addEventListener('click', function (e) {
-            cgpv.api.getMapViewer('map1').notifications.addNotificationError('this is an error notification');
+            mapViewer.notifications.addNotificationError('this is an error notification');
           });
 
           // listen to map moveend event
-          cgpv.api.getMapViewer('map1').onMapMoveEnd((sender, payload) => {
+          mapViewer.onMapMoveEnd((sender, payload) => {
             mapPosition.innerHTML =
               mapPosition.innerHTML = `<p>Map ${sender.mapId} with latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}</p>`;
           });
 
           // listen to map rotation event
-          cgpv.api.getMapViewer('map1').onMapRotation((sender, payload) => {
+          mapViewer.onMapRotation((sender, payload) => {
             mapRotation.innerHTML = mapRotation.innerHTML = `<p>Map ${sender.mapId} rotation ${payload.rotation}</p>`;
           });
 
           // snackbar notification
-          cgpv.api.getMapViewer('map1').notifications.showWarning('templates.firstSnackbar');
+          mapViewer.notifications.showWarning('templates.firstSnackbar');
 
           setInterval(() => {
-            cgpv.api.getMapViewer('map1').notifications.showMessage('templates.canApplyFunction', [], false, {
+            mapViewer.notifications.showMessage('templates.canApplyFunction', [], false, {
               label: 'Click me!',
               action: () => {
                 alert('You clicked me!');
               },
             });
 
-            cgpv.api.getMapViewer('map1').notifications.addNotificationSuccess('this is a success notification title');
+            mapViewer.notifications.addNotificationSuccess('this is a success notification title');
           }, 10000);
         }
       });
+
+      // initialize cgpv
+      cgpv.init();
 
       // create snippets
       window.addEventListener('load', () => {

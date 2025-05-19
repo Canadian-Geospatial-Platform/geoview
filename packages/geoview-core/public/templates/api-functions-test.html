@@ -137,9 +137,10 @@
 
     <script src="codedoc.js"></script>
     <script>
-      // initialize cgpv and api events, a callback is optional, used if calling api' s after the rendering is ready
-      cgpv.init((mapId) => {
-        if (mapId === 'map1') {
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        // If map1
+        if (mapViewer.mapId === 'map1') {
           cgpv.api.utilities.geo
             .getESRIServiceMetadata('https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/1')
             .then((data) => {
@@ -221,6 +222,9 @@
           });
         }
       });
+
+      // initialize cgpv
+      cgpv.init();
 
       // create snippets
       window.addEventListener('load', () => {
