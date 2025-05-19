@@ -12,14 +12,18 @@ import {
   TypeResultSetEntry,
 } from '@/api/config/types/map-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
-import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
+import {
+  ConfigBaseClass,
+  LayerStatusChangedDelegate,
+  LayerStatusChangedEvent,
+} from '@/core/utils/config/validation-classes/config-base-class';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { LayerApi } from '@/geo/layer/layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import { AbstractBaseLayer, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractBaseLayer, LayerNameChangedDelegate, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -48,10 +52,10 @@ export abstract class AbstractLayerSet {
   #onLayerStatusUpdatedHandlers: LayerStatusUpdatedDelegate[] = [];
 
   // Keep a bounded reference to the handle layer status changed
-  #boundHandleLayerStatusChanged: (config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) => void;
+  #boundedHandleLayerStatusChanged: LayerStatusChangedDelegate;
 
   // Keep a bounded reference to the handle layer status changed
-  #boundHandleLayerNameChanged: (layer: AbstractBaseLayer, layerNameEvent: LayerNameChangedEvent) => void;
+  #boundedHandleLayerNameChanged: LayerNameChangedDelegate;
 
   /**
    * Constructs a new LayerSet instance.
@@ -59,8 +63,8 @@ export abstract class AbstractLayerSet {
    */
   constructor(layerApi: LayerApi) {
     this.layerApi = layerApi;
-    this.#boundHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
-    this.#boundHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
+    this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
+    this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
   }
 
   /**
@@ -202,7 +206,7 @@ export abstract class AbstractLayerSet {
     };
 
     // Register the layer status changed handler
-    layerConfig.onLayerStatusChanged(this.#boundHandleLayerStatusChanged);
+    layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
   }
 
   /**
@@ -278,7 +282,7 @@ export abstract class AbstractLayerSet {
     this.#registeredLayers.push(layer);
 
     // Register the layer name changed handler
-    layer.onLayerNameChanged(this.#boundHandleLayerNameChanged);
+    layer.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
   }
 
   /**
@@ -312,7 +316,7 @@ export abstract class AbstractLayerSet {
    */
   protected onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
     // Unregister the layer status changed handler
-    layerConfig?.offLayerStatusChanged(this.#boundHandleLayerStatusChanged);
+    layerConfig?.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
   }
 
   /**
@@ -322,7 +326,7 @@ export abstract class AbstractLayerSet {
    */
   protected onUnregisterLayer(layer: AbstractBaseLayer | undefined): void {
     // Unregister the layer name changed handler
-    layer?.offLayerNameChanged(this.#boundHandleLayerNameChanged);
+    layer?.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
   }
 
   /**

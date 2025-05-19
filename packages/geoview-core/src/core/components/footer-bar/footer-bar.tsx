@@ -289,12 +289,12 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // Log
     logger.logTraceUseEffect('FOOTER-BAR - mount');
 
-    // TODO: Refactor - Registering those handlers only once the component has been mounted can cause issues if 'someone' calls
+    // TODO: Refactor - Registering those handlers only when the component has been mounted can cause issues if 'someone' calls
     // TO.DOCONT: mapViewer('map1').footerBarApi.createTab() before the component is actually mounted.
-    // TO.DOCONT: The handler when tabs are created should happen earlier and the component should only 'react' to store tabs values
+    // TO.DOCONT: The handler when tabs are created should happen earlier and the ui component should only 'react' to store tabs values.
     // TO.DOCONT: We had an issue where a custom footer tab was never appearing, because the 'createTab()' call was happening before
-    // TO.DOCONT: this FooterBar component was actually mounted. Removing the 'mapLoaded' condition, before mounting the FooterBar
-    // TO.DOCONT: (in Footer-bar.tsx), was sufficient to fix the issue for now, but it should be addressed eventually.
+    // TO.DOCONT: this FooterBar component was actually mounted. That being said, removing the 'mapLoaded' condition, before mounting
+    // TO.DOCONT: the FooterBar (in Footer-bar.tsx), was sufficient to fix the issue for now, but it should be addressed eventually.
 
     // Register footerbar tab created/removed handlers
     footerBarApi.onFooterTabCreated(handleAddTab);

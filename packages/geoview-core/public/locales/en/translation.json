@@ -302,7 +302,8 @@
     "map": {
       "mapIdNotFound": "Map with ID '__param__' not found.",
       "geoviewStoreNotFound": "GeoView Store on Map '__param__' not found.",
-      "mapWrongCall": "Div avec identifiant id __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'."
+      "mapDivNotExists": "Div avec identifiant __param__ does not exist.",
+      "mapWrongCall": "Div avec identifiant __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'."
     },
     "geocore": {
       "uuidNotFound": "GeoCore layer identifier '__param__' does not exist on the server.",
