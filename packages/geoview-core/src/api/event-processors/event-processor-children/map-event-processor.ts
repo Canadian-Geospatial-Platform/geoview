@@ -515,6 +515,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  /**
+   * Sets the home view
+   * @param mapId - The map id
+   * @param view - The view settings
+   * @deprecated
+   */
+  // TODO: Check - Not called anywhere, deprecated?
   static setHomeButtonView(mapId: string, view: TypeMapViewSettings): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setHomeView(view);
