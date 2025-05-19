@@ -798,7 +798,7 @@ export class MapViewer {
     // Remove the map
     const mapDiv = await this.remove(false);
 
-    // TODO: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
+    // TODO: There is still a problem with bad config schema value and layers loading... should be refactor when config is done
     api.createMapFromConfig(mapDiv.id, JSON.stringify(config), height).catch((error: unknown) => {
       // Log
       logger.logError(`Couldn't reload the map in map-viewer`, error);
@@ -835,7 +835,9 @@ export class MapViewer {
   /**
    * Update nav bar home button view settings.
    * @param {TypeMapViewSettings} view - The new view settings.
+   * @deprecated
    */
+  // TODO: Check - Not called anywhere, deprecated?
   setHomeButtonView(view: TypeMapViewSettings): void {
     // Redirect to the processor
     MapEventProcessor.setHomeButtonView(this.mapId, view);

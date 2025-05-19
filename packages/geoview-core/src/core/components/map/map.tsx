@@ -52,6 +52,8 @@ export function Map(props: MapProps): JSX.Element {
   const isMapInitialized = useRef<boolean>(false);
   const [isMapReady, setIsMapReady] = useState(false);
 
+  const hasRun = useRef(false);
+
   const initCGPVMap = useCallback((): void => {
     // Log
     logger.logTraceUseCallback('map.initCGPVMap');
@@ -83,6 +85,10 @@ export function Map(props: MapProps): JSX.Element {
 
   useEffect(() => {
     logger.logTraceUseEffect('MAP - initCGPVMap');
+
+    // Prevent double run, due to React's StrictMode in dev
+    if (hasRun.current) return;
+    hasRun.current = true;
 
     if (mapElement.current && !isMapReady && !isMapInitialized.current) {
       // Create map

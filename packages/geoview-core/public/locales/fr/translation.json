@@ -300,7 +300,8 @@
     },
     "map": {
       "mapIdNotFound": "La carte avec l'identifiant '__param__' est introuvable.",
-      "geoviewStoreNotFound": "Le 'React Store' sur la carte '__param__' est introuvable."
+      "geoviewStoreNotFound": "Le 'React Store' sur la carte '__param__' est introuvable.",
+      "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call."
     },
     "geocore": {
       "uuidNotFound": "L'identifiant de couche GeoCore '__param__' n'existe pas sur le serveur.",
