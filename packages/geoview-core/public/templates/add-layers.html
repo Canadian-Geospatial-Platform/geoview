@@ -256,10 +256,8 @@
         cgpv.api.getMapViewer('map1').setProjection(Number(document.getElementById('projections').value));
       }
 
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init((mapId) => {
-        // write some code ...
-      });
+      // initialize cgpv
+      cgpv.init();
 
       // create snippets
       window.addEventListener('load', () => {

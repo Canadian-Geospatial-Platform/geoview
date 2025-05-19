@@ -221,7 +221,7 @@ export function Shell(props: ShellProps): JSX.Element {
           <CircularProgress isLoaded={mapLoaded} />
           <CircularProgress isLoaded={!circularProgressActive} />
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
-            {mapLoaded && <AppBar api={mapViewer.appBarApi} />}
+            <AppBar api={mapViewer.appBarApi} />
             <MapInfo />
             <Box sx={sxClasses.mapContainer}>
               <Map viewer={mapViewer} mapHeight={mapShellContainerRef.current?.style.height || '100px'} />
@@ -236,7 +236,7 @@ export function Shell(props: ShellProps): JSX.Element {
               onClose={handleSnackBarClose}
             />
           </Box>
-          {geoviewConfig!.footerBar !== undefined && mapLoaded && <FooterBar api={mapViewer.footerBarApi} />}
+          {geoviewConfig!.footerBar !== undefined && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
             <Modal
               key={modalId}

@@ -75,13 +75,8 @@
     <pre id="LNG1CS" class="panel"></pre>
     <script src="codedoc.js"></script>
     <script>
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init((mapId) => {
-        if (mapId === 'map1') {
-          // Write code here...
-          // ...
-        }
-      });
+      // initialize cgpv
+      cgpv.init();
 
       // create snippets
       window.addEventListener('load', () => {
