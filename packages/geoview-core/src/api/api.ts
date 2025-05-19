@@ -206,7 +206,6 @@ export class API {
    * @param {number} divHeight - height of the div to inject the map in (mandatory if the map reloads)
    */
   // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<void> {
     // Get the map div
     const mapDiv = document.getElementById(divId);

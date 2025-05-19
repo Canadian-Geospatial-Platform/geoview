@@ -36,6 +36,9 @@ export class GeoViewError extends Error {
     this.messageKey = messageKey;
     this.messageParams = messageParams;
 
+    // Translate the messag in English by default to at least provide 'something' readable
+    this.message = this.translateMessage('en');
+
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, GeoViewError.prototype);
   }
@@ -269,7 +272,7 @@ export class NoBoundsError extends GeoViewError {
 export class NoExtentError extends GeoViewError {
   /**
    * Creates an instance of NoExtentError.
-   * @param {Extent} layerPath - The layer path for which we tried to get an Extent.
+   * @param {string} layerPath - The layer path for which we tried to get an Extent.
    */
   constructor(layerPath: string) {
     super('layers.errorNoExtent', [layerPath]);
@@ -279,5 +282,25 @@ export class NoExtentError extends GeoViewError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, NoExtentError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a map-related function is called at the wrong time or under invalid conditions during initialization.
+ * Typically used to indicate misuse of the initialization sequence.
+ */
+export class InitMapWrongCallError extends GeoViewError {
+  /**
+   * Creates an instance of InitMapWrongCallError.
+   * @param {string} mapId - The map id for which a wront function call was made.
+   */
+  constructor(mapId: string) {
+    super('error.map.mapWrongCall', [mapId]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'InitMapWrongCallError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, InitMapWrongCallError.prototype);
   }
 }
