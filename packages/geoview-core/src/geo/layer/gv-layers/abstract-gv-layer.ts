@@ -1084,7 +1084,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleChangedEvent, void>;
+export type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleChangedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1102,7 +1102,7 @@ export type LegendQueryingEvent = unknown;
 /**
  * Define a delegate for the event handler function signature
  */
-type LegendQueryingDelegate = EventDelegateBase<AbstractGVLayer, LegendQueryingEvent, void>;
+export type LegendQueryingDelegate = EventDelegateBase<AbstractGVLayer, LegendQueryingEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1114,12 +1114,12 @@ export type LegendQueriedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
+export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
 
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
+export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1132,7 +1132,7 @@ export type LayerFilterAppliedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGVLayer, IndividualLayerLoadedEvent, void>;
+export type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGVLayer, IndividualLayerLoadedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1145,7 +1145,7 @@ export type IndividualLayerLoadedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
 
 /**
  * Define an event for the delegate

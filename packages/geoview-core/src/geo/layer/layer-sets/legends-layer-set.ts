@@ -4,7 +4,7 @@ import { logger } from '@/core/utils/logger';
 import { TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { AbstractLayerSet, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { AbstractGVLayer, LayerStyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractGVLayer, LayerStyleChangedDelegate, LayerStyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
@@ -22,7 +22,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
   declare resultSet: TypeLegendResultSet;
 
   // Keep a bounded reference to the handle layer status changed
-  #boundHandleLayerStyleChanged: (layer: AbstractGVLayer, layerStyleEvent: LayerStyleChangedEvent) => void;
+  #boundedHandleLayerStyleChanged: LayerStyleChangedDelegate;
 
   /**
    * Constructs a Legends LayerSet to manage layers legends.
@@ -30,7 +30,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    */
   constructor(layerApi: LayerApi) {
     super(layerApi);
-    this.#boundHandleLayerStyleChanged = this.#handleLayerStyleChanged.bind(this);
+    this.#boundedHandleLayerStyleChanged = this.#handleLayerStyleChanged.bind(this);
   }
 
   /**
@@ -82,7 +82,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // If regular layer
     if (layer instanceof AbstractGVLayer) {
       // Register handler on layer style change
-      layer.onLayerStyleChanged(this.#boundHandleLayerStyleChanged);
+      layer.onLayerStyleChanged(this.#boundedHandleLayerStyleChanged);
     }
   }
 

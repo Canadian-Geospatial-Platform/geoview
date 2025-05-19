@@ -13,7 +13,7 @@ import * as GeoUtilities from '@/geo/utils/utilities';
 
 import { initMapDivFromFunctionCall } from '@/app';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
+import { InitDivNotExistError, MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -209,18 +209,14 @@ export class API {
   async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer> {
     // Get the map div
     const mapDiv = document.getElementById(divId);
+    if (!mapDiv) throw new InitDivNotExistError(divId);
+
     if (divHeight) mapDiv!.style.height = `${divHeight}px`;
 
-    // If found the map div
-    if (mapDiv) {
-      // Init by function call
-      const mapViewer = await initMapDivFromFunctionCall(mapDiv, mapConfig);
-      this.#emitMapAddedToDiv({ mapId: divId });
-      return mapViewer;
-    }
-
-    // Failed
-    throw new Error(`Div with id ${divId} does not exist`);
+    // Init by function call
+    const mapViewer = await initMapDivFromFunctionCall(mapDiv, mapConfig);
+    this.#emitMapAddedToDiv({ mapId: divId });
+    return mapViewer;
   }
 
   /**

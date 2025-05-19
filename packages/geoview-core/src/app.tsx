@@ -211,32 +211,29 @@ async function renderMap(mapElement: Element): Promise<MapViewer> {
  * @param {string} mapConfig - The new config passed in from the function call
  */
 export function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): Promise<MapViewer> {
-  // If the div doesn't have a geoview-map class (therefore isn't supposed to be loaded via init())
-  if (!mapDiv.classList.contains('geoview-map')) {
-    // Check if it is a url for a config file or a config string
-    const url = mapConfig.match('.json$') !== null;
+  // If the div has a geoview-map class (therefore is supposed to be loaded via init())
+  if (mapDiv.classList.contains('geoview-map')) throw new InitMapWrongCallError(mapDiv.id);
 
-    // Create a data-config attribute and set config value on the div
-    const att = document.createAttribute(url ? 'data-config-url' : 'data-config');
-    // Clean apostrophes in the config if not escaped already
-    att.value = mapConfig.replaceAll(/(?<!\\)'/g, "\\'");
-    mapDiv.setAttributeNode(att);
+  // Check if it is a url for a config file or a config string
+  const url = mapConfig.match('.json$') !== null;
 
-    // Set the geoview-map class on the div so that this class name is standard for all maps (either created via init or via func call)
-    mapDiv.classList.add('geoview-map');
+  // Create a data-config attribute and set config value on the div
+  const att = document.createAttribute(url ? 'data-config-url' : 'data-config');
+  // Clean apostrophes in the config if not escaped already
+  att.value = mapConfig.replaceAll(/(?<!\\)'/g, "\\'");
+  mapDiv.setAttributeNode(att);
 
-    // Add a compatibility flag on the div so that when a map is loaded via function call, it's subsequently ignored in eventual init() calls.
-    // This is useful in case that a html first calls for example `cgpv.api.createMapFromConfig('LNG1', config, divHeight);` and then
-    // calls `cgpv.init()` (let's say for other maps on the page), the map LNG1 isn't being initialized twice.
-    // Remember that init() grabs all maps with geoview-map class and we just added that class manually above, so we need that flag.
-    mapDiv.classList.add('geoview-map-func-call');
+  // Set the geoview-map class on the div so that this class name is standard for all maps (either created via init or via func call)
+  mapDiv.classList.add('geoview-map');
 
-    // Render the map
-    return renderMap(mapDiv);
-  }
+  // Add a compatibility flag on the div so that when a map is loaded via function call, it's subsequently ignored in eventual init() calls.
+  // This is useful in case that a html first calls for example `cgpv.api.createMapFromConfig('LNG1', config, divHeight);` and then
+  // calls `cgpv.init()` (let's say for other maps on the page), the map LNG1 isn't being initialized twice.
+  // Remember that init() grabs all maps with geoview-map class and we just added that class manually above, so we need that flag.
+  mapDiv.classList.add('geoview-map-func-call');
 
-  // Throw
-  throw new InitMapWrongCallError(mapDiv.id);
+  // Render the map
+  return renderMap(mapDiv);
 }
 
 /**

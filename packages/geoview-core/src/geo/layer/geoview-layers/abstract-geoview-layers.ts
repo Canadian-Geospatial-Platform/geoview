@@ -126,9 +126,6 @@ export abstract class AbstractGeoViewLayer {
   #onLayerGVCreatedHandlers: LayerGVCreatedDelegate[] = [];
 
   // Keep all callback delegates references
-  #onIndividualLayerLoadedHandlers: IndividualLayerLoadedDelegate[] = [];
-
-  // Keep all callback delegates references
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
   /**
@@ -995,24 +992,6 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Registers an individual layer loaded event handler.
-   * @param {IndividualLayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onIndividualLayerLoadedHandlers, callback);
-  }
-
-  /**
-   * Unregisters an individual layer loaded event handler.
-   * @param {IndividualLayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onIndividualLayerLoadedHandlers, callback);
-  }
-
-  /**
    * Emits an event to all handlers when the layer's sent a message.
    * @param {LayerMessageEvent} event - The event to emit
    * @private
@@ -1185,19 +1164,6 @@ export interface TypeWmsLegendStyle {
   name: string;
   legend: HTMLCanvasElement | null;
 }
-
-/**
- * Define a delegate for the event handler function signature
- */
-type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGeoViewLayer, IndividualLayerLoadedEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type IndividualLayerLoadedEvent = {
-  // The loaded layer
-  layerPath: string;
-};
 
 /**
  * Define a delegate for the event handler function signature
