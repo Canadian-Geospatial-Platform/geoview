@@ -19,6 +19,7 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
     // Value for this.source.format can only be GeoJSON.
     if (!this.source) this.source = { format: 'GeoJSON' };
     if (!this.source.format) this.source.format = 'GeoJSON';
+    if (layerConfig.source.geojson) this.source.geojson = layerConfig.source.geojson;
 
     // If undefined, we assign the metadataAccessPath of the GeoView layer to dataAccessPath and place the layerId at the end of it.
     if (!this.source.dataAccessPath) {

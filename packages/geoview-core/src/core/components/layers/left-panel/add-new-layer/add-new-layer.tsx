@@ -28,7 +28,7 @@ import {
   GroupLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
-  TypeGeoviewLayerTypeWithGeoCore,
+  TypeInitialGeoviewLayerType,
 } from '@/api/config/types/map-schema-types';
 
 import { ConfigApi } from '@/api/config/config-api';
@@ -44,7 +44,7 @@ const sxClasses = {
   },
 };
 
-const { GEOCORE } = CONST_LAYER_ENTRY_TYPES;
+const { GEOCORE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
 
 interface FileUploadSectionProps {
   onFileSelected: (file: File, fileURL: string, fileName: string) => void;
@@ -84,13 +84,19 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
   /**
    * Process a file for upload and notify the parent component
    *
-   * @param {File} file - The file to process (JSON, GeoJSON, or CSV)
+   * @param {File} file - The file to process (JSON, GeoJSON, ZIP, SHP or CSV)
    * @returns {void}
    * @throws {Error} Shows an error notification if file type is not supported
    */
   const processFile = (file: File): void => {
     const upFilename = file.name.toUpperCase();
-    if (upFilename.endsWith('.JSON') || upFilename.endsWith('.GEOJSON') || upFilename.endsWith('.CSV')) {
+    if (
+      upFilename.endsWith('.JSON') ||
+      upFilename.endsWith('.GEOJSON') ||
+      upFilename.endsWith('.CSV') ||
+      upFilename.endsWith('.ZIP') ||
+      upFilename.endsWith('.SHP')
+    ) {
       const fileURL = URL.createObjectURL(file);
       const fileName = file.name.split('.')[0];
 
@@ -190,7 +196,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
           ref={fileInputRef}
           style={{ display: 'none' }}
           onChange={handleChange}
-          accept=".json, .geojson, .csv"
+          accept=".json, .geojson, .csv, .zip, .shp"
         />
       </Box>
       <Button
@@ -229,7 +235,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
  *
  * @component
  * @description This component guides users through the process of adding a new layer to the map,
- * including uploading files (JSON, GeoJSON, CSV), entering URLs, selecting layer types,
+ * including uploading files (JSON, GeoJSON, CSV, ZIP, SHP), entering URLs, selecting layer types,
  * and configuring layer options. It uses a stepper UI to break the process into manageable steps.
  *
  * @returns {JSX.Element} The rendered component with a multi-step form for adding layers
@@ -248,7 +254,7 @@ export function AddNewLayer(): JSX.Element {
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
   const [displayURL, setDisplayURL] = useState('');
-  const [layerType, setLayerType] = useState<TypeGeoviewLayerTypeWithGeoCore | ''>('');
+  const [layerType, setLayerType] = useState<TypeInitialGeoviewLayerType | ''>('');
   const [layerList, setLayerList] = useState<GroupLayerEntryConfig[]>([]);
   const [layerName, setLayerName] = useState('');
   const [layerIdsToAdd, setLayerIdsToAdd] = useState<string[]>([]);
@@ -272,6 +278,7 @@ export function AddNewLayer(): JSX.Element {
   // List of layer types and labels (Step 2)
   const layerOptions = [
     [CSV, 'CSV'],
+    [SHAPEFILE, 'Shapefile'],
     [ESRI_DYNAMIC, 'ESRI Dynamic Service'],
     [ESRI_FEATURE, 'ESRI Feature Service'],
     [ESRI_IMAGE, 'ESRI Image Service'],
@@ -329,7 +336,7 @@ export function AddNewLayer(): JSX.Element {
   // #endregion
 
   // Set layer type for "Select format" step if detected (Step 1)
-  const setLayerTypeIfAllowed = (layerTypeValue: TypeGeoviewLayerTypeWithGeoCore): boolean => {
+  const setLayerTypeIfAllowed = (layerTypeValue: TypeInitialGeoviewLayerType): boolean => {
     if (disabledLayerTypes.includes(layerTypeValue)) {
       emitErrorDisabled(layerTypeValue);
       setLayerType('');
@@ -388,7 +395,7 @@ export function AddNewLayer(): JSX.Element {
   const handleStep2 = (): void => {
     setIsLoading(true);
 
-    const populateLayerList = async (curlayerType: TypeGeoviewLayerType | 'geoCore'): Promise<boolean> => {
+    const populateLayerList = async (curlayerType: TypeInitialGeoviewLayerType): Promise<boolean> => {
       try {
         // Create an instance of the GeoView layer. The list of layer entry config is empty, but if the URL specify a sublayer
         // the instance created will adjust the metadata access path and the list of sublayers accordingly.
@@ -467,6 +474,7 @@ export function AddNewLayer(): JSX.Element {
       layerType === GEOJSON ||
       layerType === CSV ||
       layerType === VECTOR_TILES ||
+      layerType === 'shapefile' ||
       layerType === 'geoCore'
     ) {
       promise = populateLayerList(layerType);
@@ -538,7 +546,7 @@ export function AddNewLayer(): JSX.Element {
         // eslint-disable-next-line no-param-reassign
         if (layerEntryConfig.source) layerEntryConfig.source = { dataAccessPath: layerEntryConfig.source.dataAccessPath };
       });
-
+      console.log(newGeoViewLayer);
       // Use the config to convert simplified layer config into proper layer config
       const config = new Config(language);
       const configObj = config.initializeMapConfig(mapId, [newGeoViewLayer], (errorKey: string, params: string[]) => {
@@ -554,7 +562,8 @@ export function AddNewLayer(): JSX.Element {
 
       if (configObj?.length) {
         // XYZ tile uses dataAccessPath which has been set, so remove metdataAccessPath
-        if (configObj[0].geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES) delete configObj[0].metadataAccessPath;
+        if (configObj[0].geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES)
+          delete (configObj[0] as TypeGeoviewLayerConfig).metadataAccessPath;
 
         logger.logDebug('newGeoViewLayer to add', configObj[0]);
         // Add the layer using the proper function
@@ -601,7 +610,7 @@ export function AddNewLayer(): JSX.Element {
    * @param {SelectChangeEvent<unknown>} event - TextField event
    */
   const handleSelectType = (event: SelectChangeEvent<unknown>): void => {
-    setLayerType(event.target.value as TypeGeoviewLayerTypeWithGeoCore);
+    setLayerType(event.target.value as TypeInitialGeoviewLayerType);
     setLayerList([]);
     setLayerIdsToAdd([]);
 
@@ -786,7 +795,7 @@ export function AddNewLayer(): JSX.Element {
                     ref={serviceTypeRef}
                     menuItems={layerOptions
                       .filter(([value]) => {
-                        return !disabledLayerTypes.includes(value as TypeGeoviewLayerTypeWithGeoCore);
+                        return !disabledLayerTypes.includes(value as TypeInitialGeoviewLayerType);
                       })
                       .map(([value, label]) => ({
                         key: value,

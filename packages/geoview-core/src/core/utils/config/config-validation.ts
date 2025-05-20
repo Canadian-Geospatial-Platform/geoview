@@ -24,6 +24,7 @@ import {
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
   mapConfigLayerEntryIsGeoCore,
+  mapConfigLayerEntryIsShapefile,
   layerEntryIsGroupLayer,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
@@ -183,7 +184,7 @@ export class ConfigValidation {
     for (let i = 0; i < listOfGeoviewLayerConfig.length && isValid; i++) {
       // If not GeoCore, validate the geoview configuration with the schema.
       // GeoCore doesn't have schema validation as part of the routine below, because they're not a TypeGeoviewLayerType anymore
-      if (!mapConfigLayerEntryIsGeoCore(listOfGeoviewLayerConfig[i])) {
+      if (!mapConfigLayerEntryIsGeoCore(listOfGeoviewLayerConfig[i]) && !mapConfigLayerEntryIsShapefile(listOfGeoviewLayerConfig[i])) {
         const gvLayerConfigCasted = listOfGeoviewLayerConfig[i] as TypeGeoviewLayerConfig;
         isValid = this.#isValidTypeListOfLayerEntryConfig(
           gvLayerConfigCasted.geoviewLayerType,
@@ -220,7 +221,7 @@ export class ConfigValidation {
       const validConfigs: typeof listOfMapConfigLayerEntry = [];
 
       listOfMapConfigLayerEntry.forEach((geoviewLayerConfig) => {
-        if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
+        if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig) || mapConfigLayerEntryIsShapefile(geoviewLayerConfig)) {
           // As-is we keep it
           validConfigs.push(geoviewLayerConfig);
         } else {
@@ -258,7 +259,6 @@ export class ConfigValidation {
           }
         }
       });
-
       // We're done processing the listOfMapConfigLayerEntry and we only have valid ones in the validConfigs list
       // Repopulate the original array
       listOfMapConfigLayerEntry.length = 0;

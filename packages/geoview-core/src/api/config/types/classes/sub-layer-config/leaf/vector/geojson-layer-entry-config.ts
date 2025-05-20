@@ -1,14 +1,17 @@
 import { merge } from 'lodash';
+import { FeatureCollectionWithFilename } from 'shpjs';
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@/api/config/types/config-constants';
-import { Cast } from '@/api/config/types/config-types';
+import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 import {
   TypeLayerStyleConfig,
   TypeLayerEntryType,
-  TypeBaseVectorSourceInitialConfig,
   TypeFeatureInfoLayerConfig,
   TypeStyleGeometry,
   TypeLayerInitialSettings,
   Extent,
+  TypeGeojsonSourceInitialConfig,
+  AbstractGeoviewLayerConfig,
+  EntryConfigBaseClass,
 } from '@/api/config/types/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-layer-entry-config';
 import { GeoJsonLayerConfig } from '@/api/config/types/classes/geoview-config/vector-config/geojson-config';
@@ -29,11 +32,20 @@ export class GeoJsonLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   // ==================
   // #region PROPERTIES
   /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeBaseVectorSourceInitialConfig;
+  declare source: TypeGeojsonSourceInitialConfig;
 
   /** Style to apply to the raster layer. */
   layerStyle?: TypeLayerStyleConfig;
   // #endregion PROPERTIES
+
+  constructor(layerConfig: TypeJsonObject, geoviewLayerConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass) {
+    super(layerConfig, geoviewLayerConfig, parentNode);
+    Object.assign(this, layerConfig);
+
+    // We assign the metadataAccessPath of the GeoView layer to dataAccessPath.
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = geoviewLayerConfig.metadataAccessPath;
+    if (layerConfig.source.geojson) this.source.geojson = layerConfig.source.geojson as unknown as FeatureCollectionWithFilename;
+  }
 
   // ===============
   // #region METHODS

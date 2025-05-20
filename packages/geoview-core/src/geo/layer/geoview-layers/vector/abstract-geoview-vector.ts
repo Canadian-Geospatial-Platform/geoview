@@ -16,6 +16,7 @@ import {
 } from '@/api/config/types/map-schema-types';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeSourceGeoJSONInitialConfig } from '@/geo/layer/geoview-layers/vector/geojson';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -91,7 +92,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const url = AbstractGeoViewVector.#resolveUrl(layerConfig, vectorSource, extent, resolution, projection);
 
         // Fetch the data
-        const responseText = await AbstractGeoViewVector.#fetchData(url, sourceConfig);
+        const responseText =
+          layerConfig.schemaTag === CONST_LAYER_TYPES.GEOJSON && (layerConfig.source as TypeSourceGeoJSONInitialConfig)?.geojson
+            ? ''
+            : await AbstractGeoViewVector.#fetchData(url, sourceConfig);
 
         // Parse the result of the fetch to read the features
         const features = await this.#parseFeatures(url, responseText, layerConfig, vectorSource, projection, extent, readOptions);
@@ -191,7 +195,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
       default:
         // Fallback to using the format's default read method
-        return source.getFormat()!.readFeatures(responseText, {
+        return source.getFormat()!.readFeatures((layerConfig.source as TypeSourceGeoJSONInitialConfig).geojson || responseText, {
           ...readOptions,
           featureProjection: projection,
           extent,

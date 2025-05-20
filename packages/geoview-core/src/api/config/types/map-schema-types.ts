@@ -3,6 +3,8 @@ import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { Pixel } from 'ol/pixel';
 
+import shp from 'shpjs';
+
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { LayerEntryTypesKey, TypeJsonValue } from '@/api/config/types/config-types';
 
@@ -367,11 +369,8 @@ export type TypeGeoviewLayerType =
   | 'vectorTiles'
   | 'xyzTiles';
 
-/**
- * This type is created to only be used when validating the configuration schema types.
- * Indeed, GeoCore is not an official Abstract Geoview Layer, but it can be used in schema types.
- */
-export type TypeGeoviewLayerTypeWithGeoCore = TypeGeoviewLayerType | typeof CONST_LAYER_ENTRY_TYPES.GEOCORE;
+/** Definition of the geoview layer types accepted by the viewer. */
+export type TypeInitialGeoviewLayerType = TypeGeoviewLayerType | 'geoCore' | 'shapefile';
 
 /**
  * Definition of the GeoView layer constants
@@ -494,7 +493,7 @@ export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLi
 
 // TODO: refactor remove geoCore
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
-export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore';
+export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore' | 'shapefile';
 
 /** Temporal dimension associated to the layer. */
 export type TypeTemporalDimension = TimeDimension;
@@ -573,6 +572,12 @@ export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceIniti
   separator?: string;
   /** The feature format used by the XHR feature loader when url is set. */
   format?: TypeVectorSourceFormats; // TODO: refactor - from geo map schema type
+}
+
+/** Initial settings to apply to the GeoView vector layer source at creation time. */
+export interface TypeGeojsonSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
+  /** Geojson converted from shapefile */
+  geojson?: shp.FeatureCollectionWithFilename;
 }
 
 /** Initial settings to apply to the GeoView vector tile layer source at creation time. */
@@ -912,6 +917,7 @@ export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryT
   RASTER_IMAGE: 'raster-image',
   GROUP: 'group',
   GEOCORE: 'geoCore',
+  SHAPEFILE: 'shapefile',
 };
 
 // It seems sometimes this type guard is called with a TypeLayerEntryConfig and sometimes with a ConfigBaseClass, so I'm putting it explicit
@@ -956,7 +962,16 @@ export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLa
   return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.GEOCORE;
 };
 
-export type MapConfigLayerEntry = TypeGeoviewLayerConfig | GeoCoreLayerConfig;
+/**
+ * Returns true if the layer entry from the map configuration represents a shapefile layer type.
+ * @param {MapConfigLayerEntry} layerConfigEntryOption The layer entry config to check
+ * @returns {boolean} True if the layer type if GeoCore
+ */
+export const mapConfigLayerEntryIsShapefile = (layerConfigEntryOption: MapConfigLayerEntry): boolean => {
+  return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.SHAPEFILE;
+};
+
+export type MapConfigLayerEntry = TypeGeoviewLayerConfig | GeoCoreLayerConfig | ShapefileLayerConfig;
 
 export type TypeGeoviewLayerConfig = {
   /** The GeoView layer identifier. */
@@ -1011,6 +1026,26 @@ export type GeoCoreLayerConfig = {
   initialSettings?: TypeLayerInitialSettings;
 
   /** The layer entries to use from the GeoCore layer. */
+  listOfLayerEntryConfig?: TypeLayerEntryConfig[];
+};
+
+export type ShapefileLayerConfig = {
+  /** Type of GeoView layer. */
+  geoviewLayerType: typeof CONST_LAYER_ENTRY_TYPES.SHAPEFILE;
+
+  /** The GeoView layer identifier. */
+  geoviewLayerId: string;
+
+  /** The path to the shapefile */
+  metadataAccessPath: string;
+
+  /** The display name of the layer. This overrides the default name coming from the GeoCore API. */
+  geoviewLayerName?: string | undefined;
+
+  /** Initial settings to apply to the layer at creation time. */
+  initialSettings?: TypeLayerInitialSettings;
+
+  /** The layer entries to use from the shapefile. */
   listOfLayerEntryConfig?: TypeLayerEntryConfig[];
 };
 
