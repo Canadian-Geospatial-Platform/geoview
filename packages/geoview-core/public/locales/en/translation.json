@@ -141,6 +141,8 @@
     "layerType": "Type: ",
     "layerResource": "Resource: ",
     "layerMetadata": "Metadata: ",
+    "layerDefaultFilter": "Default filter: ",
+    "layerServiceProjection": "Service projection: ",
     "layerHoverable": "Info on mouse over",
     "layerQueryable": "Info on mouse click"
   },

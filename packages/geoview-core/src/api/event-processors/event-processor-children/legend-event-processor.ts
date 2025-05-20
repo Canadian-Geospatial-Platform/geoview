@@ -113,9 +113,22 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
-  static getLayerEntryConfig(mapId: string, layerPath: string): AbstractBaseLayerEntryConfig {
-    // Get the layer config
-    return MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath) as AbstractBaseLayerEntryConfig;
+  static getLayerEntryConfigDefaultFilter(mapId: string, layerPath: string): string | undefined {
+    const entryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath) as AbstractBaseLayerEntryConfig;
+
+    // Check if entryConfig exists and has layerFilter property
+    return entryConfig && 'layerFilter' in entryConfig ? (entryConfig.layerFilter as string) : undefined;
+  }
+
+  static getLayerServiceProjection(mapId: string, layerPath: string): string | undefined {
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+
+    if (geoviewLayer && 'getMetadataProjection' in geoviewLayer && typeof geoviewLayer.getMetadataProjection === 'function') {
+      const projection = geoviewLayer.getMetadataProjection();
+      return projection && typeof projection.getCode === 'function' ? projection.getCode() : undefined;
+    }
+
+    return undefined;
   }
 
   /**

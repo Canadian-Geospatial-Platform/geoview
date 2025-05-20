@@ -26,7 +26,8 @@ import {
 import {
   useLayerHighlightedLayer,
   useLayerStoreActions,
-  useSelectorEntryConfigFilter,
+  useSelectorEntryConfigDefaultFilter,
+  useSelectorLayerServiceProjection,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
@@ -83,7 +84,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layersData = useDataTableAllFeaturesDataArray();
   const metadataUrl = useAppMetadataServiceURL();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
-  const layerFilter = useSelectorEntryConfigFilter(useGeoViewMapId(), layerDetails.layerPath);
+  const layerFilter = useSelectorEntryConfigDefaultFilter(useGeoViewMapId(), layerDetails.layerPath);
+  const layerNativeProjection = useSelectorLayerServiceProjection(useGeoViewMapId(), layerDetails.layerPath);
 
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerDetails.controls?.highlight;
@@ -392,7 +394,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         </Button>
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
           <Box>{`${t('layers.layerType')!}${layerDetails.type}`}</Box>
-          {layerFilter && <Box>{`Layer Filter: ${layerFilter}`}</Box>}
+          {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
+          {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
           {resources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')!}`}
