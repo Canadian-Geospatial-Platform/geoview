@@ -2,7 +2,7 @@ import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 
-import { doUntil, generateId, whenThisThen } from '@/core/utils/utilities';
+import { doUntil, generateId } from '@/core/utils/utilities';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -767,28 +767,6 @@ export abstract class AbstractGeoViewLayer {
   allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
     // Redirect
     return ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, this.listOfLayerEntryConfig);
-  }
-
-  /**
-   * Returns a Promise that will be resolved once the given layer is in a processed phase.
-   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * @param {AbstractGeoViewLayer} geoviewLayerConfig - The layer object
-   * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise
-   * @param {number} checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
-   * @returns {Promise<void>} A promise when done waiting
-   * @throws An exception when the layer failed to become in processed phase before the timeout expired
-   */
-  async waitForAllLayerStatusAreGreaterThanOrEqualTo(timeout?: number, checkFrequency?: number): Promise<void> {
-    // Wait for the processed phase
-    await whenThisThen(
-      () => {
-        return this.allLayerStatusAreGreaterThanOrEqualTo('processed');
-      },
-      timeout,
-      checkFrequency
-    );
-
-    // Here we resolve successfully, otherwise an exception has been thrown already
   }
 
   /**

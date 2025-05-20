@@ -96,6 +96,13 @@ export type GeoViewLayerAddedResult = {
  * @class LayerApi
  */
 export class LayerApi {
+  // TODO: Reorder the functions in this class:
+  // - overrides
+  // - public
+  // - private
+  // - region events
+  // - static
+
   // Maximum time duration to wait when registering a layer for the time slider
   static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
 
@@ -1999,7 +2006,7 @@ export class LayerApi {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent, void>;
+export type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -2013,7 +2020,7 @@ export type LayerAddedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerLoadedDelegate = EventDelegateBase<LayerApi, LayerLoadedEvent, void>;
+export type LayerLoadedDelegate = EventDelegateBase<LayerApi, LayerLoadedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -2028,7 +2035,7 @@ export type LayerLoadedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, void>;
+export type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -2043,7 +2050,7 @@ export type LayerErrorEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent, void>;
+export type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -2056,7 +2063,7 @@ export type LayerRemovedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerVisibilityToggledEvent, void>;
+export type LayerVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerVisibilityToggledEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -2071,7 +2078,7 @@ export type LayerVisibilityToggledEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerItemVisibilityToggledEvent, void>;
+export type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerItemVisibilityToggledEvent, void>;
 
 /**
  * Define an event for the delegate

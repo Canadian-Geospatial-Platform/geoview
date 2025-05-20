@@ -135,9 +135,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param {boolean} forced - Indicates if the legend query should be forced to happen (example when refreshing the legend)
    */
   #checkQueryLegend(layerPath: string, forced: boolean): void {
-    // Get the layer
+    // Get the layer, skip when not found
     const layer = this.layerApi.getGeoviewLayer(layerPath);
-    const layerConfig = layer?.getLayerConfig();
+    if (!layer) return;
+
+    // Get the config, skip when not found
+    const layerConfig = layer.getLayerConfig();
 
     // If the layer legend should be queried (and not already querying).
     // GV Gotta make sure that we're not already querying, because EsriImage layers, for example, adjust the
@@ -147,7 +150,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
       return;
     }
 
-    if (layer && layerConfig && layer instanceof AbstractGVLayer && (this.#legendShouldBeQueried(layerConfig) || forced)) {
+    if (layer instanceof AbstractGVLayer && (this.#legendShouldBeQueried(layerConfig) || forced)) {
       // Flag
       this.resultSet[layerPath].legendQueryStatus = 'querying';
 
