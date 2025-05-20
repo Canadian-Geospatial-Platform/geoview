@@ -6,7 +6,7 @@ import {
   useAllLayersCollapsed,
   useAllLayersVisible,
   useMapHasCollapsibleLayers,
-  useMapStoreActions
+  useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
@@ -35,7 +35,7 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
     justifyContent: 'flex-start',
     alignItems: 'center',
     marginLeft: '8px',
-    width: 'fit-content'
+    width: 'fit-content',
   };
 
   const handleVisibilityToggle = useCallback(() => {
@@ -51,24 +51,24 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
       {(source === 'legend' || displayState === 'view') && (
         <Tooltip title={t('toggle-all.show-tooltip')}>
           <span>
-          <Switch
-            size={isSmallScreen ? "small": "medium"}
-            checked={allLayersVisible}
-            onChange={handleVisibilityToggle}
-            label={t('toggle-all.show')!}
-          />
+            <Switch
+              size={isSmallScreen ? 'small' : 'medium'}
+              checked={allLayersVisible}
+              onChange={handleVisibilityToggle}
+              label={t('toggle-all.show')!}
+            />
           </span>
         </Tooltip>
       )}
       {hasCollapsibleLayers && (
         <Tooltip title={t('toggle-all.collapse-tooltip')}>
           <span>
-          <Switch
-            size={isSmallScreen ? "small": "medium"}
-            checked={allLayersCollapsed}
-            onChange={handleCollapseToggle}
-            label={t('toggle-all.collapse')!}
-          />
+            <Switch
+              size={isSmallScreen ? 'small' : 'medium'}
+              checked={allLayersCollapsed}
+              onChange={handleCollapseToggle}
+              label={t('toggle-all.collapse')!}
+            />
           </span>
         </Tooltip>
       )}
