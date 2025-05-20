@@ -153,8 +153,11 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
             // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
             if (!AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId())) {
+              DataTableEventProcessor.setTotalFeatures(this.getMapId(), arrayOfRecords.length);
               // eslint-disable-next-line no-param-reassign
               arrayOfRecords = arrayOfRecords.filter((record) => record.featureIcon);
+            } else {
+              DataTableEventProcessor.setTotalFeatures(this.getMapId());
             }
 
             // Keep the features retrieved

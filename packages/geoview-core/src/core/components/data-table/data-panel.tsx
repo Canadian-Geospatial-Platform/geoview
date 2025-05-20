@@ -9,6 +9,7 @@ import {
   useDataTableAllFeaturesDataArray,
   useDataTableLayerSettings,
   useDataTableStoreActions,
+  useDataTableTotalFeatures,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
@@ -50,6 +51,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   const layerData = useDataTableAllFeaturesDataArray();
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
+  const totalFeaturesQueried = useDataTableTotalFeatures();
   const { setSelectedLayerPath } = useDataTableStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
@@ -123,12 +125,15 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       }
       let featureStr = t('dataTable.noFeatures');
       const features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length;
-      if (features !== undefined) {
+      if (features !== undefined && !totalFeaturesQueried) {
         featureStr = `${features} ${t('dataTable.features')}`;
+      }
+      if (features !== undefined && totalFeaturesQueried) {
+        featureStr = `${features} ${t('dataTable.features')} (${totalFeaturesQueried} ${t('dataTable.totalFeatures')})`;
       }
       return featureStr;
     },
-    [datatableSettings, orderedLayerData, t]
+    [datatableSettings, orderedLayerData, t, totalFeaturesQueried]
   );
 
   /**

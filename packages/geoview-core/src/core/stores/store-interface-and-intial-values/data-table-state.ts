@@ -19,6 +19,7 @@ export interface IDataTableState {
   selectedFeature: TypeFeatureInfoEntry | null;
   selectedLayerPath: string;
   tableFilters: Record<string, string>;
+  totalFeatures: number | undefined;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
@@ -49,6 +50,7 @@ export interface IDataTableState {
     setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setTableFilters(newTableFilters: Record<string, string>): void;
+    setTotalFeatures(total: number | undefined): void;
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
   };
 }
@@ -69,6 +71,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
     selectedFeature: null,
     selectedLayerPath: '',
     tableFilters: {},
+    totalFeatures: undefined,
     // Initialize default
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       set({
@@ -226,6 +229,14 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           },
         });
       },
+      setTotalFeatures(total: number): void {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            totalFeatures: total,
+          },
+        });
+      },
       setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
         layerSettings.toolbarRowSelectedMessageRecord = message;
@@ -302,5 +313,7 @@ export const useDataTableLayerSettings = (): Record<string, IDataTableSettings> 
   useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
 export const useDataTableSelectedFeature = (): TypeFeatureInfoEntry | null =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.selectedFeature);
+export const useDataTableTotalFeatures = (): number | undefined =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.totalFeatures);
 
 export const useDataTableStoreActions = (): DataTableActions => useStore(useGeoViewStore(), (state) => state.dataTableState.actions);
