@@ -623,7 +623,7 @@ export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitia
   /**
    * If true, the layer will call the service using its native SRID so that OpenLayers take charge of the reprojection on the map.
    */
-  useNativeProjection?: boolean;
+  forceServiceProjection?: boolean;
 }
 
 /** Type from which we derive the source properties for all the ESRI Image leaf nodes in the layer tree. */

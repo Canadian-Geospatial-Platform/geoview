@@ -218,8 +218,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       // Uncollapse it
       setFooterBarIsCollapsed(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrayOfLayerDataBatch, selectedTab]);
+  }, [arrayOfLayerDataBatch, isCollapsed, selectedTab, setFooterBarIsCollapsed]);
   // Don't add isCollapsed in the dependency array, because it'll retrigger the useEffect
 
   /**
@@ -357,7 +356,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
           logger.logPromiseFailed('api.plugin.loadScript(geochart) in useEffect in FooterBar', error);
         });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [footerBarTabsConfig, mapId]);
 
   // Scroll the footer into view on mouse click
