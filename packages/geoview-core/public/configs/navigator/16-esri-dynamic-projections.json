@@ -2,6 +2,7 @@
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
+      "initialView": { "zoomAndCenter": [5, [-90, 50]] },
       "projection": 3857
     },
     "basemapOptions": {
@@ -11,14 +12,14 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "historical-flood-ol",
-        "geoviewLayerName": "Hist. Flo. OL",
-        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerId": "uniqueValueId-ol",
+        "geoviewLayerName": "(OL) UniqueValue",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "layerName": "Projected by OpenLayers",
+            "layerId": "4",
+            "layerName": "(OL) UniqueValue",
             "source": {
               "useNativeProjection": true
             }
@@ -26,14 +27,68 @@
         ]
       },
       {
-        "geoviewLayerId": "historical-flood-server",
-        "geoviewLayerName": "Hist. Flo. SRV",
-        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerId": "uniqueValueId-server",
+        "geoviewLayerName": "(Server) UniqueValue",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "4",
+            "layerName": "(Server) UniqueValue"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "unemployed-ol",
+        "geoviewLayerName": "(OL) Unemployed",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/PCH/OLMC_CLOSM_E/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2",
+            "layerName": "(OL) Unemployed",
+            "source": {
+              "useNativeProjection": true
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "unemployed-server",
+        "geoviewLayerName": "(Server) Unemployed",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/PCH/OLMC_CLOSM_E/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2",
+            "layerName": "(Server) Unemployed"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "cpcad-ol",
+        "geoviewLayerName": "Protected and conserved area",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "Projected by server"
+            "layerName": "(OL) Protected and conserved area",
+            "source": {
+              "useNativeProjection": true
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "cpcad-server",
+        "geoviewLayerName": "Protected and conserved area",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "(Server) Protected and conserved area"
           }
         ]
       }
