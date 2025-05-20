@@ -185,8 +185,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       crossOrigin: source.crossOrigin ?? 'Anonymous',
     };
 
-    // If using native projection
-    if (source.useNativeProjection) {
+    // If forcing service projection so that OpenLayers takes care of reprojecting locally on the map
+    if (source.forceServiceProjection) {
       // Find the SRID from the layer metadata
       const srid =
         layerConfig.getLayerMetadata()?.sourceSpatialReference?.latestWkid || layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;
