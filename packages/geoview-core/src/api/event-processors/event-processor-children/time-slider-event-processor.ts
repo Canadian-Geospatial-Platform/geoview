@@ -71,9 +71,15 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id of the state to act on
    * @param {TypeLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
    */
-  static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layerConfig: TypeLayerEntryConfig): void {
+  static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layer: AbstractGVLayer, layerConfig: TypeLayerEntryConfig): void {
     // If there is no TimeSlider
     if (!this.getTimesliderState(mapId)) return;
+
+    // Get the temporal dimension, if any
+    const tempDimension = layer.getTemporalDimension();
+
+    // If not temporal dimension or invalid
+    if (!tempDimension || !tempDimension.isValid) return; // Skip
 
     // Get the time slider values
     const timeSliderValues = this.getInitialTimeSliderValues(mapId, layerConfig);
