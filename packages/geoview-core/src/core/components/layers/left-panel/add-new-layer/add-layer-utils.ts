@@ -1,4 +1,11 @@
-import { GroupLayerEntryConfig, MapFeatureConfig, TypeGeoviewLayerType, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import {
+  GroupLayerEntryConfig,
+  MapFeatureConfig,
+  TypeGeoviewLayerType,
+  TypeGeoviewLayerConfig,
+  ShapefileLayerConfig,
+  MapConfigLayerEntry,
+} from '@/api/config/types/map-schema-types';
 import { Cast, toJsonObject } from '@/api/config/types/config-types';
 import { generateId } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -69,9 +76,18 @@ const allSubLayersAreIncluded = (groupLayer: GroupLayerEntryConfig, layerIds: (s
  * @param {BuildGeoViewLayerInput} inputProps - The layer information
  * @returns {TypeGeoviewLayerConfig} The geoview layer config
  */
-export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): TypeGeoviewLayerConfig => {
+export const buildGeoLayerToAdd = (inputProps: BuildGeoViewLayerInput): MapConfigLayerEntry => {
   const { layerIdsToAdd, layerName, layerType, layerURL, layerList } = inputProps;
   logger.logDebug(layerList, layerIdsToAdd);
+
+  if (layerType === 'shapefile') {
+    return {
+      geoviewLayerName: layerName,
+      geoviewLayerId: generateId(),
+      geoviewLayerType: 'shapefile',
+      metadataAccessPath: layerURL,
+    } as ShapefileLayerConfig;
+  }
 
   const listOfLayerEntryConfig: LayerEntryConfigShell[] = [];
   const layersToAdd = layerIdsToAdd.map((layerId) => getLayerById(layerList, layerId)).filter((layerToAdd) => !!layerToAdd);
