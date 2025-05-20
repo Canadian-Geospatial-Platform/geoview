@@ -278,7 +278,7 @@ export class API {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapViewerReadyDelegate = EventDelegateBase<API, MapViewerReadyEvent, void>;
+export type MapViewerReadyDelegate = EventDelegateBase<API, MapViewerReadyEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -291,7 +291,7 @@ export type MapViewerReadyEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapAddedToDivDelegate = EventDelegateBase<API, MapAddedToDivEvent, void>;
+export type MapAddedToDivDelegate = EventDelegateBase<API, MapAddedToDivEvent, void>;
 
 /**
  * Define an event for the delegate

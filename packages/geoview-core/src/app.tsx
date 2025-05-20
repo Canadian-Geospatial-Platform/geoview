@@ -18,7 +18,7 @@ import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import { API } from '@/api/api';
-import { TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { MapViewerDelegate, TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
@@ -36,10 +36,10 @@ export const api = new API();
 
 const reactRoot: Record<string, Root> = {};
 
-let cgpvCallbackMapInit: (mapViewer: MapViewer) => void;
-let cgpvCallbackMapReady: (mapViewer: MapViewer) => void;
-let cgpvCallbackLayersProcessed: (mapViewer: MapViewer) => void;
-let cgpvCallbackLayersLoaded: (mapViewer: MapViewer) => void;
+let cgpvCallbackMapInit: MapViewerDelegate;
+let cgpvCallbackMapReady: MapViewerDelegate;
+let cgpvCallbackLayersProcessed: MapViewerDelegate;
+let cgpvCallbackLayersLoaded: MapViewerDelegate;
 
 /**
  * Checks if a root is mounted for a given map ID
@@ -238,11 +238,8 @@ export function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: strin
 
 /**
  * Initializes the cgpv and render it to root element
- *
- * @param {(mapId: string) => void} obsoleteCallbackMapInit optional callback function to run once the map rendering is ready
- * @param {(mapId: string) => void} obsoleteCallbackMapLayersLoaded optional callback function to run once layers are loaded on the map
  */
-function init(obsoleteCallbackMapInit?: (mapId: string) => void, obsoleteCallbackMapLayersLoaded?: (mapId: string) => void): void {
+function init(): void {
   const mapElements = document.getElementsByClassName('geoview-map');
 
   // loop through map elements on the page
@@ -274,7 +271,6 @@ function init(obsoleteCallbackMapInit?: (mapId: string) => void, obsoleteCallbac
           try {
             // Callback about it
             theCallbackMapInit?.(theMapViewer);
-            obsoleteCallbackMapInit?.(mapId); // TODO: Obsolete call, remove it eventually
           } catch (error: unknown) {
             // Log
             logger.logError('An error happened in the initialization callback.', error);
@@ -302,7 +298,6 @@ function init(obsoleteCallbackMapInit?: (mapId: string) => void, obsoleteCallbac
 
             // Callback for that particular map
             theCallbackLayersLoaded?.(mapViewer);
-            obsoleteCallbackMapLayersLoaded?.(mapViewer.mapId); // TODO: Obsolete call, remove it eventually
           });
         })
         .catch((error: unknown) => {
@@ -315,36 +310,36 @@ function init(obsoleteCallbackMapInit?: (mapId: string) => void, obsoleteCallbac
 
 /**
  * Registers a callback when the map has been initialized
- * @param {(mapViewer: MapViewer) => void} callback - The callback to be called
+ * @param {MapViewerDelegate} callback - The callback to be called
  */
-export function onMapInit(callback: (mapViewer: MapViewer) => void): void {
+export function onMapInit(callback: MapViewerDelegate): void {
   // Keep the callback
   cgpvCallbackMapInit = callback;
 }
 
 /**
  * Registers a callback when the map has turned ready / layers were registered
- * @param {(mapViewer: MapViewer) => void} callback - The callback to be called
+ * @param {MapViewerDelegate} callback - The callback to be called
  */
-export function onMapReady(callback: (mapViewer: MapViewer) => void): void {
+export function onMapReady(callback: MapViewerDelegate): void {
   // Keep the callback
   cgpvCallbackMapReady = callback;
 }
 
 /**
  * Registers a callback when the layers have been processed
- * @param {(mapViewer: MapViewer) => void} callback - The callback to be called
+ * @param {MapViewerDelegate} callback - The callback to be called
  */
-export function onLayersProcessed(callback: (mapViewer: MapViewer) => void): void {
+export function onLayersProcessed(callback: MapViewerDelegate): void {
   // Keep the callback
   cgpvCallbackLayersProcessed = callback;
 }
 
 /**
  * Registers a callback when the layers have been loaded
- * @param {(mapViewer: MapViewer) => void} callback - The callback to be called
+ * @param {MapViewerDelegate} callback - The callback to be called
  */
-export function onLayersLoaded(callback: (mapViewer: MapViewer) => void): void {
+export function onLayersLoaded(callback: MapViewerDelegate): void {
   // Keep the callback
   cgpvCallbackLayersLoaded = callback;
 }

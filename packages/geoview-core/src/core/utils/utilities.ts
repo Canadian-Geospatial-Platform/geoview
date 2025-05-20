@@ -385,12 +385,19 @@ export const delay = (ms: number): Promise<void> => {
  */
 export const doUntil = <T>(callback: () => T, ms: number): NodeJS.Timeout => {
   // Start a recurrent timer
+  let done = false;
   const interval = setInterval(() => {
+    // If done, skip (protect against race conditions)
+    if (done) return;
+
     // Callback
-    const shouldClearInterval = callback();
+    const shouldStop = callback();
 
     // If clearing the interval
-    if (shouldClearInterval) clearInterval(interval);
+    if (shouldStop) {
+      done = true;
+      clearInterval(interval);
+    }
   }, ms);
 
   // Return the interval timer
@@ -441,25 +448,30 @@ function _whenThisThenThat<T>(
   timeout: number,
   checkFrequency: number
 ): void {
-  // Do until
-  doUntil(() => {
-    // Check if we're good
-    const result = checkCallback();
+  // GV This pattern immediately calls the callback and then starts checking recursively.
+  // Do not change this for a 'doUntil' as the latter only calls the callback *after* the first checkFrequency expires.
 
-    // If got something
-    if (result) {
-      // Do the 'that' and we're done
-      doCallback(result);
-      return true;
-    }
-    if (Date.now() - startDate.getTime() > timeout) {
-      // We're done, timeout expired
-      failCallback(`Task abandoned, took too long (over ${timeout} ms).`);
-      return true;
-    }
+  // Check if we're good
+  const v = checkCallback();
 
-    // Continue loop
-    return false;
+  // If check was positive
+  if (v) {
+    // Do that and we're done
+    doCallback(v);
+    return;
+  }
+
+  // If expired
+  if (Date.now() - startDate.getTime() > timeout) {
+    // Failed, took too long, this throws an exception in typical async/await contexts
+    failCallback('Task abandonned, took too long.');
+    return;
+  }
+
+  // Check again later
+  setTimeout(() => {
+    // Recursive call
+    _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, timeout, checkFrequency);
   }, checkFrequency);
 }
 
