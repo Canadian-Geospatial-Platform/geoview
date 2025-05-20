@@ -316,6 +316,9 @@ export class MapViewer {
     // Note the time
     this.#checkMapReadyStartTime = Date.now();
 
+    // Load the Map itself and the UI controls
+    MapEventProcessor.initMapControls(this.mapId);
+
     // Load the list of geoview layers in the config to add all layers on the map.
     // After this call, all first level layers have been registered.
     // TODO: refactor - remove the cast as MapConfigLayerEntry[] everywhere
@@ -1250,7 +1253,6 @@ export class MapViewer {
 
     // Now that the map dom is loaded, register a handle when size is changing
     map.on('change:size', this.#handleMapChangeSize.bind(this));
-    map.dispatchEvent('change:size'); // dispatch event to set initial value
 
     // Register essential map-view handlers
     map.on('moveend', this.#handleMapMoveEnd.bind(this));
@@ -1474,7 +1476,8 @@ export class MapViewer {
       const size = this.map.getSize() as unknown as [number, number];
 
       // Save in the store
-      MapEventProcessor.setMapChangeSize(this.mapId, size, scale);
+      MapEventProcessor.setMapSize(this.mapId, size);
+      MapEventProcessor.setMapScale(this.mapId, scale);
 
       // Emit to the outside
       this.#emitMapChangeSize({ size });
@@ -1533,12 +1536,11 @@ export class MapViewer {
     this.#mapReady = true;
     this.#emitMapReady();
 
-    // Load the Map itself and the UI controls
-    MapEventProcessor.initMapControls(this.mapId);
-
     // Load the guide
-    // TODO: Check - Do we really need to await on the guide?
-    await AppEventProcessor.setGuide(this.mapId);
+    AppEventProcessor.setGuide(this.mapId).catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('in #setGuide in #readyMap', error);
+    });
 
     // Check how load in milliseconds has it been processing thus far
     const elapsedMilliseconds = Date.now() - this.#checkMapReadyStartTime!;
@@ -1588,10 +1590,8 @@ export class MapViewer {
 
     // Create and dispatch the resolution change event to force the registration of layers in the
     // inVisibleRange array when layers are loaded.
+    // This is to trigger a 'this.#handleMapZoomEnd' once layers are loaded
     this.getView().dispatchEvent(new ObjectEvent('change:resolution', 'visibleRange', null));
-
-    // Done
-    return Promise.resolve();
   }
 
   /**
