@@ -107,7 +107,8 @@ export interface IMapState {
   };
 
   setterActions: {
-    setMapChangeSize: (size: [number, number], scale: TypeScaleInfo) => void;
+    setMapSize: (size: [number, number]) => void;
+    setMapScale: (scale: TypeScaleInfo) => void;
     setMapLoaded: (mapLoaded: boolean) => void;
     setMapDisplayed: () => void;
     setAttribution: (attribution: string[]) => void;
@@ -550,15 +551,26 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
     setterActions: {
       /**
-       * Sets the map size and scale.
+       * Sets the map size.
        * @param {[number, number]} size - The size of the map.
-       * @param {TypeScaleInfo} scale - The scale information.
        */
-      setMapChangeSize: (size: [number, number], scale: TypeScaleInfo): void => {
+      setMapSize: (size: [number, number]): void => {
         set({
           mapState: {
             ...get().mapState,
             size,
+          },
+        });
+      },
+
+      /**
+       * Sets the map scale.
+       * @param {TypeScaleInfo} scale - The scale information.
+       */
+      setMapScale: (scale: TypeScaleInfo): void => {
+        set({
+          mapState: {
+            ...get().mapState,
             scale,
           },
         });

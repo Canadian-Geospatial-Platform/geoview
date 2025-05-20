@@ -124,7 +124,7 @@
     "errorInvalidExtent": "Étendue invalide '__param__'.",
     "fetchProgress": "Téléchargement des données... Téléchargé __param__ de __param__ enregistrements.",
     "fetchDone": "Données téléchargées - __param__ enregistrements.",
-    "fetchStart": "Début du téléchargement des données...",
+    "fetchStart": "Téléchargement des données...",
     "only": "seulement",
     "opacity": "Opacité",
     "opacityMax": "Maximum du parent",
@@ -301,8 +301,8 @@
     "map": {
       "mapIdNotFound": "La carte avec l'identifiant '__param__' est introuvable.",
       "geoviewStoreNotFound": "Le 'React Store' sur la carte '__param__' est introuvable.",
-      "mapDivNotExists": "Div with id ${divId} does not exist",
-      "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call."
+      "mapDivNotExists": "Div avec identifiant __param__ does not exist.",
+      "mapWrongCall": "Div avec identifiant __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'."
     },
     "geocore": {
       "uuidNotFound": "L'identifiant de couche GeoCore '__param__' n'existe pas sur le serveur.",
