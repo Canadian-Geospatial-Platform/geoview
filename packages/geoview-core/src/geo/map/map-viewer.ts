@@ -1589,9 +1589,6 @@ export class MapViewer {
     // Create and dispatch the resolution change event to force the registration of layers in the
     // inVisibleRange array when layers are loaded.
     this.getView().dispatchEvent(new ObjectEvent('change:resolution', 'visibleRange', null));
-
-    // Done
-    return Promise.resolve();
   }
 
   /**
