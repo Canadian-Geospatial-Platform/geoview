@@ -27,6 +27,7 @@ export const CV_CONFIG_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/
 export const CV_CONFIG_METADATA_RECORDS_URL = '';
 
 export const CV_CONFIG_GEOCORE_TYPE = 'geoCore';
+export const CV_CONFIG_SHAPEFILE_TYPE = 'shapefile';
 
 // TODO: Remove GEOCORE after refactor
 // Constants for the layer config types
@@ -37,6 +38,7 @@ export const CV_CONST_SUB_LAYER_TYPES: Record<LayerEntryTypesKey, TypeLayerEntry
   RASTER_IMAGE: 'raster-image',
   GROUP: 'group',
   GEOCORE: 'geoCore',
+  SHAPEFILE: 'shapefile',
 };
 
 /**
