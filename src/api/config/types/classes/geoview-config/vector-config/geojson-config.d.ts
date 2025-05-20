@@ -1,7 +1,6 @@
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { GeoJsonGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/geojson-group-layer-config';
 import { TypeJsonArray, TypeJsonObject } from '@/api/config/types/config-types';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { GeoJsonLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/geojson-layer-entry-config';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 export type TypeGeoJsonLayerNode = GeoJsonGroupLayerConfig | GeoJsonLayerEntryConfig;
@@ -12,16 +11,15 @@ export declare class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
     /**
      * Type of GeoView layer.
      */
-    geoviewLayerType: import("@/api/config/types/map-schema-types").TypeGeoviewLayerType;
+    geoviewLayerType: import("../../../map-schema-types").TypeGeoviewLayerType;
     /** The layer entries to use from the GeoView layer. */
     listOfLayerEntryConfig: EntryConfigBaseClass[] | TypeGeoJsonLayerNode[];
     /**
      * The class constructor.
      *
      * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
      */
-    constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage);
+    constructor(geoviewLayerConfig: TypeJsonObject);
     /**
      * The getter method that returns the geoview layer schema to use for the validation. Each geoview layer type knows what
      * section of the schema must be used to do its validation.
@@ -35,27 +33,25 @@ export declare class GeoJsonLayerConfig extends AbstractGeoviewLayerConfig {
      * type needed.
      *
      * @param {TypeJsonObject} layerConfig The sublayer configuration.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
      * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
      *
      * @returns {EntryConfigBaseClass} The sublayer instance or undefined if there is an error.
      * @override
      */
-    createLeafNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
+    createLeafNode(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
     /**
      * The method used to implement the class factory model that returns the instance of the class based on the group
      * type needed.
      *
      * @param {TypeJsonObject} layerConfig The group node configuration.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
      * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
      *
      * @returns {EntryConfigBaseClass} The sublayer instance or undefined if there is an error.
      * @override
      */
-    createGroupNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
+    createGroupNode(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
     /**
      * Get the service metadata from the metadataAccessPath and store it in the private property of the geoview layer.
      * @override @async

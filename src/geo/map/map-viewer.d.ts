@@ -4,7 +4,7 @@ import OLMap from 'ol/Map';
 import View, { FitOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
-import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
+import { Projection as OLProjection } from 'ol/proj';
 import { Condition } from 'ol/events/condition';
 import { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapViewSettings } from '@/api/config/types/map-schema-types';
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
@@ -28,6 +28,7 @@ import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 /**
  * Class used to manage created maps
  *
@@ -128,6 +129,11 @@ export declare class MapViewer {
      * @returns {TypeOrderedLayerInfo[]} The ordered layer info
      */
     getMapLayerOrderInfo(): TypeOrderedLayerInfo[];
+    /**
+     * Gets the i18nInstance for localization.
+     * @returns {i18n[]} The i18n instance
+     */
+    getI18nInstance(): i18n;
     /**
      * set fullscreen / exit fullscreen
      *
@@ -269,6 +275,11 @@ export declare class MapViewer {
      */
     zoomToLngLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void>;
     /**
+     * Update the size of the icon image list based on styles.
+     * @param {TypeLegend} legend - The legend to check.
+     */
+    updateIconImageCache(legend: TypeLegend): void;
+    /**
      * Initializes selection interactions
      */
     initSelectInteractions(): Select;
@@ -343,32 +354,32 @@ export declare class MapViewer {
     /**
      * Transforms coordinate from given projection to the current projection of the map.
      * @param {Coordinate} coordinate - The given coordinate
-     * @param {ProjectionLike} fromProj - The projection of the given coordinate
+     * @param {OLProjection} fromProj - The projection of the given coordinate
      * @returns {Coordinate} The coordinate in the map projection
      */
-    convertCoordinateFromProjToMapProj(coordinate: Coordinate, fromProj: ProjectionLike): Coordinate;
+    convertCoordinateFromProjToMapProj(coordinate: Coordinate, fromProj: OLProjection): Coordinate;
     /**
      * Transforms coordinate from map projection to given projection.
      * @param {Coordinate} coordinate - The given coordinate
-     * @param {ProjectionLike} toProj - The projection that should be output
+     * @param {OLProjection} toProj - The projection that should be output
      * @returns {Coordinate} The coordinate in the map projection
      */
-    convertCoordinateFromMapProjToProj(coordinate: Coordinate, toProj: ProjectionLike): Coordinate;
+    convertCoordinateFromMapProjToProj(coordinate: Coordinate, toProj: OLProjection): Coordinate;
     /**
      * Transforms extent from given projection to the current projection of the map.
      * @param {Extent} extent - The given extent
-     * @param {ProjectionLike} fromProj - The projection of the given extent
+     * @param {OLProjection} fromProj - The projection of the given extent
      * @param {number} stops - The number of stops to perform densification on the extent
      * @returns {Extent} The extent in the map projection
      */
-    convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike, stops?: number): Extent;
+    convertExtentFromProjToMapProj(extent: Extent, fromProj: OLProjection, stops?: number): Extent;
     /**
      * Transforms extent from map projection to given projection. If the projects are the same, the extent is simply returned.
      * @param {Extent} extent - The given extent
-     * @param {ProjectionLike} toProj - The projection that should be output
+     * @param {OLProjection} toProj - The projection that should be output
      * @returns {Extent} The extent in the map projection
      */
-    convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent;
+    convertExtentFromMapProjToProj(extent: Extent, toProj: OLProjection, stops?: number): Extent;
     /**
      * Creates a map config based on current map state.
      * @param {BooleanExpression} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.

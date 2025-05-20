@@ -1,6 +1,6 @@
 import { OSM, VectorTile, XYZ } from 'ol/source';
 import { Extent } from 'ol/extent';
-/** ******************************************************************************************************************************
+/**
  * interface used to define a new basemap.
  */
 export type TypeBasemapProps = {
@@ -21,7 +21,7 @@ export type TypeBasemapProps = {
     defaultExtent?: Extent;
     defaultResolutions?: number[];
 };
-/** ******************************************************************************************************************************
+/**
  * interface used to define a new basemap layer
  */
 export type TypeBasemapLayer = {

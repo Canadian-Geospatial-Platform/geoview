@@ -1,6 +1,7 @@
 import ImageLayer from 'ol/layer/Image';
 import Static from 'ol/source/ImageStatic';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -14,11 +15,10 @@ export declare class GVImageStatic extends AbstractGVRaster {
     #private;
     /**
      * Constructs a GVImageStatic layer to manage an OpenLayer layer.
-     * @param {string} mapId - The map id
      * @param {Static} olSource - The OpenLayer source.
      * @param {ImageStaticLayerEntryConfig} layerConfig - The layer configuration.
      */
-    constructor(mapId: string, olSource: Static, layerConfig: ImageStaticLayerEntryConfig);
+    constructor(olSource: Static, layerConfig: ImageStaticLayerEntryConfig);
     /**
      * Overrides the get of the OpenLayers Layer
      * @returns {ImageLayer<Static>} The OpenLayers Layer
@@ -41,7 +41,9 @@ export declare class GVImageStatic extends AbstractGVRaster {
     onFetchLegend(): Promise<TypeLegend | null>;
     /**
      * Overrides the way to get the bounds for this layer type.
+     * @param {OLProjection} projection - The projection to get the bounds into.
+     * @param {number} stops - The number of stops to use to generate the extent.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    onGetBounds(): Extent | undefined;
+    onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
 }

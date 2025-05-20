@@ -11,7 +11,7 @@ import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 export { getGeoViewStore } from '@/core/stores/stores-managers';
 export type { SelectChangeEvent } from '@mui/material';
-/** ******************************************************************************************************************************
+/**
  * Definition of the map feature configuration according to what can be specified in the map div and in the schema for the
  * type extension TypeMapFeaturesInstance.
  */
@@ -21,7 +21,7 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
     /** This attribute is not part of the schema. It is placed here to keep the 'data-lang' attribute of the HTML div of the map. */
     displayLanguage?: TypeDisplayLanguage;
 }
-/** ******************************************************************************************************************************
+/**
  *  Definition of a global Window type.
  */
 declare global {
@@ -30,7 +30,7 @@ declare global {
         geoviewPlugins: Record<string, unknown>;
     }
 }
-/** ******************************************************************************************************************************
+/**
  * Type extending the window object.
  */
 export interface TypeWindow extends Window {
@@ -45,7 +45,7 @@ export interface TypeWindow extends Window {
         }) | AbstractPlugin | undefined;
     };
 }
-/** ******************************************************************************************************************************
+/**
  * Type used for exporting core.
  */
 export type TypeCGPV = {
@@ -60,12 +60,12 @@ export type TypeCGPV = {
     ui: TypeCGPVUI;
     logger: typeof logger;
 };
-/** ******************************************************************************************************************************
+/**
  * Type used for a callback function.
  */
 export type CGPVInitCallback = (callbackMapsInit?: (mapId: string) => void, callbackMapsLayersLoaded?: (mapId: string) => void) => void;
 export type CGPVCallback = (callback: (mapId: string) => void) => void;
-/** ******************************************************************************************************************************
+/**
  * Type used for exporting UI
  */
 export type TypeCGPVUI = {
@@ -74,7 +74,7 @@ export type TypeCGPVUI = {
     useWhatChanged: typeof useWhatChanged;
     elements: typeof UI;
 };
-/** ******************************************************************************************************************************
+/**
  *  Definition of an extended HTML element type.
  */
 export interface TypeHTMLElement extends HTMLElement {
@@ -82,7 +82,7 @@ export interface TypeHTMLElement extends HTMLElement {
     msRequestFullscreen: () => void;
     mozRequestFullScreen: () => void;
 }
-/** ******************************************************************************************************************************
+/**
  *  Definition of an Container where components are rendered.
  */
 export type TypeContainerBox = 'appBar' | 'footerBar';

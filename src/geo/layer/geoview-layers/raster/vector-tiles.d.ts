@@ -1,10 +1,9 @@
-import VectorTileLayer from 'ol/layer/VectorTile';
 import VectorTileSource from 'ol/source/VectorTile';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.VECTOR_TILES;
@@ -17,25 +16,52 @@ export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'lis
  * @class VectorTiles
  */
 export declare class VectorTiles extends AbstractGeoViewRaster {
+    /** Fallback projection (the map projection) */
+    fallbackProjection: string;
     /**
      * Constructs a VectorTiles Layer configuration processor.
-     *
-     * @param {string} mapId the id of the map
      * @param {TypeVectorTilesConfig} layerConfig the layer configuration
      */
-    constructor(mapId: string, layerConfig: TypeVectorTilesConfig);
-    /**
-     * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-     * @returns {Promise<VectorTileLayer<VectorTileSource>>} The GeoView raster layer that has been created.
-     */
-    protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<VectorTileLayer<VectorTileSource>>;
+    constructor(layerConfig: TypeVectorTilesConfig, fallbackProjection: string);
     /**
      * Overrides the way the layer metadata is processed.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration to process.
-     * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+     * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTilesLayerEntryConfig>;
+    /**
+     * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
+     * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
+     * @returns {Promise<VectorTileLayer<VectorTileSource>>} The GeoView raster layer that has been created.
+     */
+    protected onProcessOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<GVVectorTiles>;
+    /**
+     * Overrides the creation of the GV Layer
+     * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration.
+     * @returns {GVVectorTiles} The GV Layer
+     */
+    protected onCreateGVLayer(layerConfig: VectorTilesLayerEntryConfig): GVVectorTiles;
+    /**
+     * Creates a configuration object for a XYZTiles layer.
+     * This function constructs a `TypeVectorTilesConfig` object that describes an XYZTiles layer
+     * and its associated entry configurations based on the provided parameters.
+     * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+     * @param {string} geoviewLayerName - The display name of the GeoView layer.
+     * @param {string} metadataAccessPath - The URL or path to access metadata.
+     * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+     * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+     * @returns {TypeVectorTilesConfig} The constructed configuration object for the XYZTiles layer.
+     */
+    static createVectorTilesLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean, layerEntries: TypeJsonArray): TypeVectorTilesConfig;
+    /**
+     * Creates a VectorTileSource from a layer config.
+     * This encapsulates projection, tileGrid, and format setup.
+     * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
+     * @param {string} fallbackProjection - Fallback projection if none is provided in the config.
+     * @returns An initialized VectorTileSource ready for use in a layer.
+     * @throws If required config fields like dataAccessPath are missing.
+     */
+    static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig, fallbackProjection: string): VectorTileSource;
 }
 /**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeVectorTilesConfig if the geoviewLayerType attribute of the

@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 import { TypeJsonValue } from '@/api/config/types/config-types';
 import { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
-/** ******************************************************************************************************************************
+/**
  * Interface used to initialize a button panel.
  */
 export type TypeButtonPanelProps = {
@@ -11,7 +11,7 @@ export type TypeButtonPanelProps = {
     /** Button properties. */
     button: TypeButtonProps;
 };
-/** ******************************************************************************************************************************
+/**
  * type for the panel properties used when creating a new panel.
  */
 export type TypePanelProps = {
@@ -56,7 +56,7 @@ export interface PanelStyles {
         [key: string]: string;
     };
 }
-/** ******************************************************************************************************************************
+/**
  * Interface for the button properties used when creating a new button.
  */
 export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
@@ -79,7 +79,7 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
     /** Button visibility. */
     visible?: boolean;
 }
-/** ******************************************************************************************************************************
+/**
  * Interface for the text properties used when creating a new text field.
  */
 export interface TypeTextFieldProps extends Omit<TextFieldProps, 'type'> {
@@ -88,7 +88,7 @@ export interface TypeTextFieldProps extends Omit<TextFieldProps, 'type'> {
     /** Location for tooltip. */
     tooltipPlacement?: TooltipProps['placement'];
 }
-/** ******************************************************************************************************************************
+/**
  * Interface for the button properties used when creating a new button.
  */
 export interface ButtonPropsLayerPanel {
@@ -96,7 +96,7 @@ export interface ButtonPropsLayerPanel {
     isLast?: boolean;
     handleNext: () => void;
 }
-/** ******************************************************************************************************************************
+/**
  * Interface used when creating a new button panel.
  */
 export type TypeButtonPanel = {
@@ -111,7 +111,7 @@ export type TypeButtonPanel = {
     /** callback triggered when a panel is fully opened */
     onOpen?: () => void;
 };
-/** ******************************************************************************************************************************
+/**
  * constant that defines the panel types.
  */
 export declare const CONST_PANEL_TYPES: {

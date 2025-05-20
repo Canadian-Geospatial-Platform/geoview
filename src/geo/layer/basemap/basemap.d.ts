@@ -6,7 +6,6 @@ import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } 
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { MapViewer } from '@/geo/map/map-viewer';
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -46,9 +45,9 @@ export declare class BasemapApi {
      * @param {TypeBasemapOptions} basemapOptions - Basemap options.
      * @param {TypeValidMapProjectionCodes} projection - Optional projection code.
      * @param {TypeDisplayLanguage} language - Optional language.
-     * @return {Promise<TypeBasemapProps | undefined>} The core basemap.
+     * @return {Promise<TypeBasemapProps>} The core basemap.
      */
-    createCoreBasemap(basemapOptions: TypeBasemapOptions, projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<TypeBasemapProps | undefined>;
+    createCoreBasemap(basemapOptions: TypeBasemapOptions, projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<TypeBasemapProps>;
     /**
      * Create a custom basemap.
      * @param {TypeBasemapProps} basemapProps - Basemap properties.
@@ -111,7 +110,7 @@ type BasemapChangedDelegate = EventDelegateBase<BasemapApi, BasemapChangedEvent,
  * Define an event for the delegate.
  */
 export type BasemapErrorEvent = {
-    error: GeoViewError;
+    error: Error;
 };
 /**
  * Define a delegate for the event handler function signature.

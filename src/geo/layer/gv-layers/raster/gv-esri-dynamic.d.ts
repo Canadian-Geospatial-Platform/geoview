@@ -1,8 +1,9 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Image as ImageLayer } from 'ol/layer';
 import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
+import { Map as OLMap } from 'ol';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { TypeFeatureInfoEntry, rangeDomainType, codedValueType, TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
@@ -17,14 +18,12 @@ import { TypeJsonObject } from '@/api/config/types/config-types';
 export declare class GVEsriDynamic extends AbstractGVRaster {
     #private;
     static DEFAULT_HIT_TOLERANCE: number;
-    hitTolerance: number;
     /**
      * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
-     * @param {string} mapId - The map id
      * @param {ImageArcGISRest} olSource - The OpenLayer source.
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration.
      */
-    constructor(mapId: string, olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig);
+    constructor(olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig);
     /**
      * Overrides the get of the OpenLayers Layer
      * @returns {ImageLayer<ImageArcGISRest>} The OpenLayers Layer
@@ -40,6 +39,11 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @returns {EsriDynamicLayerEntryConfig} The layer configuration or undefined if not found.
      */
     getLayerConfig(): EsriDynamicLayerEntryConfig;
+    /**
+     * Overrides the hit tolerance of the layer
+     * @returns {number} The hit tolerance for a GV Esri Dynamic layer
+     */
+    getHitTolerance(): number;
     /**
      * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
      * @param {string} fieldName - The field name for which we want to get the type.
@@ -65,21 +69,14 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      */
     fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeJsonObject>;
     /**
-     * Overrides the return of feature information at a given pixel location.
-     * @param {Pixel} location - The pixel coordinate that will be used by the query.
-     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-     * @param {AbortController?} abortController - The optional abort controller.
-     * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
-     */
-    protected getFeatureInfoAtPixel(location: Pixel, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
-    /**
      * Overrides the return of feature information at a given coordinate.
+     * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
      * @param {Coordinate} location - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Query the features geometry with a web worker
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
@@ -92,12 +89,13 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     fetchFeatureInfoGeometryWithWorker(layerConfig: EsriDynamicLayerEntryConfig, objectIds: number[], queryGeometry: boolean, projection: number, maxAllowableOffset: number): Promise<TypeJsonObject>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
+     * @param {OLMap} map - The Map where to get Feature Info At LongLat from.
      * @param {Coordinate} lnglat - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtLongLat(map: OLMap, lnglat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Gets the layer view filter. The filter is derived from the uniqueValue or the classBreak visibility flags and a layerFilter
      * associated to the layer.
@@ -117,7 +115,7 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     /**
      * Overrides when the layer gets in loaded status.
      */
-    onLoaded(): void;
+    protected onLoaded(): void;
     /**
      * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
      * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
@@ -129,14 +127,17 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     applyViewFilter(filter: string, combineLegendFilter?: boolean): void;
     /**
      * Overrides the way to get the bounds for this layer type.
+     * @param {OLProjection} projection - The projection to get the bounds into.
+     * @param {number} stops - The number of stops to use to generate the extent.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    onGetBounds(): Extent | undefined;
+    onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
     /**
      * Sends a query to get ESRI Dynamic feature geometries and calculates an extent from them.
      * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
-     * @param {string} outfield - ID field to return for services that require a value in outfields.
-     * @returns {Promise<Extent | undefined>} The extent of the features, if available.
+     * @param {OLProjection} outProjection - The output projection for the extent.
+     * @param {string?} outfield - ID field to return for services that require a value in outfields.
+     * @returns {Promise<Extent>} The extent of the features, if available.
      */
-    getExtentFromFeatures(objectIds: string[], outfield?: string): Promise<Extent | undefined>;
+    getExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
 }

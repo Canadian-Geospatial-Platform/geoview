@@ -1,6 +1,6 @@
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { TypeDisplayLanguage, TypeStyleGeometry } from '@/api/config/types/map-schema-types';
+import { TypeStyleGeometry } from '@/api/config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 /**
  * The ESRI dynamic geoview layer class.
@@ -11,9 +11,8 @@ export declare abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeo
      * The class constructor.
      *
      * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
      */
-    constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage);
+    constructor(geoviewLayerConfig: TypeJsonObject);
     /**
      * Get the service metadata from the metadataAccessPath and store it in a protected property of the geoview layer.
      * Verify that all sublayers defined in the listOfLayerEntryConfig exist in the metadata and fetch all sublayers metadata.

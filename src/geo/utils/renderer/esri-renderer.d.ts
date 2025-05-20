@@ -1,5 +1,5 @@
 import { TypeLayerStyleConfig } from '@/api/config/types/map-schema-types';
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseRenderer as an EsriUniqueValueRenderer if the type attribute of the
  * verifyIfRenderer parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
  * this function.
@@ -9,7 +9,7 @@ import { TypeLayerStyleConfig } from '@/api/config/types/map-schema-types';
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const esriRendererIsUniqueValue: (verifyIfRenderer: EsriBaseRenderer) => verifyIfRenderer is EsriUniqueValueRenderer;
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseSymbol as an EsriSimpleMarkerSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriSMS'. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -18,7 +18,7 @@ export declare const esriRendererIsUniqueValue: (verifyIfRenderer: EsriBaseRende
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const isSimpleMarkerSymbol: (verifyIfSymbol: EsriBaseSymbol) => verifyIfSymbol is EsriSimpleMarkerSymbol;
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseSymbol as an EsriSimpleFillSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriSFS'. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -27,7 +27,7 @@ export declare const isSimpleMarkerSymbol: (verifyIfSymbol: EsriBaseSymbol) => v
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const isEsriSimpleFillSymbol: (verifyIfSymbol: EsriBaseSymbol) => verifyIfSymbol is EsriSimpleFillSymbol;
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseSymbol as an EsriSimpleLineSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriSLS'. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -36,7 +36,7 @@ export declare const isEsriSimpleFillSymbol: (verifyIfSymbol: EsriBaseSymbol) =>
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const isSimpleLineSymbol: (verifyIfSymbol: EsriBaseSymbol) => verifyIfSymbol is EsriSimpleLineSymbol;
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseSymbol as an EsriPictureMarkerSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriPMS'. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -45,7 +45,7 @@ export declare const isSimpleLineSymbol: (verifyIfSymbol: EsriBaseSymbol) => ver
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const isPictureMarkerSymbol: (verifyIfSymbol: EsriBaseSymbol) => verifyIfSymbol is EsriPictureMarkerSymbol;
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseRenderer as an EsriSimpleRenderer if the type attribute of the verifyIfRenderer
  * parameter is 'simple'. The type ascention applies only to the true block of the if clause that use this function.
  *
@@ -54,7 +54,7 @@ export declare const isPictureMarkerSymbol: (verifyIfSymbol: EsriBaseSymbol) => 
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const esriRendererIsSimple: (verifyIfRenderer: EsriBaseRenderer) => verifyIfRenderer is EsriSimpleRenderer;
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines an EsriBaseRenderer as an EsriClassBreakRenderer if the type attribute of the
  * verifyIfRenderer parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use this
  * function.
@@ -64,7 +64,7 @@ export declare const esriRendererIsSimple: (verifyIfRenderer: EsriBaseRenderer) 
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const esriRendererIsClassBreaks: (verifyIfRenderer: EsriBaseRenderer) => verifyIfRenderer is EsriClassBreakRenderer;
-/** *****************************************************************************************************************************
+/**
  * Get GeoView style from Esri renderer.
  *
  * @param {EsriBaseRenderer} renderer - ESRI renderer to convert.

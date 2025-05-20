@@ -1,5 +1,5 @@
 import { AbstractPlugin } from './abstract-plugin';
-/** ******************************************************************************************************************************
+/**
  * Map Plugin abstract class.
  */
 export declare abstract class MapPlugin extends AbstractPlugin {

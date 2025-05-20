@@ -2,8 +2,8 @@ import { Extent } from 'ol/extent';
 import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntryPartial, TypeLayerStatus, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry, TypeLayerControls } from '@/api/config/types/map-schema-types';
-import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeFeatureInfoEntryPartial, TypeLayerStatus, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry, TypeLayerControls, TypeGeoviewLayerType } from '@/api/config/types/map-schema-types';
+import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 type LayerActions = ILayerState['actions'];
 export interface ILayerState {
     highlightedLayer: string;
@@ -16,7 +16,7 @@ export interface ILayerState {
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         deleteLayer: (layerPath: string) => void;
-        getExtentFromFeatures: (layerPath: string, featureIds: string[], outfield?: string) => Promise<Extent | undefined>;
+        getExtentFromFeatures: (layerPath: string, featureIds: string[], outfield?: string) => Promise<Extent>;
         queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
         getLayer: (layerPath: string) => TypeLegendLayer | undefined;
         getLayerBounds: (layerPath: string) => number[] | undefined;

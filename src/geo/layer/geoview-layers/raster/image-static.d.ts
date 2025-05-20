@@ -1,10 +1,9 @@
 import Static from 'ol/source/ImageStatic';
-import ImageLayer from 'ol/layer/Image';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/api/config/types/map-schema-types';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_TYPES } from '@/api/config/types/map-schema-types';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
     listOfLayerEntryConfig: ImageStaticLayerEntryConfig[];
@@ -18,11 +17,9 @@ export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig,
 export declare class ImageStatic extends AbstractGeoViewRaster {
     /**
      * Constructs a ImageStatic Layer configuration processor.
-     *
-     * @param {string} mapId the id of the map
      * @param {TypeImageStaticLayerConfig} layerConfig the layer configuration
      */
-    constructor(mapId: string, layerConfig: TypeImageStaticLayerConfig);
+    constructor(layerConfig: TypeImageStaticLayerConfig);
     /**
      * Overrides the way the metadata is fetched and set in the 'metadata' property. Resolves when done.
      * @returns {Promise<void>} A promise that the execution is completed.
@@ -34,11 +31,36 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      */
     protected onValidateLayerEntryConfig(layerConfig: TypeLayerEntryConfig): void;
     /**
-     * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
-     * @returns {Promise<ImageLayer<Static>>} The GeoView raster layer that has been created.
+     * Overrides the way the layer metadata is processed.
+     * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @returns {Promise<ImageStaticLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<ImageLayer<Static>>;
+    protected onProcessLayerMetadata(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageStaticLayerEntryConfig>;
+    /**
+     * Overrides the creation of the GV Layer
+     * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration.
+     * @returns {GVImageStatic} The GV Layer
+     */
+    protected onCreateGVLayer(layerConfig: ImageStaticLayerEntryConfig): GVImageStatic;
+    /**
+     * Creates a configuration object for a Static Image layer.
+     * This function constructs a `TypeImageStaticLayerConfig` object that describes an Static Image layer
+     * and its associated entry configurations based on the provided parameters.
+     * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
+     * @param {string} geoviewLayerName - The display name of the GeoView layer.
+     * @param {string} metadataAccessPath - The URL or path to access metadata.
+     * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+     * @param {TypeJsonArray} layerEntries - An array of layer entries objects to be included in the configuration.
+     * @returns {TypeImageStaticLayerConfig} The constructed configuration object for the Static Image layer.
+     */
+    static createImageStaticLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean, layerEntries: TypeJsonArray): TypeImageStaticLayerConfig;
+    /**
+     * Creates a StaticImage source from a layer config.
+     * @param {ImageStaticLayerEntryConfig} layerConfig - Configuration for the image static layer.
+     * @returns A configured ol/source/ImageStatic instance.
+     * @throws If required config fields like dataAccessPath, extent, or projection are missing.
+     */
+    static createImageStaticSource(layerConfig: ImageStaticLayerEntryConfig): Static;
 }
 /**
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeImageStaticLayerConfig if the geoviewLayerType attribute of the

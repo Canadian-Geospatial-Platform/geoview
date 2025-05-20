@@ -1,17 +1,229 @@
+import { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/config/types/map-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { TypeJsonArray, TypeJsonValue } from '@/api/config/types/config-types';
-import { TypeLayerEntryConfig } from '@/api/config/types/map-schema-types';
-export declare class GeoViewLayerError extends GeoViewError {
-    geoviewLayerId: string;
-    constructor(mapId: string, geoviewLayerId: string, localizedKeyOrMessage?: string | undefined, params?: TypeJsonValue[] | TypeJsonArray | string[] | undefined);
+/**
+ * Error related to a specific GeoView layer, extending GeoViewError with the layer ID.
+ * @extends {GeoViewError}
+ */
+export declare class LayerError extends GeoViewError {
+    /** The GeoView layer path or GeoView layer ID associated with this error. */
+    readonly layerPathOrId: string;
+    /**
+     * Constructs a new LayerError.
+     * @param {string} layerPathOrId - The layer ID associated with this error.
+     * @param {string} messageKey - A localization key. Defaults to generic error
+     * @param {unknown[] | undefined} params - Optional localization parameters.
+     * @param {ErrorOptions?} options - Optional error options, including `cause`.
+     */
+    constructor(layerPathOrId: string, messageKey: string, params?: unknown[], options?: ErrorOptions);
 }
-export declare class GeoViewLayerNotCreatedError extends GeoViewLayerError {
-    constructor(mapId: string, geoviewLayerId: string);
+/**
+ * Error thrown when a GeoView layer has an invalid layer type.
+ * This typically indicates a configuration issue for a specific layer and its type.
+ */
+export declare class LayerInvalidGeoviewLayerTypeError extends LayerError {
+    /**
+     * Constructs a new LayerInvalidGeoviewLayerTypeError instance.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer with invalid layer type.
+     * @param {TypeGeoviewLayerType | TypeLayerEntryType} geoviewLayerType - The Geoview layer type
+     */
+    constructor(geoviewLayerId: string, geoviewLayerType: TypeGeoviewLayerType | TypeLayerEntryType);
 }
-export declare class GeoViewLayerLoadedFailedError extends GeoViewLayerError {
-    layerConfig: TypeLayerEntryConfig;
-    constructor(mapId: string, layerConfig: TypeLayerEntryConfig, localizedKeyOrMessage: string, params?: TypeJsonValue[] | TypeJsonArray | string[] | undefined);
+/**
+ * Error thrown when a GeoView layer is missing a required `geoviewLayerId`.
+ * This typically indicates a configuration issue for a specific layer type.
+ */
+export declare class LayerMissingGeoviewLayerIdError extends LayerError {
+    /**
+     * Constructs a new LayerMissingGeoviewLayerIdError instance.
+     * @param {TypeGeoviewLayerType} geoviewLayerType - The Geoview layer type
+     */
+    constructor(geoviewLayerType: TypeGeoviewLayerType);
 }
-export declare class GeoViewLayerCreatedTwiceError extends GeoViewLayerError {
-    constructor(mapId: string, geoviewLayerId: string);
+/**
+ * Custom error class thrown when the GeoView layer configuration is invalid due to the ESRI layer ID not being a number.
+ * This error is used when the ESRI layer ID provided is expected to be a number, but it is not.
+ * @extends {LayerEntryConfigError}
+ */
+export declare class LayerEntryConfigLayerIdEsriMustBeNumberError extends LayerError {
+    /**
+     * Constructor to initialize the LayerEntryConfigLayerIdEsriMustBeNumberError.
+     * This error is thrown when the ESRI layer ID is not a number, which is required for proper layer configuration.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer with invalid layer type.
+     */
+    constructor(geoviewLayerId: string, badNumber: string);
+}
+/**
+ * Error thrown when a specified layer cannot be found.
+ * This error is typically raised when attempting to reference a layer that does not exist,
+ * possibly due to an invalid path.
+ * @extends {LayerError}
+ */
+export declare class LayerNotFoundError extends LayerError {
+    /**
+     * Constructs a new LayerNotFoundError instance.
+     * @param {string} layerPath - The path or identifier of the missing layer.
+     */
+    constructor(layerPath: string);
+}
+/**
+ * Error thrown when a `dataAccessPath` is missing for a GeoView layer while `metadataAccessPath` is also undefined.
+ * This typically indicates a misconfigured layer source.
+ * @extends {LayerError}
+ */
+export declare class LayerDataAccessPathMandatoryError extends LayerError {
+    /**
+     * Constructs a new LayerDataAccessPathMandatoryError.
+     * @param {string} layerPath - The layer path of the layer entry missing a valid `dataAccessPath`.
+     */
+    constructor(layerPath: string);
+}
+export declare class LayerMetadataAccessPathMandatoryError extends LayerError {
+    /**
+     * Constructs a new LayerMetadataAccessPathMandatoryError.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer missing a valid `dataAccessPath`.
+     * @param {TypeGeoviewLayerType} geoviewLayerType - The Geoview layer type
+     */
+    constructor(geoviewLayerId: string, geoviewLayerType: TypeGeoviewLayerType);
+}
+/**
+ * Custom error class for errors that occur when metadata for a GeoView layer cannot be fetched.
+ * This is typically used in scenarios where fetching or reading metadata for a specific service fails.
+ * @extends {LayerError}
+ */
+export declare class LayerServiceMetadataUnableToFetchError extends LayerError {
+    /**
+     * Constructor to initialize the LayerServiceMetadataUnableToFetchError with the layer ID, and the underlying cause of the error.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer related to the error.
+     * @param {Error} cause - The underlying error that caused this exception (e.g., network failure or timeout).
+     */
+    constructor(geoviewLayerId: string, cause: Error);
+}
+/**
+ * Custom error class for scenarios where the metadata of a GeoView layer service is empty.
+ * This error is typically thrown when a metadata request returns an empty response.
+ * @extends {LayerError}
+ */
+export declare class LayerServiceMetadataEmptyError extends LayerError {
+    /**
+     * Constructor to initialize the LayerServiceMetadataEmptyError with the layer ID.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer whose metadata was empty.
+     */
+    constructor(geoviewLayerId: string);
+}
+/**
+ * Error thrown when a layer is expected to be a GeoJson layer but is not.
+ * @extends {LayerError}
+ */
+export declare class LayerNotGeoJsonError extends LayerError {
+    /**
+     * Constructor to initialize the LayerNotEsriDynamicError with the layer path
+     * @param {string} layerPath - The path of the layer that failed validation.
+     */
+    constructor(layerPath: string);
+}
+/**
+ * Error thrown when a layer is expected to be an EsriDynamic layer but is not.
+ * @extends {LayerError}
+ */
+export declare class LayerNotEsriDynamicError extends LayerError {
+    /**
+     * Constructor to initialize the LayerNotEsriDynamicError with the layer path
+     * @param {string} layerPath - The path of the layer that failed validation.
+     */
+    constructor(layerPath: string);
+}
+/**
+ * Error thrown when a layer is not queryable.
+ * This typically means that the layer does not support feature queries, such as `GetFeatureInfo`,
+ * attribute selection, or spatial filtering, either due to its type or configuration.
+ * @extends {LayerError}
+ */
+export declare class LayerNotQueryableError extends LayerError {
+    /**
+     * Creates an instance of LayerNotQueryableError.
+     * @param {string} layerPath - The path or identifier of the layer that is not queryable.
+     */
+    constructor(layerPath: string);
+}
+/**
+ * Error thrown when an invalid filter is applied to a layer.
+ * This typically occurs when a provided filter string doesn't match the expected format
+ * or values for the target layer, which may cause issues in rendering or data querying.
+ * @extends {LayerError}
+ */
+export declare class LayerInvalidLayerFilterError extends LayerError {
+    /**
+     * Creates an instance of LayerInvalidLayerFilterError.
+     * @param {string} layerPath - The identifier or path to the layer with the invalid filter.
+     * @param {string} filter - The internal representation of the filter that caused the error.
+     * @param {string | undefined} layerFilter - The filter string applied to the layer, if provided.
+     * @param {Error} cause - The original error that triggered this error, used for debugging and tracing.
+     */
+    constructor(layerPath: string, filter: string, layerFilter: string | undefined, cause: Error);
+}
+/**
+ * Custom error class thrown when a GeoView layer is attempted to be created more than once.
+ * This error is typically used when a layer is added to a map with an already existing layer ID.
+ * @extends {LayerError}
+ */
+export declare class LayerCreatedTwiceError extends LayerError {
+    /**
+     * Constructor to initialize the LayerCreatedTwiceError with the layer ID.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer that was attempted to be created twice.
+     */
+    constructor(geoviewLayerId: string);
+}
+/**
+ * Custom error class thrown when a GeoView layer creation fails.
+ * This error is typically used when a layer cannot be successfully created on the map.
+ * @extends {LayerError}
+ */
+export declare class LayerNotCreatedError extends LayerError {
+    /**
+     * Constructor to initialize the LayerNotCreatedError with the layer ID.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer that failed to be created.
+     */
+    constructor(geoviewLayerId: string);
+}
+/**
+ * Custom error class thrown when no capabilities are found (or capabilities are empty)
+ * for a GeoView layer on a map.
+ * This error typically occurs when the capabilities for a specific layer are either not available
+ * or not properly loaded for the given layer.
+ * @extends {LayerError}
+ */
+export declare class LayerNoCapabilitiesError extends LayerError {
+    /**
+     * Constructor to initialize the LayerNoCapabilitiesError with the layer ID.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer that does not have capabilities.
+     */
+    constructor(geoviewLayerId: string);
+}
+/**
+ * Error thrown when an unsupported `Format` parameter is used in a WMS `GetFeatureInfo` request.
+ * According to WMS standards, the `Format` parameter for `GetFeatureInfo` requests must be one of:
+ * `text/xml`, `text/html`, or `text/plain`. This error indicates that a different or invalid format
+ * was supplied.
+ * @extends {LayerError}
+ */
+export declare class LayerInvalidFeatureInfoFormatWMSError extends LayerError {
+    /**
+     * Creates an instance of LayerInvalidFeatureInfoFormatWMSError.
+     *
+     * @param {string} layerPath - The path or identifier of the WMS layer that received the invalid format.
+     */
+    constructor(layerPath: string);
+}
+/**
+ * Error thrown when no geographic data (e.g., coordinates or location fields) is found in a CSV sheet.
+ * This error typically occurs when attempting to load a CSV file as a map layer,
+ * but the file does not contain recognizable geographic fields (such as latitude and longitude).
+ * @extends {LayerError}
+ */
+export declare class LayerNoGeographicDataInCSVError extends LayerError {
+    /**
+     * Creates an instance of LayerNoGeographicDataInCSVError.
+     * @param {string} layerPath - The identifier or path of the CSV layer lacking geographic data.
+     */
+    constructor(layerPath: string);
 }

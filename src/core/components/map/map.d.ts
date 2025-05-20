@@ -1,6 +1,7 @@
 import { MapViewer } from '@/geo/map/map-viewer';
 type MapProps = {
     viewer: MapViewer;
+    mapHeight: string;
 };
 /**
  * Create a map component

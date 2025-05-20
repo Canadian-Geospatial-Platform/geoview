@@ -11,11 +11,10 @@ import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vecto
 export declare class GVEsriFeature extends AbstractGVVector {
     /**
      * Constructs a GVEsriFeature layer to manage an OpenLayer layer.
-     * @param {string} mapId - The map id
      * @param {VectorSource} olSource - The OpenLayer source.
      * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer configuration.
      */
-    constructor(mapId: string, olSource: VectorSource, layerConfig: EsriFeatureLayerEntryConfig);
+    constructor(olSource: VectorSource, layerConfig: EsriFeatureLayerEntryConfig);
     /**
      * Overrides the get of the layer configuration associated with the layer.
      * @returns {EsriFeatureLayerEntryConfig} The layer configuration or undefined if not found.

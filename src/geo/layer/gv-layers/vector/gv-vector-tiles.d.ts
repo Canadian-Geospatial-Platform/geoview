@@ -11,11 +11,10 @@ import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 export declare class GVVectorTiles extends AbstractGVVectorTile {
     /**
      * Constructs a GVVectorTiles layer to manage an OpenLayer layer.
-     * @param {string} mapId - The map id
      * @param {VectorTile} olSource - The OpenLayer source.
      * @param {VectorTilesLayerEntryConfig} layerConfig - The layer configuration.
      */
-    constructor(mapId: string, olSource: VectorTile, layerConfig: VectorTilesLayerEntryConfig);
+    constructor(olSource: VectorTile, layerConfig: VectorTilesLayerEntryConfig);
     /**
      * Overrides the get of the layer configuration associated with the layer.
      * @returns {VectorTilesLayerEntryConfig} The layer configuration or undefined if not found.

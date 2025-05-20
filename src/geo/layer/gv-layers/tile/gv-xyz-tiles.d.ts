@@ -1,6 +1,7 @@
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
@@ -13,11 +14,10 @@ import { TypeOutfieldsType } from '@/api/config/types/map-schema-types';
 export declare class GVXYZTiles extends AbstractGVTile {
     /**
      * Constructs a GVXYZTiles layer to manage an OpenLayer layer.
-     * @param {string} mapId - The map id
      * @param {XYZ} olSource - The OpenLayer source.
      * @param {XYZTilesLayerEntryConfig} layerConfig - The layer configuration.
      */
-    constructor(mapId: string, olSource: XYZ, layerConfig: XYZTilesLayerEntryConfig);
+    constructor(olSource: XYZ, layerConfig: XYZTilesLayerEntryConfig);
     /**
      * Overrides the get of the OpenLayers Layer
      * @returns {TileLayer<XYZ>} The OpenLayers Layer
@@ -41,7 +41,9 @@ export declare class GVXYZTiles extends AbstractGVTile {
     protected getFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Overrides the way to get the bounds for this layer type.
+     * @param {OLProjection} projection - The projection to get the bounds into.
+     * @param {number} stops - The number of stops to use to generate the extent.
      * @returns {Extent | undefined} The layer bounding box.
      */
-    onGetBounds(): Extent | undefined;
+    onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
 }

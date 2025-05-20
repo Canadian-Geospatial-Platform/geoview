@@ -2,6 +2,7 @@ import { CV_CONFIG_GEOCORE_TYPE } from '@/api/config/types/config-constants';
 import { TypeJsonObject, TypeJsonArray } from '@/api/config/types/config-types';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import { AbstractGeoviewLayerConfig, EntryConfigBaseClass, TypeDisplayLanguage, TypeGeoviewLayerType, TypeLayerStyleConfig } from '@/api/config/types/map-schema-types';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
  * @exports
@@ -42,12 +43,10 @@ export declare class ConfigApi {
     /**
      * Get the default values that are applied to the map feature configuration when the user doesn't provide a value for a field
      * that is covered by a default value.
-     * @param {TypeDisplayLanguage} language The language of the map feature config we want to produce.
-     *
      * @returns {MapFeatureConfig} The map feature configuration default values.
      * @static
      */
-    static getDefaultMapFeatureConfig(language: TypeDisplayLanguage): MapFeatureConfig;
+    static getDefaultMapFeatureConfig(): MapFeatureConfig;
     /**
      * Convert one layer config or an array of GeoCore layer config to their GeoView equivalents. The method returns undefined
      * and log an error in the console if a GeoCore layer cannot be converted. When the input/output type is an array, it is
@@ -74,12 +73,10 @@ export declare class ConfigApi {
      * and all changes made will be logged in the console.
      *
      * @param {string | TypeJsonObject} mapConfig The map feature configuration to validate.
-     * @param {TypeDisplayLanguage} language The language of the map feature config we want to produce.
-     *
      * @returns {MapFeatureConfig} The validated map feature configuration.
      * @static
      */
-    static validateMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): MapFeatureConfig;
+    static validateMapConfig(mapConfig: string | TypeJsonObject): MapFeatureConfig;
     /**
      * Create the map feature configuration instance using the json string or the json object provided by the user.
      * All GeoCore entries found in the config are translated to their corresponding Geoview configuration.
@@ -122,4 +119,70 @@ export declare class ConfigApi {
      * @returns {TypeLayerStyleConfig} The converted style
      */
     static getStyleFromESRIRenderer(input: string): TypeLayerStyleConfig | undefined;
+    /**
+     * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+     * @returns A Promise with the layer configuration
+     * @experimental
+     */
+    static createEsriDynamicConfig(): Promise<ConfigBaseClass[]>;
+    /**
+     * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+     * @returns A Promise with the layer configuration
+     * @experimental
+     */
+    static createEsriImageConfig(): Promise<ConfigBaseClass[]>;
+    /**
+     * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+     * @returns A Promise with the layer configuration
+     * @experimental
+     */
+    static createImageStaticConfig(): Promise<ConfigBaseClass[]>;
+    /**
+     * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+     * @returns A Promise with the layer configuration
+     * @experimental
+     */
+    static createVectorTilesConfig(): Promise<ConfigBaseClass[]>;
+    /**
+     * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+     * @returns A Promise with the layer configuration
+     * @experimental
+     */
+    static createWMSConfig(): Promise<ConfigBaseClass[]>;
+    /**
+     * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+     * @returns A Promise with the layer configuration
+     * @experimental
+     */
+    static createXYZTilesConfig(): Promise<ConfigBaseClass[]>;
+    /**
+     * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+     * @returns A Promise with the layer configuration
+     * @experimental
+     */
+    static createCSVFeatureConfig(): Promise<ConfigBaseClass[]>;
+    /**
+     * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+     * @returns A Promise with the layer configuration
+     * @experimental
+     */
+    static createEsriFeatureConfig(): Promise<ConfigBaseClass[]>;
+    /**
+     * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+     * @returns A Promise with the layer configuration
+     * @experimental
+     */
+    static createGeoJsonLayerConfig(): Promise<ConfigBaseClass[]>;
+    /**
+     * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+     * @returns A Promise with the layer configuration
+     * @experimental
+     */
+    static createOGCFeatureConfig(): Promise<ConfigBaseClass[]>;
+    /**
+     * Experimental approach to use our Geoview-Layers classes from the ConfigAPI
+     * @returns A Promise with the layer configuration
+     * @experimental
+     */
+    static createWFSConfig(): Promise<ConfigBaseClass[]>;
 }

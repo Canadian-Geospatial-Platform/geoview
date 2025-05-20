@@ -6,11 +6,9 @@ export type GeoChartGeoCoreConfig = TypeJsonObject & {
     };
 };
 export type GeoChartConfig = TypeJsonObject & {
-    layers: [
-        {
-            layerId: string;
-        }
-    ];
+    layers: {
+        layerId: string;
+    }[];
 };
 export type UUIDmapConfigReaderResponse = {
     layers: TypeGeoviewLayerConfig[];
@@ -25,10 +23,10 @@ export declare class UUIDmapConfigReader {
     #private;
     /**
      * Generates GeoView layers and package configurations (i.e. geochart), from GeoCore API, using a list of UUIDs.
-     * @param {string} baseUrl the base url of GeoCore API
-     * @param {string} lang the language to get the config for
-     * @param {string[]} uuids a list of uuids to get the configurations for
-     * @returns {Promise<UUIDmapConfigReaderResponse>} layers and geocharts read and parsed from uuids results from GeoCore
+     * @param {string} baseUrl - The base url of GeoCore API
+     * @param {string} lang - The language to get the config for
+     * @param {string[]} uuids - A list of uuids to get the configurations for
+     * @returns {Promise<UUIDmapConfigReaderResponse>} Layers and Geocharts read and parsed from uuids results from GeoCore
      */
     static getGVConfigFromUUIDs(baseUrl: string, lang: string, uuids: string[]): Promise<UUIDmapConfigReaderResponse>;
 }

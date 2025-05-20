@@ -1,7 +1,6 @@
 import { AbstractGeoviewLayerConfig } from '@/api/config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { WfsGroupLayerConfig } from '@/api/config/types/classes/sub-layer-config/group-node/wfs-group-layer-config';
 import { TypeJsonObject } from '@/api/config/types/config-types';
-import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { WfsLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/vector/wfs-layer-entry-config';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 export type TypeWfsLayerNode = WfsGroupLayerConfig | WfsLayerEntryConfig;
@@ -12,7 +11,7 @@ export declare class WfsLayerConfig extends AbstractGeoviewLayerConfig {
     /**
      * Type of GeoView layer.
      */
-    geoviewLayerType: import("@/api/config/types/map-schema-types").TypeGeoviewLayerType;
+    geoviewLayerType: import("../../../map-schema-types").TypeGeoviewLayerType;
     /** The layer entries to use from the GeoView layer. */
     listOfLayerEntryConfig: EntryConfigBaseClass[] | TypeWfsLayerNode[];
     /**
@@ -28,27 +27,25 @@ export declare class WfsLayerConfig extends AbstractGeoviewLayerConfig {
      * type needed.
      *
      * @param {TypeJsonObject} layerConfig The sublayer configuration.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
      * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
      *
      * @returns {EntryConfigBaseClass} The sublayer instance or undefined if there is an error.
      * @override
      */
-    createLeafNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
+    createLeafNode(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
     /**
      * The method used to implement the class factory model that returns the instance of the class based on the group
      * type needed.
      *
      * @param {TypeJsonObject} layerConfig The group node configuration.
-     * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
      * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
      *
      * @returns {EntryConfigBaseClass} The sublayer instance or undefined if there is an error.
      * @override
      */
-    createGroupNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
+    createGroupNode(layerConfig: TypeJsonObject, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass;
     /**
      * Get the service metadata from the metadataAccessPath and store it in the private property of the geoview layer.
      * @override @async

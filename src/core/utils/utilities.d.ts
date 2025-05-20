@@ -1,23 +1,24 @@
 import { Root } from 'react-dom/client';
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { TypeJsonArray, TypeJsonObject, TypeJsonValue } from '@/api/config/types/config-types';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
- * @param {TypeJsonValue[] | TypeJsonArray | string[]} params - An array of parameters to replace, i.e. ['short']
+ * @param {unknown[]} params - An array of parameters to replace, i.e. ['short']
  * @param {string} message - The original message, i.e. "My string is __param__"
  * @returns {string} Message with values replaced "My string is short"
  */
-export declare function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string): string;
+export declare function replaceParams(params: unknown[], message: string): string;
 /**
  * Return proper language Geoview localized values from map i18n instance
  *
- * @param {string} localizedKey - The localize key to read the message from
  * @param {TypeDisplayLanguage} language - The language to get the message in
+ * @param {string} messageKey - The localize key to read the message from
+ * @param {unknown[] | undefined} params - An array of parameters to replace, i.e. ['short']
  * @returns {string} The translated message with values replaced
  */
-export declare function getLocalizedMessage(localizedKey: string, language: TypeDisplayLanguage, params?: TypeJsonValue[] | TypeJsonArray | string[] | undefined): string;
+export declare function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: string, params?: unknown[] | undefined): string;
 /**
  * Deep merge objects togheter. Latest object will overwrite value on previous one
  * if property exist.
@@ -44,10 +45,8 @@ export declare function getScriptAndAssetURL(): string;
  */
 export declare function generateId(length?: 8 | 18 | 36): string;
 /**
- * Function used to validate the GeoCore UUIDs.
- *
+ * Validates the GeoCore UUIDs.
  * @param {string} uuid The UUID to validate.
- *
  * @returns {boolean} Returns true if the UUID respect the format.
  */
 export declare function isValidUUID(uuid: string): boolean;
@@ -60,36 +59,22 @@ export declare function isValidUUID(uuid: string): boolean;
  */
 export declare function setAlphaColor(colorArray: number[], alpha: number): number[];
 /**
- * Validate if a JSON string is well formatted
+ * Validates if a JSON string is well formatted
  * @param {string} str - The string to test
  * @returns {bollean} true if the JSON is valid, false otherwise
  */
 export declare function isJsonString(str: string): boolean;
 /**
- * Convert an XML document object into a json object
- *
+ * Converts an XML document object into a json object
  * @param {Document | Node | Element} xml - The XML document object
  * @returns The converted json object
  */
-export declare function xmlToJson(xml: Document | Node | Element): TypeJsonObject;
-/**
- * Fetches a url for a json response.
- * If the response is empty, throws an EmptyResponseError.
- * @param {string} url - The url to fetch.
- * @returns {Promise<TypeJsonObject>} The fetched json response.
- */
-export declare function fetchJson(url: string): Promise<TypeJsonObject>;
-/**
- * Fetches a url for a xml response then converts the response to a json response.
- * If the response is empty, throws an EmptyResponseError.
- * @param {string} url - The url to fetch.
- * @returns {Promise<TypeJsonObject>} The fetched json response.
- */
-export declare function fetchXMLToJson(url: string): Promise<TypeJsonObject>;
+export declare function xmlToJson(xml: Document | Node | Element): any;
 /**
  * Execute a XMLHttpRequest
  * @param {string} url - The url to request
  * @returns {Promise<string>} The return value, return is '{}' if request failed
+ * @deprecated Use the core/utils/fetch-helper.ts/Fetch functions instead
  */
 export declare function getXMLHttpRequest(url: string): Promise<string>;
 /**

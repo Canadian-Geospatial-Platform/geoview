@@ -1,11 +1,11 @@
 import { AbstractBaseEsriLayerEntryConfig } from '@/api/config/types/classes/sub-layer-config/leaf/abstract-base-esri-layer-entry-config';
-import { TypeLayerStyleConfig, TypeLayerEntryType, TypeSourceEsriFeatureInitialConfig } from '@/api/config/types/map-schema-types';
+import { TypeLayerStyleConfig, TypeLayerEntryType, TypeBaseVectorSourceInitialConfig } from '@/api/config/types/map-schema-types';
 /**
  * The ESRI feature geoview sublayer class.
  */
 export declare class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfig {
     /** Source settings to apply to the GeoView feature layer source at creation time. */
-    source: TypeSourceEsriFeatureInitialConfig;
+    source: TypeBaseVectorSourceInitialConfig;
     /** Style to apply to the feature layer. */
     layerStyle?: TypeLayerStyleConfig;
     /**

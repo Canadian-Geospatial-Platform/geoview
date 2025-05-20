@@ -4,22 +4,22 @@ import 'dayjs/locale/fr-ca';
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 export type TypeDateFragments = [number[], number[], string[]];
-/** ******************************************************************************************************************************
+/**
  * Type used to define the date precision pattern to use.
  */
 export type DatePrecision = 'year' | 'month' | 'day' | undefined;
-/** ******************************************************************************************************************************
+/**
  * Type used to define the time precision pattern to use.
  */
 export type TimePrecision = 'hour' | 'minute' | 'second' | undefined;
-/** ******************************************************************************************************************************
+/**
  * Type used to define the range values for an OGC time dimension.
  */
 type RangeItems = {
     type: string;
     range: string[];
 };
-/** ******************************************************************************************************************************
+/**
  * Type used to define the GeoView OGC time dimension.
  */
 export type TimeDimension = {
@@ -30,8 +30,9 @@ export type TimeDimension = {
     nearestValues: 'discrete' | 'absolute';
     singleHandle: boolean;
     displayPattern: [DatePrecision | undefined, TimePrecision | undefined];
+    isValid: boolean;
 };
-/** ******************************************************************************************************************************
+/**
  * Type used to validate the ESRI time dimension.
  */
 export type TimeDimensionESRI = {

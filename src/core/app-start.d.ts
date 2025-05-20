@@ -1,5 +1,6 @@
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 export declare const MapContext: import("react").Context<TypeMapContext>;
 /**
  * Type used for the map context
@@ -13,6 +14,7 @@ export type TypeMapContext = {
  */
 interface AppStartProps {
     mapFeaturesConfig: TypeMapFeaturesConfig;
+    lang: TypeDisplayLanguage;
     onMapViewerInit?: (mapViewer: MapViewer) => void;
 }
 /**

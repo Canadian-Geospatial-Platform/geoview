@@ -2,7 +2,8 @@ import { TypeBaseVectorSourceInitialConfig, TypeSourceImageEsriInitialConfig, Ty
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
-/** ******************************************************************************************************************************
+import { TimeDimension } from '@/app';
+/**
  * Base type used to define a GeoView layer to display on the map.
  */
 export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
@@ -39,6 +40,26 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @param {TypeJsonObject} layerMetadata - The layer metadata to set
      */
     setLayerMetadata(layerMetadata: TypeJsonObject): void;
+    /**
+     * Gets the temporal dimension, if any, that is associated to the layer.
+     * @returns {TimeDimension | undefined} The temporal dimension.
+     */
+    getTemporalDimension(): TimeDimension | undefined;
+    /**
+     * Sets the temporal dimension that is associated to the layer.
+     * @param {TimeDimension} temporalDimension - The temporal dimension.
+     */
+    setTemporalDimension(temporalDimension: TimeDimension): void;
+    /**
+     * Gets the layer attributions
+     * @returns {string[]} The layer attributions
+     */
+    getAttributions(): string[];
+    /**
+     * Sets the layer attributions
+     * @param {string[]} attributions - The layer attributions
+     */
+    setAttributions(attributions: string[]): void;
     /**
      * The TypeStyleGeometries associated with the style as could be read from the layer config metadata.
      * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry

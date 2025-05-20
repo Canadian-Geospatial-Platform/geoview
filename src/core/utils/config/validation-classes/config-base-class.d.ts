@@ -1,6 +1,5 @@
 import { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus } from '@/api/config/types/map-schema-types';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 /**
@@ -64,6 +63,14 @@ export declare abstract class ConfigBaseClass {
      */
     get layerStatus(): TypeLayerStatus;
     /**
+     * Returns the sibling layer configurations of the current layer.
+     * If the current layer has a parent, this method retrieves all layer entry
+     * configs under the same parent. It can optionally exclude layers of type 'group'.
+     * @param {boolean} includeGroups - Whether to include entries of type 'group' in the result. False by default.
+     * @returns {ConfigBaseClass[]} An array of sibling layer configurations. Returns an empty array if there is no parent.
+     */
+    getSiblings(includeGroups?: boolean): ConfigBaseClass[];
+    /**
      * Sets the layer status to registered.
      */
     setLayerStatusRegistered(): void;
@@ -92,6 +99,14 @@ export declare abstract class ConfigBaseClass {
      * @param {string} newLayerStatus - The new layerId value.
      */
     setLayerStatus(newLayerStatus: TypeLayerStatus): void;
+    /**
+     * Updates the status of all parents layers based on the status of their sibling layers.
+     * This method checks the statuses of sibling layers (layers sharing the same parent).
+     * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
+     * - If at least one sibling is in a 'loaded' state, it sets the parent layer status to 'loaded'.
+     * - If neither condition is met, the parent status remains unchanged.
+     */
+    updateLayerStatusParent(): void;
     /**
      * This method compares the internal layer status of the config with the layer status passed as a parameter and it
      * returns true if the internal value is greater or equal to the value of the parameter.

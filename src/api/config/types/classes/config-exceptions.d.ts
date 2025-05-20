@@ -13,4 +13,3 @@ export declare class GeoviewLayerInvalidParameterError extends ConfigError {
     messageVariables: string[];
     constructor(messageKey: string, messageVariables: string[]);
 }
-export {};

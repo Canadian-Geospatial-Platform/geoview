@@ -1,3 +1,4 @@
+import { Map as OLMap } from 'ol';
 import { EventDelegateBase } from '@/api/events/event-helper';
 import { QueryType, TypeFeatureInfoEntry, TypeLayerEntryConfig, TypeLayerStatus, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/config/types/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -117,6 +118,7 @@ export declare abstract class AbstractLayerSet {
     protected onLayerSetUpdatedProcess(layerPath: string): void;
     /**
      * Processes layer data to query features on it, if the layer path can be queried.
+     * @param {OLMap} map - The Map to query layer features from.
      * @param {AbstractGVLayer} geoviewLayer - The geoview layer
      * @param {QueryType} queryType - The query type
      * @param {TypeLocation} location - The location for the query
@@ -124,7 +126,7 @@ export declare abstract class AbstractLayerSet {
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise resolving to the query results
      */
-    protected static queryLayerFeatures(geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected static queryLayerFeatures(map: OLMap, geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Checks if the layer is of queryable type based on its class definition
      * @param {AbstractBaseLayer} layer - The layer
@@ -140,9 +142,10 @@ export declare abstract class AbstractLayerSet {
     /**
      * Checks if the layer is in visible range.
      * @param {AbstractGVLayer} layer - The layer
+     * @param {number | undefined} currentZoom - The map current zoom level
      * @returns {boolean} True if the state is queryable or undefined
      */
-    protected static isInVisibleRange(layer: AbstractGVLayer): boolean;
+    protected static isInVisibleRange(layer: AbstractGVLayer, currentZoom: number | undefined): boolean;
     /**
      * Align records with informatiom provided by OutFields from layer config.
      * This will update fields in and delete unwanted fields from the arrayOfRecords

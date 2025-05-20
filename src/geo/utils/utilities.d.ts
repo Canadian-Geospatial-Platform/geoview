@@ -14,7 +14,7 @@ import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerStyleConfig, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
-export declare const layerTypes: Record<"CSV" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/geo/layer/geoview-layers/abstract-geoview-layers").TypeGeoviewLayerType>;
+export declare const layerTypes: Record<"CSV" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOPACKAGE" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("@/api/config/types/map-schema-types").TypeGeoviewLayerType>;
 /**
  * Fetch the json response from the ESRI map server to get REST endpoint metadata
  * @function getESRIServiceMetadata
@@ -30,13 +30,6 @@ export declare function getESRIServiceMetadata(url: string): Promise<TypeJsonObj
  * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
  */
 export declare function getWMSServiceMetadata(url: string, layers: string): Promise<TypeJsonObject>;
-/**
- * Fetch the json response from the XML response of a WFS getCapabilities request
- * @function getWFSServiceMetadata
- * @param {string} url the url of the WFS server
- * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
- */
-export declare function getWFSServiceMetadata(url: string): Promise<TypeJsonObject>;
 /**
  * Return the map server url from a layer service
  *
@@ -87,7 +80,7 @@ export declare function getDefaultDrawingStyle(strokeColor?: Color | string, str
  * @returns {TileLayer<XYZ>} return the created basemap
  */
 export declare function createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile>;
-/** ***************************************************************************************************************************
+/**
  * This method gets the legend styles used by the the layer as specified by the style configuration.
  *
  * @param {TypeLayerStyleConfig} styleConfig - Layer style configuration.
@@ -157,6 +150,12 @@ export declare function polygonToExtent(polygon: Polygon): Extent;
  * @returns {Extent} The validated extent
  */
 export declare function validateExtent(extent: Extent, code?: string): Extent;
+/**
+ * Checks if a given extent is long/lat.
+ * @param {Extent} extent - The extent to check.
+ * @returns {boolean} Whether or not the extent is long/lat
+ */
+export declare function isExtentLngLat(extent: Extent): boolean;
 /**
  * Validates lat long, LCC, or Web Mercator extent if it is defined.
  * @param {Extent} extent - The extent to validate.
