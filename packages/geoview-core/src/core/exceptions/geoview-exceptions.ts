@@ -36,7 +36,7 @@ export class GeoViewError extends Error {
     this.messageKey = messageKey;
     this.messageParams = messageParams;
 
-    // Translate the messag in English by default to at least provide 'something' readable
+    // Translate the message in English by default to at least provide 'something' readable
     this.message = this.translateMessage('en');
 
     // Ensure correct inheritance (important for transpilation targets)

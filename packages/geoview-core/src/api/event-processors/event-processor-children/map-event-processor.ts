@@ -139,6 +139,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     store.getState().mapState.setterActions.setOverlayNorthMarker(northPoleMarker);
     store.getState().mapState.setterActions.setOverlayClickMarker(clickMarkerOverlay);
 
+    // Get the size as [number, number]
+    const size = map.getSize() as unknown as [number, number];
+
+    // Set map size
+    store.getState().mapState.setterActions.setMapSize(size);
+
     // set map interaction
     this.setInteraction(mapId, store.getState().mapState.interaction);
   }
@@ -397,9 +403,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setRotation(rotation);
   }
 
-  static setMapChangeSize(mapId: string, size: [number, number], scale: TypeScaleInfo): void {
+  static setMapSize(mapId: string, size: [number, number]): void {
     // Save in store
-    this.getMapStateProtected(mapId).setterActions.setMapChangeSize(size, scale);
+    this.getMapStateProtected(mapId).setterActions.setMapSize(size);
+  }
+
+  static setMapScale(mapId: string, scale: TypeScaleInfo): void {
+    // Save in store
+    this.getMapStateProtected(mapId).setterActions.setMapScale(scale);
   }
 
   static setMapMoveEnd(
@@ -519,9 +530,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Sets the home view
    * @param mapId - The map id
    * @param view - The view settings
-   * @deprecated
    */
-  // TODO: Check - Not called anywhere, deprecated?
   static setHomeButtonView(mapId: string, view: TypeMapViewSettings): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setHomeView(view);

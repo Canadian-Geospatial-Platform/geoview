@@ -125,7 +125,7 @@
     "errorInvalidExtent": "Invalid extent '__param__'.",
     "fetchProgress": "Fetching data... Retrieved __param__ of __param__ records.",
     "fetchDone": "Data fetched - __param__ records.",
-    "fetchStart": "Start fetching data...",
+    "fetchStart": "Fetching data...",
     "only": "only",
     "opacity": "Opacity",
     "opacityMax": "Maximum from parent",
@@ -215,7 +215,7 @@
       "notFound": "A schema error was found, check the console to see what is wrong.",
       "wrongPath": "Cannot find schema '__param__'."
     },
-    "changeDisplayLanguageLayers": "Layers can not be relaoded because the configuration does not support this language",
+    "changeDisplayLanguageLayers": "Layers can not be reloaded because the configuration does not support this language",
     "changeDisplayLanguage": "Only 'en' and 'fr' are supported",
     "changeDisplayTheme": "Theme unsupported",
     "changeDisplayProjection": "Projection unsupported",
@@ -282,7 +282,7 @@
   "warning": {
     "layer": {
       "slowFetch": "Downloading '__param__' is taking longer then expected...",
-      "slowRender": "The layer '__param__' is slow the render on the map, please be patient...",
+      "slowRender": "The layer '__param__' is slow to render on the map, please be patient...",
       "basemapTakingLongTime": "The basemap is taking a long time to respond...",
       "metadataTakingLongTime": "The metadata for the layer '__param__' is taking longer than expected to fetch...",
       "vectorTileRemoved": "The vector tile __param__ had to be removed due to a projection conflict."
@@ -301,8 +301,8 @@
     "map": {
       "mapIdNotFound": "Map with ID '__param__' not found.",
       "geoviewStoreNotFound": "GeoView Store on Map '__param__' not found.",
-      "mapDivNotExists": "Div avec identifiant __param__ does not exist.",
-      "mapWrongCall": "Div avec identifiant __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'."
+      "mapDivNotExists": "Div with id ${divId} does not exist",
+      "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call."
     },
     "geocore": {
       "uuidNotFound": "GeoCore layer identifier '__param__' does not exist on the server.",
