@@ -148,7 +148,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    * @returns {JSX.Element | null} JSX.Element | null
    */
   const renderContent = (): JSX.Element | null => {
-    if (selectedLayerPath) {
+    if (selectedLayerPath && timeSliderLayers && selectedLayerPath in timeSliderLayers) {
       return <TimeSlider config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />;
     }
 
