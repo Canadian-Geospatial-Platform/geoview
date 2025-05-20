@@ -137,9 +137,10 @@ export class LegendsLayerSet extends AbstractLayerSet {
   #checkQueryLegend(layerPath: string, forced: boolean): void {
     // Get the layer, skip when not found
     const layer = this.layerApi.getGeoviewLayer(layerPath);
-    if (!layer) return;
+    if (!layer) return; // Skip when no layer found
+    // TODO: Check - Is this check necessary or are we always supposed to have a layer
 
-    // Get the config, skip when not found
+    // Get the config
     const layerConfig = layer.getLayerConfig();
 
     // If the layer legend should be queried (and not already querying).

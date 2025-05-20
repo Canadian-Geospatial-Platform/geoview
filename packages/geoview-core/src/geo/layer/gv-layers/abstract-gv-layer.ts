@@ -144,7 +144,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     // Increment the counter
     this.loadingCounter++;
 
-    // Mark the current event with the loading counter, this is a trick using the wrapper to reget it in the 'onLoaded'
+    // Mark the current event with the loading counter, this is a trick using the wrapper to re-obtain it in the 'onLoaded' function below.
     // eslint-disable-next-line no-underscore-dangle
     this.#findWrapperBetweenEventHandlers(event)._loadingCounter = this.loadingCounter;
 
