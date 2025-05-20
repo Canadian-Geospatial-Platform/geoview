@@ -517,7 +517,10 @@ export const useSelectorLayerIcons = (layerPath: string): TypeLegendLayerItem[] 
   });
 };
 
-export const useSelectorEntryConfig = (mapId: string, layerPath: string): AbstractBaseLayerEntryConfig => {
-  // Redirect to LegendEventProcessorLegendEventProcessor
-  return LegendEventProcessor.getLayerEntryConfig(mapId, layerPath);
+export const useSelectorEntryConfigFilter = (mapId: string, layerPath: string): string | undefined => {
+  // Redirect to LegendEventProcessor
+  const entryConfig = LegendEventProcessor.getLayerEntryConfig(mapId, layerPath);
+
+  // Check if entryConfig exists and has layerFilter property
+  return entryConfig && 'layerFilter' in entryConfig ? (entryConfig.layerFilter as string) : undefined;
 };

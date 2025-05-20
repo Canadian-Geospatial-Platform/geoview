@@ -26,7 +26,7 @@ import {
 import {
   useLayerHighlightedLayer,
   useLayerStoreActions,
-  useSelectorEntryConfig,
+  useSelectorEntryConfigFilter,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
@@ -83,8 +83,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layersData = useDataTableAllFeaturesDataArray();
   const metadataUrl = useAppMetadataServiceURL();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
-
-  const selectedLAyerEntryConfig = useSelectorEntryConfig(useGeoViewMapId(), layerDetails.layerPath);
+  const layerFilter = useSelectorEntryConfigFilter(useGeoViewMapId(), layerDetails.layerPath);
 
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerDetails.controls?.highlight;
@@ -383,8 +382,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     const id = layerDetails.layerPath.split('/')[0].split(':')[0];
     const validId = isValidUUID(id) && metadataUrl !== '';
 
-    logger.logDebug('TEST', selectedLAyerEntryConfig);
-
     return (
       <Box>
         <Button type="text" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
@@ -394,8 +391,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           </IconButton>
         </Button>
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
-          <Box>{`${t('layers.layerType')}${layerDetails.type}`}</Box>
-          {selectedLAyerEntryConfig.layerFilter && <Box>{`Layer Filter: ${selectedLAyerEntryConfig.layerFilter}`}</Box>}
+          <Box>{`${t('layers.layerType')!}${layerDetails.type}`}</Box>
+          {layerFilter && <Box>{`Layer Filter: ${layerFilter}`}</Box>}
           {resources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')}`}
