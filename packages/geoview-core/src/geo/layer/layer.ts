@@ -26,10 +26,12 @@ import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   mapConfigLayerEntryIsGeoCore,
+  mapConfigLayerEntryIsShapefile,
   layerEntryIsGroupLayer,
   TypeLayerStatus,
   GeoCoreLayerConfig,
   CONST_LAYER_TYPES,
+  ShapefileLayerConfig,
 } from '@/api/config/types/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -83,6 +85,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { ConfigApi } from '@/api/config/config-api';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
+import { ShapefileReader } from '@/core/utils/config/reader/shapefile-reader';
 // import { LayerMockup } from '@/geo/layer/layer-mockup';
 
 export type GeoViewLayerAddedResult = {
@@ -341,6 +344,19 @@ export class LayerApi {
 
         // Create a promise to fetch from UUID
         const promise = geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig as GeoCoreLayerConfig);
+
+        // Catch failed promises here. The filled promises will be taken care of with the others below.
+        promise.catch((error: unknown) => {
+          // Show the error(s)
+          this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+        });
+
+        // Add the promise to the array
+        promisesOfGeoCoreGeoviewLayers.push(promise);
+      } else if (mapConfigLayerEntryIsShapefile(geoviewLayerConfig)) {
+        const promise = ShapefileReader.convertShapefileConfigToGeoJson(geoviewLayerConfig as ShapefileLayerConfig) as Promise<
+          TypeGeoviewLayerConfig[]
+        >;
 
         // Catch failed promises here. The filled promises will be taken care of with the others below.
         promise.catch((error: unknown) => {
