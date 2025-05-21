@@ -385,7 +385,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           </IconButton>
         </Button>
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
-          <Box>{`${t('layers.layerType')!}${layerDetails.type}`}</Box>
+          <Box>{`${t('layers.layerType')}${layerDetails.type}`}</Box>
           {resources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')}`}
@@ -414,7 +414,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             <Switch
               size="small"
               onChange={() => setLayerQueryable(layerDetails.layerPath, !layerDetails.queryable!)}
-              label={t('layers.layerQueryable') || undefined}
+              label={t('layers.layerQueryable')!}
               checked={layerDetails.queryable}
             />
           )}
