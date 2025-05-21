@@ -5,7 +5,6 @@ import { useLayerDisplayState, useLayerStoreActions, useSelectedLayer } from '@/
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
-import { ToggleAll } from '../toggle-all/toggle-all';
 import { logger } from '@/core/utils/logger';
 import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from '@/core/components/common/responsive-grid-layout';
 import { Typography } from '@/ui/typography/typography';
@@ -47,7 +46,6 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const leftPanel = (): JSX.Element => {
     return (
       <Box id="layers-left-panel">
-        <ToggleAll source="layers" />
         <LeftPanel showLayerDetailsPanel={showLayerDetailsPanel} isLayoutEnlarged={isLayoutEnlarged} />
       </Box>
     );

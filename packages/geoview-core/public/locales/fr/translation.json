@@ -249,11 +249,11 @@
     "resizeTooltip": "Redimensionner",
     "noTab": "Pas d'onglet"
   },
-  "toggle-all": {
-    "show": "Tout afficher",
-    "show-tooltip": "Toggles the visibility of all layers in the map",
+  "toggleAll": {
+    "show": "Afficher tout",
+    "showTooltip": "Bascule la visibilité de toutes les couches de la carte",
     "collapse": "Réduire tout",
-    "collapse-tooltip": "Toggles whether sublayers are shown in the legend / layer list"
+    "collapseTooltip": "Permet de déterminer si les sous-couches sont affichées dans la légende / liste des couches."
   },
   "error": {
     "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour détails",

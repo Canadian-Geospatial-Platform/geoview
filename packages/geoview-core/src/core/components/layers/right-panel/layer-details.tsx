@@ -379,16 +379,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Box>
         <Button type="text" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
-          {`${t('layers.moreInfo')!}`}
-          <IconButton className="buttonOutline" edge="end" size="small" tooltip={t('layers.toggleCollapse')!}>
+          {`${t('layers.moreInfo')}`}
+          <IconButton className="buttonOutline" edge="end" size="small" tooltip={t('layers.toggleCollapse') || undefined}>
             {isInfoCollapse ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </Button>
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
-          <Box>{`${t('layers.layerType')!}${layerDetails.type}`}</Box>
+          <Box>{`${t('layers.layerType') || undefined}${layerDetails.type}`}</Box>
           {resources !== '' && (
             <Box className="info-container">
-              {`${t('layers.layerResource')!}`}
+              {`${t('layers.layerResource')}`}
               <a href={resources} target="_blank" rel="noopener noreferrer">
                 {resources}
               </a>
@@ -396,7 +396,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           )}
           {validId && (
             <Box className="info-container">
-              {`${t('layers.layerMetadata')!}`}
+              {`${t('layers.layerMetadata')}`}
               <a href={`${metadataUrl}${id}`} target="_blank" rel="noopener noreferrer">
                 {`${id}`}
               </a>
@@ -406,7 +406,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             <Switch
               size="small"
               onChange={() => setLayerHoverable(layerDetails.layerPath, !layerDetails.hoverable!)}
-              label={t('layers.layerHoverable')!}
+              label={t('layers.layerHoverable') || undefined}
               checked={layerDetails.hoverable}
             />
           )}
@@ -414,7 +414,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             <Switch
               size="small"
               onChange={() => setLayerQueryable(layerDetails.layerPath, !layerDetails.queryable!)}
-              label={t('layers.layerQueryable')!}
+              label={t('layers.layerQueryable') || undefined}
               checked={layerDetails.queryable}
             />
           )}

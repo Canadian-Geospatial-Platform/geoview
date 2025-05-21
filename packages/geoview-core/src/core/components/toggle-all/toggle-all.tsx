@@ -15,11 +15,22 @@ interface ToggleAllProps {
   source?: 'layers' | 'legend';
 }
 
+const toggleAllStyle = {
+  display: 'flex',
+  flexDirection: 'row',
+  gap: '0px',
+  justifyContent: 'flex-start',
+  alignItems: 'center',
+  marginLeft: '8px',
+  width: 'fit-content',
+};
+
 export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   // Log
   logger.logTraceRender('components/toggle-all/toggle');
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const { t } = useTranslation<string>();
 
   const displayState = useLayerDisplayState();
@@ -27,16 +38,6 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
   const allLayersCollapsed = useAllLayersCollapsed();
   const hasCollapsibleLayers = useMapHasCollapsibleLayers();
   const { setAllLayersVisibility, setAllLayersCollapsed } = useMapStoreActions();
-
-  const toggleAllStyle = {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '0px',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    marginLeft: '8px',
-    width: 'fit-content',
-  };
 
   const handleVisibilityToggle = useCallback(() => {
     setAllLayersVisibility(!allLayersVisible);
@@ -49,25 +50,25 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
   return (
     <Box id="toggle-all" sx={toggleAllStyle}>
       {(source === 'legend' || displayState === 'view') && (
-        <Tooltip title={t('toggle-all.show-tooltip')}>
+        <Tooltip title={t('toggleAll.showTooltip')}>
           <span>
             <Switch
               size={isSmallScreen ? 'small' : 'medium'}
               checked={allLayersVisible}
               onChange={handleVisibilityToggle}
-              label={t('toggle-all.show')!}
+              label={t('toggleAll.show') || undefined}
             />
           </span>
         </Tooltip>
       )}
       {hasCollapsibleLayers && (
-        <Tooltip title={t('toggle-all.collapse-tooltip')}>
+        <Tooltip title={t('toggleAll.collapseTooltip')}>
           <span>
             <Switch
               size={isSmallScreen ? 'small' : 'medium'}
               checked={allLayersCollapsed}
               onChange={handleCollapseToggle}
-              label={t('toggle-all.collapse')!}
+              label={t('toggleAll.collapse') || undefined}
             />
           </span>
         </Tooltip>
