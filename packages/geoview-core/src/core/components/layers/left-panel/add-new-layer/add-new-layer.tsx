@@ -614,10 +614,8 @@ export function AddNewLayer(): JSX.Element {
    * @param {ChangeEvent<HTMLInputElement>} event - TextField event
    */
   const handleNameLayer = (event: ChangeEvent<HTMLInputElement>): void => {
-    if (event.target.value !== undefined) {
-      setStepButtonEnabled(true);
-      setLayerName(event.target.value);
-    }
+    setStepButtonEnabled(true);
+    setLayerName(event.target.value);
   };
 
   /**
@@ -712,7 +710,6 @@ export function AddNewLayer(): JSX.Element {
   // TODO: refactor - remove the unstable nested component
   // eslint-disable-next-line react/no-unstable-nested-components
   function NavButtons({ isFirst = false, isLast = false, handleNext }: ButtonPropsLayerPanel): JSX.Element {
-    logger.logDebug('TEST', layerName);
     return isLoading ? (
       <Box sx={{ padding: 10 }}>
         <CircularProgressBase />
