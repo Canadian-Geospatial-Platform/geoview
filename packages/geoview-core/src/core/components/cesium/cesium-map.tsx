@@ -68,6 +68,8 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/cesium-state';
 import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 
 type MapProps = {
   viewer: MapViewer;
@@ -607,13 +609,16 @@ export function CesiumMap(props: MapProps): JSX.Element {
   const setCesiumViewer = useCesiumSetRef();
   const setCesiumSize = useCesiumStoreSetterActions().setMapSize;
   const setCesiumIsInitialized = useCesiumStoreSetterActions().setIsInitialized;
+  const { setActiveAppBarTab } = useUIStoreActions();
   const { viewer } = props;
 
   viewer.layer.onLayerAdded(() => {
+    setActiveAppBarTab(CV_DEFAULT_APPBAR_CORE.OPEN_3D, CV_DEFAULT_APPBAR_CORE.OPEN_3D, false, false);
     setShow3dMap(false);
   });
 
   viewer.layer.onLayerRemoved(() => {
+    setActiveAppBarTab(CV_DEFAULT_APPBAR_CORE.OPEN_3D, CV_DEFAULT_APPBAR_CORE.OPEN_3D, false, false);
     setShow3dMap(false);
   });
 
