@@ -380,12 +380,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <Box>
         <Button type="text" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} onClick={() => setIsInfoCollapse(!isInfoCollapse)}>
           {`${t('layers.moreInfo')}`}
-          <IconButton className="buttonOutline" edge="end" size="small" tooltip={t('layers.toggleCollapse') || undefined}>
+          <IconButton className="buttonOutline" edge="end" size="small" tooltip={t('layers.toggleCollapse')!}>
             {isInfoCollapse ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </Button>
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
-          <Box>{`${t('layers.layerType') || undefined}${layerDetails.type}`}</Box>
+          <Box>{`${t('layers.layerType')!}${layerDetails.type}`}</Box>
           {resources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')}`}
@@ -406,7 +406,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             <Switch
               size="small"
               onChange={() => setLayerHoverable(layerDetails.layerPath, !layerDetails.hoverable!)}
-              label={t('layers.layerHoverable') || undefined}
+              label={t('layers.layerHoverable')!}
               checked={layerDetails.hoverable}
             />
           )}
