@@ -7,7 +7,7 @@ import { SxStyles } from '@/ui/style/types';
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme): SxStyles => ({
+export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, footerPanelResizeValue: number): SxStyles => ({
   rightIcons: {
     marginTop: 0,
     display: 'flex',
@@ -15,11 +15,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
   },
   panel: {
-    borderTop: 1,
-    paddingTop: '0 !important',
     borderColor: 'divider',
-    height: '100%',
+    borderTop: 1,
+    flexGrow: 1,
+    height: isMapFullScreen ? 'calc( 100% - 56px )' : 'calc( 800px -  56px )', // if fullscreen height = 100% - tab panel if not fullscreen height is viewer height - tab panel
+    overflow: 'hidden',
+    paddingTop: '0 !important',
     width: '100%',
+    '.tab-panel' : {
+      height: '100%',
+    }
   },
   tab: {
     fontSize: theme.palette.geoViewFontSize.default,

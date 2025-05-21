@@ -80,12 +80,10 @@ export const getSxClassesMain = (
   containerType: string
 ): SxClasses => ({
   container: {
-    padding: containerType === CONTAINER_TYPE.FOOTER_BAR ? '20px' : '0px 10px 10px 10px',
     display: 'flex',
     flexDirection: 'column',
-    maxHeight: getMaxHeight(isFullScreen, containerType, mapHeight), // maxHeight only when not fullscreen or app-bar
-    height: getContainerHeight(containerType, isFullScreen, footerBarIsCollapsed, footerPanelResizeValue),
-    overflowY: containerType === CONTAINER_TYPE.FOOTER_BAR || containerType === CONTAINER_TYPE.APP_BAR ? 'hidden' : 'auto',
+    height: '100%',
+    padding: containerType === CONTAINER_TYPE.FOOTER_BAR ? '20px' : '0px 10px 10px 10px',
   },
 });
 
@@ -174,21 +172,12 @@ export const getSxClasses = (
       },
     },
   },
-  rightGridContentHeight: {
-    zIndex: isMapFullScreen ? 'unset' : 100, // should be is full screen dialog
-    '& > div:first-of-type': {
-      // maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : '575px', // maxHeight only when not fullscreen
-
-      maxHeight: calculateMaxHeight(containerType, isMapFullScreen, footerPanelResizeValue, mapHeight, topHeight, footerBarIsCollapsed),
-
-      height: isMapFullScreen ? 'fit-content' : undefined, // height only when fullscreen (- padding)
-      overflowY: 'auto',
-    },
-  },
-  rightGridContent: {
+  rightMainContent: {
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
     borderRadius: '5px',
     backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
+    // maxHeight: '100%',
+    overflowY: 'auto',
     '&:focus-visible': {
       border: '2px solid inherit',
     },
@@ -238,13 +227,14 @@ export const getSxClasses = (
       },
     },
   },
-  leftGridContentHeight: {
-    zIndex: isMapFullScreen ? 'unset' : 100, // should be is full screen dialog
-    // maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 130px)` : '565px', // maxHeight only when not fullscreen
-
-    maxHeight: calculateMaxHeight(containerType, isMapFullScreen, footerPanelResizeValue, mapHeight, topHeight, footerBarIsCollapsed),
-
-    height: isMapFullScreen ? 'fit-content' : undefined, // height only when fullscreen (- padding)
-    overflowY: 'auto',
+  gridRightMain: {
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    height: '100%'
   },
+  gridLeftMain: {
+    height: '100%',
+    overflowY: 'auto',
+  }
 });

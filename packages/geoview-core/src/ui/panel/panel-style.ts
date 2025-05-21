@@ -66,7 +66,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflow: 'hidden',
     overflowY: 'hidden',
     boxSizing: 'border-box',
-    marginBottom: '16px',
+    // marginBottom: '16px',
     '&:last-child': {
       paddingBottom: 0,
     },

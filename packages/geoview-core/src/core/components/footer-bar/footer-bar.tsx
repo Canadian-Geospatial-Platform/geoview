@@ -256,6 +256,30 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     setFooterBarIsCollapsed(false);
   };
 
+  useEffect(() => {
+    if (!tabsContainerRef.current) {
+      return;
+    }
+
+    logger.logTraceUseEffect('FOOTER-BAR - handleResize', isCollapsed);
+
+    // default values as set by the height of the div
+    let footerHeight = 'fit-content';
+
+    // adjust values from px to % to accomodate fullscreen plus page zoom
+    if (isMapFullScreen) {
+
+      // by default the footerbar is collapsed when a user goes fullscreen
+      if (isCollapsed) {
+        footerHeight = 'fit-content';
+      } else {
+        footerHeight = `${footerPanelResizeValue}%`;
+      }
+    }
+
+    tabsContainerRef.current.style.height = footerHeight;
+  }, [tabsContainerRef, isCollapsed, isMapFullScreen, footerPanelResizeValue]);
+
   /**
    * Add plugins
    */

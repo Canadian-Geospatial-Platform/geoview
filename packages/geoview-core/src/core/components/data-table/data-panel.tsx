@@ -253,7 +253,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
           {orderedLayerData
             .filter((data) => data.layerPath === selectedLayerPath)
             .map((data: MappedLayerDataType) => (
-              <Box key={data.layerPath} ref={dataTableRef}>
+              <Box key={data.layerPath} ref={dataTableRef} className="data-table-panel" sx={{ height: '100%' }}>
                 <DataTable data={data} layerPath={data.layerPath} containerType={containerType} />
               </Box>
             ))}
@@ -306,6 +306,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
         'dataTable.children.sortingAndReordering',
         'dataTable.children.keyboardNavigation',
       ]}
+      className="data-table-layout"
     >
       {renderContent()}
     </Layout>

@@ -71,6 +71,7 @@ export const useMapResize = ({
   }, [footerTabContainer, footerPanelResizeValue, isFooterBarCollapsed, isMapFullScreen, origHeight]);
 
   useEffect(() => {
+
     // Update mapDiv height to accomodate the footerbar
     if (mapLoaded && isFooterBar) {
       Object.assign(geoviewElement.style, {

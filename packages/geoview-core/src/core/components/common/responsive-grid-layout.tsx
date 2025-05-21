@@ -318,14 +318,14 @@ const ResponsiveGridLayout = forwardRef(
       return (
         <>
           <FullScreenDialog open={isFullScreen} onClose={() => setIsFullScreen(false)}>
-            <Box sx={sxClasses.rightGridContent} className="responsive-layout-right-main-content fullscreen-mode">
+            <Box sx={sxClasses.rightMainContent} className="responsive-layout-right-main-content fullscreen-mode">
               {content}
             </Box>
           </FullScreenDialog>
 
           <Box
             ref={rightMainRef}
-            sx={sxClasses.rightGridContent}
+            sx={sxClasses.rightMainContent}
             tabIndex={-1}
             className={isGuideOpen ? 'responsive-layout-right-main-content guide-container' : 'responsive-layout-right-main-content'}
           >
@@ -337,7 +337,7 @@ const ResponsiveGridLayout = forwardRef(
 
     return (
       <Box ref={ref} sx={sxClassesMain.container} className="responsive-layout-container">
-        <ResponsiveGrid.Root sx={{ pt: 8, pb: 0 }}>
+        <ResponsiveGrid.Root sx={{ pt: 8, pb: 0 }} className="responsive-layout-top-row">
           {!fullWidth && (
             <ResponsiveGrid.Left
               isRightPanelVisible={isRightPanelVisible}
@@ -382,13 +382,17 @@ const ResponsiveGridLayout = forwardRef(
             </Box>
           </ResponsiveGrid.Right>
         </ResponsiveGrid.Root>
-        <ResponsiveGrid.Root>
+        <ResponsiveGrid.Root className="responsive-layout-main-row"
+          sx={{
+            flexGrow: 1,
+            overflow: 'hidden',
+          }}>
           <ResponsiveGrid.Left
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
             fullWidth={fullWidth}
             aria-hidden={!isRightPanelVisible}
-            sxProps={sxClasses.leftGridContentHeight as SxProps}
+            sxProps={sxClasses.gridLeftMain}
             className="responsive-layout-left-main"
           >
             {leftMain}
@@ -397,7 +401,7 @@ const ResponsiveGridLayout = forwardRef(
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
             fullWidth={fullWidth}
-            sxProps={sxClasses.rightGridContentHeight as SxProps}
+            sxProps={sxClasses.gridRightMain}
             className="responsive-layout-right-main"
           >
             {renderRightContent()}

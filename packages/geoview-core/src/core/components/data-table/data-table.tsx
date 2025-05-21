@@ -472,7 +472,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     enableRowVirtualization: true,
     muiTableContainerProps: {
       sx: {
-        maxHeight: isMapFullScreen ? `calc(${footerPanelResizeValue}vh - 240px)` : '425px', // TODO: set 425px when not in full screen. Even FS should use the footerPanelResizeValue
+        maxHeight: 'calc(100% - 97px)', // 97px is the height of the data table header. Setting max height prevents the containing columns scrollbars from triggering
       },
     },
     rowVirtualizerInstanceRef,
@@ -497,6 +497,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     muiTablePaperProps: ({ table }) => ({
       style: {
         zIndex: table.getState().isFullScreen ? 999999 : undefined,
+        height: '100%',
       },
     }),
     muiTableBodyProps: {
@@ -631,8 +632,8 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
   useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance: useTable });
 
   return (
-    <Box sx={sxClasses.dataTableWrapper}>
-      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language}>
+    <Box sx={sxClasses.dataTableWrapper} className="data-table-wrapper">
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language} className="data-table-localization-provider">
         <MaterialReactTable table={useTable} />
       </LocalizationProvider>
       <LightBoxComponent />

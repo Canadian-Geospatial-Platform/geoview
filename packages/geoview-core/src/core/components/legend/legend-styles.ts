@@ -56,8 +56,7 @@ export const getSxClassesMain = (
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
-    maxHeight: isFullScreen || containerType === CONTAINER_TYPE.APP_BAR ? '100%' : '660px', // maxHeight only when not fullscreen or app-bar
-    height: getContainerHeight(containerType, isFullScreen, footerBarIsCollapsed, footerPanelResizeValue),
+    height: '100%',
     overflowY: 'auto',
     overflowX: 'hidden',
   },

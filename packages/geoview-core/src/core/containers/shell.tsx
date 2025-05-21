@@ -80,6 +80,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const isFooterBarCollapsed = useUIFooterBarIsCollapsed();
   const geoviewElement = useAppGeoviewHTMLElement();
   const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`) as HTMLElement;
+  const footerTabPanelsContainer = geoviewElement.querySelector(`.tabs-panels-container`) as HTLMElement;
 
   // Ref for container height
   const { mapShellContainerRef } = useMapResize({
