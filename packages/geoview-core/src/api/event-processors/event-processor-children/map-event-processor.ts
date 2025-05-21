@@ -145,6 +145,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Set map size
     store.getState().mapState.setterActions.setMapSize(size);
 
+    // Get the scale information
+    this.getScaleInfoFromDomElement(mapId)
+      .then((scale) => {
+        // Set the map scale
+        MapEventProcessor.setMapScale(mapId, scale);
+      })
+      .catch((error: unknown) => {
+        // Log error
+        logger.logPromiseFailed('in getScaleInfoFromDomElement in initMapControls', error);
+      });
+
     // set map interaction
     this.setInteraction(mapId, store.getState().mapState.interaction);
   }
