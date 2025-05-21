@@ -19,7 +19,7 @@ import {
   commonProcessLayerMetadata,
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { LayerEntryConfigLayerIdNotFeatureLayerError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { LayerNotFeatureLayerError } from '@/core/exceptions/layer-exceptions';
 import { TypeJsonArray } from '@/api/config/types/config-types';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 
@@ -121,7 +121,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
     if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
       // Add a layer load error
-      this.addLayerLoadError(new LayerEntryConfigLayerIdNotFeatureLayerError(layerConfig), layerConfig);
+      this.addLayerLoadError(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerName()), layerConfig);
       return true;
     }
     return false;

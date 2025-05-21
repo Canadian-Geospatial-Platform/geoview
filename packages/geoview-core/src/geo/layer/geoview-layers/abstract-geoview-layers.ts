@@ -2,7 +2,7 @@ import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 
-import { generateId, whenThisThen } from '@/core/utils/utilities';
+import { doUntil, generateId } from '@/core/utils/utilities';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -67,10 +67,13 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
  *
  */
 export abstract class AbstractGeoViewLayer {
-  // The default hit tolerance the query should be using
-  static DEFAULT_HIT_TOLERANCE: number = 4;
+  /** The default hit tolerance the query should be using */
+  static readonly DEFAULT_HIT_TOLERANCE: number = 4;
 
-  // The default hit tolerance
+  /** The default waiting time before showing a warning about the metadata taking a long time to get processed */
+  static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number = 10 * 1000; // 10 seconds
+
+  /** The default hit tolerance */
   hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
 
   /** The type of GeoView layer that is instantiated. */
@@ -84,10 +87,10 @@ export abstract class AbstractGeoViewLayer {
   /** The GeoView layer name. The value of this attribute is extracted from the mapLayerConfig parameter. If its value is
    * undefined, a default value is generated.
    */
-  geoviewLayerName: string = '';
+  geoviewLayerName: string;
 
   /** The GeoView layer metadataAccessPath. The name attribute is optional */
-  metadataAccessPath: string = '';
+  metadataAccessPath: string;
 
   /**
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
@@ -123,9 +126,6 @@ export abstract class AbstractGeoViewLayer {
   #onLayerGVCreatedHandlers: LayerGVCreatedDelegate[] = [];
 
   // Keep all callback delegates references
-  #onIndividualLayerLoadedHandlers: IndividualLayerLoadedDelegate[] = [];
-
-  // Keep all callback delegates references
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
   /**
@@ -137,7 +137,7 @@ export abstract class AbstractGeoViewLayer {
     this.type = type;
     this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId();
     this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName ? geoviewLayerConfig.geoviewLayerName : DEFAULT_LAYER_NAMES[type];
-    if (geoviewLayerConfig.metadataAccessPath) this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath.trim();
+    this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath?.trim() || '';
     this.serverDateFragmentsOrder = geoviewLayerConfig.serviceDateFormat
       ? DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat)
       : undefined;
@@ -214,14 +214,16 @@ export abstract class AbstractGeoViewLayer {
     logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
 
     // Try to get a key for logging timings
-    let logTimingsKey;
-    if (this.listOfLayerEntryConfig.length > 0) logTimingsKey = `${this.geoviewLayerId} | ${this.listOfLayerEntryConfig[0].layerPath}`;
+    const logTimingsKey = this.geoviewLayerId;
 
     // Log
-    if (logTimingsKey) logger.logMarkerStart(logTimingsKey);
+    logger.logMarkerStart(logTimingsKey);
 
     // Fetch and set the service metadata
     await this.#fetchAndSetServiceMetadata();
+
+    // Log the time it took thus far
+    logger.logMarkerCheck(logTimingsKey, 'to fetch the service metadata');
 
     // If layers, validate the metadata
     if (this.listOfLayerEntryConfig.length) {
@@ -234,10 +236,10 @@ export abstract class AbstractGeoViewLayer {
 
       // Process the layer metadata for each layer entry
       await this.#processListOfLayerMetadata(this.listOfLayerEntryConfig);
-    }
 
-    // Log the time it took thus far
-    if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to get additional service definition');
+      // Log the time it took thus far
+      logger.logMarkerCheck(logTimingsKey, `to process the (${this.listOfLayerEntryConfig.length}) layer metadata(s)`);
+    }
 
     // Process list of layers and await
     const layer = await this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
@@ -246,7 +248,7 @@ export abstract class AbstractGeoViewLayer {
     this.olRootLayer = layer?.getOLLayer();
 
     // Log the time it took thus far
-    if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
+    logger.logMarkerCheck(logTimingsKey, 'to create the layers');
   }
 
   /**
@@ -261,13 +263,16 @@ export abstract class AbstractGeoViewLayer {
         // Log
         logger.logTraceCore(`LAYERS - 2 - Fetching and setting service metadata for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
 
+        // Start a timer to see if the layer metadata could be fetched after delay
+        this.#startMetadataFetchWatcher();
+
         // Process and, yes, keep the await here, because we want to make extra sure the onFetchAndSetServiceMetadata is
         // executed asynchronously, even if the implementation of the overriden method is synchronous.
         // All so that the try/catch works nicely here.
         await this.onFetchAndSetServiceMetadata();
       } else {
         // TODO: Check - Is this else really happening? Do we need the if (this.metadataAccessPath) at all?
-        // debugger;
+        logger.logDebug(`WOW IT HAPPENED! '${this.geoviewLayerId}' HAD NO METADATA ACCESS PATH!`);
       }
     } catch (error: unknown) {
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)
@@ -282,11 +287,11 @@ export abstract class AbstractGeoViewLayer {
       // If ResponseEmptyError error
       if (error instanceof ResponseEmptyError) {
         // Throw higher
-        throw new LayerServiceMetadataEmptyError(this.geoviewLayerId);
+        throw new LayerServiceMetadataEmptyError(this.geoviewLayerId, this.geoviewLayerName);
       }
 
       // Throw higher
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, error as Error);
+      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.geoviewLayerName, formatError(error));
     }
   }
 
@@ -359,7 +364,7 @@ export abstract class AbstractGeoViewLayer {
             // Cancelled.. skip (this is notably to support WMS special grouping)
           } else {
             // A validation of a layer entry config failed
-            this.addLayerLoadError(error as Error, layerConfig);
+            this.addLayerLoadError(formatError(error), layerConfig);
           }
         }
       }
@@ -495,11 +500,6 @@ export abstract class AbstractGeoViewLayer {
         return await this.onProcessLayerMetadata(layerConfig);
       }
 
-      // Skip it, that layer entry already had issues
-      logger.logWarning(
-        `Layer metadata processing skipped for layer path '${layerConfig.layerPath}', an error was already detected during validation phase.`
-      );
-
       // Return as-is
       return layerConfig;
     } catch (error: unknown) {
@@ -561,7 +561,7 @@ export abstract class AbstractGeoViewLayer {
           return layerGroup || baseLayer;
         } catch (error: unknown) {
           // Add a layer load error
-          this.addLayerLoadError(error as Error, layerConfig);
+          this.addLayerLoadError(formatError(error), layerConfig);
           return undefined;
         }
       }
@@ -624,9 +624,6 @@ export abstract class AbstractGeoViewLayer {
    * @private
    */
   #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayer> {
-    // Indicate that the layer config has entered the 'loading' status
-    layerConfig.setLayerStatusLoading();
-
     // Process
     return this.onProcessOneLayerEntry(layerConfig);
   }
@@ -773,28 +770,6 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Returns a Promise that will be resolved once the given layer is in a processed phase.
-   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * @param {AbstractGeoViewLayer} geoviewLayerConfig - The layer object
-   * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise
-   * @param {number} checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
-   * @returns {Promise<void>} A promise when done waiting
-   * @throws An exception when the layer failed to become in processed phase before the timeout expired
-   */
-  async waitForAllLayerStatusAreGreaterThanOrEqualTo(timeout?: number, checkFrequency?: number): Promise<void> {
-    // Wait for the processed phase
-    await whenThisThen(
-      () => {
-        return this.allLayerStatusAreGreaterThanOrEqualTo('processed');
-      },
-      timeout,
-      checkFrequency
-    );
-
-    // Here we resolve successfully, otherwise an exception has been thrown already
-  }
-
-  /**
    * Recursively gets all layer entry configs in the GeoView Layer.
    * @returns {ConfigBaseClass[]} The list of layer entry configs
    */
@@ -827,6 +802,29 @@ export abstract class AbstractGeoViewLayer {
       // Go recursive
       this.#getAllLayerEntryConfigsRec(totalList, layerEntryConfig);
     });
+  }
+
+  /**
+   * Starts a delayed check to monitor the metadata fetch process for this GeoView layer.
+   * After a predefined wait period (`DEFAULT_WAIT_PERIOD_METADATA_WARNING`), it verifies whether all layer configurations
+   * have reached at least the 'processed' status. If not, it emits a warning message indicating that metadata loading
+   * is taking longer than expected.
+   *
+   * This helps notify users or the system of potential delays in loading metadata.
+   * @private
+   */
+  #startMetadataFetchWatcher(): void {
+    // Do the following thing until we stop it
+    doUntil(() => {
+      // Check if the layer configs were all at least processed, we're done
+      if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) return true;
+
+      // Emit message
+      this.emitMessage('warning.layer.metadataTakingLongTime', [this.geoviewLayerName || this.geoviewLayerId]);
+
+      // Continue loop
+      return false;
+    }, AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING);
   }
 
   // #region EVENTS
@@ -969,24 +967,6 @@ export abstract class AbstractGeoViewLayer {
   offLayerGroupCreated(callback: LayerGroupCreatedDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerGroupCreatedHandlers, callback);
-  }
-
-  /**
-   * Registers an individual layer loaded event handler.
-   * @param {IndividualLayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onIndividualLayerLoadedHandlers, callback);
-  }
-
-  /**
-   * Unregisters an individual layer loaded event handler.
-   * @param {IndividualLayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onIndividualLayerLoadedHandlers, callback);
   }
 
   /**
@@ -1162,19 +1142,6 @@ export interface TypeWmsLegendStyle {
   name: string;
   legend: HTMLCanvasElement | null;
 }
-
-/**
- * Define a delegate for the event handler function signature
- */
-type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGeoViewLayer, IndividualLayerLoadedEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type IndividualLayerLoadedEvent = {
-  // The loaded layer
-  layerPath: string;
-};
 
 /**
  * Define a delegate for the event handler function signature

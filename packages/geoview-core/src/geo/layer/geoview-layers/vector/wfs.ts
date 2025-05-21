@@ -73,7 +73,7 @@ export class WFS extends AbstractGeoViewVector {
       this.#version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
     } else {
       // Throw error
-      throw new LayerNoCapabilitiesError(this.geoviewLayerId);
+      throw new LayerNoCapabilitiesError(this.geoviewLayerId, this.geoviewLayerName);
     }
   }
 

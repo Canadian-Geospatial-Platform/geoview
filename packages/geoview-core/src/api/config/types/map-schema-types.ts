@@ -620,6 +620,10 @@ export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitia
    * and .gif formats support transparency.
    */
   transparent?: boolean;
+  /**
+   * If true, the layer will call the service using its native SRID so that OpenLayers take charge of the reprojection on the map.
+   */
+  forceServiceProjection?: boolean;
 }
 
 /** Type from which we derive the source properties for all the ESRI Image leaf nodes in the layer tree. */

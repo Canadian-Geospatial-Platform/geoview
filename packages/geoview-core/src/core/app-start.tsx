@@ -13,7 +13,7 @@ import { api } from '@/app';
 import { createI18nInstance } from '@/core/translation/i18n';
 import { useAppDisplayThemeById } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
-import { GeoViewMapIdAlreadyExist } from '@/core/exceptions/geoview-exceptions';
+import { GeoViewMapIdAlreadyExistError } from '@/core/exceptions/geoview-exceptions';
 
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks
@@ -66,7 +66,7 @@ function AppStart(props: AppStartProps): JSX.Element {
 
     async function initializeMap(): Promise<void> {
       // If a map with this id already exist, throw error
-      if (api.hasMapViewer(mapId)) throw new GeoViewMapIdAlreadyExist(mapId);
+      if (api.hasMapViewer(mapId)) throw new GeoViewMapIdAlreadyExistError(mapId);
 
       // Create i18n istance for the map
       const i18n = await createI18nInstance(lang);

@@ -36,6 +36,102 @@ export class LayerError extends GeoViewError {
 }
 
 /**
+ * Error thrown when a specified layer cannot be found.
+ * This error is typically raised when attempting to reference a layer that does not exist,
+ * possibly due to an invalid path.
+ * @extends {LayerError}
+ */
+export class LayerNotFoundError extends LayerError {
+  /**
+   * Constructs a new LayerNotFoundError instance.
+   * @param {string} layerPath - The path or identifier of the missing layer.
+   */
+  constructor(layerPath: string) {
+    super(layerPath, 'error.layer.layerNotFound', [layerPath]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerNotFoundError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a layer is expected to be a GeoJson layer but is not.
+ * @extends {LayerError}
+ */
+export class LayerNotGeoJsonError extends LayerError {
+  /**
+   * Constructor to initialize the LayerNotEsriDynamicError with the layer path
+   * @param {string} layerPath - The path of the layer.
+   * @param {string | undefined} layerName - The layer name.
+   */
+  constructor(layerPath: string, layerName: string | undefined) {
+    super(layerPath, 'error.layer.notAGeoJsonLayer', [layerName || layerPath]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerNotGeoJsonError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a layer is expected to be an EsriDynamic layer but is not.
+ * @extends {LayerError}
+ */
+export class LayerNotEsriDynamicError extends LayerError {
+  /**
+   * Constructor to initialize the LayerNotEsriDynamicError with the layer path
+   * @param {string} layerPath - The path of the layer.
+   * @param {string | undefined} layerName - The layer name.
+   */
+  constructor(layerPath: string, layerName: string | undefined) {
+    super(layerPath, 'error.layer.notAnEsriDynamicLayer', [layerName || layerPath]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerNotEsriDynamicError.prototype);
+  }
+}
+
+/**
+ * Custom error class thrown when the GeoView layer configuration is invalid due to the layer ID not being a feature layer.
+ * This error is specifically used when the provided layer ID does not correspond to a valid feature layer.
+ * @extends {LayerError}
+ */
+export class LayerNotFeatureLayerError extends LayerError {
+  /**
+   * Constructor to initialize the LayerNotFeatureLayerError.
+   * This error is thrown when the layer ID provided does not correspond to a feature layer.
+   * @param {string} layerPath - The configuration object associated with the GeoView layer.
+   * @param {string | undefined} layerName - The layer name.
+   */
+  constructor(layerPath: string, layerName: string | undefined) {
+    super(layerPath, 'error.layer.notAFeatureLayer', [layerName || layerPath]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerNotFeatureLayerError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a layer is not queryable.
+ * This typically means that the layer does not support feature queries, such as `GetFeatureInfo`,
+ * attribute selection, or spatial filtering, either due to its type or configuration.
+ * @extends {LayerError}
+ */
+export class LayerNotQueryableError extends LayerError {
+  /**
+   * Creates an instance of LayerNotQueryableError.
+   * @param {string} layerPath - The path or identifier of the layer that is not queryable.
+   * @param {string | undefined} layerName - The layer name.
+   */
+  constructor(layerPath: string, layerName: string | undefined) {
+    // Construct a detailed error message for debugging
+    super(layerPath, 'error.layer.notQueryableLayer', [layerName || layerPath]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerNotQueryableError.prototype);
+  }
+}
+
+/**
  * Error thrown when a GeoView layer has an invalid layer type.
  * This typically indicates a configuration issue for a specific layer and its type.
  */
@@ -46,7 +142,7 @@ export class LayerInvalidGeoviewLayerTypeError extends LayerError {
    * @param {TypeGeoviewLayerType | TypeLayerEntryType} geoviewLayerType - The Geoview layer type
    */
   constructor(geoviewLayerId: string, geoviewLayerType: TypeGeoviewLayerType | TypeLayerEntryType) {
-    super(geoviewLayerId, `Invalid GeoView Layer Type ${geoviewLayerType}`);
+    super(geoviewLayerId, 'validation.layer.invalidGeoviewLayerType', [geoviewLayerType]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerInvalidGeoviewLayerTypeError.prototype);
@@ -63,7 +159,7 @@ export class LayerMissingGeoviewLayerIdError extends LayerError {
    * @param {TypeGeoviewLayerType} geoviewLayerType - The Geoview layer type
    */
   constructor(geoviewLayerType: TypeGeoviewLayerType) {
-    super('unknown', `geoviewLayerId is mandatory for GeoView layer of type ${geoviewLayerType}.`);
+    super('unknown', 'validation.layer.geoviewLayerIdMandatoryForLayerType', [geoviewLayerType]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerMissingGeoviewLayerIdError.prototype);
@@ -73,16 +169,17 @@ export class LayerMissingGeoviewLayerIdError extends LayerError {
 /**
  * Custom error class thrown when the GeoView layer configuration is invalid due to the ESRI layer ID not being a number.
  * This error is used when the ESRI layer ID provided is expected to be a number, but it is not.
- * @extends {LayerEntryConfigError}
+ * @extends {LayerError}
  */
 export class LayerEntryConfigLayerIdEsriMustBeNumberError extends LayerError {
   /**
    * Constructor to initialize the LayerEntryConfigLayerIdEsriMustBeNumberError.
    * This error is thrown when the ESRI layer ID is not a number, which is required for proper layer configuration.
    * @param {string} geoviewLayerId - The ID of the GeoView layer with invalid layer type.
+   * @param {string | undefined} layerName - The layer name.
    */
-  constructor(geoviewLayerId: string, badNumber: string) {
-    super(geoviewLayerId, `ESRI layerId must be a number, was ${badNumber} (geoviewLayerId: ${geoviewLayerId})`);
+  constructor(geoviewLayerId: string, badNumber: string, layerName: string | undefined) {
+    super(geoviewLayerId, 'validation.layer.layerIdMustBeNumber', [badNumber, layerName || geoviewLayerId]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerEntryConfigLayerIdEsriMustBeNumberError.prototype);
@@ -90,21 +187,21 @@ export class LayerEntryConfigLayerIdEsriMustBeNumberError extends LayerError {
 }
 
 /**
- * Error thrown when a specified layer cannot be found.
- * This error is typically raised when attempting to reference a layer that does not exist,
- * possibly due to an invalid path.
+ * Custom error class thrown when the MetadataAccessPath is missing for a layer configuration.
  * @extends {LayerError}
  */
-export class LayerNotFoundError extends LayerError {
+export class LayerMetadataAccessPathMandatoryError extends LayerError {
   /**
-   * Constructs a new LayerNotFoundError instance.
-   * @param {string} layerPath - The path or identifier of the missing layer.
+   * Constructs a new LayerMetadataAccessPathMandatoryError.
+   * @param {string} geoviewLayerId - The ID of the GeoView layer missing a valid `metadataAccessPath`.
+   * @param {TypeGeoviewLayerType} geoviewLayerType - The Geoview layer type.
+   * @param {string | undefined} layerName - The layer name.
    */
-  constructor(layerPath: string) {
-    super(layerPath, `Layer at path ${layerPath} not found.`);
+  constructor(geoviewLayerId: string, geoviewLayerType: TypeGeoviewLayerType, layerName: string | undefined) {
+    super(geoviewLayerId, 'validation.layer.metadataAccessPathMissing', [layerName || geoviewLayerId, geoviewLayerType]);
 
     // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerNotFoundError.prototype);
+    Object.setPrototypeOf(this, LayerMetadataAccessPathMandatoryError.prototype);
   }
 }
 
@@ -117,26 +214,13 @@ export class LayerDataAccessPathMandatoryError extends LayerError {
   /**
    * Constructs a new LayerDataAccessPathMandatoryError.
    * @param {string} layerPath - The layer path of the layer entry missing a valid `dataAccessPath`.
+   * @param {string | undefined} layerName - The layer name.
    */
-  constructor(layerPath: string) {
-    super(layerPath, `dataAccessPath is mandatory for GeoView layer ${layerPath} when the metadataAccessPath is undefined.`, undefined);
+  constructor(layerPath: string, layerName: string | undefined) {
+    super(layerPath, 'validation.layer.dataAccessPathMissing', [layerName || layerPath]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerDataAccessPathMandatoryError.prototype);
-  }
-}
-
-export class LayerMetadataAccessPathMandatoryError extends LayerError {
-  /**
-   * Constructs a new LayerMetadataAccessPathMandatoryError.
-   * @param {string} geoviewLayerId - The ID of the GeoView layer missing a valid `dataAccessPath`.
-   * @param {TypeGeoviewLayerType} geoviewLayerType - The Geoview layer type
-   */
-  constructor(geoviewLayerId: string, geoviewLayerType: TypeGeoviewLayerType) {
-    super(geoviewLayerId, `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerId} of type ${geoviewLayerType}.`, undefined);
-
-    // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerMetadataAccessPathMandatoryError.prototype);
   }
 }
 
@@ -149,10 +233,11 @@ export class LayerServiceMetadataUnableToFetchError extends LayerError {
   /**
    * Constructor to initialize the LayerServiceMetadataUnableToFetchError with the layer ID, and the underlying cause of the error.
    * @param {string} geoviewLayerId - The ID of the GeoView layer related to the error.
+   * @param {string | undefined} layerName - The layer name.
    * @param {Error} cause - The underlying error that caused this exception (e.g., network failure or timeout).
    */
-  constructor(geoviewLayerId: string, cause: Error) {
-    super(geoviewLayerId, `Unable to fetch and read metadata for layer __param__`, [geoviewLayerId], { cause });
+  constructor(geoviewLayerId: string, layerName: string | undefined, cause: Error) {
+    super(geoviewLayerId, 'validation.layer.unableToFetch', [layerName || geoviewLayerId], { cause });
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerServiceMetadataUnableToFetchError.prototype);
@@ -168,66 +253,13 @@ export class LayerServiceMetadataEmptyError extends LayerError {
   /**
    * Constructor to initialize the LayerServiceMetadataEmptyError with the layer ID.
    * @param {string} geoviewLayerId - The ID of the GeoView layer whose metadata was empty.
+   * @param {string | undefined} layerName - The layer name.
    */
-  constructor(geoviewLayerId: string) {
-    super(geoviewLayerId, `Metadata of the service was empty for layer __param__`, [geoviewLayerId]);
+  constructor(geoviewLayerId: string, layerName: string | undefined) {
+    super(geoviewLayerId, 'validation.layer.serviceMetadataEmpty', [layerName || geoviewLayerId]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerServiceMetadataEmptyError.prototype);
-  }
-}
-
-/**
- * Error thrown when a layer is expected to be a GeoJson layer but is not.
- * @extends {LayerError}
- */
-export class LayerNotGeoJsonError extends LayerError {
-  /**
-   * Constructor to initialize the LayerNotEsriDynamicError with the layer path
-   * @param {string} layerPath - The path of the layer that failed validation.
-   */
-  constructor(layerPath: string) {
-    super(layerPath, 'Not a GeoJson layer', [layerPath]);
-
-    // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerNotGeoJsonError.prototype);
-  }
-}
-
-/**
- * Error thrown when a layer is expected to be an EsriDynamic layer but is not.
- * @extends {LayerError}
- */
-export class LayerNotEsriDynamicError extends LayerError {
-  /**
-   * Constructor to initialize the LayerNotEsriDynamicError with the layer path
-   * @param {string} layerPath - The path of the layer that failed validation.
-   */
-  constructor(layerPath: string) {
-    super(layerPath, 'Not an EsriDynamic layer', [layerPath]);
-
-    // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerNotEsriDynamicError.prototype);
-  }
-}
-
-/**
- * Error thrown when a layer is not queryable.
- * This typically means that the layer does not support feature queries, such as `GetFeatureInfo`,
- * attribute selection, or spatial filtering, either due to its type or configuration.
- * @extends {LayerError}
- */
-export class LayerNotQueryableError extends LayerError {
-  /**
-   * Creates an instance of LayerNotQueryableError.
-   * @param {string} layerPath - The path or identifier of the layer that is not queryable.
-   */
-  constructor(layerPath: string) {
-    // Construct a detailed error message for debugging
-    super(layerPath, `Layer at path ${layerPath} is not queryable`, [layerPath]);
-
-    // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerNotQueryableError.prototype);
   }
 }
 
@@ -241,13 +273,14 @@ export class LayerInvalidLayerFilterError extends LayerError {
   /**
    * Creates an instance of LayerInvalidLayerFilterError.
    * @param {string} layerPath - The identifier or path to the layer with the invalid filter.
+   * @param {string | undefined} layerName - The layer name.
    * @param {string} filter - The internal representation of the filter that caused the error.
    * @param {string | undefined} layerFilter - The filter string applied to the layer, if provided.
    * @param {Error} cause - The original error that triggered this error, used for debugging and tracing.
    */
-  constructor(layerPath: string, filter: string, layerFilter: string | undefined, cause: Error) {
+  constructor(layerPath: string, layerName: string | undefined, filter: string, layerFilter: string | undefined, cause: Error) {
     // Construct a detailed error message for debugging
-    super(layerPath, `Invalid layer filter.\nfilter = ${layerFilter}\ninternal filter = ${filter}`, [layerPath], cause);
+    super(layerPath, 'validation.layer.invalidLayerFilter', [layerName || layerPath, layerFilter, filter], cause);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerInvalidLayerFilterError.prototype);
@@ -263,9 +296,10 @@ export class LayerCreatedTwiceError extends LayerError {
   /**
    * Constructor to initialize the LayerCreatedTwiceError with the layer ID.
    * @param {string} geoviewLayerId - The ID of the GeoView layer that was attempted to be created twice.
+   * @param {string | undefined} layerName - The layer name.
    */
-  constructor(geoviewLayerId: string) {
-    super(geoviewLayerId, 'validation.layer.createtwice', [geoviewLayerId]);
+  constructor(geoviewLayerId: string, layerName: string | undefined) {
+    super(geoviewLayerId, 'validation.layer.createtwice', [layerName || geoviewLayerId]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerCreatedTwiceError.prototype);
@@ -281,9 +315,10 @@ export class LayerNotCreatedError extends LayerError {
   /**
    * Constructor to initialize the LayerNotCreatedError with the layer ID.
    * @param {string} geoviewLayerId - The ID of the GeoView layer that failed to be created.
+   * @param {string | undefined} layerName - The layer name.
    */
-  constructor(geoviewLayerId: string) {
-    super(geoviewLayerId, `Failed to create the layer ${geoviewLayerId}`);
+  constructor(geoviewLayerId: string, layerName: string | undefined) {
+    super(geoviewLayerId, 'validation.layer.failedToCreateLayer', [layerName || geoviewLayerId]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerNotCreatedError.prototype);
@@ -301,9 +336,10 @@ export class LayerNoCapabilitiesError extends LayerError {
   /**
    * Constructor to initialize the LayerNoCapabilitiesError with the layer ID.
    * @param {string} geoviewLayerId - The ID of the GeoView layer that does not have capabilities.
+   * @param {string | undefined} layerName - The layer name.
    */
-  constructor(geoviewLayerId: string) {
-    super(geoviewLayerId, `No capabilities (or empty) found for layer ${geoviewLayerId}`);
+  constructor(geoviewLayerId: string, layerName: string | undefined) {
+    super(geoviewLayerId, 'validation.layer.noCapabilitiesOrEmpty', [layerName || geoviewLayerId]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerNoCapabilitiesError.prototype);
@@ -322,9 +358,10 @@ export class LayerInvalidFeatureInfoFormatWMSError extends LayerError {
    * Creates an instance of LayerInvalidFeatureInfoFormatWMSError.
    *
    * @param {string} layerPath - The path or identifier of the WMS layer that received the invalid format.
+   * @param {string | undefined} layerName - The layer name.
    */
-  constructor(layerPath: string) {
-    super(layerPath, "Parameter 'Format' of GetFeatureInfo only support text/xml, text/html and text/plain for WMS services.");
+  constructor(layerPath: string, layerName: string | undefined) {
+    super(layerPath, 'validation.layer.wmsServiceFormatParameter', [layerName || layerPath]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerInvalidFeatureInfoFormatWMSError.prototype);
@@ -341,9 +378,10 @@ export class LayerNoGeographicDataInCSVError extends LayerError {
   /**
    * Creates an instance of LayerNoGeographicDataInCSVError.
    * @param {string} layerPath - The identifier or path of the CSV layer lacking geographic data.
+   * @param {string | undefined} layerName - The layer name.
    */
-  constructor(layerPath: string) {
-    super(layerPath, `Could not find geographic data in the CSV`);
+  constructor(layerPath: string, layerName: string | undefined) {
+    super(layerPath, 'validation.layer.csvNoGeographicData', [layerName || layerPath]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerNoGeographicDataInCSVError.prototype);

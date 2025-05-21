@@ -18,6 +18,7 @@ import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-v
 import { useAppDisabledLayerTypes, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { getLocalizedMessage } from '@/core/utils/utilities';
 import { Config } from '@/core/utils/config/config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -32,10 +33,9 @@ import {
 } from '@/api/config/types/map-schema-types';
 
 import { ConfigApi } from '@/api/config/config-api';
-import { buildGeoLayerToAdd, getLayerNameById } from './add-layer-utils';
+import { buildGeoLayerToAdd, getLayerNameById } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { GeoviewLayerConfigError } from '@/api/config/types/classes/config-exceptions';
-import { AddLayerTree } from './add-layer-tree';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 
 const sxClasses = {
   buttonGroup: {
@@ -293,7 +293,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorEmpty = (textField: string): void => {
     setIsLoading(false);
-    api.getMapViewer(mapId).notifications.showError(`${textField} ${t('layers.errorEmpty')}`, [], false);
+    api.getMapViewer(mapId).notifications.showError('layers.errorEmpty', [textField], false);
   };
 
   /**
@@ -542,14 +542,14 @@ export function AddNewLayer(): JSX.Element {
       // Use the config to convert simplified layer config into proper layer config
       const config = new Config(language);
       const configObj = config.initializeMapConfig(mapId, [newGeoViewLayer], (errorKey: string, params: string[]) => {
-        // Create the error
-        const error = new GeoViewError(errorKey, params);
+        // Get the message for the logger
+        const message = getLocalizedMessage(language, errorKey, params);
 
         // Log it
-        logger.logWarning(`- Map ${mapId}: ${error.message}`);
+        logger.logWarning(`- Map ${mapId}: ${message}`);
 
-        // Show the error
-        api.getMapViewer(mapId).notifications.showError(error.message);
+        // Show the error using its key (which will get translated)
+        api.getMapViewer(mapId).notifications.showError(errorKey, params);
       });
 
       if (configObj?.length) {

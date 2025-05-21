@@ -33,6 +33,12 @@ export function replaceParams(params: unknown[], message: string): string {
  * @returns {string} The translated message with values replaced
  */
 export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: string, params: unknown[] | undefined = undefined): string {
+  // Check if the message key exists, before translating it and log a warning when it doesn't exist
+  if (!i18n.exists(messageKey, { lng: language })) {
+    // Log error
+    logger.logError(`MISSING MESSAGE KEY FOR MESSAGE: ${messageKey}`);
+  }
+
   const trans = i18n.getFixedT(language);
   let message = trans(messageKey);
 
@@ -358,6 +364,70 @@ export function stringify(str: unknown): unknown | string {
 }
 
 /**
+ * Delay helper function.
+ * @param {number} ms - The number of milliseconds to wait for.
+ * @returns {Promise<void>} Promise which resolves when the delay timeout expires.
+ */
+export const delay = (ms: number): Promise<void> => {
+  return new Promise((resolve) => {
+    // Wait
+    setTimeout(resolve, ms);
+  });
+};
+
+/**
+ * Repeatedly invokes a callback function at a given interval until it returns `true`.
+ * Once the callback returns `true`, the interval is cleared and the polling stops.
+ * @param {() => T} callback - A function that is called every `ms` milliseconds.
+ *                                   If it returns `true`, the interval is cleared.
+ * @param {number} ms - The interval time in milliseconds between callback executions.
+ * @returns {NodeJS.Timeout} The interval timer ID, which can be used to clear the interval manually if needed.
+ */
+export const doUntil = <T>(callback: () => T, ms: number): NodeJS.Timeout => {
+  // Start a recurrent timer
+  let done = false;
+  const interval = setInterval(() => {
+    // If done, skip (protect against race conditions)
+    if (done) return;
+
+    // Callback
+    const shouldStop = callback();
+
+    // If clearing the interval
+    if (shouldStop) {
+      done = true;
+      clearInterval(interval);
+    }
+  }, ms);
+
+  // Return the interval timer
+  return interval;
+};
+
+/**
+ * Repeatedly invokes a callback function at a specified interval until one of two conditions is met:
+ * - The callback function explicitly returns `true`, indicating the interval should be cleared.
+ * - All provided promises have resolved or rejected.
+ * This is useful for performing a recurring action (e.g., logging or polling) that can end either due to
+ * external completion logic or once all promises are settled.
+ * @param {() => T} callback - A function executed on each interval. If it returns `true`, the interval is cleared.
+ * @param {Promise<unknown>[]} promises - An array of promises whose completion will also stop the interval.
+ * @param {number} ms - The interval duration in milliseconds.
+ * @returns {NodeJS.Timeout} The interval timer, which can be cleared manually if needed.
+ */
+export const doUntilPromises = <T>(callback: () => T, promises: Promise<unknown>[], ms: number): NodeJS.Timeout => {
+  // Start a recurrent timer
+  const interval = doUntil(callback, ms);
+
+  // Disble eslint here, it should be caught by the creator of the promise
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  Promise.all(promises).finally(() => clearInterval(interval));
+
+  // Return the interval timer
+  return interval;
+};
+
+/**
  * Internal function to work with async "whenThisThat"... methods.
  * This function is recursive and checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
@@ -367,7 +437,7 @@ export function stringify(str: unknown): unknown | string {
  * @param {function} failCallback - The function executed when checkCallback has failed for too long (went over the timeout)
  * @param {Date} startDate - The initial date this task was started
  * @param {number} timeout - The duration in milliseconds until the task is aborted
- * @param {number} checkFrequency - The frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
+ * @param {number} checkFrequency - The frequency in milliseconds to callback for a check.
  */
 // eslint-disable-next-line no-underscore-dangle
 function _whenThisThenThat<T>(
@@ -378,21 +448,31 @@ function _whenThisThenThat<T>(
   timeout: number,
   checkFrequency: number
 ): void {
+  // GV This pattern immediately calls the callback and then starts checking recursively.
+  // Do not change this for a 'doUntil' as the latter only calls the callback *after* the first checkFrequency expires.
+
   // Check if we're good
   const v = checkCallback();
+
+  // If check was positive
   if (v) {
-    // Do that
+    // Do that and we're done
     doCallback(v);
-  } else if (new Date().getTime() - startDate.getTime() <= timeout) {
-    // Check again later
-    setTimeout(() => {
-      // Recursive call
-      _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, timeout, checkFrequency);
-    }, checkFrequency);
-  } else {
-    // Failed, took too long, this throws an exception in typical async/await contexts
-    failCallback('Task abandonned, took too long.');
+    return;
   }
+
+  // If expired
+  if (Date.now() - startDate.getTime() > timeout) {
+    // Failed, took too long, this throws an exception in typical async/await contexts
+    failCallback(`Task abandonned, took over ${timeout} ms to get anything.`);
+    return;
+  }
+
+  // Check again later
+  setTimeout(() => {
+    // Recursive call
+    _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, timeout, checkFrequency);
+  }, checkFrequency);
 }
 
 /**
@@ -429,18 +509,6 @@ export function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkF
     whenThisThenThat(checkCallback, resolve, reject, timeout, checkFrequency);
   });
 }
-
-/**
- * Delay helper function.
- * @param {number} ms - The number of milliseconds to wait for.
- * @returns {Promise<void>} Promise which resolves when the delay timeout expires.
- */
-export const delay = (ms: number): Promise<void> => {
-  return new Promise((resolve) => {
-    // Wait
-    setTimeout(resolve, ms);
-  });
-};
 
 /**
  * Escape special characters from string

@@ -52,6 +52,8 @@ export function Map(props: MapProps): JSX.Element {
   const isMapInitialized = useRef<boolean>(false);
   const [isMapReady, setIsMapReady] = useState(false);
 
+  const hasRun = useRef(false);
+
   const initCGPVMap = useCallback((): void => {
     // Log
     logger.logTraceUseCallback('map.initCGPVMap');
@@ -83,6 +85,13 @@ export function Map(props: MapProps): JSX.Element {
 
   useEffect(() => {
     logger.logTraceUseEffect('MAP - initCGPVMap');
+
+    // FIXME: Here, we're preventing a double run, because at this level it's not only impacting a rendering thing, it's impacting the core
+    // FIX.MECONT: and raising double mapReady events which doesn't make sense.
+    // FIX.MECONT: The core of the issue is that the map creation shouldn't be happening inside a 'useEffect' hook, which is a UI thing.
+    // Prevent double run, due to React's StrictMode in dev.
+    if (hasRun.current) return;
+    hasRun.current = true;
 
     if (mapElement.current && !isMapReady && !isMapInitialized.current) {
       // Create map

@@ -25,6 +25,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonObject } from '@/api/config/types/config-types';
 import { LayerDataAccessPathMandatoryError, LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { doUntilPromises } from '@/core/utils/utilities';
 
 // Some constants
 const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude|latitude', 'latitude | latitude'];
@@ -38,6 +39,9 @@ const NAME_FIELD_KEYWORDS = ['^name$', '^title$', '^label$'];
  * The AbstractGeoViewVector class.
  */
 export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
+  /** The maximum delay to wait before we warn about the features fetch taking a long time */
+  static readonly DEFAULT_WAIT_SLOW_FETCH_WARNING = 15 * 1000; // 15 seconds
+
   /**
    * Creates a VectorSource from a layer config.
    * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
@@ -47,7 +51,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Validate the dataAccessPath exists
     if (!layerConfig.source?.dataAccessPath) {
       // Throw error missing dataAccessPath
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath);
+      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     // Redirect
@@ -111,7 +115,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Add the features in the source
         vectorSource.addFeatures(features);
 
-        // Call the success callback with the features. This will trigger the onLoad callback on the layer object (though it
+        // Call the success callback with the features. This will trigger the onLoaded callback on the layer object (though it
         // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
         successCallback?.(features);
 
@@ -262,21 +266,21 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Get array of all the promises
     const promises = urlArray.map((featureUrl) => Fetch.fetchJsonAsObject(featureUrl));
 
-    // TODO: message - Create message for all vector layer fetching. Create a centralized message creator for geoview-layers
-    // Prepare a setInterval to emitMessage every couple seconds while the promise is ongoing
-    const timeInterval = setInterval(() => {
-      // Emit message about the fetching being slow
-      this.emitMessage('layers.slowFetch', [this.geoviewLayerName || '...']);
-    }, 15000); // Log every 15 seconds
+    // Start a watcher for a slow fetch happening
+    doUntilPromises(
+      () => {
+        // Emit message about the fetching being slow
+        this.emitMessage('warning.layer.slowFetch', [this.geoviewLayerName]);
 
-    // Create an all promise for all of them and hook when the promise resolves/rejects
-    const allPromise = Promise.all(promises).finally(() => {
-      // Clear interval even if there's an error
-      clearInterval(timeInterval);
-    });
+        // Continue watcher
+        return false;
+      },
+      promises,
+      AbstractGeoViewVector.DEFAULT_WAIT_SLOW_FETCH_WARNING
+    );
 
     // Return the all promise
-    return allPromise;
+    return Promise.all(promises);
   }
 
   /**
@@ -385,7 +389,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     if (latIndex === undefined || lonIndex === undefined) {
       // Failed
-      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath);
+      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath, layerConfig.getLayerName());
     }
 
     AbstractGeoViewVector.#processFeatureInfoConfig(headers, csvRows[1], EXCLUDED_HEADERS, layerConfig);

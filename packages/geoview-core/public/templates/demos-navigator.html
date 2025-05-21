@@ -145,6 +145,7 @@
           <option value="./configs/navigator/15-xyz-tile.json">Layer - XYZ Tile -</option>
           <option value="./configs/navigator/15-xyz-tile-errors.json">Layer - XYZ Tile - errors</option>
           <option value="./configs/navigator/16-esri-dynamic.json">Layer - ESRI Dynamic -</option>
+          <option value="./configs/navigator/16-esri-dynamic-projections.json">Layer - ESRI Dynamic - projections</option>
           <option value="./configs/navigator/16-esri-dynamic-errors.json">Layer - ESRI Dynamic - errors</option>
           <option value="./configs/navigator/17-esri-feature.json">Layer - ESRI Feature -</option>
           <option value="./configs/navigator/17-esri-feature-errors.json">Layer - ESRI Feature - errors</option>
@@ -194,8 +195,8 @@
       <p>Display Projection:</p>
       <div class="selector">
         <select name="Switch Projection" id="switchProjection">
-          <option value="3978">LCC</option>
-          <option value="3857">Web Mercator</option>
+          <option value="3978">LCC (3978)</option>
+          <option value="3857">Web Mercator (3857)</option>
           <option value="unsupported">Not Supported</option>
         </select>
       </div>
@@ -229,8 +230,17 @@
 
     <script src="codedoc.js"></script>
     <script>
-      // ------------------ CONFIG SELECTOR SECTION START -----------------------------------------
       const configLoader = document.getElementById('configLoader');
+      const switchLang = document.getElementById('switchLang');
+      const resetLayer = document.getElementById('resetLayer');
+      const switchThemeElem = document.getElementById('switchTheme');
+      const switchProjectioneElem = document.getElementById('switchProjection');
+      const reload = document.getElementById('Reload-Button');
+      const remove = document.getElementById('Remove-Button');
+      const urlParams = new URLSearchParams(window.location.search);
+      const config = urlParams.get('config');
+
+      // ------------------ CONFIG SELECTOR SECTION START -----------------------------------------
       configLoader.addEventListener('change', (e) => {
         // delete old map
         cgpv.api.deleteMapViewer('map1', true);
@@ -238,18 +248,22 @@
         // wait until map is removed before recreating it
         setTimeout(() => {
           // create new map in a new dom node
-          if (document.getElementById('map1') === null) {
-            const newDiv = document.createElement('div');
-            const id = document.createAttribute('id');
-            const style = document.createAttribute('style');
-            id.value = 'map1';
-            newDiv.setAttributeNode(id);
-            document.getElementById('mapSection').appendChild(newDiv);
+          let mapDiv = document.getElementById('map1');
+          if (mapDiv === null) {
+            mapDiv = document.createElement('div');
+            // const style = document.createAttribute('style'); // Commented this, because it wasn't doing anything
+            mapDiv.setAttribute('id', 'map1');
+            document.getElementById('mapSection').appendChild(mapDiv);
           }
+
+          // Set the language to the switchLang value, always
+          mapDiv.setAttribute('data-lang', switchLang.value);
 
           // create map
           cgpv.api.createMapFromConfig('map1', e.target.value, 800)
-            .then(() => listenToLegendLayerSetChanges('sandboxMap-state', 'map1'))
+            .then((mapViewer) => {
+              listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
+            })
             .catch((error) => {
               console.error('Failed to create map from config', error);
             });
@@ -287,37 +301,30 @@
       });
       // ------------------ CONFIG SELECTOR SECTION END -----------------------------------------
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const config = urlParams.get('config');
+      // If there's a config
       if (config) {
         configLoader.value = config;
         configLoader.dispatchEvent(new Event('change'));
       }
 
       // ------------------ SWITCHER SECTION START -----------------------------------------
-      const switchLang = document.getElementById('switchLang');
-      const resetLayer = document.getElementById('resetLayer');
       switchLang.addEventListener('change', (e) => {
         cgpv.api.getMapViewer('map1').setLanguage(e.target.value, resetLayer.checked);
       });
 
-      const switchThemeElem = document.getElementById('switchTheme');
       switchThemeElem.addEventListener('change', (e) => {
         cgpv.api.getMapViewer('map1').setTheme(e.target.value);
       });
 
-      const switchProjectioneElem = document.getElementById('switchProjection');
       switchProjectioneElem.addEventListener('change', (e) => {
         cgpv.api.getMapViewer('map1').setProjection(e.target.value);
       });
       // ------------------ SWITCHER SECTION END -----------------------------------------
 
-      const reload = document.getElementById('Reload-Button');
       reload.addEventListener('click', (e) => {
         cgpv.api.getMapViewer('map1').reload();
       });
 
-      const remove = document.getElementById('Remove-Button');
       remove.addEventListener('click', (e) => {
         cgpv.api.deleteMapViewer('map1', true);
       });

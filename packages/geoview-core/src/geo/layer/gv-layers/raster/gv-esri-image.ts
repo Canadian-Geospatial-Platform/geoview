@@ -13,7 +13,6 @@ import {
   TypeLayerStyleConfigInfo,
   TypeLayerStyleSettings,
 } from '@/api/config/types/map-schema-types';
-import { parseDateTimeValuesEsriImageOrWMS } from '@/geo/layer/gv-layers/utils';
 import { validateExtent } from '@/geo/utils/utilities';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
@@ -21,6 +20,7 @@ import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/laye
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { TypeJsonArray } from '@/api/config/types/config-types';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 
 /**
  * Manages an Esri Image layer.
@@ -150,56 +150,30 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
-   * Overrides when the layer gets in loaded status.
-   */
-  protected override onLoaded(): void {
-    // Call parent
-    super.onLoaded();
-
-    // Apply view filter immediately
-    this.applyViewFilter(this.getLayerConfig().layerFilter || '');
-  }
-
-  /**
    * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
    * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
-   * @param {boolean} combineLegendFilter - Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(filter: string, combineLegendFilter: boolean = true): void {
+  applyViewFilter(filter: string | undefined = ''): void {
     // Log
     logger.logTraceCore('GV-ESRI-IMAGE - applyViewFilter', this.getLayerPath());
 
-    const layerConfig = this.getLayerConfig();
-    const olLayer = this.getOLLayer();
-
-    // Get source
-    const source = olLayer.getSource();
-    if (source) {
-      // Update the layer config on the fly (maybe not ideal to do this?)
-      layerConfig.legendFilterIsOff = !combineLegendFilter;
-      if (combineLegendFilter) layerConfig.layerFilter = filter;
-
-      if (filter) {
-        let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
-        const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
-        const dimension = queryElements[0].trim();
-        filterValueToUse = queryElements[1].trim();
-
-        // Parse the filter value to use
-        filterValueToUse = parseDateTimeValuesEsriImageOrWMS(filterValueToUse, this.getExternalFragmentsOrder());
-
-        source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
-        olLayer.changed();
-
+    // Process the layer filtering using the static method shared between EsriImage and WMS
+    GVWMS.applyViewFilterOnSource(
+      this.getLayerConfig(),
+      this.getOLSource(),
+      this.getExternalFragmentsOrder(),
+      this,
+      filter,
+      (filterToUse: string) => {
         // Emit event
         this.emitLayerFilterApplied({
-          filter: filterValueToUse,
+          filter: filterToUse,
         });
       }
-    }
+    );
   }
 
   /**

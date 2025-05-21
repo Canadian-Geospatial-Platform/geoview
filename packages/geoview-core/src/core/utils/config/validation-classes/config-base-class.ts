@@ -12,6 +12,7 @@ import { TypeJsonObject } from '@/api/config/types/config-types';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { NotImplementedError } from '@/core/exceptions/core-exceptions';
+import { DateMgt, TypeDateFragments } from '@/core/utils/date-mgt';
 
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -149,6 +150,16 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Gets the layer name of the entry layer or
+   * fallbacks on the geoviewLayerName from the GeoViewLayerConfig or
+   * fallbacks on the geoviewLayerId from the GeoViewLayerConfig or
+   * fallsback on the layerPath.
+   */
+  getLayerName(): string {
+    return this.layerName || this.geoviewLayerConfig.geoviewLayerName || this.geoviewLayerConfig.geoviewLayerId || this.layerPath;
+  }
+
+  /**
    * Returns the sibling layer configurations of the current layer.
    * If the current layer has a parent, this method retrieves all layer entry
    * configs under the same parent. It can optionally exclude layers of type 'group'.
@@ -163,6 +174,14 @@ export abstract class ConfigBaseClass {
 
     // No siblings
     return [];
+  }
+
+  /**
+   * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
+   * @returns {TypeDateFragments} The Date Fragments
+   */
+  getExternalFragmentsOrder(): TypeDateFragments {
+    return DateMgt.getDateFragmentsOrder(this.geoviewLayerConfig.externalDateFormat);
   }
 
   /**
@@ -224,8 +243,8 @@ export abstract class ConfigBaseClass {
     // GV For quick debug, uncomment the line
     // if (newLayerStatus === 'error') debugger;
 
-    // Check if we're not accidentally trying to set a status less than the current one
-    if (!this.isGreaterThanOrEqualTo(newLayerStatus)) {
+    // Check if we're not accidentally trying to set a status less than the current one (or setting loading, it's allowed to jump between loading and loaded)
+    if (!this.isGreaterThanOrEqualTo(newLayerStatus) || newLayerStatus === 'loading') {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
 
@@ -432,7 +451,7 @@ export abstract class ConfigBaseClass {
 /**
  * Define a delegate for the event handler function signature.
  */
-type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
+export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
 
 /**
  * Define an event for the delegate.

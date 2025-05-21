@@ -13,7 +13,7 @@ import * as GeoUtilities from '@/geo/utils/utilities';
 
 import { initMapDivFromFunctionCall } from '@/app';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
+import { InitDivNotExistError, MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -206,22 +206,17 @@ export class API {
    * @param {number} divHeight - height of the div to inject the map in (mandatory if the map reloads)
    */
   // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<void> {
+  async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer> {
     // Get the map div
     const mapDiv = document.getElementById(divId);
+    if (!mapDiv) throw new InitDivNotExistError(divId);
+
     if (divHeight) mapDiv!.style.height = `${divHeight}px`;
 
-    // If found the map div
-    if (mapDiv) {
-      // Init by function call
-      await initMapDivFromFunctionCall(mapDiv, mapConfig);
-      this.#emitMapAddedToDiv({ mapId: divId });
-      return;
-    }
-
-    // Failed
-    throw new Error(`Div with id ${divId} does not exist`);
+    // Init by function call
+    const mapViewer = await initMapDivFromFunctionCall(mapDiv, mapConfig);
+    this.#emitMapAddedToDiv({ mapId: divId });
+    return mapViewer;
   }
 
   /**
@@ -283,7 +278,7 @@ export class API {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapViewerReadyDelegate = EventDelegateBase<API, MapViewerReadyEvent, void>;
+export type MapViewerReadyDelegate = EventDelegateBase<API, MapViewerReadyEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -296,7 +291,7 @@ export type MapViewerReadyEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapAddedToDivDelegate = EventDelegateBase<API, MapAddedToDivEvent, void>;
+export type MapAddedToDivDelegate = EventDelegateBase<API, MapAddedToDivEvent, void>;
 
 /**
  * Define an event for the delegate

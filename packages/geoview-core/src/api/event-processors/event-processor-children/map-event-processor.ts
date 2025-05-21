@@ -60,6 +60,7 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
+import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -138,6 +139,23 @@ export class MapEventProcessor extends AbstractEventProcessor {
     store.getState().mapState.setterActions.setOverlayNorthMarker(northPoleMarker);
     store.getState().mapState.setterActions.setOverlayClickMarker(clickMarkerOverlay);
 
+    // Get the size as [number, number]
+    const size = map.getSize() as unknown as [number, number];
+
+    // Set map size
+    store.getState().mapState.setterActions.setMapSize(size);
+
+    // Get the scale information
+    this.getScaleInfoFromDomElement(mapId)
+      .then((scale) => {
+        // Set the map scale
+        MapEventProcessor.setMapScale(mapId, scale);
+      })
+      .catch((error: unknown) => {
+        // Log error
+        logger.logPromiseFailed('in getScaleInfoFromDomElement in initMapControls', error);
+      });
+
     // set map interaction
     this.setInteraction(mapId, store.getState().mapState.interaction);
   }
@@ -204,19 +222,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<TypeScaleInfo>} A Promise to receive scale information when the dom has it
    */
   static async getScaleInfoFromDomElement(mapId: string): Promise<TypeScaleInfo> {
-    try {
-      // Check if the scaleControl exists and is showing information, wait for it
-      await whenThisThen(
-        () =>
-          document.getElementById(`${mapId}-scaleControlBarMetric`)?.querySelector('.ol-scale-text') &&
-          document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text')
-      );
-    } catch (error: unknown) {
-      // Log
-      logger.logError(`Couldn't retrieve the scale information from the dom tree`, error);
-      // TODO: Check - Maybe we want to actually throw the exception here? Logging only for now until couple maps get tested.
-      // throw error;
-    }
+    // Check if the scaleControl exists and is showing information, wait for it
+    await whenThisThen(
+      () =>
+        document.getElementById(`${mapId}-scaleControlBarMetric`)?.querySelector('.ol-scale-text') &&
+        document.getElementById(`${mapId}-scaleControlBarImperial`)?.querySelector('.ol-scale-text')
+    );
 
     // Get metric values
     const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
@@ -396,9 +407,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setRotation(rotation);
   }
 
-  static setMapChangeSize(mapId: string, size: [number, number], scale: TypeScaleInfo): void {
+  static setMapSize(mapId: string, size: [number, number]): void {
     // Save in store
-    this.getMapStateProtected(mapId).setterActions.setMapChangeSize(size, scale);
+    this.getMapStateProtected(mapId).setterActions.setMapSize(size);
+  }
+
+  static setMapScale(mapId: string, scale: TypeScaleInfo): void {
+    // Save in store
+    this.getMapStateProtected(mapId).setterActions.setMapScale(scale);
   }
 
   static setMapMoveEnd(
@@ -485,11 +501,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           this.getMapViewerLayerAPI(mapId).removeLayerUsingPath(layer.getLayerPath());
 
           // Log
-          this.getMapViewer(mapId).notifications.showWarning(
-            `The vector tile ${layer.getLayerName()} had to be removed due to a projection conflict.`,
-            [],
-            true
-          );
+          this.getMapViewer(mapId).notifications.showWarning('warning.layer.vectorTileRemoved', [layer.getLayerName()], true);
         });
 
       // set new view
@@ -518,6 +530,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  /**
+   * Sets the home view
+   * @param mapId - The map id
+   * @param view - The view settings
+   */
   static setHomeButtonView(mapId: string, view: TypeMapViewSettings): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setHomeView(view);
@@ -678,7 +695,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Set the group markers, and update on the map
     curMarkers[group] = groupMarkers;
     this.getMapStateProtected(mapId).setterActions.setPointMarkers(curMarkers);
-    MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.pointMarkers.updatePointMarkers(curMarkers);
+    MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.pointMarkers?.updatePointMarkers(curMarkers);
   }
 
   /**
@@ -708,7 +725,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Set the pointMarkers and update on map
     this.getMapStateProtected(mapId).setterActions.setPointMarkers(curMarkers);
-    MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.pointMarkers.updatePointMarkers(curMarkers);
+    MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.pointMarkers?.updatePointMarkers(curMarkers);
   }
 
   /**
@@ -1198,8 +1215,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
         const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
         const filter = filters.join(' and ');
 
-        // Force the layer to applyfilter so it refresh for layer class selection (esri layerDef) even if no other filter are applied.
-        geoviewLayer.applyViewFilter(filter);
+        // If EsriDynamic
+        if (geoviewLayer instanceof GVEsriDynamic) {
+          // Force the layer to applyfilter so it refreshes its layerDefs
+          geoviewLayer.applyViewFilter(filter);
+        } else if (geoviewLayer instanceof AbstractGVVector) {
+          // Force the layer to applyfilter so it refreshes its layer config filter
+          geoviewLayer.applyViewFilter(filter);
+        } else {
+          // Not supported
+          throw new NotSupportedError('Layer type not supported when trying to perform an applyLayerFilters.');
+        }
       }
     }
   }
