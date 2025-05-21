@@ -103,8 +103,7 @@
     "url": "Entrer l'URL ou l'identifiant Geocore",
     "urlNoGeocore": "Entrer l'URL",
     "layer": "Couche",
-    "stepOne": "Entrer l'URL/ l'identifiant Geocore",
-    "stepOneNoGeocore": "Entrer l'URL",
+    "stepOne": "Télécharger des données",
     "stepTwo": "Sélectionner le format",
     "stepThree": "Configurer la couche",
     "stepFour": "Entrer le nom",
@@ -142,6 +141,8 @@
     "layerType": "Type : ",
     "layerResource": "Ressource : ",
     "layerMetadata": "Métadonnées : ",
+    "layerDefaultFilter": "Filtre par défault : ",
+    "layerServiceProjection": "Projection du service : ",
     "layerHoverable": "Info au passage de la souris",
     "layerQueryable": "Info au click de la souris"
   },

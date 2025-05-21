@@ -103,8 +103,7 @@
     "url": "Enter URL or Geocore ID",
     "urlNoGeocore": "Enter URL",
     "layer": "Layer",
-    "stepOne": "Enter URL/Geocore ID",
-    "stepOneNoGeocore": "Enter URL",
+    "stepOne": "Upload data",
     "stepTwo": "Select format",
     "stepThree": "Configure layer",
     "stepFour": "Enter name",
@@ -142,6 +141,8 @@
     "layerType": "Type: ",
     "layerResource": "Resource: ",
     "layerMetadata": "Metadata: ",
+    "layerDefaultFilter": "Default filter: ",
+    "layerServiceProjection": "Service projection: ",
     "layerHoverable": "Info on mouse over",
     "layerQueryable": "Info on mouse click"
   },

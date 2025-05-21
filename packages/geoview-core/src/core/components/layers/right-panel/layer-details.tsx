@@ -69,6 +69,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     refreshLayer,
     zoomToLayerExtent,
     getLayerBounds,
+    getLayerDefaultFilter,
+    getLayerServiceProjection,
     setLayerHoverable,
     setLayerQueryable,
   } = useLayerStoreActions();
@@ -78,6 +80,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layersData = useDataTableAllFeaturesDataArray();
   const metadataUrl = useAppMetadataServiceURL();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
+  const layerFilter = getLayerDefaultFilter(layerDetails.layerPath);
+  const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
 
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerDetails.controls?.highlight;
@@ -386,6 +390,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         </Button>
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
           <Box>{`${t('layers.layerType')}${layerDetails.type}`}</Box>
+          {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
+          {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
           {resources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')}`}
