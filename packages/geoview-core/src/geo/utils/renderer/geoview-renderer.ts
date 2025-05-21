@@ -46,12 +46,14 @@ import {
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { TypeJsonArray } from '@/api/config/types/config-types';
 
 type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
+  domainsLookup?: TypeJsonArray,
   aliasLookup?: TypeAliasLookup
 ) => Style | undefined;
 
@@ -1219,42 +1221,76 @@ function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): Typ
  * Search the unique value entry using the field values stored in the feature.
  *
  * @param {string[]} fields - Fields involved in the unique value definition.
- * @param {TypeLayerStyleConfigInfo[]} uniqueValueStyleInfo - Unique value configuration.
- * @param {Feature} feature - Feature used to test the unique value conditions.
+ * @param {TypeLayerStyleConfigInfo[]?} uniqueValueStyleInfo - Unique value configuration.
+ * @param {Feature?} feature - Feature used to test the unique value conditions.
  *
- * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+ * @returns {TypeLayerStyleConfigInfo | undefined} The Style created. Undefined if unable to create it.
  */
 function searchUniqueValueEntry(
   fields: string[],
   uniqueValueStyleInfo: TypeLayerStyleConfigInfo[],
-  feature: Feature,
+  feature?: Feature,
+  domainsLookup?: TypeJsonArray,
   aliasLookup?: TypeAliasLookup
-): number | undefined {
-  for (let i = 0; i < uniqueValueStyleInfo.length; i++) {
-    for (let j = 0, isEqual = true; j < fields.length && isEqual; j++) {
-      // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
-      // unique value definition.
-      let fieldName = feature.getKeys().find((key) => {
-        return key.toLowerCase() === fields[j]?.toLowerCase();
-      });
+): TypeLayerStyleConfigInfo | undefined {
+  // If no feature
+  if (!feature) return undefined;
 
-      // Failed to find match: Attempt to find the alias from the names
-      if (!fieldName && aliasLookup && Object.keys(aliasLookup).length > 0) {
-        if (fields[j] in aliasLookup) {
-          fieldName = aliasLookup[fields[j]];
+  // Get the feature keys
+  const featureKeys = feature.getKeys();
+
+  // Start looping on the unique value style to find
+  for (let i = 0; i < uniqueValueStyleInfo.length; i++) {
+    // Start looping on the fields
+    let allFieldsMatched = true;
+    for (let j = 0; j < fields.length; j++) {
+      const field = fields[j];
+      const expectedRawValue = uniqueValueStyleInfo[i].values[j];
+      const expectedValue = typeof expectedRawValue === 'string' ? expectedRawValue.replace("''", "'") : expectedRawValue;
+
+      // Get the target field name: check case-insensitive match in feature keys
+      let fieldName = featureKeys.find((key) => key.toLowerCase() === field.toLowerCase());
+
+      // Try alias if no match found, then re-validate the alias key against feature keys
+      if (!fieldName && aliasLookup?.[field]) {
+        const alias = aliasLookup[field];
+        fieldName = featureKeys.find((key) => key.toLowerCase() === alias.toLowerCase());
+      }
+
+      if (!fieldName) {
+        logger.logWarning(`Renderer searchUniqueValueEntry: Cannot find field "${field}"`);
+        return undefined;
+      }
+
+      // Read the actual value
+      let actualValue = feature.get(fieldName);
+
+      // First try direct match
+      // eslint-disable-next-line eqeqeq
+      let matched = actualValue == expectedValue;
+
+      // If not matched, check coded domain
+      if (!matched) {
+        const fieldDomain = domainsLookup?.find((domain) => domain.name === fieldName)?.domain;
+        if (fieldDomain?.codedValues) {
+          const codedValue = (fieldDomain.codedValues as TypeJsonArray).find((dom) => dom.name === actualValue);
+          if (codedValue) {
+            actualValue = codedValue.code;
+            // eslint-disable-next-line eqeqeq
+            matched = actualValue == expectedValue;
+          }
         }
       }
 
-      if (fieldName) {
-        const styleInfoValue =
-          typeof uniqueValueStyleInfo[i].values[j] === 'string'
-            ? (uniqueValueStyleInfo[i].values[j] as string).replace("''", "'")
-            : uniqueValueStyleInfo[i].values[j];
-        // We want type conversion for the values, so '1234' equals 1234
-        // eslint-disable-next-line eqeqeq
-        isEqual = feature.get(fieldName) == styleInfoValue;
-        if (isEqual && j + 1 === fields.length) return i;
-      } else logger.logWarning(`Renderer searchUniqueValueEntry. Can not find field ${fields[j]}`);
+      // If this field did not match, mark the whole thing as a mismatch
+      if (!matched) {
+        allFieldsMatched = false;
+        break;
+      }
+    }
+
+    if (allFieldsMatched) {
+      return uniqueValueStyleInfo[i];
     }
   }
 
@@ -1265,9 +1301,9 @@ function searchUniqueValueEntry(
  * Process the unique value settings using a point feature to get its Style.
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
- * @param {Feature} feature - Feature used to test the unique value conditions.
- * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
- * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
+ * @param {Feature?} feature - Feature used to test the unique value conditions.
+ * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
+ * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
@@ -1276,6 +1312,7 @@ function processUniqueValuePoint(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
+  domainsLookup?: TypeJsonArray,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1283,9 +1320,15 @@ function processUniqueValuePoint(
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchUniqueValueEntry(fields, info, feature!, aliasLookup);
-    if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePoint(info[i].settings);
-    if (i === undefined && hasDefault && (legendFilterIsOff || styleSettings.info[styleSettings.info.length - 1].visible !== false))
+    const styleEntry = searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
+    if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false)) return processSimplePoint(styleEntry.settings);
+
+    // TODO: Check - Why look for styleSettings.info.length - 1?
+    if (
+      styleEntry === undefined &&
+      hasDefault &&
+      (legendFilterIsOff || styleSettings.info[styleSettings.info.length - 1].visible !== false)
+    )
       return processSimplePoint(styleSettings.info[styleSettings.info.length - 1].settings);
   }
   return undefined;
@@ -1295,9 +1338,9 @@ function processUniqueValuePoint(
  * Process the unique value settings using a lineString feature to get its Style.
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
- * @param {Feature} feature - Feature used to test the unique value conditions.
- * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
- * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
+ * @param {Feature?} feature - Feature used to test the unique value conditions.
+ * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
+ * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
@@ -1306,6 +1349,7 @@ function processUniqueLineString(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
+  domainsLookup?: TypeJsonArray,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1313,9 +1357,12 @@ function processUniqueLineString(
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchUniqueValueEntry(fields, info, feature!, aliasLookup);
-    if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimpleLineString(info[i].settings, feature);
-    if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
+    const styleEntry = searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
+    if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false))
+      return processSimpleLineString(styleEntry.settings, feature);
+
+    // TODO: Check - Why look for info.length - 1?
+    if (styleEntry === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimpleLineString(info[info.length - 1].settings, feature);
   }
   return undefined;
@@ -1325,8 +1372,8 @@ function processUniqueLineString(
  * Process the unique value settings using a polygon feature to get its Style.
  *
  * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
- * @param {Feature} feature - Feature used to test the unique value conditions.
- * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
+ * @param {Feature?} feature - Feature used to test the unique value conditions.
+ * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  *
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
@@ -1336,6 +1383,7 @@ function processUniquePolygon(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
+  domainsLookup?: TypeJsonArray,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1343,9 +1391,12 @@ function processUniquePolygon(
 
   if (styleSettings.type === 'uniqueValue') {
     const { hasDefault, fields, info } = styleSettings;
-    const i = searchUniqueValueEntry(fields, info, feature!, aliasLookup);
-    if (i !== undefined && (legendFilterIsOff || info[i].visible !== false)) return processSimplePolygon(info[i].settings, feature);
-    if (i === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
+    const styleEntry = searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
+    if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false))
+      return processSimplePolygon(styleEntry.settings, feature);
+
+    // TODO: Check - Why look for info.length - 1?
+    if (styleEntry === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
       return processSimplePolygon(info[info.length - 1].settings, feature);
   }
   return undefined;
@@ -1406,6 +1457,7 @@ function processClassBreaksPoint(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
+  domainsLookup?: TypeJsonArray,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1436,6 +1488,7 @@ function processClassBreaksLineString(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
+  domainsLookup?: TypeJsonArray,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1466,6 +1519,7 @@ function processClassBreaksPolygon(
   feature?: Feature,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
+  domainsLookup?: TypeJsonArray,
   aliasLookup?: TypeAliasLookup
 ): Style | undefined {
   if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
@@ -1559,6 +1613,7 @@ export function getAndCreateFeatureStyle(
       feature as Feature,
       filterEquation,
       legendFilterIsOff,
+      undefined,
       aliasLookup
     );
 
@@ -1581,6 +1636,7 @@ export function getFeatureImageSource(
   style: TypeLayerStyleConfig,
   filterEquation?: FilterNodeType[],
   legendFilterIsOff?: boolean,
+  domainsLookup?: TypeJsonArray,
   aliasLookup?: TypeAliasLookup
 ): string | undefined {
   // The image source that will be returned (if calculated successfully)
@@ -1613,7 +1669,14 @@ export function getFeatureImageSource(
       //   });
       // });
 
-      const featureStyle = processStyle[type][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff, aliasLookup);
+      const featureStyle = processStyle[type][geometryType](
+        styleSettings,
+        feature,
+        filterEquation,
+        legendFilterIsOff,
+        domainsLookup,
+        aliasLookup
+      );
 
       if (featureStyle) {
         if (geometryType === 'Point') {
